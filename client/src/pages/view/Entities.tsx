@@ -12,6 +12,16 @@ import {
   Spacer,
   Tag,
   Link,
+  useDisclosure,
+  ModalBody,
+  Modal,
+  FormControl,
+  Select,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalFooter,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -19,7 +29,7 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 
 // Existing and custom types
-import { DataTableAction, EntityModel } from "@types";
+import { DataTableAction, EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -42,10 +52,54 @@ const Entities = () => {
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
 
+  // Entities export modal
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onClose: onExportClose,
+  } = useDisclosure();
+
+  const [toExport, setToExport] = useState([] as IGenericItem[]);
+  const [exportFormat, setExportFormat] = useState("json");
+
+  // Setup columns for review table
+  const exportTableColumnHelper = createColumnHelper<IGenericItem>();
+  const exportTableColumns = [
+    exportTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 30}
+            >
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 30 })}
+              </Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Entity Name",
+    }),
+    exportTableColumnHelper.accessor("_id", {
+      cell: () => (
+        <Flex direction={"row"} gap={"2"} align={"center"} p={"1"}>
+          <Icon name={"download"} color={"blue.600"} />
+          <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.600"}>
+            {"Export"}
+          </Text>
+        </Flex>
+      ),
+      header: "Action",
+    }),
+  ];
+
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($limit: Int) {
-      entities(limit: $limit) {
+    query GetEntities {
+      entities {
         _id
         archived
         owner
@@ -58,15 +112,13 @@ const Entities = () => {
   const { loading, error, data, refetch } = useQuery<{
     entities: EntityModel[];
   }>(GET_ENTITIES, {
-    variables: {
-      limit: 100,
-    },
+    variables: {},
   });
 
   // Query to generate exported data
   const GET_ENTITIES_EXPORT = gql`
-    query GetEntitiesExport($entities: [String]) {
-      exportEntities(entities: $entities)
+    query GetEntitiesExport($entities: [String], $format: String) {
+      exportEntities(entities: $entities, format: $format)
     }
   `;
   const [exportEntities, { loading: exportLoading, error: exportError }] =
@@ -108,20 +160,41 @@ const Entities = () => {
     columnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 20 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 20}
+            >
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 20 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Name",
     }),
-    columnHelper.accessor("created", {
-      cell: (info) => (
-        <Text fontSize={"sm"}>{dayjs(info.getValue()).fromNow()}</Text>
-      ),
-      header: "Created",
+    columnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return (
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 24}
+            >
+              <Text fontSize={"sm"}>
+                {_.truncate(info.getValue(), { length: 24 })}
+              </Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Description",
       enableHiding: true,
     }),
     columnHelper.accessor("owner", {
@@ -131,18 +204,13 @@ const Entities = () => {
       header: "Owner",
       enableHiding: true,
     }),
-    columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
-        }
-        return (
-          <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 20 })}
-          </Text>
-        );
-      },
-      header: "Description",
+    columnHelper.accessor("created", {
+      cell: (info) => (
+        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+          {dayjs(info.getValue()).fromNow()}
+        </Text>
+      ),
+      header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("_id", {
@@ -166,30 +234,45 @@ const Entities = () => {
       icon: "download",
       action: async (table, rows: any) => {
         // Export rows that have been selected
-        const toExport: string[] = [];
+        const selectedEntities: IGenericItem[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
+          selectedEntities.push({
+            _id: table.getRow(rowIndex).original._id,
+            name: table.getRow(rowIndex).original.name,
+          });
         }
+        setToExport(selectedEntities);
 
-        const response = await exportEntities({
-          variables: {
-            entities: toExport,
-          },
-        });
-
-        if (response.data.exportEntities) {
-          FileSaver.saveAs(
-            new Blob([response.data.exportEntities]),
-            slugify(
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-            ),
-          );
-        }
+        // Open the Entity export modal
+        onExportOpen();
 
         table.resetRowSelection();
       },
     },
   ];
+
+  const onExportClick = async () => {
+    const response = await exportEntities({
+      variables: {
+        // Only pass the Entity identifiers
+        entities: toExport.map((entity) => entity._id),
+        format: exportFormat,
+      },
+    });
+
+    if (response.data.exportEntities) {
+      FileSaver.saveAs(
+        new Blob([response.data.exportEntities]),
+        slugify(
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`,
+        ),
+      );
+    }
+
+    // Reset the Entity export collection and close the modal
+    setToExport([]);
+    onExportClose();
+  };
 
   return (
     <Content
@@ -255,6 +338,94 @@ const Entities = () => {
           )}
         </Flex>
       </Flex>
+
+      <Modal
+        isOpen={isExportOpen}
+        onClose={onExportClose}
+        size={"2xl"}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          {/* Heading and close button */}
+          <ModalHeader p={"2"}>Export Entities</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody px={"2"} gap={"2"}>
+            {/* Select export format */}
+            <Flex
+              w={"100%"}
+              direction={"row"}
+              py={"2"}
+              gap={"2"}
+              justify={"space-between"}
+              align={"center"}
+            >
+              <Flex gap={"1"} align={"center"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Format:
+                </Text>
+                <FormControl>
+                  <Select
+                    size={"sm"}
+                    rounded={"md"}
+                    value={exportFormat}
+                    onChange={(event) => setExportFormat(event.target.value)}
+                  >
+                    <option key={"json"} value={"json"}>
+                      JSON
+                    </option>
+                    <option key={"csv"} value={"csv"}>
+                      CSV
+                    </option>
+                  </Select>
+                </FormControl>
+              </Flex>
+            </Flex>
+
+            <Flex
+              w={"100%"}
+              direction={"column"}
+              gap={"2"}
+              p={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              rounded={"md"}
+            >
+              <DataTable
+                columns={exportTableColumns}
+                data={toExport}
+                visibleColumns={{}}
+                selectedRows={{}}
+                showPagination
+                showItemCount
+              />
+            </Flex>
+          </ModalBody>
+          <ModalFooter p={"2"}>
+            <Flex direction={"column"} w={"30%"} gap={"2"}>
+              {/* "Export" button */}
+              <Flex
+                direction={"row"}
+                w={"100%"}
+                gap={"2"}
+                justify={"right"}
+                align={"center"}
+              >
+                <Button
+                  rightIcon={<Icon name={"download"} />}
+                  colorScheme={"blue"}
+                  size={"sm"}
+                  onClick={() => onExportClick()}
+                  isLoading={exportLoading}
+                >
+                  Export
+                </Button>
+              </Flex>
+            </Flex>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Content>
   );
 };

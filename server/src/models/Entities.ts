@@ -45,6 +45,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find()
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
@@ -68,6 +69,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find({ _id: { $in: entities } })
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
@@ -99,6 +101,19 @@ export class Entities {
    * @returns {Promise<ResponseData<string>>}
    */
   static create = async (entity: IEntity): Promise<ResponseData<string>> => {
+    // Clean the Entity input data
+    entity.name = entity.name.toString().trim();
+    entity.description = entity.description.toString().trim();
+
+    // Iterate over all Attributes, casting `number` values to floats
+    entity.attributes.forEach((attribute) => {
+      attribute.values.forEach((value) => {
+        if (value.type === "number") {
+          value.data = parseFloat(value.data);
+        }
+      });
+    });
+
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
@@ -227,6 +242,15 @@ export class Entities {
       update.$set.attributes = updated.attributes;
       const updatedAttributes = updated.attributes.map((a) => a._id);
       const entityAttributes = entity.attributes.map((a) => a._id);
+
+      // Iterate over all Attributes, casting `number` values to floats
+      update.$set.attributes.forEach((attribute) => {
+        attribute.values.forEach((value) => {
+          if (value.type === "number") {
+            value.data = parseFloat(value.data);
+          }
+        });
+      });
 
       // Attributes added in updated Entity
       const addAttributeIdentifiers = _.difference(
@@ -974,24 +998,56 @@ export class Entities {
   };
 
   /**
-   * Generate a JSON representation of multiple Entities for export
+   * Generate a string-based representation of multiple Entities for export
    * @param entities Set of Entity identifiers for export
+   * @param format The format to generate (JSON or CSV)
    * @return {Promise<string>}
    */
-  static exportMany = async (entities: string[]): Promise<string> => {
-    const collection = [];
-    for await (const entity of entities) {
-      const result = await Entities.getOne(entity);
-      if (result) {
-        // Remove `history` field
-        delete (result as never)["history"];
+  static exportMany = async (
+    entities: string[],
+    format: string,
+  ): Promise<string> => {
+    if (format === "json") {
+      // Handle JSON format
+      const collection = [];
+      for await (const entity of entities) {
+        const result = await Entities.getOne(entity);
+        if (result) {
+          // Remove `history` field
+          delete (result as never)["history"];
 
-        // Add to collection for export
-        collection.push(result);
+          // Add to collection for export
+          collection.push(result);
+        }
       }
-    }
 
-    return JSON.stringify(collection, null, "  ");
+      return JSON.stringify(collection, null, "  ");
+    } else {
+      // Handle CSV format (default)
+      const headers = ["ID", "Name", "Created", "Owner", "Description"];
+      const rows: string[][] = [];
+
+      for await (const entityId of entities) {
+        const entity = await Entities.getOne(entityId);
+        if (entity) {
+          // Format the row data
+          const row = [
+            entity._id,
+            entity.name,
+            dayjs(entity.created).format("DD MMM YYYY").toString(),
+            entity.owner,
+            entity.description || "",
+          ];
+          rows.push(row);
+        }
+      }
+
+      // Combine headers and rows, and format as CSV
+      const collated = [headers, ...rows];
+      const formatted = Papa.unparse(collated);
+
+      return formatted;
+    }
   };
 
   static addAttachment = async (

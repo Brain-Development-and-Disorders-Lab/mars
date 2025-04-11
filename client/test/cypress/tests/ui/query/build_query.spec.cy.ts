@@ -40,7 +40,7 @@ describe("Search Query Builder", () => {
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
     // Search result array should contain multiple results
-    cy.get("#resultsHeading").should("contain.text", "0 results");
+    cy.get("#resultsContainer").should("contain.text", "No results found");
   });
 
   it("should build a query with 1 Name inclusion rule and 1 Attribute Value (Text) inclusion rule", () => {

@@ -3,12 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Button,
   Card,
   CardBody,
@@ -62,6 +56,8 @@ import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import { Information } from "@components/Label";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -927,6 +923,9 @@ const Project = () => {
                 Description
               </Text>
               <MDEditor
+                height={150}
+                minHeight={100}
+                maxHeight={400}
                 id={"projectDescriptionInput"}
                 style={{ width: "100%" }}
                 value={projectDescription}
@@ -1159,29 +1158,18 @@ const Project = () => {
 
             <ModalBody px={"2"} gap={"2"}>
               {/* Export information */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"2"}
-                p={"2"}
-                align={"center"}
-                justifySelf={"left"}
-                bg={"blue.200"}
-                rounded={"md"}
-              >
-                <Icon name={"info"} color={"blue.500"} />
-                {_.isEqual(exportFormat, "json") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    JSON files can be re-imported into Metadatify.
-                  </Text>
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    To export Entities alongside Project details, use JSON
-                    format.
-                  </Text>
-                )}
-              </Flex>
+              {_.isEqual(exportFormat, "json") && (
+                <Information
+                  text={"JSON files can be re-imported into Metadatify."}
+                />
+              )}
+              {_.isEqual(exportFormat, "csv") && (
+                <Information
+                  text={
+                    " To export Entities alongside Project details, use JSON format."
+                  }
+                />
+              )}
 
               {/* Select export format */}
               <Flex
@@ -1391,6 +1379,9 @@ const Project = () => {
                   Specify a description of the changes made to the Project.
                 </Text>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   id={"saveMessageInput"}
                   style={{ width: "100%" }}
                   value={saveMessage}
@@ -1428,57 +1419,12 @@ const Project = () => {
         </Modal>
 
         {/* Blocker warning message */}
-        <AlertDialog
-          isOpen={blocker.state === "blocked"}
-          leastDestructiveRef={cancelBlockerRef}
+        <UnsavedChangesModal
+          blocker={blocker}
+          cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}
-          isCentered
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent p={"2"}>
-              <AlertDialogHeader p={"2"}>
-                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"warning"} />
-                  <Text fontWeight={"semibold"}>Unsaved Changes</Text>
-                </Flex>
-              </AlertDialogHeader>
-
-              <AlertDialogBody p={"2"}>
-                <Text fontSize={"sm"}>
-                  Are you sure you want to leave this page? You will lose any
-                  unsaved changes.
-                </Text>
-              </AlertDialogBody>
-
-              <AlertDialogFooter p={"2"}>
-                <Flex w={"100%"} justify={"space-between"}>
-                  <Button
-                    size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
-                    ref={cancelBlockerRef}
-                    onClick={() => {
-                      blocker.reset?.();
-                      onBlockerClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
-                    colorScheme={"green"}
-                    onClick={() => blocker.proceed?.()}
-                    ml={3}
-                  >
-                    Continue
-                  </Button>
-                </Flex>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
+          callback={onBlockerClose}
+        />
 
         <Drawer
           isOpen={isHistoryOpen}

@@ -277,6 +277,7 @@ export const typedefs = `#graphql
 
   # "ColumnMappingInput" input
   input ColumnMappingInput {
+    namePrefix: String
     name: String
     description: String
     created: String
@@ -414,7 +415,7 @@ export const typedefs = `#graphql
     projectMetrics: ProjectMetrics
 
     # Entity queries
-    entities(limit: Int, archived: Boolean): [Entity]
+    entities(limit: Int, archived: Boolean, reverse: Boolean): [Entity]
     entity(_id: String): Entity
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics
@@ -437,7 +438,7 @@ export const typedefs = `#graphql
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
-    exportEntities(entities: [String]): String
+    exportEntities(entities: [String], format: String): String
     exportProject(_id: String, format: String, fields: [String]): String
     exportProjectEntities(_id: String, format: String): String
     exportTemplate(_id: String): String

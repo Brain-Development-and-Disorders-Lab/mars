@@ -3,12 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Button,
   Flex,
   FormControl,
@@ -36,6 +30,7 @@ import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import MDEditor from "@uiw/react-md-editor";
 
 // Utility functions and libraries
@@ -309,6 +304,9 @@ const Project = () => {
                   Description
                 </FormLabel>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   style={{ width: "100%" }}
                   value={description}
                   preview={"edit"}
@@ -533,57 +531,12 @@ const Project = () => {
       </Modal>
 
       {/* Blocker warning message */}
-      <AlertDialog
-        isOpen={blocker.state === "blocked"}
-        leastDestructiveRef={cancelBlockerRef}
+      <UnsavedChangesModal
+        blocker={blocker}
+        cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}
-        isCentered
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent p={"2"}>
-            <AlertDialogHeader p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"warning"} />
-                <Text fontWeight={"semibold"}>Unsaved Changes</Text>
-              </Flex>
-            </AlertDialogHeader>
-
-            <AlertDialogBody p={"2"}>
-              <Text fontSize={"sm"}>
-                Are you sure you want to leave this page? You will lose any
-                unsaved changes.
-              </Text>
-            </AlertDialogBody>
-
-            <AlertDialogFooter p={"2"}>
-              <Flex w={"100%"} justify={"space-between"}>
-                <Button
-                  size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  ref={cancelBlockerRef}
-                  onClick={() => {
-                    blocker.reset?.();
-                    onBlockerClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-
-                <Button
-                  size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  colorScheme={"green"}
-                  onClick={() => blocker.proceed?.()}
-                  ml={3}
-                >
-                  Continue
-                </Button>
-              </Flex>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+        callback={onBlockerClose}
+      />
     </Content>
   );
 };

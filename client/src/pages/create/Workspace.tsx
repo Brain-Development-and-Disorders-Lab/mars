@@ -273,6 +273,9 @@ const CreateWorkspace = () => {
                   Description
                 </FormLabel>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   id={"modalWorkspaceDescription"}
                   style={{ width: "100%" }}
                   value={description}

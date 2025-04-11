@@ -170,7 +170,7 @@ const Login = () => {
         alignSelf={"center"}
         gap={"8"}
         w={["sm", "md", "lg"]}
-        h={"90vh"}
+        h={"80vh"} // Header is 10vh, so 90vh - 10vh = 80vh
         wrap={"wrap"}
       >
         <Flex direction={"column"} gap={"4"}>

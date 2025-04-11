@@ -61,6 +61,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
         isOpen={isOpen}
         size={"4xl"}
         isCentered
+        scrollBehavior={"inside"}
       >
         <ModalOverlay />
 
@@ -74,12 +75,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
             >
               <Flex
                 align={"center"}
-                gap={"4"}
+                gap={"2"}
                 p={"2"}
                 border={"2px"}
                 rounded={"md"}
               >
-                <Icon name={"template"} size={"md"} />
+                <Icon name={"template"} size={"sm"} />
                 <Heading size={"sm"}>{props.attribute.name}</Heading>
               </Flex>
             </Flex>
@@ -102,7 +103,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   gap={"2"}
                   w={{ base: "100%", md: "50%" }}
                 >
-                  <Text size={"md"} fontWeight={"semibold"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
                     Name
                   </Text>
                   <Input
@@ -115,10 +116,13 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text size={"md"} fontWeight={"semibold"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
                     Description
                   </Text>
                   <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
                     style={{ width: "100%" }}
                     value={description}
                     preview={isEditing ? "edit" : "preview"}

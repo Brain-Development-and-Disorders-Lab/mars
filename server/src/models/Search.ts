@@ -1,8 +1,9 @@
-import { EntityModel, ProjectModel } from "@types";
+// Utility libraries and functions
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
 
 // Models
+import { EntityModel, ProjectModel } from "@types";
 import { Workspaces } from "./Workspaces";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
@@ -180,6 +181,82 @@ export class Search {
   };
 
   /**
+   * Helper function to traverse an object and call a callback function for each key
+   * @param object Object to traverse
+   * @param callback Callback function to call for each key
+   */
+  private static traverseQueryObject = (
+    object: any,
+    callback: (key: any, value: any) => void,
+  ) => {
+    const stack = [object];
+
+    while (stack.length > 0) {
+      let current = stack.pop();
+
+      if (typeof current === "object" && current !== null) {
+        if (Array.isArray(current)) {
+          // Handle array case
+          current.forEach((item, index) => {
+            // Modify the value in-place
+            current[index] = callback(index, item);
+            stack.push(current[index]);
+          });
+        } else {
+          // Handle object case
+          for (const key in current) {
+            if (Object.prototype.hasOwnProperty.call(current, key)) {
+              // Modify the value in-place
+              current[key] = callback(key, current[key]);
+              stack.push(current[key]);
+            }
+          }
+        }
+      } else {
+        // Apply the callback to non-object values
+        current = callback(current, current);
+      }
+    }
+  };
+
+  /**
+   * Helper function to parse a JSON-serialized query into a MongoDB query
+   * @param {string} query JSON-serialized query
+   * @return {Record<string, any>} MongoDB query
+   */
+  private static generateMongoQuery = (query: any): Record<string, any> => {
+    // Parse the query if it is a string, typically the case if only one rule is provided
+    const parsedQuery = _.isObject(query) ? query : JSON.parse(query);
+
+    // Traverse the query object and modify the values as necessary
+    Search.traverseQueryObject(parsedQuery, (key: any, value: any) => {
+      // Handle case where value is a JSON string
+      if (_.isString(value) && value.startsWith("{") && value.endsWith("}")) {
+        value = JSON.parse(value);
+      }
+
+      // Handle case where key is `$regex`
+      if (_.isString(key) && key === "$regex" && key !== value) {
+        const [pattern, flags] = value
+          .slice(value.startsWith("/") ? 1 : 0)
+          .split("/");
+        value = new RegExp(pattern, flags);
+      }
+
+      return value;
+    });
+
+    // Construct and return the MongoDB query
+    if (_.isArray(parsedQuery)) {
+      // If the query is an array, assume it's an array of query conditions
+      return { $and: parsedQuery };
+    } else {
+      // If it's not an array, use the query object directly
+      return parsedQuery;
+    }
+  };
+
+  /**
    * Create and execute a structured MongoDB query
    * @param {string} query JSON representation of query serialized to string
    * @param {string} resultType Search result type of either "entity" or "project"
@@ -193,17 +270,8 @@ export class Search {
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Parse the query string into a MongoDB query object
     const parsedQuery = JSON.parse(query);
-
-    // Construct MongoDB query
-    let mongoQuery = {};
-
-    if (_.isArray(parsedQuery)) {
-      // If the query is an array, assume it's an array of query conditions
-      mongoQuery = { $and: parsedQuery };
-    } else {
-      // If it's not an array, use the query object directly
-      mongoQuery = parsedQuery;
-    }
+    const mongoQuery: Record<string, any> =
+      Search.generateMongoQuery(parsedQuery);
 
     if (resultType === "project") {
       // Execute the search query with any specified options

@@ -8,6 +8,7 @@ import {
   Spacer,
   Tag,
   Text,
+  Tooltip,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -122,12 +123,37 @@ const Projects = () => {
   const columnHelper = createColumnHelper<ProjectModel>();
   const columns = [
     columnHelper.accessor("name", {
-      cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
+      cell: (info) => (
+        <Tooltip
+          label={info.getValue()}
+          placement={"top"}
+          isDisabled={info.getValue().length < 30}
+        >
+          <Text noOfLines={1} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 30 })}
+          </Text>
+        </Tooltip>
+      ),
       header: "Name",
     }),
-    columnHelper.accessor("created", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
-      header: "Created",
+    columnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Description",
       enableHiding: true,
     }),
     columnHelper.accessor("owner", {
@@ -136,18 +162,9 @@ const Projects = () => {
       },
       header: "Owner",
     }),
-    columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
-        }
-        return (
-          <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 20 })}
-          </Text>
-        );
-      },
-      header: "Description",
+    columnHelper.accessor("created", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("entities", {

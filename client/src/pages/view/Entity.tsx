@@ -47,12 +47,6 @@ import {
   MenuItem,
   CardFooter,
   Divider,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogBody,
-  AlertDialogHeader,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -68,6 +62,9 @@ import SearchSelect from "@components/SearchSelect";
 import Dialog from "@components/Dialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import Relationships from "@components/Relationships";
+import { Information } from "@components/Label";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import { createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -105,7 +102,6 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
-import Relationships from "@components/Relationships";
 
 const Entity = () => {
   const { id } = useParams();
@@ -163,6 +159,14 @@ const Entity = () => {
     onClose: onSaveMessageClose,
   } = useDisclosure();
   const [saveMessage, setSaveMessage] = useState("");
+
+  // Clone modal
+  const {
+    isOpen: isCloneOpen,
+    onOpen: onCloneOpen,
+    onClose: onCloneClose,
+  } = useDisclosure();
+  const [clonedEntityName, setClonedEntityName] = useState("");
 
   // History drawer
   const {
@@ -312,6 +316,21 @@ const Entity = () => {
   const [exportEntity, { loading: exportLoading, error: exportError }] =
     useLazyQuery(EXPORT_ENTITY);
 
+  // Query to create a new Entity
+  const CREATE_ENTITY = gql`
+    mutation CreateEntity($entity: EntityCreateInput) {
+      createEntity(entity: $entity) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [
+    createEntity,
+    { error: createEntityError, loading: createEntityLoading },
+  ] = useMutation(CREATE_ENTITY);
+
   // Query to create a template Template
   const CREATE_TEMPLATE = gql`
     mutation CreateTemplate($template: AttributeCreateInput) {
@@ -362,6 +381,9 @@ const Entity = () => {
       setEntityAttributes(data.entity.attributes || []);
       setEntityAttachments(data.entity.attachments);
       setEntityHistory(data.entity.history || []);
+
+      // Set the cloned Entity name
+      setClonedEntityName(`${data.entity.name} (cloned)`);
     }
     // Unpack Project data
     if (data?.projects) {
@@ -803,9 +825,18 @@ const Entity = () => {
         const fileExtension = _.upperCase(
           _.last(info.row.original.name.split(".")),
         );
-        const fileColorScheme = _.isEqual(fileExtension, "PDF")
-          ? "red"
-          : "yellow";
+        let fileColorScheme = "yellow";
+        if (_.isEqual(fileExtension, "PDF")) {
+          fileColorScheme = "red";
+        } else if (_.isEqual(fileExtension, "DNA")) {
+          fileColorScheme = "green";
+        } else if (
+          _.isEqual(fileExtension, "PNG") ||
+          _.isEqual(fileExtension, "JPEG")
+        ) {
+          fileColorScheme = "blue";
+        }
+
         return <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>;
       },
       header: "Type",
@@ -1012,6 +1043,52 @@ const Entity = () => {
         );
         setExportFields(updatedFields);
       }
+    }
+  };
+
+  // Handle clicking the "Clone" button
+  const handleCloneClick = async () => {
+    // Create a new Entity, with `(cloned)` appended to the name
+    const response = await createEntity({
+      variables: {
+        entity: {
+          name: clonedEntityName,
+          owner: entityData.owner,
+          created: dayjs(Date.now()).toISOString(),
+          archived: false,
+          description: entityData.description,
+          projects: entityData.projects,
+          relationships: entityData.relationships,
+          attributes: entityData.attributes,
+          attachments: entityData.attachments,
+        },
+      },
+    });
+
+    if (response.data.createEntity.success) {
+      onCloneClose();
+
+      toast({
+        title: "Cloned Successfully",
+        description: "Entity has been cloned successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      // Navigate to the new Entity
+      navigate(`/entities/${response.data.createEntity.data}`);
+    }
+
+    if (createEntityError) {
+      toast({
+        title: "Error",
+        description: "An error occurred while cloning the Entity",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 
@@ -1302,6 +1379,14 @@ const Entity = () => {
                   Visualize
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon name={"copy"} />}
+                  onClick={() => onCloneOpen()}
+                  fontSize={"sm"}
+                  isDisabled={entityArchived}
+                >
+                  Clone
+                </MenuItem>
+                <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
                   fontSize={"sm"}
@@ -1423,6 +1508,9 @@ const Entity = () => {
                 </Text>
                 <Flex>
                   <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
                     id={"entityDescriptionInput"}
                     style={{ width: "100%" }}
                     value={entityDescription}
@@ -1769,6 +1857,9 @@ const Entity = () => {
                     <FormControl isRequired>
                       <FormLabel fontSize={"sm"}>Description</FormLabel>
                       <MDEditor
+                        height={150}
+                        minHeight={100}
+                        maxHeight={400}
                         style={{ width: "100%" }}
                         value={attributeDescription}
                         preview={editing ? "edit" : "preview"}
@@ -2131,29 +2222,18 @@ const Entity = () => {
 
             <ModalBody px={"2"} gap={"2"}>
               {/* Export information */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"2"}
-                p={"2"}
-                align={"center"}
-                justifySelf={"left"}
-                bg={"blue.200"}
-                rounded={"md"}
-              >
-                <Icon name={"info"} color={"blue.500"} />
-                {_.isEqual(exportFormat, "json") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    JSON files can be re-imported into Metadatify.
-                  </Text>
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    When exporting Origins, Products, or Projects, only the name
-                    will be exported. To export identifiers, use JSON format.
-                  </Text>
-                )}
-              </Flex>
+              {_.isEqual(exportFormat, "json") && (
+                <Information
+                  text={"JSON files can be re-imported into Metadatify."}
+                />
+              )}
+              {_.isEqual(exportFormat, "csv") && (
+                <Information
+                  text={
+                    "When exporting Origins, Products, or Projects, only the name will be exported. To export identifiers, use JSON format."
+                  }
+                />
+              )}
 
               {/* Select export format */}
               <Flex
@@ -2408,7 +2488,7 @@ const Entity = () => {
         </Modal>
 
         {/* Attachment preview modal */}
-        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
+        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered>
           <ModalOverlay />
           <ModalContent maxW={"100vw"} w={"fit-content"}>
             <ModalHeader>Attachment Preview</ModalHeader>
@@ -2465,6 +2545,38 @@ const Entity = () => {
                   </Button>
                 </Flex>
 
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Unique ID:
+                    </Text>
+                  </Flex>
+                  <Flex w={"60%"}>
+                    <Input
+                      size={"sm"}
+                      value={id}
+                      rounded={"md"}
+                      onFocus={(event) => event.target.select()}
+                      readOnly
+                    />
+                  </Flex>
+                  <Button
+                    size={"sm"}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${id}`);
+                      toast({
+                        title: "Copied to clipboard",
+                        status: "success",
+                        position: "bottom-right",
+                        isClosable: true,
+                        duration: 2000,
+                      });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </Flex>
+
                 <Flex direction={"row"} gap={"2"}>
                   <Flex w={"25%"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -2497,6 +2609,61 @@ const Entity = () => {
           </ModalContent>
         </Modal>
 
+        {/* Clone modal */}
+        <Modal isOpen={isCloneOpen} onClose={onCloneClose} isCentered>
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"}>Clone Entity</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"} color={"gray.600"}>
+                  By default, the cloned Entity will be created with the same
+                  name, but with "(cloned)" appended to the end. You can modify
+                  the name below.
+                </Text>
+
+                <FormControl>
+                  <FormLabel fontSize={"xs"} fontWeight={"semibold"}>
+                    Cloned Entity Name:
+                  </FormLabel>
+                  <Input
+                    size={"sm"}
+                    rounded={"md"}
+                    value={clonedEntityName}
+                    onChange={(event) =>
+                      setClonedEntityName(event.target.value)
+                    }
+                  />
+                </FormControl>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"} justifyContent={"space-between"}>
+              <Button
+                onClick={onCloneClose}
+                size={"sm"}
+                colorScheme={"red"}
+                variant={"outline"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+              <Button
+                rightIcon={<Icon name={"copy"} />}
+                colorScheme={"green"}
+                onClick={handleCloneClick}
+                ml={3}
+                size={"sm"}
+                isLoading={createEntityLoading}
+                isDisabled={clonedEntityName === ""}
+              >
+                Clone
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
         {/* Save message modal */}
         <Modal
           onEsc={onSaveMessageOpen}
@@ -2519,6 +2686,9 @@ const Entity = () => {
                   Specify a description of the changes made to the Entity.
                 </Text>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   id={"saveMessageInput"}
                   style={{ width: "100%" }}
                   value={saveMessage}
@@ -2555,57 +2725,12 @@ const Entity = () => {
         </Modal>
 
         {/* Blocker warning message */}
-        <AlertDialog
-          isOpen={blocker.state === "blocked"}
-          leastDestructiveRef={cancelBlockerRef}
+        <UnsavedChangesModal
+          blocker={blocker}
+          cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}
-          isCentered
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent p={"2"}>
-              <AlertDialogHeader p={"2"}>
-                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"warning"} />
-                  <Text fontWeight={"semibold"}>Unsaved Changes</Text>
-                </Flex>
-              </AlertDialogHeader>
-
-              <AlertDialogBody p={"2"}>
-                <Text fontSize={"sm"}>
-                  Are you sure you want to leave this page? You will lose any
-                  unsaved changes.
-                </Text>
-              </AlertDialogBody>
-
-              <AlertDialogFooter p={"2"}>
-                <Flex w={"100%"} justify={"space-between"}>
-                  <Button
-                    size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
-                    ref={cancelBlockerRef}
-                    onClick={() => {
-                      blocker.reset?.();
-                      onBlockerClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
-                    colorScheme={"green"}
-                    onClick={() => blocker.proceed?.()}
-                    ml={3}
-                  >
-                    Continue
-                  </Button>
-                </Flex>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
+          callback={onBlockerClose}
+        />
 
         {/* Version history */}
         <Drawer

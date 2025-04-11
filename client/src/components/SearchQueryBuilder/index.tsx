@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { TabPanel, Flex, Button, Text, useToast } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { TabPanel, Flex, Button, useToast } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { Information } from "@components/Label";
 
 // `react-querybuilder` imports
 import QueryBuilder, {
@@ -12,7 +13,10 @@ import QueryBuilder, {
   RuleProcessor,
   RuleType,
 } from "react-querybuilder";
-import { QueryBuilderChakra } from "@react-querybuilder/chakra";
+import { QueryBuilderDnD } from "@react-querybuilder/dnd";
+import * as ReactDnD from "react-dnd";
+import * as ReactDndHtml5Backend from "react-dnd-html5-backend";
+import { QueryBuilderChakra } from "@react-querybuilder/chakra2";
 
 // SearchQueryValue component for searching Entity fields
 import SearchQueryValue from "@components/SearchQueryValue";
@@ -23,6 +27,8 @@ import { gql, useLazyQuery } from "@apollo/client";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
+import _ from "lodash";
+import { JSONPath } from "jsonpath-plus";
 
 const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   setHasSearched,
@@ -88,16 +94,31 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   /**
    * Custom function for processing specific fields within a search query,
-   * specifically `origins` and `products`
+   * specifically `relationships`
    * @param {RuleType} rule Rule for processing value
-   * @return {String}
+   * @return {any}
    */
-  const ruleProcessor: RuleProcessor = (rule: RuleType): string => {
-    if (rule.field === "relationships") {
+  const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
+    if (rule.field === "name") {
+      const value = { $regex: new RegExp(rule.value, "gi").toString() };
+      if (rule.operator === "doesNotContain") {
+        return {
+          name: {
+            $not: value,
+          },
+        };
+      } else if (rule.operator === "contains") {
+        return {
+          name: value,
+        };
+      } else {
+        return defaultRuleProcessorMongoDB(rule);
+      }
+    } else if (rule.field === "relationships") {
       // Handle `relationships` field
       if (rule.operator === "doesNotContain") {
         // If `doesNotContain`, include `$not`
-        return JSON.stringify({
+        return {
           relationships: {
             $not: {
               $elemMatch: {
@@ -105,50 +126,49 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
               },
             },
           },
-        });
-      }
-      return JSON.stringify({
-        relationships: {
-          $elemMatch: {
-            "target._id": rule.value,
+        };
+      } else {
+        return {
+          relationships: {
+            $elemMatch: {
+              "target._id": rule.value,
+            },
           },
-        },
-      });
+        };
+      }
     } else if (rule.field === "attributes") {
-      // Construct the base query components
+      // Parse the custom rule
       const customRule = JSON.parse(rule.value);
-      const processed = {
-        "attributes.values.type": customRule.type,
-      };
+
+      // Create a base custom rule structure
+      const processedCustomRules: Record<string, any>[] = [
+        { "attributes.values.type": customRule.type },
+      ];
 
       // Append query components depending on the specified operator
       if (customRule.operator === "contains") {
-        return JSON.stringify({
-          ...processed,
+        processedCustomRules.push({
           "attributes.values.data": {
-            $regex: customRule.value,
+            $regex: new RegExp(customRule.value, "gi").toString(),
           },
         });
       } else if (customRule.operator === "does not contain") {
-        return JSON.stringify({
-          ...processed,
+        processedCustomRules.push({
           "attributes.values.data": {
             $not: {
-              $regex: customRule.value,
+              $regex: new RegExp(customRule.value, "gi").toString(),
             },
           },
         });
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $eq: parseFloat(customRule.value),
             },
           });
         } else {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
@@ -156,15 +176,13 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $gt: parseFloat(customRule.value),
             },
           });
         } else {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
@@ -172,15 +190,13 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $lt: parseFloat(customRule.value),
             },
           });
         } else {
-          return JSON.stringify({
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
@@ -188,7 +204,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         }
       }
 
-      return JSON.stringify(processed);
+      // Handle the operator
+      if (rule.operator === "doesNotContain") {
+        return { $nor: processedCustomRules };
+      } else {
+        return { $and: processedCustomRules };
+      }
     }
 
     // Default rule applied
@@ -236,6 +257,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   // State to hold the query
   const [query, setQuery] = useState(initialQuery);
+  const [isValid, setIsValid] = useState(false);
 
   const toast = useToast();
 
@@ -246,10 +268,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     // Format the query in `mongodb` format before sending
     const results = await searchText({
       variables: {
-        query: formatQuery(query, {
-          format: "mongodb",
-          ruleProcessor: ruleProcessor,
-        }),
+        query: JSON.stringify(
+          formatQuery(query, {
+            format: "mongodb_query",
+            ruleProcessor: ruleProcessor,
+          }),
+        ),
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
@@ -275,36 +299,79 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     setIsSearching(false);
   };
 
+  /**
+   * Validate the query as it changes
+   * @param {RuleGroupType} query Query to validate
+   */
+  const validateQuery = (query: RuleGroupType) => {
+    if (query.rules.length > 0) {
+      // Validation involves making sure all fields have a value
+      // Extract all `value` statements from the query
+      const values = JSONPath({
+        path: "$..value",
+        json: query,
+        resultType: "path",
+      });
+      for (const value of values) {
+        // Break the path down into an array of keys
+        const path: string[] = [];
+        for (let key of value.slice(2, -1).split("][")) {
+          // Remove the quotes from the key
+          key = key.replace(/'/g, "");
+          path.push(key);
+        }
+
+        // Iterate down the path until the `value` statement is found
+        let currentLevel = query as any;
+        for (const key of path) {
+          if (key in currentLevel) {
+            // If the key is a `value` statement, check if it is valid
+            if (key === "value") {
+              if (
+                _.isUndefined(currentLevel[key]) ||
+                currentLevel[key] === ""
+              ) {
+                setIsValid(false);
+                return;
+              }
+            } else {
+              // Otherwise, continue down the path
+              currentLevel = currentLevel[key];
+            }
+          }
+        }
+      }
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
+  };
+
+  useEffect(() => {
+    // Validate the query as it changes
+    validateQuery(query);
+  }, [query]);
+
   return (
     <TabPanel p={"2"}>
       <Flex direction={"column"} gap={"2"}>
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          p={"2"}
-          rounded={"md"}
-          bg={"blue.100"}
-          align={"center"}
-          w={"fit-content"}
-        >
-          <Icon name={"info"} color={"blue.300"} />
-          <Flex direction={"column"} gap={"1"}>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
-              Use the query builder to construct advanced queries to search for
-              Entities within the Workspace.
-            </Text>
-          </Flex>
-        </Flex>
+        <Information
+          text={
+            "Use the query builder to construct advanced queries to search for Entities within the Workspace."
+          }
+        />
 
         <Flex direction={"column"} gap={"2"}>
           <QueryBuilderChakra>
-            <QueryBuilder
-              fields={fields}
-              onQueryChange={setQuery}
-              controlElements={{ valueEditor: SearchQueryValue }}
-              showCloneButtons
-              showNotToggle
-            />
+            <QueryBuilderDnD dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}>
+              <QueryBuilder
+                controlClassnames={{ queryBuilder: "queryBuilder-branches" }}
+                fields={fields}
+                onQueryChange={setQuery}
+                controlElements={{ valueEditor: SearchQueryValue }}
+                enableDragAndDrop
+              />
+            </QueryBuilderDnD>
           </QueryBuilderChakra>
           <Flex>
             <Button
@@ -313,7 +380,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
               size={"sm"}
               rightIcon={<Icon name={"search"} />}
               onClick={() => onSearchBuiltQuery()}
-              isDisabled={query.rules.length === 0}
+              isDisabled={!isValid}
             >
               Run Query
             </Button>

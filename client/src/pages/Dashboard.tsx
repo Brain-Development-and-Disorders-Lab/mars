@@ -20,6 +20,8 @@ import {
   StatArrow,
   Spacer,
   Link,
+  useDisclosure,
+  Collapse,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -70,16 +72,21 @@ const GET_DASHBOARD = gql`
       _id
       name
       description
+      entities
     }
     projectMetrics {
       all
       addedDay
     }
-    entities(limit: $entityLimit, archived: $entitiesArchived) {
+    entities(limit: $entityLimit, archived: $entitiesArchived, reverse: true) {
       _id
       archived
       name
       description
+      timestamp
+      attributes {
+        _id
+      }
     }
     entityMetrics {
       all
@@ -142,12 +149,13 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
+  const { isOpen, onToggle } = useDisclosure();
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projectsLimit: 8,
-      entitiesLimit: 8,
+      projectLimit: 8,
+      entityLimit: 8,
       entitiesArchived: false,
       activityLimit: 12,
     },
@@ -212,7 +220,7 @@ const Dashboard = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false });
+      setVisibleColumns({ description: false, attributes: false });
     } else {
       setVisibleColumns({});
     }
@@ -231,7 +239,7 @@ const Dashboard = () => {
       cell: (info) => (
         <Tooltip label={info.getValue()} placement={"top"}>
           <Text noOfLines={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 30 })}
+            {_.truncate(info.getValue(), { length: 24 })}
           </Text>
         </Tooltip>
       ),
@@ -242,9 +250,40 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
-        return <Text noOfLines={1}>{info.getValue()}</Text>;
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    entityTableColumnHelper.accessor("attributes", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+      },
+      header: "Attributes",
+      enableHiding: true,
+    }),
+    entityTableColumnHelper.accessor("timestamp", {
+      cell: (info) => {
+        return (
+          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
+      header: "Created",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("_id", {
@@ -268,11 +307,16 @@ const Dashboard = () => {
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
-      cell: (info) => (
-        <Text noOfLines={1} fontWeight={"semibold"}>
-          {info.getValue()}
-        </Text>
-      ),
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return (
+          <Text noOfLines={1} fontWeight={"semibold"}>
+            {info.getValue()}
+          </Text>
+        );
+      },
       header: "Name",
     }),
     projectTableColumnHelper.accessor("description", {
@@ -280,9 +324,29 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
-        return <Text noOfLines={1}>{info.getValue()}</Text>;
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    projectTableColumnHelper.accessor("entities", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+      },
+      header: "Entities",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("_id", {
@@ -399,25 +463,40 @@ const Dashboard = () => {
                 <Icon name={"dashboard"} size={"md"} />
                 <Heading size={"lg"}>Dashboard</Heading>
               </Flex>
-              {/* Display last update when on desktop */}
-              {breakpoint !== "base" && (
-                <Flex direction={"row"} gap={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={"gray.700"}
-                  >
-                    Last Update:
-                  </Text>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={"gray.400"}
-                  >
-                    {lastUpdate}
-                  </Text>
+              <Flex direction={"column"} gap={"1"}>
+                {/* Display last update when on desktop */}
+                {breakpoint !== "base" && (
+                  <Flex direction={"row"} gap={"1"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.700"}
+                    >
+                      Last Update:
+                    </Text>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.400"}
+                    >
+                      {lastUpdate}
+                    </Text>
+                  </Flex>
+                )}
+                {/* Display toggle for stats */}
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link onClick={onToggle}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.700"}
+                    >
+                      {isOpen ? "Hide" : "Show"} stats{" "}
+                    </Text>
+                  </Link>
+                  <Icon name={isOpen ? "c_up" : "c_down"} size={"xs"} />
                 </Flex>
-              )}
+              </Flex>
             </Flex>
             <Spacer />
             <Flex>
@@ -425,55 +504,57 @@ const Dashboard = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            p={"2"}
-            gap={"2"}
-            rounded={"md"}
-            basis={"30%"}
-            align={"center"}
-            border={"1px"}
-            borderColor={"gray.300"}
-          >
-            <StatGroup w={"100%"}>
-              <Stat>
-                <StatLabel>Total Workspace Entities</StatLabel>
-                <StatNumber>{entityMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {entityMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {entityMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+          <Collapse in={isOpen} animateOpacity>
+            <Flex
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              basis={"30%"}
+              align={"center"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <StatGroup w={"100%"}>
+                <Stat>
+                  <StatLabel>Total Workspace Entities</StatLabel>
+                  <StatNumber>{entityMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {entityMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {entityMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Projects</StatLabel>
-                <StatNumber>{projectMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {projectMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {projectMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+                <Stat>
+                  <StatLabel>Total Workspace Projects</StatLabel>
+                  <StatNumber>{projectMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {projectMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {projectMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Templates</StatLabel>
-                <StatNumber>{templateMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {templateMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {templateMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+                <Stat>
+                  <StatLabel>Total Workspace Templates</StatLabel>
+                  <StatNumber>{templateMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {templateMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {templateMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Collaborators</StatLabel>
-                <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
-              </Stat>
-            </StatGroup>
-          </Flex>
+                <Stat>
+                  <StatLabel>Total Workspace Collaborators</StatLabel>
+                  <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
+                </Stat>
+              </StatGroup>
+            </Flex>
+          </Collapse>
         </Flex>
 
         <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
@@ -491,7 +572,7 @@ const Dashboard = () => {
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"project"} size={"md"} />
-                <Heading size={"md"}>Projects</Heading>
+                <Heading size={"md"}>Recent Projects</Heading>
               </Flex>
 
               {/* Projects table */}
@@ -545,7 +626,7 @@ const Dashboard = () => {
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"entity"} size={"md"} />
-                <Heading size={"md"}>Entities</Heading>
+                <Heading size={"md"}>Recent Entities</Heading>
               </Flex>
 
               {/* Entities table */}

@@ -357,6 +357,13 @@ export type PreviewModalProps = {
   attachment: IGenericItem;
 };
 
+// `PreviewModal` support type
+export type PreviewSupport = {
+  document: boolean;
+  image: boolean;
+  sequence: boolean;
+};
+
 // `ImportModal` props
 export type ImportModalProps = {
   isOpen: boolean;
@@ -369,6 +376,14 @@ export type ScanModalProps = {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+};
+
+// `UnsavedChangesModal` props
+export type UnsavedChangesModalProps = {
+  blocker: Blocker;
+  cancelBlockerRef: React.MutableRefObject<null>;
+  onClose: () => void;
+  callback: () => void;
 };
 
 // `Scanner` props
@@ -397,6 +412,7 @@ export type IconNames =
   | "search"
   | "bell"
   | "add"
+  | "copy"
   | "edit"
   | "delete"
   | "download"
