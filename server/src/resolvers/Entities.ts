@@ -161,7 +161,7 @@ export const EntitiesResolvers = {
     // Export multiple Entities by _id
     exportEntities: async (
       _parent: IResolverParent,
-      args: { entities: string[] },
+      args: { entities: string[]; format: string },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -187,7 +187,7 @@ export const EntitiesResolvers = {
         }
       }
 
-      return await Entities.exportMany(authorizedEntities);
+      return await Entities.exportMany(authorizedEntities, args.format);
     },
 
     // Get collection of Entity metrics
