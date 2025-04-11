@@ -255,7 +255,7 @@ const Entities = () => {
     const response = await exportEntities({
       variables: {
         // Only pass the Entity identifiers
-        entities: toExport.filter((entity) => entity._id),
+        entities: toExport.map((entity) => entity._id),
         format: exportFormat,
       },
     });
@@ -269,8 +269,9 @@ const Entities = () => {
       );
     }
 
-    // Reset the Entity export collection
+    // Reset the Entity export collection and close the modal
     setToExport([]);
+    onExportClose();
   };
 
   return (
