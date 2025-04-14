@@ -279,6 +279,20 @@ export type AttachmentData = {
   filename: string;
 };
 
+// Counter types
+export type ICounter = {
+  workspace: string; // The Workspace ID assigned the Counter
+  name: string;
+  format: string; // Format, with one set of `{}` used to position the numerical values
+  current: number; // Current value of the numeric component
+  increment: number; // Amount to increase the counter by each iteration
+  created: string;
+};
+
+export type CounterModel = ICounter & {
+  _id: string;
+};
+
 // Activity types
 export type IActivity = {
   timestamp: string;
