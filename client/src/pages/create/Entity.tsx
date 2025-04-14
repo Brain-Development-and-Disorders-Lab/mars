@@ -566,6 +566,7 @@ const Entity = () => {
                       </Flex>
                       <Flex>
                         <SearchSelect
+                          id={"relationshipTargetSelect"}
                           resultType={"entity"}
                           value={selectedRelationshipTarget}
                           onChange={setSelectedRelationshipTarget}

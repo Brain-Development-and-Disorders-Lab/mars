@@ -353,7 +353,7 @@ const Template = () => {
             )}
 
             {/* Actions Menu */}
-            <Menu>
+            <Menu id={"actionsMenu"}>
               <MenuButton
                 as={Button}
                 size={"sm"}
