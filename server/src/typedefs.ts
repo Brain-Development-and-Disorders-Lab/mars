@@ -403,6 +403,27 @@ export const typedefs = `#graphql
   # "SearchResult" union type
   union SearchResult = Entity | Project
 
+  # "Counter" type
+  type Counter {
+    _id: String!
+    workspace: String
+    name: String
+    format: String
+    current: Int
+    increment: Int
+    created: String
+  }
+
+  # "CounterInput" type
+  input CounterInput {
+    workspace: String
+    name: String
+    format: String
+    current: Int
+    increment: Int
+    created: String
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -452,6 +473,11 @@ export const typedefs = `#graphql
 
     # Search queries
     search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean): [SearchResult]
+
+    # Counters queries
+    counter(_id: String): Counter
+    counters: [Counter]
+    currentCounterValue(_id: String): ResponseDataString
   }
 
   # Define mutation types
@@ -503,5 +529,9 @@ export const typedefs = `#graphql
 
     # API mutations
     revokeKey(key: String): ResponseMessage
+
+    # Counters mutations
+    createCounter(counter: CounterInput): ResponseDataString
+    incrementCounter(_id: String): ResponseDataString
   }
 `;
