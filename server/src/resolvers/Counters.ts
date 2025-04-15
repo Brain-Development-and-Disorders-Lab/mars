@@ -55,7 +55,11 @@ export const CountersResolvers = {
         );
       }
     },
-    counters: async (_parent: IResolverParent, context: Context) => {
+    counters: async (
+      _parent: IResolverParent,
+      _args: Record<string, unknown>,
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
