@@ -74,6 +74,7 @@ import { useAuthentication } from "@hooks/useAuthentication";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
+import Counter from "@components/Counter";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -118,6 +119,8 @@ const Entity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
+  const [counter, setCounter] = useState("");
+  const [useCounter, setUseCounter] = useState(false);
   const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
@@ -140,7 +143,9 @@ const Entity = () => {
   );
 
   // Various validation error states
-  const isNameError = name === "";
+  const isNameError =
+    (useCounter === false && name === "") ||
+    (useCounter === true && counter === "");
   const isDateError = created === "";
   const validDetails = !isNameError && !isDateError;
 
@@ -442,17 +447,34 @@ const Entity = () => {
                   isInvalid={isNameError || !isNameUnique}
                 >
                   <FormLabel fontSize={"sm"}>Name</FormLabel>
-                  <Input
-                    name={"name"}
-                    value={name}
-                    placeholder={"Name"}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={(event) => {
-                      setName(event.target.value);
-                      checkEntityName(event.target.value);
-                    }}
-                  />
+                  <Flex gap={"2"} justify={"space-between"}>
+                    {useCounter ? (
+                      <Counter counter={counter} setCounter={setCounter} />
+                    ) : (
+                      <Flex w={"100%"}>
+                        <Input
+                          name={"name"}
+                          value={name}
+                          placeholder={"Name"}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={(event) => {
+                            setName(event.target.value);
+                            checkEntityName(event.target.value);
+                          }}
+                        />
+                      </Flex>
+                    )}
+                    <Flex>
+                      <Button
+                        size={"sm"}
+                        onClick={() => setUseCounter(!useCounter)}
+                        colorScheme={"blue"}
+                      >
+                        Use {useCounter ? "Text" : "Counter"}
+                      </Button>
+                    </Flex>
+                  </Flex>
                   {(isNameError || !isNameUnique) && (
                     <FormErrorMessage fontSize={"sm"}>
                       A name or ID must be specified and unique.

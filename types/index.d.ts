@@ -293,6 +293,11 @@ export type CounterModel = ICounter & {
   _id: string;
 };
 
+export type CounterProps = {
+  counter: string;
+  setCounter: (value: React.SetStateAction<string>) => void;
+};
+
 // Activity types
 export type IActivity = {
   timestamp: string;
