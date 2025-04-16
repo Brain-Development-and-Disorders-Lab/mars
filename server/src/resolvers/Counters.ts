@@ -116,6 +116,47 @@ export const CountersResolvers = {
         );
       }
     },
+    nextCounterValue: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+      context: Context,
+    ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Counter to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      const counter = await Counters.getCounter(args._id);
+      if (_.isNull(counter)) {
+        throw new GraphQLError("Counter does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Check that Counter exists in the Workspace
+      if (_.isEqual(counter.workspace, workspace._id)) {
+        return await Counters.getNextValue(args._id);
+      } else {
+        throw new GraphQLError(
+          "This Counter is outside the current Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+    },
   },
   Mutation: {
     createCounter: async (
@@ -158,7 +199,7 @@ export const CountersResolvers = {
 
       // Check that Counter exists in the Workspace
       if (_.isEqual(counter.workspace, workspace._id)) {
-        return await Counters.getNextValue(args._id);
+        return await Counters.incrementValue(args._id);
       } else {
         throw new GraphQLError(
           "This Counter is outside the current Workspace",

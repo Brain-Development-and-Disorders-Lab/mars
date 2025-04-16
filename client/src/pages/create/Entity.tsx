@@ -468,16 +468,27 @@ const Entity = () => {
                     <Flex>
                       <Button
                         size={"sm"}
-                        onClick={() => setUseCounter(!useCounter)}
+                        onClick={() => {
+                          setUseCounter(!useCounter);
+
+                          // Reset the stored name and counter
+                          setName("");
+                          setCounter("");
+                        }}
                         colorScheme={"blue"}
                       >
                         Use {useCounter ? "Text" : "Counter"}
                       </Button>
                     </Flex>
                   </Flex>
-                  {(isNameError || !isNameUnique) && (
+                  {(isNameError || !isNameUnique) && !useCounter && (
                     <FormErrorMessage fontSize={"sm"}>
                       A name or ID must be specified and unique.
+                    </FormErrorMessage>
+                  )}
+                  {(isNameError || !isNameUnique) && useCounter && (
+                    <FormErrorMessage fontSize={"sm"}>
+                      A Counter must be selected or created.
                     </FormErrorMessage>
                   )}
                 </FormControl>

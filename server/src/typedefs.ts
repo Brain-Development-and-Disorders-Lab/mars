@@ -478,6 +478,7 @@ export const typedefs = `#graphql
     counter(_id: String): Counter
     counters: [Counter]
     currentCounterValue(_id: String): ResponseDataString
+    nextCounterValue(_id: String): ResponseDataString
   }
 
   # Define mutation types

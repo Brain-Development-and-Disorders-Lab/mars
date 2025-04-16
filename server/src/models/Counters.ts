@@ -98,6 +98,34 @@ export class Counters {
       };
     }
 
+    // Generate the next Counter value
+    const generated = counter.format.replace(
+      "{}",
+      (counter.current + counter.increment).toString(),
+    );
+
+    // Return the value of the Counter, subsituting within the `format`
+    return {
+      success: true,
+      message: `Preview next value for Counter "${counter.name}"`,
+      data: generated,
+    };
+  };
+
+  static incrementValue = async (
+    _id: string,
+  ): Promise<ResponseData<string>> => {
+    const counter = await Counters.getCounter(_id);
+
+    // Cover the case of no Counter found
+    if (_.isNull(counter)) {
+      return {
+        success: false,
+        message: "Counter does not exist",
+        data: "Invalid",
+      };
+    }
+
     // Generate update object
     const update: { $set: ICounter } = {
       $set: {
