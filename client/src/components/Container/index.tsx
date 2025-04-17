@@ -27,7 +27,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
     <Flex
       direction={"column"}
       w={"100%"}
-      h={"100%"}
+      h={"100vh"}
       maxH={{ base: "100%" }}
       overflowY={"auto"}
     >
