@@ -41,7 +41,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
     <Flex gap={"2"}>
       <IconButton
         aria-label={"View attribute"}
-        icon={<Icon name={isEditing ? "edit" : "view"} />}
+        icon={<Icon name={isEditing ? "edit" : "expand"} />}
         onClick={onOpen}
         size={"sm"}
       />

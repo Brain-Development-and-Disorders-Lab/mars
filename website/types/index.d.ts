@@ -39,7 +39,7 @@ export type IconNames =
   | "exit"
   | "settings"
   | "print"
-  | "view"
+  | "expand"
   | "workspace"
   | "zoom_in"
   | "zoom_out"

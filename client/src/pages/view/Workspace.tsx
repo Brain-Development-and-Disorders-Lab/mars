@@ -13,6 +13,7 @@ import {
   Tooltip,
   useBreakpoint,
   Heading,
+  Code,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -27,6 +28,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
 import {
+  CounterModel,
   DataTableAction,
   IGenericItem,
   IResponseMessage,
@@ -91,6 +93,13 @@ const Workspace = () => {
         name
         archived
       }
+      counters {
+        _id
+        name
+        current
+        format
+        increment
+      }
     }
   `;
   const [
@@ -100,6 +109,7 @@ const Workspace = () => {
     entities: (IGenericItem & { archived: boolean })[];
     projects: (IGenericItem & { archived: boolean })[];
     templates: (IGenericItem & { archived: boolean })[];
+    counters: CounterModel[];
   }>(GET_WORKSPACE_DATA, {
     fetchPolicy: "network-only",
     variables: {
@@ -193,11 +203,16 @@ const Workspace = () => {
   const [selectedTemplates, setSelectedTemplates] = useState({});
 
   // State for Workspace content presentation (show archived or not)
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchivedEntities, setShowArchivedEntities] = useState(false);
+  const [showArchivedProjects, setShowArchivedProjects] = useState(false);
+  const [showArchivedTemplates, setShowArchivedTemplates] = useState(false);
 
   // State for Workspace collaborators
   const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
+
+  // State for Workspace Counters
+  const [counters, setCounters] = useState([] as CounterModel[]);
 
   // State for Workspace privacy
   const [isPublic, setIsPublic] = useState(false);
@@ -227,7 +242,7 @@ const Workspace = () => {
         setEntities(workspaceData.data.entities);
         setShownEntities([
           ...workspaceData.data.entities.filter(
-            (entity) => entity.archived === showArchived,
+            (entity) => entity.archived === showArchivedEntities,
           ),
         ]);
         setSelectedEntities({});
@@ -236,7 +251,7 @@ const Workspace = () => {
         setProjects(workspaceData.data.projects);
         setShownProjects([
           ...workspaceData.data.projects.filter(
-            (project) => project.archived === showArchived,
+            (project) => project.archived === showArchivedProjects,
           ),
         ]);
         setSelectedProjects({});
@@ -245,10 +260,13 @@ const Workspace = () => {
         setTemplates(workspaceData.data.templates);
         setShownTemplates([
           ...workspaceData.data.templates.filter(
-            (template) => template.archived === showArchived,
+            (template) => template.archived === showArchivedTemplates,
           ),
         ]);
         setSelectedTemplates({});
+      }
+      if (workspaceData.data?.counters) {
+        setCounters(workspaceData.data.counters);
       }
 
       if (workspaceError || workspaceDataError) {
@@ -270,18 +288,29 @@ const Workspace = () => {
   // Effect to manage what contents are shown when `showArchived` is changed or archive state changed
   useEffect(() => {
     setShownEntities([
-      ...entities.filter((entity) => entity.archived === showArchived),
+      ...entities.filter((entity) => entity.archived === showArchivedEntities),
     ]);
     setSelectedEntities({});
     setShownProjects([
-      ...projects.filter((project) => project.archived === showArchived),
+      ...projects.filter(
+        (project) => project.archived === showArchivedProjects,
+      ),
     ]);
     setSelectedProjects({});
     setShownTemplates([
-      ...templates.filter((template) => template.archived === showArchived),
+      ...templates.filter(
+        (template) => template.archived === showArchivedTemplates,
+      ),
     ]);
     setSelectedTemplates({});
-  }, [entities, projects, templates, showArchived]);
+  }, [
+    entities,
+    projects,
+    templates,
+    showArchivedEntities,
+    showArchivedProjects,
+    showArchivedTemplates,
+  ]);
 
   /**
    * Handler function for modal `Done` button, apply updates to the Workspace
@@ -473,13 +502,19 @@ const Workspace = () => {
     entitiesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
-              })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              isDisabled={info.getValue().length < 24}
+              hasArrow
+            >
+              <Text>
+                {_.truncate(info.getValue(), {
+                  length: truncateTableText ? 12 : 24,
+                })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Name",
@@ -488,21 +523,27 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <IconButton
-              icon={<Icon name={"view"} />}
+            <Button
+              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Entity"}
               onClick={() => navigate(`/entities/${info.row.original._id}`)}
-            />
-            <IconButton
-              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
+            >
+              View
+            </Button>
+            <Button
+              rightIcon={
+                <Icon name={showArchivedEntities ? "rewind" : "archive"} />
+              }
               size={"sm"}
               aria-label={"Archive Entity"}
-              colorScheme={"orange"}
+              colorScheme={showArchivedEntities ? "green" : "red"}
               onClick={() =>
-                archiveEntity(info.row.original._id, !showArchived)
+                archiveEntity(info.row.original._id, !showArchivedEntities)
               }
-            />
+            >
+              {showArchivedEntities ? "Restore" : "Archive"}
+            </Button>
           </Flex>
         );
       },
@@ -511,14 +552,14 @@ const Workspace = () => {
   ];
   const entitiesTableActions: DataTableAction[] = [
     {
-      label: showArchived ? "Restore Entities" : "Archive Entities",
-      icon: showArchived ? "rewind" : "archive",
+      label: showArchivedEntities ? "Restore Entities" : "Archive Entities",
+      icon: showArchivedEntities ? "rewind" : "archive",
       action(table, rows) {
         const entitiesToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           entitiesToArchive.push(table.getRow(rowIndex).original._id);
         }
-        archiveEntities(entitiesToArchive, !showArchived);
+        archiveEntities(entitiesToArchive, !showArchivedEntities);
       },
     },
   ];
@@ -528,13 +569,19 @@ const Workspace = () => {
     projectsTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
-              })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              isDisabled={info.getValue().length < 24}
+              hasArrow
+            >
+              <Text>
+                {_.truncate(info.getValue(), {
+                  length: truncateTableText ? 12 : 24,
+                })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Name",
@@ -543,21 +590,27 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <IconButton
-              icon={<Icon name={"view"} />}
+            <Button
+              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Project"}
               onClick={() => navigate(`/projects/${info.row.original._id}`)}
-            />
-            <IconButton
-              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
+            >
+              View
+            </Button>
+            <Button
+              rightIcon={
+                <Icon name={showArchivedProjects ? "rewind" : "archive"} />
+              }
               size={"sm"}
               aria-label={"Archive Project"}
-              colorScheme={"orange"}
+              colorScheme={showArchivedProjects ? "green" : "red"}
               onClick={() =>
-                archiveProject(info.row.original._id, !showArchived)
+                archiveProject(info.row.original._id, !showArchivedProjects)
               }
-            />
+            >
+              {showArchivedProjects ? "Restore" : "Archive"}
+            </Button>
           </Flex>
         );
       },
@@ -566,14 +619,14 @@ const Workspace = () => {
   ];
   const projectsTableActions: DataTableAction[] = [
     {
-      label: showArchived ? "Restore Projects" : "Archive Projects",
-      icon: showArchived ? "rewind" : "archive",
+      label: showArchivedProjects ? "Restore Projects" : "Archive Projects",
+      icon: showArchivedProjects ? "rewind" : "archive",
       action(table, rows) {
         const projectsToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           projectsToArchive.push(table.getRow(rowIndex).original._id);
         }
-        archiveProjects(projectsToArchive, !showArchived);
+        archiveProjects(projectsToArchive, !showArchivedProjects);
       },
     },
   ];
@@ -583,13 +636,19 @@ const Workspace = () => {
     templatesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
-              })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              isDisabled={info.getValue().length < 24}
+              hasArrow
+            >
+              <Text>
+                {_.truncate(info.getValue(), {
+                  length: truncateTableText ? 12 : 24,
+                })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Name",
@@ -598,21 +657,27 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <IconButton
-              icon={<Icon name={"view"} />}
+            <Button
+              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Template"}
               onClick={() => navigate(`/templates/${info.row.original._id}`)}
-            />
-            <IconButton
-              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
+            >
+              View
+            </Button>
+            <Button
+              rightIcon={
+                <Icon name={showArchivedTemplates ? "rewind" : "archive"} />
+              }
               size={"sm"}
               aria-label={"Archive Template"}
-              colorScheme={"orange"}
+              colorScheme={showArchivedTemplates ? "green" : "red"}
               onClick={() =>
-                archiveTemplate(info.row.original._id, !showArchived)
+                archiveTemplate(info.row.original._id, !showArchivedTemplates)
               }
-            />
+            >
+              {showArchivedTemplates ? "Restore" : "Archive"}
+            </Button>
           </Flex>
         );
       },
@@ -621,16 +686,91 @@ const Workspace = () => {
   ];
   const templatesTableActions: DataTableAction[] = [
     {
-      label: showArchived ? "Restore Templates" : "Archive Templates",
-      icon: showArchived ? "rewind" : "archive",
+      label: showArchivedTemplates ? "Restore Templates" : "Archive Templates",
+      icon: showArchivedTemplates ? "rewind" : "archive",
       action(table, rows) {
         const templatesToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           templatesToArchive.push(table.getRow(rowIndex).original._id);
         }
-        archiveTemplates(templatesToArchive, !showArchived);
+        archiveTemplates(templatesToArchive, !showArchivedTemplates);
       },
     },
+  ];
+
+  const countersTableColumnHelper = createColumnHelper<CounterModel>();
+  const countersTableColumns = [
+    countersTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Flex py={"2"}>
+            <Tooltip
+              label={info.getValue()}
+              isDisabled={info.getValue().length < 24}
+              hasArrow
+            >
+              <Text>
+                {_.truncate(info.getValue(), {
+                  length: truncateTableText ? 12 : 24,
+                })}
+              </Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Name",
+    }),
+    countersTableColumnHelper.accessor("format", {
+      cell: (info) => {
+        return (
+          <Flex>
+            <Tooltip
+              label={
+                'Counter format string, where "{}" represents the position of the numeric value'
+              }
+              hasArrow
+            >
+              <Code>{info.getValue()}</Code>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Format",
+    }),
+    countersTableColumnHelper.accessor("current", {
+      cell: (info) => {
+        return (
+          <Flex>
+            <Tooltip
+              label={
+                "Current numeric value to be substituted into the Counter format string"
+              }
+              hasArrow
+            >
+              <Text fontWeight={"semibold"}>{info.getValue()}</Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Current",
+    }),
+    countersTableColumnHelper.accessor("increment", {
+      cell: (info) => {
+        return (
+          <Flex>
+            <Tooltip
+              label={
+                "After a Counter value is consumed, the numeric value is increment by this value"
+              }
+              hasArrow
+            >
+              <Text fontWeight={"semibold"}>{info.getValue()}</Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Increment",
+    }),
   ];
 
   return (
@@ -658,13 +798,6 @@ const Workspace = () => {
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Button
             size={"sm"}
-            rightIcon={<Icon name={"archive"} />}
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            {showArchived ? "Hide" : "Show"} Archive
-          </Button>
-          <Button
-            size={"sm"}
             colorScheme={"red"}
             rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/")}
@@ -675,7 +808,7 @@ const Workspace = () => {
             id={"modalWorkspaceCreateButton"}
             size={"sm"}
             colorScheme={"green"}
-            rightIcon={<Icon name={"check"} />}
+            rightIcon={<Icon name={"save"} />}
             isDisabled={name === ""}
             isLoading={
               workspaceUpdateLoading ||
@@ -685,7 +818,7 @@ const Workspace = () => {
             }
             onClick={() => handleUpdateClick()}
           >
-            Done
+            Save
           </Button>
         </Flex>
       </Flex>
@@ -887,7 +1020,7 @@ const Workspace = () => {
 
           {/* Workspace Entities */}
           <Flex
-            direction={"row"}
+            direction={"column"}
             p={"2"}
             h={"fit-content"}
             gap={"2"}
@@ -896,33 +1029,40 @@ const Workspace = () => {
             rounded={"md"}
             grow={"1"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchived ? "Archived " : ""}Entities
-              </FormLabel>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={shownEntities.length > 0 ? "" : "center"}
-                minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+            <Flex w={"100%"} align={"center"} justify={"space-between"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchivedEntities ? "Archived " : ""}Entities
+              </Text>
+              <Button
+                size={"sm"}
+                rightIcon={<Icon name={"archive"} />}
+                onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
-                {shownEntities.length > 0 ? (
-                  <DataTable
-                    data={shownEntities}
-                    columns={entitiesTableColumns}
-                    visibleColumns={{}}
-                    selectedRows={selectedEntities}
-                    actions={entitiesTableActions}
-                    showPagination
-                    showSelection
-                  />
-                ) : (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No {showArchived ? "archived " : ""}Entities
-                  </Text>
-                )}
-              </Flex>
-            </FormControl>
+                {showArchivedEntities ? "Hide" : "Show"} Archive
+              </Button>
+            </Flex>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={shownEntities.length > 0 ? "" : "center"}
+              minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+            >
+              {shownEntities.length > 0 ? (
+                <DataTable
+                  data={shownEntities}
+                  columns={entitiesTableColumns}
+                  visibleColumns={{}}
+                  selectedRows={selectedEntities}
+                  actions={entitiesTableActions}
+                  showPagination
+                  showSelection
+                />
+              ) : (
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  No {showArchivedEntities ? "archived " : ""}Entities
+                </Text>
+              )}
+            </Flex>
           </Flex>
         </Flex>
 
@@ -938,38 +1078,45 @@ const Workspace = () => {
             rounded={"md"}
             basis={"50%"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchived ? "Archived " : ""}Projects
-              </FormLabel>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={shownProjects.length > 0 ? "" : "center"}
-                minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+            <Flex w={"100%"} align={"center"} justify={"space-between"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchivedProjects ? "Archived " : ""}Projects
+              </Text>
+              <Button
+                size={"sm"}
+                rightIcon={<Icon name={"archive"} />}
+                onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
-                {shownProjects.length > 0 ? (
-                  <DataTable
-                    data={shownProjects}
-                    columns={projectsTableColumns}
-                    visibleColumns={{}}
-                    selectedRows={selectedProjects}
-                    actions={projectsTableActions}
-                    showPagination
-                    showSelection
-                  />
-                ) : (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No {showArchived ? "archived " : ""}Projects
-                  </Text>
-                )}
-              </Flex>
-            </FormControl>
+                {showArchivedProjects ? "Hide" : "Show"} Archive
+              </Button>
+            </Flex>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={shownProjects.length > 0 ? "" : "center"}
+              minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+            >
+              {shownProjects.length > 0 ? (
+                <DataTable
+                  data={shownProjects}
+                  columns={projectsTableColumns}
+                  visibleColumns={{}}
+                  selectedRows={selectedProjects}
+                  actions={projectsTableActions}
+                  showPagination
+                  showSelection
+                />
+              ) : (
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  No {showArchivedProjects ? "archived " : ""}Projects
+                </Text>
+              )}
+            </Flex>
           </Flex>
 
           {/* Workspace Templates */}
           <Flex
-            direction={"row"}
+            direction={"column"}
             p={"2"}
             h={"fit-content"}
             gap={"2"}
@@ -978,29 +1125,77 @@ const Workspace = () => {
             rounded={"md"}
             grow={"1"}
           >
+            <Flex w={"100%"} align={"center"} justify={"space-between"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchivedTemplates ? "Archived " : ""}Templates
+              </Text>
+              <Button
+                size={"sm"}
+                rightIcon={<Icon name={"archive"} />}
+                onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
+              >
+                {showArchivedTemplates ? "Hide" : "Show"} Archive
+              </Button>
+            </Flex>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={shownTemplates.length > 0 ? "" : "center"}
+              minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+            >
+              {shownTemplates.length > 0 ? (
+                <DataTable
+                  data={shownTemplates}
+                  columns={templatesTableColumns}
+                  visibleColumns={{}}
+                  selectedRows={selectedTemplates}
+                  actions={templatesTableActions}
+                  showPagination
+                  showSelection
+                />
+              ) : (
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  No {showArchivedTemplates ? "archived " : ""}Templates
+                </Text>
+              )}
+            </Flex>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
+          {/* Workspace Counters */}
+          <Flex
+            direction={"column"}
+            p={"2"}
+            gap={"2"}
+            h={"fit-content"}
+            border={"1px"}
+            borderColor={"gray.300"}
+            rounded={"md"}
+            basis={"50%"}
+          >
             <FormControl>
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchived ? "Archived " : ""}Templates
+                Counters
               </FormLabel>
               <Flex
                 w={"100%"}
                 justify={"center"}
-                align={shownTemplates.length > 0 ? "" : "center"}
-                minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+                align={counters.length > 0 ? "" : "center"}
+                minH={counters.length > 0 ? "fit-content" : "200px"}
               >
-                {shownTemplates.length > 0 ? (
+                {counters.length > 0 ? (
                   <DataTable
-                    data={shownTemplates}
-                    columns={templatesTableColumns}
+                    data={counters}
+                    columns={countersTableColumns}
                     visibleColumns={{}}
-                    selectedRows={selectedTemplates}
-                    actions={templatesTableActions}
+                    actions={[]}
+                    selectedRows={{}}
                     showPagination
-                    showSelection
                   />
                 ) : (
                   <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No {showArchived ? "archived " : ""}Templates
+                    No Counters
                   </Text>
                 )}
               </Flex>
