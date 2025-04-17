@@ -328,30 +328,6 @@ const Template = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {templateArchived ? (
-              <Button
-                id={"restoreTemplateButton"}
-                onClick={handleRestoreFromArchiveClick}
-                size={"sm"}
-                colorScheme={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
-              >
-                Restore
-              </Button>
-            ) : (
-              <Button
-                id={"editTemplateButton"}
-                size={"sm"}
-                colorScheme={editing ? "green" : "blue"}
-                rightIcon={
-                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                }
-                onClick={handleEditClick}
-              >
-                {editing ? "Done" : "Edit"}
-              </Button>
-            )}
-
             {/* Actions Menu */}
             <Menu id={"actionsMenu"}>
               <MenuButton
@@ -379,6 +355,30 @@ const Template = () => {
                 </MenuItem>
               </MenuList>
             </Menu>
+
+            {templateArchived ? (
+              <Button
+                id={"restoreTemplateButton"}
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Button
+                id={"editTemplateButton"}
+                size={"sm"}
+                colorScheme={editing ? "green" : "blue"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
+            )}
 
             {/* Archive Dialog */}
             <Dialog

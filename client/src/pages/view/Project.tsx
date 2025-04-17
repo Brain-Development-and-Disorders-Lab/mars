@@ -439,13 +439,10 @@ const Project = () => {
 
     // Reset Project state values
     setProject(project);
-    setProjectDescription(projectDescription);
-    setProjectEntities(projectEntities);
-    setProjectHistory(projectHistory);
-    setProjectCollaborators(projectCollaborators);
-
-    // Reload the page for maximum effect
-    window.location.reload();
+    setProjectDescription(project.description);
+    setProjectEntities(project.entities);
+    setProjectHistory(project.history);
+    setProjectCollaborators(project.collaborators);
   };
 
   /**
@@ -741,67 +738,6 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {projectArchived ? (
-              <Button
-                onClick={handleRestoreClick}
-                size={"sm"}
-                colorScheme={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
-              >
-                Restore
-              </Button>
-            ) : (
-              <Flex gap={"2"}>
-                {editing && (
-                  <Button
-                    onClick={handleCancelClick}
-                    size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
-                  >
-                    Cancel
-                  </Button>
-                )}
-                <Button
-                  id={"editProjectButton"}
-                  colorScheme={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
-                  }
-                  onClick={handleEditClick}
-                  loadingText={"Saving..."}
-                  isLoading={isUpdating}
-                  size={"sm"}
-                >
-                  {editing ? "Save" : "Edit"}
-                </Button>
-              </Flex>
-            )}
-
-            <Button
-              onClick={onHistoryOpen}
-              colorScheme={"green"}
-              size={"sm"}
-              rightIcon={<Icon name={"clock"} />}
-            >
-              History
-            </Button>
-
-            {/* Archive Dialog */}
-            <Dialog
-              dialogRef={archiveDialogRef}
-              header={"Archive Project"}
-              rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
-            >
-              <Text>
-                Are you sure you want to archive this Project? No Entities will
-                be deleted. This Project will be moved to the Workspace archive.
-              </Text>
-            </Dialog>
-
             {/* Actions Menu */}
             <Menu>
               <MenuButton
@@ -849,6 +785,67 @@ const Project = () => {
                 </MenuItem>
               </MenuList>
             </Menu>
+
+            {projectArchived ? (
+              <Button
+                onClick={handleRestoreClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Flex gap={"2"}>
+                {editing && (
+                  <Button
+                    onClick={handleCancelClick}
+                    size={"sm"}
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  id={"editProjectButton"}
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
+                  }
+                  onClick={handleEditClick}
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                  size={"sm"}
+                >
+                  {editing ? "Save" : "Edit"}
+                </Button>
+              </Flex>
+            )}
+
+            <Button
+              onClick={onHistoryOpen}
+              colorScheme={"gray"}
+              size={"sm"}
+              rightIcon={<Icon name={"clock"} />}
+            >
+              History
+            </Button>
+
+            {/* Archive Dialog */}
+            <Dialog
+              dialogRef={archiveDialogRef}
+              header={"Archive Project"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
+            >
+              <Text>
+                Are you sure you want to archive this Project? No Entities will
+                be deleted. This Project will be moved to the Workspace archive.
+              </Text>
+            </Dialog>
           </Flex>
         </Flex>
 

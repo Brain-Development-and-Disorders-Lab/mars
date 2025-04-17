@@ -296,6 +296,7 @@ export type CounterModel = ICounter & {
 export type CounterProps = {
   counter: string;
   setCounter: (value: React.SetStateAction<string>) => void;
+  showCreate: boolean;
 };
 
 // Activity types

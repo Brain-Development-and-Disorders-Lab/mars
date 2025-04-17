@@ -40,6 +40,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import CounterSelect from "@components/CounterSelect";
 import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
@@ -74,7 +75,6 @@ import { useAuthentication } from "@hooks/useAuthentication";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
-import Counter from "@components/Counter";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -492,7 +492,11 @@ const Entity = () => {
                   <FormLabel fontSize={"sm"}>Name</FormLabel>
                   <Flex gap={"2"} justify={"space-between"}>
                     {useCounter ? (
-                      <Counter counter={counter} setCounter={setCounter} />
+                      <CounterSelect
+                        counter={counter}
+                        setCounter={setCounter}
+                        showCreate
+                      />
                     ) : (
                       <Flex w={"100%"}>
                         <Input
