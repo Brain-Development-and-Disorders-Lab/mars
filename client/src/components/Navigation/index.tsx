@@ -8,7 +8,6 @@ import {
   Image,
   Button,
   useDisclosure,
-  Heading,
   Text,
   MenuButton,
   Menu,
@@ -56,7 +55,7 @@ const Navigation = () => {
   } = useDisclosure();
 
   return (
-    <Flex w={"100%"} p={"2"} bg={"#f2f2f2"}>
+    <Flex w={"100%"} p={"2"} bg={"gray.100"}>
       {/* Desktop navigation group */}
       <Flex
         direction={"column"}
@@ -74,9 +73,9 @@ const Navigation = () => {
           justify={"center"}
         >
           <Image src="/Favicon.png" boxSize={"24px"} />
-          <Heading fontWeight={"semibold"} size={"sm"}>
+          <Text fontWeight={"semibold"} fontSize={"lg"} color={"brand"}>
             Metadatify
-          </Heading>
+          </Text>
         </Flex>
 
         {/* Workspace menu items */}
@@ -97,7 +96,7 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "#f2f2f2"}
+              bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
               leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
@@ -112,7 +111,9 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/search") ? "#ffffff" : "#f2f2f2"
+                _.includes(location.pathname, "/search")
+                  ? "#ffffff"
+                  : "gray.100"
               }
               leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
@@ -128,7 +129,9 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/create") ? "#ffffff" : "#f2f2f2"
+                _.includes(location.pathname, "/create")
+                  ? "#ffffff"
+                  : "gray.100"
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
@@ -151,7 +154,7 @@ const Navigation = () => {
                 _.includes(location.pathname, "/entit") &&
                 !_.includes(location.pathname, "/create")
                   ? "#ffffff"
-                  : "#f2f2f2"
+                  : "gray.100"
               }
               onClick={() => navigate("/entities")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
@@ -171,7 +174,7 @@ const Navigation = () => {
                 _.includes(location.pathname, "/project") &&
                 !_.includes(location.pathname, "/create")
                   ? "#ffffff"
-                  : "#f2f2f2"
+                  : "gray.100"
               }
               onClick={() => navigate("/projects")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
@@ -191,7 +194,7 @@ const Navigation = () => {
                 _.includes(location.pathname, "/template") &&
                 !_.includes(location.pathname, "/create")
                   ? "#ffffff"
-                  : "#f2f2f2"
+                  : "gray.100"
               }
               onClick={() => navigate("/templates")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
@@ -261,7 +264,7 @@ const Navigation = () => {
         align={"center"}
         h={"100%"}
         w={"100%"}
-        bg={"#f2f2f2"}
+        bg={"gray.100"}
         justify={"space-between"}
         gap={"2"}
       >

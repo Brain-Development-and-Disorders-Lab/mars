@@ -25,11 +25,14 @@ import Icon from "@components/Icon";
 import { Information } from "@components/Label";
 
 // Custom types
-import { CounterModel, CounterProps, ResponseData } from "@types";
+import { CounterModel, CounterProps, ICounter, ResponseData } from "@types";
+
+// Custom hooks
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state
@@ -67,6 +70,9 @@ const CounterSelect = (props: CounterProps) => {
   // Toast
   const toast = useToast();
 
+  // Workspace context value
+  const { workspace } = useWorkspace();
+
   // GraphQL operations
   const GET_COUNTERS = gql`
     query GetCounters {
@@ -79,7 +85,8 @@ const CounterSelect = (props: CounterProps) => {
       }
     }
   `;
-  const { data: counterData } = useQuery(GET_COUNTERS);
+  const { data: counterData, refetch: refetchCounterData } =
+    useQuery(GET_COUNTERS);
 
   const GET_COUNTER_NEXT = gql`
     query GetCounterNext($_id: String) {
@@ -97,18 +104,42 @@ const CounterSelect = (props: CounterProps) => {
     GET_COUNTER_NEXT,
   );
 
+  const CREATE_COUNTER = gql`
+    mutation CreateCounter($counter: CounterInput) {
+      createCounter(counter: $counter) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [
+    createCounter,
+    { loading: createCounterLoading, error: createCounterError },
+  ] = useMutation<{ createCounter: ResponseData<string> }>(CREATE_COUNTER);
+
   /**
-   * Handle selection of a Counter
-   * @param event `HTMLSelectElement` `ChangeEvent` raised when option selected
+   * Update operation when a Counter is selected from the drop-down menu
+   * @param _id Counter identifier
    */
-  const handleSelectCounter = (event: ChangeEvent<HTMLSelectElement>) => {
+  const updateSelectedCounter = (_id: string) => {
     const selectedCounter = counters.filter(
-      (counter) => counter._id === event.target.value,
+      (counter) => counter._id === _id,
     )[0];
     setSelected(selectedCounter);
 
     // Propagate the selected Counter
     props.setCounter(selectedCounter._id);
+  };
+
+  /**
+   * Handle selection of a Counter
+   * @param event `HTMLSelectElement` `ChangeEvent` raised when option selected
+   */
+  const handleSelectCounter = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (event.target.value) {
+      updateSelectedCounter(event.target.value);
+    }
   };
 
   // Assign data
@@ -136,13 +167,6 @@ const CounterSelect = (props: CounterProps) => {
     setNextValue(result.data?.nextCounterValue.data || "Invalid");
   };
 
-  // Get the next Counter value
-  useEffect(() => {
-    if (selected?._id) {
-      getCounterPreview();
-    }
-  }, [selected]);
-
   const onNameInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCounterName(event.target.value);
   };
@@ -158,6 +182,57 @@ const CounterSelect = (props: CounterProps) => {
   const onIncrementInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCounterIncrement(parseInt(event.target.value));
   };
+
+  const onDoneClick = async () => {
+    // Create the ICounter object
+    const counter: ICounter = {
+      workspace: workspace,
+      name: counterName,
+      format: counterFormat,
+      current: counterInitial,
+      increment: counterIncrement,
+      created: "",
+    };
+
+    const result = await createCounter({
+      variables: {
+        counter: counter,
+      },
+    });
+
+    if (createCounterError) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: createCounterError.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (result.data?.createCounter) {
+      // Refetch the Counter data
+      await refetchCounterData();
+
+      const selectedCounter = counterData.counters.filter(
+        (counter: CounterModel) =>
+          counter._id === result.data?.createCounter.data,
+      );
+
+      // Update the selected Counter
+      setSelected(selectedCounter);
+      onClose();
+    }
+  };
+
+  // Get the next Counter value when the selected Counter has been updated
+  useEffect(() => {
+    if (selected?._id) {
+      getCounterPreview();
+    }
+  }, [selected]);
 
   useEffect(() => {
     // Evaluate the format, initial value, and increment
@@ -213,14 +288,6 @@ const CounterSelect = (props: CounterProps) => {
     setIsValidInitial(_isValidInitial);
     setIsValidIncrement(_isValidIncrement);
   }, [counterFormat, counterInitial, counterIncrement]);
-
-  useEffect(() => {
-    // Evaluate the increment
-  }, [counterIncrement]);
-
-  useEffect(() => {
-    // Evaluate the increment
-  }, [counterInitial]);
 
   return (
     <Flex direction={"column"} gap={"2"} w={"100%"}>
@@ -378,7 +445,12 @@ const CounterSelect = (props: CounterProps) => {
           </ModalBody>
           <ModalFooter p={"2"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-              <Button variant={"outline"} size={"sm"}>
+              <Button
+                variant={"outline"}
+                colorScheme={"red"}
+                size={"sm"}
+                rightIcon={<Icon name={"cross"} />}
+              >
                 Cancel
               </Button>
 
@@ -386,9 +458,14 @@ const CounterSelect = (props: CounterProps) => {
                 size={"sm"}
                 colorScheme={"green"}
                 isDisabled={
-                  !isValidFormat || !isValidIncrement || !isValidInput
+                  !isValidFormat ||
+                  !isValidIncrement ||
+                  !isValidInput ||
+                  createCounterLoading
                 }
+                isLoading={createCounterLoading}
                 rightIcon={<Icon name="check" />}
+                onClick={onDoneClick}
               >
                 Done
               </Button>
