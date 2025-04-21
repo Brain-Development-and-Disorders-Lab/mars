@@ -29,6 +29,7 @@ import { typedefs } from "./typedefs";
 import { APIResolvers } from "./resolvers/API";
 import { ActivityResolvers } from "./resolvers/Activity";
 import { AuthenticationResolvers } from "./resolvers/Authentication";
+import { CountersResolvers } from "./resolvers/Counters";
 import { DataResolvers } from "./resolvers/Data";
 import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
@@ -113,6 +114,7 @@ const start = async () => {
       ActivityResolvers,
       APIResolvers,
       AuthenticationResolvers,
+      CountersResolvers,
       DataResolvers,
       DateResolver,
       EntitiesResolvers,

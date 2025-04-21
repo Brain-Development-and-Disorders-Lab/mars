@@ -621,16 +621,13 @@ const Entity = () => {
 
     // Reset all Entity states
     setEntityData(entityData);
-    setEntityName(entityName);
-    setEntityDescription(entityDescription);
-    setEntityProjects(entityProjects);
-    setEntityRelationships(entityRelationships);
-    setEntityAttributes(entityAttributes);
-    setEntityAttachments(entityAttachments);
-    setEntityHistory(entityHistory);
-
-    // Reload the page for maximum effect
-    window.location.reload();
+    setEntityName(entityData.name);
+    setEntityDescription(entityData.description);
+    setEntityProjects(entityData.projects);
+    setEntityRelationships(entityData.relationships);
+    setEntityAttributes(entityData.attributes);
+    setEntityAttachments(entityData.attachments);
+    setEntityHistory(entityData.history);
   };
 
   /**
@@ -865,7 +862,7 @@ const Entity = () => {
               size={"sm"}
               key={`preview-file-${info.getValue()}`}
               colorScheme={"gray"}
-              icon={<Icon name={"view"} />}
+              icon={<Icon name={"expand"} />}
               onClick={() => handlePreview()}
             />
             {editing ? (
@@ -1297,54 +1294,6 @@ const Entity = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
-            {editing && (
-              <Button
-                onClick={handleCancelClick}
-                size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
-              >
-                Cancel
-              </Button>
-            )}
-            {entityArchived ? (
-              <Button
-                id={"restoreEntityButton"}
-                onClick={handleRestoreFromArchiveClick}
-                size={"sm"}
-                colorScheme={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
-              >
-                Restore
-              </Button>
-            ) : (
-              <Flex gap={"2"}>
-                <Button
-                  id={"editEntityButton"}
-                  onClick={handleEditClick}
-                  size={"sm"}
-                  colorScheme={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
-                  }
-                  loadingText={"Saving..."}
-                  isLoading={isUpdating}
-                >
-                  {editing ? "Save" : "Edit"}
-                </Button>
-              </Flex>
-            )}
-
-            {/* History button */}
-            <Button
-              size={"sm"}
-              colorScheme={"green"}
-              rightIcon={<Icon name={"clock"} />}
-              onClick={onHistoryOpen}
-            >
-              History
-            </Button>
-
             {/* Actions Menu */}
             <Menu>
               <MenuButton
@@ -1405,6 +1354,54 @@ const Entity = () => {
                 </MenuItem>
               </MenuList>
             </Menu>
+
+            {editing && (
+              <Button
+                onClick={handleCancelClick}
+                size={"sm"}
+                colorScheme={"red"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+            )}
+            {entityArchived ? (
+              <Button
+                id={"restoreEntityButton"}
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"green"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Flex gap={"2"}>
+                <Button
+                  id={"editEntityButton"}
+                  onClick={handleEditClick}
+                  size={"sm"}
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
+                  }
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                >
+                  {editing ? "Save" : "Edit"}
+                </Button>
+              </Flex>
+            )}
+
+            {/* History button */}
+            <Button
+              size={"sm"}
+              colorScheme={"gray"}
+              rightIcon={<Icon name={"clock"} />}
+              onClick={onHistoryOpen}
+            >
+              History
+            </Button>
 
             {/* Archive Dialog */}
             <Dialog

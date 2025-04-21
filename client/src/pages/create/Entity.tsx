@@ -40,6 +40,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import CounterSelect from "@components/CounterSelect";
 import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
@@ -118,6 +119,8 @@ const Entity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
+  const [counter, setCounter] = useState("");
+  const [useCounter, setUseCounter] = useState(false);
   const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
@@ -140,7 +143,9 @@ const Entity = () => {
   );
 
   // Various validation error states
-  const isNameError = name === "";
+  const isNameError =
+    (useCounter === false && name === "") ||
+    (useCounter === true && counter === "");
   const isDateError = created === "";
   const validDetails = !isNameError && !isDateError;
 
@@ -177,6 +182,19 @@ const Entity = () => {
     }
   `;
   const { loading, error, data, refetch } = useQuery(GET_CREATE_ENTITIES_DATA);
+
+  const INCREMENT_COUNTER = gql`
+    mutation IncrementCounter($_id: String) {
+      incrementCounter(_id: $_id) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [incrementCounter, { error: incrementCounterError }] = useMutation<{
+    incrementCounter: ResponseData<string>;
+  }>(INCREMENT_COUNTER);
 
   const CREATE_ENTITY = gql`
     mutation CreateEntity($entity: EntityCreateInput) {
@@ -274,11 +292,41 @@ const Entity = () => {
 
       setIsSubmitting(true);
 
+      // Steps to use the Counter if selected
+      let generatedName = name;
+      if (useCounter) {
+        // Increment the Counter and substitute the name value
+        const incrementResult = await incrementCounter({
+          variables: {
+            _id: counter,
+          },
+        });
+
+        if (incrementCounterError) {
+          // Raise an error and cancel the create operation
+          toast({
+            title: "Error",
+            status: "error",
+            description: incrementCounterError.message,
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Else, handle updating the name with the latest Counter value
+        if (incrementResult.data?.incrementCounter) {
+          generatedName = incrementResult.data.incrementCounter.data;
+        }
+      }
+
       // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
           entity: {
-            name: name,
+            name: generatedName,
             owner: owner,
             created: created,
             archived: false,
@@ -442,20 +490,52 @@ const Entity = () => {
                   isInvalid={isNameError || !isNameUnique}
                 >
                   <FormLabel fontSize={"sm"}>Name</FormLabel>
-                  <Input
-                    name={"name"}
-                    value={name}
-                    placeholder={"Name"}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={(event) => {
-                      setName(event.target.value);
-                      checkEntityName(event.target.value);
-                    }}
-                  />
-                  {(isNameError || !isNameUnique) && (
+                  <Flex gap={"2"} justify={"space-between"}>
+                    {useCounter ? (
+                      <CounterSelect
+                        counter={counter}
+                        setCounter={setCounter}
+                        showCreate
+                      />
+                    ) : (
+                      <Flex w={"100%"}>
+                        <Input
+                          name={"name"}
+                          value={name}
+                          placeholder={"Name"}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={(event) => {
+                            setName(event.target.value);
+                            checkEntityName(event.target.value);
+                          }}
+                        />
+                      </Flex>
+                    )}
+                    <Flex>
+                      <Button
+                        size={"sm"}
+                        onClick={() => {
+                          setUseCounter(!useCounter);
+
+                          // Reset the stored name and counter
+                          setName("");
+                          setCounter("");
+                        }}
+                        colorScheme={"blue"}
+                      >
+                        Use {useCounter ? "Text" : "Counter"}
+                      </Button>
+                    </Flex>
+                  </Flex>
+                  {(isNameError || !isNameUnique) && !useCounter && (
                     <FormErrorMessage fontSize={"sm"}>
                       A name or ID must be specified and unique.
+                    </FormErrorMessage>
+                  )}
+                  {(isNameError || !isNameUnique) && useCounter && (
+                    <FormErrorMessage fontSize={"sm"}>
+                      A Counter must be selected or created.
                     </FormErrorMessage>
                   )}
                 </FormControl>

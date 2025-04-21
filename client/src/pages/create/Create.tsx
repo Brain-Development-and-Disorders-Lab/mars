@@ -39,66 +39,6 @@ const Create = () => {
         p={"2"}
         wrap={"wrap"}
       >
-        {/* Project card */}
-        <Card
-          maxW={"sm"}
-          h={"md"}
-          variant={"outline"}
-          border={"1px"}
-          borderColor={"gray.300"}
-        >
-          <CardHeader>
-            <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"project"} size={"md"} />
-              <Heading size={"md"}>Project</Heading>
-            </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex p={"2"} gap={"4"} direction={"column"}>
-                <Heading size={"xs"} textTransform={"uppercase"}>
-                  Description
-                </Heading>
-                <Text fontSize={"sm"}>
-                  Create a Project to organize and share Entities.
-                </Text>
-              </Flex>
-              <Flex p={"2"} gap={"4"} direction={"column"}>
-                <Heading size={"xs"} textTransform={"uppercase"}>
-                  Fields
-                </Heading>
-                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                  <Text
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    color={"gray.600"}
-                  >
-                    Required:
-                  </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Description</Tag>
-                </Flex>
-              </Flex>
-            </Stack>
-          </CardBody>
-          <CardFooter>
-            <Flex w={"100%"} justify={"center"}>
-              <Button
-                id={"createProjectButton"}
-                size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
-                onClick={() => {
-                  posthog.capture("create_project_click");
-                  navigate("/create/project");
-                }}
-              >
-                Create
-              </Button>
-            </Flex>
-          </CardFooter>
-        </Card>
-
         {/* Entity card */}
         <Card
           maxW={"sm"}
@@ -229,6 +169,66 @@ const Create = () => {
                 onClick={() => {
                   posthog.capture("create_template_click");
                   navigate("/create/template");
+                }}
+              >
+                Create
+              </Button>
+            </Flex>
+          </CardFooter>
+        </Card>
+
+        {/* Project card */}
+        <Card
+          maxW={"sm"}
+          h={"md"}
+          variant={"outline"}
+          border={"1px"}
+          borderColor={"gray.300"}
+        >
+          <CardHeader>
+            <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
+              <Icon name={"project"} size={"md"} />
+              <Heading size={"md"}>Project</Heading>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <Stack divider={<StackDivider />} spacing={"2"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
+                <Heading size={"xs"} textTransform={"uppercase"}>
+                  Description
+                </Heading>
+                <Text fontSize={"sm"}>
+                  Create a Project to organize and share Entities.
+                </Text>
+              </Flex>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
+                <Heading size={"xs"} textTransform={"uppercase"}>
+                  Fields
+                </Heading>
+                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                  <Text
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
+                    Required:
+                  </Text>
+                  <Tag>Name</Tag>
+                  <Tag>Description</Tag>
+                </Flex>
+              </Flex>
+            </Stack>
+          </CardBody>
+          <CardFooter>
+            <Flex w={"100%"} justify={"center"}>
+              <Button
+                id={"createProjectButton"}
+                size={"sm"}
+                colorScheme={"green"}
+                rightIcon={<Icon name={"add"} />}
+                onClick={() => {
+                  posthog.capture("create_project_click");
+                  navigate("/create/project");
                 }}
               >
                 Create
