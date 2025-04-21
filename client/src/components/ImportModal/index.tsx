@@ -39,6 +39,7 @@ import Attribute from "@components/AttributeCard";
 import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
 import { Information } from "@components/Label";
+import CounterSelect from "@components/CounterSelect";
 
 // Custom and existing types
 import {
@@ -137,6 +138,8 @@ const ImportModal = (props: ImportModalProps) => {
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
   const [nameField, setNameField] = useState("");
+  const [useCounter, setUseCounter] = useState(false);
+  const [counter, setCounter] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
@@ -312,12 +315,25 @@ const ImportModal = (props: ImportModalProps) => {
   useEffect(() => {
     if (
       _.isEqual(entityInterfacePage, "details") &&
+      !useCounter &&
       nameField !== "" &&
       fileType === CSV_MIME_TYPE
     ) {
       setContinueDisabled(false);
     }
   }, [nameField]);
+
+  // Effect to manipulate 'Continue' button state when mapping fields from CSV file
+  useEffect(() => {
+    if (
+      _.isEqual(entityInterfacePage, "details") &&
+      useCounter &&
+      counter !== "" &&
+      fileType === CSV_MIME_TYPE
+    ) {
+      setContinueDisabled(false);
+    }
+  }, [counter]);
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
@@ -1168,14 +1184,43 @@ const ImportModal = (props: ImportModalProps) => {
                     </FormControl>
                     <FormControl
                       isRequired
-                      isInvalid={_.isEqual(nameField, "")}
+                      isInvalid={
+                        (!useCounter && _.isEqual(nameField, "")) ||
+                        (useCounter && _.isEqual(counter, ""))
+                      }
                     >
                       <FormLabel fontSize={"sm"}>Name</FormLabel>
-                      {getSelectComponent(
-                        "import_name",
-                        nameField,
-                        setNameField,
-                      )}
+                      <Flex gap={"2"} justify={"space-between"}>
+                        {useCounter ? (
+                          <CounterSelect
+                            counter={counter}
+                            setCounter={setCounter}
+                            showCreate
+                          />
+                        ) : (
+                          getSelectComponent(
+                            "import_name",
+                            nameField,
+                            setNameField,
+                          )
+                        )}
+                        <Flex>
+                          <Button
+                            size={"sm"}
+                            onClick={() => {
+                              setUseCounter(!useCounter);
+
+                              // Reset the stored name and counter
+                              setNameField("");
+                              setCounter("");
+                              setContinueDisabled(true);
+                            }}
+                            colorScheme={"blue"}
+                          >
+                            Use {useCounter ? "Text" : "Counter"}
+                          </Button>
+                        </Flex>
+                      </Flex>
                       <FormHelperText>
                         Column containing Entity names
                       </FormHelperText>
