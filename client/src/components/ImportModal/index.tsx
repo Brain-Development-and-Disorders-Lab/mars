@@ -1263,17 +1263,36 @@ const ImportModal = (props: ImportModalProps) => {
 
                 <Flex direction={"row"} gap={"2"}>
                   {/* Description */}
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Description</FormLabel>
-                    {getSelectComponent(
-                      "import_description",
-                      descriptionField,
-                      setDescriptionField,
-                    )}
-                    <FormHelperText>
-                      Column containing Entity descriptions
-                    </FormHelperText>
-                  </FormControl>
+                  {fileType === CSV_MIME_TYPE && (
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      {getSelectComponent(
+                        "import_description",
+                        descriptionField,
+                        setDescriptionField,
+                      )}
+                      <FormHelperText>
+                        Column containing Entity descriptions
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+
+                  {/* Description */}
+                  {fileType === JSON_MIME_TYPE && (
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Defined in JSON"}
+                        isDisabled
+                        isReadOnly
+                      />
+                      <FormHelperText>
+                        Field containing Entity descriptions
+                      </FormHelperText>
+                    </FormControl>
+                  )}
 
                   {/* Project */}
                   <FormControl>
@@ -1357,6 +1376,7 @@ const ImportModal = (props: ImportModalProps) => {
                     >
                       <Select
                         size={"sm"}
+                        rounded={"md"}
                         placeholder={"Select Template Attribute"}
                         isDisabled={templates.length === 0}
                         onChange={(event) => {
