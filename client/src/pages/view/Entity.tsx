@@ -39,6 +39,7 @@ import {
   MenuItem,
   Divider,
   Dialog,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -2368,7 +2369,7 @@ const Entity = () => {
                     </FormControl>
                   </Flex>
 
-                  <Divider />
+                  <Separator />
 
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl>
@@ -2410,7 +2411,7 @@ const Entity = () => {
                     </FormControl>
                   </Flex>
 
-                  <Divider />
+                  <Separator />
 
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl>
@@ -2794,7 +2795,7 @@ const Entity = () => {
             </DrawerHeader>
 
             <DrawerBody>
-              <VStack spacing={"2"}>
+              <VStack gap={"2"}>
                 {entityHistory.length > 0 ? (
                   entityHistory.map((entityVersion) => {
                     return (

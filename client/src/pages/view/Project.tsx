@@ -1057,7 +1057,7 @@ const Project = () => {
                       No Collaborators
                     </Text>
                   ) : (
-                    <VStack align="start">
+                    <VStack align={"start"}>
                       {projectCollaborators.map((collaborator, index) => (
                         <Flex key={index} align="center">
                           <Text mr="4">{collaborator}</Text>
@@ -1465,7 +1465,7 @@ const Project = () => {
             </DrawerHeader>
 
             <DrawerBody>
-              <VStack spacing={"2"}>
+              <VStack gap={"2"}>
                 {projectHistory && projectHistory.length > 0 ? (
                   projectHistory.map((projectVersion) => {
                     return (

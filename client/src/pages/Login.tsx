@@ -10,7 +10,7 @@ import {
   Text,
   useToast,
   Link,
-  Divider,
+  Separator,
   Box,
   AbsoluteCenter,
 } from "@chakra-ui/react";
@@ -197,7 +197,7 @@ const Login = () => {
             <Flex direction={"column"} gap={"2"} pt={"8"}>
               <Button
                 id={"orcidLoginButton"}
-                colorScheme={"gray"}
+                colorPalette={"gray"}
                 gap={"4"}
                 onClick={onLoginClick}
                 isLoading={isLoading}
@@ -212,13 +212,13 @@ const Login = () => {
               </Button>
 
               <Box position={"relative"} p={"4"}>
-                <Divider />
+                <Separator />
                 <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
                   or
                 </AbsoluteCenter>
               </Box>
 
-              <Button colorScheme={"gray"} gap={"4"} isDisabled>
+              <Button colorPalette={"gray"} gap={"4"} disabled>
                 More sign in options coming soon.
               </Button>
             </Flex>

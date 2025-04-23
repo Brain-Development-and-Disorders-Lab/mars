@@ -11,7 +11,6 @@ import React, {
 import {
   Button,
   Dialog,
-  Divider,
   Flex,
   Heading,
   IconButton,
@@ -26,6 +25,7 @@ import {
   PopoverTrigger,
   ScaleFade,
   Select,
+  Separator,
   Spacer,
   Text,
   Tooltip,
@@ -754,7 +754,7 @@ const Values = (props: {
                   </Flex>
 
                   <Flex direction={"column"} gap={"2"}>
-                    <VStack gap={"1"} separator={<Divider />}>
+                    <VStack gap={"1"} separator={<Separator />}>
                       {options.length > 0 ? (
                         options.map((option, index) => {
                           return (

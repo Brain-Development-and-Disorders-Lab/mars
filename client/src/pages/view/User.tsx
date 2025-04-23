@@ -13,9 +13,9 @@ import {
   useBreakpoint,
   IconButton,
   Tag,
+  Separator,
   Spacer,
   VStack,
-  Divider,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -103,7 +103,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
     <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"} wrap={"wrap"}>
       <Flex direction={"row"} gap={"1"} align={"center"}>
         <Icon name={"key"} />
-        <Tag colorScheme={isRevoked ? "red" : "blue"} size={"sm"}>
+        <Tag colorPalette={isRevoked ? "red" : "blue"} size={"sm"}>
           {isRevoked ? "revoked" : props.apiKey.scope}
         </Tag>
       </Flex>
@@ -115,13 +115,13 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
           maxW={"200px"}
           size={"sm"}
           rounded={"md"}
-          isDisabled={isRevoked}
+          disabled={isRevoked}
           readOnly
         />
         <Button
           size={"sm"}
           onClick={() => setShowValue(!showValue)}
-          isDisabled={isRevoked}
+          disabled={isRevoked}
         >
           {showValue ? "Hide" : "Show"}
         </Button>
@@ -154,7 +154,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
           <Button
             size={"sm"}
-            colorScheme={"red"}
+            colorPalette={"red"}
             rightIcon={<Icon name={"delete"} />}
             onClick={() => handleRevokeClick()}
             isLoading={revokeKeyLoading}
@@ -397,7 +397,7 @@ const User = () => {
         return (
           <Tooltip
             label={"You cannot leave your only Workspace"}
-            isDisabled={userWorkspaces.length > 1}
+            disabled={userWorkspaces.length > 1}
             hasArrow
           >
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
@@ -405,8 +405,8 @@ const User = () => {
                 icon={<Icon name={"b_right"} />}
                 size={"sm"}
                 aria-label={"Leave Workspace"}
-                colorScheme={"orange"}
-                isDisabled={!editing || userWorkspaces.length === 1}
+                colorPalette={"orange"}
+                disabled={!editing || userWorkspaces.length === 1}
                 onClick={() => {
                   removeWorkspace(info.row.original._id);
                 }}
@@ -453,7 +453,7 @@ const User = () => {
           <Flex direction={"row"} align={"center"} gap={"2"}>
             <Button
               size={"sm"}
-              colorScheme={"red"}
+              colorPalette={"red"}
               rightIcon={<Icon name={"cross"} />}
               onClick={() => handleCancelClick()}
             >
@@ -462,7 +462,7 @@ const User = () => {
             <Button
               id={"userDoneButton"}
               size={"sm"}
-              colorScheme={"green"}
+              colorPalette={"green"}
               rightIcon={<Icon name={"check"} />}
               isLoading={userUpdateLoading}
               onClick={() => handleUpdateClick()}
@@ -473,7 +473,7 @@ const User = () => {
         ) : (
           <Button
             size={"sm"}
-            colorScheme={"blue"}
+            colorPalette={"blue"}
             rightIcon={<Icon name={"edit"} />}
             onClick={() => setEditing(true)}
           >
@@ -504,11 +504,11 @@ const User = () => {
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                     ORCiD
                   </FormLabel>
-                  <Tag colorScheme={"green"}>{userOrcid}</Tag>
+                  <Tag colorPalette={"green"}>{userOrcid}</Tag>
                 </FormControl>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
+                <FormControl required>
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                     Email
                   </FormLabel>
@@ -519,13 +519,13 @@ const User = () => {
                     placeholder={"Email"}
                     type={"email"}
                     value={userEmail}
-                    isDisabled={!editing}
+                    disabled={!editing}
                     onChange={(event) => setUserEmail(event.target.value)}
                   />
                 </FormControl>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
+                <FormControl required>
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                     Affiliation
                   </FormLabel>
@@ -535,7 +535,7 @@ const User = () => {
                     rounded={"md"}
                     placeholder={"Affiliation"}
                     value={userAffiliation}
-                    isDisabled={!editing}
+                    disabled={!editing}
                     onChange={(event) => setUserAffiliation(event.target.value)}
                   />
                 </FormControl>
@@ -610,7 +610,7 @@ const User = () => {
                   </Text>
                   <Button
                     size={"sm"}
-                    colorScheme={"green"}
+                    colorPalette={"green"}
                     rightIcon={<Icon name={"add"} />}
                     onClick={() => handleGenerateKeyClick()}
                     isLoading={generateKeyLoading}
@@ -631,8 +631,8 @@ const User = () => {
                     <VStack
                       direction={"column"}
                       w={"100%"}
-                      divider={<Divider />}
-                      spacing={"2"}
+                      separator={<Separator />}
+                      gap={"2"}
                       justify={"left"}
                     >
                       {userKeys.map((key, index) => {
