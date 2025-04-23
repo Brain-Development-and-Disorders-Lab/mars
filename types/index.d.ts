@@ -131,7 +131,7 @@ export type ActorTagProps = {
 export type VisibilityTagProps = {
   isPublic: boolean;
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
-  isDisabled?: boolean; // Disable changing the visibility
+  disabled?: boolean; // Disable changing the visibility
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
@@ -328,14 +328,14 @@ export type PageProps = {
   children: React.ReactElement | React.ReactElement[];
 };
 
-// Dialog component
-export type DialogProps = {
+// `AlertDialog` component
+export type AlertDialogProps = {
   // Ref for placement
   dialogRef: React.MutableRefObject<any>;
   header: string;
   children: React.ReactElement | React.ReactElement[];
   // Dialog actions and state
-  isOpen: boolean;
+  open: boolean;
   onOpen: () => void;
   onClose: () => void;
   // Left and right buttons
@@ -384,16 +384,16 @@ export type PreviewSupport = {
   sequence: boolean;
 };
 
-// `ImportModal` props
-export type ImportModalProps = {
-  isOpen: boolean;
+// `ImportDialog` props
+export type ImportDialogProps = {
+  open: boolean;
   onOpen: () => void;
   onClose: () => void;
 };
 
 // `ScanModal` props
 export type ScanModalProps = {
-  isOpen: boolean;
+  open: boolean;
   onOpen: () => void;
   onClose: () => void;
 };
@@ -513,7 +513,7 @@ export type SearchSelectProps = {
   resultType: "entity" | "project";
   placeholder?: string;
   onChange?: (value: any) => void;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 // SearchBox props
