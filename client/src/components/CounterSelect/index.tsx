@@ -5,10 +5,9 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   Button,
   Dialog,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   Input,
   Select,
   Text,
@@ -364,56 +363,74 @@ const CounterSelect = (props: CounterProps) => {
                 />
 
                 <Flex>
-                  <FormControl required>
-                    <FormLabel fontSize={"sm"}>Name</FormLabel>
-                    <Input
-                      value={counterName}
-                      size={"sm"}
-                      rounded={"md"}
-                      onChange={onNameInputChange}
-                    />
-                  </FormControl>
+                  <Fieldset.Root>
+                    <Field.Root>
+                      <Field.Label>
+                        Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        value={counterName}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={onNameInputChange}
+                      />
+                    </Field.Root>
+                  </Fieldset.Root>
                 </Flex>
 
                 <Flex>
-                  <FormControl required invalid={!isValidFormat}>
-                    <FormLabel fontSize={"sm"}>Format</FormLabel>
-                    <Input
-                      value={counterFormat}
-                      size={"sm"}
-                      rounded={"md"}
-                      onChange={onFormatInputChange}
-                    />
-                    {!isValidFormat && (
-                      <FormErrorMessage fontSize={"sm"}>
-                        {formatErrorMessage}
-                      </FormErrorMessage>
-                    )}
-                  </FormControl>
+                  <Fieldset.Root invalid={!isValidFormat}>
+                    <Field.Root>
+                      <Field.Label>
+                        Format
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        value={counterFormat}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={onFormatInputChange}
+                      />
+                      {!isValidFormat && (
+                        <Field.ErrorText>{formatErrorMessage}</Field.ErrorText>
+                      )}
+                    </Field.Root>
+                  </Fieldset.Root>
                 </Flex>
 
                 <Flex direction={"row"} gap={"2"}>
-                  <FormControl required invalid={!isValidInitial}>
-                    <FormLabel fontSize={"sm"}>Initial Numeric Value</FormLabel>
-                    <Input
-                      type={"number"}
-                      value={counterInitial}
-                      size={"sm"}
-                      rounded={"md"}
-                      onChange={onInitialInputChange}
-                    />
-                  </FormControl>
+                  <Fieldset.Root invalid={!isValidInitial}>
+                    <Field.Root>
+                      <Field.Label>
+                        Initial Numeric Value
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        type={"number"}
+                        value={counterInitial}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={onInitialInputChange}
+                      />
+                    </Field.Root>
+                  </Fieldset.Root>
 
-                  <FormControl required invalid={!isValidIncrement}>
-                    <FormLabel fontSize={"sm"}>Increment</FormLabel>
-                    <Input
-                      type={"number"}
-                      value={counterIncrement}
-                      size={"sm"}
-                      rounded={"md"}
-                      onChange={onIncrementInputChange}
-                    />
-                  </FormControl>
+                  <Fieldset.Root invalid={!isValidIncrement}>
+                    <Field.Root>
+                      <Field.Label>
+                        Increment
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        type={"number"}
+                        value={counterIncrement}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={onIncrementInputChange}
+                      />
+                    </Field.Root>
+                  </Fieldset.Root>
                 </Flex>
 
                 <Flex
