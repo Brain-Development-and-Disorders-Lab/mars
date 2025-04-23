@@ -17,7 +17,7 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import ImportModal from "@components/ImportModal";
+import ImportDialog from "@components/ImportDialog";
 import ScanModal from "@components/ScanModal";
 import SearchBox from "@components/SearchBox";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
@@ -43,13 +43,13 @@ const Navigation = () => {
   const { workspace } = useWorkspace();
 
   const {
-    isOpen: isImportOpen,
+    open: importOpen,
     onOpen: onImportOpen,
     onClose: onImportClose,
   } = useDisclosure();
 
   const {
-    isOpen: isScanOpen,
+    open: scanOpen,
     onOpen: onScanOpen,
     onClose: onScanClose,
   } = useDisclosure();
@@ -99,7 +99,7 @@ const Navigation = () => {
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
               leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               Dashboard
             </Button>
@@ -117,7 +117,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               Search
             </Button>
@@ -135,7 +135,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               Create
             </Button>
@@ -157,7 +157,7 @@ const Navigation = () => {
                   : "gray.100"
               }
               onClick={() => navigate("/entities")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
@@ -177,7 +177,7 @@ const Navigation = () => {
                   : "gray.100"
               }
               onClick={() => navigate("/projects")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
@@ -197,7 +197,7 @@ const Navigation = () => {
                   : "gray.100"
               }
               onClick={() => navigate("/templates")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
               Templates
             </Button>
@@ -213,7 +213,7 @@ const Navigation = () => {
                 key={"import"}
                 size={"sm"}
                 w={"100%"}
-                colorScheme={"blue"}
+                colorPalette={"blue"}
                 leftIcon={<Icon name={"upload"} />}
                 onClick={() => {
                   // Capture event
@@ -221,7 +221,7 @@ const Navigation = () => {
 
                   onImportOpen();
                 }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
+                disabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Import
               </Button>
@@ -231,7 +231,7 @@ const Navigation = () => {
                 key={"scan"}
                 size={"sm"}
                 w={"100%"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 leftIcon={<Icon name={"scan"} />}
                 onClick={() => {
                   // Capture event
@@ -239,7 +239,7 @@ const Navigation = () => {
 
                   onScanOpen();
                 }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
+                disabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Scan
               </Button>
@@ -333,7 +333,7 @@ const Navigation = () => {
 
                   onScanOpen();
                 }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
+                disabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Scan
               </MenuItem>
@@ -357,19 +357,15 @@ const Navigation = () => {
         <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
       </Flex>
 
-      {/* `ImportModal` component */}
-      <ImportModal
-        isOpen={isImportOpen}
+      {/* `ImportDialog` component */}
+      <ImportDialog
+        open={importOpen}
         onOpen={onImportOpen}
         onClose={onImportClose}
       />
 
       {/* `ScanModal` component */}
-      <ScanModal
-        isOpen={isScanOpen}
-        onOpen={onScanOpen}
-        onClose={onScanClose}
-      />
+      <ScanModal open={scanOpen} onOpen={onScanOpen} onClose={onScanClose} />
     </Flex>
   );
 };

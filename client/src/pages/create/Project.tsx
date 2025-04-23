@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  Dialog,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -12,13 +13,6 @@ import {
   Heading,
   IconButton,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spacer,
   Text,
   useDisclosure,
@@ -144,7 +138,7 @@ const Project = () => {
             <IconButton
               icon={<Icon name={"delete"} />}
               aria-label={"Remove entity"}
-              colorScheme={"red"}
+              colorPalette={"red"}
               onClick={() => removeEntity(info.row.original)}
               size={"sm"}
             />
@@ -219,7 +213,7 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormControl isRequired isInvalid={isNameError}>
+              <FormControl required invalid={isNameError}>
                 <FormLabel htmlFor={"name"} fontSize={"sm"}>
                   Name
                 </FormLabel>
@@ -241,7 +235,7 @@ const Project = () => {
                 )}
               </FormControl>
 
-              <FormControl isRequired>
+              <FormControl required>
                 <FormLabel
                   htmlFor={"owner"}
                   fontWeight={"semibold"}
@@ -299,7 +293,7 @@ const Project = () => {
               borderColor={"gray.300"}
             >
               {/* Project description */}
-              <FormControl isRequired isInvalid={isDescriptionError}>
+              <FormControl required invalid={isDescriptionError}>
                 <FormLabel htmlFor="description" fontSize={"sm"}>
                   Description
                 </FormLabel>
@@ -332,7 +326,7 @@ const Project = () => {
             </Text>
             <Button
               size={"sm"}
-              colorScheme={"green"}
+              colorPalette={"green"}
               rightIcon={<Icon name={"add"} />}
               onClick={() => onEntitiesOpen()}
             >
@@ -397,7 +391,7 @@ const Project = () => {
       >
         <Button
           size={"sm"}
-          colorScheme={"red"}
+          colorPalette={"red"}
           rightIcon={<Icon name={"cross"} />}
           variant={"outline"}
           onClick={() => navigate("/projects")}
@@ -408,7 +402,7 @@ const Project = () => {
         <Button
           id={"finishCreateProjectButton"}
           size={"sm"}
-          colorScheme={"green"}
+          colorPalette={"green"}
           rightIcon={<Icon name={"check"} />}
           onClick={async () => {
             // Capture event
@@ -438,97 +432,102 @@ const Project = () => {
             }
             setIsSubmitting(false);
           }}
-          isDisabled={isDetailsError && !isSubmitting}
+          disabled={isDetailsError && !isSubmitting}
         >
           Finish
         </Button>
       </Flex>
 
       {/* Modal to add Entities */}
-      <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
-        <ModalOverlay />
-        <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-          {/* Heading and close button */}
-          <ModalHeader p={"2"}>Add Entity</ModalHeader>
-          <ModalCloseButton />
+      <Dialog.Root isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
+            {/* Heading and close button */}
+            <Dialog.Header p={"2"}>Add Entity</Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <SearchSelect
+                id={"entitySearchSelect"}
+                resultType={"entity"}
+                value={selectedEntity}
+                onChange={setSelectedEntity}
+              />
+            </Dialog.Body>
 
-          <ModalBody p={"2"}>
-            <SearchSelect
-              id={"entitySearchSelect"}
-              resultType={"entity"}
-              value={selectedEntity}
-              onChange={setSelectedEntity}
-            />
-          </ModalBody>
+            <Dialog.Footer p={"2"}>
+              <Button
+                colorPalette={"red"}
+                size={"sm"}
+                variant={"outline"}
+                onClick={onEntitiesClose}
+              >
+                Cancel
+                <Icon name={"cross"} />
+              </Button>
 
-          <ModalFooter p={"2"}>
-            <Button
-              colorScheme={"red"}
-              size={"sm"}
-              variant={"outline"}
-              rightIcon={<Icon name={"cross"} />}
-              onClick={onEntitiesClose}
-            >
-              Cancel
-            </Button>
+              <Spacer />
 
-            <Spacer />
-
-            <Button
-              id={"addEntityDoneButton"}
-              colorScheme={"green"}
-              size={"sm"}
-              rightIcon={<Icon name={"check"} />}
-              onClick={() => {
-                // Add the Origin to the Entity
-                addEntities(selectedEntity);
-              }}
-            >
-              Done
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <Button
+                id={"addEntityDoneButton"}
+                colorPalette={"green"}
+                size={"sm"}
+                onClick={() => {
+                  // Add the Origin to the Entity
+                  addEntities(selectedEntity);
+                }}
+              >
+                Done
+                <Icon name={"check"} />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
 
       {/* Information modal */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent px={"2"} gap={"0"} w={["xl", "2xl"]}>
-          <ModalHeader p={"2"}>Projects</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody p={"0"}>
-            <Flex direction={"column"} gap={"2"} p={"2"}>
-              <Text fontSize={"sm"}>
-                Projects can be used to organize and share Entities.
-              </Text>
-              <Text fontSize={"sm"}>
-                Any type of Entity can be included in a Project. Entities can be
-                added and removed from a Project after it has been created.
-              </Text>
+      <Dialog.Root isOpen={isOpen} onClose={onClose} isCentered>
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            {/* px={"2"} gap={"0"} w={["xl", "2xl"]} */}
+            <Dialog.Header p={"2"}>Projects</Dialog.Header>
+            <Dialog.Body p={"0"}>
+              <Flex direction={"column"} gap={"2"} p={"2"}>
+                <Text fontSize={"sm"}>
+                  Projects can be used to organize and share Entities.
+                </Text>
+                <Text fontSize={"sm"}>
+                  Any type of Entity can be included in a Project. Entities can
+                  be added and removed from a Project after it has been created.
+                </Text>
 
-              <Heading size={"sm"}>Name</Heading>
-              <Text fontSize={"sm"}>
-                Specify the name of a Project. This should be unique and will
-                act as a searchable identifier.
-              </Text>
+                <Heading size={"sm"}>Name</Heading>
+                <Text fontSize={"sm"}>
+                  Specify the name of a Project. This should be unique and will
+                  act as a searchable identifier.
+                </Text>
 
-              <Heading size={"sm"}>Date Created or Started</Heading>
-              <Text fontSize={"sm"}>
-                A timestamp assigned to the Project. For example, if this is a
-                set of Entities used in a specific experiment, this date could
-                represent when work on the experiment commenced. Otherwise, this
-                timestamp may simply represent when this Project was created in
-                Metadatify.
-              </Text>
+                <Heading size={"sm"}>Date Created or Started</Heading>
+                <Text fontSize={"sm"}>
+                  A timestamp assigned to the Project. For example, if this is a
+                  set of Entities used in a specific experiment, this date could
+                  represent when work on the experiment commenced. Otherwise,
+                  this timestamp may simply represent when this Project was
+                  created in Metadatify.
+                </Text>
 
-              <Heading size={"sm"}>Description</Heading>
-              <Text fontSize={"sm"}>
-                A brief description of the Project contents.
-              </Text>
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+                <Heading size={"sm"}>Description</Heading>
+                <Text fontSize={"sm"}>
+                  A brief description of the Project contents.
+                </Text>
+              </Flex>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
 
       {/* Blocker warning message */}
       <UnsavedChangesModal

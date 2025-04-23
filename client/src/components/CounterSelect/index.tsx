@@ -4,18 +4,12 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  Dialog,
   Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Select,
   Text,
   useDisclosure,
@@ -65,7 +59,7 @@ const CounterSelect = (props: CounterProps) => {
     counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
 
   // Create Counter modal disclosure
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { open, onOpen, onClose } = useDisclosure();
 
   // Toast
   const toast = useToast();
@@ -298,7 +292,7 @@ const CounterSelect = (props: CounterProps) => {
           size={"sm"}
           rounded={"md"}
           onChange={handleSelectCounter}
-          isDisabled={counters.length === 0}
+          disabled={counters.length === 0}
         >
           {counters.map((o: CounterModel) => {
             return (
@@ -314,7 +308,7 @@ const CounterSelect = (props: CounterProps) => {
           <Flex>
             <Button
               size={"sm"}
-              colorScheme={"green"}
+              colorPalette={"green"}
               rightIcon={<Icon name={"add"} />}
               onClick={() => onOpen()}
             >
@@ -345,134 +339,137 @@ const CounterSelect = (props: CounterProps) => {
         )}
       </Flex>
 
-      <Modal
+      <Dialog.Root
         onEsc={onClose}
         onClose={onClose}
-        isOpen={isOpen}
-        size={"2xl"}
+        isOpen={open}
+        size={"xl"}
         isCentered
         scrollBehavior={"inside"}
       >
-        <ModalOverlay />
+        <Dialog.Positioner />
+        <Dialog.Backdrop />
 
-        <ModalContent p={"2"} gap={"0"}>
-          <ModalHeader p={"2"}>Create Counter</ModalHeader>
-          <ModalCloseButton />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"2"}>Create Counter</Dialog.Header>
+            <Dialog.CloseTrigger />
 
-          <ModalBody px={"2"} gap={"2"}>
-            <Flex direction={"column"} w={"100%"} gap={"2"}>
-              <Information
-                text={
-                  "Counters are used to standardize name formats using letters and a number."
-                }
-              />
+            <Dialog.Body px={"2"} gap={"2"}>
+              <Flex direction={"column"} w={"100%"} gap={"2"}>
+                <Information
+                  text={
+                    "Counters are used to standardize name formats using letters and a number."
+                  }
+                />
 
-              <Flex>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"}>Name</FormLabel>
-                  <Input
-                    value={counterName}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={onNameInputChange}
-                  />
-                </FormControl>
-              </Flex>
-
-              <Flex>
-                <FormControl isRequired isInvalid={!isValidFormat}>
-                  <FormLabel fontSize={"sm"}>Format</FormLabel>
-                  <Input
-                    value={counterFormat}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={onFormatInputChange}
-                  />
-                  {!isValidFormat && (
-                    <FormErrorMessage fontSize={"sm"}>
-                      {formatErrorMessage}
-                    </FormErrorMessage>
-                  )}
-                </FormControl>
-              </Flex>
-
-              <Flex direction={"row"} gap={"2"}>
-                <FormControl isRequired isInvalid={!isValidInitial}>
-                  <FormLabel fontSize={"sm"}>Initial Numeric Value</FormLabel>
-                  <Input
-                    type={"number"}
-                    value={counterInitial}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={onInitialInputChange}
-                  />
-                </FormControl>
-
-                <FormControl isRequired isInvalid={!isValidIncrement}>
-                  <FormLabel fontSize={"sm"}>Increment</FormLabel>
-                  <Input
-                    type={"number"}
-                    value={counterIncrement}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={onIncrementInputChange}
-                  />
-                </FormControl>
-              </Flex>
-
-              <Flex
-                p={"2"}
-                gap={"2"}
-                direction={"column"}
-                rounded={"md"}
-                bg={"gray.100"}
-              >
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Initial Counter Value:
-                  </Text>
-                  <Text fontSize={"sm"}>{currentCounterPreview}</Text>
+                <Flex>
+                  <FormControl required>
+                    <FormLabel fontSize={"sm"}>Name</FormLabel>
+                    <Input
+                      value={counterName}
+                      size={"sm"}
+                      rounded={"md"}
+                      onChange={onNameInputChange}
+                    />
+                  </FormControl>
                 </Flex>
 
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Next Counter Value:
-                  </Text>
-                  <Text fontSize={"sm"}>{nextCounterPreview}</Text>
+                <Flex>
+                  <FormControl required invalid={!isValidFormat}>
+                    <FormLabel fontSize={"sm"}>Format</FormLabel>
+                    <Input
+                      value={counterFormat}
+                      size={"sm"}
+                      rounded={"md"}
+                      onChange={onFormatInputChange}
+                    />
+                    {!isValidFormat && (
+                      <FormErrorMessage fontSize={"sm"}>
+                        {formatErrorMessage}
+                      </FormErrorMessage>
+                    )}
+                  </FormControl>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"}>
+                  <FormControl required invalid={!isValidInitial}>
+                    <FormLabel fontSize={"sm"}>Initial Numeric Value</FormLabel>
+                    <Input
+                      type={"number"}
+                      value={counterInitial}
+                      size={"sm"}
+                      rounded={"md"}
+                      onChange={onInitialInputChange}
+                    />
+                  </FormControl>
+
+                  <FormControl required invalid={!isValidIncrement}>
+                    <FormLabel fontSize={"sm"}>Increment</FormLabel>
+                    <Input
+                      type={"number"}
+                      value={counterIncrement}
+                      size={"sm"}
+                      rounded={"md"}
+                      onChange={onIncrementInputChange}
+                    />
+                  </FormControl>
+                </Flex>
+
+                <Flex
+                  p={"2"}
+                  gap={"2"}
+                  direction={"column"}
+                  rounded={"md"}
+                  bg={"gray.100"}
+                >
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Initial Counter Value:
+                    </Text>
+                    <Text fontSize={"sm"}>{currentCounterPreview}</Text>
+                  </Flex>
+
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Next Counter Value:
+                    </Text>
+                    <Text fontSize={"sm"}>{nextCounterPreview}</Text>
+                  </Flex>
                 </Flex>
               </Flex>
-            </Flex>
-          </ModalBody>
-          <ModalFooter p={"2"}>
-            <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-              <Button
-                variant={"outline"}
-                colorScheme={"red"}
-                size={"sm"}
-                rightIcon={<Icon name={"cross"} />}
-              >
-                Cancel
-              </Button>
+            </Dialog.Body>
+            <Dialog.Footer p={"2"}>
+              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Button
+                  variant={"outline"}
+                  colorPalette={"red"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"cross"} />}
+                >
+                  Cancel
+                </Button>
 
-              <Button
-                size={"sm"}
-                colorScheme={"green"}
-                isDisabled={
-                  !isValidFormat ||
-                  !isValidIncrement ||
-                  !isValidInput ||
-                  createCounterLoading
-                }
-                isLoading={createCounterLoading}
-                rightIcon={<Icon name="check" />}
-                onClick={onDoneClick}
-              >
-                Done
-              </Button>
-            </Flex>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                <Button
+                  size={"sm"}
+                  colorPalette={"green"}
+                  disabled={
+                    !isValidFormat ||
+                    !isValidIncrement ||
+                    !isValidInput ||
+                    createCounterLoading
+                  }
+                  loading={createCounterLoading}
+                  rightIcon={<Icon name="check" />}
+                  onClick={onDoneClick}
+                >
+                  Done
+                </Button>
+              </Flex>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

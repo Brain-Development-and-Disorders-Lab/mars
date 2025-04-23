@@ -8,12 +8,7 @@ import {
   Heading,
   IconButton,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -28,7 +23,7 @@ import { AttributeViewButtonProps } from "@types";
 import _ from "lodash";
 
 const AttributeViewButton = (props: AttributeViewButtonProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { open, onOpen, onClose } = useDisclosure();
   const isEditing = _.isBoolean(props.editing) ? props.editing : false;
 
   // State to be updated
@@ -48,25 +43,22 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       {isEditing && (
         <IconButton
           aria-label={"Delete attribute"}
-          colorScheme={"red"}
+          colorPalette={"red"}
           icon={<Icon name={"delete"} />}
           onClick={props.removeCallback}
           size={"sm"}
         />
       )}
 
-      <Modal
+      <Dialog.Root
         onEsc={onClose}
         onClose={onClose}
-        isOpen={isOpen}
-        size={"4xl"}
+        isOpen={open}
         isCentered
         scrollBehavior={"inside"}
       >
-        <ModalOverlay />
-
-        <ModalContent>
-          <ModalHeader pb={"0"} pt={"2"} px={"2"}>
+        <Dialog.Content>
+          <Dialog.Header pb={"0"} pt={"2"} px={"2"}>
             <Flex
               direction={"row"}
               justify={"space-between"}
@@ -84,10 +76,10 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 <Heading size={"sm"}>{props.attribute.name}</Heading>
               </Flex>
             </Flex>
-            <ModalCloseButton />
-          </ModalHeader>
+            <Dialog.CloseTrigger />
+          </Dialog.Header>
 
-          <ModalBody p={"0"}>
+          <Dialog.Body p={"0"}>
             <Flex direction={"column"} p={"2"} gap={"2"}>
               <Flex
                 gap={"2"}
@@ -111,7 +103,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     rounded={"md"}
                     value={name}
                     onChange={(event) => setName(event.target.value)}
-                    isReadOnly={!isEditing}
+                    readOnly={!isEditing}
                   />
                 </Flex>
 
@@ -174,7 +166,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   mt={"4"}
                 >
                   <Button
-                    colorScheme={"red"}
+                    colorPalette={"red"}
                     size={"sm"}
                     variant={"outline"}
                     rightIcon={<Icon name={"cross"} />}
@@ -194,7 +186,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   </Button>
 
                   <Button
-                    colorScheme={"green"}
+                    colorPalette={"green"}
                     size={"sm"}
                     rightIcon={<Icon name={"check"} />}
                     onClick={() => {
@@ -220,9 +212,9 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 </Flex>
               )}
             </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Root>
     </Flex>
   );
 };

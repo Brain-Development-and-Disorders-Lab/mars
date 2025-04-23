@@ -7,6 +7,7 @@ import {
   Button,
   Checkbox,
   CheckboxGroup,
+  Dialog,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -14,12 +15,6 @@ import {
   FormLabel,
   Heading,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Select,
   Spacer,
   Stack,
@@ -485,10 +480,7 @@ const Entity = () => {
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                <FormControl
-                  isRequired
-                  isInvalid={isNameError || !isNameUnique}
-                >
+                <FormControl required invalid={isNameError || !isNameUnique}>
                   <FormLabel fontSize={"sm"}>Name</FormLabel>
                   <Flex gap={"2"} justify={"space-between"}>
                     {useCounter ? (
@@ -522,7 +514,7 @@ const Entity = () => {
                           setName("");
                           setCounter("");
                         }}
-                        colorScheme={"blue"}
+                        colorPalette={"blue"}
                       >
                         Use {useCounter ? "Text" : "Counter"}
                       </Button>
@@ -540,7 +532,7 @@ const Entity = () => {
                   )}
                 </FormControl>
 
-                <FormControl isInvalid={isDateError}>
+                <FormControl invalid={isDateError}>
                   <FormLabel fontSize={"sm"}>Created</FormLabel>
                   <Input
                     placeholder={"Select Date and Time"}
@@ -624,7 +616,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"2"} justify={"space-between"}>
                     <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Flex>
-                        <Select size={"sm"} rounded={"md"} isDisabled>
+                        <Select size={"sm"} rounded={"md"} disabled>
                           <option>{name}</option>
                         </Select>
                       </Flex>
@@ -655,9 +647,9 @@ const Entity = () => {
                     </Flex>
                     <Button
                       rightIcon={<Icon name={"add"} />}
-                      colorScheme={"green"}
+                      colorPalette={"green"}
                       size={"sm"}
-                      isDisabled={_.isUndefined(selectedRelationshipTarget._id)}
+                      disabled={_.isUndefined(selectedRelationshipTarget._id)}
                       onClick={() => addRelationship()}
                     >
                       Add
@@ -788,7 +780,7 @@ const Entity = () => {
                       size={"sm"}
                       rounded={"md"}
                       placeholder={"Template"}
-                      isDisabled={templates.length === 0}
+                      disabled={templates.length === 0}
                       onChange={(event) => {
                         if (!_.isEqual(event.target.value.toString(), "")) {
                           for (const template of templates) {
@@ -830,7 +822,7 @@ const Entity = () => {
                 <Button
                   size={"sm"}
                   rightIcon={<Icon name={"add"} />}
-                  colorScheme={"green"}
+                  colorPalette={"green"}
                   onClick={() => {
                     // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                     setSelectedAttributes([
@@ -894,35 +886,37 @@ const Entity = () => {
         )}
 
         {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
-            <ModalHeader p={"2"}>Entities</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"4"} p={"2"}>
-                <Heading size={"md"}>Overview</Heading>
-                <Text>
-                  Specify some basic details about this Entity. Relations
-                  between Entities and membership to Projects can be specified
-                  on the following page. Finally, the metadata associated with
-                  this Entity should be specified using Attributes and
-                  corresponding Values.
-                </Text>
-                <Heading size={"md"}>Relationships</Heading>
-                <Text>
-                  Relations between Entities and membership to Projects can be
-                  specified using Relationships.
-                </Text>
-                <Heading size={"md"}>Attributes</Heading>
-                <Text>
-                  The metadata associated with this Entity should be specified
-                  using Attributes and corresponding Values.
-                </Text>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <Dialog.Root isOpen={isOpen} onClose={onClose} isCentered>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header p={"2"}>Entities</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"4"} p={"2"}>
+                  <Heading size={"md"}>Overview</Heading>
+                  <Text>
+                    Specify some basic details about this Entity. Relations
+                    between Entities and membership to Projects can be specified
+                    on the following page. Finally, the metadata associated with
+                    this Entity should be specified using Attributes and
+                    corresponding Values.
+                  </Text>
+                  <Heading size={"md"}>Relationships</Heading>
+                  <Text>
+                    Relations between Entities and membership to Projects can be
+                    specified using Relationships.
+                  </Text>
+                  <Heading size={"md"}>Attributes</Heading>
+                  <Text>
+                    The metadata associated with this Entity should be specified
+                    using Attributes and corresponding Values.
+                  </Text>
+                </Flex>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
       </Flex>
 
       {/* Place the action buttons at the bottom of the screen on desktop */}
@@ -942,7 +936,7 @@ const Entity = () => {
         <Flex gap={"4"}>
           <Button
             size={"sm"}
-            colorScheme={"red"}
+            colorPalette={"red"}
             variant={"outline"}
             rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/entities")}
@@ -952,7 +946,7 @@ const Entity = () => {
           {!_.isEqual("start", pageState) && (
             <Button
               size={"sm"}
-              colorScheme={"orange"}
+              colorPalette={"orange"}
               variant={"outline"}
               rightIcon={<Icon name={"c_left"} />}
               onClick={onPageBack}
@@ -964,7 +958,7 @@ const Entity = () => {
 
         <Button
           size={"sm"}
-          colorScheme={_.isEqual("attributes", pageState) ? "green" : "blue"}
+          colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
           rightIcon={
             _.isEqual("attributes", pageState) ? (
               <Icon name={"check"} />
@@ -973,7 +967,7 @@ const Entity = () => {
             )
           }
           onClick={onPageNext}
-          isDisabled={!isValidInput() || isNameError}
+          disabled={!isValidInput() || isNameError}
           isLoading={isSubmitting}
         >
           {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}

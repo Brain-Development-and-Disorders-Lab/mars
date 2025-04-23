@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
+  Dialog,
   Flex,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Spinner,
   Text,
   useToast,
@@ -276,10 +271,10 @@ const ScanModal = (props: ScanModalProps) => {
 
   // Setup the scanner when the modal is opened
   useEffect(() => {
-    if (props.isOpen) {
+    if (props.open) {
       setupScanner();
     }
-  }, [props.isOpen]);
+  }, [props.open]);
 
   // Start the scanner when the scanner is ready
   useEffect(() => {
@@ -292,107 +287,109 @@ const ScanModal = (props: ScanModalProps) => {
   }, [codeScanner]);
 
   return (
-    <Modal
-      isOpen={props.isOpen}
+    <Dialog.Root
+      isOpen={props.open}
       onClose={handleOnClose}
       isCentered
       scrollBehavior={"inside"}
     >
-      <ModalOverlay />
-      <ModalContent p={"2"} gap={"0"}>
-        <ModalHeader p={"2"}>Scan Identifier</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody px={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
-          {/* Camera view */}
-          <Flex justify={"center"} align={"center"}>
-            <Flex
-              id={REGION_ID}
-              ref={cameraRef}
-              direction={"column"}
-              w={"100%"}
-              h={"100%"}
-              justify={"center"}
-              align={"center"}
-              border={showCamera ? "2px" : "none"}
-              borderColor={showCamera ? "gray.400" : "transparent"}
-              rounded={"md"}
-            ></Flex>
-          </Flex>
+      <Dialog.Trigger />
+      <Dialog.Backdrop />
+      <Dialog.Positioner>
+        <Dialog.Content>
+          <Dialog.Header p={"2"}>Scan Identifier</Dialog.Header>
+          <Dialog.Body px={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
+            {/* Camera view */}
+            <Flex justify={"center"} align={"center"}>
+              <Flex
+                id={REGION_ID}
+                ref={cameraRef}
+                direction={"column"}
+                w={"100%"}
+                h={"100%"}
+                justify={"center"}
+                align={"center"}
+                border={showCamera ? "2px" : "none"}
+                borderColor={showCamera ? "gray.400" : "transparent"}
+                rounded={"md"}
+              ></Flex>
+            </Flex>
 
-          {!showCamera && (
+            {!showCamera && (
+              <Flex
+                w={"100%"}
+                h={"100%"}
+                justify={"center"}
+                align={"center"}
+                p={"2"}
+                gap={"2"}
+              >
+                <Spinner />
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
+                  Initializing camera...
+                </Text>
+              </Flex>
+            )}
+
+            {/* Manual entry field */}
             <Flex
-              w={"100%"}
-              h={"100%"}
-              justify={"center"}
               align={"center"}
-              p={"2"}
+              mt={"4"}
+              w={"100%"}
+              justify={"center"}
               gap={"2"}
             >
-              <Spinner />
-              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                Initializing camera...
-              </Text>
-            </Flex>
-          )}
-
-          {/* Manual entry field */}
-          <Flex
-            align={"center"}
-            mt={"4"}
-            w={"100%"}
-            justify={"center"}
-            gap={"2"}
-          >
-            {!showInput && (
-              <Flex>
-                <Button
-                  size={"sm"}
-                  colorScheme={"blue"}
-                  onClick={handleManualInputSelect}
-                >
-                  Enter manually
-                </Button>
-              </Flex>
-            )}
-
-            {showInput && (
-              <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-                <Flex grow={1}>
-                  <Input
+              {!showInput && (
+                <Flex>
+                  <Button
                     size={"sm"}
-                    rounded={"md"}
-                    value={manualInputValue}
-                    onChange={(event) =>
-                      setManualInputValue(event.target.value)
-                    }
-                    placeholder={"Identifier"}
-                  />
+                    colorPalette={"blue"}
+                    onClick={handleManualInputSelect}
+                  >
+                    Enter manually
+                  </Button>
                 </Flex>
+              )}
 
-                <Button
-                  size={"sm"}
-                  isLoading={loading}
-                  rightIcon={<Icon name={"search"} />}
-                  onClick={runManualSearch}
-                >
-                  Find
-                </Button>
+              {showInput && (
+                <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+                  <Flex grow={1}>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      value={manualInputValue}
+                      onChange={(event) =>
+                        setManualInputValue(event.target.value)
+                      }
+                      placeholder={"Identifier"}
+                    />
+                  </Flex>
 
-                <Button
-                  size={"sm"}
-                  isLoading={loading}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={() => setShowInput(false)}
-                >
-                  Cancel
-                </Button>
-              </Flex>
-            )}
-          </Flex>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                  <Button
+                    size={"sm"}
+                    loading={loading}
+                    onClick={runManualSearch}
+                  >
+                    Find
+                    <Icon name={"search"} />
+                  </Button>
+
+                  <Button
+                    size={"sm"}
+                    loading={loading}
+                    colorPalette={"red"}
+                    onClick={() => setShowInput(false)}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                </Flex>
+              )}
+            </Flex>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Positioner>
+    </Dialog.Root>
   );
 };
 

@@ -10,12 +10,6 @@ import {
   Input,
   Text,
   useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
   useDisclosure,
   Tag,
   TagLabel,
@@ -35,18 +29,16 @@ import {
   DrawerHeader,
   VStack,
   Card,
-  CardBody,
   Spacer,
   Tooltip,
   IconButton,
   useBreakpoint,
-  ModalFooter,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
-  CardFooter,
   Divider,
+  Dialog,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -59,7 +51,7 @@ import Values from "@components/Values";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
-import Dialog from "@components/Dialog";
+import AlertDialog from "@components/AlertDialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Relationships from "@components/Relationships";
@@ -121,19 +113,19 @@ const Entity = () => {
   const { token } = useAuthentication();
 
   const {
-    isOpen: isGraphOpen,
+    open: graphOpen,
     onOpen: onGraphOpen,
     onClose: onGraphClose,
   } = useDisclosure();
 
   const {
-    isOpen: isShareOpen,
+    open: shareOpen,
     onOpen: onShareOpen,
     onClose: onShareClose,
   } = useDisclosure();
 
   const {
-    isOpen: isAddProjectsOpen,
+    open: addProjectsOpen,
     onOpen: onAddProjectsOpen,
     onClose: onAddProjectsClose,
   } = useDisclosure();
@@ -141,7 +133,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const {
-    isOpen: isAddRelationshipsOpen,
+    open: addRelationshipsOpen,
     onOpen: onAddRelationshipsOpen,
     onClose: onAddRelationshipsClose,
   } = useDisclosure();
@@ -154,7 +146,7 @@ const Entity = () => {
 
   // Save message modal
   const {
-    isOpen: isSaveMessageOpen,
+    open: saveMessageOpen,
     onOpen: onSaveMessageOpen,
     onClose: onSaveMessageClose,
   } = useDisclosure();
@@ -162,7 +154,7 @@ const Entity = () => {
 
   // Clone modal
   const {
-    isOpen: isCloneOpen,
+    open: cloneOpen,
     onOpen: onCloneOpen,
     onClose: onCloneClose,
   } = useDisclosure();
@@ -170,7 +162,7 @@ const Entity = () => {
 
   // History drawer
   const {
-    isOpen: isHistoryOpen,
+    open: historyOpen,
     onOpen: onHistoryOpen,
     onClose: onHistoryClose,
   } = useDisclosure();
@@ -180,7 +172,7 @@ const Entity = () => {
 
   // Adding Templates to existing Entity
   const {
-    isOpen: isAddAttributesOpen,
+    open: addAttributesOpen,
     onOpen: onAddAttributesOpen,
     onClose: onAddAttributesClose,
   } = useDisclosure();
@@ -521,13 +513,13 @@ const Entity = () => {
   // State for dialog confirming if user should archive
   const archiveDialogRef = useRef();
   const {
-    isOpen: isArchiveDialogOpen,
+    open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
     onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   const {
-    isOpen: isExportOpen,
+    open: exportOpen,
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
@@ -535,7 +527,7 @@ const Entity = () => {
   const [exportFormat, setExportFormat] = useState("json");
 
   const {
-    isOpen: isUploadOpen,
+    open: uploadOpen,
     onOpen: onUploadOpen,
     onClose: onUploadClose,
   } = useDisclosure();
@@ -544,7 +536,7 @@ const Entity = () => {
     {} as IGenericItem,
   );
   const {
-    isOpen: isPreviewOpen,
+    open: previewOpen,
     onOpen: onPreviewOpen,
     onClose: onPreviewClose,
   } = useDisclosure();
@@ -684,7 +676,7 @@ const Entity = () => {
               <IconButton
                 icon={<Icon name={"delete"} />}
                 aria-label={"Remove project"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
@@ -756,7 +748,7 @@ const Entity = () => {
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
           <Tooltip label={tooltipLabelValue} hasArrow>
-            <Tag colorScheme={"purple"} size={"sm"}>
+            <Tag colorPalette={"purple"} size={"sm"}>
               {info.row.original.values.length}
             </Tag>
           </Tooltip>
@@ -834,7 +826,7 @@ const Entity = () => {
           fileColorScheme = "blue";
         }
 
-        return <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>;
+        return <Tag colorPalette={fileColorScheme}>{fileExtension}</Tag>;
       },
       header: "Type",
     },
@@ -861,7 +853,7 @@ const Entity = () => {
               aria-label={"Preview attachment"}
               size={"sm"}
               key={`preview-file-${info.getValue()}`}
-              colorScheme={"gray"}
+              colorPalette={"gray"}
               icon={<Icon name={"expand"} />}
               onClick={() => handlePreview()}
             />
@@ -870,7 +862,7 @@ const Entity = () => {
                 aria-label={"Remove attachment"}
                 size={"sm"}
                 key={`remove-file-${info.getValue()}`}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 icon={<Icon name={"delete"} />}
                 onClick={() => removeAttachment(info.getValue())}
               />
@@ -879,7 +871,7 @@ const Entity = () => {
                 aria-label={"Download attachment"}
                 size={"sm"}
                 key={`download-file-${info.getValue()}`}
-                colorScheme={"blue"}
+                colorPalette={"blue"}
                 icon={<Icon name={"download"} />}
                 onClick={() => handleDownload()}
               />
@@ -1299,7 +1291,7 @@ const Entity = () => {
               <MenuButton
                 as={Button}
                 size={"sm"}
-                colorScheme={"yellow"}
+                colorPalette={"yellow"}
                 rightIcon={<Icon name={"lightning"} />}
               >
                 Actions
@@ -1308,7 +1300,7 @@ const Entity = () => {
                 <MenuItem
                   icon={<Icon name={"print"} />}
                   fontSize={"sm"}
-                  isDisabled
+                  disabled
                 >
                   Print
                 </MenuItem>
@@ -1323,7 +1315,7 @@ const Entity = () => {
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
                   fontSize={"sm"}
-                  isDisabled={editing || entityArchived}
+                  disabled={editing || entityArchived}
                 >
                   Visualize
                 </MenuItem>
@@ -1331,7 +1323,7 @@ const Entity = () => {
                   icon={<Icon name={"copy"} />}
                   onClick={() => onCloneOpen()}
                   fontSize={"sm"}
-                  isDisabled={entityArchived}
+                  disabled={entityArchived}
                 >
                   Clone
                 </MenuItem>
@@ -1339,7 +1331,7 @@ const Entity = () => {
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
                   fontSize={"sm"}
-                  isDisabled={editing || entityArchived}
+                  disabled={editing || entityArchived}
                 >
                   Export
                 </MenuItem>
@@ -1348,7 +1340,7 @@ const Entity = () => {
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
                   fontSize={"sm"}
-                  isDisabled={entityArchived}
+                  disabled={entityArchived}
                 >
                   Archive
                 </MenuItem>
@@ -1359,7 +1351,7 @@ const Entity = () => {
               <Button
                 onClick={handleCancelClick}
                 size={"sm"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 rightIcon={<Icon name={"cross"} />}
               >
                 Cancel
@@ -1370,7 +1362,7 @@ const Entity = () => {
                 id={"restoreEntityButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
@@ -1381,34 +1373,28 @@ const Entity = () => {
                   id={"editEntityButton"}
                   onClick={handleEditClick}
                   size={"sm"}
-                  colorScheme={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
-                  }
+                  colorPalette={editing ? "green" : "blue"}
                   loadingText={"Saving..."}
-                  isLoading={isUpdating}
+                  loading={isUpdating}
                 >
                   {editing ? "Save" : "Edit"}
+                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
                 </Button>
               </Flex>
             )}
 
             {/* History button */}
-            <Button
-              size={"sm"}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"clock"} />}
-              onClick={onHistoryOpen}
-            >
+            <Button size={"sm"} colorPalette={"gray"} onClick={onHistoryOpen}>
               History
+              <Icon name={"clock"} />
             </Button>
 
             {/* Archive Dialog */}
-            <Dialog
+            <AlertDialog
               dialogRef={archiveDialogRef}
               header={"Archive Entity"}
               rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
+              open={archiveDialogOpen}
               onOpen={onArchiveDialogOpen}
               onClose={onArchiveDialogClose}
             >
@@ -1422,7 +1408,7 @@ const Entity = () => {
                   visible. It can be restored at any time.
                 </Text>
               </Flex>
-            </Dialog>
+            </AlertDialog>
           </Flex>
         </Flex>
 
@@ -1547,7 +1533,7 @@ const Entity = () => {
                 <Button
                   size={"sm"}
                   rightIcon={<Icon name={"add"} />}
-                  isDisabled={!editing}
+                  disabled={!editing}
                   onClick={onAddProjectsOpen}
                 >
                   Add
@@ -1605,11 +1591,11 @@ const Entity = () => {
                 <Button
                   id={"addAttributeModalButton"}
                   size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
-                  isDisabled={!editing}
+                  disabled={!editing}
                   onClick={onAddAttributesOpen}
                 >
                   Add
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
 
@@ -1668,7 +1654,7 @@ const Entity = () => {
                   <Button
                     size={"sm"}
                     rightIcon={<Icon name={"add"} />}
-                    isDisabled={!editing}
+                    disabled={!editing}
                     onClick={onAddRelationshipsOpen}
                   >
                     Add
@@ -1764,439 +1750,453 @@ const Entity = () => {
         </Flex>
 
         {/* Add Attributes modal */}
-        <Modal
-          isOpen={isAddAttributesOpen}
+        <Dialog.Root
+          isOpen={addAttributesOpen}
           onClose={onAddAttributesClose}
-          size={"4xl"}
+          size={"xl"}
           isCentered
         >
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"2"}>
-            <ModalHeader p={"2"}>Add Attribute</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              {/* Attribute creation */}
-              <Flex direction={"column"} gap={"2"} pb={"2"} justify={"center"}>
-                <Select
-                  size={"sm"}
-                  placeholder={"Select Template"}
-                  value={selectedTemplate}
-                  onChange={(event) => {
-                    if (!_.isEqual(event.target.value.toString(), "")) {
-                      setSelectedTemplate(event.target.value);
-                      for (const template of templates) {
-                        if (
-                          _.isEqual(event.target.value.toString(), template._id)
-                        ) {
-                          setAttributeName(template.name);
-                          setAttributeDescription(template.description);
-                          setAttributeValues(() => [...template.values]);
-                          break;
-                        }
-                      }
-                    }
-                  }}
-                >
-                  {!loading &&
-                    templates.map((template) => {
-                      return (
-                        <option key={template._id} value={template._id}>
-                          {template.name}
-                        </option>
-                      );
-                    })}
-                  ;
-                </Select>
-                <Text fontSize="sm">
-                  Don't see the Template you're looking for? You can
-                  <Link
-                    onClick={() => navigate("/create/template")}
-                    style={{
-                      color: "#3182ce",
-                      marginLeft: "5px",
-                      marginRight: "5px",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    create
-                  </Link>
-                  a new Template here.
-                </Text>
-
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} gap={"2"} */}
+              <Dialog.Header p={"2"}>Add Attribute</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                {/* Attribute creation */}
                 <Flex
                   direction={"column"}
                   gap={"2"}
-                  w={"100%"}
+                  pb={"2"}
                   justify={"center"}
                 >
-                  <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                    <FormControl isRequired>
-                      <FormLabel fontSize={"sm"}>Name</FormLabel>
-                      <Input
-                        size={"sm"}
-                        placeholder={"Name"}
-                        id="formName"
-                        rounded={"md"}
-                        value={attributeName}
-                        onChange={(event) =>
-                          setAttributeName(event.target.value)
-                        }
-                        required
-                      />
-                      {isAttributeNameError && (
-                        <FormErrorMessage>
-                          A name must be specified for the Attribute.
-                        </FormErrorMessage>
-                      )}
-                    </FormControl>
-
-                    <FormControl isRequired>
-                      <FormLabel fontSize={"sm"}>Description</FormLabel>
-                      <MDEditor
-                        height={150}
-                        minHeight={100}
-                        maxHeight={400}
-                        style={{ width: "100%" }}
-                        value={attributeDescription}
-                        preview={editing ? "edit" : "preview"}
-                        id={"formDescription"}
-                        extraCommands={[]}
-                        onChange={(value) => {
-                          setAttributeDescription(value || "");
-                        }}
-                      />
-                      {isAttributeDescriptionError && (
-                        <FormErrorMessage>
-                          A description should be provided for the Attribute.
-                        </FormErrorMessage>
-                      )}
-                    </FormControl>
-                  </Flex>
-
-                  <Flex>
-                    <FormControl isRequired isInvalid={isAttributeValueError}>
-                      <Values
-                        viewOnly={false}
-                        values={attributeValues}
-                        setValues={setAttributeValues}
-                      />
-                    </FormControl>
-                  </Flex>
-                </Flex>
-              </Flex>
-
-              {/* Modal buttons */}
-              <Flex direction={"row"} justify={"center"} gap={"2"}>
-                {/* "Cancel" button */}
-                <Button
-                  colorScheme={"red"}
-                  size={"sm"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onAddAttributesClose}
-                >
-                  Cancel
-                </Button>
-
-                <Spacer />
-
-                <Button
-                  colorScheme={"blue"}
-                  size={"sm"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"add"} />}
-                  onClick={onSaveAsTemplate}
-                  isDisabled={isAttributeError}
-                  isLoading={loadingTemplateCreate}
-                >
-                  Save as Template
-                </Button>
-
-                <Button
-                  colorScheme={"green"}
-                  size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  isDisabled={isAttributeError}
-                  onClick={() => {
-                    addAttribute();
-                  }}
-                >
-                  Done
-                </Button>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-
-        {/* Add Projects modal */}
-        <Modal
-          isOpen={isAddProjectsOpen}
-          onClose={onAddProjectsClose}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Entity to Projects</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              {/* Select component for Projects */}
-              <Flex direction={"column"} gap={"2"}>
-                <FormControl>
                   <Select
                     size={"sm"}
-                    title={"Select Project"}
-                    placeholder={"Select Project"}
+                    placeholder={"Select Template"}
+                    value={selectedTemplate}
                     onChange={(event) => {
-                      const selectedProject = event.target.value.toString();
-                      if (selectedProjects.includes(selectedProject)) {
-                        // Check that the selected Project has not already been selected
-                        toast({
-                          title: "Warning",
-                          description: "Project has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else if (!_.isEqual(selectedProject, "")) {
-                        // Add the selected Project if not the default option
-                        setSelectedProjects([
-                          ...selectedProjects,
-                          selectedProject,
-                        ]);
+                      if (!_.isEqual(event.target.value.toString(), "")) {
+                        setSelectedTemplate(event.target.value);
+                        for (const template of templates) {
+                          if (
+                            _.isEqual(
+                              event.target.value.toString(),
+                              template._id,
+                            )
+                          ) {
+                            setAttributeName(template.name);
+                            setAttributeDescription(template.description);
+                            setAttributeValues(() => [...template.values]);
+                            break;
+                          }
+                        }
                       }
                     }}
                   >
                     {!loading &&
-                      projectData.map((project: IGenericItem) => {
-                        if (
-                          !_.includes(selectedProjects, project._id) &&
-                          !_.includes(entityProjects, project._id)
-                        ) {
-                          // Only include Projects that haven't been selected or the Entity is currently present in
+                      templates.map((template) => {
+                        return (
+                          <option key={template._id} value={template._id}>
+                            {template.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                  <Text fontSize="sm">
+                    Don't see the Template you're looking for? You can
+                    <Link
+                      onClick={() => navigate("/create/template")}
+                      style={{
+                        color: "#3182ce",
+                        marginLeft: "5px",
+                        marginRight: "5px",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      create
+                    </Link>
+                    a new Template here.
+                  </Text>
+
+                  <Flex
+                    direction={"column"}
+                    gap={"2"}
+                    w={"100%"}
+                    justify={"center"}
+                  >
+                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
+                      <FormControl required>
+                        <FormLabel fontSize={"sm"}>Name</FormLabel>
+                        <Input
+                          size={"sm"}
+                          placeholder={"Name"}
+                          id="formName"
+                          rounded={"md"}
+                          value={attributeName}
+                          onChange={(event) =>
+                            setAttributeName(event.target.value)
+                          }
+                          required
+                        />
+                        {isAttributeNameError && (
+                          <FormErrorMessage>
+                            A name must be specified for the Attribute.
+                          </FormErrorMessage>
+                        )}
+                      </FormControl>
+
+                      <FormControl required>
+                        <FormLabel fontSize={"sm"}>Description</FormLabel>
+                        <MDEditor
+                          height={150}
+                          minHeight={100}
+                          maxHeight={400}
+                          style={{ width: "100%" }}
+                          value={attributeDescription}
+                          preview={editing ? "edit" : "preview"}
+                          id={"formDescription"}
+                          extraCommands={[]}
+                          onChange={(value) => {
+                            setAttributeDescription(value || "");
+                          }}
+                        />
+                        {isAttributeDescriptionError && (
+                          <FormErrorMessage>
+                            A description should be provided for the Attribute.
+                          </FormErrorMessage>
+                        )}
+                      </FormControl>
+                    </Flex>
+
+                    <Flex>
+                      <FormControl required invalid={isAttributeValueError}>
+                        <Values
+                          viewOnly={false}
+                          values={attributeValues}
+                          setValues={setAttributeValues}
+                        />
+                      </FormControl>
+                    </Flex>
+                  </Flex>
+                </Flex>
+
+                {/* Modal buttons */}
+                <Flex direction={"row"} justify={"center"} gap={"2"}>
+                  {/* "Cancel" button */}
+                  <Button
+                    colorPalette={"red"}
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={onAddAttributesClose}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+
+                  <Spacer />
+
+                  <Button
+                    colorPalette={"blue"}
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={onSaveAsTemplate}
+                    disabled={isAttributeError}
+                    isLoading={loadingTemplateCreate}
+                  >
+                    Save as Template
+                    <Icon name={"add"} />
+                  </Button>
+
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    disabled={isAttributeError}
+                    onClick={() => {
+                      addAttribute();
+                    }}
+                  >
+                    Done
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Add Projects modal */}
+        <Dialog.Root
+          isOpen={addProjectsOpen}
+          onClose={onAddProjectsClose}
+          isCentered
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} gap={"2"} w={["lg", "xl", "2xl"]} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>Add Entity to Projects</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                {/* Select component for Projects */}
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <Select
+                      size={"sm"}
+                      title={"Select Project"}
+                      placeholder={"Select Project"}
+                      onChange={(event) => {
+                        const selectedProject = event.target.value.toString();
+                        if (selectedProjects.includes(selectedProject)) {
+                          // Check that the selected Project has not already been selected
+                          toast({
+                            title: "Warning",
+                            description: "Project has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else if (!_.isEqual(selectedProject, "")) {
+                          // Add the selected Project if not the default option
+                          setSelectedProjects([
+                            ...selectedProjects,
+                            selectedProject,
+                          ]);
+                        }
+                      }}
+                    >
+                      {!loading &&
+                        projectData.map((project: IGenericItem) => {
+                          if (
+                            !_.includes(selectedProjects, project._id) &&
+                            !_.includes(entityProjects, project._id)
+                          ) {
+                            // Only include Projects that haven't been selected or the Entity is currently present in
+                            return (
+                              <option key={project._id} value={project._id}>
+                                {project.name}
+                              </option>
+                            );
+                          } else {
+                            return null;
+                          }
+                        })}
+                    </Select>
+                  </FormControl>
+
+                  <Flex
+                    direction={"row"}
+                    gap={"2"}
+                    p={"2"}
+                    align={"center"}
+                    justify={"center"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                    minH={"100px"}
+                  >
+                    {selectedProjects.length > 0 ? (
+                      selectedProjects.map((project) => {
+                        if (!_.isEqual(project, "")) {
                           return (
-                            <option key={project._id} value={project._id}>
-                              {project.name}
-                            </option>
+                            <Tag key={`tag-${project}`}>
+                              <TagLabel>
+                                <Linky
+                                  id={project}
+                                  type={"projects"}
+                                  size={"sm"}
+                                />
+                              </TagLabel>
+                              <TagCloseButton
+                                onClick={() => {
+                                  setSelectedProjects([
+                                    ...selectedProjects.filter((selected) => {
+                                      return !_.isEqual(project, selected);
+                                    }),
+                                  ]);
+                                }}
+                              />
+                            </Tag>
                           );
                         } else {
                           return null;
                         }
-                      })}
-                  </Select>
-                </FormControl>
+                      })
+                    ) : (
+                      <Text
+                        fontSize={"sm"}
+                        fontWeight={"semibold"}
+                        color={"gray.400"}
+                      >
+                        No Projects selected
+                      </Text>
+                    )}
+                  </Flex>
+                </Flex>
+              </Dialog.Body>
 
-                <Flex
-                  direction={"row"}
-                  gap={"2"}
-                  p={"2"}
-                  align={"center"}
-                  justify={"center"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  minH={"100px"}
-                >
-                  {selectedProjects.length > 0 ? (
-                    selectedProjects.map((project) => {
-                      if (!_.isEqual(project, "")) {
-                        return (
-                          <Tag key={`tag-${project}`}>
-                            <TagLabel>
-                              <Linky
-                                id={project}
-                                type={"projects"}
-                                size={"sm"}
-                              />
-                            </TagLabel>
-                            <TagCloseButton
-                              onClick={() => {
-                                setSelectedProjects([
-                                  ...selectedProjects.filter((selected) => {
-                                    return !_.isEqual(project, selected);
-                                  }),
-                                ]);
-                              }}
-                            />
-                          </Tag>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })
-                  ) : (
-                    <Text
+              <Dialog.Footer p={"2"}>
+                {/* "Cancel" button */}
+                <Flex direction={"row"} justify={"center"} w={"100%"}>
+                  <Button
+                    colorPalette={"red"}
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={onCancelAddProjectsClick}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+
+                  <Spacer />
+
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    onClick={() => {
+                      addProjects(selectedProjects);
+                    }}
+                    disabled={selectedProjects.length === 0}
+                  >
+                    Add Entity to {selectedProjects.length} Project
+                    {selectedProjects.length === 1 ? "" : "s"}
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Add Relationships modal */}
+        <Dialog.Root
+          isOpen={addRelationshipsOpen}
+          onClose={onAddRelationshipsClose}
+          size={"lg"}
+          isCentered
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} gap={"0"} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>
+                <Text fontWeight={"bold"} fontSize={"sm"}>
+                  Add Relationship
+                </Text>
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex
+                    direction={"row"}
+                    gap={"2"}
+                    justify={"space-between"}
+                    p={"2"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                  >
+                    <Flex direction={"column"} gap={"1"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Source
+                      </Text>
+                      <Select size={"sm"} rounded={"md"} disabled>
+                        <option>{entityName}</option>
+                      </Select>
+                    </Flex>
+                    <Flex direction={"column"} gap={"1"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Type
+                      </Text>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        value={selectedRelationshipType}
+                        onChange={(event) =>
+                          setSelectedRelationshipType(
+                            event.target.value as RelationshipType,
+                          )
+                        }
+                      >
+                        <option value={"general"}>General</option>
+                        <option value={"parent"}>Parent</option>
+                        <option value={"child"}>Child</option>
+                      </Select>
+                    </Flex>
+                    <Flex direction={"column"} gap={"1"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Target
+                      </Text>
+                      <SearchSelect
+                        resultType={"entity"}
+                        value={selectedRelationshipTarget}
+                        onChange={setSelectedRelationshipTarget}
+                      />
+                    </Flex>
+                  </Flex>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"bold"}>
+                      Description:
+                    </Text>
+                    <Text fontSize={"sm"}>{entityName} is</Text>
+                    <Tag
                       fontSize={"sm"}
                       fontWeight={"semibold"}
-                      color={"gray.400"}
+                      colorPalette={"yellow"}
                     >
-                      No Projects selected
+                      {selectedRelationshipType === "general" && "related"}
+                      {selectedRelationshipType === "child" && "a child"}
+                      {selectedRelationshipType === "parent" && "a parent"}
+                    </Tag>
+                    <Text fontSize={"sm"}>
+                      {selectedRelationshipType === "general" ? "to" : "of"}
                     </Text>
-                  )}
+                    <Tag
+                      fontSize={"sm"}
+                      fontWeight={"semibold"}
+                      colorPalette={"blue"}
+                    >
+                      {_.isUndefined(selectedRelationshipTarget.name)
+                        ? "Select Entity"
+                        : selectedRelationshipTarget.name}
+                    </Tag>
+                  </Flex>
                 </Flex>
-              </Flex>
-            </ModalBody>
+              </Dialog.Body>
 
-            <ModalFooter p={"2"}>
-              {/* "Cancel" button */}
-              <Flex direction={"row"} justify={"center"} w={"100%"}>
+              <Dialog.Footer p={"2"}>
                 <Button
-                  colorScheme={"red"}
+                  colorPalette={"red"}
                   size={"sm"}
                   variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onCancelAddProjectsClick}
+                  onClick={onAddRelationshipsClose}
                 >
                   Cancel
+                  <Icon name={"cross"} />
                 </Button>
 
                 <Spacer />
 
                 <Button
-                  colorScheme={"green"}
+                  colorPalette={"green"}
                   size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => {
-                    addProjects(selectedProjects);
-                  }}
-                  isDisabled={selectedProjects.length === 0}
+                  disabled={_.isUndefined(selectedRelationshipTarget._id)}
+                  onClick={() => addRelationship()}
                 >
-                  Add Entity to {selectedProjects.length} Project
-                  {selectedProjects.length === 1 ? "" : "s"}
+                  Done
+                  <Icon name={"check"} />
                 </Button>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Add Relationships modal */}
-        <Modal
-          isOpen={isAddRelationshipsOpen}
-          onClose={onAddRelationshipsClose}
-          size={"lg"}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>
-              <Text fontWeight={"bold"} fontSize={"sm"}>
-                Add Relationship
-              </Text>
-            </ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Flex
-                  direction={"row"}
-                  gap={"2"}
-                  justify={"space-between"}
-                  p={"2"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                >
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Source
-                    </Text>
-                    <Select size={"sm"} rounded={"md"} isDisabled>
-                      <option>{entityName}</option>
-                    </Select>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Type
-                    </Text>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      value={selectedRelationshipType}
-                      onChange={(event) =>
-                        setSelectedRelationshipType(
-                          event.target.value as RelationshipType,
-                        )
-                      }
-                    >
-                      <option value={"general"}>General</option>
-                      <option value={"parent"}>Parent</option>
-                      <option value={"child"}>Child</option>
-                    </Select>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Target
-                    </Text>
-                    <SearchSelect
-                      resultType={"entity"}
-                      value={selectedRelationshipTarget}
-                      onChange={setSelectedRelationshipTarget}
-                    />
-                  </Flex>
-                </Flex>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"bold"}>
-                    Description:
-                  </Text>
-                  <Text fontSize={"sm"}>{entityName} is</Text>
-                  <Tag
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    colorScheme={"yellow"}
-                  >
-                    {selectedRelationshipType === "general" && "related"}
-                    {selectedRelationshipType === "child" && "a child"}
-                    {selectedRelationshipType === "parent" && "a parent"}
-                  </Tag>
-                  <Text fontSize={"sm"}>
-                    {selectedRelationshipType === "general" ? "to" : "of"}
-                  </Text>
-                  <Tag
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    colorScheme={"blue"}
-                  >
-                    {_.isUndefined(selectedRelationshipTarget.name)
-                      ? "Select Entity"
-                      : selectedRelationshipTarget.name}
-                  </Tag>
-                </Flex>
-              </Flex>
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Button
-                colorScheme={"red"}
-                size={"sm"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onAddRelationshipsClose}
-              >
-                Cancel
-              </Button>
-
-              <Spacer />
-
-              <Button
-                colorScheme={"green"}
-                size={"sm"}
-                rightIcon={<Icon name={"check"} />}
-                isDisabled={_.isUndefined(selectedRelationshipTarget._id)}
-                onClick={() => addRelationship()}
-              >
-                Done
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Upload modal */}
         <Uploader
-          isOpen={isUploadOpen}
+          open={uploadOpen}
           onOpen={onUploadOpen}
           onClose={onUploadClose}
           uploads={toUploadAttachments}
@@ -2205,521 +2205,547 @@ const Entity = () => {
         />
 
         {/* Export modal */}
-        <Modal
-          isOpen={isExportOpen}
+        <Dialog.Root
+          isOpen={exportOpen}
           onClose={onExportClose}
-          size={"2xl"}
+          size={"xl"}
           isCentered
         >
-          <ModalOverlay />
-          <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Export Entity</ModalHeader>
-            <ModalCloseButton />
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} w={["lg", "xl", "2xl"]} gap={"0"} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>Export Entity</Dialog.Header>
+              <Dialog.Body px={"2"} gap={"2"}>
+                {/* Export information */}
+                {_.isEqual(exportFormat, "json") && (
+                  <Information
+                    text={"JSON files can be re-imported into Metadatify."}
+                  />
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Information
+                    text={
+                      "When exporting Origins, Products, or Projects, only the name will be exported. To export identifiers, use JSON format."
+                    }
+                  />
+                )}
 
-            <ModalBody px={"2"} gap={"2"}>
-              {/* Export information */}
-              {_.isEqual(exportFormat, "json") && (
-                <Information
-                  text={"JSON files can be re-imported into Metadatify."}
-                />
-              )}
-              {_.isEqual(exportFormat, "csv") && (
-                <Information
-                  text={
-                    "When exporting Origins, Products, or Projects, only the name will be exported. To export identifiers, use JSON format."
-                  }
-                />
-              )}
-
-              {/* Select export format */}
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                py={"2"}
-                gap={"2"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Flex gap={"1"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Format:
-                  </Text>
-                  <FormControl>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      value={exportFormat}
-                      onChange={(event) => setExportFormat(event.target.value)}
-                    >
-                      <option key={"json"} value={"json"}>
-                        JSON
-                      </option>
-                      <option key={"csv"} value={"csv"}>
-                        CSV
-                      </option>
-                    </Select>
-                  </FormControl>
-                </Flex>
-                <Text fontSize={"sm"}>
-                  Select the Entity fields to be exported.
-                </Text>
-              </Flex>
-
-              {/* Selection content */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <Flex direction={"row"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Details</FormLabel>
-                    {!loading ? (
-                      <CheckboxGroup size={"sm"}>
-                        <Stack spacing={2} direction={"column"}>
-                          <Checkbox disabled defaultChecked fontSize={"sm"}>
-                            Name: {entityName}
-                          </Checkbox>
-                          <Checkbox
-                            isChecked={_.includes(exportFields, "created")}
-                            onChange={(event) =>
-                              handleExportCheck("created", event.target.checked)
-                            }
-                            fontSize={"sm"}
-                          >
-                            Created:{" "}
-                            {dayjs(entityData.created).format("DD MMM YYYY")}
-                          </Checkbox>
-                          <Checkbox isChecked={true} isDisabled fontSize={"sm"}>
-                            Owner: {entityData.owner}
-                          </Checkbox>
-                          <Checkbox
-                            isChecked={_.includes(exportFields, "description")}
-                            onChange={(event) =>
-                              handleExportCheck(
-                                "description",
-                                event.target.checked,
-                              )
-                            }
-                            isDisabled={_.isEqual(entityDescription, "")}
-                          >
-                            <Text noOfLines={1} fontSize={"sm"}>
-                              Description:{" "}
-                              {_.isEqual(entityDescription, "")
-                                ? "No description"
-                                : _.truncate(entityDescription, { length: 32 })}
-                            </Text>
-                          </Checkbox>
-                        </Stack>
-                      </CheckboxGroup>
-                    ) : (
-                      <Text fontSize={"sm"}>Loading details</Text>
-                    )}
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Projects</FormLabel>
-                    {!loading && entityProjects.length > 0 ? (
-                      <Stack spacing={2} direction={"column"}>
-                        {entityProjects.map((project) => {
-                          allExportFields.push(`project_${project}`);
-                          return (
-                            <Checkbox
-                              size={"sm"}
-                              key={project}
-                              isChecked={_.includes(
-                                exportFields,
-                                `project_${project}`,
-                              )}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  `project_${project}`,
-                                  event.target.checked,
-                                )
-                              }
-                            >
-                              <Linky
-                                id={project}
-                                type={"projects"}
-                                size={"sm"}
-                              />
-                            </Checkbox>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Text fontSize={"sm"}>No Projects</Text>
-                    )}
-                  </FormControl>
-                </Flex>
-
-                <Divider />
-
-                <Flex direction={"row"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Origins</FormLabel>
-                    {!loading && entityRelationships?.length > 0 ? (
-                      <Stack spacing={2} direction={"column"}>
-                        {entityRelationships.map((relationship) => {
-                          allExportFields.push(
-                            `relationship_${relationship.target._id}_${relationship.type}`,
-                          );
-                          return (
-                            <Checkbox
-                              size={"sm"}
-                              fontSize={"sm"}
-                              key={relationship.target._id}
-                              isChecked={_.includes(
-                                exportFields,
-                                `relationship_${relationship.target._id}_${relationship.type}`,
-                              )}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  `relationship_${relationship.target._id}_${relationship.type}`,
-                                  event.target.checked,
-                                )
-                              }
-                            >
-                              <Linky
-                                id={relationship.target._id}
-                                type={"entities"}
-                                size={"sm"}
-                              />
-                            </Checkbox>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Text fontSize={"sm"}>No Origins</Text>
-                    )}
-                  </FormControl>
-                </Flex>
-
-                <Divider />
-
-                <Flex direction={"row"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Attributes</FormLabel>
-                    {!loading && entityAttributes.length > 0 ? (
-                      <Stack spacing={2} direction={"column"}>
-                        {entityAttributes.map((attribute) => {
-                          allExportFields.push(`attribute_${attribute._id}`);
-                          return (
-                            <Checkbox
-                              size={"sm"}
-                              fontSize={"sm"}
-                              key={attribute._id}
-                              isChecked={_.includes(
-                                exportFields,
-                                `attribute_${attribute._id}`,
-                              )}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  `attribute_${attribute._id}`,
-                                  event.target.checked,
-                                )
-                              }
-                            >
-                              {attribute.name}
-                            </Checkbox>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Text fontSize={"sm"}>No Attributes</Text>
-                    )}
-                  </FormControl>
-                </Flex>
-              </Flex>
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Flex direction={"column"} w={"30%"} gap={"2"}>
-                {/* "Download" button */}
+                {/* Select export format */}
                 <Flex
-                  direction={"row"}
                   w={"100%"}
+                  direction={"row"}
+                  py={"2"}
                   gap={"2"}
-                  justify={"right"}
+                  justify={"space-between"}
                   align={"center"}
                 >
-                  <Button
-                    rightIcon={<Icon name={"download"} />}
-                    colorScheme={"blue"}
-                    size={"sm"}
-                    onClick={() => handleDownloadClick(exportFormat)}
-                    isLoading={exportLoading}
-                  >
-                    Download
-                  </Button>
+                  <Flex gap={"1"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Format:
+                    </Text>
+                    <FormControl>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        value={exportFormat}
+                        onChange={(event) =>
+                          setExportFormat(event.target.value)
+                        }
+                      >
+                        <option key={"json"} value={"json"}>
+                          JSON
+                        </option>
+                        <option key={"csv"} value={"csv"}>
+                          CSV
+                        </option>
+                      </Select>
+                    </FormControl>
+                  </Flex>
+                  <Text fontSize={"sm"}>
+                    Select the Entity fields to be exported.
+                  </Text>
                 </Flex>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+
+                {/* Selection content */}
+                <Flex
+                  direction={"column"}
+                  p={"2"}
+                  gap={"2"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                >
+                  <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Details</FormLabel>
+                      {!loading ? (
+                        <CheckboxGroup size={"sm"}>
+                          <Stack spacing={2} direction={"column"}>
+                            <Checkbox disabled defaultChecked fontSize={"sm"}>
+                              Name: {entityName}
+                            </Checkbox>
+                            <Checkbox
+                              isChecked={_.includes(exportFields, "created")}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "created",
+                                  event.target.checked,
+                                )
+                              }
+                              fontSize={"sm"}
+                            >
+                              Created:{" "}
+                              {dayjs(entityData.created).format("DD MMM YYYY")}
+                            </Checkbox>
+                            <Checkbox isChecked={true} disabled fontSize={"sm"}>
+                              Owner: {entityData.owner}
+                            </Checkbox>
+                            <Checkbox
+                              isChecked={_.includes(
+                                exportFields,
+                                "description",
+                              )}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "description",
+                                  event.target.checked,
+                                )
+                              }
+                              disabled={_.isEqual(entityDescription, "")}
+                            >
+                              <Text noOfLines={1} fontSize={"sm"}>
+                                Description:{" "}
+                                {_.isEqual(entityDescription, "")
+                                  ? "No description"
+                                  : _.truncate(entityDescription, {
+                                      length: 32,
+                                    })}
+                              </Text>
+                            </Checkbox>
+                          </Stack>
+                        </CheckboxGroup>
+                      ) : (
+                        <Text fontSize={"sm"}>Loading details</Text>
+                      )}
+                    </FormControl>
+
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Projects</FormLabel>
+                      {!loading && entityProjects.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityProjects.map((project) => {
+                            allExportFields.push(`project_${project}`);
+                            return (
+                              <Checkbox
+                                size={"sm"}
+                                key={project}
+                                isChecked={_.includes(
+                                  exportFields,
+                                  `project_${project}`,
+                                )}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `project_${project}`,
+                                    event.target.checked,
+                                  )
+                                }
+                              >
+                                <Linky
+                                  id={project}
+                                  type={"projects"}
+                                  size={"sm"}
+                                />
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text fontSize={"sm"}>No Projects</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+
+                  <Divider />
+
+                  <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Origins</FormLabel>
+                      {!loading && entityRelationships?.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityRelationships.map((relationship) => {
+                            allExportFields.push(
+                              `relationship_${relationship.target._id}_${relationship.type}`,
+                            );
+                            return (
+                              <Checkbox
+                                size={"sm"}
+                                fontSize={"sm"}
+                                key={relationship.target._id}
+                                isChecked={_.includes(
+                                  exportFields,
+                                  `relationship_${relationship.target._id}_${relationship.type}`,
+                                )}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `relationship_${relationship.target._id}_${relationship.type}`,
+                                    event.target.checked,
+                                  )
+                                }
+                              >
+                                <Linky
+                                  id={relationship.target._id}
+                                  type={"entities"}
+                                  size={"sm"}
+                                />
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text fontSize={"sm"}>No Origins</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+
+                  <Divider />
+
+                  <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Attributes</FormLabel>
+                      {!loading && entityAttributes.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityAttributes.map((attribute) => {
+                            allExportFields.push(`attribute_${attribute._id}`);
+                            return (
+                              <Checkbox
+                                size={"sm"}
+                                fontSize={"sm"}
+                                key={attribute._id}
+                                isChecked={_.includes(
+                                  exportFields,
+                                  `attribute_${attribute._id}`,
+                                )}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `attribute_${attribute._id}`,
+                                    event.target.checked,
+                                  )
+                                }
+                              >
+                                {attribute.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text fontSize={"sm"}>No Attributes</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+                </Flex>
+              </Dialog.Body>
+
+              <Dialog.Footer p={"2"}>
+                <Flex direction={"column"} w={"30%"} gap={"2"}>
+                  {/* "Download" button */}
+                  <Flex
+                    direction={"row"}
+                    w={"100%"}
+                    gap={"2"}
+                    justify={"right"}
+                    align={"center"}
+                  >
+                    <Button
+                      colorPalette={"blue"}
+                      size={"sm"}
+                      onClick={() => handleDownloadClick(exportFormat)}
+                      loading={exportLoading}
+                    >
+                      Download
+                      <Icon name={"download"} />
+                    </Button>
+                  </Flex>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Graph modal */}
-        <Modal
+        <Dialog.Root
           size={"full"}
           onEsc={onGraphClose}
           onClose={onGraphClose}
-          isOpen={isGraphOpen}
+          open={graphOpen}
         >
-          <ModalOverlay />
-          <ModalContent p={"2"}>
-            <ModalHeader p={"2"} gap={"2"}>
-              Visualize: {entityName}
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Graph
-                id={entityData._id}
-                entityNavigateHook={handleEntityNodeClick}
-              />
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} */}
+              <Dialog.Header p={"2"} gap={"2"}>
+                Visualize: {entityName}
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Graph
+                  id={entityData._id}
+                  entityNavigateHook={handleEntityNodeClick}
+                />
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Attachment preview modal */}
-        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered>
-          <ModalOverlay />
-          <ModalContent maxW={"100vw"} w={"fit-content"}>
-            <ModalHeader>Attachment Preview</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Flex justify={"center"} align={"center"} pb={"2"}>
-                <PreviewModal attachment={previewAttachment} />
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <Dialog.Root open={previewOpen} onClose={onPreviewClose} isCentered>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* maxW={"100vw"} w={"fit-content"} */}
+              <Dialog.Header>Attachment Preview</Dialog.Header>
+              <Dialog.Body>
+                <Flex justify={"center"} align={"center"} pb={"2"}>
+                  <PreviewModal attachment={previewAttachment} />
+                </Flex>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Share modal */}
-        <Modal isOpen={isShareOpen} onClose={onShareClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Share Entity</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Flex w={"25%"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Sharable URL:
-                    </Text>
-                  </Flex>
-                  <Flex w={"60%"}>
-                    <Input
+        <Dialog.Root open={shareOpen} onClose={onShareClose} isCentered>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>Share Entity</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Flex w={"25%"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Sharable URL:
+                      </Text>
+                    </Flex>
+                    <Flex w={"60%"}>
+                      <Input
+                        size={"sm"}
+                        value={`https://app.metadatify.com/entities/${id}`}
+                        rounded={"md"}
+                        onFocus={(event) => event.target.select()}
+                        readOnly
+                      />
+                    </Flex>
+                    <Button
                       size={"sm"}
-                      value={`https://app.metadatify.com/entities/${id}`}
-                      rounded={"md"}
-                      onFocus={(event) => event.target.select()}
-                      readOnly
-                    />
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(
+                          `https://app.metadatify.com/entities/${id}`,
+                        );
+                        toast({
+                          title: "Copied to clipboard",
+                          status: "success",
+                          position: "bottom-right",
+                          isClosable: true,
+                          duration: 2000,
+                        });
+                      }}
+                    >
+                      Copy
+                    </Button>
                   </Flex>
-                  <Button
-                    size={"sm"}
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(
-                        `https://app.metadatify.com/entities/${id}`,
-                      );
-                      toast({
-                        title: "Copied to clipboard",
-                        status: "success",
-                        position: "bottom-right",
-                        isClosable: true,
-                        duration: 2000,
-                      });
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </Flex>
 
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Flex w={"25%"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Unique ID:
-                    </Text>
-                  </Flex>
-                  <Flex w={"60%"}>
-                    <Input
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Flex w={"25%"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Unique ID:
+                      </Text>
+                    </Flex>
+                    <Flex w={"60%"}>
+                      <Input
+                        size={"sm"}
+                        value={id}
+                        rounded={"md"}
+                        onFocus={(event) => event.target.select()}
+                        readOnly
+                      />
+                    </Flex>
+                    <Button
                       size={"sm"}
-                      value={id}
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(`${id}`);
+                        toast({
+                          title: "Copied to clipboard",
+                          status: "success",
+                          position: "bottom-right",
+                          isClosable: true,
+                          duration: 2000,
+                        });
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </Flex>
+
+                  <Flex direction={"row"} gap={"2"}>
+                    <Flex w={"25%"}>
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        QR Code:
+                      </Text>
+                    </Flex>
+                    <Flex
+                      p={"2"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
                       rounded={"md"}
-                      onFocus={(event) => event.target.select()}
-                      readOnly
-                    />
-                  </Flex>
-                  <Button
-                    size={"sm"}
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(`${id}`);
-                      toast({
-                        title: "Copied to clipboard",
-                        status: "success",
-                        position: "bottom-right",
-                        isClosable: true,
-                        duration: 2000,
-                      });
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </Flex>
-
-                <Flex direction={"row"} gap={"2"}>
-                  <Flex w={"25%"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      QR Code:
-                    </Text>
-                  </Flex>
-                  <Flex
-                    p={"2"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                    rounded={"md"}
-                  >
-                    <QRCode id={`${id}_qr`} value={`${id}`} size={80} />
+                    >
+                      <QRCode id={`${id}_qr`} value={`${id}`} size={80} />
+                    </Flex>
                   </Flex>
                 </Flex>
-              </Flex>
-            </ModalBody>
+              </Dialog.Body>
 
-            <ModalFooter p={"2"}>
-              <Spacer />
-              <Button
-                colorScheme={"green"}
-                size={"sm"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={onShareClose}
-              >
-                Done
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Clone modal */}
-        <Modal isOpen={isCloneOpen} onClose={onCloneClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"}>
-            <ModalHeader p={"2"}>Clone Entity</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"} color={"gray.600"}>
-                  By default, the cloned Entity will be created with the same
-                  name, but with "(cloned)" appended to the end. You can modify
-                  the name below.
-                </Text>
-
-                <FormControl>
-                  <FormLabel fontSize={"xs"} fontWeight={"semibold"}>
-                    Cloned Entity Name:
-                  </FormLabel>
-                  <Input
-                    size={"sm"}
-                    rounded={"md"}
-                    value={clonedEntityName}
-                    onChange={(event) =>
-                      setClonedEntityName(event.target.value)
-                    }
-                  />
-                </FormControl>
-              </Flex>
-            </ModalBody>
-
-            <ModalFooter p={"2"} justifyContent={"space-between"}>
-              <Button
-                onClick={onCloneClose}
-                size={"sm"}
-                colorScheme={"red"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-              >
-                Cancel
-              </Button>
-              <Button
-                rightIcon={<Icon name={"copy"} />}
-                colorScheme={"green"}
-                onClick={handleCloneClick}
-                ml={3}
-                size={"sm"}
-                isLoading={createEntityLoading}
-                isDisabled={clonedEntityName === ""}
-              >
-                Clone
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Save message modal */}
-        <Modal
-          onEsc={onSaveMessageOpen}
-          onClose={onSaveMessageClose}
-          isOpen={isSaveMessageOpen}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"}>
-            <ModalHeader p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"save"} />
-                <Text fontWeight={"semibold"}>Saving Changes</Text>
-              </Flex>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"} color={"gray.600"}>
-                  Specify a description of the changes made to the Entity.
-                </Text>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  id={"saveMessageInput"}
-                  style={{ width: "100%" }}
-                  value={saveMessage}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setSaveMessage(value || "");
-                  }}
-                />
-              </Flex>
-            </ModalBody>
-            <ModalFooter p={"2"}>
-              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+              <Dialog.Footer p={"2"}>
+                <Spacer />
                 <Button
+                  colorPalette={"green"}
                   size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={() => onSaveMessageClose()}
-                >
-                  Cancel
-                </Button>
-
-                <Button
-                  size={"sm"}
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => handleSaveMessageDoneClick()}
+                  onClick={onShareClose}
                 >
                   Done
+                  <Icon name={"check"} />
                 </Button>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Clone modal */}
+        <Dialog.Root open={cloneOpen} onClose={onCloneClose} isCentered>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} */}
+              <Dialog.Header p={"2"}>Clone Entity</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"sm"} color={"gray.600"}>
+                    By default, the cloned Entity will be created with the same
+                    name, but with "(cloned)" appended to the end. You can
+                    modify the name below.
+                  </Text>
+
+                  <FormControl>
+                    <FormLabel fontSize={"xs"} fontWeight={"semibold"}>
+                      Cloned Entity Name:
+                    </FormLabel>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      value={clonedEntityName}
+                      onChange={(event) =>
+                        setClonedEntityName(event.target.value)
+                      }
+                    />
+                  </FormControl>
+                </Flex>
+              </Dialog.Body>
+
+              <Dialog.Footer p={"2"} justifyContent={"space-between"}>
+                <Button
+                  onClick={onCloneClose}
+                  size={"sm"}
+                  colorPalette={"red"}
+                  variant={"outline"}
+                >
+                  Cancel
+                  <Icon name={"cross"} />
+                </Button>
+                <Button
+                  colorPalette={"green"}
+                  onClick={handleCloneClick}
+                  ml={3}
+                  size={"sm"}
+                  loading={createEntityLoading}
+                  disabled={clonedEntityName === ""}
+                >
+                  Clone
+                  <Icon name={"copy"} />
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Save message modal */}
+        <Dialog.Root
+          onEsc={onSaveMessageOpen}
+          onClose={onSaveMessageClose}
+          open={saveMessageOpen}
+          isCentered
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} */}
+              <Dialog.Header p={"2"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"save"} />
+                  <Text fontWeight={"semibold"}>Saving Changes</Text>
+                </Flex>
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"sm"} color={"gray.600"}>
+                    Specify a description of the changes made to the Entity.
+                  </Text>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    id={"saveMessageInput"}
+                    style={{ width: "100%" }}
+                    value={saveMessage}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setSaveMessage(value || "");
+                    }}
+                  />
+                </Flex>
+              </Dialog.Body>
+              <Dialog.Footer p={"2"}>
+                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                  <Button
+                    size={"sm"}
+                    colorPalette={"red"}
+                    onClick={() => onSaveMessageClose()}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+
+                  <Button
+                    size={"sm"}
+                    colorPalette={"green"}
+                    onClick={() => handleSaveMessageDoneClick()}
+                  >
+                    Done
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Blocker warning message */}
         <UnsavedChangesModal
@@ -2731,7 +2757,7 @@ const Entity = () => {
 
         {/* Version history */}
         <Drawer
-          isOpen={isHistoryOpen}
+          isOpen={historyOpen}
           placement={"right"}
           size={"md"}
           onClose={onHistoryClose}
@@ -2780,7 +2806,7 @@ const Entity = () => {
                         border={"1px"}
                         borderColor={"gray.300"}
                       >
-                        <CardBody p={"2"} pb={"0"}>
+                        <Card.Body p={"2"} pb={"0"}>
                           <Flex direction={"column"} gap={"2"}>
                             {/* Name */}
                             <Text
@@ -2794,7 +2820,7 @@ const Entity = () => {
                             {/* Description */}
                             <Flex w={"100%"}>
                               {_.isEqual(entityVersion.description, "") ? (
-                                <Tag size={"sm"} colorScheme={"orange"}>
+                                <Tag size={"sm"} colorPalette={"orange"}>
                                   No Description
                                 </Tag>
                               ) : (
@@ -2986,9 +3012,9 @@ const Entity = () => {
                               </Flex>
                             </Flex>
                           </Flex>
-                        </CardBody>
+                        </Card.Body>
 
-                        <CardFooter p={"2"}>
+                        <Card.Footer p={"2"}>
                           {/* Version information */}
                           <Flex direction={"column"} gap={"2"} w={"100%"}>
                             <Flex
@@ -3012,7 +3038,7 @@ const Entity = () => {
                                   gap={"2"}
                                   align={"center"}
                                 >
-                                  <Tag size={"sm"} colorScheme={"green"}>
+                                  <Tag size={"sm"} colorPalette={"green"}>
                                     {entityVersion.version}
                                   </Tag>
                                 </Flex>
@@ -3029,16 +3055,14 @@ const Entity = () => {
                                 {_.isEqual(entityVersion.message, "") ||
                                 _.isNull(entityVersion.message) ? (
                                   <Flex>
-                                    <Tag size={"sm"} colorScheme={"orange"}>
+                                    <Tag size={"sm"} colorPalette={"orange"}>
                                       No Message
                                     </Tag>
                                   </Flex>
                                 ) : (
                                   <Tooltip
                                     label={entityVersion.message}
-                                    isDisabled={
-                                      entityVersion.message.length < 32
-                                    }
+                                    disabled={entityVersion.message.length < 32}
                                     hasArrow
                                   >
                                     <Text fontSize={"sm"}>
@@ -3070,19 +3094,19 @@ const Entity = () => {
 
                             <Flex w={"100%"} justify={"right"}>
                               <Button
-                                colorScheme={"orange"}
+                                colorPalette={"orange"}
                                 size={"sm"}
                                 rightIcon={<Icon name={"rewind"} />}
                                 onClick={() => {
                                   handleRestoreFromHistoryClick(entityVersion);
                                 }}
-                                isDisabled={entityArchived}
+                                disabled={entityArchived}
                               >
                                 Restore
                               </Button>
                             </Flex>
                           </Flex>
-                        </CardFooter>
+                        </Card.Footer>
                       </Card>
                     );
                   })

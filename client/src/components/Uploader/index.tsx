@@ -7,16 +7,10 @@ import {
   Button,
   Text,
   useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
   Input,
-  ModalFooter,
   FormControl,
   Tag,
+  Dialog,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -26,7 +20,7 @@ import _ from "lodash";
 import { gql, useMutation } from "@apollo/client";
 
 const Uploader = (props: {
-  isOpen: boolean;
+  open: boolean;
   onOpen: () => void;
   onClose: () => void;
   target: string;
@@ -116,33 +110,33 @@ const Uploader = (props: {
       {isLoaded && isError ? (
         <Error />
       ) : (
-        <>
-          <Modal
-            isOpen={props.isOpen}
-            onClose={props.onClose}
-            isCentered
-            size={"4xl"}
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"0"}>
-              <ModalHeader px={"2"}>Upload Attachment</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody px={"2"}>
+        <Dialog.Root
+          isOpen={props.open}
+          onClose={props.onClose}
+          isCentered
+          size={"xl"}
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header px={"2"}>Upload Attachment</Dialog.Header>
+              <Dialog.Body px={"2"}>
                 <Flex gap={"2"} direction={"column"}>
                   <Flex gap={"1"} direction={"row"} align={"center"}>
                     <Text fontSize={"sm"}>Supported file formats:</Text>
-                    <Tag colorScheme={"green"} size={"sm"}>
+                    <Tag.Root colorPalette={"green"} size={"sm"}>
                       PDF
-                    </Tag>
-                    <Tag colorScheme={"green"} size={"sm"}>
+                    </Tag.Root>
+                    <Tag.Root colorPalette={"green"} size={"sm"}>
                       JPEG
-                    </Tag>
-                    <Tag colorScheme={"green"} size={"sm"}>
+                    </Tag.Root>
+                    <Tag.Root colorPalette={"green"} size={"sm"}>
                       PNG
-                    </Tag>
-                    <Tag colorScheme={"green"} size={"sm"}>
+                    </Tag.Root>
+                    <Tag.Root colorPalette={"green"} size={"sm"}>
                       DNA
-                    </Tag>
+                    </Tag.Root>
                   </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>
                     <FormControl>
@@ -183,7 +177,7 @@ const Uploader = (props: {
                             <Text
                               fontWeight={"semibold"}
                               fontSize={"xs"}
-                              textColor={"gray.600"}
+                              color={"gray.600"}
                             >
                               {displayType}
                             </Text>
@@ -231,13 +225,12 @@ const Uploader = (props: {
                     </FormControl>
                   </Flex>
                 </Flex>
-              </ModalBody>
-              <ModalFooter p={"2"}>
+              </Dialog.Body>
+              <Dialog.Footer p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name="cross" />}
+                    colorPalette={"red"}
                     variant={"outline"}
                     onClick={() => {
                       setFile({} as File);
@@ -245,22 +238,23 @@ const Uploader = (props: {
                     }}
                   >
                     Cancel
+                    <Icon name="cross" />
                   </Button>
                   <Button
                     size={"sm"}
-                    colorScheme={"green"}
-                    isDisabled={_.isEqual(file, {}) || loading}
-                    rightIcon={<Icon name={"upload"} />}
+                    colorPalette={"green"}
+                    disabled={_.isEqual(file, {}) || loading}
                     onClick={() => performUpload()}
-                    isLoading={loading}
+                    loading={loading}
                   >
                     Upload
+                    <Icon name={"upload"} />
                   </Button>
                 </Flex>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-        </>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
       )}
     </>
   );

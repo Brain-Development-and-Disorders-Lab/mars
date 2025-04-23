@@ -10,19 +10,13 @@ import React, {
 // Existing and custom components
 import {
   Button,
+  Dialog,
   Divider,
   Flex,
   Heading,
   IconButton,
   Input,
   Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -67,7 +61,7 @@ const Values = (props: {
 }) => {
   const toast = useToast();
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { open, onOpen, onClose } = useDisclosure();
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
 
@@ -166,12 +160,12 @@ const Values = (props: {
             <Input
               id={`i_${original._id}_name`}
               value={value}
-              isReadOnly={props.viewOnly}
+              readOnly={props.viewOnly}
               onChange={onChange}
               onBlur={onBlur}
               size={"sm"}
               rounded={"md"}
-              isInvalid={_.isEqual(value, "")}
+              invalid={_.isEqual(value, "")}
             />
           );
         },
@@ -229,12 +223,12 @@ const Values = (props: {
                     value={value}
                     size={"sm"}
                     rounded={"md"}
-                    isReadOnly={props.viewOnly}
+                    readOnly={props.viewOnly}
                     onChange={(event) =>
                       setValue(parseFloat(event.target.value))
                     }
                     onBlur={onBlur}
-                    isInvalid={
+                    invalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   />
@@ -248,10 +242,10 @@ const Values = (props: {
                     value={value}
                     size={"sm"}
                     rounded={"md"}
-                    isReadOnly={props.viewOnly}
+                    readOnly={props.viewOnly}
                     onChange={(event) => setValue(event.target.value)}
                     onBlur={onBlur}
-                    isInvalid={
+                    invalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   />
@@ -266,10 +260,10 @@ const Values = (props: {
                       value={value}
                       size={"sm"}
                       rounded={"md"}
-                      isReadOnly={props.viewOnly}
+                      readOnly={props.viewOnly}
                       onChange={(event) => setValue(event.target.value)}
                       onBlur={onBlur}
-                      isInvalid={
+                      invalid={
                         _.isEqual(value, "") &&
                         _.isEqual(props.requireData, true)
                       }
@@ -364,10 +358,10 @@ const Values = (props: {
                     value={value}
                     size={"sm"}
                     rounded={"md"}
-                    isReadOnly={props.viewOnly}
+                    readOnly={props.viewOnly}
                     onChange={(event) => setValue(event.target.value)}
                     onBlur={onBlur}
-                    isInvalid={
+                    invalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   />
@@ -382,7 +376,7 @@ const Values = (props: {
                       resultType={"entity"}
                       value={value}
                       onChange={onSearchSelectChange}
-                      isDisabled={props.viewOnly}
+                      disabled={props.viewOnly}
                     />
                   );
                 } else {
@@ -402,10 +396,10 @@ const Values = (props: {
                     value={value.selected}
                     size={"sm"}
                     rounded={"md"}
-                    isDisabled={props.viewOnly}
+                    disabled={props.viewOnly}
                     onChange={onSelectChange}
                     onBlur={onBlur}
-                    isInvalid={
+                    invalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   >
@@ -431,10 +425,10 @@ const Values = (props: {
                 placeholder={"Column"}
                 size={"sm"}
                 rounded={"md"}
-                isDisabled={props.viewOnly}
+                disabled={props.viewOnly}
                 onChange={(event) => setValue(event.target.value)}
                 onBlur={onBlur}
-                isInvalid={
+                invalid={
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)
                 }
               >
@@ -520,10 +514,10 @@ const Values = (props: {
           <PopoverTrigger>
             <Button
               variant={"solid"}
-              colorScheme={"green"}
+              colorPalette={"green"}
               rightIcon={<Icon name={"add"} />}
               className={"add-value-button-form"}
-              isDisabled={props.viewOnly}
+              disabled={props.viewOnly}
               size={"sm"}
             >
               Add Value
@@ -660,7 +654,7 @@ const Values = (props: {
                   borderColor={"teal.300"}
                   _hover={{ bg: "teal.400" }}
                   rightIcon={<Icon name={"v_select"} />}
-                  isDisabled={!_.isUndefined(props.permittedValues)}
+                  disabled={!_.isUndefined(props.permittedValues)}
                   onClick={() => {
                     onOpen();
                   }}
@@ -702,148 +696,150 @@ const Values = (props: {
         </Flex>
       )}
 
-      <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal
+      <ScaleFade initialScale={0.9} in={open}>
+        <Dialog.Root
           onEsc={onClose}
           onClose={onClose}
-          isOpen={isOpen}
-          size={"3xl"}
+          isOpen={open}
+          size={"xl"}
           isCentered
         >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader p={"2"}>Add Options</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"} gap={"2"} pb={"0"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"}>
-                  For a Select value, set the options to be displayed.
-                  Duplicates are not permitted.
-                </Text>
-                <Text fontSize={"sm"}>
-                  Name the option, then click "Add" to add it to the collection
-                  of options associated with this Select value. Click "Continue"
-                  to add this Select value to the Attribute.
-                </Text>
-                <Flex direction={"row"} gap={"4"}>
-                  <Input
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Option Value"}
-                    value={option}
-                    onChange={(event) => setOption(event.target.value)}
-                  />
-                  <Button
-                    colorScheme={"green"}
-                    size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
-                    onClick={() => {
-                      if (!_.includes(options, option)) {
-                        setOptions([...options, option.toString()]);
-                        setOption("");
-                      } else {
-                        toast({
-                          title: "Warning",
-                          description: "Can't add duplicate options.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      }
-                    }}
-                    isDisabled={_.isEqual(option, "")}
-                  >
-                    Add
-                  </Button>
-                </Flex>
-
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header p={"2"}>Add Options</Dialog.Header>
+              <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <VStack gap={"1"} divider={<Divider />}>
-                    {options.length > 0 ? (
-                      options.map((option, index) => {
-                        return (
-                          <Flex
-                            direction={"row"}
-                            w={"100%"}
-                            justify={"space-between"}
-                            align={"center"}
-                            key={option}
-                          >
-                            <Flex gap={"2"}>
-                              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                Option {index + 1}:
-                              </Text>
-                              <Text fontSize={"sm"}>{option}</Text>
-                            </Flex>
-                            <IconButton
-                              aria-label={`remove_${index}`}
-                              size={"sm"}
-                              colorScheme={"red"}
-                              icon={<Icon name={"delete"} />}
-                              onClick={() => {
-                                setOptions([
-                                  ...options.filter(
-                                    (currentOption) =>
-                                      !_.isEqual(currentOption, option),
-                                  ),
-                                ]);
-                              }}
-                            />
-                          </Flex>
-                        );
-                      })
-                    ) : (
-                      <Flex
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        minH={"100px"}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                      >
-                        <Text
-                          fontSize={"sm"}
-                          fontWeight={"semibold"}
-                          color={"gray.400"}
-                        >
-                          No Options
-                        </Text>
-                      </Flex>
-                    )}
-                  </VStack>
-                </Flex>
-              </Flex>
-            </ModalBody>
-            <ModalFooter p={"2"}>
-              <Button
-                size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={() => {
-                  // Reset the list of options
-                  setOptions([]);
+                  <Text fontSize={"sm"}>
+                    For a Select value, set the options to be displayed.
+                    Duplicates are not permitted.
+                  </Text>
+                  <Text fontSize={"sm"}>
+                    Name the option, then click "Add" to add it to the
+                    collection of options associated with this Select value.
+                    Click "Continue" to add this Select value to the Attribute.
+                  </Text>
+                  <Flex direction={"row"} gap={"4"}>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Option Value"}
+                      value={option}
+                      onChange={(event) => setOption(event.target.value)}
+                    />
+                    <Button
+                      colorPalette={"green"}
+                      size={"sm"}
+                      onClick={() => {
+                        if (!_.includes(options, option)) {
+                          setOptions([...options, option.toString()]);
+                          setOption("");
+                        } else {
+                          toast({
+                            title: "Warning",
+                            description: "Can't add duplicate options.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        }
+                      }}
+                      disabled={_.isEqual(option, "")}
+                    >
+                      Add
+                      <Icon name={"add"} />
+                    </Button>
+                  </Flex>
 
-                  // Close the modal
-                  onClose();
-                }}
-              >
-                Cancel
-              </Button>
-              <Spacer />
-              <Button
-                size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={addOptions}
-                isDisabled={_.isEqual(options.length, 0)}
-              >
-                Continue
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+                  <Flex direction={"column"} gap={"2"}>
+                    <VStack gap={"1"} separator={<Divider />}>
+                      {options.length > 0 ? (
+                        options.map((option, index) => {
+                          return (
+                            <Flex
+                              direction={"row"}
+                              w={"100%"}
+                              justify={"space-between"}
+                              align={"center"}
+                              key={option}
+                            >
+                              <Flex gap={"2"}>
+                                <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                  Option {index + 1}:
+                                </Text>
+                                <Text fontSize={"sm"}>{option}</Text>
+                              </Flex>
+                              <IconButton
+                                aria-label={`remove_${index}`}
+                                size={"sm"}
+                                colorPalette={"red"}
+                                icon={<Icon name={"delete"} />}
+                                onClick={() => {
+                                  setOptions([
+                                    ...options.filter(
+                                      (currentOption) =>
+                                        !_.isEqual(currentOption, option),
+                                    ),
+                                  ]);
+                                }}
+                              />
+                            </Flex>
+                          );
+                        })
+                      ) : (
+                        <Flex
+                          w={"100%"}
+                          align={"center"}
+                          justify={"center"}
+                          minH={"100px"}
+                          rounded={"md"}
+                          border={"1px"}
+                          borderColor={"gray.300"}
+                        >
+                          <Text
+                            fontSize={"sm"}
+                            fontWeight={"semibold"}
+                            color={"gray.400"}
+                          >
+                            No Options
+                          </Text>
+                        </Flex>
+                      )}
+                    </VStack>
+                  </Flex>
+                </Flex>
+              </Dialog.Body>
+              <Dialog.Footer p={"2"}>
+                <Button
+                  size={"sm"}
+                  colorPalette={"red"}
+                  onClick={() => {
+                    // Reset the list of options
+                    setOptions([]);
+
+                    // Close the modal
+                    onClose();
+                  }}
+                >
+                  Cancel
+                  <Icon name={"cross"} />
+                </Button>
+                <Spacer />
+                <Button
+                  size={"sm"}
+                  colorPalette={"green"}
+                  onClick={addOptions}
+                  disabled={_.isEqual(options.length, 0)}
+                >
+                  Continue
+                  <Icon name={"c_right"} />
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
       </ScaleFade>
     </Flex>
   );

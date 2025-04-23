@@ -18,7 +18,7 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import Dialog from "@components/Dialog";
+import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
@@ -56,7 +56,7 @@ const Template = () => {
   // State for dialog confirming if user should archive
   const archiveDialogRef = useRef();
   const {
-    isOpen: isArchiveDialogOpen,
+    open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
     onClose: onArchiveDialogClose,
   } = useDisclosure();
@@ -333,7 +333,7 @@ const Template = () => {
               <MenuButton
                 as={Button}
                 size={"sm"}
-                colorScheme={"yellow"}
+                colorPalette={"yellow"}
                 rightIcon={<Icon name={"lightning"} />}
               >
                 Actions
@@ -342,14 +342,14 @@ const Template = () => {
                 <MenuItem
                   icon={<Icon name={"download"} />}
                   onClick={handleDownloadClick}
-                  isDisabled={editing || templateArchived}
+                  disabled={editing || templateArchived}
                 >
                   Export
                 </MenuItem>
                 <MenuItem
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
-                  isDisabled={templateArchived}
+                  disabled={templateArchived}
                 >
                   Archive
                 </MenuItem>
@@ -361,7 +361,7 @@ const Template = () => {
                 id={"restoreTemplateButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
-                colorScheme={"orange"}
+                colorPalette={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
@@ -370,7 +370,7 @@ const Template = () => {
               <Button
                 id={"editTemplateButton"}
                 size={"sm"}
-                colorScheme={editing ? "green" : "blue"}
+                colorPalette={editing ? "green" : "blue"}
                 rightIcon={
                   editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                 }
@@ -381,11 +381,11 @@ const Template = () => {
             )}
 
             {/* Archive Dialog */}
-            <Dialog
+            <AlertDialog
               dialogRef={archiveDialogRef}
               header={"Archive Template"}
               rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
+              open={archiveDialogOpen}
               onOpen={onArchiveDialogOpen}
               onClose={onArchiveDialogClose}
             >
@@ -393,7 +393,7 @@ const Template = () => {
                 Are you sure you want to archive this Template? It can be
                 restored any time from the Workspace archives.
               </Text>
-            </Dialog>
+            </AlertDialog>
           </Flex>
         </Flex>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Dialog,
   Flex,
   Menu,
   MenuButton,
@@ -7,9 +8,6 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
-  Modal,
-  ModalContent,
-  ModalOverlay,
   Spacer,
   Spinner,
   Text,
@@ -41,7 +39,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
   // Modal state for transition overlay
   const {
-    isOpen: isTransitionOpen,
+    open: transitionOpen,
     onOpen: onTransitionOpen,
     onClose: onTransitionClose,
   } = useDisclosure();
@@ -302,7 +300,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 );
               })
             ) : (
-              <MenuItem isDisabled>
+              <MenuItem disabled>
                 <Flex
                   direction={"row"}
                   gap={"2"}
@@ -322,7 +320,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
             {/* Option to create a new Workspace */}
             <MenuItem
               onClick={() => handleUpdateClick()}
-              isDisabled={workspaces.length === 0}
+              disabled={workspaces.length === 0}
             >
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"edit"} />
@@ -366,34 +364,37 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         </MenuList>
       </Menu>
 
-      <Modal
-        isOpen={isTransitionOpen}
+      <Dialog.Root
+        isOpen={transitionOpen}
         onClose={onTransitionClose}
         size={"full"}
         motionPreset={"none"}
       >
-        <ModalOverlay />
-        <ModalContent
-          w={"100%"}
-          h={"100%"}
-          backdropFilter={"blur(2px)"}
-          background={"rgba(255, 255, 255, 0.85)"}
-        >
-          <Flex
-            direction={"column"}
-            gap={"4"}
-            w={"100%"}
-            h={"100%"}
-            align={"center"}
-            justify={"center"}
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content
+          // w={"100%"}
+          // h={"100%"}
+          // backdropFilter={"blur(2px)"}
+          // background={"rgba(255, 255, 255, 0.85)"}
           >
-            <Text fontWeight={"semibold"} color={"gray.600"}>
-              Loading Workspace...
-            </Text>
-            <Spinner size={"lg"} color={"gray.600"} />
-          </Flex>
-        </ModalContent>
-      </Modal>
+            <Flex
+              direction={"column"}
+              gap={"4"}
+              w={"100%"}
+              h={"100%"}
+              align={"center"}
+              justify={"center"}
+            >
+              <Text fontWeight={"semibold"} color={"gray.600"}>
+                Loading Workspace...
+              </Text>
+              <Spinner size={"lg"} color={"gray.600"} />
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

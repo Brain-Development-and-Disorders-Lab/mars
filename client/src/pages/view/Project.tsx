@@ -5,11 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Checkbox,
   CheckboxGroup,
+  Dialog,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -27,13 +25,6 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Radio,
   RadioGroup,
   Select,
@@ -51,7 +42,7 @@ import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Dialog from "@components/Dialog";
+import AlertDialog from "@components/AlertDialog";
 import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
@@ -98,7 +89,7 @@ const Project = () => {
 
   // Add Entities
   const {
-    isOpen: isEntitiesOpen,
+    open: entitiesOpen,
     onOpen: onEntitiesOpen,
     onClose: onEntitiesClose,
   } = useDisclosure();
@@ -106,14 +97,14 @@ const Project = () => {
   // State for dialog confirming if user should archive Project
   const archiveDialogRef = useRef();
   const {
-    isOpen: isArchiveDialogOpen,
+    open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
     onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // History drawer
   const {
-    isOpen: isHistoryOpen,
+    open: historyOpen,
     onOpen: onHistoryOpen,
     onClose: onHistoryClose,
   } = useDisclosure();
@@ -137,7 +128,7 @@ const Project = () => {
 
   // Save message modal
   const {
-    isOpen: isSaveMessageOpen,
+    open: isSaveMessageOpen,
     onOpen: onSaveMessageOpen,
     onClose: onSaveMessageClose,
   } = useDisclosure();
@@ -148,7 +139,7 @@ const Project = () => {
 
   // Export modal state and data
   const {
-    isOpen: isExportOpen,
+    open: isExportOpen,
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
@@ -673,7 +664,7 @@ const Project = () => {
               <IconButton
                 icon={<Icon name={"delete"} />}
                 aria-label={"Remove entity"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 onClick={() => handleRemoveEntity(info.row.original)}
                 size={"sm"}
               />
@@ -742,7 +733,7 @@ const Project = () => {
             <Menu>
               <MenuButton
                 as={Button}
-                colorScheme={"yellow"}
+                colorPalette={"yellow"}
                 rightIcon={<Icon name={"lightning"} />}
                 size={"sm"}
               >
@@ -753,12 +744,12 @@ const Project = () => {
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
                   fontSize={"sm"}
-                  isDisabled={exportLoading || projectArchived}
+                  disabled={exportLoading || projectArchived}
                 >
                   Export Project
                 </MenuItem>
                 <Tooltip
-                  isDisabled={projectEntities?.length > 0 || projectArchived}
+                  disabled={projectEntities?.length > 0 || projectArchived}
                   label={"This Project does not contain any Entities."}
                   hasArrow
                 >
@@ -766,7 +757,7 @@ const Project = () => {
                     onClick={handleExportEntitiesClick}
                     icon={<Icon name={"download"} />}
                     fontSize={"sm"}
-                    isDisabled={
+                    disabled={
                       projectEntities?.length === 0 ||
                       exportEntitiesLoading ||
                       projectArchived
@@ -779,7 +770,7 @@ const Project = () => {
                   icon={<Icon name={"archive"} />}
                   onClick={onArchiveDialogOpen}
                   fontSize={"sm"}
-                  isDisabled={projectArchived}
+                  disabled={projectArchived}
                 >
                   Archive
                 </MenuItem>
@@ -790,7 +781,7 @@ const Project = () => {
               <Button
                 onClick={handleRestoreClick}
                 size={"sm"}
-                colorScheme={"orange"}
+                colorPalette={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
@@ -801,7 +792,7 @@ const Project = () => {
                   <Button
                     onClick={handleCancelClick}
                     size={"sm"}
-                    colorScheme={"red"}
+                    colorPalette={"red"}
                     rightIcon={<Icon name={"cross"} />}
                   >
                     Cancel
@@ -809,7 +800,7 @@ const Project = () => {
                 )}
                 <Button
                   id={"editProjectButton"}
-                  colorScheme={editing ? "green" : "blue"}
+                  colorPalette={editing ? "green" : "blue"}
                   rightIcon={
                     editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
                   }
@@ -825,7 +816,7 @@ const Project = () => {
 
             <Button
               onClick={onHistoryOpen}
-              colorScheme={"gray"}
+              colorPalette={"gray"}
               size={"sm"}
               rightIcon={<Icon name={"clock"} />}
             >
@@ -833,11 +824,11 @@ const Project = () => {
             </Button>
 
             {/* Archive Dialog */}
-            <Dialog
+            <AlertDialog
               dialogRef={archiveDialogRef}
               header={"Archive Project"}
               rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
+              open={archiveDialogOpen}
               onOpen={onArchiveDialogOpen}
               onClose={onArchiveDialogClose}
             >
@@ -845,7 +836,7 @@ const Project = () => {
                 Are you sure you want to archive this Project? No Entities will
                 be deleted. This Project will be moved to the Workspace archive.
               </Text>
-            </Dialog>
+            </AlertDialog>
           </Flex>
         </Flex>
 
@@ -962,7 +953,7 @@ const Project = () => {
                   rightIcon={<Icon name={"add"} />}
                   onClick={onEntitiesOpen}
                   size={"sm"}
-                  isDisabled={!editing}
+                  disabled={!editing}
                 >
                   Add
                 </Button>
@@ -1023,15 +1014,15 @@ const Project = () => {
                       size={"sm"}
                       value={newCollaborator}
                       onChange={(e) => setNewCollaborator(e.target.value)}
-                      isDisabled={!editing}
+                      disabled={!editing}
                     />
                   </FormControl>
                   <Spacer />
                   <Button
-                    colorScheme={"green"}
+                    colorPalette={"green"}
                     rightIcon={<Icon name={"add"} />}
                     size={"sm"}
-                    isDisabled={!editing}
+                    disabled={!editing}
                     onClick={() => {
                       // Prevent adding empty or duplicate collaborator
                       if (
@@ -1094,326 +1085,339 @@ const Project = () => {
         </Flex>
 
         {/* Modal to add Entities */}
-        <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Entity</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              <SearchSelect
-                id={"entitySearchSelect"}
-                resultType={"entity"}
-                value={selectedEntity}
-                onChange={setSelectedEntity}
-              />
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Button
-                colorScheme={"red"}
-                size={"sm"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onEntitiesClose}
-              >
-                Cancel
-              </Button>
-
-              <Spacer />
-
-              <Button
-                id={"addEntityDoneButton"}
-                colorScheme={"green"}
-                size={"sm"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Origin to the Entity
-                    addEntities(selectedEntity);
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        <Modal
-          isOpen={isExportOpen}
-          onClose={onExportClose}
-          size={"2xl"}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Export Project</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody px={"2"} gap={"2"}>
-              {/* Export information */}
-              {_.isEqual(exportFormat, "json") && (
-                <Information
-                  text={"JSON files can be re-imported into Metadatify."}
+        <Dialog.Root open={entitiesOpen} onClose={onEntitiesClose} isCentered>
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>Add Entity</Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <SearchSelect
+                  id={"entitySearchSelect"}
+                  resultType={"entity"}
+                  value={selectedEntity}
+                  onChange={setSelectedEntity}
                 />
-              )}
-              {_.isEqual(exportFormat, "csv") && (
-                <Information
-                  text={
-                    " To export Entities alongside Project details, use JSON format."
-                  }
-                />
-              )}
+              </Dialog.Body>
 
-              {/* Select export format */}
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                py={"2"}
-                gap={"2"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Flex gap={"1"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Format:
-                  </Text>
-                  <FormControl>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      value={exportFormat}
-                      onChange={(event) => {
-                        setExportFormat(event.target.value);
-
-                        // Remove `entities` field if currently selected and switching to CSV format
-                        if (event.target.value === "csv") {
-                          setExportFields([
-                            ...exportFields.filter(
-                              (field) => field !== "entities",
-                            ),
-                          ]);
-                        }
-                      }}
-                    >
-                      <option key={"json"} value={"json"}>
-                        JSON
-                      </option>
-                      <option key={"csv"} value={"csv"}>
-                        CSV
-                      </option>
-                    </Select>
-                  </FormControl>
-                </Flex>
-                <Text fontSize={"sm"}>
-                  Select the Project fields to be exported.
-                </Text>
-              </Flex>
-
-              {/* Selection content */}
-              <Flex
-                direction={"row"}
-                p={"2"}
-                gap={"4"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Details</FormLabel>
-                  {!loading ? (
-                    <CheckboxGroup>
-                      <Stack spacing={2} direction={"column"}>
-                        <Checkbox
-                          disabled
-                          defaultChecked
-                          size={"sm"}
-                          fontSize={"sm"}
-                        >
-                          Name: {projectName}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          fontSize={"sm"}
-                          isChecked={_.includes(exportFields, "created")}
-                          onChange={(event) =>
-                            handleExportCheck("created", event.target.checked)
-                          }
-                        >
-                          Created:{" "}
-                          {dayjs(project.created).format("DD MMM YYYY")}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "owner")}
-                          onChange={(event) =>
-                            handleExportCheck("owner", event.target.checked)
-                          }
-                        >
-                          Owner: {project.owner}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "description")}
-                          onChange={(event) =>
-                            handleExportCheck(
-                              "description",
-                              event.target.checked,
-                            )
-                          }
-                          isDisabled={_.isEqual(projectDescription, "")}
-                        >
-                          <Text noOfLines={1} fontSize={"sm"}>
-                            Description:{" "}
-                            {_.isEqual(projectDescription, "")
-                              ? "No description"
-                              : _.truncate(projectDescription, { length: 32 })}
-                          </Text>
-                        </Checkbox>
-                      </Stack>
-                    </CheckboxGroup>
-                  ) : (
-                    <Text fontSize={"sm"}>Loading details...</Text>
-                  )}
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Entities</FormLabel>
-                  {!loading ? (
-                    <CheckboxGroup>
-                      <Tooltip
-                        label={
-                          "Entities cannot be included when exporting to CSV"
-                        }
-                        hasArrow
-                        isDisabled={_.isEqual(exportFormat, "json")}
-                      >
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "entities")}
-                          onChange={(event) =>
-                            handleExportCheck("entities", event.target.checked)
-                          }
-                          isDisabled={
-                            _.isEqual(projectEntities.length, 0) ||
-                            _.isEqual(exportFormat, "csv")
-                          }
-                        >
-                          <Text noOfLines={1} fontSize={"sm"}>
-                            Export Entities
-                          </Text>
-                        </Checkbox>
-                      </Tooltip>
-                    </CheckboxGroup>
-                  ) : (
-                    <Text fontSize={"sm"}>Loading details...</Text>
-                  )}
-                  {_.includes(exportFields, "entities") && (
-                    <RadioGroup
-                      onChange={setExportEntityDetails}
-                      value={exportEntityDetails}
-                    >
-                      <Stack direction={"row"} gap={"1"}>
-                        <Radio value={"name"} size={"sm"} fontSize={"sm"}>
-                          Names
-                        </Radio>
-                        <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
-                          Identifiers
-                        </Radio>
-                      </Stack>
-                    </RadioGroup>
-                  )}
-                </FormControl>
-              </Flex>
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Flex direction={"column"} w={"30%"} gap={"2"}>
-                {/* "Download" button */}
-                <Flex
-                  direction={"row"}
-                  w={"100%"}
-                  gap={"2"}
-                  justify={"right"}
-                  align={"center"}
-                >
-                  <Button
-                    rightIcon={<Icon name={"download"} />}
-                    colorScheme={"blue"}
-                    size={"sm"}
-                    onClick={() => handleDownloadClick(exportFormat)}
-                    isLoading={exportLoading}
-                  >
-                    Download
-                  </Button>
-                </Flex>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Save message modal */}
-        <Modal
-          onEsc={onSaveMessageOpen}
-          onClose={onSaveMessageClose}
-          isOpen={isSaveMessageOpen}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"}>
-            <ModalHeader p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"save"} />
-                <Text fontWeight={"semibold"}>Saving Changes</Text>
-              </Flex>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"} color={"gray.600"}>
-                  Specify a description of the changes made to the Project.
-                </Text>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  id={"saveMessageInput"}
-                  style={{ width: "100%" }}
-                  value={saveMessage}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setSaveMessage(value || "");
-                  }}
-                />
-              </Flex>
-            </ModalBody>
-            <ModalFooter p={"2"}>
-              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+              <Dialog.Footer p={"2"}>
                 <Button
+                  colorPalette={"red"}
                   size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={() => onSaveMessageClose()}
+                  variant={"outline"}
+                  onClick={onEntitiesClose}
                 >
                   Cancel
+                  <Icon name={"cross"} />
                 </Button>
 
+                <Spacer />
+
                 <Button
-                  id={"saveMessageDoneButton"}
+                  id={"addEntityDoneButton"}
+                  colorPalette={"green"}
                   size={"sm"}
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => handleSaveMessageDoneClick()}
+                  onClick={() => {
+                    if (id) {
+                      // Add the Origin to the Entity
+                      addEntities(selectedEntity);
+                    }
+                  }}
                 >
                   Done
+                  <Icon name={"check"} />
                 </Button>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Dialog to export Entities */}
+        <Dialog.Root
+          open={isExportOpen}
+          onClose={onExportClose}
+          size={"xl"}
+          isCentered
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} w={["lg", "xl", "2xl"]} gap={"0"} */}
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"}>Export Project</Dialog.Header>
+              <Dialog.Body px={"2"} gap={"2"}>
+                {/* Export information */}
+                {_.isEqual(exportFormat, "json") && (
+                  <Information
+                    text={"JSON files can be re-imported into Metadatify."}
+                  />
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Information
+                    text={
+                      " To export Entities alongside Project details, use JSON format."
+                    }
+                  />
+                )}
+
+                {/* Select export format */}
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  py={"2"}
+                  gap={"2"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Flex gap={"1"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Format:
+                    </Text>
+                    <FormControl>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        value={exportFormat}
+                        onChange={(event) => {
+                          setExportFormat(event.target.value);
+
+                          // Remove `entities` field if currently selected and switching to CSV format
+                          if (event.target.value === "csv") {
+                            setExportFields([
+                              ...exportFields.filter(
+                                (field) => field !== "entities",
+                              ),
+                            ]);
+                          }
+                        }}
+                      >
+                        <option key={"json"} value={"json"}>
+                          JSON
+                        </option>
+                        <option key={"csv"} value={"csv"}>
+                          CSV
+                        </option>
+                      </Select>
+                    </FormControl>
+                  </Flex>
+                  <Text fontSize={"sm"}>
+                    Select the Project fields to be exported.
+                  </Text>
+                </Flex>
+
+                {/* Selection content */}
+                <Flex
+                  direction={"row"}
+                  p={"2"}
+                  gap={"4"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                >
+                  <FormControl>
+                    <FormLabel fontSize={"sm"}>Details</FormLabel>
+                    {!loading ? (
+                      <CheckboxGroup>
+                        <Stack spacing={2} direction={"column"}>
+                          <Checkbox
+                            disabled
+                            defaultChecked
+                            size={"sm"}
+                            fontSize={"sm"}
+                          >
+                            Name: {projectName}
+                          </Checkbox>
+                          <Checkbox
+                            size={"sm"}
+                            fontSize={"sm"}
+                            isChecked={_.includes(exportFields, "created")}
+                            onChange={(event) =>
+                              handleExportCheck("created", event.target.checked)
+                            }
+                          >
+                            Created:{" "}
+                            {dayjs(project.created).format("DD MMM YYYY")}
+                          </Checkbox>
+                          <Checkbox
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "owner")}
+                            onChange={(event) =>
+                              handleExportCheck("owner", event.target.checked)
+                            }
+                          >
+                            Owner: {project.owner}
+                          </Checkbox>
+                          <Checkbox
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "description")}
+                            onChange={(event) =>
+                              handleExportCheck(
+                                "description",
+                                event.target.checked,
+                              )
+                            }
+                            disabled={_.isEqual(projectDescription, "")}
+                          >
+                            <Text noOfLines={1} fontSize={"sm"}>
+                              Description:{" "}
+                              {_.isEqual(projectDescription, "")
+                                ? "No description"
+                                : _.truncate(projectDescription, {
+                                    length: 32,
+                                  })}
+                            </Text>
+                          </Checkbox>
+                        </Stack>
+                      </CheckboxGroup>
+                    ) : (
+                      <Text fontSize={"sm"}>Loading details...</Text>
+                    )}
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel fontSize={"sm"}>Entities</FormLabel>
+                    {!loading ? (
+                      <CheckboxGroup>
+                        <Tooltip
+                          label={
+                            "Entities cannot be included when exporting to CSV"
+                          }
+                          hasArrow
+                          disabled={_.isEqual(exportFormat, "json")}
+                        >
+                          <Checkbox
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "entities")}
+                            onChange={(event) =>
+                              handleExportCheck(
+                                "entities",
+                                event.target.checked,
+                              )
+                            }
+                            disabled={
+                              _.isEqual(projectEntities.length, 0) ||
+                              _.isEqual(exportFormat, "csv")
+                            }
+                          >
+                            <Text noOfLines={1} fontSize={"sm"}>
+                              Export Entities
+                            </Text>
+                          </Checkbox>
+                        </Tooltip>
+                      </CheckboxGroup>
+                    ) : (
+                      <Text fontSize={"sm"}>Loading details...</Text>
+                    )}
+                    {_.includes(exportFields, "entities") && (
+                      <RadioGroup
+                        onChange={setExportEntityDetails}
+                        value={exportEntityDetails}
+                      >
+                        <Stack direction={"row"} gap={"1"}>
+                          <Radio value={"name"} size={"sm"} fontSize={"sm"}>
+                            Names
+                          </Radio>
+                          <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
+                            Identifiers
+                          </Radio>
+                        </Stack>
+                      </RadioGroup>
+                    )}
+                  </FormControl>
+                </Flex>
+              </Dialog.Body>
+
+              <Dialog.Footer p={"2"}>
+                <Flex direction={"column"} w={"30%"} gap={"2"}>
+                  {/* "Download" button */}
+                  <Flex
+                    direction={"row"}
+                    w={"100%"}
+                    gap={"2"}
+                    justify={"right"}
+                    align={"center"}
+                  >
+                    <Button
+                      colorPalette={"blue"}
+                      size={"sm"}
+                      onClick={() => handleDownloadClick(exportFormat)}
+                      loading={exportLoading}
+                    >
+                      Download
+                      <Icon name={"download"} />
+                    </Button>
+                  </Flex>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Save message modal */}
+        <Dialog.Root
+          onEsc={onSaveMessageOpen}
+          onClose={onSaveMessageClose}
+          open={isSaveMessageOpen}
+          isCentered
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {/* p={"2"} */}
+              <Dialog.Header p={"2"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"save"} />
+                  <Text fontWeight={"semibold"}>Saving Changes</Text>
+                </Flex>
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"sm"} color={"gray.600"}>
+                    Specify a description of the changes made to the Project.
+                  </Text>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    id={"saveMessageInput"}
+                    style={{ width: "100%" }}
+                    value={saveMessage}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setSaveMessage(value || "");
+                    }}
+                  />
+                </Flex>
+              </Dialog.Body>
+              <Dialog.Footer p={"2"}>
+                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                  <Button
+                    size={"sm"}
+                    colorPalette={"red"}
+                    onClick={() => onSaveMessageClose()}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+
+                  <Button
+                    id={"saveMessageDoneButton"}
+                    size={"sm"}
+                    colorPalette={"green"}
+                    onClick={() => handleSaveMessageDoneClick()}
+                  >
+                    Done
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Blocker warning message */}
         <UnsavedChangesModal
@@ -1424,7 +1428,7 @@ const Project = () => {
         />
 
         <Drawer
-          isOpen={isHistoryOpen}
+          open={historyOpen}
           placement={"right"}
           size={"md"}
           onClose={onHistoryClose}
@@ -1473,7 +1477,7 @@ const Project = () => {
                         border={"1px"}
                         borderColor={"gray.300"}
                       >
-                        <CardHeader p={"0"}>
+                        <Card.Header p={"0"}>
                           <Flex
                             direction={"column"}
                             w={"100%"}
@@ -1488,13 +1492,13 @@ const Project = () => {
                               {projectVersion.name}
                             </Text>
                           </Flex>
-                        </CardHeader>
+                        </Card.Header>
 
-                        <CardBody px={"2"} py={"0"}>
+                        <Card.Body px={"2"} py={"0"}>
                           <Flex direction={"column"} gap={"2"}>
                             {/* Description */}
                             {_.isEqual(projectVersion.description, "") ? (
-                              <Tag size={"sm"} colorScheme={"orange"}>
+                              <Tag size={"sm"} colorPalette={"orange"}>
                                 No Description
                               </Tag>
                             ) : (
@@ -1598,9 +1602,9 @@ const Project = () => {
                               </Flex>
                             </Flex>
                           </Flex>
-                        </CardBody>
+                        </Card.Body>
 
-                        <CardFooter p={"2"}>
+                        <Card.Footer p={"2"}>
                           {/* Version information */}
                           <Flex direction={"column"} gap={"2"} w={"100%"}>
                             <Flex
@@ -1624,7 +1628,7 @@ const Project = () => {
                                   gap={"2"}
                                   align={"center"}
                                 >
-                                  <Tag size={"sm"} colorScheme={"green"}>
+                                  <Tag size={"sm"} colorPalette={"green"}>
                                     {projectVersion.version}
                                   </Tag>
                                 </Flex>
@@ -1641,14 +1645,14 @@ const Project = () => {
                                 {_.isEqual(projectVersion.message, "") ||
                                 _.isNull(projectVersion.message) ? (
                                   <Flex>
-                                    <Tag size={"sm"} colorScheme={"orange"}>
+                                    <Tag size={"sm"} colorPalette={"orange"}>
                                       No Message
                                     </Tag>
                                   </Flex>
                                 ) : (
                                   <Tooltip
                                     label={projectVersion.message}
-                                    isDisabled={
+                                    disabled={
                                       projectVersion.message.length < 32
                                     }
                                     hasArrow
@@ -1682,19 +1686,19 @@ const Project = () => {
 
                             <Flex w={"100%"} justify={"right"}>
                               <Button
-                                colorScheme={"orange"}
+                                colorPalette={"orange"}
                                 size={"sm"}
                                 rightIcon={<Icon name={"rewind"} />}
                                 onClick={() => {
                                   handleRestoreFromHistoryClick(projectVersion);
                                 }}
-                                isDisabled={projectArchived}
+                                disabled={projectArchived}
                               >
                                 Restore
                               </Button>
                             </Flex>
                           </Flex>
-                        </CardFooter>
+                        </Card.Footer>
                       </Card>
                     );
                   })
