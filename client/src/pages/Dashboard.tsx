@@ -701,7 +701,7 @@ const Dashboard = () => {
             {/* Activity list */}
             {activityData.length > 0 ? (
               <Flex p={"0"} w={"100%"} overflowY={"auto"}>
-                <VStack spacing={"3"} w={"95%"}>
+                <VStack gap={"3"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
                       <Flex

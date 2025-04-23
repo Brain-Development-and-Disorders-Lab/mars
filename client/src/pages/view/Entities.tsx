@@ -6,6 +6,7 @@ import {
   Flex,
   Heading,
   Text,
+  Dialog,
   Button,
   useBreakpoint,
   Tooltip,
@@ -13,15 +14,8 @@ import {
   Tag,
   Link,
   useDisclosure,
-  ModalBody,
-  Modal,
   FormControl,
   Select,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalFooter,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -72,7 +66,7 @@ const Entities = () => {
             <Tooltip
               label={info.getValue()}
               hasArrow
-              isDisabled={info.getValue().length < 30}
+              disabled={info.getValue().length < 30}
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 30 })}
@@ -164,7 +158,7 @@ const Entities = () => {
             <Tooltip
               label={info.getValue()}
               hasArrow
-              isDisabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 20}
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 20 })}
@@ -178,14 +172,14 @@ const Entities = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorPalette={"orange"}>Empty</Tag>;
         }
         return (
           <Flex>
             <Tooltip
               label={info.getValue()}
               hasArrow
-              isDisabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 24}
             >
               <Text fontSize={"sm"}>
                 {_.truncate(info.getValue(), { length: 24 })}
@@ -299,7 +293,7 @@ const Entities = () => {
             <Spacer />
             <Button
               rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
             >
@@ -339,93 +333,94 @@ const Entities = () => {
         </Flex>
       </Flex>
 
-      <Modal
+      <Dialog.Root
         isOpen={isExportOpen}
         onClose={onExportClose}
-        size={"2xl"}
+        size={"xl"}
         isCentered
       >
-        <ModalOverlay />
-        <ModalContent>
-          {/* Heading and close button */}
-          <ModalHeader p={"2"}>Export Entities</ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody px={"2"} gap={"2"}>
-            {/* Select export format */}
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              py={"2"}
-              gap={"2"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex gap={"1"} align={"center"}>
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                  Format:
-                </Text>
-                <FormControl>
-                  <Select
-                    size={"sm"}
-                    rounded={"md"}
-                    value={exportFormat}
-                    onChange={(event) => setExportFormat(event.target.value)}
-                  >
-                    <option key={"json"} value={"json"}>
-                      JSON
-                    </option>
-                    <option key={"csv"} value={"csv"}>
-                      CSV
-                    </option>
-                  </Select>
-                </FormControl>
-              </Flex>
-            </Flex>
-
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
-              <DataTable
-                columns={exportTableColumns}
-                data={toExport}
-                visibleColumns={{}}
-                selectedRows={{}}
-                showPagination
-                showItemCount
-              />
-            </Flex>
-          </ModalBody>
-          <ModalFooter p={"2"}>
-            <Flex direction={"column"} w={"30%"} gap={"2"}>
-              {/* "Export" button */}
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            {/* Heading and close button */}
+            <Dialog.Header p={"2"}>Export Entities</Dialog.Header>
+            <Dialog.Body px={"2"} gap={"2"}>
+              {/* Select export format */}
               <Flex
-                direction={"row"}
                 w={"100%"}
+                direction={"row"}
+                py={"2"}
                 gap={"2"}
-                justify={"right"}
+                justify={"space-between"}
                 align={"center"}
               >
-                <Button
-                  rightIcon={<Icon name={"download"} />}
-                  colorScheme={"blue"}
-                  size={"sm"}
-                  onClick={() => onExportClick()}
-                  isLoading={exportLoading}
-                >
-                  Export
-                </Button>
+                <Flex gap={"1"} align={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    Format:
+                  </Text>
+                  <FormControl>
+                    <Select
+                      size={"sm"}
+                      rounded={"md"}
+                      value={exportFormat}
+                      onChange={(event) => setExportFormat(event.target.value)}
+                    >
+                      <option key={"json"} value={"json"}>
+                        JSON
+                      </option>
+                      <option key={"csv"} value={"csv"}>
+                        CSV
+                      </option>
+                    </Select>
+                  </FormControl>
+                </Flex>
               </Flex>
-            </Flex>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                <DataTable
+                  columns={exportTableColumns}
+                  data={toExport}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  showPagination
+                  showItemCount
+                />
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p={"2"}>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Export" button */}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"right"}
+                  align={"center"}
+                >
+                  <Button
+                    rightIcon={<Icon name={"download"} />}
+                    colorPalette={"blue"}
+                    size={"sm"}
+                    onClick={() => onExportClick()}
+                    isLoading={exportLoading}
+                  >
+                    Export
+                  </Button>
+                </Flex>
+              </Flex>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Content>
   );
 };
