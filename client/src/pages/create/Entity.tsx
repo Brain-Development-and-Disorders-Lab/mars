@@ -716,7 +716,7 @@ const Entity = () => {
                       }
                     }}
                   >
-                    <Stack spacing={[1, 5]} direction={"column"}>
+                    <Stack gap={[1, 5]} direction={"column"}>
                       {projects.map((project) => {
                         return (
                           <Checkbox key={project._id} value={project._id}>

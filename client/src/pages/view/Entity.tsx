@@ -2283,7 +2283,7 @@ const Entity = () => {
                       <FormLabel fontSize={"sm"}>Details</FormLabel>
                       {!loading ? (
                         <CheckboxGroup size={"sm"}>
-                          <Stack spacing={2} direction={"column"}>
+                          <Stack gap={2} direction={"column"}>
                             <Checkbox disabled defaultChecked fontSize={"sm"}>
                               Name: {entityName}
                             </Checkbox>
@@ -2335,7 +2335,7 @@ const Entity = () => {
                     <FormControl>
                       <FormLabel fontSize={"sm"}>Projects</FormLabel>
                       {!loading && entityProjects.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
+                        <Stack gap={2} direction={"column"}>
                           {entityProjects.map((project) => {
                             allExportFields.push(`project_${project}`);
                             return (
@@ -2374,7 +2374,7 @@ const Entity = () => {
                     <FormControl>
                       <FormLabel fontSize={"sm"}>Origins</FormLabel>
                       {!loading && entityRelationships?.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
+                        <Stack gap={2} direction={"column"}>
                           {entityRelationships.map((relationship) => {
                             allExportFields.push(
                               `relationship_${relationship.target._id}_${relationship.type}`,
@@ -2416,7 +2416,7 @@ const Entity = () => {
                     <FormControl>
                       <FormLabel fontSize={"sm"}>Attributes</FormLabel>
                       {!loading && entityAttributes.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
+                        <Stack gap={2} direction={"column"}>
                           {entityAttributes.map((attribute) => {
                             allExportFields.push(`attribute_${attribute._id}`);
                             return (

@@ -44,7 +44,7 @@ const SearchBox = (props: SearchBoxProps) => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { isOpen, onToggle, onClose } = useDisclosure();
+  const { open, onToggle, onClose } = useDisclosure();
   const [query, setQuery] = useState("");
 
   // Workspace context
@@ -144,11 +144,7 @@ const SearchBox = (props: SearchBoxProps) => {
 
   return (
     <Flex w={"100%"} p={"0"}>
-      <Popover
-        isOpen={isOpen}
-        onClose={onCloseWrapper}
-        placement={"bottom-end"}
-      >
+      <Popover isOpen={open} onClose={onCloseWrapper} placement={"bottom-end"}>
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
             <InputGroup size={"sm"}>
@@ -160,7 +156,7 @@ const SearchBox = (props: SearchBoxProps) => {
                 rounded={"md"}
                 placeholder={"Quick Search"}
                 background={"white"}
-                isDisabled={workspace === ""}
+                disabled={workspace === ""}
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyUp={(event) => {
                   // Listen for "Enter" key when entering a query
@@ -205,7 +201,7 @@ const SearchBox = (props: SearchBoxProps) => {
                 !isError && (
                   <VStack
                     gap={"1"}
-                    divider={<StackDivider borderColor={"gray.300"} />}
+                    separator={<StackDivider borderColor={"gray.300"} />}
                     w={"100%"}
                   >
                     {results.length > 0 ? (

@@ -5,9 +5,6 @@ import React from "react";
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Flex,
   Heading,
   Stack,
@@ -47,14 +44,14 @@ const Create = () => {
           border={"1px"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"entity"} size={"md"} />
               <Heading size={"md"}>Entity</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<StackDivider />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -96,13 +93,13 @@ const Create = () => {
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createEntityButton"}
                 size={"sm"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_entity_click");
@@ -112,7 +109,7 @@ const Create = () => {
                 Create
               </Button>
             </Flex>
-          </CardFooter>
+          </Card.Footer>
         </Card>
 
         {/* Template card */}
@@ -123,14 +120,14 @@ const Create = () => {
           border={"1px"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"template"} size={"md"} />
               <Heading size={"md"}>Template</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<StackDivider />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -158,13 +155,13 @@ const Create = () => {
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createTemplateButton"}
                 size={"sm"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_template_click");
@@ -174,7 +171,7 @@ const Create = () => {
                 Create
               </Button>
             </Flex>
-          </CardFooter>
+          </Card.Footer>
         </Card>
 
         {/* Project card */}
@@ -185,14 +182,14 @@ const Create = () => {
           border={"1px"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"project"} size={"md"} />
               <Heading size={"md"}>Project</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<StackDivider />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -218,13 +215,13 @@ const Create = () => {
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createProjectButton"}
                 size={"sm"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_project_click");
@@ -234,7 +231,7 @@ const Create = () => {
                 Create
               </Button>
             </Flex>
-          </CardFooter>
+          </Card.Footer>
         </Card>
       </Flex>
     </Content>

@@ -1221,7 +1221,7 @@ const Project = () => {
                     <FormLabel fontSize={"sm"}>Details</FormLabel>
                     {!loading ? (
                       <CheckboxGroup>
-                        <Stack spacing={2} direction={"column"}>
+                        <Stack gap={2} direction={"column"}>
                           <Checkbox
                             disabled
                             defaultChecked
