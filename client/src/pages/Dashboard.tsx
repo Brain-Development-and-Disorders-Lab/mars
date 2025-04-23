@@ -248,13 +248,13 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return <Tag colorPalette={"orange"}>No Description</Tag>;
         }
         return (
           <Tooltip
             label={info.getValue()}
             placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 30}
           >
             <Text noOfLines={1}>
               {_.truncate(info.getValue(), { length: 30 })}
@@ -268,9 +268,9 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("attributes", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return <Tag colorPalette={"orange"}>None</Tag>;
         }
-        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+        return <Tag colorPalette={"green"}>{info.getValue().length}</Tag>;
       },
       header: "Attributes",
       enableHiding: true,
@@ -309,7 +309,7 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("name", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return <Tag colorPalette={"orange"}>None</Tag>;
         }
         return (
           <Text noOfLines={1} fontWeight={"semibold"}>
@@ -322,13 +322,13 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return <Tag colorPalette={"orange"}>No Description</Tag>;
         }
         return (
           <Tooltip
             label={info.getValue()}
             placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 30}
           >
             <Text noOfLines={1}>
               {_.truncate(info.getValue(), { length: 30 })}
@@ -342,9 +342,9 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("entities", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return <Tag colorPalette={"orange"}>None</Tag>;
         }
-        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+        return <Tag colorPalette={"green"}>{info.getValue().length}</Tag>;
       },
       header: "Entities",
       enableHiding: true,
@@ -605,7 +605,7 @@ const Dashboard = () => {
                 <Button
                   key={`view-projects-all`}
                   size={"sm"}
-                  colorScheme={"blue"}
+                  colorPalette={"blue"}
                   rightIcon={<Icon name={"c_right"} />}
                   onClick={() => navigate(`/projects`)}
                 >
@@ -663,7 +663,7 @@ const Dashboard = () => {
                 <Button
                   key={`view-entity-all`}
                   size={"sm"}
-                  colorScheme={"blue"}
+                  colorPalette={"blue"}
                   rightIcon={<Icon name={"c_right"} />}
                   onClick={() => navigate(`/entities`)}
                 >
@@ -712,7 +712,9 @@ const Dashboard = () => {
                         align={"center"}
                       >
                         <Tooltip label={activity.actor} hasArrow>
-                          <Avatar name={activity.actor} size={"sm"} />
+                          <Avatar.Root size={"sm"} key={activity.actor}>
+                            <Avatar.Fallback name={activity.actor} />
+                          </Avatar.Root>
                         </Tooltip>
                         <Flex direction={"column"} w={"100%"}>
                           <Flex direction={"row"} gap={"1"}>

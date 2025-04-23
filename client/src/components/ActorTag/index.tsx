@@ -68,14 +68,16 @@ const ActorTag = (props: ActorTagProps) => {
       bg={"white"}
       minW={"120px"}
     >
-      <Avatar name={actorLabel} size={"sm"} />
+      <Avatar.Root size={"sm"} key={actorLabel}>
+        <Avatar.Fallback name={actorLabel} />
+      </Avatar.Root>
       <Flex direction={"column"} gap={"0.5"}>
-        <Skeleton isLoaded={!loading}>
+        <Skeleton loading={loading}>
           <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>
         </Skeleton>
-        <Skeleton isLoaded={!loading}>
+        <Skeleton loading={loading}>
           {breakpoint !== "base" && (
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
               {props.orcid}
