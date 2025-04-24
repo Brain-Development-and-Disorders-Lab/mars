@@ -69,12 +69,12 @@ const Invalid = () => {
           </Flex>
 
           <Button
-            rightIcon={<Icon name={"a_right"} />}
             onClick={() => navigate("/")}
             colorPalette={"orange"}
             size={"sm"}
           >
             Dashboard
+            <Icon name={"a_right"} />
           </Button>
         </Flex>
       </Flex>

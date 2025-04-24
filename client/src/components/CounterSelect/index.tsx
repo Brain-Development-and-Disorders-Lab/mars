@@ -305,13 +305,9 @@ const CounterSelect = (props: CounterProps) => {
         {/* Button to create new Counter */}
         {props.showCreate && (
           <Flex>
-            <Button
-              size={"sm"}
-              colorPalette={"green"}
-              rightIcon={<Icon name={"add"} />}
-              onClick={() => onOpen()}
-            >
+            <Button size={"sm"} colorPalette={"green"} onClick={() => onOpen()}>
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         )}
@@ -468,13 +464,9 @@ const CounterSelect = (props: CounterProps) => {
             </Dialog.Body>
             <Dialog.Footer p={"2"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                <Button
-                  variant={"outline"}
-                  colorPalette={"red"}
-                  size={"sm"}
-                  rightIcon={<Icon name={"cross"} />}
-                >
+                <Button variant={"outline"} colorPalette={"red"} size={"sm"}>
                   Cancel
+                  <Icon name={"cross"} />
                 </Button>
 
                 <Button
@@ -487,10 +479,10 @@ const CounterSelect = (props: CounterProps) => {
                     createCounterLoading
                   }
                   loading={createCounterLoading}
-                  rightIcon={<Icon name="check" />}
                   onClick={onDoneClick}
                 >
                   Done
+                  <Icon name="check" />
                 </Button>
               </Flex>
             </Dialog.Footer>

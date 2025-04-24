@@ -210,12 +210,12 @@ const Projects = () => {
             </Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
               colorPalette={"green"}
               onClick={() => navigate("/create/project")}
               size={"sm"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>

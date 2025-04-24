@@ -68,11 +68,11 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
               <Button
                 size={"sm"}
                 variant={"outline"}
-                leftIcon={<Icon name={"c_left"} />}
                 className={"tooltip__button"}
                 {...backProps}
                 colorPalette={"orange"}
               >
+                <Icon name={"c_left"} />
                 {backProps.title}
               </Button>
             )}
@@ -80,12 +80,12 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {continuous && (
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"c_right"} />}
                 colorPalette={"blue"}
                 className={"tooltip__button tooltip__button--primary"}
                 {...primaryProps}
               >
                 {primaryProps.title}
+                <Icon name={"c_right"} />
               </Button>
             )}
           </Flex>

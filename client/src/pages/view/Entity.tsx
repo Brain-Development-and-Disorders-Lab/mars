@@ -1291,13 +1291,9 @@ const Entity = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
             {/* Actions Menu */}
             <Menu>
-              <MenuButton
-                as={Button}
-                size={"sm"}
-                colorPalette={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-              >
+              <MenuButton as={Button} size={"sm"} colorPalette={"yellow"}>
                 Actions
+                <Icon name={"lightning"} />
               </MenuButton>
               <MenuList>
                 <MenuItem
@@ -1355,9 +1351,9 @@ const Entity = () => {
                 onClick={handleCancelClick}
                 size={"sm"}
                 colorPalette={"red"}
-                rightIcon={<Icon name={"cross"} />}
               >
                 Cancel
+                <Icon name={"cross"} />
               </Button>
             )}
             {entityArchived ? (
@@ -1366,9 +1362,9 @@ const Entity = () => {
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorPalette={"green"}
-                rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
+                <Icon name={"rewind"} />
               </Button>
             ) : (
               <Flex gap={"2"}>
@@ -1535,11 +1531,11 @@ const Entity = () => {
                 </Text>
                 <Button
                   size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
                   disabled={!editing}
                   onClick={onAddProjectsOpen}
                 >
                   Add
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
               <Flex
@@ -1656,11 +1652,11 @@ const Entity = () => {
                   </Text>
                   <Button
                     size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
                     disabled={!editing}
                     onClick={onAddRelationshipsOpen}
                   >
                     Add
+                    <Icon name={"add"} />
                   </Button>
                 </Flex>
                 <Flex
@@ -1711,12 +1707,9 @@ const Entity = () => {
                   <Text fontSize={"sm"} fontWeight={"bold"}>
                     Attachments
                   </Text>
-                  <Button
-                    size={"sm"}
-                    rightIcon={<Icon name={"upload"} />}
-                    onClick={onUploadOpen}
-                  >
+                  <Button size={"sm"} onClick={onUploadOpen}>
                     Upload
+                    <Icon name={"upload"} />
                   </Button>
                 </Flex>
 
@@ -3153,13 +3146,13 @@ const Entity = () => {
                               <Button
                                 colorPalette={"orange"}
                                 size={"sm"}
-                                rightIcon={<Icon name={"rewind"} />}
                                 onClick={() => {
                                   handleRestoreFromHistoryClick(entityVersion);
                                 }}
                                 disabled={entityArchived}
                               >
                                 Restore
+                                <Icon name={"rewind"} />
                               </Button>
                             </Flex>
                           </Flex>

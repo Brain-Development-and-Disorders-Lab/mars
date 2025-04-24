@@ -378,11 +378,11 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
               aria-label={"Run Query"}
               colorPalette={"green"}
               size={"sm"}
-              rightIcon={<Icon name={"search"} />}
               onClick={() => onSearchBuiltQuery()}
               disabled={!isValid}
             >
               Run Query
+              <Icon name={"search"} />
             </Button>
           </Flex>
         </Flex>

@@ -606,10 +606,10 @@ const Dashboard = () => {
                   key={`view-projects-all`}
                   size={"sm"}
                   colorPalette={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
                   onClick={() => navigate(`/projects`)}
                 >
                   All Projects
+                  <Icon name={"c_right"} />
                 </Button>
               </Flex>
             </Flex>
@@ -664,10 +664,10 @@ const Dashboard = () => {
                   key={`view-entity-all`}
                   size={"sm"}
                   colorPalette={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
                   onClick={() => navigate(`/entities`)}
                 >
                   All Entities
+                  <Icon name={"c_right"} />
                 </Button>
               </Flex>
             </Flex>

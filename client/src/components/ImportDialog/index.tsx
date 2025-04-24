@@ -1401,7 +1401,6 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                     <Button
                       size={"sm"}
-                      rightIcon={<Icon name={"add"} />}
                       colorPalette={"green"}
                       onClick={() => {
                         // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
@@ -1420,6 +1419,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       }}
                     >
                       Create
+                      <Icon name={"add"} />
                     </Button>
                   </Flex>
 
@@ -1611,7 +1611,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                 id={"importCancelButton"}
                 size={"sm"}
                 colorPalette={"red"}
-                rightIcon={<Icon name="cross" />}
                 variant={"outline"}
                 onClick={() => {
                   // Capture event
@@ -1625,10 +1624,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                 }}
               >
                 Cancel
+                <Icon name="cross" />
               </Button>
 
               <Flex align={"center"} justify={"center"} gap={"2"}>
-                {/* {importLoading && <Spinner size={"sm"} />} */}
                 <Button
                   id={"importContinueButton"}
                   size={"sm"}
@@ -1638,20 +1637,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                       ? "green"
                       : "blue"
                   }
-                  rightIcon={
-                    _.includes(
-                      ["upload", "details", "mapping"],
-                      entityInterfacePage,
-                    ) ? (
-                      <Icon name={"c_right"} />
-                    ) : (
-                      <Icon name={"check"} />
-                    )
-                  }
                   variant={"solid"}
                   onClick={onContinueClick}
                   disabled={continueDisabled || importLoading}
-                  isLoading={importLoading}
+                  loading={importLoading}
                   loadingText={"Processing"}
                 >
                   {/* Entities import type */}
@@ -1675,6 +1664,16 @@ const ImportDialog = (props: ImportDialogProps) => {
                   {_.isEqual(importType, "template") &&
                     _.isEqual(entityInterfacePage, "review") &&
                     "Finish"}
+
+                  {/* Icon */}
+                  {_.includes(
+                    ["upload", "details", "mapping"],
+                    entityInterfacePage,
+                  ) ? (
+                    <Icon name={"c_right"} />
+                  ) : (
+                    <Icon name={"check"} />
+                  )}
                 </Button>
               </Flex>
             </Flex>

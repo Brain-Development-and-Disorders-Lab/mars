@@ -307,11 +307,11 @@ const Graph = (props: {
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
             size={"xs"}
-            rightIcon={<Icon name={"a_right"} />}
             disabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
           >
             View
+            <Icon name={"a_right"} />
           </Button>
         </Flex>
       </Flex>

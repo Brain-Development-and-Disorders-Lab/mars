@@ -368,13 +368,9 @@ const DataTable = (props: DataTableProps) => {
           {/* Actions button */}
           {props.showSelection && (
             <Menu size={"sm"}>
-              <MenuButton
-                as={Button}
-                colorPalette={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-                size={"sm"}
-              >
+              <MenuButton as={Button} colorPalette={"yellow"} size={"sm"}>
                 Actions
+                <Icon name={"lightning"} />
               </MenuButton>
               <MenuList>
                 {props.actions &&

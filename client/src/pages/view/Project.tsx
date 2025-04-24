@@ -732,13 +732,9 @@ const Project = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu>
-              <MenuButton
-                as={Button}
-                colorPalette={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-                size={"sm"}
-              >
+              <MenuButton as={Button} colorPalette={"yellow"} size={"sm"}>
                 Actions
+                <Icon name={"lightning"} />
               </MenuButton>
               <MenuList>
                 <MenuItem
@@ -783,9 +779,9 @@ const Project = () => {
                 onClick={handleRestoreClick}
                 size={"sm"}
                 colorPalette={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
+                <Icon name={"rewind"} />
               </Button>
             ) : (
               <Flex gap={"2"}>
@@ -794,34 +790,28 @@ const Project = () => {
                     onClick={handleCancelClick}
                     size={"sm"}
                     colorPalette={"red"}
-                    rightIcon={<Icon name={"cross"} />}
                   >
                     Cancel
+                    <Icon name={"cross"} />
                   </Button>
                 )}
                 <Button
                   id={"editProjectButton"}
                   colorPalette={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
-                  }
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
-                  isLoading={isUpdating}
+                  loading={isUpdating}
                   size={"sm"}
                 >
                   {editing ? "Save" : "Edit"}
+                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
                 </Button>
               </Flex>
             )}
 
-            <Button
-              onClick={onHistoryOpen}
-              colorPalette={"gray"}
-              size={"sm"}
-              rightIcon={<Icon name={"clock"} />}
-            >
+            <Button onClick={onHistoryOpen} colorPalette={"gray"} size={"sm"}>
               History
+              <Icon name={"clock"} />
             </Button>
 
             {/* Archive Dialog */}
@@ -951,12 +941,12 @@ const Project = () => {
                 </Text>
                 <Button
                   id={"addEntityButton"}
-                  rightIcon={<Icon name={"add"} />}
                   onClick={onEntitiesOpen}
                   size={"sm"}
                   disabled={!editing}
                 >
                   Add
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
               <Flex
@@ -1025,7 +1015,6 @@ const Project = () => {
                   <Spacer />
                   <Button
                     colorPalette={"green"}
-                    rightIcon={<Icon name={"add"} />}
                     size={"sm"}
                     disabled={!editing}
                     onClick={() => {
@@ -1043,6 +1032,7 @@ const Project = () => {
                     }}
                   >
                     Add
+                    <Icon name={"add"} />
                   </Button>
                 </Flex>
                 <Flex
@@ -1711,13 +1701,13 @@ const Project = () => {
                               <Button
                                 colorPalette={"orange"}
                                 size={"sm"}
-                                rightIcon={<Icon name={"rewind"} />}
                                 onClick={() => {
                                   handleRestoreFromHistoryClick(projectVersion);
                                 }}
                                 disabled={projectArchived}
                               >
                                 Restore
+                                <Icon name={"rewind"} />
                               </Button>
                             </Flex>
                           </Flex>

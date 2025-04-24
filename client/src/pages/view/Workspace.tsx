@@ -525,17 +525,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Entity"}
               onClick={() => navigate(`/entities/${info.row.original._id}`)}
             >
               View
+              <Icon name={"a_right"} />
             </Button>
             <Button
-              rightIcon={
-                <Icon name={showArchivedEntities ? "rewind" : "archive"} />
-              }
               size={"sm"}
               aria-label={"Archive Entity"}
               colorPalette={showArchivedEntities ? "green" : "red"}
@@ -544,6 +541,7 @@ const Workspace = () => {
               }
             >
               {showArchivedEntities ? "Restore" : "Archive"}
+              {<Icon name={showArchivedEntities ? "rewind" : "archive"} />}
             </Button>
           </Flex>
         );
@@ -592,17 +590,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Project"}
               onClick={() => navigate(`/projects/${info.row.original._id}`)}
             >
               View
+              <Icon name={"a_right"} />
             </Button>
             <Button
-              rightIcon={
-                <Icon name={showArchivedProjects ? "rewind" : "archive"} />
-              }
               size={"sm"}
               aria-label={"Archive Project"}
               colorPalette={showArchivedProjects ? "green" : "red"}
@@ -611,6 +606,7 @@ const Workspace = () => {
               }
             >
               {showArchivedProjects ? "Restore" : "Archive"}
+              {<Icon name={showArchivedProjects ? "rewind" : "archive"} />}
             </Button>
           </Flex>
         );
@@ -659,17 +655,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
               aria-label={"View Template"}
               onClick={() => navigate(`/templates/${info.row.original._id}`)}
             >
               View
+              <Icon name={"a_right"} />
             </Button>
             <Button
-              rightIcon={
-                <Icon name={showArchivedTemplates ? "rewind" : "archive"} />
-              }
               size={"sm"}
               aria-label={"Archive Template"}
               colorPalette={showArchivedTemplates ? "green" : "red"}
@@ -678,6 +671,7 @@ const Workspace = () => {
               }
             >
               {showArchivedTemplates ? "Restore" : "Archive"}
+              {<Icon name={showArchivedTemplates ? "rewind" : "archive"} />}
             </Button>
           </Flex>
         );
@@ -800,16 +794,15 @@ const Workspace = () => {
           <Button
             size={"sm"}
             colorPalette={"red"}
-            rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/")}
           >
             Cancel
+            <Icon name={"cross"} />
           </Button>
           <Button
             id={"modalWorkspaceCreateButton"}
             size={"sm"}
             colorPalette={"green"}
-            rightIcon={<Icon name={"save"} />}
             disabled={name === ""}
             isLoading={
               workspaceUpdateLoading ||
@@ -820,6 +813,7 @@ const Workspace = () => {
             onClick={() => handleUpdateClick()}
           >
             Save
+            <Icon name={"save"} />
           </Button>
         </Flex>
       </Flex>
@@ -1046,10 +1040,10 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
                 onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
                 {showArchivedEntities ? "Hide" : "Show"} Archive
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex
@@ -1095,10 +1089,10 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
                 onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
                 {showArchivedProjects ? "Hide" : "Show"} Archive
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex
@@ -1142,10 +1136,10 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
                 onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
               >
                 {showArchivedTemplates ? "Hide" : "Show"} Archive
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex

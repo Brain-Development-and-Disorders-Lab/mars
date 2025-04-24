@@ -45,7 +45,6 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
               <Button
                 size={"sm"}
                 colorPalette={"red"}
-                rightIcon={<Icon name={"cross"} />}
                 ref={props.cancelBlockerRef}
                 onClick={() => {
                   props.blocker.reset?.();
@@ -53,16 +52,17 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
                 }}
               >
                 Cancel
+                <Icon name={"cross"} />
               </Button>
 
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"check"} />}
                 colorPalette={"green"}
                 onClick={() => props.blocker.proceed?.()}
                 ml={3}
               >
                 Continue
+                <Icon name={"check"} />
               </Button>
             </Flex>
           </AlertDialogFooter>

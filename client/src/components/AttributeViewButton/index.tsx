@@ -167,7 +167,6 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     colorPalette={"red"}
                     size={"sm"}
                     variant={"outline"}
-                    rightIcon={<Icon name={"cross"} />}
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(attribute.description);
@@ -181,12 +180,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     }}
                   >
                     Cancel
+                    <Icon name={"cross"} />
                   </Button>
 
                   <Button
                     colorPalette={"green"}
                     size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       // Close the modal
                       onClose();
@@ -206,6 +205,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     }}
                   >
                     Done
+                    <Icon name={"check"} />
                   </Button>
                 </Flex>
               )}

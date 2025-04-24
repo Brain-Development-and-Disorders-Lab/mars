@@ -387,12 +387,12 @@ const Search = () => {
                   <Button
                     aria-label={"Search"}
                     size={"sm"}
-                    rightIcon={<Icon name={"search"} />}
                     colorPalette={"green"}
                     disabled={query === ""}
                     onClick={() => runSearch()}
                   >
                     Search
+                    <Icon name={"search"} />
                   </Button>
                 </Flex>
               </Flex>

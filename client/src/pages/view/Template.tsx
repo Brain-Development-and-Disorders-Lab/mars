@@ -330,13 +330,9 @@ const Template = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu id={"actionsMenu"}>
-              <MenuButton
-                as={Button}
-                size={"sm"}
-                colorPalette={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-              >
+              <MenuButton as={Button} size={"sm"} colorPalette={"yellow"}>
                 Actions
+                <Icon name={"lightning"} />
               </MenuButton>
               <MenuList>
                 <MenuItem
@@ -362,21 +358,19 @@ const Template = () => {
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorPalette={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
+                <Icon name={"rewind"} />
               </Button>
             ) : (
               <Button
                 id={"editTemplateButton"}
                 size={"sm"}
                 colorPalette={editing ? "green" : "blue"}
-                rightIcon={
-                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                }
                 onClick={handleEditClick}
               >
                 {editing ? "Done" : "Edit"}
+                {editing ? <Icon name={"check"} /> : <Icon name={"edit"} />}
               </Button>
             )}
 

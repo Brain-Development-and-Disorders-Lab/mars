@@ -155,11 +155,11 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
           <Button
             size={"sm"}
             colorPalette={"red"}
-            rightIcon={<Icon name={"delete"} />}
             onClick={() => handleRevokeClick()}
-            isLoading={revokeKeyLoading}
+            loading={revokeKeyLoading}
           >
             Revoke
+            <Icon name={"delete"} />
           </Button>
         </Flex>
       )}
@@ -455,30 +455,30 @@ const User = () => {
             <Button
               size={"sm"}
               colorPalette={"red"}
-              rightIcon={<Icon name={"cross"} />}
               onClick={() => handleCancelClick()}
             >
               Cancel
+              <Icon name={"cross"} />
             </Button>
             <Button
               id={"userDoneButton"}
               size={"sm"}
               colorPalette={"green"}
-              rightIcon={<Icon name={"check"} />}
-              isLoading={userUpdateLoading}
+              loading={userUpdateLoading}
               onClick={() => handleUpdateClick()}
             >
               Done
+              <Icon name={"check"} />
             </Button>
           </Flex>
         ) : (
           <Button
             size={"sm"}
             colorPalette={"blue"}
-            rightIcon={<Icon name={"edit"} />}
             onClick={() => setEditing(true)}
           >
             Edit
+            <Icon name={"edit"} />
           </Button>
         )}
       </Flex>
@@ -626,11 +626,11 @@ const User = () => {
                   <Button
                     size={"sm"}
                     colorPalette={"green"}
-                    rightIcon={<Icon name={"add"} />}
                     onClick={() => handleGenerateKeyClick()}
-                    isLoading={generateKeyLoading}
+                    loading={generateKeyLoading}
                   >
                     Add API Key
+                    <Icon name={"add"} />
                   </Button>
                 </Flex>
                 <Flex

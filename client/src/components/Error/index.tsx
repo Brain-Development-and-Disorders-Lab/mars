@@ -54,12 +54,9 @@ const Error = () => {
           <Text>Network connectivity has been lost</Text>
         </Flex>
 
-        <Button
-          rightIcon={<Icon name={"reload"} />}
-          onClick={() => navigate(0)}
-          size={"sm"}
-        >
+        <Button onClick={() => navigate(0)} size={"sm"}>
           Reload Page
+          <Icon name={"reload"} />
         </Button>
       </Flex>
     </Flex>

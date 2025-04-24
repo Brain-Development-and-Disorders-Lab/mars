@@ -152,13 +152,9 @@ const Template = () => {
             <Icon name={"template"} size={"md"} />
             <Heading size={"md"}>Create Template</Heading>
             <Spacer />
-            <Button
-              size={"sm"}
-              rightIcon={<Icon name={"info"} />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
+            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
@@ -371,20 +367,20 @@ const Template = () => {
           size={"sm"}
           colorPalette={"red"}
           variant={"outline"}
-          rightIcon={<Icon name={"cross"} />}
           onClick={() => navigate("/templates")}
         >
           Cancel
+          <Icon name={"cross"} />
         </Button>
         <Spacer />
         <Button
           size={"sm"}
           colorPalette={"green"}
-          rightIcon={<Icon name={"check"} />}
           onClick={onSubmit}
           disabled={isDetailsError || isValueError || isSubmitting}
         >
           Finish
+          <Icon name={"check"} />
         </Button>
       </Flex>
 

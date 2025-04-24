@@ -520,12 +520,12 @@ const Values = (props: {
             <Button
               variant={"solid"}
               colorPalette={"green"}
-              rightIcon={<Icon name={"add"} />}
               className={"add-value-button-form"}
               disabled={props.viewOnly}
               size={"sm"}
             >
               Add Value
+              <Icon name={"add"} />
             </Button>
           </PopoverTrigger>
           <PopoverContent>
@@ -547,7 +547,6 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"orange.300"}
                   _hover={{ bg: "orange.400" }}
-                  rightIcon={<Icon name={"v_date"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -561,6 +560,7 @@ const Values = (props: {
                   }}
                 >
                   Date
+                  <Icon name={"v_date"} />
                 </Button>
 
                 <Button
@@ -570,7 +570,6 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"blue.300"}
                   _hover={{ bg: "blue.400" }}
-                  rightIcon={<Icon name={"v_text"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -584,6 +583,7 @@ const Values = (props: {
                   }}
                 >
                   Text
+                  <Icon name={"v_text"} />
                 </Button>
 
                 <Button
@@ -592,7 +592,6 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"green.300"}
                   _hover={{ bg: "green.400" }}
-                  rightIcon={<Icon name={"v_number"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -606,6 +605,7 @@ const Values = (props: {
                   }}
                 >
                   Number
+                  <Icon name={"v_number"} />
                 </Button>
 
                 <Button
@@ -614,7 +614,6 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"yellow.300"}
                   _hover={{ bg: "yellow.400" }}
-                  rightIcon={<Icon name={"v_url"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -628,6 +627,7 @@ const Values = (props: {
                   }}
                 >
                   URL
+                  <Icon name={"v_url"} />
                 </Button>
 
                 <Button
@@ -636,7 +636,6 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"purple.300"}
                   _hover={{ bg: "purple.400" }}
-                  rightIcon={<Icon name={"entity"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -650,6 +649,7 @@ const Values = (props: {
                   }}
                 >
                   Entity
+                  <Icon name={"entity"} />
                 </Button>
 
                 <Button
@@ -658,13 +658,13 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"teal.300"}
                   _hover={{ bg: "teal.400" }}
-                  rightIcon={<Icon name={"v_select"} />}
                   disabled={!_.isUndefined(props.permittedValues)}
                   onClick={() => {
                     onOpen();
                   }}
                 >
                   Select
+                  <Icon name={"v_select"} />
                 </Button>
               </Flex>
             </PopoverBody>

@@ -293,12 +293,12 @@ const Entities = () => {
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
               colorPalette={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>
@@ -414,13 +414,13 @@ const Entities = () => {
                   align={"center"}
                 >
                   <Button
-                    rightIcon={<Icon name={"download"} />}
                     colorPalette={"blue"}
                     size={"sm"}
                     onClick={() => onExportClick()}
-                    isLoading={exportLoading}
+                    loading={exportLoading}
                   >
                     Export
+                    <Icon name={"download"} />
                   </Button>
                 </Flex>
               </Flex>

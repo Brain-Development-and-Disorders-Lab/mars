@@ -85,11 +85,11 @@ const Create = () => {
                   >
                     Optional:
                   </Text>
-                  <Tag>Description</Tag>
-                  <Tag>Projects</Tag>
-                  <Tag>Origins</Tag>
-                  <Tag>Products</Tag>
-                  <Tag>Attributes</Tag>
+                  <Tag.Root>Description</Tag.Root>
+                  <Tag.Root>Projects</Tag.Root>
+                  <Tag.Root>Origins</Tag.Root>
+                  <Tag.Root>Products</Tag.Root>
+                  <Tag.Root>Attributes</Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
@@ -100,20 +100,20 @@ const Create = () => {
                 id={"createEntityButton"}
                 size={"sm"}
                 colorPalette={"green"}
-                rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_entity_click");
                   navigate("/create/entity");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
           </Card.Footer>
         </Card>
 
         {/* Template card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
@@ -149,9 +149,9 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Description</Tag>
-                  <Tag>Values</Tag>
+                  <Tag.Root>Name</Tag.Root>
+                  <Tag.Root>Description</Tag.Root>
+                  <Tag.Root>Values</Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
@@ -162,20 +162,20 @@ const Create = () => {
                 id={"createTemplateButton"}
                 size={"sm"}
                 colorPalette={"green"}
-                rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_template_click");
                   navigate("/create/template");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
           </Card.Footer>
-        </Card>
+        </Card.Root>
 
         {/* Project card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
@@ -210,8 +210,8 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Description</Tag>
+                  <Tag.Root>Name</Tag.Root>
+                  <Tag.Root>Description</Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
@@ -222,17 +222,17 @@ const Create = () => {
                 id={"createProjectButton"}
                 size={"sm"}
                 colorPalette={"green"}
-                rightIcon={<Icon name={"add"} />}
                 onClick={() => {
                   posthog.capture("create_project_click");
                   navigate("/create/project");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
           </Card.Footer>
-        </Card>
+        </Card.Root>
       </Flex>
     </Content>
   );

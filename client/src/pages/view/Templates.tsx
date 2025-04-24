@@ -178,12 +178,12 @@ const Templates = () => {
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
               colorPalette={"green"}
               onClick={() => navigate("/create/template")}
               size={"sm"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>

@@ -183,13 +183,9 @@ const Project = () => {
             <Icon name={"project"} size={"md"} />
             <Heading size={"md"}>Create Project</Heading>
             <Spacer />
-            <Button
-              size={"sm"}
-              rightIcon={<Icon name={"info"} />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
+            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
@@ -318,10 +314,10 @@ const Project = () => {
             <Button
               size={"sm"}
               colorPalette={"green"}
-              rightIcon={<Icon name={"add"} />}
               onClick={() => onEntitiesOpen()}
             >
               Add Entity
+              <Icon name={"add"} />
             </Button>
           </Flex>
           <Flex
@@ -383,18 +379,17 @@ const Project = () => {
         <Button
           size={"sm"}
           colorPalette={"red"}
-          rightIcon={<Icon name={"cross"} />}
           variant={"outline"}
           onClick={() => navigate("/projects")}
         >
           Cancel
+          <Icon name={"cross"} />
         </Button>
 
         <Button
           id={"finishCreateProjectButton"}
           size={"sm"}
           colorPalette={"green"}
-          rightIcon={<Icon name={"check"} />}
           onClick={async () => {
             // Capture event
             posthog.capture("create_project_finish");
@@ -426,6 +421,7 @@ const Project = () => {
           disabled={isDetailsError && !isSubmitting}
         >
           Finish
+          <Icon name={"check"} />
         </Button>
       </Flex>
 

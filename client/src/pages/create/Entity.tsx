@@ -422,13 +422,9 @@ const Entity = () => {
             <Icon name={"entity"} size={"md"} />
             <Heading size={"md"}>Create Entity</Heading>
             <Spacer />
-            <Button
-              size={"sm"}
-              rightIcon={<Icon name={"info"} />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
+            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
@@ -664,7 +660,6 @@ const Entity = () => {
                           </Flex>
                         </Flex>
                         <Button
-                          rightIcon={<Icon name={"add"} />}
                           colorPalette={"green"}
                           size={"sm"}
                           disabled={_.isUndefined(
@@ -673,6 +668,7 @@ const Entity = () => {
                           onClick={() => addRelationship()}
                         >
                           Add
+                          <Icon name={"add"} />
                         </Button>
                       </Flex>
                       <Field.HelperText>
@@ -969,20 +965,20 @@ const Entity = () => {
             size={"sm"}
             colorPalette={"red"}
             variant={"outline"}
-            rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/entities")}
           >
             Cancel
+            <Icon name={"cross"} />
           </Button>
           {!_.isEqual("start", pageState) && (
             <Button
               size={"sm"}
               colorPalette={"orange"}
               variant={"outline"}
-              rightIcon={<Icon name={"c_left"} />}
               onClick={onPageBack}
             >
               Back
+              <Icon name={"c_left"} />
             </Button>
           )}
         </Flex>
@@ -990,18 +986,16 @@ const Entity = () => {
         <Button
           size={"sm"}
           colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
-          rightIcon={
-            _.isEqual("attributes", pageState) ? (
-              <Icon name={"check"} />
-            ) : (
-              <Icon name={"c_right"} />
-            )
-          }
           onClick={onPageNext}
           disabled={!isValidInput() || isNameError}
           isLoading={isSubmitting}
         >
           {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
+          {_.isEqual("attributes", pageState) ? (
+            <Icon name={"check"} />
+          ) : (
+            <Icon name={"c_right"} />
+          )}
         </Button>
       </Flex>
 
