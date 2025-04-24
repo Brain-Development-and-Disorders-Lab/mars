@@ -847,10 +847,10 @@ const Project = () => {
                       {projectHistory && projectHistory.length > 0 ? (
                         projectHistory.map((projectVersion) => {
                           return (
-                            <Card
+                            <Card.Root
                               w={"100%"}
                               key={`v_${projectVersion.timestamp}`}
-                              variant={"simple"}
+                              variant={"outline"}
                               rounded={"md"}
                               border={"1px"}
                               borderColor={"gray.300"}
@@ -1116,7 +1116,7 @@ const Project = () => {
                                   </Flex>
                                 </Flex>
                               </Card.Footer>
-                            </Card>
+                            </Card.Root>
                           );
                         })
                       ) : (

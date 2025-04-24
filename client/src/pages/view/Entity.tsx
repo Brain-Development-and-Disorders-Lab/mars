@@ -1443,10 +1443,10 @@ const Entity = () => {
                         {entityHistory.length > 0 ? (
                           entityHistory.map((entityVersion) => {
                             return (
-                              <Card
+                              <Card.Root
                                 w={"100%"}
                                 key={`v_${entityVersion.timestamp}`}
-                                variant={"simple"}
+                                variant={"outline"}
                                 rounded={"md"}
                                 border={"1px"}
                                 borderColor={"gray.300"}
@@ -1829,7 +1829,7 @@ const Entity = () => {
                                     </Flex>
                                   </Flex>
                                 </Card.Footer>
-                              </Card>
+                              </Card.Root>
                             );
                           })
                         ) : (

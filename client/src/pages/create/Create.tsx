@@ -37,7 +37,7 @@ const Create = () => {
         wrap={"wrap"}
       >
         {/* Entity card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
@@ -124,7 +124,7 @@ const Create = () => {
               </Button>
             </Flex>
           </Card.Footer>
-        </Card>
+        </Card.Root>
 
         {/* Template card */}
         <Card.Root
