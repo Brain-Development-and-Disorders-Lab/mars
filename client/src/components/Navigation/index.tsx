@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import {
@@ -7,7 +7,6 @@ import {
   IconButton,
   Image,
   Button,
-  useDisclosure,
   Text,
   Menu,
   Spacer,
@@ -38,13 +37,9 @@ const Navigation = () => {
   // Workspace context value
   const { workspace } = useWorkspace();
 
-  const { open: importOpen, onOpen: onImportOpen } = useDisclosure();
-
-  const {
-    open: scanOpen,
-    onOpen: onScanOpen,
-    onClose: onScanClose,
-  } = useDisclosure();
+  // Modal open states
+  const [importOpen, setImportOpen] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
 
   return (
     <Flex w={"100%"} p={"2"} bg={"gray.100"}>
@@ -53,7 +48,6 @@ const Navigation = () => {
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
         gap={"4"}
-        w={"100%"}
       >
         {/* Heading */}
         <Flex
@@ -71,7 +65,7 @@ const Navigation = () => {
         </Flex>
 
         {/* Workspace menu items */}
-        <Flex direction={"column"} align={"self-start"} gap={"6"}>
+        <Flex direction={"column"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
             <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             <SearchBox resultType={"entity"} />
@@ -89,6 +83,8 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -107,6 +103,8 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/search")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -125,6 +123,8 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/create")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -147,6 +147,8 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -167,6 +169,8 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -187,6 +191,8 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -199,18 +205,18 @@ const Navigation = () => {
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
               Tools
             </Text>
-            <Flex direction={"row"} gap={"2"}>
+            <Flex direction={"row"} gap={"2"} w={"100%"}>
               <Button
                 id={"navImportButtonDesktop"}
                 key={"import"}
                 size={"sm"}
-                w={"100%"}
+                rounded={"md"}
                 colorPalette={"blue"}
                 onClick={() => {
                   // Capture event
                   posthog.capture("import_modal_open");
 
-                  onImportOpen();
+                  setImportOpen(true);
                 }}
                 disabled={workspace === "" || _.isUndefined(workspace)}
               >
@@ -222,13 +228,13 @@ const Navigation = () => {
                 id={"navScanButtonDesktop"}
                 key={"scan"}
                 size={"sm"}
-                w={"100%"}
+                rounded={"md"}
                 colorPalette={"green"}
                 onClick={() => {
                   // Capture event
                   posthog.capture("scan_modal_open");
 
-                  onScanOpen();
+                  setScanOpen(true);
                 }}
                 disabled={workspace === "" || _.isUndefined(workspace)}
               >
@@ -335,7 +341,7 @@ const Navigation = () => {
                     // Capture event
                     posthog.capture("scan_modal_open");
 
-                    onScanOpen();
+                    setScanOpen(true);
                   }}
                   disabled={workspace === "" || _.isUndefined(workspace)}
                 >
@@ -368,10 +374,10 @@ const Navigation = () => {
       </Flex>
 
       {/* `ImportDialog` component */}
-      <ImportDialog open={importOpen} />
+      <ImportDialog open={importOpen} setOpen={setImportOpen} />
 
       {/* `ScanModal` component */}
-      <ScanModal open={scanOpen} onOpen={onScanOpen} onClose={onScanClose} />
+      <ScanModal open={scanOpen} setOpen={setScanOpen} />
     </Flex>
   );
 };

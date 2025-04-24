@@ -88,7 +88,7 @@ const ScanModal = (props: ScanModalProps) => {
       return;
     };
 
-    props.onClose();
+    props.setOpen(false);
   };
 
   /**
@@ -281,6 +281,8 @@ const ScanModal = (props: ScanModalProps) => {
       placement={"center"}
       scrollBehavior={"inside"}
       onExitComplete={handleOnClose}
+      onEscapeKeyDown={handleOnClose}
+      onInteractOutside={handleOnClose}
     >
       <Dialog.Trigger />
       <Dialog.Backdrop />

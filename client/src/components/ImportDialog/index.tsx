@@ -862,18 +862,35 @@ const ImportDialog = (props: ImportDialogProps) => {
     setAttributesField([]);
   };
 
+  /**
+   * Handle closing the `Dialog` before the import process is complete
+   */
+  const handleOnClose = () => {
+    resetState();
+    props.setOpen(false);
+  };
+
   return (
     <Dialog.Root
       open={props.open}
       placement={"center"}
       size={"xl"}
       scrollBehavior={"inside"}
+      onEscapeKeyDown={handleOnClose}
+      onInteractOutside={handleOnClose}
     >
       <Dialog.Trigger />
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"}>Import File</Dialog.Header>
+          <Dialog.Header
+            p={"2"}
+            mt={"2"}
+            fontWeight={"semibold"}
+            fontSize={"lg"}
+          >
+            Import File
+          </Dialog.Header>
           <Dialog.Body px={"2"} gap={"2"}>
             <Information
               text={
@@ -893,44 +910,48 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
                 File contents:
               </Text>
-              <Flex>
-                <Select.Root
-                  key={"select-import-type"}
-                  size={"sm"}
-                  collection={createListCollection({
-                    items: ["Entites", "Template"],
-                  })}
-                  onValueChange={(details) =>
-                    setImportType(
-                      details.items[0].toLowerCase() as "entities" | "template",
-                    )
-                  }
-                  disabled={isTypeSelectDisabled}
-                >
-                  <Select.HiddenSelect />
-                  <Select.Label>Select Export Type</Select.Label>
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder={"Select Export Type"} />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {["Entites", "Template"].map((exportType: string) => (
-                          <Select.Item item={exportType} key={exportType}>
-                            {exportType}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              </Flex>
+              <Select.Root
+                key={"select-import-type"}
+                w={"sm"}
+                size={"sm"}
+                rounded={"md"}
+                collection={createListCollection({
+                  items: ["Entities", "Template"],
+                })}
+                onValueChange={(details) =>
+                  setImportType(
+                    details.items[0].toLowerCase() as "entities" | "template",
+                  )
+                }
+                disabled={isTypeSelectDisabled}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder={"Select Export Type"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {createListCollection({
+                        items: ["Entities", "Template"],
+                      }).items.map((exportType: string) => (
+                        <Select.Item
+                          item={exportType}
+                          key={exportType.toLowerCase()}
+                        >
+                          {exportType}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
               <Spacer />
               <Flex py={"2"} gap={"1"} align={"center"}>
                 <Text
@@ -940,10 +961,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                 >
                   Supported formats:
                 </Text>
-                <Tag.Root>
-                  {_.isEqual(importType, "entities") && (
+                {_.isEqual(importType, "entities") && (
+                  <Tag.Root>
                     <Tag.Label>CSV</Tag.Label>
-                  )}
+                  </Tag.Root>
+                )}
+                <Tag.Root>
                   <Tag.Label>JSON</Tag.Label>
                 </Tag.Root>
               </Flex>
@@ -951,12 +974,13 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
-              <Flex pb={"2"}>
-                <Steps.Root
-                  step={entityStep}
-                  onStepChange={(event) => setEntityStep(event.step)}
-                  count={entitySteps.length}
-                >
+              <Steps.Root
+                step={entityStep}
+                onStepChange={(event) => setEntityStep(event.step)}
+                count={entitySteps.length}
+                pb={"2"}
+              >
+                <Steps.List>
                   {entitySteps.map((step, index) => (
                     <Steps.Item key={index} index={index} title={step.title}>
                       <Steps.Indicator />
@@ -964,17 +988,18 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Steps.Separator />
                     </Steps.Item>
                   ))}
-                </Steps.Root>
-              </Flex>
+                </Steps.List>
+              </Steps.Root>
             )}
 
             {_.isEqual(importType, "template") && (
-              <Flex pb={"2"}>
-                <Steps.Root
-                  step={templateStep}
-                  onStepChange={(event) => setTemplateStep(event.step)}
-                  count={templateSteps.length}
-                >
+              <Steps.Root
+                step={templateStep}
+                onStepChange={(event) => setTemplateStep(event.step)}
+                count={templateSteps.length}
+                pb={"2"}
+              >
+                <Steps.List>
                   {templateSteps.map((step, index) => (
                     <Steps.Item key={index} index={index} title={step.title}>
                       <Steps.Indicator />
@@ -982,8 +1007,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Steps.Separator />
                     </Steps.Item>
                   ))}
-                </Steps.Root>
-              </Flex>
+                </Steps.List>
+              </Steps.Root>
             )}
 
             {/* Display filename and list of columns if a CSV file after upload */}
@@ -1649,7 +1674,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   });
 
                   // Close the `ImportDialog`
-                  resetState();
+                  handleOnClose();
                 }}
               >
                 Cancel
