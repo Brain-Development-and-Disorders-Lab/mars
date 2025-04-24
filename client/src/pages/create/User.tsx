@@ -176,7 +176,9 @@ const User = () => {
             pt={"8"}
           >
             <Text fontWeight={"semibold"}>ORCiD:</Text>
-            <Tag colorPalette={"green"}>{token.orcid}</Tag>
+            <Tag.Root colorPalette={"green"}>
+              <Tag.Label>{token.orcid}</Tag.Label>
+            </Tag.Root>
           </Flex>
 
           <Fieldset.Root required>

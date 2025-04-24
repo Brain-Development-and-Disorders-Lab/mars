@@ -73,8 +73,12 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Created</Tag>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Created</Tag.Label>
+                  </Tag.Root>
                 </Flex>
 
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
@@ -85,11 +89,21 @@ const Create = () => {
                   >
                     Optional:
                   </Text>
-                  <Tag.Root>Description</Tag.Root>
-                  <Tag.Root>Projects</Tag.Root>
-                  <Tag.Root>Origins</Tag.Root>
-                  <Tag.Root>Products</Tag.Root>
-                  <Tag.Root>Attributes</Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Projects</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Origins</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Products</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Attributes</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
@@ -149,9 +163,15 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag.Root>Name</Tag.Root>
-                  <Tag.Root>Description</Tag.Root>
-                  <Tag.Root>Values</Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Values</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
@@ -210,8 +230,12 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag.Root>Name</Tag.Root>
-                  <Tag.Root>Description</Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>

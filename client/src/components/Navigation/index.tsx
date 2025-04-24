@@ -97,10 +97,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
-              leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"dashboard"} />
               Dashboard
             </Button>
 
@@ -115,10 +115,10 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
-              leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"search"} />
               Search
             </Button>
 
@@ -133,10 +133,10 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
-              leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"add"} />
               Create
             </Button>
 
@@ -146,7 +146,6 @@ const Navigation = () => {
 
             <Button
               id={"navEntitiesButtonDesktop"}
-              leftIcon={<Icon name={"entity"} />}
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
@@ -159,6 +158,7 @@ const Navigation = () => {
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"entity"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -166,7 +166,6 @@ const Navigation = () => {
 
             <Button
               id={"navProjectsButtonDesktop"}
-              leftIcon={<Icon name={"project"} />}
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
@@ -179,6 +178,7 @@ const Navigation = () => {
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"project"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -186,7 +186,6 @@ const Navigation = () => {
 
             <Button
               id={"navTemplatesButtonDesktop"}
-              leftIcon={<Icon name={"template"} />}
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
@@ -199,6 +198,7 @@ const Navigation = () => {
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"template"} />
               Templates
             </Button>
           </Flex>
@@ -214,7 +214,6 @@ const Navigation = () => {
                 size={"sm"}
                 w={"100%"}
                 colorPalette={"blue"}
-                leftIcon={<Icon name={"upload"} />}
                 onClick={() => {
                   // Capture event
                   posthog.capture("import_modal_open");
@@ -223,6 +222,7 @@ const Navigation = () => {
                 }}
                 disabled={workspace === "" || _.isUndefined(workspace)}
               >
+                <Icon name={"upload"} />
                 Import
               </Button>
 
@@ -232,7 +232,6 @@ const Navigation = () => {
                 size={"sm"}
                 w={"100%"}
                 colorPalette={"green"}
-                leftIcon={<Icon name={"scan"} />}
                 onClick={() => {
                   // Capture event
                   posthog.capture("scan_modal_open");
@@ -241,6 +240,7 @@ const Navigation = () => {
                 }}
                 disabled={workspace === "" || _.isUndefined(workspace)}
               >
+                <Icon name={"scan"} />
                 Scan
               </Button>
             </Flex>

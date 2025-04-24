@@ -115,7 +115,11 @@ const Templates = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Text fontSize={"sm"}>
@@ -128,7 +132,11 @@ const Templates = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <Tag.Root size={"sm"}>
+            <Tag.Label>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Owner",
       enableHiding: true,

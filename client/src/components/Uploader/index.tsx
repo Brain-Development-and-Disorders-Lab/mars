@@ -127,16 +127,16 @@ const Uploader = (props: {
                   <Flex gap={"1"} direction={"row"} align={"center"}>
                     <Text fontSize={"sm"}>Supported file formats:</Text>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      PDF
+                      <Tag.Label>PDF</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      JPEG
+                      <Tag.Label>JPEG</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      PNG
+                      <Tag.Label>PNG</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      DNA
+                      <Tag.Label>DNA</Tag.Label>
                     </Tag.Root>
                   </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>

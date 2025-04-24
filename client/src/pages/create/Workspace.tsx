@@ -376,7 +376,9 @@ const CreateWorkspace = () => {
                         py={"2"}
                         w={"100%"}
                       >
-                        <Tag colorPalette={"green"}>{collaborator}</Tag>
+                        <Tag.Root colorPalette={"green"}>
+                          <Tag.Label>{collaborator}</Tag.Label>
+                        </Tag.Root>
                         <Spacer />
                         <IconButton
                           size={"sm"}
