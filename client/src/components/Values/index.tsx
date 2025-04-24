@@ -19,14 +19,7 @@ import {
   Input,
   Link,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger,
   Portal,
-  ScaleFade,
   Select,
   Separator,
   Spacer,
@@ -556,8 +549,8 @@ const Values = (props: {
         <Text fontSize={"sm"} fontWeight={"bold"}>
           Values
         </Text>
-        <Popover>
-          <PopoverTrigger>
+        <Popover.Root>
+          <Popover.Trigger>
             <Button
               variant={"solid"}
               colorPalette={"green"}
@@ -568,149 +561,151 @@ const Values = (props: {
               Add Value
               <Icon name={"add"} />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <PopoverArrow />
-            <PopoverCloseButton />
-            <PopoverHeader>
-              <Flex>
-                <Heading fontWeight={"semibold"} size={"xs"}>
-                  Select Type
-                </Heading>
-              </Flex>
-            </PopoverHeader>
-            <PopoverBody>
-              <Flex gap={"2"} wrap={"wrap"}>
-                {/* Buttons to add Values */}
-                <Button
-                  bg={"orange.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"orange.300"}
-                  _hover={{ bg: "orange.400" }}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_date_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "date",
-                        data: dayjs(Date.now()).toISOString(),
-                      },
-                    ]);
-                  }}
-                >
-                  Date
-                  <Icon name={"v_date"} />
-                </Button>
+          </Popover.Trigger>
 
-                <Button
-                  id="add-value-button-text"
-                  bg={"blue.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"blue.300"}
-                  _hover={{ bg: "blue.400" }}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_text_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "text",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  Text
-                  <Icon name={"v_text"} />
-                </Button>
+          <Popover.Positioner>
+            <Popover.Content>
+              <Popover.Arrow />
+              <Popover.Header>
+                <Flex>
+                  <Heading fontWeight={"semibold"} size={"xs"}>
+                    Select Type
+                  </Heading>
+                </Flex>
+              </Popover.Header>
+              <Popover.Body>
+                <Flex gap={"2"} wrap={"wrap"}>
+                  {/* Buttons to add Values */}
+                  <Button
+                    bg={"orange.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"orange.300"}
+                    _hover={{ bg: "orange.400" }}
+                    onClick={() => {
+                      props.setValues([
+                        ...props.values,
+                        {
+                          _id: `v_date_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "date",
+                          data: dayjs(Date.now()).toISOString(),
+                        },
+                      ]);
+                    }}
+                  >
+                    Date
+                    <Icon name={"v_date"} />
+                  </Button>
 
-                <Button
-                  bg={"green.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"green.300"}
-                  _hover={{ bg: "green.400" }}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_number_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "number",
-                        data: 0,
-                      },
-                    ]);
-                  }}
-                >
-                  Number
-                  <Icon name={"v_number"} />
-                </Button>
+                  <Button
+                    id="add-value-button-text"
+                    bg={"blue.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"blue.300"}
+                    _hover={{ bg: "blue.400" }}
+                    onClick={() => {
+                      props.setValues([
+                        ...props.values,
+                        {
+                          _id: `v_text_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "text",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    Text
+                    <Icon name={"v_text"} />
+                  </Button>
 
-                <Button
-                  bg={"yellow.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"yellow.300"}
-                  _hover={{ bg: "yellow.400" }}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_url_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "url",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  URL
-                  <Icon name={"v_url"} />
-                </Button>
+                  <Button
+                    bg={"green.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"green.300"}
+                    _hover={{ bg: "green.400" }}
+                    onClick={() => {
+                      props.setValues([
+                        ...props.values,
+                        {
+                          _id: `v_number_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "number",
+                          data: 0,
+                        },
+                      ]);
+                    }}
+                  >
+                    Number
+                    <Icon name={"v_number"} />
+                  </Button>
 
-                <Button
-                  bg={"purple.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"purple.300"}
-                  _hover={{ bg: "purple.400" }}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `p_entity_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "entity",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  Entity
-                  <Icon name={"entity"} />
-                </Button>
+                  <Button
+                    bg={"yellow.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"yellow.300"}
+                    _hover={{ bg: "yellow.400" }}
+                    onClick={() => {
+                      props.setValues([
+                        ...props.values,
+                        {
+                          _id: `v_url_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "url",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    URL
+                    <Icon name={"v_url"} />
+                  </Button>
 
-                <Button
-                  bg={"teal.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"teal.300"}
-                  _hover={{ bg: "teal.400" }}
-                  disabled={!_.isUndefined(props.permittedValues)}
-                  onClick={() => {
-                    onOpen();
-                  }}
-                >
-                  Select
-                  <Icon name={"v_select"} />
-                </Button>
-              </Flex>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+                  <Button
+                    bg={"purple.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"purple.300"}
+                    _hover={{ bg: "purple.400" }}
+                    onClick={() => {
+                      props.setValues([
+                        ...props.values,
+                        {
+                          _id: `p_entity_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "entity",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    Entity
+                    <Icon name={"entity"} />
+                  </Button>
+
+                  <Button
+                    bg={"teal.300"}
+                    size={"sm"}
+                    color={"white"}
+                    borderColor={"teal.300"}
+                    _hover={{ bg: "teal.400" }}
+                    disabled={!_.isUndefined(props.permittedValues)}
+                    onClick={() => {
+                      onOpen();
+                    }}
+                  >
+                    Select
+                    <Icon name={"v_select"} />
+                  </Button>
+                </Flex>
+              </Popover.Body>
+            </Popover.Content>
+          </Popover.Positioner>
+        </Popover.Root>
       </Flex>
 
       {props.values.length > 0 ? (
@@ -742,145 +737,143 @@ const Values = (props: {
         </Flex>
       )}
 
-      <ScaleFade initialScale={0.9} in={open}>
-        <Dialog.Root open={open} size={"xl"} placement={"center"} closeOnEscape>
-          <Dialog.Trigger />
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header p={"2"}>Add Options</Dialog.Header>
-              <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"sm"}>
-                    For a Select value, set the options to be displayed.
-                    Duplicates are not permitted.
-                  </Text>
-                  <Text fontSize={"sm"}>
-                    Name the option, then click "Add" to add it to the
-                    collection of options associated with this Select value.
-                    Click "Continue" to add this Select value to the Attribute.
-                  </Text>
-                  <Flex direction={"row"} gap={"4"}>
-                    <Input
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Option Value"}
-                      value={option}
-                      onChange={(event) => setOption(event.target.value)}
-                    />
-                    <Button
-                      colorPalette={"green"}
-                      size={"sm"}
-                      onClick={() => {
-                        if (!_.includes(options, option)) {
-                          setOptions([...options, option.toString()]);
-                          setOption("");
-                        } else {
-                          toaster.create({
-                            title: "Warning",
-                            description: "Can't add duplicate options.",
-                            type: "warning",
-                            duration: 2000,
-                            closable: true,
-                          });
-                        }
-                      }}
-                      disabled={_.isEqual(option, "")}
-                    >
-                      Add
-                      <Icon name={"add"} />
-                    </Button>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"2"}>
-                    <VStack gap={"1"} separator={<Separator />}>
-                      {options.length > 0 ? (
-                        options.map((option, index) => {
-                          return (
-                            <Flex
-                              direction={"row"}
-                              w={"100%"}
-                              justify={"space-between"}
-                              align={"center"}
-                              key={option}
-                            >
-                              <Flex gap={"2"}>
-                                <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                  Option {index + 1}:
-                                </Text>
-                                <Text fontSize={"sm"}>{option}</Text>
-                              </Flex>
-                              <IconButton
-                                aria-label={`remove_${index}`}
-                                size={"sm"}
-                                colorPalette={"red"}
-                                onClick={() => {
-                                  setOptions([
-                                    ...options.filter(
-                                      (currentOption) =>
-                                        !_.isEqual(currentOption, option),
-                                    ),
-                                  ]);
-                                }}
-                              >
-                                <Icon name={"delete"} />
-                              </IconButton>
-                            </Flex>
-                          );
-                        })
-                      ) : (
-                        <Flex
-                          w={"100%"}
-                          align={"center"}
-                          justify={"center"}
-                          minH={"100px"}
-                          rounded={"md"}
-                          border={"1px"}
-                          borderColor={"gray.300"}
-                        >
-                          <Text
-                            fontSize={"sm"}
-                            fontWeight={"semibold"}
-                            color={"gray.400"}
-                          >
-                            No Options
-                          </Text>
-                        </Flex>
-                      )}
-                    </VStack>
-                  </Flex>
+      <Dialog.Root open={open} size={"xl"} placement={"center"} closeOnEscape>
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"2"}>Add Options</Dialog.Header>
+            <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"}>
+                  For a Select value, set the options to be displayed.
+                  Duplicates are not permitted.
+                </Text>
+                <Text fontSize={"sm"}>
+                  Name the option, then click "Add" to add it to the collection
+                  of options associated with this Select value. Click "Continue"
+                  to add this Select value to the Attribute.
+                </Text>
+                <Flex direction={"row"} gap={"4"}>
+                  <Input
+                    size={"sm"}
+                    rounded={"md"}
+                    placeholder={"Option Value"}
+                    value={option}
+                    onChange={(event) => setOption(event.target.value)}
+                  />
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    onClick={() => {
+                      if (!_.includes(options, option)) {
+                        setOptions([...options, option.toString()]);
+                        setOption("");
+                      } else {
+                        toaster.create({
+                          title: "Warning",
+                          description: "Can't add duplicate options.",
+                          type: "warning",
+                          duration: 2000,
+                          closable: true,
+                        });
+                      }
+                    }}
+                    disabled={_.isEqual(option, "")}
+                  >
+                    Add
+                    <Icon name={"add"} />
+                  </Button>
                 </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"2"}>
-                <Button
-                  size={"sm"}
-                  colorPalette={"red"}
-                  onClick={() => {
-                    // Reset the list of options
-                    setOptions([]);
 
-                    // Close the modal
-                    onClose();
-                  }}
-                >
-                  Cancel
-                  <Icon name={"cross"} />
-                </Button>
-                <Spacer />
-                <Button
-                  size={"sm"}
-                  colorPalette={"green"}
-                  onClick={addOptions}
-                  disabled={_.isEqual(options.length, 0)}
-                >
-                  Continue
-                  <Icon name={"c_right"} />
-                </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
-      </ScaleFade>
+                <Flex direction={"column"} gap={"2"}>
+                  <VStack gap={"1"} separator={<Separator />}>
+                    {options.length > 0 ? (
+                      options.map((option, index) => {
+                        return (
+                          <Flex
+                            direction={"row"}
+                            w={"100%"}
+                            justify={"space-between"}
+                            align={"center"}
+                            key={option}
+                          >
+                            <Flex gap={"2"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Option {index + 1}:
+                              </Text>
+                              <Text fontSize={"sm"}>{option}</Text>
+                            </Flex>
+                            <IconButton
+                              aria-label={`remove_${index}`}
+                              size={"sm"}
+                              colorPalette={"red"}
+                              onClick={() => {
+                                setOptions([
+                                  ...options.filter(
+                                    (currentOption) =>
+                                      !_.isEqual(currentOption, option),
+                                  ),
+                                ]);
+                              }}
+                            >
+                              <Icon name={"delete"} />
+                            </IconButton>
+                          </Flex>
+                        );
+                      })
+                    ) : (
+                      <Flex
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        minH={"100px"}
+                        rounded={"md"}
+                        border={"1px"}
+                        borderColor={"gray.300"}
+                      >
+                        <Text
+                          fontSize={"sm"}
+                          fontWeight={"semibold"}
+                          color={"gray.400"}
+                        >
+                          No Options
+                        </Text>
+                      </Flex>
+                    )}
+                  </VStack>
+                </Flex>
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p={"2"}>
+              <Button
+                size={"sm"}
+                colorPalette={"red"}
+                onClick={() => {
+                  // Reset the list of options
+                  setOptions([]);
+
+                  // Close the modal
+                  onClose();
+                }}
+              >
+                Cancel
+                <Icon name={"cross"} />
+              </Button>
+              <Spacer />
+              <Button
+                size={"sm"}
+                colorPalette={"green"}
+                onClick={addOptions}
+                disabled={_.isEqual(options.length, 0)}
+              >
+                Continue
+                <Icon name={"c_right"} />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

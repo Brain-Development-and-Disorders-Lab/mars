@@ -14,7 +14,6 @@ import {
   useBreakpoint,
   InputGroup,
   Input,
-  InputRightElement,
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
@@ -416,7 +415,16 @@ const DataTable = (props: DataTableProps) => {
           {columnNames.length > 0 && props.showColumnSelect && (
             <Flex>
               <Flex pos={"relative"} w={"100%"}>
-                <InputGroup size={"sm"} onClick={onColumnsClick}>
+                <InputGroup
+                  onClick={onColumnsClick}
+                  endElement={
+                    showColumnList ? (
+                      <Icon name={"c_up"} />
+                    ) : (
+                      <Icon name={"c_down"} />
+                    )
+                  }
+                >
                   <Input
                     placeholder={"Show Columns"}
                     value={"Show Columns"}
@@ -428,13 +436,6 @@ const DataTable = (props: DataTableProps) => {
                     disabled={props.viewOnly}
                     readOnly
                   />
-                  <InputRightElement>
-                    {showColumnList ? (
-                      <Icon name={"c_up"} />
-                    ) : (
-                      <Icon name={"c_down"} />
-                    )}
-                  </InputRightElement>
                 </InputGroup>
                 {showColumnList && (
                   <Flex

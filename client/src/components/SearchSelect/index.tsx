@@ -4,7 +4,6 @@ import {
   Button,
   Flex,
   InputGroup,
-  InputRightElement,
   Text,
   Spinner,
 } from "@chakra-ui/react";
@@ -197,7 +196,9 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle search text input
    * @param event Input event
    */
-  const handleInputChange = async (event: any) => {
+  const handleInputChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (event.target.value === "") {
       // Case where search input is empty, reset `hasSearched` state
       setHasSearched(false);
@@ -224,7 +225,12 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   return (
     <Flex id={props.id || "searchSelect"} pos={"relative"} w={"100%"}>
-      <InputGroup size={"sm"} onClick={onInputClick}>
+      <InputGroup
+        onClick={onInputClick}
+        endElement={
+          showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />
+        }
+      >
         <Input
           placeholder={placeholder}
           value={props.value?.name || ""}
@@ -235,9 +241,6 @@ const SearchSelect = (props: SearchSelectProps) => {
           disabled={props?.disabled || false}
           readOnly
         />
-        <InputRightElement>
-          {showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />}
-        </InputRightElement>
       </InputGroup>
       {showResults && (
         <Flex

@@ -35,6 +35,7 @@ import { gql, useMutation } from "@apollo/client";
 
 // Custom types
 import { IGenericItem, ResponseData } from "@types";
+import { Cell } from "@tanstack/react-table";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -120,15 +121,15 @@ const Project = () => {
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
-      id: (info: any) => info.row.original,
-      cell: (info: any) => (
+      id: (info: Cell<string, string>) => info.row.original,
+      cell: (info: Cell<string, string>) => (
         <Linky id={info.row.original} type={"entities"} size={"sm"} />
       ),
       header: "Name",
     },
     {
       id: "view",
-      cell: (info: any) => {
+      cell: (info: Cell<string, string>) => {
         return (
           <Flex w={"100%"} justify={"end"}>
             <IconButton
