@@ -305,7 +305,7 @@ const CounterSelect = (props: CounterProps) => {
           <Select.HiddenSelect />
           <Select.Label>Select Counter</Select.Label>
           <Select.Control>
-            <Select.Trigger>
+            <Select.Trigger asChild>
               <Select.ValueText placeholder={"Select Counter"} />
             </Select.Trigger>
             <Select.IndicatorGroup>

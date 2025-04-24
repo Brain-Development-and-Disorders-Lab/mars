@@ -165,7 +165,7 @@ const SearchQueryValue = ({
               <Select.HiddenSelect />
               <Select.Label>Select Value Type</Select.Label>
               <Select.Control>
-                <Select.Trigger>
+                <Select.Trigger asChild>
                   <Select.ValueText placeholder={"Select Value type"} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
@@ -198,7 +198,7 @@ const SearchQueryValue = ({
               <Select.HiddenSelect />
               <Select.Label>Select Operator</Select.Label>
               <Select.Control>
-                <Select.Trigger>
+                <Select.Trigger asChild>
                   <Select.ValueText placeholder={"Select Operator"} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>

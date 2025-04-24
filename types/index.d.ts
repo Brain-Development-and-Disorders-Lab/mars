@@ -384,13 +384,13 @@ export type PreviewSupport = {
 // `ImportDialog` props
 export type ImportDialogProps = {
   open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
 // `ScanModal` props
 export type ScanModalProps = {
   open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
 // `UnsavedChangesModal` props

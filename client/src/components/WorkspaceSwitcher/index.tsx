@@ -233,15 +233,16 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   };
 
   return (
-    <Flex id={props.id ? props.id : "workspaceSwitcher"}>
+    <Flex id={props.id ? props.id : "workspaceSwitcher"} w={"100%"}>
       <Menu.Root open={isOpen}>
-        <Menu.Trigger>
+        <Menu.Trigger asChild>
           <Button
             h={"100%"}
             w={"100%"}
             rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
+            color={"black"}
             bg={"white"}
             _hover={{ bg: "gray.300" }}
             onClick={() => setIsOpen(!isOpen)}
@@ -251,8 +252,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               gap={"2"}
               align={"center"}
               p={"2"}
-              ml={"2"}
-              mr={"2"}
+              w={"100%"}
             >
               <Icon name={"workspace"} />
               <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -265,7 +265,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         </Menu.Trigger>
 
         <Menu.Positioner>
-          <Menu.Content bg={"white"}>
+          <Menu.Content bg={"white"} w={"100%"}>
             <Menu.ItemGroup>
               {/* Create a list of all Workspaces the user has access to */}
               {workspaces.length > 0 ? (
@@ -279,7 +279,6 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                       <Flex
                         direction={"row"}
                         gap={"2"}
-                        w={"100%"}
                         align={"center"}
                         justify={"space-between"}
                       >
@@ -300,7 +299,6 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   <Flex
                     direction={"row"}
                     gap={"2"}
-                    w={"100%"}
                     align={"center"}
                     justify={"space-between"}
                   >

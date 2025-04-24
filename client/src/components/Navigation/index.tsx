@@ -81,6 +81,7 @@ const Navigation = () => {
               key={"dashboard"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
               _hover={{ bg: "gray.200" }}
@@ -97,6 +98,7 @@ const Navigation = () => {
               key={"search"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/search")
@@ -117,6 +119,7 @@ const Navigation = () => {
               key={"create"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/create")
@@ -140,6 +143,7 @@ const Navigation = () => {
               id={"navEntitiesButtonDesktop"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/entit") &&
@@ -162,6 +166,7 @@ const Navigation = () => {
               id={"navProjectsButtonDesktop"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/project") &&
@@ -184,6 +189,7 @@ const Navigation = () => {
               id={"navTemplatesButtonDesktop"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/template") &&

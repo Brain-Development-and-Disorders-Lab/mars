@@ -636,7 +636,7 @@ const Entity = () => {
                               <Select.HiddenSelect />
                               <Select.Label>Select Option</Select.Label>
                               <Select.Control>
-                                <Select.Trigger>
+                                <Select.Trigger asChild>
                                   <Select.ValueText
                                     placeholder={"Select Option"}
                                   />
@@ -853,7 +853,7 @@ const Entity = () => {
                           <Select.HiddenSelect />
                           <Select.Label>Select Template</Select.Label>
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger asChild>
                               <Select.ValueText
                                 placeholder={"Select Template"}
                               />

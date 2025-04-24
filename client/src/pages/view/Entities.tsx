@@ -266,7 +266,9 @@ const Entities = () => {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
         slugify(
-          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`,
+          `export_entities_${dayjs(Date.now()).format(
+            "YYYY_MM_DD",
+          )}.${exportFormat}`,
         ),
       );
     }
@@ -378,7 +380,7 @@ const Entities = () => {
                           <Select.HiddenSelect />
                           <Select.Label>Select Export Format</Select.Label>
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger asChild>
                               <Select.ValueText
                                 placeholder={"Select Export Format"}
                               />

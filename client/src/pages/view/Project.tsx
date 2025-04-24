@@ -710,7 +710,7 @@ const Project = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu.Root>
-              <Menu.Trigger>
+              <Menu.Trigger asChild>
                 <Button colorPalette={"yellow"} size={"sm"}>
                   Actions
                   <Icon name={"lightning"} />
@@ -796,7 +796,7 @@ const Project = () => {
 
             {/* Version history */}
             <Drawer.Root open={historyOpen} size={"md"}>
-              <Drawer.Trigger>
+              <Drawer.Trigger asChild>
                 <Button
                   onClick={() => setHistoryOpen(true)}
                   colorPalette={"gray"}
@@ -1507,7 +1507,7 @@ const Project = () => {
                             <Select.HiddenSelect />
                             <Select.Label>Select Export Format</Select.Label>
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger asChild>
                                 <Select.ValueText
                                   placeholder={"Select Export Format"}
                                 />

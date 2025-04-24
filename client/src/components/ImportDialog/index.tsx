@@ -684,7 +684,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         <Select.HiddenSelect />
         <Select.Label>Select Column</Select.Label>
         <Select.Control>
-          <Select.Trigger>
+          <Select.Trigger asChild>
             <Select.ValueText placeholder={"Select Column"} />
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -927,7 +927,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               >
                 <Select.HiddenSelect />
                 <Select.Control>
-                  <Select.Trigger>
+                  <Select.Trigger asChild>
                     <Select.ValueText placeholder={"Select Export Type"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>
@@ -1286,7 +1286,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             <Select.HiddenSelect />
                             <Select.Label>Select Project</Select.Label>
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger asChild>
                                 <Select.ValueText
                                   placeholder={"Select Project"}
                                 />
@@ -1423,7 +1423,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               <Select.HiddenSelect />
                               <Select.Label>Select Project</Select.Label>
                               <Select.Control>
-                                <Select.Trigger>
+                                <Select.Trigger asChild>
                                   <Select.ValueText
                                     placeholder={"Select Project"}
                                   />

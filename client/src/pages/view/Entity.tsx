@@ -28,7 +28,6 @@ import {
   Field,
   createListCollection,
   Portal,
-  ListCollection,
   CloseButton,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
@@ -122,7 +121,7 @@ const Entity = () => {
     onClose: onAddProjectsClose,
   } = useDisclosure();
   const [projectsCollection, setProjectsCollection] = useState(
-    {} as ListCollection<ProjectModel>,
+    createListCollection<ProjectModel>({ items: [] }),
   );
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
@@ -162,7 +161,7 @@ const Entity = () => {
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
-    {} as ListCollection<AttributeModel>,
+    createListCollection<AttributeModel>({ items: [] }),
   );
 
   // Adding Templates to existing Entity
@@ -1274,7 +1273,7 @@ const Entity = () => {
             align={"center"}
             gap={"2"}
             p={"2"}
-            border={"2px"}
+            border={"2px solid"}
             rounded={"md"}
           >
             <Icon name={"entity"} size={"md"} />
@@ -1290,7 +1289,7 @@ const Entity = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
             {/* Actions Menu */}
             <Menu.Root>
-              <Menu.Trigger>
+              <Menu.Trigger asChild>
                 <Button size={"sm"} colorPalette={"yellow"}>
                   Actions
                   <Icon name={"lightning"} />
@@ -1448,7 +1447,7 @@ const Entity = () => {
                                 key={`v_${entityVersion.timestamp}`}
                                 variant={"outline"}
                                 rounded={"md"}
-                                border={"1px"}
+                                border={"1px solid"}
                                 borderColor={"gray.300"}
                               >
                                 <Card.Body p={"2"} pb={"0"}>
@@ -1493,7 +1492,7 @@ const Entity = () => {
                                         gap={"1"}
                                         p={"2"}
                                         rounded={"md"}
-                                        border={"1px"}
+                                        border={"1px solid"}
                                         borderColor={"gray.300"}
                                         grow={"1"}
                                       >
@@ -1547,7 +1546,7 @@ const Entity = () => {
                                         gap={"1"}
                                         p={"2"}
                                         rounded={"md"}
-                                        border={"1px"}
+                                        border={"1px solid"}
                                         borderColor={"gray.300"}
                                         grow={"1"}
                                       >
@@ -1582,7 +1581,7 @@ const Entity = () => {
                                         gap={"1"}
                                         p={"2"}
                                         rounded={"md"}
-                                        border={"1px"}
+                                        border={"1px solid"}
                                         borderColor={"gray.300"}
                                         grow={"1"}
                                       >
@@ -1645,7 +1644,7 @@ const Entity = () => {
                                         gap={"1"}
                                         p={"2"}
                                         rounded={"md"}
-                                        border={"1px"}
+                                        border={"1px solid"}
                                         borderColor={"gray.300"}
                                         grow={"1"}
                                       >
@@ -1892,7 +1891,7 @@ const Entity = () => {
                     }}
                     readOnly={!editing}
                     rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                     bg={"white"}
                   />
@@ -1931,7 +1930,7 @@ const Entity = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
               basis={"40%"}
@@ -1969,7 +1968,7 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               grow={"1"}
               basis={"40%"}
@@ -2027,7 +2026,7 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               grow={"1"}
               basis={"40%"}
@@ -2089,7 +2088,7 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               basis={"40%"}
               grow={"1"}
@@ -2146,7 +2145,7 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               basis={"40%"}
               grow={"1"}
@@ -2234,7 +2233,7 @@ const Entity = () => {
                     <Select.HiddenSelect />
                     <Select.Label>Select Template</Select.Label>
                     <Select.Control>
-                      <Select.Trigger>
+                      <Select.Trigger asChild>
                         <Select.ValueText placeholder={"Select Template"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
@@ -2436,7 +2435,7 @@ const Entity = () => {
                           <Select.HiddenSelect />
                           <Select.Label>Select Project</Select.Label>
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger asChild>
                               <Select.ValueText
                                 placeholder={"Select Project"}
                               />
@@ -2469,7 +2468,7 @@ const Entity = () => {
                     align={"center"}
                     justify={"center"}
                     rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                     minH={"100px"}
                   >
@@ -2571,7 +2570,7 @@ const Entity = () => {
                     justify={"space-between"}
                     p={"2"}
                     rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                   >
                     <Flex direction={"column"} gap={"1"}>
@@ -2605,7 +2604,7 @@ const Entity = () => {
                         <Select.HiddenSelect />
                         <Select.Label>Select Relationship Type</Select.Label>
                         <Select.Control>
-                          <Select.Trigger>
+                          <Select.Trigger asChild>
                             <Select.ValueText
                               placeholder={"Select Relationship Type"}
                             />
@@ -2768,7 +2767,7 @@ const Entity = () => {
                             <Select.HiddenSelect />
                             <Select.Label>Select Export Format</Select.Label>
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger asChild>
                                 <Select.ValueText
                                   placeholder={"Select Export Format"}
                                 />
@@ -2810,7 +2809,7 @@ const Entity = () => {
                   p={"2"}
                   gap={"2"}
                   rounded={"md"}
-                  border={"1px"}
+                  border={"1px solid"}
                   borderColor={"gray.300"}
                 >
                   <Flex direction={"row"} gap={"2"}>
@@ -3181,7 +3180,7 @@ const Entity = () => {
                     </Flex>
                     <Flex
                       p={"2"}
-                      border={"1px"}
+                      border={"1px solid"}
                       borderColor={"gray.300"}
                       rounded={"md"}
                     >

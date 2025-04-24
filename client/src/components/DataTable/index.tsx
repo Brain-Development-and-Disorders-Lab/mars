@@ -505,7 +505,7 @@ const DataTable = (props: DataTableProps) => {
                 <Select.HiddenSelect />
                 <Select.Label>Select Page Size</Select.Label>
                 <Select.Control>
-                  <Select.Trigger>
+                  <Select.Trigger asChild>
                     <Select.ValueText placeholder={"Select Page Size"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>

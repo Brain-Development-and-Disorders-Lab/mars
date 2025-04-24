@@ -410,7 +410,9 @@ const Graph = (props: {
             id: "toast-retrieved-relationships",
             title: "Retrieved relationships",
             type: "success",
-            description: `Showing ${addedRelationshipCount} relationship${addedRelationshipCount > 1 ? "s" : ""} for Entity "${entity.name}"`,
+            description: `Showing ${addedRelationshipCount} relationship${
+              addedRelationshipCount > 1 ? "s" : ""
+            } for Entity "${entity.name}"`,
             duration: 4000,
             closable: true,
           });
