@@ -514,19 +514,21 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_double_left"} />}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-              />
+              >
+                <Icon name={"c_double_left"} />
+              </IconButton>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_left"} />}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-              />
+              >
+                <Icon name={"c_left"} />
+              </IconButton>
               {table.getPageCount() > 0 && (
                 <Flex gap={"1"}>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -541,19 +543,21 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_right"} />}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-              />
+              >
+                <Icon name={"c_right"} />
+              </IconButton>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_double_right"} />}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-              />
+              >
+                <Icon name={"c_double_right"} />
+              </IconButton>
             </Flex>
           </Flex>
         )}

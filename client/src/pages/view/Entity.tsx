@@ -673,14 +673,15 @@ const Entity = () => {
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
               <IconButton
-                icon={<Icon name={"delete"} />}
                 aria-label={"Remove project"}
                 colorPalette={"red"}
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
                 size={"sm"}
-              />
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             ) : (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
@@ -853,27 +854,30 @@ const Entity = () => {
               size={"sm"}
               key={`preview-file-${info.getValue()}`}
               colorPalette={"gray"}
-              icon={<Icon name={"expand"} />}
               onClick={() => handlePreview()}
-            />
+            >
+              <Icon name={"expand"} />
+            </IconButton>
             {editing ? (
               <IconButton
                 aria-label={"Remove attachment"}
                 size={"sm"}
                 key={`remove-file-${info.getValue()}`}
                 colorPalette={"red"}
-                icon={<Icon name={"delete"} />}
                 onClick={() => removeAttachment(info.getValue())}
-              />
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             ) : (
               <IconButton
                 aria-label={"Download attachment"}
                 size={"sm"}
                 key={`download-file-${info.getValue()}`}
                 colorPalette={"blue"}
-                icon={<Icon name={"download"} />}
                 onClick={() => handleDownload()}
-              />
+              >
+                <Icon name={"download"} />
+              </IconButton>
             )}
           </Flex>
         );

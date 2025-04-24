@@ -402,7 +402,6 @@ const User = () => {
           >
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
               <IconButton
-                icon={<Icon name={"b_right"} />}
                 size={"sm"}
                 aria-label={"Leave Workspace"}
                 colorPalette={"orange"}
@@ -410,7 +409,9 @@ const User = () => {
                 onClick={() => {
                   removeWorkspace(info.row.original._id);
                 }}
-              />
+              >
+                <Icon name={"b_right"} />
+              </IconButton>
             </Flex>
           </Tooltip>
         );

@@ -134,12 +134,13 @@ const Project = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             <IconButton
-              icon={<Icon name={"delete"} />}
               aria-label={"Remove entity"}
               colorPalette={"red"}
               onClick={() => removeEntity(info.row.original)}
               size={"sm"}
-            />
+            >
+              <Icon name={"delete"} />
+            </IconButton>
           </Flex>
         );
       },

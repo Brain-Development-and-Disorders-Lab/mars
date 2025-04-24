@@ -126,14 +126,15 @@ const Relationships = (props: RelationshipsProps) => {
               </Flex>
             ) : (
               <IconButton
-                icon={<Icon name={"delete"} />}
                 aria-label={"Remove relationship"}
                 colorPalette={"red"}
                 onClick={() => {
                   removeRelationship(info.row.original);
                 }}
                 size={"sm"}
-              />
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             )}
           </Flex>
         );

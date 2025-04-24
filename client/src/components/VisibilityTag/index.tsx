@@ -72,8 +72,9 @@ const VisibilityTag = (props: VisibilityTagProps) => {
             aria-label={"set-visibility"}
             size={"sm"}
             disabled
-            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
-          />
+          >
+            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+          </IconButton>
         </Tooltip>
       ) : (
         <Tooltip
@@ -85,10 +86,11 @@ const VisibilityTag = (props: VisibilityTagProps) => {
             aria-label={"set-visibility"}
             size={"sm"}
             colorPalette={"green"}
-            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
             disabled={props.disabled}
             onClick={handleVisibilityClick}
-          />
+          >
+            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+          </IconButton>
         </Tooltip>
       )}
     </Flex>

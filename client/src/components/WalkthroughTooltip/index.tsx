@@ -31,10 +31,11 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
         <IconButton
           size={"sm"}
           colorPalette={"red"}
-          icon={<Icon name={"cross"} />}
           className={"tooltip__close"}
           {...closeProps}
-        />
+        >
+          <Icon name={"cross"} />
+        </IconButton>
       </Flex>
 
       <Flex

@@ -74,24 +74,27 @@ const ImageControls = () => {
     >
       <IconButton
         size={"sm"}
-        icon={<Icon name={"zoom_out"} />}
         colorPalette={"blue"}
         aria-label={"Zoom out"}
         onClick={() => zoomOut()}
-      />
+      >
+        <Icon name={"zoom_out"} />
+      </IconButton>
       <IconButton
         size={"sm"}
-        icon={<Icon name={"zoom_in"} />}
         colorPalette={"blue"}
         aria-label={"Zoom in"}
         onClick={() => zoomIn()}
-      />
+      >
+        <Icon name={"zoom_in"} />
+      </IconButton>
       <IconButton
         size={"sm"}
-        icon={<Icon name={"reload"} />}
         aria-label={"Reset"}
         onClick={() => resetTransform()}
-      />
+      >
+        <Icon name={"reload"} />
+      </IconButton>
     </Flex>
   );
 };
@@ -298,9 +301,10 @@ const PreviewModal = (props: PreviewModalProps) => {
                     size={"sm"}
                     colorPalette={"blue"}
                     onClick={previousPage}
-                    icon={<Icon name={"c_left"} />}
                     disabled={previewIndex === 1}
-                  />
+                  >
+                    <Icon name={"c_left"} />
+                  </IconButton>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
                     Page {previewIndex} of {previewPages}
                   </Text>
@@ -309,9 +313,10 @@ const PreviewModal = (props: PreviewModalProps) => {
                     size={"sm"}
                     colorPalette={"blue"}
                     onClick={nextPage}
-                    icon={<Icon name={"c_right"} />}
                     disabled={previewIndex === previewPages}
-                  />
+                  >
+                    <Icon name={"c_right"} />
+                  </IconButton>
                 </Flex>
               </Flex>
             ) : (

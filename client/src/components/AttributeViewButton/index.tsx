@@ -34,20 +34,18 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
   return (
     <Flex gap={"2"}>
-      <IconButton
-        aria-label={"View attribute"}
-        icon={<Icon name={isEditing ? "edit" : "expand"} />}
-        onClick={onOpen}
-        size={"sm"}
-      />
+      <IconButton aria-label={"View attribute"} onClick={onOpen} size={"sm"}>
+        <Icon name={isEditing ? "edit" : "expand"} />
+      </IconButton>
       {isEditing && (
         <IconButton
           aria-label={"Delete attribute"}
           colorPalette={"red"}
-          icon={<Icon name={"delete"} />}
           onClick={props.removeCallback}
           size={"sm"}
-        />
+        >
+          <Icon name={"delete"} />
+        </IconButton>
       )}
 
       <Dialog.Root

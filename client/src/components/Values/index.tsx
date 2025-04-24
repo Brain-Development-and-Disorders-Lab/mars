@@ -780,7 +780,6 @@ const Values = (props: {
                                 aria-label={`remove_${index}`}
                                 size={"sm"}
                                 colorPalette={"red"}
-                                icon={<Icon name={"delete"} />}
                                 onClick={() => {
                                   setOptions([
                                     ...options.filter(
@@ -789,7 +788,9 @@ const Values = (props: {
                                     ),
                                   ]);
                                 }}
-                              />
+                              >
+                                <Icon name={"delete"} />
+                              </IconButton>
                             </Flex>
                           );
                         })

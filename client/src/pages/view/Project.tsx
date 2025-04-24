@@ -662,12 +662,13 @@ const Project = () => {
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
               <IconButton
-                icon={<Icon name={"delete"} />}
                 aria-label={"Remove entity"}
                 colorPalette={"red"}
                 onClick={() => handleRemoveEntity(info.row.original)}
                 size={"sm"}
-              />
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             ) : (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
@@ -1068,7 +1069,6 @@ const Project = () => {
                           {editing && (
                             <IconButton
                               aria-label="Remove collaborator"
-                              icon={<Icon name="delete" />}
                               onClick={() =>
                                 setProjectCollaborators((collaborators) =>
                                   collaborators.filter(
@@ -1076,7 +1076,9 @@ const Project = () => {
                                   ),
                                 )
                               }
-                            />
+                            >
+                              <Icon name="delete" />
+                            </IconButton>
                           )}
                         </Flex>
                       ))}
