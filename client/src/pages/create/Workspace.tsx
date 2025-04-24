@@ -196,7 +196,7 @@ const CreateWorkspace = () => {
               size={"sm"}
               colorPalette={"green"}
               onClick={() => handleCreateWorkspaceClick()}
-              isLoading={createLoading}
+              loading={createLoading}
               disabled={name === ""}
             >
               Create

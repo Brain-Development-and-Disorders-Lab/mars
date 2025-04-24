@@ -45,8 +45,10 @@ import { usePostHog } from "posthog-js/react";
 
 const Project = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen } = useDisclosure();
   const { token } = useAuthentication();
+
+  // Information dialog state
+  const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [created, setCreated] = useState(
@@ -72,11 +74,7 @@ const Project = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
-  const {
-    isOpen: isEntitiesOpen,
-    onOpen: onEntitiesOpen,
-    onClose: onEntitiesClose,
-  } = useDisclosure();
+  const [entitiesOpen, setEntitiesOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
   const [entities, setEntities] = useState([] as string[]);
 
@@ -155,7 +153,7 @@ const Project = () => {
     if (!_.includes(entities, entity._id)) {
       setEntities([...entities, entity._id]);
     }
-    onEntitiesClose();
+    setEntitiesOpen(false);
   };
 
   /**
@@ -182,7 +180,11 @@ const Project = () => {
             <Icon name={"project"} size={"md"} />
             <Heading size={"md"}>Create Project</Heading>
             <Spacer />
-            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => setInformationOpen(true)}
+            >
               Info
               <Icon name={"info"} />
             </Button>
@@ -313,7 +315,7 @@ const Project = () => {
             <Button
               size={"sm"}
               colorPalette={"green"}
-              onClick={() => onEntitiesOpen()}
+              onClick={() => setEntitiesOpen(true)}
             >
               Add Entity
               <Icon name={"add"} />
@@ -425,7 +427,13 @@ const Project = () => {
       </Flex>
 
       {/* Modal to add Entities */}
-      <Dialog.Root open={isEntitiesOpen} placement={"center"}>
+      <Dialog.Root
+        open={entitiesOpen}
+        onOpenChange={(event) => setEntitiesOpen(event.open)}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -447,7 +455,7 @@ const Project = () => {
                 colorPalette={"red"}
                 size={"sm"}
                 variant={"outline"}
-                onClick={onEntitiesClose}
+                onClick={() => setEntitiesOpen(false)}
               >
                 Cancel
                 <Icon name={"cross"} />
@@ -473,7 +481,13 @@ const Project = () => {
       </Dialog.Root>
 
       {/* Information modal */}
-      <Dialog.Root open={isOpen} placement={"center"}>
+      <Dialog.Root
+        open={informationOpen}
+        onOpenChange={(event) => setInformationOpen(event.open)}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>

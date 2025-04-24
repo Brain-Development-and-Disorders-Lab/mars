@@ -37,7 +37,7 @@ import QueryBuilder, {
 import { QueryBuilderDnD } from "@react-querybuilder/dnd";
 import * as ReactDnD from "react-dnd";
 import * as ReactDndHtml5Backend from "react-dnd-html5-backend";
-import { QueryBuilderChakra } from "@react-querybuilder/chakra2";
+import { QueryBuilderChakra } from "@react-querybuilder/chakra";
 
 // SearchQueryValue component for searching Entity fields
 import SearchQueryValue from "@components/SearchQueryValue";
@@ -709,11 +709,18 @@ const Search = () => {
                     >
                       Options:
                     </Text>
-                    <Switch
-                      colorPalette={"green"}
+                    <Switch.Root
                       checked={showArchived}
-                      onChange={() => setShowArchived(!showArchived)}
-                    />
+                      onCheckedChange={(event) =>
+                        setShowArchived(event.checked)
+                      }
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <Switch.Label />
+                    </Switch.Root>
                     <Text
                       fontWeight={"semibold"}
                       fontSize={"sm"}

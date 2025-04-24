@@ -1806,10 +1806,10 @@
   resolved "https://registry.yarnpkg.com/@react-dnd/shallowequal/-/shallowequal-4.0.2.tgz#d1b4befa423f692fa4abf1c79209702e7d8ae4b4"
   integrity sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==
 
-"@react-querybuilder/chakra2@^8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@react-querybuilder/chakra2/-/chakra2-8.1.0.tgz#6ac12a2c860581c5e7d2d7dd16e072892c622c98"
-  integrity sha512-G8rJgEDzjlJGa3Zfii13pSV7uzQ+8CIGfJrHCKhnOzytLKRCt+zDIw+ynQxP97BFS4JA7hU7nOZ2tBck9mIjSA==
+"@react-querybuilder/chakra@^8.5.0":
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/@react-querybuilder/chakra/-/chakra-8.5.0.tgz#04f79202b775b14fadd3fc786e67e6a055006716"
+  integrity sha512-is7LoVSdfmuxd+OCGYvdWxZnnvtERXfWHP2MRiuHjlwKcN2ZD5x3DUDMQlqttNs/sQp0A5th3SN3GHHBqG1lEg==
 
 "@react-querybuilder/dnd@^8.2.0":
   version "8.5.0"
@@ -2897,7 +2897,7 @@
     remark-github-blockquote-alert "^1.0.0"
     unist-util-visit "^5.0.0"
 
-"@uiw/react-md-editor@^4.0.4":
+"@uiw/react-md-editor@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@uiw/react-md-editor/-/react-md-editor-4.0.5.tgz#183342ffacafd3bff237ebc54e6b28b56def08bb"
   integrity sha512-x+S7ZMz1B+KwVODOZk663H2gdOZhcFsrPUF8V69K4L2BbTZ3A4sBCw/uTrBE9dHH0gajAzRAYbAYCHsUQaTcyA==
@@ -6166,12 +6166,12 @@ forwarded@0.2.0:
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
 
 framer-motion@^12.7.4:
-  version "12.8.0"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-12.8.0.tgz#ffc84f97bb7e0f1c78ced439d5b83f76ba916d12"
-  integrity sha512-EarL75miCDcKLEAQLJ+6Zfwdj+KQsVlbHGGlygZ/TigKBj7NLPkyDKk4WLFUScjAs2xNpfMRLBM6VsCJq9Roxg==
+  version "12.9.1"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-12.9.1.tgz#89f22079610b6656fbbaa7e9b498a5be75f7d623"
+  integrity sha512-dZBp2TO0a39Cc24opshlLoM0/OdTZVKzcXWuhntfwy2Qgz3t9+N4sTyUqNANyHaRFiJUWbwwsXeDvQkEBPky+g==
   dependencies:
-    motion-dom "^12.8.0"
-    motion-utils "^12.7.5"
+    motion-dom "^12.9.1"
+    motion-utils "^12.8.3"
     tslib "^2.4.0"
 
 fresh@0.5.2:
@@ -8741,17 +8741,17 @@ moo@^0.5.0:
   resolved "https://registry.yarnpkg.com/moo/-/moo-0.5.2.tgz#f9fe82473bc7c184b0d32e2215d3f6e67278733c"
   integrity sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==
 
-motion-dom@^12.8.0:
-  version "12.8.0"
-  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-12.8.0.tgz#0d2b917fb395ce55cf0e910f8d127a8b0343c021"
-  integrity sha512-YsfUE1F8Ycv9th1V0YJ6LOx9U2EMe/8P3RXK1o6NZhRbdFiWvzBLvxqp2X6Fn3rbJbwWkSEfnpe14ZU9Oz1d1Q==
+motion-dom@^12.9.1:
+  version "12.9.1"
+  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-12.9.1.tgz#1e128c7db7f98994a305933df3b11d47b7467085"
+  integrity sha512-xqXEwRLDYDTzOgXobSoWtytRtGlf7zdkRfFbrrdP7eojaGQZ5Go4OOKtgnx7uF8sAkfr1ZjMvbCJSCIT2h6fkQ==
   dependencies:
-    motion-utils "^12.7.5"
+    motion-utils "^12.8.3"
 
-motion-utils@^12.7.5:
-  version "12.7.5"
-  resolved "https://registry.yarnpkg.com/motion-utils/-/motion-utils-12.7.5.tgz#d77df2c6e336540766d9927498e62571b81b66bd"
-  integrity sha512-JIgrmEq7Vw1x0AUrjvkRp7oMMQkGqSUMT50O/Ag6RRCQWG3gRRTkOI+BirBAJT6m+GIPoiyxkJ1u98GgF/a6TQ==
+motion-utils@^12.8.3:
+  version "12.8.3"
+  resolved "https://registry.yarnpkg.com/motion-utils/-/motion-utils-12.8.3.tgz#d72bd9712574266088f0903f69466a9d3ad206c4"
+  integrity sha512-GYVauZEbca8/zOhEiYOY9/uJeedYQld6co/GJFKOy//0c/4lDqk0zB549sBYqqV2iMuX+uHrY1E5zd8A2L+1Lw==
 
 mri@^1.2.0:
   version "1.2.0"
@@ -9336,9 +9336,9 @@ postcss@^8.4.33:
     source-map-js "^1.2.1"
 
 posthog-js@^1.184.2:
-  version "1.236.5"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.236.5.tgz#6cb34fd4c9e4e6df58e9b2f6878270a9a226af49"
-  integrity sha512-2FrWVZwcLyeZAtdDckJaCfsk9m6DMdr/nVPVSqzF7yvm9pDsdbkvB3A16iqRj5L3EcqV2xWOcv8xWmKgdnNnqA==
+  version "1.236.6"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.236.6.tgz#f4d73d25773f4e4bafd7632717c97b27bd9f1b7c"
+  integrity sha512-IX4fkn3HCK+ObdHr/AuWd+Ks7bgMpRpOQB93b5rDJAWkG4if4xFVUn5pgEjyCNeOO2GM1ECnp08q9tYNYEfwbA==
   dependencies:
     core-js "^3.38.1"
     fflate "^0.4.8"

@@ -77,7 +77,7 @@ const Entity = () => {
   ];
   const [pageStep, setPageStep] = useState(0);
 
-  const { isOpen, onOpen } = useDisclosure();
+  const [informationOpen, setInformationOpen] = useState(false);
   const { token } = useAuthentication();
 
   // Navigation and routing
@@ -200,7 +200,6 @@ const Entity = () => {
       setProjects(data.projects);
     }
     if (data?.templates) {
-      setTemplates(data.templates);
       setTemplatesCollection(
         createListCollection<AttributeModel>({ items: data.templates }),
       );
@@ -416,7 +415,11 @@ const Entity = () => {
             <Icon name={"entity"} size={"md"} />
             <Heading size={"md"}>Create Entity</Heading>
             <Spacer />
-            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => setInformationOpen(true)}
+            >
               Info
               <Icon name={"info"} />
             </Button>
@@ -949,7 +952,13 @@ const Entity = () => {
         )}
 
         {/* Information modal */}
-        <Dialog.Root open={isOpen} placement={"center"}>
+        <Dialog.Root
+          open={informationOpen}
+          onOpenChange={(event) => setInformationOpen(event.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -1024,7 +1033,7 @@ const Entity = () => {
           colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
           onClick={onPageNext}
           disabled={!isValidInput() || isNameError}
-          isLoading={isSubmitting}
+          loading={isSubmitting}
         >
           {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
           {_.isEqual("attributes", pageState) ? (

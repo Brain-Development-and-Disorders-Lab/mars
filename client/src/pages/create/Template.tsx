@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
   Dialog,
   Field,
@@ -10,8 +11,6 @@ import {
   Flex,
   Heading,
   Input,
-  List,
-  ListItem,
   Spacer,
   Text,
   useDisclosure,
@@ -41,9 +40,9 @@ import { usePostHog } from "posthog-js/react";
 
 const Template = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen } = useDisclosure();
-
   const { token } = useAuthentication();
+
+  const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -150,7 +149,11 @@ const Template = () => {
             <Icon name={"template"} size={"md"} />
             <Heading size={"md"}>Create Template</Heading>
             <Spacer />
-            <Button size={"sm"} variant={"outline"} onClick={onOpen}>
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => setInformationOpen(true)}
+            >
               Info
               <Icon name={"info"} />
             </Button>
@@ -255,7 +258,14 @@ const Template = () => {
       </Flex>
 
       {/* Information modal */}
-      <Dialog.Root open={isOpen} size={"xl"} placement={"center"}>
+      <Dialog.Root
+        open={informationOpen}
+        onOpenChange={(event) => setInformationOpen(event.open)}
+        size={"xl"}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -283,72 +293,60 @@ const Template = () => {
                     "Add Value" and selecting the specific type of Value. There
                     are six supported Value types:
                   </Text>
-                  <List spacing={"1"}>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"v_date"} color={"orange.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          Date:
-                        </Text>
-                        <Text fontSize={"sm"}>
-                          Used to specify a point in time.
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"v_text"} color={"blue.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          Text:
-                        </Text>
-                        <Text fontSize={"sm"}>
-                          Used to specify text of variable length.
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"v_number"} color={"green.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          Number:
-                        </Text>
-                        <Text fontSize={"sm"}>
-                          Used to specify a numerical value.
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"v_url"} color={"yellow.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          URL:
-                        </Text>
-                        <Text fontSize={"sm"}>Used to specify a link.</Text>
-                      </Flex>
-                    </ListItem>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"entity"} color={"purple.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          Entity:
-                        </Text>
-                        <Text fontSize={"sm"}>
-                          Used to specify a relation to another Entity.
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                    <ListItem>
-                      <Flex gap={"1"} align={"center"}>
-                        <Icon name={"v_select"} color={"teal.300"} />
-                        <Text fontWeight={"semibold"} fontSize={"sm"}>
-                          Select:
-                        </Text>
-                        <Text fontSize={"sm"}>
-                          Used to specify an option from a group of options.
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                  </List>
+                  <Box as={"ul"} listStyleType={"circle"}>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_date"} color={"orange.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Date:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a point in time.
+                      </Text>
+                    </Flex>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_text"} color={"blue.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Text:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify text of variable length.
+                      </Text>
+                    </Flex>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_number"} color={"green.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Number:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a numerical value.
+                      </Text>
+                    </Flex>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_url"} color={"yellow.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        URL:
+                      </Text>
+                      <Text fontSize={"sm"}>Used to specify a link.</Text>
+                    </Flex>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"entity"} color={"purple.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Entity:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a relation to another Entity.
+                      </Text>
+                    </Flex>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_select"} color={"teal.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Select:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify an option from a group of options.
+                      </Text>
+                    </Flex>
+                  </Box>
                 </Flex>
               </Flex>
             </Dialog.Body>
