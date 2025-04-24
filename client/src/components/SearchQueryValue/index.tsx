@@ -159,7 +159,7 @@ const SearchQueryValue = ({
                 items: ["Text", "URL", "Number", "Date"],
               })}
               onValueChange={(details) =>
-                updateValueType(details.items[0] as IValueType)
+                updateValueType(details.items[0].toLowerCase() as IValueType)
               }
             >
               <Select.HiddenSelect />

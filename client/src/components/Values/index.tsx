@@ -11,6 +11,8 @@ import React, {
 import {
   Button,
   Dialog,
+  Field,
+  Fieldset,
   Flex,
   Heading,
   IconButton,
@@ -23,12 +25,14 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
+  Portal,
   ScaleFade,
   Select,
   Separator,
   Spacer,
   Text,
   VStack,
+  createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -355,19 +359,27 @@ const Values = (props: {
               }
               case "date": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    type={"date"}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    readOnly={props.viewOnly}
-                    onChange={(event) => setValue(event.target.value)}
-                    onBlur={onBlur}
-                    invalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          type={"date"}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) => setValue(event.target.value)}
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
@@ -393,56 +405,87 @@ const Values = (props: {
               }
               case "select": {
                 dataInput = (
-                  <Select
-                    title="Select Option"
-                    id={`s_${original._id}_data`}
-                    value={value.selected}
+                  <Select.Root
+                    key={"select-option"}
                     size={"sm"}
-                    rounded={"md"}
-                    disabled={props.viewOnly}
-                    onChange={onSelectChange}
-                    onBlur={onBlur}
                     invalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
+                    collection={createListCollection<IGenericItem>({
+                      items: value.options,
+                    })}
+                    onValueChange={(details) =>
+                      onSelectChange(details.items[0])
+                    }
                   >
-                    {value.options &&
-                      value.options.map((value: string) => {
-                        return (
-                          <option key={value} value={value}>
-                            {value}
-                          </option>
-                        );
-                      })}
-                  </Select>
+                    <Select.HiddenSelect />
+                    <Select.Label>Select Option</Select.Label>
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder={"Select Option"} />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {createListCollection<IGenericItem>({
+                            items: value.options,
+                          }).items.map((option: IGenericItem) => (
+                            <Select.Item item={option} key={option._id}>
+                              {option.name}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
                 );
                 break;
               }
             }
           } else {
             dataInput = (
-              <Select
-                title="Select Column"
-                id={`s_${original._id}_data`}
-                value={value}
-                placeholder={"Column"}
+              <Select.Root
+                key={"select-column"}
                 size={"sm"}
-                rounded={"md"}
-                disabled={props.viewOnly}
-                onChange={(event) => setValue(event.target.value)}
-                onBlur={onBlur}
                 invalid={
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)
                 }
-              >
-                {props.permittedValues.map((value) => {
-                  return (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  );
+                collection={createListCollection<string>({
+                  items: props.permittedValues,
                 })}
-              </Select>
+                onValueChange={(details) => setValue(details.items[0])}
+                disabled={props.viewOnly}
+              >
+                <Select.HiddenSelect />
+                <Select.Label>Select Column</Select.Label>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder={"Select Column"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {createListCollection<string>({
+                        items: props.permittedValues,
+                      }).items.map((value: string) => (
+                        <Select.Item item={value} key={value}>
+                          {value}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
             );
           }
 

@@ -13,6 +13,8 @@ import {
   Flex,
   Heading,
   Input,
+  ListCollection,
+  Portal,
   Select,
   Spacer,
   Stack,
@@ -27,6 +29,7 @@ import {
   Stepper,
   Text,
   VStack,
+  createListCollection,
   useBreakpoint,
   useDisclosure,
   useSteps,
@@ -105,8 +108,13 @@ const Entity = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
+  // Projects
   const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
+
+  // Templates collection
+  const [templatesCollection, setTemplatesCollection] = useState(
+    {} as ListCollection<AttributeModel>,
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -207,6 +215,9 @@ const Entity = () => {
     }
     if (data?.templates) {
       setTemplates(data.templates);
+      setTemplatesCollection(
+        createListCollection<AttributeModel>({ items: data.templates }),
+      );
     }
   }, [data]);
 
@@ -627,25 +638,51 @@ const Entity = () => {
                       >
                         <Flex direction={"row"} gap={"2"} align={"center"}>
                           <Flex>
-                            <Select size={"sm"} rounded={"md"} disabled>
-                              <option>{name}</option>
-                            </Select>
+                            <Input size={"sm"} value={name} disabled readOnly />
                           </Flex>
                           <Flex>
-                            <Select
+                            <Select.Root
+                              key={"select-relationship-type"}
                               size={"sm"}
-                              rounded={"md"}
-                              value={selectedRelationshipType}
-                              onChange={(event) =>
+                              collection={createListCollection({
+                                items: ["General", "Parent", "Child"],
+                              })}
+                              onValueChange={(details) =>
                                 setSelectedRelationshipType(
-                                  event.target.value as RelationshipType,
+                                  details.items[0].toLowerCase() as RelationshipType,
                                 )
                               }
                             >
-                              <option value={"general"}>General</option>
-                              <option value={"parent"}>Parent</option>
-                              <option value={"child"}>Child</option>
-                            </Select>
+                              <Select.HiddenSelect />
+                              <Select.Label>Select Option</Select.Label>
+                              <Select.Control>
+                                <Select.Trigger>
+                                  <Select.ValueText
+                                    placeholder={"Select Option"}
+                                  />
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                  <Select.Indicator />
+                                </Select.IndicatorGroup>
+                              </Select.Control>
+                              <Portal>
+                                <Select.Positioner>
+                                  <Select.Content>
+                                    {createListCollection({
+                                      items: ["General", "Parent", "Child"],
+                                    }).items.map((relationship: string) => (
+                                      <Select.Item
+                                        item={relationship}
+                                        key={relationship.toLowerCase()}
+                                      >
+                                        {relationship}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))}
+                                  </Select.Content>
+                                </Select.Positioner>
+                              </Portal>
+                            </Select.Root>
                           </Flex>
                           <Flex>
                             <SearchSelect
@@ -798,19 +835,16 @@ const Entity = () => {
                   <Fieldset.Root maxW={"sm"}>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Select
+                        <Select.Root
+                          key={"select-template"}
                           size={"sm"}
-                          rounded={"md"}
-                          placeholder={"Template"}
-                          disabled={templates.length === 0}
-                          onChange={(event) => {
-                            if (!_.isEqual(event.target.value.toString(), "")) {
-                              for (const template of templates) {
+                          collection={templatesCollection}
+                          onValueChange={(details) => {
+                            const selectedTemplate = details.items[0];
+                            if (!_.isEqual(selectedTemplate._id, "")) {
+                              for (const template of templatesCollection.items) {
                                 if (
-                                  _.isEqual(
-                                    event.target.value.toString(),
-                                    template._id,
-                                  )
+                                  _.isEqual(selectedTemplate._id, template._id)
                                 ) {
                                   setSelectedAttributes([
                                     ...selectedAttributes,
@@ -829,15 +863,38 @@ const Entity = () => {
                               }
                             }
                           }}
+                          disabled={templatesCollection.items.length === 0}
                         >
-                          {templates.map((template) => {
-                            return (
-                              <option key={template._id} value={template._id}>
-                                {template.name}
-                              </option>
-                            );
-                          })}
-                        </Select>
+                          <Select.HiddenSelect />
+                          <Select.Label>Select Template</Select.Label>
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText
+                                placeholder={"Select Template"}
+                              />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Portal>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {templatesCollection.items.map(
+                                  (template: AttributeModel) => (
+                                    <Select.Item
+                                      item={template}
+                                      key={template._id}
+                                    >
+                                      {template.name}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ),
+                                )}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Portal>
+                        </Select.Root>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>

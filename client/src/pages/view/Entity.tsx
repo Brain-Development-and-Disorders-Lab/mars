@@ -34,6 +34,9 @@ import {
   Separator,
   Fieldset,
   Field,
+  createListCollection,
+  Portal,
+  ListCollection,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -125,7 +128,9 @@ const Entity = () => {
     onOpen: onAddProjectsOpen,
     onClose: onAddProjectsClose,
   } = useDisclosure();
-  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [projectsCollection, setProjectsCollection] = useState(
+    {} as ListCollection<ProjectModel>,
+  );
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const {
@@ -166,13 +171,17 @@ const Entity = () => {
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
 
+  // Templates
+  const [templatesCollection, setTemplatesCollection] = useState(
+    {} as ListCollection<AttributeModel>,
+  );
+
   // Adding Templates to existing Entity
   const {
     open: addAttributesOpen,
     onOpen: onAddAttributesOpen,
     onClose: onAddAttributesClose,
   } = useDisclosure();
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState(
@@ -375,11 +384,24 @@ const Entity = () => {
     }
     // Unpack Project data
     if (data?.projects) {
-      setProjectData(data.projects);
+      // Filter out existing Project membership or selected Projects
+      const filteredProjects: ProjectModel[] = data.projects.filter(
+        (project: ProjectModel) => {
+          return (
+            !_.includes(selectedProjects, project._id) &&
+            !_.includes(entityProjects, project._id)
+          );
+        },
+      );
+      setProjectsCollection(
+        createListCollection<ProjectModel>({ items: filteredProjects }),
+      );
     }
     // Unpack Template data
     if (data?.templates) {
-      setTemplates(data.templates);
+      setTemplatesCollection(
+        createListCollection<AttributeModel>({ items: data.templates }),
+      );
     }
   }, [data]);
 
@@ -459,7 +481,14 @@ const Entity = () => {
         duration: 2000,
         closable: true,
       });
-      setTemplates(() => [...templates, attributeData as AttributeModel]);
+      setTemplatesCollection(
+        createListCollection<AttributeModel>({
+          items: [
+            ...templatesCollection.items,
+            attributeData as AttributeModel,
+          ],
+        }),
+      );
     }
 
     if (errorTemplateCreate) {
@@ -1422,7 +1451,7 @@ const Entity = () => {
                     onChange={(event) => {
                       setEntityName(event.target.value || "");
                     }}
-                    isReadOnly={!editing}
+                    readOnly={!editing}
                     rounded={"md"}
                     border={"1px"}
                     borderColor={"gray.300"}
@@ -1746,20 +1775,15 @@ const Entity = () => {
                   pb={"2"}
                   justify={"center"}
                 >
-                  <Select
+                  <Select.Root
+                    key={"select-template"}
                     size={"sm"}
-                    placeholder={"Select Template"}
-                    value={selectedTemplate}
-                    onChange={(event) => {
-                      if (!_.isEqual(event.target.value.toString(), "")) {
-                        setSelectedTemplate(event.target.value);
-                        for (const template of templates) {
-                          if (
-                            _.isEqual(
-                              event.target.value.toString(),
-                              template._id,
-                            )
-                          ) {
+                    collection={templatesCollection}
+                    onValueChange={(details) => {
+                      if (!_.isEqual(details.items[0], "")) {
+                        setSelectedTemplate(details.items[0]._id);
+                        for (const template of templatesCollection.items) {
+                          if (_.isEqual(details.items[0], template._id)) {
                             setAttributeName(template.name);
                             setAttributeDescription(template.description);
                             setAttributeValues(() => [...template.values]);
@@ -1769,16 +1793,29 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {!loading &&
-                      templates.map((template) => {
-                        return (
-                          <option key={template._id} value={template._id}>
-                            {template.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
+                    <Select.HiddenSelect />
+                    <Select.Label>Select Template</Select.Label>
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder={"Select Template"} />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {templatesCollection.items.map((template) => (
+                            <Select.Item item={template} key={template._id}>
+                              {template.name}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
                   <Text fontSize="sm">
                     Don't see the Template you're looking for? You can
                     <Link
@@ -1931,14 +1968,15 @@ const Entity = () => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Select
+                        <Select.Root
+                          key={"select-project"}
                           size={"sm"}
-                          title={"Select Project"}
-                          placeholder={"Select Project"}
-                          onChange={(event) => {
-                            const selectedProject =
-                              event.target.value.toString();
-                            if (selectedProjects.includes(selectedProject)) {
+                          collection={projectsCollection}
+                          onValueChange={(details) => {
+                            const selectedProject = details.items[0];
+                            if (
+                              selectedProjects.includes(selectedProject._id)
+                            ) {
                               // Check that the selected Project has not already been selected
                               toaster.create({
                                 title: "Warning",
@@ -1948,32 +1986,40 @@ const Entity = () => {
                                 duration: 2000,
                                 closable: true,
                               });
-                            } else if (!_.isEqual(selectedProject, "")) {
+                            } else if (!_.isEqual(selectedProject._id, "")) {
                               // Add the selected Project if not the default option
                               setSelectedProjects([
                                 ...selectedProjects,
-                                selectedProject,
+                                selectedProject._id,
                               ]);
                             }
                           }}
                         >
-                          {!loading &&
-                            projectData.map((project: IGenericItem) => {
-                              if (
-                                !_.includes(selectedProjects, project._id) &&
-                                !_.includes(entityProjects, project._id)
-                              ) {
-                                // Only include Projects that haven't been selected or the Entity is currently present in
-                                return (
-                                  <option key={project._id} value={project._id}>
+                          <Select.HiddenSelect />
+                          <Select.Label>Select Project</Select.Label>
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText
+                                placeholder={"Select Project"}
+                              />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Portal>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {projectsCollection.items.map((project) => (
+                                  <Select.Item item={project} key={project._id}>
                                     {project.name}
-                                  </option>
-                                );
-                              } else {
-                                return null;
-                              }
-                            })}
-                        </Select>
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                ))}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Portal>
+                        </Select.Root>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -2094,28 +2140,60 @@ const Entity = () => {
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
                         Source
                       </Text>
-                      <Select size={"sm"} rounded={"md"} disabled>
-                        <option>{entityName}</option>
-                      </Select>
+                      <Input
+                        size={"sm"}
+                        rounded={"md"}
+                        value={entityName}
+                        readOnly
+                        disabled
+                      />
                     </Flex>
                     <Flex direction={"column"} gap={"1"}>
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
                         Type
                       </Text>
-                      <Select
+                      <Select.Root
+                        key={"select-relationship-type"}
                         size={"sm"}
-                        rounded={"md"}
-                        value={selectedRelationshipType}
-                        onChange={(event) =>
+                        collection={createListCollection({
+                          items: ["General", "Parent", "Child"],
+                        })}
+                        onValueChange={(details) => {
                           setSelectedRelationshipType(
-                            event.target.value as RelationshipType,
-                          )
-                        }
+                            details.items[0].toLowerCase() as RelationshipType,
+                          );
+                        }}
                       >
-                        <option value={"general"}>General</option>
-                        <option value={"parent"}>Parent</option>
-                        <option value={"child"}>Child</option>
-                      </Select>
+                        <Select.HiddenSelect />
+                        <Select.Label>Select Relationship Type</Select.Label>
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText
+                              placeholder={"Select Relationship Type"}
+                            />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Portal>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {createListCollection({
+                                items: ["General", "Parent", "Child"],
+                              }).items.map((relationship) => (
+                                <Select.Item
+                                  item={relationship}
+                                  key={relationship}
+                                >
+                                  {relationship}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Portal>
+                      </Select.Root>
                     </Flex>
                     <Flex direction={"column"} gap={"1"}>
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -2239,21 +2317,46 @@ const Entity = () => {
                     <Fieldset.Root>
                       <Fieldset.Content>
                         <Field.Root>
-                          <Select
+                          <Select.Root
+                            key={"select-export-format"}
                             size={"sm"}
-                            rounded={"md"}
-                            value={exportFormat}
-                            onChange={(event) =>
-                              setExportFormat(event.target.value)
+                            collection={createListCollection({
+                              items: ["JSON", "CSV"],
+                            })}
+                            onValueChange={(details) =>
+                              setExportFormat(details.items[0].toLowerCase())
                             }
                           >
-                            <option key={"json"} value={"json"}>
-                              JSON
-                            </option>
-                            <option key={"csv"} value={"csv"}>
-                              CSV
-                            </option>
-                          </Select>
+                            <Select.HiddenSelect />
+                            <Select.Label>Select Export Format</Select.Label>
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText
+                                  placeholder={"Select Export Format"}
+                                />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {createListCollection({
+                                    items: ["JSON", "CSV"],
+                                  }).items.map((valueType) => (
+                                    <Select.Item
+                                      item={valueType}
+                                      key={valueType}
+                                    >
+                                      {valueType}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ))}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
                         </Field.Root>
                       </Fieldset.Content>
                     </Fieldset.Root>

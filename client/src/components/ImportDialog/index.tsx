@@ -918,7 +918,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                     items: ["Entites", "Template"],
                   })}
                   onValueChange={(details) =>
-                    setImportType(details.items[0] as "entities" | "template")
+                    setImportType(
+                      details.items[0].toLowerCase() as "entities" | "template",
+                    )
                   }
                   disabled={isTypeSelectDisabled}
                 >

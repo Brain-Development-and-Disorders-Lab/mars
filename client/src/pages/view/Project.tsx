@@ -25,6 +25,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Portal,
   Radio,
   RadioGroup,
   Select,
@@ -33,6 +34,7 @@ import {
   Tag,
   Text,
   VStack,
+  createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -842,7 +844,7 @@ const Project = () => {
                     onChange={(event) => {
                       setProjectName(event.target.value);
                     }}
-                    isReadOnly={!editing}
+                    readOnly={!editing}
                     bg={"white"}
                     rounded={"md"}
                     border={"1px"}
@@ -1156,15 +1158,17 @@ const Project = () => {
                     <Fieldset.Root>
                       <Fieldset.Content>
                         <Field.Root>
-                          <Select
+                          <Select.Root
+                            key={"select-export-format"}
                             size={"sm"}
-                            rounded={"md"}
-                            value={exportFormat}
-                            onChange={(event) => {
-                              setExportFormat(event.target.value);
+                            collection={createListCollection({
+                              items: ["JSON", "CSV"],
+                            })}
+                            onValueChange={(details) => {
+                              setExportFormat(details.items[0].toLowerCase());
 
                               // Remove `entities` field if currently selected and switching to CSV format
-                              if (event.target.value === "csv") {
+                              if (details.items[0].toLowerCase() === "csv") {
                                 setExportFields([
                                   ...exportFields.filter(
                                     (field) => field !== "entities",
@@ -1173,13 +1177,36 @@ const Project = () => {
                               }
                             }}
                           >
-                            <option key={"json"} value={"json"}>
-                              JSON
-                            </option>
-                            <option key={"csv"} value={"csv"}>
-                              CSV
-                            </option>
-                          </Select>
+                            <Select.HiddenSelect />
+                            <Select.Label>Select Export Format</Select.Label>
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText
+                                  placeholder={"Select Export Format"}
+                                />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {createListCollection({
+                                    items: ["JSON", "CSV"],
+                                  }).items.map((valueType) => (
+                                    <Select.Item
+                                      item={valueType}
+                                      key={valueType}
+                                    >
+                                      {valueType}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ))}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
                         </Field.Root>
                       </Fieldset.Content>
                     </Fieldset.Root>
