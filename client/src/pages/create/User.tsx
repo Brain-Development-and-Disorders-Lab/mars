@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import {
   Button,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   Image,
   Input,
@@ -176,68 +176,96 @@ const User = () => {
             pt={"8"}
           >
             <Text fontWeight={"semibold"}>ORCiD:</Text>
-            <Tag colorScheme={"green"}>{token.orcid}</Tag>
+            <Tag colorPalette={"green"}>{token.orcid}</Tag>
           </Flex>
 
-          <FormControl isRequired>
-            <Flex direction={"column"} gap={"2"}>
-              <Flex direction={"row"} gap={"2"}>
-                <Flex direction={"column"} w={"100%"}>
-                  <FormLabel>First Name</FormLabel>
-                  <Input
-                    id={"userFirstNameInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userFirstName}
-                    onChange={(event) => setUserFirstName(event.target.value)}
-                  />
-                </Flex>
-                <Flex direction={"column"} w={"100%"}>
-                  <FormLabel>Last Name</FormLabel>
-                  <Input
-                    id={"userLastNameInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userLastName}
-                    onChange={(event) => setUserLastName(event.target.value)}
-                  />
-                </Flex>
-              </Flex>
+          <Fieldset.Root required>
+            <Fieldset.Content>
               <Flex direction={"column"} gap={"2"}>
-                <Flex direction={"column"}>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    id={"userEmailInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    type={"email"}
-                    value={userEmail}
-                    onChange={(event) => setUserEmail(event.target.value)}
-                  />
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"column"} w={"100%"}>
+                    <Field.Root>
+                      <Field.Label>
+                        First Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userFirstNameInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userFirstName}
+                        onChange={(event) =>
+                          setUserFirstName(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
+                  <Flex direction={"column"} w={"100%"}>
+                    <Field.Root>
+                      <Field.Label>
+                        Last Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userLastNameInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userLastName}
+                        onChange={(event) =>
+                          setUserLastName(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
                 </Flex>
-                <Flex direction={"column"}>
-                  <FormLabel>Affiliation</FormLabel>
-                  <Input
-                    id={"userAffiliationInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userAffiliation}
-                    onChange={(event) => setUserAffiliation(event.target.value)}
-                  />
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"column"}>
+                    <Field.Root>
+                      <Field.Label>
+                        Email
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userEmailInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        type={"email"}
+                        value={userEmail}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Flex>
+                  <Flex direction={"column"}>
+                    <Field.Root>
+                      <Field.Label>
+                        Affiliation
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userAffiliationInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userAffiliation}
+                        onChange={(event) =>
+                          setUserAffiliation(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
                 </Flex>
               </Flex>
-            </Flex>
-          </FormControl>
+            </Fieldset.Content>
+          </Fieldset.Root>
           <Flex align={"center"} justify={"right"} w={"100%"}>
             <Button
               id={"userDoneButton"}
-              rightIcon={<Icon name={"check"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               size={"sm"}
               onClick={() => handleUserDone()}
-              isDisabled={!isUserComplete}
+              disabled={!isUserComplete}
             >
               Done
+              <Icon name={"check"} />
             </Button>
           </Flex>
         </Flex>

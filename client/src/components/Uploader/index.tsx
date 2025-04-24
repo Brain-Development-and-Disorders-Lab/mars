@@ -8,9 +8,10 @@ import {
   Text,
   useToast,
   Input,
-  FormControl,
   Tag,
   Dialog,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -139,90 +140,100 @@ const Uploader = (props: {
                     </Tag.Root>
                   </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>
-                    <FormControl>
-                      <Flex
-                        direction={"column"}
-                        minH={"50vh"}
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        border={"2px"}
-                        borderStyle={"dashed"}
-                        borderColor={"gray.300"}
-                        bg={"gray.50"}
-                        rounded={"md"}
-                      >
-                        {_.isEqual(file, {}) ? (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontWeight={"semibold"} fontSize={"sm"}>
-                              Drag file here
-                            </Text>
-                            <Text fontSize={"sm"}>or click to upload</Text>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontWeight={"semibold"} fontSize={"sm"}>
-                              {displayName}
-                            </Text>
-                            <Text
-                              fontWeight={"semibold"}
-                              fontSize={"xs"}
-                              color={"gray.600"}
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Flex
+                          direction={"column"}
+                          minH={"50vh"}
+                          w={"100%"}
+                          align={"center"}
+                          justify={"center"}
+                          border={"2px"}
+                          borderStyle={"dashed"}
+                          borderColor={"gray.300"}
+                          bg={"gray.50"}
+                          rounded={"md"}
+                        >
+                          {_.isEqual(file, {}) ? (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
                             >
-                              {displayType}
-                            </Text>
-                          </Flex>
-                        )}
-                      </Flex>
-                      <Input
-                        type={"file"}
-                        h={"100%"}
-                        w={"100%"}
-                        rounded={"md"}
-                        position={"absolute"}
-                        top={"0"}
-                        left={"0"}
-                        opacity={"0"}
-                        aria-hidden={"true"}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                          if (
-                            event.target.files &&
-                            event.target.files.length > 0
-                          ) {
-                            // Only accept image or PDF files
-                            if (
-                              _.includes(
-                                ["image/jpeg", "image/png", "application/pdf"],
-                                event.target.files[0].type,
-                              ) ||
-                              _.endsWith(event.target.files[0].name, ".dna")
-                            ) {
-                              setFile(event.target.files[0]);
-                            } else {
-                              toast({
-                                title: "Warning",
-                                status: "warning",
-                                description:
-                                  "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
-                                duration: 4000,
-                                position: "bottom-right",
-                                isClosable: true,
-                              });
-                            }
-                          }
-                        }}
-                      />
-                    </FormControl>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Drag file here
+                              </Text>
+                              <Text fontSize={"sm"}>or click to upload</Text>
+                            </Flex>
+                          ) : (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                {displayName}
+                              </Text>
+                              <Text
+                                fontWeight={"semibold"}
+                                fontSize={"xs"}
+                                color={"gray.600"}
+                              >
+                                {displayType}
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+                        <Field.Root>
+                          <Input
+                            type={"file"}
+                            h={"100%"}
+                            w={"100%"}
+                            rounded={"md"}
+                            position={"absolute"}
+                            top={"0"}
+                            left={"0"}
+                            opacity={"0"}
+                            aria-hidden={"true"}
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>,
+                            ) => {
+                              if (
+                                event.target.files &&
+                                event.target.files.length > 0
+                              ) {
+                                // Only accept image or PDF files
+                                if (
+                                  _.includes(
+                                    [
+                                      "image/jpeg",
+                                      "image/png",
+                                      "application/pdf",
+                                    ],
+                                    event.target.files[0].type,
+                                  ) ||
+                                  _.endsWith(event.target.files[0].name, ".dna")
+                                ) {
+                                  setFile(event.target.files[0]);
+                                } else {
+                                  toast({
+                                    title: "Warning",
+                                    status: "warning",
+                                    description:
+                                      "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
+                                    duration: 4000,
+                                    position: "bottom-right",
+                                    isClosable: true,
+                                  });
+                                }
+                              }
+                            }}
+                          />
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
                 </Flex>
               </Dialog.Body>

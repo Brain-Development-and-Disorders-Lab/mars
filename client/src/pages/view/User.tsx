@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Flex,
-  FormControl,
-  FormLabel,
   Input,
   Button,
   Text,
@@ -16,6 +14,8 @@ import {
   Separator,
   Spacer,
   VStack,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -500,45 +500,59 @@ const User = () => {
               borderColor={"gray.300"}
             >
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    ORCiD
-                  </FormLabel>
-                  <Tag colorPalette={"green"}>{userOrcid}</Tag>
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>ORCiD</Field.Label>
+                      <Tag.Root colorPalette={"green"}>{userOrcid}</Tag.Root>
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl required>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Email
-                  </FormLabel>
-                  <Input
-                    id={"modalUserEmail"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Email"}
-                    type={"email"}
-                    value={userEmail}
-                    disabled={!editing}
-                    onChange={(event) => setUserEmail(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root required>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>
+                        Email
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserEmail"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Email"}
+                        type={"email"}
+                        value={userEmail}
+                        disabled={!editing}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl required>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Affiliation
-                  </FormLabel>
-                  <Input
-                    id={"modalUserAffiliation"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Affiliation"}
-                    value={userAffiliation}
-                    disabled={!editing}
-                    onChange={(event) => setUserAffiliation(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root required>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>
+                        Affiliation
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserAffiliation"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Affiliation"}
+                        value={userAffiliation}
+                        disabled={!editing}
+                        onChange={(event) =>
+                          setUserAffiliation(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
             </Flex>
           </Flex>
@@ -558,9 +572,9 @@ const User = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
                 Workspaces
-              </FormLabel>
+              </Text>
               <Flex
                 w={"100%"}
                 justify={"center"}

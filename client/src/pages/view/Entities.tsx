@@ -14,8 +14,9 @@ import {
   Tag,
   Link,
   useDisclosure,
-  FormControl,
   Select,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -359,21 +360,27 @@ const Entities = () => {
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
                     Format:
                   </Text>
-                  <FormControl>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      value={exportFormat}
-                      onChange={(event) => setExportFormat(event.target.value)}
-                    >
-                      <option key={"json"} value={"json"}>
-                        JSON
-                      </option>
-                      <option key={"csv"} value={"csv"}>
-                        CSV
-                      </option>
-                    </Select>
-                  </FormControl>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Select
+                          size={"sm"}
+                          rounded={"md"}
+                          value={exportFormat}
+                          onChange={(event) =>
+                            setExportFormat(event.target.value)
+                          }
+                        >
+                          <option key={"json"} value={"json"}>
+                            JSON
+                          </option>
+                          <option key={"csv"} value={"csv"}>
+                            CSV
+                          </option>
+                        </Select>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
               </Flex>
 

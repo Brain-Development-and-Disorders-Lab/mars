@@ -14,9 +14,9 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   IconButton,
   Input,
@@ -1007,16 +1007,20 @@ const Project = () => {
                   Collaborators
                 </Text>
                 <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <FormControl>
-                    <Input
-                      placeholder={"ORCiD"}
-                      rounded={"md"}
-                      size={"sm"}
-                      value={newCollaborator}
-                      onChange={(e) => setNewCollaborator(e.target.value)}
-                      disabled={!editing}
-                    />
-                  </FormControl>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Input
+                          placeholder={"ORCiD"}
+                          rounded={"md"}
+                          size={"sm"}
+                          value={newCollaborator}
+                          onChange={(e) => setNewCollaborator(e.target.value)}
+                          disabled={!editing}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                   <Spacer />
                   <Button
                     colorPalette={"green"}
@@ -1176,32 +1180,36 @@ const Project = () => {
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       Format:
                     </Text>
-                    <FormControl>
-                      <Select
-                        size={"sm"}
-                        rounded={"md"}
-                        value={exportFormat}
-                        onChange={(event) => {
-                          setExportFormat(event.target.value);
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Select
+                            size={"sm"}
+                            rounded={"md"}
+                            value={exportFormat}
+                            onChange={(event) => {
+                              setExportFormat(event.target.value);
 
-                          // Remove `entities` field if currently selected and switching to CSV format
-                          if (event.target.value === "csv") {
-                            setExportFields([
-                              ...exportFields.filter(
-                                (field) => field !== "entities",
-                              ),
-                            ]);
-                          }
-                        }}
-                      >
-                        <option key={"json"} value={"json"}>
-                          JSON
-                        </option>
-                        <option key={"csv"} value={"csv"}>
-                          CSV
-                        </option>
-                      </Select>
-                    </FormControl>
+                              // Remove `entities` field if currently selected and switching to CSV format
+                              if (event.target.value === "csv") {
+                                setExportFields([
+                                  ...exportFields.filter(
+                                    (field) => field !== "entities",
+                                  ),
+                                ]);
+                              }
+                            }}
+                          >
+                            <option key={"json"} value={"json"}>
+                              JSON
+                            </option>
+                            <option key={"csv"} value={"csv"}>
+                              CSV
+                            </option>
+                          </Select>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
                   <Text fontSize={"sm"}>
                     Select the Project fields to be exported.
@@ -1217,115 +1225,128 @@ const Project = () => {
                   border={"1px"}
                   borderColor={"gray.300"}
                 >
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Details</FormLabel>
-                    {!loading ? (
-                      <CheckboxGroup>
-                        <Stack gap={2} direction={"column"}>
-                          <Checkbox
-                            disabled
-                            defaultChecked
-                            size={"sm"}
-                            fontSize={"sm"}
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>Details</Field.Label>
+                        {!loading ? (
+                          <CheckboxGroup>
+                            <Stack gap={2} direction={"column"}>
+                              <Checkbox
+                                disabled
+                                defaultChecked
+                                size={"sm"}
+                                fontSize={"sm"}
+                              >
+                                Name: {projectName}
+                              </Checkbox>
+                              <Checkbox
+                                size={"sm"}
+                                fontSize={"sm"}
+                                isChecked={_.includes(exportFields, "created")}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    "created",
+                                    event.target.checked,
+                                  )
+                                }
+                              >
+                                Created:{" "}
+                                {dayjs(project.created).format("DD MMM YYYY")}
+                              </Checkbox>
+                              <Checkbox
+                                size={"sm"}
+                                isChecked={_.includes(exportFields, "owner")}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    "owner",
+                                    event.target.checked,
+                                  )
+                                }
+                              >
+                                Owner: {project.owner}
+                              </Checkbox>
+                              <Checkbox
+                                size={"sm"}
+                                isChecked={_.includes(
+                                  exportFields,
+                                  "description",
+                                )}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    "description",
+                                    event.target.checked,
+                                  )
+                                }
+                                disabled={_.isEqual(projectDescription, "")}
+                              >
+                                <Text lineClamp={1} fontSize={"sm"}>
+                                  Description:{" "}
+                                  {_.isEqual(projectDescription, "")
+                                    ? "No description"
+                                    : _.truncate(projectDescription, {
+                                        length: 32,
+                                      })}
+                                </Text>
+                              </Checkbox>
+                            </Stack>
+                          </CheckboxGroup>
+                        ) : (
+                          <Text fontSize={"sm"}>Loading details...</Text>
+                        )}
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label>Entities</Field.Label>
+                        {!loading ? (
+                          <CheckboxGroup>
+                            <Tooltip
+                              label={
+                                "Entities cannot be included when exporting to CSV"
+                              }
+                              hasArrow
+                              disabled={_.isEqual(exportFormat, "json")}
+                            >
+                              <Checkbox
+                                size={"sm"}
+                                isChecked={_.includes(exportFields, "entities")}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    "entities",
+                                    event.target.checked,
+                                  )
+                                }
+                                disabled={
+                                  _.isEqual(projectEntities.length, 0) ||
+                                  _.isEqual(exportFormat, "csv")
+                                }
+                              >
+                                <Text lineClamp={1} fontSize={"sm"}>
+                                  Export Entities
+                                </Text>
+                              </Checkbox>
+                            </Tooltip>
+                          </CheckboxGroup>
+                        ) : (
+                          <Text fontSize={"sm"}>Loading details...</Text>
+                        )}
+                        {_.includes(exportFields, "entities") && (
+                          <RadioGroup
+                            onChange={setExportEntityDetails}
+                            value={exportEntityDetails}
                           >
-                            Name: {projectName}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            fontSize={"sm"}
-                            isChecked={_.includes(exportFields, "created")}
-                            onChange={(event) =>
-                              handleExportCheck("created", event.target.checked)
-                            }
-                          >
-                            Created:{" "}
-                            {dayjs(project.created).format("DD MMM YYYY")}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "owner")}
-                            onChange={(event) =>
-                              handleExportCheck("owner", event.target.checked)
-                            }
-                          >
-                            Owner: {project.owner}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "description")}
-                            onChange={(event) =>
-                              handleExportCheck(
-                                "description",
-                                event.target.checked,
-                              )
-                            }
-                            disabled={_.isEqual(projectDescription, "")}
-                          >
-                            <Text noOfLines={1} fontSize={"sm"}>
-                              Description:{" "}
-                              {_.isEqual(projectDescription, "")
-                                ? "No description"
-                                : _.truncate(projectDescription, {
-                                    length: 32,
-                                  })}
-                            </Text>
-                          </Checkbox>
-                        </Stack>
-                      </CheckboxGroup>
-                    ) : (
-                      <Text fontSize={"sm"}>Loading details...</Text>
-                    )}
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Entities</FormLabel>
-                    {!loading ? (
-                      <CheckboxGroup>
-                        <Tooltip
-                          label={
-                            "Entities cannot be included when exporting to CSV"
-                          }
-                          hasArrow
-                          disabled={_.isEqual(exportFormat, "json")}
-                        >
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "entities")}
-                            onChange={(event) =>
-                              handleExportCheck(
-                                "entities",
-                                event.target.checked,
-                              )
-                            }
-                            disabled={
-                              _.isEqual(projectEntities.length, 0) ||
-                              _.isEqual(exportFormat, "csv")
-                            }
-                          >
-                            <Text noOfLines={1} fontSize={"sm"}>
-                              Export Entities
-                            </Text>
-                          </Checkbox>
-                        </Tooltip>
-                      </CheckboxGroup>
-                    ) : (
-                      <Text fontSize={"sm"}>Loading details...</Text>
-                    )}
-                    {_.includes(exportFields, "entities") && (
-                      <RadioGroup
-                        onChange={setExportEntityDetails}
-                        value={exportEntityDetails}
-                      >
-                        <Stack direction={"row"} gap={"1"}>
-                          <Radio value={"name"} size={"sm"} fontSize={"sm"}>
-                            Names
-                          </Radio>
-                          <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
-                            Identifiers
-                          </Radio>
-                        </Stack>
-                      </RadioGroup>
-                    )}
-                  </FormControl>
+                            <Stack direction={"row"} gap={"1"}>
+                              <Radio value={"name"} size={"sm"} fontSize={"sm"}>
+                                Names
+                              </Radio>
+                              <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
+                                Identifiers
+                              </Radio>
+                            </Stack>
+                          </RadioGroup>
+                        )}
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
               </Dialog.Body>
 

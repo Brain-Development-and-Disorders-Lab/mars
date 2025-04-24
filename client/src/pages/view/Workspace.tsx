@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   Flex,
   Spacer,
-  FormControl,
-  FormLabel,
   Input,
   Button,
   IconButton,
@@ -14,6 +12,9 @@ import {
   useBreakpoint,
   Heading,
   Code,
+  Fieldset,
+  Field,
+  Separator,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -505,7 +506,7 @@ const Workspace = () => {
           <Flex>
             <Tooltip
               label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 24}
               hasArrow
             >
               <Text>
@@ -537,7 +538,7 @@ const Workspace = () => {
               }
               size={"sm"}
               aria-label={"Archive Entity"}
-              colorScheme={showArchivedEntities ? "green" : "red"}
+              colorPalette={showArchivedEntities ? "green" : "red"}
               onClick={() =>
                 archiveEntity(info.row.original._id, !showArchivedEntities)
               }
@@ -572,7 +573,7 @@ const Workspace = () => {
           <Flex>
             <Tooltip
               label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 24}
               hasArrow
             >
               <Text>
@@ -604,7 +605,7 @@ const Workspace = () => {
               }
               size={"sm"}
               aria-label={"Archive Project"}
-              colorScheme={showArchivedProjects ? "green" : "red"}
+              colorPalette={showArchivedProjects ? "green" : "red"}
               onClick={() =>
                 archiveProject(info.row.original._id, !showArchivedProjects)
               }
@@ -639,7 +640,7 @@ const Workspace = () => {
           <Flex>
             <Tooltip
               label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 24}
               hasArrow
             >
               <Text>
@@ -671,7 +672,7 @@ const Workspace = () => {
               }
               size={"sm"}
               aria-label={"Archive Template"}
-              colorScheme={showArchivedTemplates ? "green" : "red"}
+              colorPalette={showArchivedTemplates ? "green" : "red"}
               onClick={() =>
                 archiveTemplate(info.row.original._id, !showArchivedTemplates)
               }
@@ -706,7 +707,7 @@ const Workspace = () => {
           <Flex py={"2"}>
             <Tooltip
               label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 24}
               hasArrow
             >
               <Text>
@@ -798,7 +799,7 @@ const Workspace = () => {
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Button
             size={"sm"}
-            colorScheme={"red"}
+            colorPalette={"red"}
             rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/")}
           >
@@ -807,9 +808,9 @@ const Workspace = () => {
           <Button
             id={"modalWorkspaceCreateButton"}
             size={"sm"}
-            colorScheme={"green"}
+            colorPalette={"green"}
             rightIcon={<Icon name={"save"} />}
-            isDisabled={name === ""}
+            disabled={name === ""}
             isLoading={
               workspaceUpdateLoading ||
               archiveEntitiesLoading ||
@@ -837,20 +838,25 @@ const Workspace = () => {
           >
             <Flex direction={"row"} gap={"2"}>
               <Flex grow={"1"}>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"} mb={"1"}>
-                    Name
-                  </FormLabel>
-                  <Input
-                    id={"modalWorkspaceName"}
-                    bg={"white"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Name"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root required>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>
+                        Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalWorkspaceName"}
+                        bg={"white"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Name"}
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
 
               <TimestampTag timestamp={created} description={"Created"} />
@@ -887,23 +893,25 @@ const Workspace = () => {
             rounded={"md"}
             grow={"1"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                Description
-              </FormLabel>
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                style={{ width: "100%" }}
-                value={description}
-                preview={"edit"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setDescription(value || "");
-                }}
-              />
-            </FormControl>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Field.Label>Description</Field.Label>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    style={{ width: "100%" }}
+                    value={description}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Flex>
         </Flex>
 
@@ -928,22 +936,27 @@ const Workspace = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"2"} align={"center"}>
-              <FormControl>
-                <Input
-                  placeholder={"ORCiD"}
-                  rounded={"md"}
-                  size={"sm"}
-                  w={"100%"}
-                  value={collaborator}
-                  onChange={(event) => setCollaborator(event.target.value)}
-                />
-              </FormControl>
-              {/* <Spacer /> */}
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Input
+                      placeholder={"ORCiD"}
+                      rounded={"md"}
+                      size={"sm"}
+                      w={"100%"}
+                      value={collaborator}
+                      onChange={(event) => setCollaborator(event.target.value)}
+                    />
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
+
+              <Separator />
+
               <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
+                colorPalette={"green"}
                 size={"sm"}
-                isDisabled={collaborator === ""}
+                disabled={collaborator === ""}
                 onClick={() => {
                   // Prevent adding empty or duplicate collaborator
                   if (collaborator && !collaborators.includes(collaborator)) {
@@ -956,6 +969,7 @@ const Workspace = () => {
                 }}
               >
                 Add
+                <Icon name={"add"} />
               </Button>
             </Flex>
             <Flex
@@ -988,16 +1002,7 @@ const Workspace = () => {
                       <IconButton
                         size={"sm"}
                         aria-label={"Remove collaborator"}
-                        icon={
-                          <Icon
-                            name={
-                              token.orcid === collaborator
-                                ? "b_right"
-                                : "delete"
-                            }
-                          />
-                        }
-                        colorScheme={
+                        colorPalette={
                           token.orcid === collaborator ? "orange" : "red"
                         }
                         onClick={() =>
@@ -1007,10 +1012,16 @@ const Workspace = () => {
                             ),
                           )
                         }
-                        isDisabled={
+                        disabled={
                           collaborator === owner && token.orcid !== owner
                         }
-                      />
+                      >
+                        <Icon
+                          name={
+                            token.orcid === collaborator ? "b_right" : "delete"
+                          }
+                        />
+                      </IconButton>
                     </Flex>
                   ))}
                 </Flex>
@@ -1174,32 +1185,34 @@ const Workspace = () => {
             rounded={"md"}
             basis={"50%"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                Counters
-              </FormLabel>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={counters.length > 0 ? "" : "center"}
-                minH={counters.length > 0 ? "fit-content" : "200px"}
-              >
-                {counters.length > 0 ? (
-                  <DataTable
-                    data={counters}
-                    columns={countersTableColumns}
-                    visibleColumns={{}}
-                    actions={[]}
-                    selectedRows={{}}
-                    showPagination
-                  />
-                ) : (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No Counters
-                  </Text>
-                )}
-              </Flex>
-            </FormControl>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Field.Label>Counters</Field.Label>
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={counters.length > 0 ? "" : "center"}
+                    minH={counters.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {counters.length > 0 ? (
+                      <DataTable
+                        data={counters}
+                        columns={countersTableColumns}
+                        visibleColumns={{}}
+                        actions={[]}
+                        selectedRows={{}}
+                        showPagination
+                      />
+                    ) : (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        No Counters
+                      </Text>
+                    )}
+                  </Flex>
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Flex>
         </Flex>
       </Flex>

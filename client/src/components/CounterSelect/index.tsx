@@ -364,72 +364,82 @@ const CounterSelect = (props: CounterProps) => {
 
                 <Flex>
                   <Fieldset.Root>
-                    <Field.Root>
-                      <Field.Label>
-                        Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        value={counterName}
-                        size={"sm"}
-                        rounded={"md"}
-                        onChange={onNameInputChange}
-                      />
-                    </Field.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>
+                          Name
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          value={counterName}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={onNameInputChange}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
 
                 <Flex>
                   <Fieldset.Root invalid={!isValidFormat}>
-                    <Field.Root>
-                      <Field.Label>
-                        Format
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        value={counterFormat}
-                        size={"sm"}
-                        rounded={"md"}
-                        onChange={onFormatInputChange}
-                      />
-                      {!isValidFormat && (
-                        <Field.ErrorText>{formatErrorMessage}</Field.ErrorText>
-                      )}
-                    </Field.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>
+                          Format
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          value={counterFormat}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={onFormatInputChange}
+                        />
+                        {!isValidFormat && (
+                          <Field.ErrorText>
+                            {formatErrorMessage}
+                          </Field.ErrorText>
+                        )}
+                      </Field.Root>
+                    </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
 
                 <Flex direction={"row"} gap={"2"}>
                   <Fieldset.Root invalid={!isValidInitial}>
-                    <Field.Root>
-                      <Field.Label>
-                        Initial Numeric Value
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        type={"number"}
-                        value={counterInitial}
-                        size={"sm"}
-                        rounded={"md"}
-                        onChange={onInitialInputChange}
-                      />
-                    </Field.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>
+                          Initial Numeric Value
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          type={"number"}
+                          value={counterInitial}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={onInitialInputChange}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
                   </Fieldset.Root>
 
                   <Fieldset.Root invalid={!isValidIncrement}>
-                    <Field.Root>
-                      <Field.Label>
-                        Increment
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        type={"number"}
-                        value={counterIncrement}
-                        size={"sm"}
-                        rounded={"md"}
-                        onChange={onIncrementInputChange}
-                      />
-                    </Field.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>
+                          Increment
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          type={"number"}
+                          value={counterIncrement}
+                          size={"sm"}
+                          rounded={"md"}
+                          onChange={onIncrementInputChange}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
 

@@ -13,14 +13,11 @@ import {
   useDisclosure,
   Tag,
   TagLabel,
-  FormControl,
-  FormLabel,
   Select,
   TagCloseButton,
   CheckboxGroup,
   Checkbox,
   Stack,
-  FormErrorMessage,
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -37,9 +34,10 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Divider,
   Dialog,
   Separator,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -1827,57 +1825,72 @@ const Entity = () => {
                     justify={"center"}
                   >
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <FormControl required>
-                        <FormLabel fontSize={"sm"}>Name</FormLabel>
-                        <Input
-                          size={"sm"}
-                          placeholder={"Name"}
-                          id="formName"
-                          rounded={"md"}
-                          value={attributeName}
-                          onChange={(event) =>
-                            setAttributeName(event.target.value)
-                          }
-                          required
-                        />
-                        {isAttributeNameError && (
-                          <FormErrorMessage>
-                            A name must be specified for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
+                      <Fieldset.Root required>
+                        <Fieldset.Content>
+                          <Field.Root>
+                            <Field.Label>
+                              Name
+                              <Field.RequiredIndicator />
+                            </Field.Label>
+                            <Input
+                              size={"sm"}
+                              placeholder={"Name"}
+                              id="formName"
+                              rounded={"md"}
+                              value={attributeName}
+                              onChange={(event) =>
+                                setAttributeName(event.target.value)
+                              }
+                              required
+                            />
+                            {isAttributeNameError && (
+                              <Field.ErrorText>
+                                A name must be specified for the Attribute.
+                              </Field.ErrorText>
+                            )}
+                          </Field.Root>
 
-                      <FormControl required>
-                        <FormLabel fontSize={"sm"}>Description</FormLabel>
-                        <MDEditor
-                          height={150}
-                          minHeight={100}
-                          maxHeight={400}
-                          style={{ width: "100%" }}
-                          value={attributeDescription}
-                          preview={editing ? "edit" : "preview"}
-                          id={"formDescription"}
-                          extraCommands={[]}
-                          onChange={(value) => {
-                            setAttributeDescription(value || "");
-                          }}
-                        />
-                        {isAttributeDescriptionError && (
-                          <FormErrorMessage>
-                            A description should be provided for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
+                          <Field.Root>
+                            <Field.Label>
+                              Description
+                              <Field.RequiredIndicator />
+                            </Field.Label>
+                            <MDEditor
+                              height={150}
+                              minHeight={100}
+                              maxHeight={400}
+                              style={{ width: "100%" }}
+                              value={attributeDescription}
+                              preview={editing ? "edit" : "preview"}
+                              id={"formDescription"}
+                              extraCommands={[]}
+                              onChange={(value) => {
+                                setAttributeDescription(value || "");
+                              }}
+                            />
+                            {isAttributeDescriptionError && (
+                              <Field.ErrorText>
+                                A description should be provided for the
+                                Attribute.
+                              </Field.ErrorText>
+                            )}
+                          </Field.Root>
+                        </Fieldset.Content>
+                      </Fieldset.Root>
                     </Flex>
 
                     <Flex>
-                      <FormControl required invalid={isAttributeValueError}>
-                        <Values
-                          viewOnly={false}
-                          values={attributeValues}
-                          setValues={setAttributeValues}
-                        />
-                      </FormControl>
+                      <Fieldset.Root required invalid={isAttributeValueError}>
+                        <Fieldset.Content>
+                          <Field.Root>
+                            <Values
+                              viewOnly={false}
+                              values={attributeValues}
+                              setValues={setAttributeValues}
+                            />
+                          </Field.Root>
+                        </Fieldset.Content>
+                      </Fieldset.Root>
                     </Flex>
                   </Flex>
                 </Flex>
@@ -1903,7 +1916,7 @@ const Entity = () => {
                     variant={"outline"}
                     onClick={onSaveAsTemplate}
                     disabled={isAttributeError}
-                    isLoading={loadingTemplateCreate}
+                    loading={loadingTemplateCreate}
                   >
                     Save as Template
                     <Icon name={"add"} />
@@ -1942,50 +1955,56 @@ const Entity = () => {
               <Dialog.Body p={"2"}>
                 {/* Select component for Projects */}
                 <Flex direction={"column"} gap={"2"}>
-                  <FormControl>
-                    <Select
-                      size={"sm"}
-                      title={"Select Project"}
-                      placeholder={"Select Project"}
-                      onChange={(event) => {
-                        const selectedProject = event.target.value.toString();
-                        if (selectedProjects.includes(selectedProject)) {
-                          // Check that the selected Project has not already been selected
-                          toast({
-                            title: "Warning",
-                            description: "Project has already been selected.",
-                            status: "warning",
-                            duration: 2000,
-                            position: "bottom-right",
-                            isClosable: true,
-                          });
-                        } else if (!_.isEqual(selectedProject, "")) {
-                          // Add the selected Project if not the default option
-                          setSelectedProjects([
-                            ...selectedProjects,
-                            selectedProject,
-                          ]);
-                        }
-                      }}
-                    >
-                      {!loading &&
-                        projectData.map((project: IGenericItem) => {
-                          if (
-                            !_.includes(selectedProjects, project._id) &&
-                            !_.includes(entityProjects, project._id)
-                          ) {
-                            // Only include Projects that haven't been selected or the Entity is currently present in
-                            return (
-                              <option key={project._id} value={project._id}>
-                                {project.name}
-                              </option>
-                            );
-                          } else {
-                            return null;
-                          }
-                        })}
-                    </Select>
-                  </FormControl>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Select
+                          size={"sm"}
+                          title={"Select Project"}
+                          placeholder={"Select Project"}
+                          onChange={(event) => {
+                            const selectedProject =
+                              event.target.value.toString();
+                            if (selectedProjects.includes(selectedProject)) {
+                              // Check that the selected Project has not already been selected
+                              toast({
+                                title: "Warning",
+                                description:
+                                  "Project has already been selected.",
+                                status: "warning",
+                                duration: 2000,
+                                position: "bottom-right",
+                                isClosable: true,
+                              });
+                            } else if (!_.isEqual(selectedProject, "")) {
+                              // Add the selected Project if not the default option
+                              setSelectedProjects([
+                                ...selectedProjects,
+                                selectedProject,
+                              ]);
+                            }
+                          }}
+                        >
+                          {!loading &&
+                            projectData.map((project: IGenericItem) => {
+                              if (
+                                !_.includes(selectedProjects, project._id) &&
+                                !_.includes(entityProjects, project._id)
+                              ) {
+                                // Only include Projects that haven't been selected or the Entity is currently present in
+                                return (
+                                  <option key={project._id} value={project._id}>
+                                    {project.name}
+                                  </option>
+                                );
+                              } else {
+                                return null;
+                              }
+                            })}
+                        </Select>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
 
                   <Flex
                     direction={"row"}
@@ -2247,23 +2266,27 @@ const Entity = () => {
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       Format:
                     </Text>
-                    <FormControl>
-                      <Select
-                        size={"sm"}
-                        rounded={"md"}
-                        value={exportFormat}
-                        onChange={(event) =>
-                          setExportFormat(event.target.value)
-                        }
-                      >
-                        <option key={"json"} value={"json"}>
-                          JSON
-                        </option>
-                        <option key={"csv"} value={"csv"}>
-                          CSV
-                        </option>
-                      </Select>
-                    </FormControl>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Select
+                            size={"sm"}
+                            rounded={"md"}
+                            value={exportFormat}
+                            onChange={(event) =>
+                              setExportFormat(event.target.value)
+                            }
+                          >
+                            <option key={"json"} value={"json"}>
+                              JSON
+                            </option>
+                            <option key={"csv"} value={"csv"}>
+                              CSV
+                            </option>
+                          </Select>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
                   <Text fontSize={"sm"}>
                     Select the Entity fields to be exported.
@@ -2280,171 +2303,198 @@ const Entity = () => {
                   borderColor={"gray.300"}
                 >
                   <Flex direction={"row"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Details</FormLabel>
-                      {!loading ? (
-                        <CheckboxGroup size={"sm"}>
-                          <Stack gap={2} direction={"column"}>
-                            <Checkbox disabled defaultChecked fontSize={"sm"}>
-                              Name: {entityName}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={_.includes(exportFields, "created")}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  "created",
-                                  event.target.checked,
-                                )
-                              }
-                              fontSize={"sm"}
-                            >
-                              Created:{" "}
-                              {dayjs(entityData.created).format("DD MMM YYYY")}
-                            </Checkbox>
-                            <Checkbox isChecked={true} disabled fontSize={"sm"}>
-                              Owner: {entityData.owner}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={_.includes(
-                                exportFields,
-                                "description",
-                              )}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  "description",
-                                  event.target.checked,
-                                )
-                              }
-                              disabled={_.isEqual(entityDescription, "")}
-                            >
-                              <Text noOfLines={1} fontSize={"sm"}>
-                                Description:{" "}
-                                {_.isEqual(entityDescription, "")
-                                  ? "No description"
-                                  : _.truncate(entityDescription, {
-                                      length: 32,
-                                    })}
-                              </Text>
-                            </Checkbox>
-                          </Stack>
-                        </CheckboxGroup>
-                      ) : (
-                        <Text fontSize={"sm"}>Loading details</Text>
-                      )}
-                    </FormControl>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Field.Label>Details</Field.Label>
+                          {!loading ? (
+                            <CheckboxGroup size={"sm"}>
+                              <Stack gap={2} direction={"column"}>
+                                <Checkbox
+                                  disabled
+                                  defaultChecked
+                                  fontSize={"sm"}
+                                >
+                                  Name: {entityName}
+                                </Checkbox>
+                                <Checkbox
+                                  isChecked={_.includes(
+                                    exportFields,
+                                    "created",
+                                  )}
+                                  onChange={(event) =>
+                                    handleExportCheck(
+                                      "created",
+                                      event.target.checked,
+                                    )
+                                  }
+                                  fontSize={"sm"}
+                                >
+                                  Created:{" "}
+                                  {dayjs(entityData.created).format(
+                                    "DD MMM YYYY",
+                                  )}
+                                </Checkbox>
+                                <Checkbox
+                                  isChecked={true}
+                                  disabled
+                                  fontSize={"sm"}
+                                >
+                                  Owner: {entityData.owner}
+                                </Checkbox>
+                                <Checkbox
+                                  isChecked={_.includes(
+                                    exportFields,
+                                    "description",
+                                  )}
+                                  onChange={(event) =>
+                                    handleExportCheck(
+                                      "description",
+                                      event.target.checked,
+                                    )
+                                  }
+                                  disabled={_.isEqual(entityDescription, "")}
+                                >
+                                  <Text lineClamp={1} fontSize={"sm"}>
+                                    Description:{" "}
+                                    {_.isEqual(entityDescription, "")
+                                      ? "No description"
+                                      : _.truncate(entityDescription, {
+                                          length: 32,
+                                        })}
+                                  </Text>
+                                </Checkbox>
+                              </Stack>
+                            </CheckboxGroup>
+                          ) : (
+                            <Text fontSize={"sm"}>Loading details</Text>
+                          )}
+                        </Field.Root>
 
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Projects</FormLabel>
-                      {!loading && entityProjects.length > 0 ? (
-                        <Stack gap={2} direction={"column"}>
-                          {entityProjects.map((project) => {
-                            allExportFields.push(`project_${project}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                key={project}
-                                isChecked={_.includes(
-                                  exportFields,
-                                  `project_${project}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `project_${project}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                <Linky
-                                  id={project}
-                                  type={"projects"}
-                                  size={"sm"}
-                                />
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Projects</Text>
-                      )}
-                    </FormControl>
+                        <Field.Root>
+                          <Field.Label>Projects</Field.Label>
+                          {!loading && entityProjects.length > 0 ? (
+                            <Stack gap={2} direction={"column"}>
+                              {entityProjects.map((project) => {
+                                allExportFields.push(`project_${project}`);
+                                return (
+                                  <Checkbox
+                                    size={"sm"}
+                                    key={project}
+                                    isChecked={_.includes(
+                                      exportFields,
+                                      `project_${project}`,
+                                    )}
+                                    onChange={(event) =>
+                                      handleExportCheck(
+                                        `project_${project}`,
+                                        event.target.checked,
+                                      )
+                                    }
+                                  >
+                                    <Linky
+                                      id={project}
+                                      type={"projects"}
+                                      size={"sm"}
+                                    />
+                                  </Checkbox>
+                                );
+                              })}
+                            </Stack>
+                          ) : (
+                            <Text fontSize={"sm"}>No Projects</Text>
+                          )}
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
 
                   <Separator />
 
                   <Flex direction={"row"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Origins</FormLabel>
-                      {!loading && entityRelationships?.length > 0 ? (
-                        <Stack gap={2} direction={"column"}>
-                          {entityRelationships.map((relationship) => {
-                            allExportFields.push(
-                              `relationship_${relationship.target._id}_${relationship.type}`,
-                            );
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                fontSize={"sm"}
-                                key={relationship.target._id}
-                                isChecked={_.includes(
-                                  exportFields,
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Field.Label>Origins</Field.Label>
+                          {!loading && entityRelationships?.length > 0 ? (
+                            <Stack gap={2} direction={"column"}>
+                              {entityRelationships.map((relationship) => {
+                                allExportFields.push(
                                   `relationship_${relationship.target._id}_${relationship.type}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `relationship_${relationship.target._id}_${relationship.type}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                <Linky
-                                  id={relationship.target._id}
-                                  type={"entities"}
-                                  size={"sm"}
-                                />
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Origins</Text>
-                      )}
-                    </FormControl>
+                                );
+                                return (
+                                  <Checkbox
+                                    size={"sm"}
+                                    fontSize={"sm"}
+                                    key={relationship.target._id}
+                                    isChecked={_.includes(
+                                      exportFields,
+                                      `relationship_${relationship.target._id}_${relationship.type}`,
+                                    )}
+                                    onChange={(event) =>
+                                      handleExportCheck(
+                                        `relationship_${relationship.target._id}_${relationship.type}`,
+                                        event.target.checked,
+                                      )
+                                    }
+                                  >
+                                    <Linky
+                                      id={relationship.target._id}
+                                      type={"entities"}
+                                      size={"sm"}
+                                    />
+                                  </Checkbox>
+                                );
+                              })}
+                            </Stack>
+                          ) : (
+                            <Text fontSize={"sm"}>No Origins</Text>
+                          )}
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
 
                   <Separator />
 
                   <Flex direction={"row"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Attributes</FormLabel>
-                      {!loading && entityAttributes.length > 0 ? (
-                        <Stack gap={2} direction={"column"}>
-                          {entityAttributes.map((attribute) => {
-                            allExportFields.push(`attribute_${attribute._id}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                fontSize={"sm"}
-                                key={attribute._id}
-                                isChecked={_.includes(
-                                  exportFields,
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Field.Label>Attributes</Field.Label>
+                          {!loading && entityAttributes.length > 0 ? (
+                            <Stack gap={2} direction={"column"}>
+                              {entityAttributes.map((attribute) => {
+                                allExportFields.push(
                                   `attribute_${attribute._id}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `attribute_${attribute._id}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                {attribute.name}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Attributes</Text>
-                      )}
-                    </FormControl>
+                                );
+                                return (
+                                  <Checkbox
+                                    size={"sm"}
+                                    fontSize={"sm"}
+                                    key={attribute._id}
+                                    isChecked={_.includes(
+                                      exportFields,
+                                      `attribute_${attribute._id}`,
+                                    )}
+                                    onChange={(event) =>
+                                      handleExportCheck(
+                                        `attribute_${attribute._id}`,
+                                        event.target.checked,
+                                      )
+                                    }
+                                  >
+                                    {attribute.name}
+                                  </Checkbox>
+                                );
+                              })}
+                            </Stack>
+                          ) : (
+                            <Text fontSize={"sm"}>No Attributes</Text>
+                          )}
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
                 </Flex>
               </Dialog.Body>
@@ -2643,19 +2693,21 @@ const Entity = () => {
                     modify the name below.
                   </Text>
 
-                  <FormControl>
-                    <FormLabel fontSize={"xs"} fontWeight={"semibold"}>
-                      Cloned Entity Name:
-                    </FormLabel>
-                    <Input
-                      size={"sm"}
-                      rounded={"md"}
-                      value={clonedEntityName}
-                      onChange={(event) =>
-                        setClonedEntityName(event.target.value)
-                      }
-                    />
-                  </FormControl>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>Cloned Entity Name:</Field.Label>
+                        <Input
+                          size={"sm"}
+                          rounded={"md"}
+                          value={clonedEntityName}
+                          onChange={(event) =>
+                            setClonedEntityName(event.target.value)
+                          }
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
               </Dialog.Body>
 

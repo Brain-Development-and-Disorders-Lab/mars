@@ -9,9 +9,7 @@ import {
   Text,
   useToast,
   Input,
-  FormControl,
   Select,
-  FormLabel,
   Tag,
   useSteps,
   Stepper,
@@ -23,9 +21,10 @@ import {
   Box,
   StepTitle,
   StepSeparator,
-  FormHelperText,
   Tooltip,
   Spacer,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -1044,90 +1043,95 @@ const ImportDialog = (props: ImportDialogProps) => {
                   align={"center"}
                   justify={"center"}
                 >
-                  <FormControl>
-                    <Flex
-                      direction={"column"}
-                      minH={"50vh"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"center"}
-                      border={"2px"}
-                      borderStyle={fileName === "" ? "dashed" : "solid"}
-                      borderColor={"gray.300"}
-                      rounded={"md"}
-                      background={fileName === "" ? "gray.50" : "white"}
-                    >
-                      {_.isEqual(file, {}) ? (
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
                         <Flex
                           direction={"column"}
+                          minH={"50vh"}
                           w={"100%"}
-                          justify={"center"}
                           align={"center"}
+                          justify={"center"}
+                          border={"2px"}
+                          borderStyle={fileName === "" ? "dashed" : "solid"}
+                          borderColor={"gray.300"}
+                          rounded={"md"}
+                          background={fileName === "" ? "gray.50" : "white"}
                         >
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            Drag file here
-                          </Text>
-                          <Text fontSize={"sm"}>or click to upload</Text>
+                          {_.isEqual(file, {}) ? (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Drag file here
+                              </Text>
+                              <Text fontSize={"sm"}>or click to upload</Text>
+                            </Flex>
+                          ) : (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                {file.name}
+                              </Text>
+                            </Flex>
+                          )}
                         </Flex>
-                      ) : (
-                        <Flex
-                          direction={"column"}
+
+                        <Input
+                          type={"file"}
+                          h={"100%"}
                           w={"100%"}
-                          justify={"center"}
-                          align={"center"}
-                        >
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            {file.name}
-                          </Text>
-                        </Flex>
-                      )}
-                    </Flex>
+                          position={"absolute"}
+                          rounded={"md"}
+                          top={"0"}
+                          left={"0"}
+                          opacity={"0"}
+                          aria-hidden={"true"}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                            if (
+                              event.target.files &&
+                              event.target.files.length > 0
+                            ) {
+                              // Only accept defined file types
+                              if (
+                                _.includes(
+                                  [CSV_MIME_TYPE, JSON_MIME_TYPE],
+                                  event.target.files[0].type,
+                                )
+                              ) {
+                                // Capture event
+                                posthog.capture("import_upload_file", {
+                                  importType: importType,
+                                  fileName: event.target.files[0].name,
+                                });
 
-                    <Input
-                      type={"file"}
-                      h={"100%"}
-                      w={"100%"}
-                      position={"absolute"}
-                      rounded={"md"}
-                      top={"0"}
-                      left={"0"}
-                      opacity={"0"}
-                      aria-hidden={"true"}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                        if (
-                          event.target.files &&
-                          event.target.files.length > 0
-                        ) {
-                          // Only accept defined file types
-                          if (
-                            _.includes(
-                              [CSV_MIME_TYPE, JSON_MIME_TYPE],
-                              event.target.files[0].type,
-                            )
-                          ) {
-                            // Capture event
-                            posthog.capture("import_upload_file", {
-                              importType: importType,
-                              fileName: event.target.files[0].name,
-                            });
-
-                            setFileName(event.target.files[0].name);
-                            setFileType(event.target.files[0].type);
-                            setFile(event.target.files[0]);
-                          } else {
-                            toast({
-                              title: "Warning",
-                              status: "warning",
-                              description: "Please upload a JSON or CSV file",
-                              duration: 2000,
-                              position: "bottom-right",
-                              isClosable: true,
-                            });
-                          }
-                        }
-                      }}
-                    />
-                  </FormControl>
+                                setFileName(event.target.files[0].name);
+                                setFileType(event.target.files[0].type);
+                                setFile(event.target.files[0]);
+                              } else {
+                                toast({
+                                  title: "Warning",
+                                  status: "warning",
+                                  description:
+                                    "Please upload a JSON or CSV file",
+                                  duration: 2000,
+                                  position: "bottom-right",
+                                  isClosable: true,
+                                });
+                              }
+                            }
+                          }}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
               )}
 
@@ -1154,119 +1158,145 @@ const ImportDialog = (props: ImportDialogProps) => {
                   )}
 
                   {fileType === CSV_MIME_TYPE && (
-                    <Flex direction={"row"} gap={"2"}>
-                      <FormControl>
-                        <FormLabel fontSize={"sm"}>Name Prefix</FormLabel>
-                        <Input
-                          value={namePrefixField}
-                          placeholder={"Name Prefix"}
-                          size={"sm"}
-                          rounded={"md"}
-                          onChange={(event) =>
-                            setNamePrefixField(event.target.value)
-                          }
-                        />
-                        <FormHelperText>
-                          Add a prefix to each Entity name
-                        </FormHelperText>
-                      </FormControl>
-                      <FormControl required invalid={_.isEqual(nameField, "")}>
-                        <FormLabel fontSize={"sm"}>Name</FormLabel>
-                        {getSelectComponent(
-                          "import_name",
-                          nameField,
-                          setNameField,
-                        )}
-                        <FormHelperText>
-                          Column containing Entity names
-                        </FormHelperText>
-                      </FormControl>
-                    </Flex>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Flex direction={"row"} gap={"2"}>
+                          <Field.Root>
+                            <Field.Label>Name Prefix</Field.Label>
+                            <Input
+                              value={namePrefixField}
+                              placeholder={"Name Prefix"}
+                              size={"sm"}
+                              rounded={"md"}
+                              onChange={(event) =>
+                                setNamePrefixField(event.target.value)
+                              }
+                            />
+                            <Field.HelperText>
+                              Add a prefix to each Entity name
+                            </Field.HelperText>
+                          </Field.Root>
+
+                          <Field.Root
+                            required
+                            invalid={_.isEqual(nameField, "")}
+                          >
+                            <Field.Label>
+                              Name
+                              <Field.RequiredIndicator />
+                            </Field.Label>
+                            {getSelectComponent(
+                              "import_name",
+                              nameField,
+                              setNameField,
+                            )}
+                            <Field.HelperText>
+                              Column containing Entity names
+                            </Field.HelperText>
+                          </Field.Root>
+                        </Flex>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   )}
 
                   {fileType === JSON_MIME_TYPE && (
                     <Flex direction={"row"} gap={"2"}>
-                      <FormControl>
-                        <FormLabel fontSize={"sm"}>Name Prefix</FormLabel>
-                        <Input
-                          value={namePrefixField}
-                          placeholder={"Name Prefix"}
-                          size={"sm"}
-                          rounded={"md"}
-                          onChange={(event) =>
-                            setNamePrefixField(event.target.value)
-                          }
-                        />
-                        <FormHelperText>
-                          Add a prefix to each Entity name
-                        </FormHelperText>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel fontSize={"sm"}>Name</FormLabel>
-                        <Select
-                          size={"sm"}
-                          rounded={"md"}
-                          placeholder={"Defined in JSON"}
-                          disabled
-                          isReadOnly
-                        />
-                        <FormHelperText>
-                          Field containing Entity names
-                        </FormHelperText>
-                      </FormControl>
+                      <Fieldset.Root>
+                        <Fieldset.Content>
+                          <Field.Root>
+                            <Field.Label>Name Prefix</Field.Label>
+                            <Input
+                              value={namePrefixField}
+                              placeholder={"Name Prefix"}
+                              size={"sm"}
+                              rounded={"md"}
+                              onChange={(event) =>
+                                setNamePrefixField(event.target.value)
+                              }
+                            />
+                            <Field.HelperText>
+                              Add a prefix to each Entity name
+                            </Field.HelperText>
+                          </Field.Root>
+
+                          <Field.Root>
+                            <Field.Label>Name</Field.Label>
+                            <Select
+                              size={"sm"}
+                              rounded={"md"}
+                              placeholder={"Defined in JSON"}
+                              disabled
+                              isReadOnly
+                            />
+                            <Field.HelperText>
+                              Field containing Entity names
+                            </Field.HelperText>
+                          </Field.Root>
+                        </Fieldset.Content>
+                      </Fieldset.Root>
                     </Flex>
                   )}
 
                   <Flex direction={"row"} gap={"2"}>
-                    {/* Description */}
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Description</FormLabel>
-                      {getSelectComponent(
-                        "import_description",
-                        descriptionField,
-                        setDescriptionField,
-                      )}
-                      <FormHelperText>
-                        Column containing Entity descriptions
-                      </FormHelperText>
-                    </FormControl>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        {/* Description */}
+                        <Field.Root>
+                          <Field.Label>Description</Field.Label>
+                          {getSelectComponent(
+                            "import_description",
+                            descriptionField,
+                            setDescriptionField,
+                          )}
+                          <Field.HelperText>
+                            Column containing Entity descriptions
+                          </Field.HelperText>
+                        </Field.Root>
 
-                    {/* Project */}
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Project</FormLabel>
-                      <Select
-                        id={"import_projects"}
-                        size={"sm"}
-                        rounded={"md"}
-                        placeholder={"Select Project"}
-                        value={projectField}
-                        onChange={(event) =>
-                          setProjectField(event.target.value)
-                        }
-                      >
-                        {projects.map((project) => {
-                          return (
-                            <option key={project._id} value={project._id}>
-                              {project.name}
-                            </option>
-                          );
-                        })}
-                      </Select>
-                      <FormHelperText>Add Entities to a Project</FormHelperText>
-                    </FormControl>
+                        {/* Project */}
+                        <Field.Root>
+                          <Field.Label>Project</Field.Label>
+                          <Select
+                            id={"import_projects"}
+                            size={"sm"}
+                            rounded={"md"}
+                            placeholder={"Select Project"}
+                            value={projectField}
+                            onChange={(event) =>
+                              setProjectField(event.target.value)
+                            }
+                          >
+                            {projects.map((project) => {
+                              return (
+                                <option key={project._id} value={project._id}>
+                                  {project.name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                          <Field.HelperText>
+                            Add Entities to a Project
+                          </Field.HelperText>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
 
                   <Flex direction={"row"} gap={"2"} w={"50%"}>
                     {/* Owner */}
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Owner</FormLabel>
-                      <Flex>
-                        <ActorTag orcid={ownerField} fallback={"Unknown"} />
-                      </Flex>
-                      <FormHelperText>
-                        Owner of imported Entities
-                      </FormHelperText>
-                    </FormControl>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Field.Label>Owner</Field.Label>
+                          <Flex>
+                            <ActorTag orcid={ownerField} fallback={"Unknown"} />
+                          </Flex>
+                          <Field.HelperText>
+                            Owner of imported Entities
+                          </Field.HelperText>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   </Flex>
                 </Flex>
               )}
@@ -1307,58 +1337,67 @@ const ImportDialog = (props: ImportDialogProps) => {
                     wrap={["wrap", "nowrap"]}
                   >
                     {/* Drop-down to select a Template */}
-                    <FormControl maxW={"sm"}>
-                      <Tooltip
-                        label={
-                          templates.length > 0
-                            ? "Select an existing Template"
-                            : "No Templates exist yet"
-                        }
-                        hasArrow
-                      >
-                        <Select
-                          size={"sm"}
-                          placeholder={"Select Template Attribute"}
-                          disabled={templates.length === 0}
-                          onChange={(event) => {
-                            if (!_.isEqual(event.target.value.toString(), "")) {
-                              for (const template of templates) {
-                                if (
-                                  _.isEqual(
-                                    event.target.value.toString(),
-                                    template._id,
-                                  )
-                                ) {
-                                  setAttributesField([
-                                    ...attributesField,
-                                    {
-                                      _id: `a-${nanoid(6)}`,
-                                      name: template.name,
-                                      timestamp: template.timestamp,
-                                      owner: template.owner,
-                                      archived: false,
-                                      description: template.description,
-                                      values: template.values,
-                                    },
-                                  ]);
-                                  break;
-                                }
-                              }
+                    <Fieldset.Root maxW={"sm"}>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Tooltip
+                            label={
+                              templates.length > 0
+                                ? "Select an existing Template"
+                                : "No Templates exist yet"
                             }
-                          }}
-                        >
-                          {isLoaded &&
-                            templates.map((template) => {
-                              return (
-                                <option key={template._id} value={template._id}>
-                                  {template.name}
-                                </option>
-                              );
-                            })}
-                          ;
-                        </Select>
-                      </Tooltip>
-                    </FormControl>
+                            hasArrow
+                          >
+                            <Select
+                              size={"sm"}
+                              placeholder={"Select Template Attribute"}
+                              disabled={templates.length === 0}
+                              onChange={(event) => {
+                                if (
+                                  !_.isEqual(event.target.value.toString(), "")
+                                ) {
+                                  for (const template of templates) {
+                                    if (
+                                      _.isEqual(
+                                        event.target.value.toString(),
+                                        template._id,
+                                      )
+                                    ) {
+                                      setAttributesField([
+                                        ...attributesField,
+                                        {
+                                          _id: `a-${nanoid(6)}`,
+                                          name: template.name,
+                                          timestamp: template.timestamp,
+                                          owner: template.owner,
+                                          archived: false,
+                                          description: template.description,
+                                          values: template.values,
+                                        },
+                                      ]);
+                                      break;
+                                    }
+                                  }
+                                }
+                              }}
+                            >
+                              {isLoaded &&
+                                templates.map((template) => {
+                                  return (
+                                    <option
+                                      key={template._id}
+                                      value={template._id}
+                                    >
+                                      {template.name}
+                                    </option>
+                                  );
+                                })}
+                              ;
+                            </Select>
+                          </Tooltip>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
 
                     <Button
                       size={"sm"}
@@ -1455,90 +1494,94 @@ const ImportDialog = (props: ImportDialogProps) => {
                   align={"center"}
                   justify={"center"}
                 >
-                  <FormControl>
-                    <Flex
-                      direction={"column"}
-                      minH={"50vh"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"center"}
-                      border={"2px"}
-                      borderStyle={fileName === "" ? "dashed" : "solid"}
-                      borderColor={"gray.300"}
-                      rounded={"md"}
-                      background={fileName === "" ? "gray.50" : "white"}
-                    >
-                      {_.isEqual(file, {}) ? (
-                        <Flex
-                          direction={"column"}
-                          w={"100%"}
-                          justify={"center"}
-                          align={"center"}
-                        >
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            Drag file here
-                          </Text>
-                          <Text fontSize={"sm"}>or click to upload</Text>
-                        </Flex>
-                      ) : (
-                        <Flex
-                          direction={"column"}
-                          w={"100%"}
-                          justify={"center"}
-                          align={"center"}
-                        >
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            {file.name}
-                          </Text>
-                        </Flex>
-                      )}
-                    </Flex>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Flex
+                        direction={"column"}
+                        minH={"50vh"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={fileName === "" ? "dashed" : "solid"}
+                        borderColor={"gray.300"}
+                        rounded={"md"}
+                        background={fileName === "" ? "gray.50" : "white"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontSize={"sm"} fontWeight={"semibold"}>
+                              Drag file here
+                            </Text>
+                            <Text fontSize={"sm"}>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontSize={"sm"} fontWeight={"semibold"}>
+                              {file.name}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Flex>
 
-                    <Input
-                      type={"file"}
-                      h={"100%"}
-                      w={"100%"}
-                      position={"absolute"}
-                      rounded={"md"}
-                      top={"0"}
-                      left={"0"}
-                      opacity={"0"}
-                      aria-hidden={"true"}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                        if (
-                          event.target.files &&
-                          event.target.files.length > 0
-                        ) {
-                          // Only accept defined file types
-                          if (
-                            _.isEqual(
-                              JSON_MIME_TYPE,
-                              event.target.files[0].type,
-                            )
-                          ) {
-                            // Capture event
-                            posthog.capture("import_upload_file", {
-                              importType: importType,
-                              fileName: event.target.files[0].name,
-                            });
+                      <Field.Root>
+                        <Input
+                          type={"file"}
+                          h={"100%"}
+                          w={"100%"}
+                          position={"absolute"}
+                          rounded={"md"}
+                          top={"0"}
+                          left={"0"}
+                          opacity={"0"}
+                          aria-hidden={"true"}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                            if (
+                              event.target.files &&
+                              event.target.files.length > 0
+                            ) {
+                              // Only accept defined file types
+                              if (
+                                _.isEqual(
+                                  JSON_MIME_TYPE,
+                                  event.target.files[0].type,
+                                )
+                              ) {
+                                // Capture event
+                                posthog.capture("import_upload_file", {
+                                  importType: importType,
+                                  fileName: event.target.files[0].name,
+                                });
 
-                            setFileName(event.target.files[0].name);
-                            setFileType(event.target.files[0].type);
-                            setFile(event.target.files[0]);
-                          } else {
-                            toast({
-                              title: "Warning",
-                              status: "warning",
-                              description: "Please upload a JSON file",
-                              duration: 2000,
-                              position: "bottom-right",
-                              isClosable: true,
-                            });
-                          }
-                        }
-                      }}
-                    />
-                  </FormControl>
+                                setFileName(event.target.files[0].name);
+                                setFileType(event.target.files[0].type);
+                                setFile(event.target.files[0]);
+                              } else {
+                                toast({
+                                  title: "Warning",
+                                  status: "warning",
+                                  description: "Please upload a JSON file",
+                                  duration: 2000,
+                                  position: "bottom-right",
+                                  isClosable: true,
+                                });
+                              }
+                            }
+                          }}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
               )}
 

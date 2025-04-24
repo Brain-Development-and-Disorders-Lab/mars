@@ -5,11 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Dialog,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
   IconButton,
   Input,
@@ -213,64 +211,54 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormControl required invalid={isNameError}>
-                <FormLabel htmlFor={"name"} fontSize={"sm"}>
-                  Name
-                </FormLabel>
-                <Input
-                  id={"name"}
-                  name={"name"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  borderColor={"gray.300"}
-                  focusBorderColor={"black"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                {isNameError && (
-                  <FormErrorMessage>
-                    A name to identify the Project must be specified.
-                  </FormErrorMessage>
-                )}
-              </FormControl>
+              <Fieldset.Root required invalid={isNameError}>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Name</Field.Label>
+                    <Input
+                      id={"name"}
+                      name={"name"}
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Name"}
+                      borderColor={"gray.300"}
+                      focusBorderColor={"black"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                    {isNameError && (
+                      <Field.ErrorText>
+                        A name to identify the Project must be specified.
+                      </Field.ErrorText>
+                    )}
+                  </Field.Root>
 
-              <FormControl required>
-                <FormLabel
-                  htmlFor={"owner"}
-                  fontWeight={"semibold"}
-                  fontSize={"sm"}
-                >
-                  Owner
-                </FormLabel>
-                <Flex>
-                  <ActorTag orcid={owner} fallback={"Unknown User"} />
-                </Flex>
-              </FormControl>
+                  <Field.Root>
+                    <Field.Label>Owner</Field.Label>
+                    <Flex>
+                      <ActorTag orcid={owner} fallback={"Unknown User"} />
+                    </Flex>
+                  </Field.Root>
 
-              <FormControl>
-                <FormLabel
-                  htmlFor="date"
-                  fontWeight={"semibold"}
-                  fontSize={"sm"}
-                >
-                  Created
-                </FormLabel>
-                <Input
-                  size={"sm"}
-                  rounded={"md"}
-                  type={"datetime-local"}
-                  value={created}
-                  onChange={(event) =>
-                    setCreated(
-                      dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"),
-                    )
-                  }
-                />
-                <FormHelperText fontSize={"xs"}>
-                  Specify a timestamp for the Project.
-                </FormHelperText>
-              </FormControl>
+                  <Field.Root>
+                    <Field.Label>Created</Field.Label>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      type={"datetime-local"}
+                      value={created}
+                      onChange={(event) =>
+                        setCreated(
+                          dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"),
+                        )
+                      }
+                    />
+                    <Field.HelperText>
+                      Specify a timestamp for the Project.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
 
@@ -293,28 +281,30 @@ const Project = () => {
               borderColor={"gray.300"}
             >
               {/* Project description */}
-              <FormControl required invalid={isDescriptionError}>
-                <FormLabel htmlFor="description" fontSize={"sm"}>
-                  Description
-                </FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-                {isDescriptionError && (
-                  <FormErrorMessage>
-                    A description must be provided.
-                  </FormErrorMessage>
-                )}
-              </FormControl>
+              <Fieldset.Root required invalid={isDescriptionError}>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={"edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                    {isDescriptionError && (
+                      <Field.ErrorText>
+                        A description must be provided.
+                      </Field.ErrorText>
+                    )}
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
         </Flex>

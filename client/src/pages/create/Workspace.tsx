@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   Flex,
   Spacer,
-  FormControl,
-  FormLabel,
   Input,
   Button,
   VStack,
@@ -13,6 +11,8 @@ import {
   Text,
   useToast,
   Heading,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -188,7 +188,7 @@ const CreateWorkspace = () => {
             {workspace !== "" && (
               <Button
                 size={"sm"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 onClick={() => handleCancelClick()}
               >
                 Cancel
@@ -197,10 +197,10 @@ const CreateWorkspace = () => {
             <Button
               id={"modalWorkspaceCreateButton"}
               size={"sm"}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => handleCreateWorkspaceClick()}
               isLoading={createLoading}
-              isDisabled={name === ""}
+              disabled={name === ""}
             >
               Create
             </Button>
@@ -243,19 +243,24 @@ const CreateWorkspace = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormControl isRequired>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Name
-                </FormLabel>
-                <Input
-                  id={"modalWorkspaceName"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </FormControl>
+              <Fieldset.Root required>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>
+                      Name
+                      <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      id={"modalWorkspaceName"}
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Name"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
 
             {/* Workspace description */}
@@ -268,24 +273,26 @@ const CreateWorkspace = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Description
-                </FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  id={"modalWorkspaceDescription"}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-              </FormControl>
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      id={"modalWorkspaceDescription"}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={"edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
 
@@ -314,21 +321,26 @@ const CreateWorkspace = () => {
                 this Workspace when they next sign into Metadatify.
               </Text>
               <Flex direction={"row"} gap={"2"} align={"center"}>
-                <FormControl>
-                  <Input
-                    placeholder={"ORCiD"}
-                    rounded={"md"}
-                    size={"sm"}
-                    value={collaborator}
-                    onChange={(event) => setCollaborator(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Input
+                        placeholder={"ORCiD"}
+                        rounded={"md"}
+                        size={"sm"}
+                        value={collaborator}
+                        onChange={(event) =>
+                          setCollaborator(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
                 <Spacer />
                 <Button
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"add"} />}
+                  colorPalette={"green"}
                   size={"sm"}
-                  isDisabled={collaborator === ""}
+                  disabled={collaborator === ""}
                   onClick={() => {
                     // Prevent adding empty or duplicate collaborator
                     if (collaborator && !collaborators.includes(collaborator)) {
@@ -341,6 +353,7 @@ const CreateWorkspace = () => {
                   }}
                 >
                   Add
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
               <Flex
@@ -363,13 +376,12 @@ const CreateWorkspace = () => {
                         py={"2"}
                         w={"100%"}
                       >
-                        <Tag colorScheme={"green"}>{collaborator}</Tag>
+                        <Tag colorPalette={"green"}>{collaborator}</Tag>
                         <Spacer />
                         <IconButton
                           size={"sm"}
                           aria-label={"Remove collaborator"}
-                          icon={<Icon name="delete" />}
-                          colorScheme={"red"}
+                          colorPalette={"red"}
                           onClick={() =>
                             setCollaborators((collaborators) =>
                               collaborators.filter(
@@ -377,7 +389,9 @@ const CreateWorkspace = () => {
                               ),
                             )
                           }
-                        />
+                        >
+                          <Icon name="delete" />
+                        </IconButton>
                       </Flex>
                     ))}
                   </VStack>

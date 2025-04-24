@@ -5,15 +5,12 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
   Flex,
-  FormControl,
-  FormLabel,
   Input,
   Text,
   Spacer,
-  CardHeader,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
@@ -54,8 +51,8 @@ const AttributeCard = (props: AttributeCardProps) => {
   };
 
   return (
-    <Card variant={"outline"} w={"100%"}>
-      <CardHeader p={"2"}>
+    <Card.Root variant={"outline"} w={"100%"}>
+      <Card.Header p={"2"}>
         <Flex
           align={"center"}
           gap={"2"}
@@ -69,52 +66,59 @@ const AttributeCard = (props: AttributeCardProps) => {
             Attribute
           </Text>
         </Flex>
-      </CardHeader>
-      <CardBody p={"2"} pb={"0"}>
+      </Card.Header>
+      <Card.Body p={"2"} pb={"0"}>
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              w={{ base: "100%", md: "50%" }}
-            >
-              <FormControl isRequired isInvalid={isNameError}>
-                <FormLabel fontSize={"sm"}>Name</FormLabel>
-                <Input
-                  size={"sm"}
-                  placeholder={"Name"}
-                  value={name}
-                  isDisabled={finished}
-                  rounded={"md"}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </FormControl>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Flex
+                  direction={"column"}
+                  gap={"2"}
+                  w={{ base: "100%", md: "50%" }}
+                >
+                  <Field.Root>
+                    <Field.Label>Name</Field.Label>
+                    <Input
+                      size={"sm"}
+                      placeholder={"Name"}
+                      value={name}
+                      disabled={finished}
+                      rounded={"md"}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                  </Field.Root>
 
-              <Flex direction={"column"} gap={"1"}>
-                <Text fontSize={"sm"}>Owner</Text>
-                <Flex>
-                  <ActorTag orcid={props.owner} fallback={"Unknown User"} />
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"sm"}>Owner</Text>
+                    <Flex>
+                      <ActorTag orcid={props.owner} fallback={"Unknown User"} />
+                    </Flex>
+                  </Flex>
                 </Flex>
-              </Flex>
-            </Flex>
 
-            <Flex w={{ base: "100%", md: "50%" }}>
-              <FormControl isRequired isInvalid={isDescriptionError} w={"100%"}>
-                <FormLabel fontSize={"sm"}>Description</FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={finished ? "preview" : "edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-              </FormControl>
-            </Flex>
+                <Flex w={{ base: "100%", md: "50%" }}>
+                  <Field.Root required invalid={isDescriptionError} w={"100%"}>
+                    <Field.Label>Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={finished ? "preview" : "edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                  </Field.Root>
+                </Flex>
+              </Fieldset.Content>
+              <Fieldset.ErrorText>
+                Some fields are invalid. Please check them.
+              </Fieldset.ErrorText>
+            </Fieldset.Root>
           </Flex>
 
           {attributeCardData.restrictDataValues ? (
@@ -135,40 +139,40 @@ const AttributeCard = (props: AttributeCardProps) => {
             />
           )}
         </Flex>
-      </CardBody>
+      </Card.Body>
 
-      <CardFooter p={"2"} pt={"0"}>
+      <Card.Footer p={"2"} pt={"0"}>
         <Button
           size={"sm"}
-          colorScheme={"red"}
+          colorPalette={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props._id);
             }
           }}
-          rightIcon={<Icon name={"delete"} />}
         >
           Remove
+          <Icon name={"delete"} />
         </Button>
 
         <Spacer />
 
         <Button
           size={"sm"}
-          rightIcon={<Icon name={"check"} />}
-          colorScheme={"green"}
+          colorPalette={"green"}
           onClick={() => {
             setFinished(true);
             if (props.onUpdate) {
               props.onUpdate(attributeCardData);
             }
           }}
-          isDisabled={finished || !validAttributes}
+          disabled={finished || !validAttributes}
         >
           Save
+          <Icon name={"check"} />
         </Button>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   );
 };
 

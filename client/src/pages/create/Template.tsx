@@ -5,11 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Dialog,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
   Input,
   List,
@@ -182,25 +180,29 @@ const Template = () => {
               borderColor={"gray.300"}
               rounded={"md"}
             >
-              <FormControl required>
-                <FormLabel fontSize={"sm"}>Template Name</FormLabel>
-                <Input
-                  size={"sm"}
-                  placeholder={"Name"}
-                  rounded={"md"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-                {isNameError && (
-                  <FormErrorMessage fontSize={"sm"}>
-                    A name must be specified for the Template.
-                  </FormErrorMessage>
-                )}
-                <FormHelperText fontSize={"sm"}>
-                  Provide a concise and descriptive name for the Template.
-                </FormHelperText>
-              </FormControl>
+              <Fieldset.Root required>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Template Name</Field.Label>
+                    <Input
+                      size={"sm"}
+                      placeholder={"Name"}
+                      rounded={"md"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      required
+                    />
+                    {isNameError && (
+                      <Field.ErrorText>
+                        A name must be specified for the Template.
+                      </Field.ErrorText>
+                    )}
+                    <Field.HelperText>
+                      Provide a concise and descriptive name for the Template.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
 
@@ -222,29 +224,33 @@ const Template = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <FormControl required>
-                <FormLabel fontSize={"sm"}>Template Description</FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-                {isDescriptionError && (
-                  <FormErrorMessage fontSize={"sm"}>
-                    A description should be provided for the Template.
-                  </FormErrorMessage>
-                )}
-                <FormHelperText fontSize={"sm"}>
-                  Describe the purpose and contents of this Template.
-                </FormHelperText>
-              </FormControl>
+              <Fieldset.Root required>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Template Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={"edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                    {isDescriptionError && (
+                      <Field.ErrorText>
+                        A description should be provided for the Template.
+                      </Field.ErrorText>
+                    )}
+                    <Field.HelperText>
+                      Describe the purpose and contents of this Template.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
         </Flex>
