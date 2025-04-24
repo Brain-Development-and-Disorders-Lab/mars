@@ -7,13 +7,9 @@ import {
   Card,
   Checkbox,
   CheckboxGroup,
+  CloseButton,
   Dialog,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
   Field,
   Fieldset,
   Flex,
@@ -99,11 +95,7 @@ const Project = () => {
   } = useDisclosure();
 
   // History drawer
-  const {
-    open: historyOpen,
-    onOpen: onHistoryOpen,
-    onClose: onHistoryClose,
-  } = useDisclosure();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -482,7 +474,7 @@ const Project = () => {
     }
 
     // Close the drawer
-    onHistoryClose();
+    setHistoryOpen(false);
 
     // Apply updated state
     setProject(updateData);
@@ -800,10 +792,343 @@ const Project = () => {
               </Flex>
             )}
 
-            <Button onClick={onHistoryOpen} colorPalette={"gray"} size={"sm"}>
-              History
-              <Icon name={"clock"} />
-            </Button>
+            {/* Version history */}
+            <Drawer.Root open={historyOpen} size={"md"}>
+              <Drawer.Trigger>
+                <Button
+                  onClick={() => setHistoryOpen(true)}
+                  colorPalette={"gray"}
+                  size={"sm"}
+                >
+                  History
+                  <Icon name={"clock"} />
+                </Button>
+              </Drawer.Trigger>
+              <Drawer.Backdrop />
+              <Drawer.Positioner>
+                <Drawer.Content>
+                  <Drawer.CloseTrigger asChild>
+                    <CloseButton size="sm" />
+                  </Drawer.CloseTrigger>
+                  <Drawer.Header pb={"2"}>
+                    <Flex direction={"column"} w={"100%"} gap={"2"}>
+                      <Text fontSize={"sm"} fontWeight={"bold"}>
+                        History
+                      </Text>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        justify={"space-between"}
+                      >
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                            {projectHistory.length > 0
+                              ? dayjs(projectHistory[0].timestamp).fromNow()
+                              : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            Previous Versions:
+                          </Text>
+                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                            {projectHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                    </Flex>
+                  </Drawer.Header>
+
+                  <Drawer.Body>
+                    <VStack gap={"2"}>
+                      {projectHistory && projectHistory.length > 0 ? (
+                        projectHistory.map((projectVersion) => {
+                          return (
+                            <Card
+                              w={"100%"}
+                              key={`v_${projectVersion.timestamp}`}
+                              variant={"simple"}
+                              rounded={"md"}
+                              border={"1px"}
+                              borderColor={"gray.300"}
+                            >
+                              <Card.Header p={"0"}>
+                                <Flex
+                                  direction={"column"}
+                                  w={"100%"}
+                                  gap={"1"}
+                                  p={"2"}
+                                >
+                                  <Text
+                                    fontWeight={"semibold"}
+                                    fontSize={"sm"}
+                                    color={"gray.700"}
+                                  >
+                                    {projectVersion.name}
+                                  </Text>
+                                </Flex>
+                              </Card.Header>
+
+                              <Card.Body px={"2"} py={"0"}>
+                                <Flex direction={"column"} gap={"2"}>
+                                  {/* Description */}
+                                  {_.isEqual(projectVersion.description, "") ? (
+                                    <Tag.Root
+                                      size={"sm"}
+                                      colorPalette={"orange"}
+                                    >
+                                      <Tag.Label>No Description</Tag.Label>
+                                    </Tag.Root>
+                                  ) : (
+                                    <Text fontSize={"sm"}>
+                                      {_.truncate(projectVersion.description, {
+                                        length: 56,
+                                      })}
+                                    </Text>
+                                  )}
+
+                                  <Flex direction={"row"} gap={"2"}>
+                                    {/* Entities */}
+                                    <Flex
+                                      direction={"column"}
+                                      gap={"1"}
+                                      p={"2"}
+                                      rounded={"md"}
+                                      border={"1px"}
+                                      borderColor={"gray.300"}
+                                      grow={"1"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Entities
+                                      </Text>
+                                      {projectVersion.entities.length > 0 ? (
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Tag.Root
+                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
+                                            size={"sm"}
+                                          >
+                                            <Tag.Label>
+                                              <Linky
+                                                type={"projects"}
+                                                id={projectVersion.entities[0]}
+                                                size={"sm"}
+                                              />
+                                            </Tag.Label>
+                                          </Tag.Root>
+                                          {projectVersion.entities.length >
+                                            1 && (
+                                            <Text
+                                              fontWeight={"semibold"}
+                                              fontSize={"sm"}
+                                            >
+                                              and{" "}
+                                              {projectVersion.entities.length -
+                                                1}{" "}
+                                              others
+                                            </Text>
+                                          )}
+                                        </Flex>
+                                      ) : (
+                                        <Text fontSize={"sm"}>No Entities</Text>
+                                      )}
+                                    </Flex>
+
+                                    {/* Collaborators */}
+                                    <Flex
+                                      direction={"column"}
+                                      gap={"1"}
+                                      p={"2"}
+                                      rounded={"md"}
+                                      border={"1px"}
+                                      borderColor={"gray.300"}
+                                      grow={"1"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Collaborators
+                                      </Text>
+                                      {projectVersion.collaborators.length >
+                                      0 ? (
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Tag.Root
+                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
+                                            size={"sm"}
+                                          >
+                                            <Tag.Label>
+                                              {projectVersion.collaborators[0]}
+                                            </Tag.Label>
+                                          </Tag.Root>
+                                          {projectVersion.collaborators.length >
+                                            1 && (
+                                            <Text
+                                              fontWeight={"semibold"}
+                                              fontSize={"sm"}
+                                            >
+                                              and{" "}
+                                              {projectVersion.collaborators
+                                                .length - 1}{" "}
+                                              others
+                                            </Text>
+                                          )}
+                                        </Flex>
+                                      ) : (
+                                        <Text fontSize={"sm"}>
+                                          No Collaborators
+                                        </Text>
+                                      )}
+                                    </Flex>
+                                  </Flex>
+                                </Flex>
+                              </Card.Body>
+
+                              <Card.Footer p={"2"}>
+                                {/* Version information */}
+                                <Flex direction={"column"} gap={"2"} w={"100%"}>
+                                  <Flex
+                                    direction={"row"}
+                                    gap={"2"}
+                                    bg={"gray.100"}
+                                    justify={"center"}
+                                    rounded={"md"}
+                                  >
+                                    <Flex
+                                      direction={"column"}
+                                      w={"100%"}
+                                      gap={"1"}
+                                      p={"2"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Version
+                                      </Text>
+                                      <Flex
+                                        direction={"row"}
+                                        gap={"2"}
+                                        align={"center"}
+                                      >
+                                        <Tag.Root
+                                          size={"sm"}
+                                          colorPalette={"green"}
+                                        >
+                                          <Tag.Label>
+                                            {projectVersion.version}
+                                          </Tag.Label>
+                                        </Tag.Root>
+                                      </Flex>
+                                      <Text
+                                        fontWeight={"semibold"}
+                                        fontSize={"xs"}
+                                        color={"gray.400"}
+                                      >
+                                        {dayjs(
+                                          projectVersion.timestamp,
+                                        ).fromNow()}
+                                      </Text>
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Message
+                                      </Text>
+                                      {_.isEqual(projectVersion.message, "") ||
+                                      _.isNull(projectVersion.message) ? (
+                                        <Flex>
+                                          <Tag.Root
+                                            size={"sm"}
+                                            colorPalette={"orange"}
+                                          >
+                                            <Tag.Label>No Message</Tag.Label>
+                                          </Tag.Root>
+                                        </Flex>
+                                      ) : (
+                                        <Tooltip
+                                          content={projectVersion.message}
+                                          disabled={
+                                            projectVersion.message.length < 32
+                                          }
+                                          showArrow
+                                        >
+                                          <Text fontSize={"sm"}>
+                                            {_.truncate(
+                                              projectVersion.message,
+                                              {
+                                                length: 32,
+                                              },
+                                            )}
+                                          </Text>
+                                        </Tooltip>
+                                      )}
+                                    </Flex>
+
+                                    <Flex
+                                      direction={"column"}
+                                      w={"100%"}
+                                      gap={"1"}
+                                      p={"2"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Author
+                                      </Text>
+                                      <Flex>
+                                        <ActorTag
+                                          orcid={projectVersion.author}
+                                          fallback={"Unknown User"}
+                                        />
+                                      </Flex>
+                                    </Flex>
+                                  </Flex>
+
+                                  <Flex w={"100%"} justify={"right"}>
+                                    <Button
+                                      colorPalette={"orange"}
+                                      size={"sm"}
+                                      onClick={() => {
+                                        handleRestoreFromHistoryClick(
+                                          projectVersion,
+                                        );
+                                      }}
+                                      disabled={projectArchived}
+                                    >
+                                      Restore
+                                      <Icon name={"rewind"} />
+                                    </Button>
+                                  </Flex>
+                                </Flex>
+                              </Card.Footer>
+                            </Card>
+                          );
+                        })
+                      ) : (
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          No previous versions.
+                        </Text>
+                      )}
+                    </VStack>
+                  </Drawer.Body>
+                </Drawer.Content>
+              </Drawer.Positioner>
+            </Drawer.Root>
 
             {/* Archive Dialog */}
             <AlertDialog
@@ -1466,296 +1791,6 @@ const Project = () => {
           onClose={onBlockerClose}
           callback={onBlockerClose}
         />
-
-        <Drawer
-          open={historyOpen}
-          placement={"right"}
-          size={"md"}
-          onClose={onHistoryClose}
-        >
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader pb={"2"}>
-              <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text fontSize={"sm"} fontWeight={"bold"}>
-                  History
-                </Text>
-                <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Last modified:
-                    </Text>
-                    <Text fontSize={"sm"} fontWeight={"normal"}>
-                      {projectHistory.length > 0
-                        ? dayjs(projectHistory[0].timestamp).fromNow()
-                        : "never"}
-                    </Text>
-                  </Flex>
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Previous Versions:
-                    </Text>
-                    <Text fontSize={"sm"} fontWeight={"normal"}>
-                      {projectHistory.length}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </DrawerHeader>
-
-            <DrawerBody>
-              <VStack gap={"2"}>
-                {projectHistory && projectHistory.length > 0 ? (
-                  projectHistory.map((projectVersion) => {
-                    return (
-                      <Card
-                        w={"100%"}
-                        key={`v_${projectVersion.timestamp}`}
-                        variant={"simple"}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                      >
-                        <Card.Header p={"0"}>
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            gap={"1"}
-                            p={"2"}
-                          >
-                            <Text
-                              fontWeight={"semibold"}
-                              fontSize={"sm"}
-                              color={"gray.700"}
-                            >
-                              {projectVersion.name}
-                            </Text>
-                          </Flex>
-                        </Card.Header>
-
-                        <Card.Body px={"2"} py={"0"}>
-                          <Flex direction={"column"} gap={"2"}>
-                            {/* Description */}
-                            {_.isEqual(projectVersion.description, "") ? (
-                              <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                <Tag.Label>No Description</Tag.Label>
-                              </Tag.Root>
-                            ) : (
-                              <Text fontSize={"sm"}>
-                                {_.truncate(projectVersion.description, {
-                                  length: 56,
-                                })}
-                              </Text>
-                            )}
-
-                            <Flex direction={"row"} gap={"2"}>
-                              {/* Entities */}
-                              <Flex
-                                direction={"column"}
-                                gap={"1"}
-                                p={"2"}
-                                rounded={"md"}
-                                border={"1px"}
-                                borderColor={"gray.300"}
-                                grow={"1"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Entities
-                                </Text>
-                                {projectVersion.entities.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tag.Root
-                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
-                                      size={"sm"}
-                                    >
-                                      <Tag.Label>
-                                        <Linky
-                                          type={"projects"}
-                                          id={projectVersion.entities[0]}
-                                          size={"sm"}
-                                        />
-                                      </Tag.Label>
-                                    </Tag.Root>
-                                    {projectVersion.entities.length > 1 && (
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"sm"}
-                                      >
-                                        and {projectVersion.entities.length - 1}{" "}
-                                        others
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>No Entities</Text>
-                                )}
-                              </Flex>
-
-                              {/* Collaborators */}
-                              <Flex
-                                direction={"column"}
-                                gap={"1"}
-                                p={"2"}
-                                rounded={"md"}
-                                border={"1px"}
-                                borderColor={"gray.300"}
-                                grow={"1"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Collaborators
-                                </Text>
-                                {projectVersion.collaborators.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tag.Root
-                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
-                                      size={"sm"}
-                                    >
-                                      <Tag.Label>
-                                        {projectVersion.collaborators[0]}
-                                      </Tag.Label>
-                                    </Tag.Root>
-                                    {projectVersion.collaborators.length >
-                                      1 && (
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"sm"}
-                                      >
-                                        and{" "}
-                                        {projectVersion.collaborators.length -
-                                          1}{" "}
-                                        others
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>No Collaborators</Text>
-                                )}
-                              </Flex>
-                            </Flex>
-                          </Flex>
-                        </Card.Body>
-
-                        <Card.Footer p={"2"}>
-                          {/* Version information */}
-                          <Flex direction={"column"} gap={"2"} w={"100%"}>
-                            <Flex
-                              direction={"row"}
-                              gap={"2"}
-                              bg={"gray.100"}
-                              justify={"center"}
-                              rounded={"md"}
-                            >
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                gap={"1"}
-                                p={"2"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Version
-                                </Text>
-                                <Flex
-                                  direction={"row"}
-                                  gap={"2"}
-                                  align={"center"}
-                                >
-                                  <Tag.Root size={"sm"} colorPalette={"green"}>
-                                    <Tag.Label>
-                                      {projectVersion.version}
-                                    </Tag.Label>
-                                  </Tag.Root>
-                                </Flex>
-                                <Text
-                                  fontWeight={"semibold"}
-                                  fontSize={"xs"}
-                                  color={"gray.400"}
-                                >
-                                  {dayjs(projectVersion.timestamp).fromNow()}
-                                </Text>
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Message
-                                </Text>
-                                {_.isEqual(projectVersion.message, "") ||
-                                _.isNull(projectVersion.message) ? (
-                                  <Flex>
-                                    <Tag.Root
-                                      size={"sm"}
-                                      colorPalette={"orange"}
-                                    >
-                                      <Tag.Label>No Message</Tag.Label>
-                                    </Tag.Root>
-                                  </Flex>
-                                ) : (
-                                  <Tooltip
-                                    content={projectVersion.message}
-                                    disabled={
-                                      projectVersion.message.length < 32
-                                    }
-                                    showArrow
-                                  >
-                                    <Text fontSize={"sm"}>
-                                      {_.truncate(projectVersion.message, {
-                                        length: 32,
-                                      })}
-                                    </Text>
-                                  </Tooltip>
-                                )}
-                              </Flex>
-
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                gap={"1"}
-                                p={"2"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Author
-                                </Text>
-                                <Flex>
-                                  <ActorTag
-                                    orcid={projectVersion.author}
-                                    fallback={"Unknown User"}
-                                  />
-                                </Flex>
-                              </Flex>
-                            </Flex>
-
-                            <Flex w={"100%"} justify={"right"}>
-                              <Button
-                                colorPalette={"orange"}
-                                size={"sm"}
-                                onClick={() => {
-                                  handleRestoreFromHistoryClick(projectVersion);
-                                }}
-                                disabled={projectArchived}
-                              >
-                                Restore
-                                <Icon name={"rewind"} />
-                              </Button>
-                            </Flex>
-                          </Flex>
-                        </Card.Footer>
-                      </Card>
-                    );
-                  })
-                ) : (
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    No previous versions.
-                  </Text>
-                )}
-              </VStack>
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
       </Flex>
     </Content>
   );
