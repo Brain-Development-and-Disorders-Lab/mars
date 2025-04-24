@@ -9,11 +9,7 @@ import {
   Button,
   useDisclosure,
   Text,
-  MenuButton,
   Menu,
-  MenuList,
-  MenuItem,
-  MenuGroup,
   Spacer,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -42,11 +38,7 @@ const Navigation = () => {
   // Workspace context value
   const { workspace } = useWorkspace();
 
-  const {
-    open: importOpen,
-    onOpen: onImportOpen,
-    onClose: onImportClose,
-  } = useDisclosure();
+  const { open: importOpen, onOpen: onImportOpen } = useDisclosure();
 
   const {
     open: scanOpen,
@@ -269,100 +261,114 @@ const Navigation = () => {
         gap={"2"}
       >
         {/* Navigation items */}
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label={"Open Menu"}
-            display={{ base: "flex", lg: "none" }}
-            size={"md"}
-            bg={"white"}
-            icon={<Icon name={"list"} />}
-          />
-          <MenuList>
-            <MenuGroup title={"Menu"}>
-              <MenuItem
-                id={"navDashboardButtonMobile"}
-                icon={<Icon name={"dashboard"} />}
-                onClick={() => navigate("/")}
-              >
-                Dashboard
-              </MenuItem>
-              <MenuItem
-                id={"navSearchButtonMobile"}
-                icon={<Icon name={"search"} />}
-                onClick={() => navigate("/search")}
-              >
-                Search
-              </MenuItem>
-              <MenuItem
-                id={"navProjectButtonMobile"}
-                icon={<Icon name={"project"} />}
-                onClick={() => navigate("/projects")}
-              >
-                Projects
-              </MenuItem>
-              <MenuItem
-                id={"navEntitiesButtonMobile"}
-                icon={<Icon name={"entity"} />}
-                onClick={() => navigate("/entities")}
-              >
-                Entities
-              </MenuItem>
-              <MenuItem
-                id={"navTemplatesButtonMobile"}
-                icon={<Icon name={"template"} />}
-                onClick={() => navigate("/templates")}
-              >
-                Templates
-              </MenuItem>
-            </MenuGroup>
-            <MenuGroup title={"Tools"}>
-              <MenuItem
-                id={"navCreateButtonMobile"}
-                icon={<Icon name={"add"} />}
-                onClick={() => navigate("/create")}
-              >
-                Create
-              </MenuItem>
-              <MenuItem
-                id={"navScanButtonMobile"}
-                icon={<Icon name={"scan"} />}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("scan_modal_open");
-
-                  onScanOpen();
-                }}
-                disabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                Scan
-              </MenuItem>
-            </MenuGroup>
-
-            {/* Version number */}
-            <Flex
-              direction={"row"}
-              gap={"2"}
-              align={"center"}
-              justify={"center"}
+        <Menu.Root>
+          <Menu.Trigger asChild>
+            <IconButton
+              aria-label={"Open Menu"}
+              display={{ base: "flex", lg: "none" }}
+              size={"md"}
+              bg={"white"}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                v{process.env.VERSION}
-              </Text>
-            </Flex>
-          </MenuList>
-        </Menu>
+              <Icon name={"list"} />
+            </IconButton>
+          </Menu.Trigger>
+          <Menu.Positioner>
+            <Menu.Content>
+              <Menu.ItemGroup title={"Menu"}>
+                <Menu.ItemGroupLabel>Menu</Menu.ItemGroupLabel>
+                <Menu.Item
+                  id={"navDashboardButtonMobile"}
+                  value={"dashboard"}
+                  onClick={() => navigate("/")}
+                >
+                  <Icon name={"dashboard"} />
+                  Dashboard
+                </Menu.Item>
+                <Menu.Item
+                  id={"navSearchButtonMobile"}
+                  value={"search"}
+                  onClick={() => navigate("/search")}
+                >
+                  <Icon name={"search"} />
+                  Search
+                </Menu.Item>
+                <Menu.Item
+                  id={"navProjectButtonMobile"}
+                  value={"projects"}
+                  onClick={() => navigate("/projects")}
+                >
+                  <Icon name={"project"} />
+                  Projects
+                </Menu.Item>
+                <Menu.Item
+                  id={"navEntitiesButtonMobile"}
+                  value={"entities"}
+                  onClick={() => navigate("/entities")}
+                >
+                  <Icon name={"entity"} />
+                  Entities
+                </Menu.Item>
+                <Menu.Item
+                  id={"navTemplatesButtonMobile"}
+                  value={"templates"}
+                  onClick={() => navigate("/templates")}
+                >
+                  <Icon name={"template"} />
+                  Templates
+                </Menu.Item>
+              </Menu.ItemGroup>
+
+              <Menu.ItemGroup title={"Tools"}>
+                <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
+                <Menu.Item
+                  id={"navCreateButtonMobile"}
+                  value={"create"}
+                  onClick={() => navigate("/create")}
+                >
+                  <Icon name={"add"} />
+                  Create
+                </Menu.Item>
+                <Menu.Item
+                  id={"navScanButtonMobile"}
+                  value={"scan"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("scan_modal_open");
+
+                    onScanOpen();
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"scan"} />
+                  Scan
+                </Menu.Item>
+              </Menu.ItemGroup>
+
+              {/* Version number */}
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+                justify={"center"}
+              >
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.400"}
+                >
+                  v{process.env.VERSION}
+                </Text>
+              </Flex>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Menu.Root>
 
         {/* Workspace switcher */}
         <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
       </Flex>
 
       {/* `ImportDialog` component */}
-      <ImportDialog
-        open={importOpen}
-        onOpen={onImportOpen}
-        onClose={onImportClose}
-      />
+      <ImportDialog open={importOpen} />
 
       {/* `ScanModal` component */}
       <ScanModal open={scanOpen} onOpen={onScanOpen} onClose={onScanClose} />

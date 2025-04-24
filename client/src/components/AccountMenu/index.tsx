@@ -96,7 +96,7 @@ const AccountMenu = () => {
   return (
     <Flex gap={"4"} justify={"center"} w={"100%"}>
       <Menu.Root>
-        <Menu.Trigger>
+        <Menu.Trigger asChild>
           <Button
             h={"100%"}
             w={"100%"}

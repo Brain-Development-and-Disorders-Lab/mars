@@ -233,6 +233,7 @@ const Entities = () => {
     {
       label: `Export Selected`,
       icon: "download",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, rows: any) => {
         // Export rows that have been selected
         const selectedEntities: IGenericItem[] = [];

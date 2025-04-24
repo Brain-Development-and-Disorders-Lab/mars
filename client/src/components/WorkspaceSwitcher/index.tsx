@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
+  Button,
   Dialog,
   Flex,
   Menu,
-  MenuButton,
-  MenuDivider,
-  MenuGroup,
-  MenuItem,
-  MenuList,
   Spacer,
   Spinner,
   Text,
@@ -238,127 +234,133 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
   return (
     <Flex id={props.id ? props.id : "workspaceSwitcher"}>
-      <Menu isOpen={isOpen} autoSelect={false}>
-        <MenuButton
-          h={"100%"}
-          w={"100%"}
-          rounded={"md"}
-          border={"1px"}
-          borderColor={"gray.300"}
-          bg={"white"}
-          _hover={{ bg: "gray.300" }}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            align={"center"}
-            p={"2"}
-            ml={"2"}
-            mr={"2"}
+      <Menu.Root open={isOpen}>
+        <Menu.Trigger>
+          <Button
+            h={"100%"}
+            w={"100%"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+            bg={"white"}
+            _hover={{ bg: "gray.300" }}
+            onClick={() => setIsOpen(!isOpen)}
           >
-            <Icon name={"workspace"} />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(label, { length: 14 })}
-            </Text>
-            <Spacer />
-            <Icon name={"c_expand"} />
-          </Flex>
-        </MenuButton>
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              p={"2"}
+              ml={"2"}
+              mr={"2"}
+            >
+              <Icon name={"workspace"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(label, { length: 14 })}
+              </Text>
+              <Spacer />
+              <Icon name={"c_expand"} />
+            </Flex>
+          </Button>
+        </Menu.Trigger>
 
-        <MenuList bg={"white"}>
-          <MenuGroup>
-            {/* Create a list of all Workspaces the user has access to */}
-            {workspaces.length > 0 ? (
-              workspaces.map((accessible) => {
-                return (
-                  <MenuItem
-                    onClick={() => handleWorkspaceClick(accessible)}
-                    key={"w_" + accessible._id}
-                  >
-                    <Flex
-                      direction={"row"}
-                      gap={"2"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"space-between"}
+        <Menu.Positioner>
+          <Menu.Content bg={"white"}>
+            <Menu.ItemGroup>
+              {/* Create a list of all Workspaces the user has access to */}
+              {workspaces.length > 0 ? (
+                workspaces.map((accessible) => {
+                  return (
+                    <Menu.Item
+                      value={accessible.name}
+                      onClick={() => handleWorkspaceClick(accessible)}
+                      key={"w_" + accessible._id}
                     >
-                      <Tooltip content={accessible.name} showArrow>
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          {_.truncate(accessible.name, { length: 24 })}
-                        </Text>
-                      </Tooltip>
-                      {workspace === accessible._id && (
-                        <Icon name={"check"} color={"green.600"} />
-                      )}
-                    </Flex>
-                  </MenuItem>
-                );
-              })
-            ) : (
-              <MenuItem disabled>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"space-between"}
+                      >
+                        <Tooltip content={accessible.name} showArrow>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            {_.truncate(accessible.name, { length: 24 })}
+                          </Text>
+                        </Tooltip>
+                        {workspace === accessible._id && (
+                          <Icon name={"check"} color={"green.600"} />
+                        )}
+                      </Flex>
+                    </Menu.Item>
+                  );
+                })
+              ) : (
+                <Menu.Item value={"no-workspaces"} disabled>
+                  <Flex
+                    direction={"row"}
+                    gap={"2"}
+                    w={"100%"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      No Workspaces
+                    </Text>
+                  </Flex>
+                </Menu.Item>
+              )}
+            </Menu.ItemGroup>
+
+            <Menu.ItemGroup>
+              {/* Option to create a new Workspace */}
+              <Menu.Item
+                value={"edit"}
+                onClick={() => handleUpdateClick()}
+                disabled={workspaces.length === 0}
+              >
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"edit"} />
+                  <Text fontSize={"sm"}>Edit workspace</Text>
+                </Flex>
+              </Menu.Item>
+              <Menu.Item value={"create"} onClick={() => handleCreateClick()}>
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"add"} />
+                  <Text fontSize={"sm"}>Create workspace</Text>
+                </Flex>
+              </Menu.Item>
+            </Menu.ItemGroup>
+
+            <Menu.Separator />
+
+            <Menu.ItemGroup>
+              <Menu.Item value={"account"} onClick={() => handleProfileClick()}>
                 <Flex
+                  id={"accountSettingsItem"}
                   direction={"row"}
                   gap={"2"}
-                  w={"100%"}
                   align={"center"}
-                  justify={"space-between"}
                 >
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    No Workspaces
-                  </Text>
+                  <Icon name={"person"} />
+                  <Text fontSize={"sm"}>Account settings</Text>
                 </Flex>
-              </MenuItem>
-            )}
-          </MenuGroup>
-
-          <MenuGroup>
-            {/* Option to create a new Workspace */}
-            <MenuItem
-              onClick={() => handleUpdateClick()}
-              disabled={workspaces.length === 0}
-            >
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"edit"} />
-                <Text fontSize={"sm"}>Edit workspace</Text>
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={() => handleCreateClick()}>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"add"} />
-                <Text fontSize={"sm"}>Create workspace</Text>
-              </Flex>
-            </MenuItem>
-          </MenuGroup>
-
-          <MenuDivider />
-
-          <MenuGroup>
-            <MenuItem onClick={() => handleProfileClick()}>
-              <Flex
-                id={"accountSettingsItem"}
-                direction={"row"}
-                gap={"2"}
-                align={"center"}
-              >
-                <Icon name={"person"} />
-                <Text fontSize={"sm"}>Account settings</Text>
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={() => logout()}>
-              <Flex
-                id={"accountLogoutItem"}
-                direction={"row"}
-                gap={"2"}
-                align={"center"}
-              >
-                <Icon name={"b_right"} />
-                <Text fontSize={"sm"}>Log out</Text>
-              </Flex>
-            </MenuItem>
-          </MenuGroup>
-        </MenuList>
-      </Menu>
+              </Menu.Item>
+              <Menu.Item value={"logout"} onClick={() => logout()}>
+                <Flex
+                  id={"accountLogoutItem"}
+                  direction={"row"}
+                  gap={"2"}
+                  align={"center"}
+                >
+                  <Icon name={"b_right"} />
+                  <Text fontSize={"sm"}>Log out</Text>
+                </Flex>
+              </Menu.Item>
+            </Menu.ItemGroup>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Menu.Root>
 
       <Dialog.Root
         open={transitionOpen}
