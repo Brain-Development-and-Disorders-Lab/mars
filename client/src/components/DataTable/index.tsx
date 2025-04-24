@@ -16,6 +16,7 @@ import {
   Input,
   InputRightElement,
   Portal,
+  createListCollection,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -30,6 +31,7 @@ import Icon from "@components/Icon";
 // Existing and custom types
 import { DataTableProps } from "@types";
 declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
   }
@@ -483,24 +485,37 @@ const DataTable = (props: DataTableProps) => {
           <Flex gap={"2"} wrap={"wrap"}>
             <Flex gap={"2"} align={"center"}>
               <Text fontSize={"sm"}>Show:</Text>
-              <Select
-                id={"select-page-size"}
+              <Select.Root
+                key={"select-pagesize"}
                 size={"sm"}
-                rounded={"md"}
-                value={table.getState().pagination.pageSize}
-                onChange={(event) => {
-                  table.setPageSize(Number(event.target.value));
-                }}
-                invalid={false}
+                collection={createListCollection({ items: [10, 20, 50, 100] })}
+                onValueChange={(details) =>
+                  table.setPageSize(Number(details.value[0]))
+                }
               >
-                {[10, 20, 50, 100].map((size) => {
-                  return (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  );
-                })}
-              </Select>
+                <Select.HiddenSelect />
+                <Select.Label>Select Page Size</Select.Label>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder={"Select Page Size"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {[10, 20, 50, 100].map((count) => (
+                        <Select.Item item={count} key={count}>
+                          {count}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
             </Flex>
 
             <Flex direction={"row"} gap={"2"} align={"center"}>

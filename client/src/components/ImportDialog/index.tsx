@@ -23,6 +23,9 @@ import {
   Spacer,
   Fieldset,
   Field,
+  ListCollection,
+  Portal,
+  createListCollection,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -74,9 +77,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [fileType, setFileType] = useState(CSV_MIME_TYPE);
   const [fileName, setFileName] = useState("");
 
-  // Page states
-  const [isLoaded, setIsLoaded] = useState(false);
-
   // Operation and button states
   const [importLoading, setImportLoading] = useState(false);
   const [continueDisabled, setContinueDisabled] = useState(true);
@@ -122,9 +122,19 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
+  const [columnsCollection, setColumnsCollection] = useState(
+    {} as ListCollection<string>,
+  );
 
-  // Data used to assign for mapping
-  const [projects, setProjects] = useState([] as IGenericItem[]);
+  // Projects
+  const [projectsCollection, setProjectsCollection] = useState(
+    {} as ListCollection<IGenericItem>,
+  );
+
+  // Templates
+  const [templatesCollection, setTemplatesCollection] = useState(
+    {} as ListCollection<AttributeModel>,
+  );
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
@@ -132,7 +142,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
   );
@@ -170,10 +179,8 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [
-    getMappingData,
-    { loading: mappingDataLoading, error: mappingDataError },
-  ] = useLazyQuery(GET_MAPPING_DATA);
+  const [getMappingData, { error: mappingDataError }] =
+    useLazyQuery(GET_MAPPING_DATA);
 
   const REVIEW_ENTITY_CSV = gql`
     mutation ReviewEntityCSV(
@@ -446,12 +453,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
       if (response.data && response.data.prepareEntityCSV.length > 0) {
         // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet = response.data.prepareEntityCSV.filter(
-          (column: string) => {
+        const filteredColumnSet: string[] =
+          response.data.prepareEntityCSV.filter((column: string) => {
             return !_.startsWith(column, "__EMPTY");
-          },
-        );
+          });
         setColumns(filteredColumnSet);
+        setColumnsCollection(
+          createListCollection({ items: filteredColumnSet }),
+        );
 
         setImportLoading(true);
         const mappingResult = await setupMapping();
@@ -481,16 +490,19 @@ const ImportDialog = (props: ImportDialogProps) => {
    * and Attributes.
    */
   const setupMapping = async (): Promise<boolean> => {
-    setIsLoaded(!mappingDataLoading);
     setImportLoading(true);
     const response = await getMappingData();
     setImportLoading(false);
 
     if (response.data?.templates) {
-      setTemplates(response.data.templates);
+      setTemplatesCollection(
+        createListCollection({ items: response.data.templates }),
+      );
     }
     if (response.data?.projects) {
-      setProjects(response.data.projects);
+      setProjectsCollection(
+        createListCollection({ items: response.data.projects }),
+      );
     }
 
     if (mappingDataError) {
@@ -504,7 +516,6 @@ const ImportDialog = (props: ImportDialogProps) => {
       return false;
     }
 
-    setIsLoaded(!mappingDataLoading);
     return true;
   };
 
@@ -542,7 +553,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: any; file: any } = {
+    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
       columnMapping: {
         namePrefix: namePrefixField,
         name: nameField,
@@ -612,7 +623,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const finishImportEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: IColumnMapping; file: any } = {
+    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
       columnMapping: {
         namePrefix: namePrefixField,
         name: nameField,
@@ -677,27 +688,39 @@ const ImportDialog = (props: ImportDialogProps) => {
    * @returns {ReactElement}
    */
   const getSelectComponent = (
-    id: string,
-    value: any,
-    setValue: React.SetStateAction<any>,
+    key: string,
+    onValueChange: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     return (
-      <Select
-        id={id}
+      <Select.Root
+        key={key}
         size={"sm"}
-        rounded={"md"}
-        placeholder={"Select Column"}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        collection={columnsCollection}
+        onValueChange={(details) => onValueChange(details.items[0])}
       >
-        {columns.map((column) => {
-          return (
-            <option key={column} value={column}>
-              {column}
-            </option>
-          );
-        })}
-      </Select>
+        <Select.HiddenSelect />
+        <Select.Label>Select Column</Select.Label>
+        <Select.Control>
+          <Select.Trigger>
+            <Select.ValueText placeholder={"Select Column"} />
+          </Select.Trigger>
+          <Select.IndicatorGroup>
+            <Select.Indicator />
+          </Select.IndicatorGroup>
+        </Select.Control>
+        <Portal>
+          <Select.Positioner>
+            <Select.Content>
+              {columnsCollection.items.map((column: string) => (
+                <Select.Item item={column} key={column}>
+                  {column}
+                  <Select.ItemIndicator />
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Positioner>
+        </Portal>
+      </Select.Root>
     );
   };
 
@@ -848,10 +871,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     // Reset import and mapping state
     setColumns([]);
+    setColumnsCollection(createListCollection({ items: [] as string[] }));
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setTemplates([]);
+    setTemplatesCollection({} as ListCollection<AttributeModel>);
     setAttributesField([]);
   };
 
@@ -887,18 +911,40 @@ const ImportDialog = (props: ImportDialogProps) => {
                 File contents:
               </Text>
               <Flex>
-                <Select
-                  value={importType}
-                  onChange={(event) =>
-                    setImportType(event.target.value as "entities" | "template")
-                  }
+                <Select.Root
+                  key={"select-import-type"}
                   size={"sm"}
-                  rounded={"md"}
+                  collection={createListCollection({
+                    items: ["Entites", "Template"],
+                  })}
+                  onValueChange={(details) =>
+                    setImportType(details.items[0] as "entities" | "template")
+                  }
                   disabled={isTypeSelectDisabled}
                 >
-                  <option value={"entities"}>Entities</option>
-                  <option value={"template"}>Template</option>
-                </Select>
+                  <Select.HiddenSelect />
+                  <Select.Label>Select Export Type</Select.Label>
+                  <Select.Control>
+                    <Select.Trigger>
+                      <Select.ValueText placeholder={"Select Export Type"} />
+                    </Select.Trigger>
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal>
+                    <Select.Positioner>
+                      <Select.Content>
+                        {["Entites", "Template"].map((exportType: string) => (
+                          <Select.Item item={exportType} key={exportType}>
+                            {exportType}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
               </Flex>
               <Spacer />
               <Flex py={"2"} gap={"1"} align={"center"}>
@@ -1169,11 +1215,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               Name
                               <Field.RequiredIndicator />
                             </Field.Label>
-                            {getSelectComponent(
-                              "import_name",
-                              nameField,
-                              setNameField,
-                            )}
+                            {getSelectComponent("import_name", setNameField)}
                             <Field.HelperText>
                               Column containing Entity names
                             </Field.HelperText>
@@ -1205,12 +1247,12 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                           <Field.Root>
                             <Field.Label>Name</Field.Label>
-                            <Select
+                            <Input
                               size={"sm"}
                               rounded={"md"}
                               placeholder={"Defined in JSON"}
                               disabled
-                              isReadOnly
+                              readOnly
                             />
                             <Field.HelperText>
                               Field containing Entity names
@@ -1229,7 +1271,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Field.Label>Description</Field.Label>
                           {getSelectComponent(
                             "import_description",
-                            descriptionField,
                             setDescriptionField,
                           )}
                           <Field.HelperText>
@@ -1240,24 +1281,44 @@ const ImportDialog = (props: ImportDialogProps) => {
                         {/* Project */}
                         <Field.Root>
                           <Field.Label>Project</Field.Label>
-                          <Select
-                            id={"import_projects"}
+                          <Select.Root
+                            key={"select-project"}
                             size={"sm"}
-                            rounded={"md"}
-                            placeholder={"Select Project"}
-                            value={projectField}
-                            onChange={(event) =>
-                              setProjectField(event.target.value)
+                            collection={projectsCollection}
+                            onValueChange={(details) =>
+                              setProjectField(details.items[0]._id)
                             }
                           >
-                            {projects.map((project) => {
-                              return (
-                                <option key={project._id} value={project._id}>
-                                  {project.name}
-                                </option>
-                              );
-                            })}
-                          </Select>
+                            <Select.HiddenSelect />
+                            <Select.Label>Select Project</Select.Label>
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText
+                                  placeholder={"Select Project"}
+                                />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {projectsCollection.items.map(
+                                    (project: IGenericItem) => (
+                                      <Select.Item
+                                        item={project}
+                                        key={project._id}
+                                      >
+                                        {project.name}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ),
+                                  )}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
                           <Field.HelperText>
                             Add Entities to a Project
                           </Field.HelperText>
@@ -1326,24 +1387,23 @@ const ImportDialog = (props: ImportDialogProps) => {
                         <Field.Root>
                           <Tooltip
                             content={
-                              templates.length > 0
+                              templatesCollection.items.length > 0
                                 ? "Select an existing Template"
                                 : "No Templates exist yet"
                             }
                             showArrow
                           >
-                            <Select
+                            <Select.Root
+                              key={"select-template"}
                               size={"sm"}
-                              placeholder={"Select Template Attribute"}
-                              disabled={templates.length === 0}
-                              onChange={(event) => {
-                                if (
-                                  !_.isEqual(event.target.value.toString(), "")
-                                ) {
-                                  for (const template of templates) {
+                              collection={templatesCollection}
+                              onValueChange={(details) => {
+                                const selectedTemplate = details.items[0];
+                                if (!_.isEqual(selectedTemplate._id, "")) {
+                                  for (const template of templatesCollection.items) {
                                     if (
                                       _.isEqual(
-                                        event.target.value.toString(),
+                                        selectedTemplate._id,
                                         template._id,
                                       )
                                     ) {
@@ -1364,20 +1424,38 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   }
                                 }
                               }}
+                              disabled={templatesCollection.items.length === 0}
                             >
-                              {isLoaded &&
-                                templates.map((template) => {
-                                  return (
-                                    <option
-                                      key={template._id}
-                                      value={template._id}
-                                    >
-                                      {template.name}
-                                    </option>
-                                  );
-                                })}
-                              ;
-                            </Select>
+                              <Select.HiddenSelect />
+                              <Select.Label>Select Project</Select.Label>
+                              <Select.Control>
+                                <Select.Trigger>
+                                  <Select.ValueText
+                                    placeholder={"Select Project"}
+                                  />
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                  <Select.Indicator />
+                                </Select.IndicatorGroup>
+                              </Select.Control>
+                              <Portal>
+                                <Select.Positioner>
+                                  <Select.Content>
+                                    {templatesCollection.items.map(
+                                      (template: AttributeModel) => (
+                                        <Select.Item
+                                          item={template}
+                                          key={template._id}
+                                        >
+                                          {template.name}
+                                          <Select.ItemIndicator />
+                                        </Select.Item>
+                                      ),
+                                    )}
+                                  </Select.Content>
+                                </Select.Positioner>
+                              </Portal>
+                            </Select.Root>
                           </Tooltip>
                         </Field.Root>
                       </Fieldset.Content>
@@ -1602,7 +1680,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                   });
 
                   // Close the `ImportDialog`
-                  props.onClose();
                   resetState();
                 }}
               >

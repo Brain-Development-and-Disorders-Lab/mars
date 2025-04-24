@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Input, Flex, Select } from "@chakra-ui/react";
+import {
+  Input,
+  Flex,
+  Select,
+  createListCollection,
+  Portal,
+} from "@chakra-ui/react";
 import { ValueEditorProps } from "react-querybuilder";
 
 // Custom components
@@ -18,7 +24,9 @@ const SearchQueryValue = ({
 }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
   const [selected, setSelected] = useState({} as IGenericItem);
-  const [operators, setOperators] = useState(["contains", "does not contain"]);
+  const [operatorsCollection, setOperatorsCollection] = useState(
+    createListCollection({ items: ["contains", "does not contain"] }),
+  );
 
   // `Attribute` field state
   const [attributeValue, setAttributeValue] = useState("");
@@ -35,17 +43,23 @@ const SearchQueryValue = ({
       case "text":
       case "url":
         setAttributeValueInputType("text");
-        setOperators(["contains", "does not contain"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["contains", "does not contain"] }),
+        );
         setAttributeValueOperator("contains");
         break;
       case "date":
         setAttributeValueInputType("date");
-        setOperators(["equals", ">", "<"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["equals", ">", "<"] }),
+        );
         setAttributeValueOperator("equals");
         break;
       case "number":
         setAttributeValueInputType("number");
-        setOperators(["equals", ">", "<"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["equals", ">", "<"] }),
+        );
         setAttributeValueOperator("equals");
         break;
     }
@@ -64,7 +78,7 @@ const SearchQueryValue = ({
    * Handle the input value changing
    * @param event Event object and data
    */
-  const handleInputChange = (event: any) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (_.isEqual(field, "attributes")) {
       // Handle `attributes` field differently
       setAttributeValue(event.target.value);
@@ -137,29 +151,73 @@ const SearchQueryValue = ({
           w={"100%"}
         >
           <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-            <Select
-              className={"rule-value-type"}
-              value={attributeValueType}
-              onChange={(event) =>
-                updateValueType(event.target.value as IValueType)
+            {/* Value type `Select` */}
+            <Select.Root
+              key={"select-value-type"}
+              size={"sm"}
+              collection={createListCollection({
+                items: ["Text", "URL", "Number", "Date"],
+              })}
+              onValueChange={(details) =>
+                updateValueType(details.items[0] as IValueType)
               }
             >
-              <option value={"text"}>Text</option>
-              <option value={"url"}>URL</option>
-              <option value={"number"}>Number</option>
-              <option value={"date"}>Date</option>
-            </Select>
-            <Select
-              className={"rule-value-operators"}
-              value={attributeValueOperator}
-              onChange={(event) => handleOperatorChange(event.target.value)}
+              <Select.HiddenSelect />
+              <Select.Label>Select Value Type</Select.Label>
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText placeholder={"Select Value type"} />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {["Text", "URL", "Number", "Date"].map((valueType) => (
+                      <Select.Item item={valueType} key={valueType}>
+                        {valueType}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
+
+            {/* Operator `Select` */}
+            <Select.Root
+              key={"select-operator"}
+              size={"sm"}
+              collection={operatorsCollection}
+              onValueChange={(details) =>
+                handleOperatorChange(details.items[0])
+              }
             >
-              {operators.map((operator) => (
-                <option key={operator} value={operator}>
-                  {operator}
-                </option>
-              ))}
-            </Select>
+              <Select.HiddenSelect />
+              <Select.Label>Select Operator</Select.Label>
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText placeholder={"Select Operator"} />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {operatorsCollection.items.map((operator) => (
+                      <Select.Item item={operator} key={operator}>
+                        {operator}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
           </Flex>
           <Flex w={"100%"}>
             <Input

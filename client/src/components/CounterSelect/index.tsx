@@ -4,11 +4,14 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  createListCollection,
   Dialog,
   Field,
   Fieldset,
   Flex,
   Input,
+  ListCollection,
+  Portal,
   Select,
   Text,
   useDisclosure,
@@ -52,6 +55,11 @@ const CounterSelect = (props: CounterProps) => {
   // Counter previews
   const [currentCounterPreview, setCurrentCounterPreview] = useState("");
   const [nextCounterPreview, setNextCounterPreview] = useState("");
+
+  // Counter collection for `Select`
+  const [counterCollection, setCounterCollection] = useState(
+    {} as ListCollection<CounterModel>,
+  );
 
   // Overall error state
   const isValidInput =
@@ -124,11 +132,14 @@ const CounterSelect = (props: CounterProps) => {
 
   /**
    * Handle selection of a Counter
-   * @param event `HTMLSelectElement` `ChangeEvent` raised when option selected
+   * @param details
    */
-  const handleSelectCounter = (event: ChangeEvent<HTMLSelectElement>) => {
-    if (event.target.value) {
-      updateSelectedCounter(event.target.value);
+  const handleSelectCounter = (details: {
+    value: string[];
+    items: CounterModel[];
+  }) => {
+    if (details.value.length > 0) {
+      updateSelectedCounter(details.value[0]);
     }
   };
 
@@ -136,6 +147,11 @@ const CounterSelect = (props: CounterProps) => {
   useEffect(() => {
     if (counterData?.counters) {
       setCounters(counterData.counters);
+      setCounterCollection(
+        createListCollection<CounterModel>({
+          items: counterData,
+        }),
+      );
     }
   }, [counterData]);
 
@@ -280,22 +296,35 @@ const CounterSelect = (props: CounterProps) => {
   return (
     <Flex direction={"column"} gap={"2"} w={"100%"}>
       <Flex w={"100%"} gap={"2"}>
-        <Select
-          value={selected._id}
-          placeholder={counters.length === 0 ? "No Counters" : "Select Counter"}
+        <Select.Root
+          key={"select-counter"}
           size={"sm"}
-          rounded={"md"}
-          onChange={handleSelectCounter}
-          disabled={counters.length === 0}
+          collection={counterCollection}
+          onValueChange={handleSelectCounter}
         >
-          {counters.map((o: CounterModel) => {
-            return (
-              <option key={o._id} value={o._id}>
-                {o.name}
-              </option>
-            );
-          })}
-        </Select>
+          <Select.HiddenSelect />
+          <Select.Label>Select Counter</Select.Label>
+          <Select.Control>
+            <Select.Trigger>
+              <Select.ValueText placeholder={"Select Counter"} />
+            </Select.Trigger>
+            <Select.IndicatorGroup>
+              <Select.Indicator />
+            </Select.IndicatorGroup>
+          </Select.Control>
+          <Portal>
+            <Select.Positioner>
+              <Select.Content>
+                {counterCollection.items.map((counter) => (
+                  <Select.Item item={counter} key={counter._id}>
+                    {counter.name}
+                    <Select.ItemIndicator />
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Positioner>
+          </Portal>
+        </Select.Root>
 
         {/* Button to create new Counter */}
         {props.showCreate && (
