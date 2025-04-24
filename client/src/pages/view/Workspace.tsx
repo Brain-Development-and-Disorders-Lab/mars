@@ -7,7 +7,6 @@ import {
   Button,
   IconButton,
   Text,
-  useToast,
   useBreakpoint,
   Heading,
   Code,
@@ -23,6 +22,7 @@ import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -50,7 +50,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
 
 const Workspace = () => {
-  const toast = useToast();
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
 
@@ -271,13 +270,12 @@ const Workspace = () => {
       }
 
       if (workspaceError || workspaceDataError) {
-        toast({
+        toaster.create({
           title: "Error",
           description: "Unable to refresh Workspace information",
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     };
@@ -388,40 +386,36 @@ const Workspace = () => {
     });
 
     if (workspaceUpdateError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update Workspace",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveEntitiesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Entities",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveProjectsError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Projects",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveTemplatesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Templates",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       navigate("/");

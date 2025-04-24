@@ -12,10 +12,10 @@ import {
   Spinner,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 
 // GraphQL resources
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
@@ -34,7 +34,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
 
 const WorkspaceSwitcher = (props: { id?: string }) => {
-  const toast = useToast();
   const navigate = useNavigate();
 
   // Modal state for transition overlay
@@ -102,13 +101,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     });
 
     if (_.isUndefined(workspaceResult.data) && !_.isUndefined(workspaceError)) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to get name of current Workspace",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (!_.isUndefined(workspaceResult.data)) {
       setLabel(workspaceResult.data.workspace.name);
@@ -146,13 +144,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     setIsLoading(false);
 
     if (workspacesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update list of Workspaces",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -170,13 +167,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
 
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Workspaces",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [loading]);

@@ -6,7 +6,6 @@ import {
   Flex,
   Button,
   Text,
-  useToast,
   Input,
   Tag,
   Dialog,
@@ -15,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
+import { toaster } from "@components/Toast";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -37,8 +37,6 @@ const Uploader = (props: {
   const [displayName, setDisplayName] = useState("");
   const [displayType, setDisplayType] = useState("");
 
-  const toast = useToast();
-
   const UPLOAD_ATTACHMENT = gql`
     mutation UploadAttachment($target: String!, $file: Upload!) {
       uploadAttachment(target: $target, file: $file) {
@@ -58,13 +56,12 @@ const Uploader = (props: {
     });
 
     if (error) {
-      toast({
+      toaster.create({
         title: "Upload Error",
-        status: "error",
+        type: "error",
         description: "Error occurred while uploading file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setIsError(true);
     }
@@ -81,13 +78,12 @@ const Uploader = (props: {
       setIsError(false);
       setIsLoaded(true);
 
-      toast({
+      toaster.create({
         title: "Uploaded",
-        status: "success",
+        type: "success",
         description: `Uploaded file successfully`,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -213,14 +209,13 @@ const Uploader = (props: {
                                 ) {
                                   setFile(event.target.files[0]);
                                 } else {
-                                  toast({
+                                  toaster.create({
                                     title: "Warning",
-                                    status: "warning",
+                                    type: "warning",
                                     description:
                                       "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
                                     duration: 4000,
-                                    position: "bottom-right",
-                                    isClosable: true,
+                                    closable: true,
                                   });
                                 }
                               }

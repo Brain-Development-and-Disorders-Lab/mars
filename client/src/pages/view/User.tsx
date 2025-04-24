@@ -5,7 +5,6 @@ import {
   Input,
   Button,
   Text,
-  useToast,
   Heading,
   useBreakpoint,
   IconButton,
@@ -17,6 +16,7 @@ import {
   Field,
 } from "@chakra-ui/react";
 import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
@@ -50,7 +50,6 @@ import dayjs from "dayjs";
  * @return {React.JSX.Element}
  */
 const APIKeyItem = (props: { apiKey: APIKey }) => {
-  const toast = useToast();
   const [isRevoked, setIsRevoked] = useState(
     dayjs(props.apiKey.expires).diff(Date.now()) < 0,
   );
@@ -77,24 +76,22 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
     if (result.data?.revokeKey && result.data.revokeKey.success) {
       setIsRevoked(true);
-      toast({
+      toaster.create({
         title: "Success",
         description: "API key revoked successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (revokeKeyError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to revoke API key",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -168,7 +165,6 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 };
 
 const User = () => {
-  const toast = useToast();
   const breakpoint = useBreakpoint();
 
   // Authentication
@@ -300,13 +296,12 @@ const User = () => {
     });
 
     if (userUpdateError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update User information",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       // Update the displayed name
@@ -340,13 +335,12 @@ const User = () => {
     });
 
     if (generateKeyError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update User information",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 

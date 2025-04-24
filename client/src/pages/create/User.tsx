@@ -9,12 +9,12 @@ import {
   Input,
   Tag,
   Text,
-  useToast,
 } from "@chakra-ui/react";
 
 // Custom components
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -30,8 +30,6 @@ import { useAuthentication } from "@hooks/useAuthentication";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 const User = () => {
-  const toast = useToast();
-
   const { token } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
   const navigate = useNavigate();
@@ -110,22 +108,20 @@ const User = () => {
     }
 
     if (userUpdateError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Failed to update User information",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (userError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Failed to get updated User information",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };

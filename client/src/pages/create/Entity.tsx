@@ -30,7 +30,6 @@ import {
   useBreakpoint,
   useDisclosure,
   useSteps,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
@@ -40,6 +39,7 @@ import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -87,8 +87,7 @@ const Entity = () => {
     count: pageSteps.length,
   });
 
-  const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen } = useDisclosure();
   const { token } = useAuthentication();
 
   // Navigation and routing
@@ -238,13 +237,12 @@ const Entity = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -297,13 +295,12 @@ const Entity = () => {
 
         if (incrementCounterError) {
           // Raise an error and cancel the create operation
-          toast({
+          toaster.create({
             title: "Error",
-            status: "error",
+            type: "error",
             description: incrementCounterError.message,
             duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
+            closable: true,
           });
           setIsSubmitting(false);
           return;

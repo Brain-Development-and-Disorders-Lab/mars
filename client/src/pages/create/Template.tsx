@@ -15,12 +15,12 @@ import {
   Spacer,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -41,8 +41,7 @@ import { usePostHog } from "posthog-js/react";
 
 const Template = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  const { isOpen, onOpen } = useDisclosure();
 
   const { token } = useAuthentication();
 
@@ -127,13 +126,12 @@ const Template = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: error.message,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);

@@ -1,14 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  Dialog,
-  Flex,
-  Input,
-  Spinner,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
+import { Button, Dialog, Flex, Input, Spinner, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // QR code scanner components
 import {
@@ -37,7 +30,6 @@ const REGION_ID = "scanner-region";
 
 const ScanModal = (props: ScanModalProps) => {
   const posthog = usePostHog();
-  const toast = useToast();
   const navigate = useNavigate();
 
   // State to manage identifier input visibility
@@ -143,13 +135,12 @@ const ScanModal = (props: ScanModalProps) => {
 
     if (error || _.isUndefined(results.data)) {
       // Entity does not exist
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: `Entity with identifier "${input}" not found`,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, 200);
@@ -172,14 +163,13 @@ const ScanModal = (props: ScanModalProps) => {
     if (error || _.isUndefined(results.data)) {
       // Entity does not exist
       if (!toast.isActive("entityNotExist")) {
-        toast({
+        toaster.create({
           id: "entityNotExist",
           title: "Error",
-          status: "error",
+          type: "error",
           description: `Entity with identifier "${manualInputValue}" not found`,
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }
@@ -201,14 +191,13 @@ const ScanModal = (props: ScanModalProps) => {
           codeScanner?.clear();
         })
         .catch((error) => {
-          toast({
+          toaster.create({
             id: "scanner-error",
             title: "Scanning Error",
             description: error,
-            status: "error",
+            type: "error",
             duration: 3000,
-            isClosable: true,
-            position: "bottom-right",
+            closable: true,
           });
         });
     }

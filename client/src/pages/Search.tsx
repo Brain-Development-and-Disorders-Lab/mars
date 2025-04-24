@@ -19,7 +19,6 @@ import {
   Tag,
   Text,
   useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -28,6 +27,7 @@ import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -54,7 +54,6 @@ const Search = () => {
 
   const navigate = useNavigate();
   const breakpoint = useBreakpoint();
-  const toast = useToast();
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
@@ -123,13 +122,12 @@ const Search = () => {
 
     if (error) {
       setIsError(true);
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 

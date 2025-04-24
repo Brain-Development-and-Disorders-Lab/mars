@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { TabPanel, Flex, Button, useToast } from "@chakra-ui/react";
+import { TabPanel, Flex, Button } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { Information } from "@components/Label";
+import { toaster } from "@components/Toast";
 
 // `react-querybuilder` imports
 import QueryBuilder, {
@@ -259,8 +260,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   const [query, setQuery] = useState(initialQuery);
   const [isValid, setIsValid] = useState(false);
 
-  const toast = useToast();
-
   const onSearchBuiltQuery = async () => {
     setIsSearching(true);
     setHasSearched(true);
@@ -286,13 +285,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     }
 
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 

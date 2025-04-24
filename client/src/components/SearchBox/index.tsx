@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import {
   Flex,
   Input,
-  useToast,
   Text,
   Popover,
   PopoverTrigger,
@@ -26,6 +25,7 @@ import {
   InputLeftElement,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { IGenericItem, SearchBoxProps } from "@types";
@@ -42,7 +42,6 @@ const MAX_RESULTS = 5;
 
 const SearchBox = (props: SearchBoxProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
 
   const { open, onToggle, onClose } = useDisclosure();
   const [query, setQuery] = useState("");
@@ -107,13 +106,12 @@ const SearchBox = (props: SearchBoxProps) => {
 
     if (error) {
       setIsError(true);
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 

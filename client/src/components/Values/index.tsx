@@ -30,7 +30,6 @@ import {
   Text,
   VStack,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
@@ -38,6 +37,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { DataTableAction, IGenericItem, IValue } from "@types";
@@ -59,8 +59,6 @@ const Values = (props: {
   requireData?: true | false;
   permittedValues?: string[];
 }) => {
-  const toast = useToast();
-
   const { open, onOpen, onClose } = useDisclosure();
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
@@ -735,13 +733,12 @@ const Values = (props: {
                           setOptions([...options, option.toString()]);
                           setOption("");
                         } else {
-                          toast({
+                          toaster.create({
                             title: "Warning",
                             description: "Can't add duplicate options.",
-                            status: "warning",
+                            type: "warning",
                             duration: 2000,
-                            position: "bottom-right",
-                            isClosable: true,
+                            closable: true,
                           });
                         }
                       }}

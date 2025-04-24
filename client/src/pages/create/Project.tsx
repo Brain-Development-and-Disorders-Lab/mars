@@ -14,7 +14,6 @@ import {
   Spacer,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -23,6 +22,7 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Utility functions and libraries
@@ -44,8 +44,7 @@ import { usePostHog } from "posthog-js/react";
 
 const Project = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  const { isOpen, onOpen } = useDisclosure();
   const { token } = useAuthentication();
 
   const [name, setName] = useState("");
@@ -97,13 +96,12 @@ const Project = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: error.message,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);

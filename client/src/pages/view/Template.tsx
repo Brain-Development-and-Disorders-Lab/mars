@@ -13,7 +13,6 @@ import {
   MenuList,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -21,6 +20,7 @@ import Values from "@components/Values";
 import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
+import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -41,7 +41,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 const Template = () => {
   const { id } = useParams();
-  const toast = useToast();
 
   const [editing, setEditing] = useState(false);
 
@@ -134,13 +133,12 @@ const Template = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Unable to retrieve Template information",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -164,23 +162,21 @@ const Template = () => {
     });
 
     if (response.data.archiveTemplate.success) {
-      toast({
+      toaster.create({
         title: "Archived Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setTemplateArchived(true);
       onArchiveDialogClose();
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while archiving Template",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -197,23 +193,21 @@ const Template = () => {
     });
 
     if (response.data.archiveTemplate.success) {
-      toast({
+      toaster.create({
         title: "Restored Template successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setTemplateArchived(false);
       onArchiveDialogClose();
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while restoring Template",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -236,21 +230,19 @@ const Template = () => {
         },
       });
       if (response.data.updateTemplate.success) {
-        toast({
+        toaster.create({
           title: "Updated Successfully",
-          status: "success",
+          type: "success",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       } else {
-        toast({
+        toaster.create({
           title: "Error",
           description: "An error occurred when saving updates.",
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
       setEditing(false);
@@ -276,24 +268,22 @@ const Template = () => {
         slugify(`${templateName.replace(" ", "")}_export.json`),
       );
 
-      toast({
+      toaster.create({
         title: "Info",
         description: `Generated JSON file`,
-        status: "info",
+        type: "info",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (exportError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred exporting this Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };

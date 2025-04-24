@@ -7,7 +7,6 @@ import {
   Button,
   Dialog,
   Text,
-  useToast,
   Input,
   Select,
   Tag,
@@ -32,6 +31,7 @@ import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
 import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
+import { toaster } from "@components/Toast";
 
 // Custom and existing types
 import {
@@ -82,7 +82,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [continueDisabled, setContinueDisabled] = useState(true);
 
   const navigate = useNavigate();
-  const toast = useToast();
   const { token } = useAuthentication();
 
   // State to differentiate which type of file is being imported
@@ -338,13 +337,12 @@ const ImportDialog = (props: ImportDialogProps) => {
       const parsed = JSON.parse(data as string);
       return parsed;
     } catch {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: "Could not parse file contents",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       return {} as { entities: EntityModel[] };
     }
@@ -357,26 +355,24 @@ const ImportDialog = (props: ImportDialogProps) => {
   const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
     // Check that "entities" field exists
     if (_.isUndefined(parsed["entities"])) {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: 'File does not contain top-level "entities" key',
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       return false;
     }
 
     // Check that it contains `EntityModel` instances
     if (parsed.entities.length === 0) {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: "File does not contain any Entity data",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       return false;
     }
@@ -438,13 +434,12 @@ const ImportDialog = (props: ImportDialogProps) => {
       setImportLoading(false);
 
       if (prepareEntityCSVError || _.isUndefined(response.data)) {
-        toast({
+        toaster.create({
           title: "CSV Import Error",
-          status: "error",
+          type: "error",
           description: "Error while preparing file",
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
         return false;
       }
@@ -466,13 +461,12 @@ const ImportDialog = (props: ImportDialogProps) => {
         return mappingResult;
       } else if (response.data.prepareEntityCSV.length === 0) {
         // If the CSV file is empty, display an error message
-        toast({
+        toaster.create({
           title: "CSV Import Error",
-          status: "error",
+          type: "error",
           description: "File is empty",
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
         return false;
       }
@@ -500,13 +494,12 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
 
     if (mappingDataError) {
-      toast({
+      toaster.create({
         title: "Import Error",
-        status: "error",
+        type: "error",
         description: "Could not retrieve data for mapping columns",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       return false;
     }
@@ -533,13 +526,12 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
 
     if (reviewEntityJSONError) {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: "Error while reviewing JSON file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -574,13 +566,12 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
 
     if (reviewEntityCSVError) {
-      toast({
+      toaster.create({
         title: "CSV Import Error",
-        status: "error",
+        type: "error",
         description: "Error while reviewing CSV file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -600,19 +591,17 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
 
     if (importEntityJSONError) {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: "Error while importing JSON file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (response.data.importEntityJSON.success === true) {
       // Close the `ImportDialog` UI
-      props.onClose();
       resetState();
       navigate(0);
     }
@@ -645,16 +634,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
 
     if (importEntityCSVError) {
-      toast({
+      toaster.create({
         title: "CSV Import Error",
-        status: "error",
+        type: "error",
         description: "Error while importing CSV file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
-      props.onClose();
       resetState();
       navigate(0);
     }
@@ -670,16 +657,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
 
     if (importTemplateJSONError) {
-      toast({
+      toaster.create({
         title: "JSON Import Error",
-        status: "error",
+        type: "error",
         description: "Error while importing JSON file",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
-      props.onClose();
       resetState();
       navigate(0);
     }
@@ -1116,14 +1101,13 @@ const ImportDialog = (props: ImportDialogProps) => {
                                 setFileType(event.target.files[0].type);
                                 setFile(event.target.files[0]);
                               } else {
-                                toast({
+                                toaster.create({
                                   title: "Warning",
-                                  status: "warning",
+                                  type: "warning",
                                   description:
                                     "Please upload a JSON or CSV file",
                                   duration: 2000,
-                                  position: "bottom-right",
-                                  isClosable: true,
+                                  closable: true,
                                 });
                               }
                             }
@@ -1567,13 +1551,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                                 setFileType(event.target.files[0].type);
                                 setFile(event.target.files[0]);
                               } else {
-                                toast({
+                                toaster.create({
                                   title: "Warning",
-                                  status: "warning",
+                                  type: "warning",
                                   description: "Please upload a JSON file",
                                   duration: 2000,
-                                  position: "bottom-right",
-                                  isClosable: true,
+                                  closable: true,
                                 });
                               }
                             }

@@ -9,12 +9,12 @@ import {
   Tag,
   Text,
   useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
@@ -49,7 +49,6 @@ const GET_PROJECTS = gql`
 `;
 
 const Projects = () => {
-  const toast = useToast();
   const navigate = useNavigate();
 
   // Effect to adjust column visibility
@@ -108,13 +107,12 @@ const Projects = () => {
   useEffect(() => {
     if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Projects",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error, loading]);

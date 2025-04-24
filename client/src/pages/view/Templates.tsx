@@ -11,12 +11,12 @@ import {
   Tag,
   Text,
   useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
-import Icon from "@components/Icon";
 import { Content } from "@components/Container";
+import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { AttributeModel } from "@types";
@@ -34,7 +34,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 const Templates = () => {
   const navigate = useNavigate();
-  const toast = useToast();
 
   // Page state
   const [templates, setTemplates] = useState([] as AttributeModel[]);
@@ -69,13 +68,12 @@ const Templates = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Unable to retrieve Templates",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);

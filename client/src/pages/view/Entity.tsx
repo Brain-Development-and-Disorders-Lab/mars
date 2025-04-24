@@ -9,7 +9,6 @@ import {
   Heading,
   Input,
   Text,
-  useToast,
   useDisclosure,
   Tag,
   Select,
@@ -54,6 +53,7 @@ import Relationships from "@components/Relationships";
 import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -95,7 +95,6 @@ import { useAuthentication } from "@hooks/useAuthentication";
 const Entity = () => {
   const { id } = useParams();
   const breakpoint = useBreakpoint();
-  const toast = useToast();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -387,12 +386,11 @@ const Entity = () => {
   // Display any GraphQL errors
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Entity information",
-        status: "error",
-        position: "bottom-right",
-        isClosable: true,
+        type: "error",
+        closable: true,
       });
     }
   }, [error]);
@@ -428,13 +426,12 @@ const Entity = () => {
     if (fileResponse.data) {
       FileSaver.saveAs(new Blob([fileResponse.data]), slugify(filename));
     } else {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: `Error creating download for file "${filename}"`,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -456,24 +453,22 @@ const Entity = () => {
     });
 
     if (response.data.createTemplate.success) {
-      toast({
+      toaster.create({
         title: "Saved!",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setTemplates(() => [...templates, attributeData as AttributeModel]);
     }
 
     if (errorTemplateCreate) {
-      toast({
+      toaster.create({
         title: "Error",
         description: errorTemplateCreate.message,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -573,21 +568,19 @@ const Entity = () => {
         },
       });
 
-      toast({
+      toaster.create({
         title: "Updated Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } catch (error: any) {
-      toast({
+      toaster.create({
         title: "Error",
         description: `Entity could not be updated`,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -631,20 +624,18 @@ const Entity = () => {
     });
 
     if (archiveError) {
-      toast({
+      toaster.create({
         title: "Error while unarchiving Entity",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
-      toast({
+      toaster.create({
         title: "Entity successfully unarchived",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setEntityArchived(false);
     }
@@ -926,13 +917,12 @@ const Entity = () => {
           message: saveMessage,
         },
       });
-      toast({
+      toaster.create({
         title: "Success",
         description: `Restored Entity version ${entityVersion.version}`,
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
 
       // Update the state (safely)
@@ -945,13 +935,12 @@ const Entity = () => {
       // Close the sidebar
       onHistoryClose();
     } catch (error: any) {
-      toast({
+      toaster.create({
         title: "Error",
         description: `Entity could not be restored`,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -996,24 +985,22 @@ const Entity = () => {
       // Reset the export state
       setExportFields([]);
 
-      toast({
+      toaster.create({
         title: "Success",
         description: `Successfully generated ${format.toUpperCase()} file`,
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (exportError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred when exporting this Entity",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -1062,26 +1049,24 @@ const Entity = () => {
     if (response.data.createEntity.success) {
       onCloneClose();
 
-      toast({
+      toaster.create({
         title: "Cloned Successfully",
         description: "Entity has been cloned successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       // Navigate to the new Entity
       navigate(`/entities/${response.data.createEntity.data}`);
     }
 
     if (createEntityError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while cloning the Entity",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -1096,23 +1081,21 @@ const Entity = () => {
     });
 
     if (response.data.archiveEntity.success) {
-      toast({
+      toaster.create({
         title: "Archived Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setEntityArchived(true);
       onArchiveDialogClose();
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while archiving Entity",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -1957,14 +1940,13 @@ const Entity = () => {
                               event.target.value.toString();
                             if (selectedProjects.includes(selectedProject)) {
                               // Check that the selected Project has not already been selected
-                              toast({
+                              toaster.create({
                                 title: "Warning",
                                 description:
                                   "Project has already been selected.",
-                                status: "warning",
+                                type: "warning",
                                 duration: 2000,
-                                position: "bottom-right",
-                                isClosable: true,
+                                closable: true,
                               });
                             } else if (!_.isEqual(selectedProject, "")) {
                               // Add the selected Project if not the default option
@@ -2582,12 +2564,11 @@ const Entity = () => {
                         await navigator.clipboard.writeText(
                           `https://app.metadatify.com/entities/${id}`,
                         );
-                        toast({
+                        toaster.create({
                           title: "Copied to clipboard",
-                          status: "success",
-                          position: "bottom-right",
-                          isClosable: true,
+                          type: "success",
                           duration: 2000,
+                          closable: true,
                         });
                       }}
                     >
@@ -2614,12 +2595,11 @@ const Entity = () => {
                       size={"sm"}
                       onClick={async () => {
                         await navigator.clipboard.writeText(`${id}`);
-                        toast({
+                        toaster.create({
                           title: "Copied to clipboard",
-                          status: "success",
-                          position: "bottom-right",
-                          isClosable: true,
+                          type: "success",
                           duration: 2000,
+                          closable: true,
                         });
                       }}
                     >

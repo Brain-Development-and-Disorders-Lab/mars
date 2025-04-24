@@ -9,7 +9,6 @@ import {
   Tag,
   IconButton,
   Text,
-  useToast,
   Heading,
   Fieldset,
   Field,
@@ -18,6 +17,7 @@ import {
 // Custom components
 import Icon from "@components/Icon";
 import { Content } from "@components/Container";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Custom types
@@ -42,7 +42,6 @@ const CreateWorkspace = () => {
   // Access token to set the active Workspace
   const { token } = useAuthentication();
   const navigate = useNavigate();
-  const toast = useToast();
 
   // Get contexts
   const { workspace, activateWorkspace } = useWorkspace();
@@ -131,25 +130,23 @@ const CreateWorkspace = () => {
         setDescription("");
         setCollaborators([]);
 
-        toast({
+        toaster.create({
           title: "Success",
           description: "Workspace created successfully",
-          status: "success",
+          type: "success",
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }
 
     if (createError || workspacesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Workspaces",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };

@@ -146,11 +146,10 @@ const CounterSelect = (props: CounterProps) => {
     if (nextValueError) {
       toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: nextValueError.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -193,11 +192,10 @@ const CounterSelect = (props: CounterProps) => {
     if (createCounterError) {
       toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: createCounterError.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       return;
     }

@@ -3,13 +3,13 @@ import {
   Input,
   Button,
   Flex,
-  useToast,
   InputGroup,
   InputRightElement,
   Text,
   Spinner,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
@@ -84,13 +84,12 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
 
     if (entitiesError || projectsError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Error while retrieving options for selection",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -152,8 +151,6 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [showResults, setShowResults] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const toast = useToast();
-
   // Function to fetch results based on the search term
   const fetchResults = debounce(async (query) => {
     const results = await searchText({
@@ -175,13 +172,12 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
 
     if (searchError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: searchError.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       setShowResults(true);

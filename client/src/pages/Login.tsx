@@ -8,7 +8,6 @@ import {
   Button,
   Image,
   Text,
-  useToast,
   Link,
   Separator,
   Box,
@@ -16,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,8 +41,6 @@ const useParameters = () => {
 };
 
 const Login = () => {
-  const toast = useToast();
-
   const { token, login } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
 
@@ -84,23 +82,22 @@ const Login = () => {
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
       ) {
-        toast({
+        toaster.create({
           id: "login-graphql-error-toast",
           title: "Login Error",
-          status: "error",
+          type: "error",
           description: result.message,
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       } else if (
         result.message.includes("access") &&
         !toast.isActive("login-access-error-toast")
       ) {
-        toast({
+        toaster.create({
           id: "login-access-error-toast",
           title: "Access Unavailable",
-          status: "info",
+          type: "info",
           description: (
             <Flex direction={"column"}>
               <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
@@ -111,9 +108,7 @@ const Login = () => {
               </Link>
             </Flex>
           ),
-          duration: null,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }

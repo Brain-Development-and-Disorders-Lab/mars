@@ -34,7 +34,6 @@ import {
   Text,
   VStack,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
@@ -48,6 +47,7 @@ import VisibilityTag from "@components/VisibilityTag";
 import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -75,7 +75,6 @@ import slugify from "slugify";
 
 const Project = () => {
   const { id } = useParams();
-  const toast = useToast();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -262,13 +261,12 @@ const Project = () => {
   useEffect(() => {
     if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Project information",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [loading, error]);
@@ -332,22 +330,20 @@ const Project = () => {
           message: saveMessage,
         },
       });
-      toast({
+      toaster.create({
         title: "Updated Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } catch {
       if (updateError) {
-        toast({
+        toaster.create({
           title: "Error",
           description: updateError.message,
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }
@@ -371,23 +367,21 @@ const Project = () => {
       },
     });
     if (response.data.archiveProject.success) {
-      toast({
+      toaster.create({
         title: "Archived Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setProjectArchived(true);
       onArchiveDialogClose();
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred when archiving Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
     setEditing(false);
@@ -402,22 +396,20 @@ const Project = () => {
       },
     });
     if (response.data.archiveProject.success) {
-      toast({
+      toaster.create({
         title: "Restored Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setProjectArchived(false);
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred when restoring Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
     setEditing(false);
@@ -474,22 +466,20 @@ const Project = () => {
           message: `Restored Project version ${projectVersion.version}`,
         },
       });
-      toast({
+      toaster.create({
         title: "Success",
         description: `Restored Project version ${projectVersion.version}`,
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } catch (error: any) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Project could not be restored",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -532,13 +522,12 @@ const Project = () => {
     }
 
     if (exportEntitiesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Project Entities could not be exported",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -577,24 +566,22 @@ const Project = () => {
       // Reset the export state
       setExportFields([]);
 
-      toast({
+      toaster.create({
         title: "Info",
         description: `Generated ${format.toUpperCase()} file`,
-        status: "info",
+        type: "info",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (exportError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred exporting this Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };

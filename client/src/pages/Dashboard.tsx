@@ -6,7 +6,6 @@ import {
   Flex,
   Heading,
   Text,
-  useToast,
   useBreakpoint,
   Tag,
   VStack,
@@ -31,6 +30,7 @@ import ActorTag from "@components/ActorTag";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import Joyride, { ACTIONS, CallBackProps, EVENTS } from "react-joyride";
 
 // Existing and custom types
@@ -118,9 +118,6 @@ const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
 
-  // Toast to show errors
-  const toast = useToast();
-
   // Workspace context
   const { workspace } = useWorkspace();
   const { token, setToken } = useAuthentication();
@@ -200,13 +197,12 @@ const Dashboard = () => {
   useEffect(() => {
     if (error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Could not retrieve data for Dashboard",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
