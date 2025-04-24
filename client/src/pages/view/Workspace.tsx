@@ -505,9 +505,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
+              content={info.getValue()}
               disabled={info.getValue().length < 24}
-              hasArrow
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -570,9 +570,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
+              content={info.getValue()}
               disabled={info.getValue().length < 24}
-              hasArrow
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -635,9 +635,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
+              content={info.getValue()}
               disabled={info.getValue().length < 24}
-              hasArrow
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -700,9 +700,9 @@ const Workspace = () => {
         return (
           <Flex py={"2"}>
             <Tooltip
-              label={info.getValue()}
+              content={info.getValue()}
               disabled={info.getValue().length < 24}
-              hasArrow
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -720,10 +720,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 'Counter format string, where "{}" represents the position of the numeric value'
               }
-              hasArrow
+              showArrow
             >
               <Code>{info.getValue()}</Code>
             </Tooltip>
@@ -737,10 +737,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 "Current numeric value to be substituted into the Counter format string"
               }
-              hasArrow
+              showArrow
             >
               <Text fontWeight={"semibold"}>{info.getValue()}</Text>
             </Tooltip>
@@ -754,10 +754,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 "After a Counter value is consumed, the numeric value is increment by this value"
               }
-              hasArrow
+              showArrow
             >
               <Text fontWeight={"semibold"}>{info.getValue()}</Text>
             </Tooltip>
@@ -804,7 +804,7 @@ const Workspace = () => {
             size={"sm"}
             colorPalette={"green"}
             disabled={name === ""}
-            isLoading={
+            loading={
               workspaceUpdateLoading ||
               archiveEntitiesLoading ||
               archiveProjectsLoading ||
@@ -832,9 +832,9 @@ const Workspace = () => {
           >
             <Flex direction={"row"} gap={"2"}>
               <Flex grow={"1"}>
-                <Fieldset.Root required>
+                <Fieldset.Root>
                   <Fieldset.Content>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Name
                         <Field.RequiredIndicator />

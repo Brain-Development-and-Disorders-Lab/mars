@@ -180,8 +180,7 @@ const Search = () => {
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
+            content={info.getValue()}
             disabled={info.getValue().length < 30}
           >
             <Text lineClamp={1}>

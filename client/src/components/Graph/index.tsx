@@ -285,7 +285,7 @@ const Graph = (props: {
           align={"center"}
         >
           <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
-          <Tooltip key={`tooltip_${id}`} label={name}>
+          <Tooltip key={`tooltip_${id}`} content={name}>
             <Text
               key={`inner_label_text_${id}`}
               fontWeight={"semibold"}

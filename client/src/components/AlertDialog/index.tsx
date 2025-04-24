@@ -13,7 +13,6 @@ const AlertDialog = (props: AlertDialogProps) => {
   const leftButtonLabel = props.leftButtonLabel || "Cancel";
   const leftButtonAction = () => {
     props.leftButtonAction?.();
-    props.onClose();
   };
 
   const rightButtonColor = props.rightButtonColor || "green";
@@ -23,12 +22,7 @@ const AlertDialog = (props: AlertDialogProps) => {
   };
 
   return (
-    <Dialog.Root
-      leastDestructiveRef={props.dialogRef}
-      onClose={props.onClose}
-      isOpen={props.open}
-      isCentered
-    >
+    <Dialog.Root open={props.open} placement={"center"}>
       <Dialog.Trigger />
       <Dialog.Backdrop />
       <Dialog.Positioner>
@@ -40,7 +34,6 @@ const AlertDialog = (props: AlertDialogProps) => {
               size={"sm"}
               variant={"outline"}
               colorPalette={leftButtonColor}
-              ref={props.dialogRef}
               onClick={leftButtonAction}
             >
               {leftButtonLabel}

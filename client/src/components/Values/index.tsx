@@ -321,7 +321,7 @@ const Values = (props: {
                   }
 
                   dataInput = (
-                    <Tooltip label={tooltipText} hasArrow>
+                    <Tooltip content={tooltipText} showArrow>
                       <Flex
                         direction={"row"}
                         align={"center"}
@@ -702,13 +702,7 @@ const Values = (props: {
       )}
 
       <ScaleFade initialScale={0.9} in={open}>
-        <Dialog.Root
-          onEsc={onClose}
-          onClose={onClose}
-          isOpen={open}
-          size={"xl"}
-          isCentered
-        >
+        <Dialog.Root open={open} size={"xl"} placement={"center"} closeOnEscape>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>

@@ -12,10 +12,10 @@ import {
   Select,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { Information } from "@components/Label";
+import { toaster } from "@components/Toast";
 
 // Custom types
 import { CounterModel, CounterProps, ICounter, ResponseData } from "@types";
@@ -59,9 +59,6 @@ const CounterSelect = (props: CounterProps) => {
 
   // Create Counter modal disclosure
   const { open, onOpen, onClose } = useDisclosure();
-
-  // Toast
-  const toast = useToast();
 
   // Workspace context value
   const { workspace } = useWorkspace();
@@ -147,7 +144,7 @@ const CounterSelect = (props: CounterProps) => {
 
     // Handle any errors
     if (nextValueError) {
-      toast({
+      toaster.create({
         title: "Error",
         status: "error",
         description: nextValueError.message,
@@ -194,7 +191,7 @@ const CounterSelect = (props: CounterProps) => {
     });
 
     if (createCounterError) {
-      toast({
+      toaster.create({
         title: "Error",
         status: "error",
         description: createCounterError.message,
@@ -335,12 +332,11 @@ const CounterSelect = (props: CounterProps) => {
       </Flex>
 
       <Dialog.Root
-        onEsc={onClose}
-        onClose={onClose}
-        isOpen={open}
+        open={open}
         size={"xl"}
-        isCentered
+        placement={"center"}
         scrollBehavior={"inside"}
+        closeOnEscape
       >
         <Dialog.Positioner />
         <Dialog.Backdrop />

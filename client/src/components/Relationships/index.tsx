@@ -75,7 +75,7 @@ const Relationships = (props: RelationshipsProps) => {
     relationshipTableColumnHelper.accessor("source", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue().name} hasArrow>
+          <Tooltip content={info.getValue().name} showArrow>
             <Text>
               {_.truncate(info.getValue().name, {
                 length: 24,
@@ -101,7 +101,7 @@ const Relationships = (props: RelationshipsProps) => {
     relationshipTableColumnHelper.accessor("target", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue().name} hasArrow>
+          <Tooltip content={info.getValue().name} showArrow>
             <Text>
               {_.truncate(info.getValue().name, {
                 length: 24,

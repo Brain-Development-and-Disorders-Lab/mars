@@ -243,9 +243,9 @@ const CreateWorkspace = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <Fieldset.Root required>
+              <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root required>
                     <Field.Label>
                       Name
                       <Field.RequiredIndicator />

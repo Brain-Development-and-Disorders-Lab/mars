@@ -717,7 +717,7 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
+          <Tooltip content={info.getValue()} showArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -731,7 +731,7 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("description", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
+          <Tooltip content={info.getValue()} showArrow>
             <Text>{_.truncate(info.getValue(), { length: 12 })}</Text>
           </Tooltip>
         );
@@ -745,7 +745,7 @@ const Entity = () => {
           .map((value) => value.name)
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
-          <Tooltip label={tooltipLabelValue} hasArrow>
+          <Tooltip content={tooltipLabelValue} showArrow>
             <Tag.Root colorPalette={"purple"}>
               <Tag.Label>{info.row.original.values.length}</Tag.Label>
             </Tag.Root>
@@ -795,7 +795,7 @@ const Entity = () => {
     attachmentTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
+          <Tooltip content={info.getValue()} showArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -1281,7 +1281,7 @@ const Entity = () => {
             rounded={"md"}
           >
             <Icon name={"entity"} size={"md"} />
-            <Tooltip label={entityData.name} placement={"top"}>
+            <Tooltip content={entityData.name}>
               <Heading fontWeight={"semibold"} size={"md"}>
                 {_.truncate(entityData.name, { length: 30 })}
               </Heading>
@@ -1748,12 +1748,7 @@ const Entity = () => {
         </Flex>
 
         {/* Add Attributes modal */}
-        <Dialog.Root
-          isOpen={addAttributesOpen}
-          onClose={onAddAttributesClose}
-          size={"xl"}
-          isCentered
-        >
+        <Dialog.Root open={addAttributesOpen} size={"xl"} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -1824,9 +1819,9 @@ const Entity = () => {
                     justify={"center"}
                   >
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <Fieldset.Root required>
+                      <Fieldset.Root>
                         <Fieldset.Content>
-                          <Field.Root>
+                          <Field.Root required>
                             <Field.Label>
                               Name
                               <Field.RequiredIndicator />
@@ -1849,7 +1844,7 @@ const Entity = () => {
                             )}
                           </Field.Root>
 
-                          <Field.Root>
+                          <Field.Root required>
                             <Field.Label>
                               Description
                               <Field.RequiredIndicator />
@@ -1879,9 +1874,9 @@ const Entity = () => {
                     </Flex>
 
                     <Flex>
-                      <Fieldset.Root required invalid={isAttributeValueError}>
+                      <Fieldset.Root invalid={isAttributeValueError}>
                         <Fieldset.Content>
-                          <Field.Root>
+                          <Field.Root required>
                             <Values
                               viewOnly={false}
                               values={attributeValues}
@@ -1939,11 +1934,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Add Projects modal */}
-        <Dialog.Root
-          isOpen={addProjectsOpen}
-          onClose={onAddProjectsClose}
-          isCentered
-        >
+        <Dialog.Root open={addProjectsOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2091,10 +2082,9 @@ const Entity = () => {
 
         {/* Add Relationships modal */}
         <Dialog.Root
-          isOpen={addRelationshipsOpen}
-          onClose={onAddRelationshipsClose}
+          open={addRelationshipsOpen}
           size={"lg"}
-          isCentered
+          placement={"center"}
         >
           <Dialog.Trigger />
           <Dialog.Backdrop />
@@ -2228,12 +2218,7 @@ const Entity = () => {
         />
 
         {/* Export modal */}
-        <Dialog.Root
-          isOpen={exportOpen}
-          onClose={onExportClose}
-          size={"xl"}
-          isCentered
-        >
+        <Dialog.Root open={exportOpen} size={"xl"} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2529,12 +2514,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Graph modal */}
-        <Dialog.Root
-          size={"full"}
-          onEsc={onGraphClose}
-          onClose={onGraphClose}
-          open={graphOpen}
-        >
+        <Dialog.Root open={graphOpen} size={"full"} closeOnEscape>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2554,7 +2534,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Attachment preview modal */}
-        <Dialog.Root open={previewOpen} onClose={onPreviewClose} isCentered>
+        <Dialog.Root open={previewOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2571,7 +2551,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Share modal */}
-        <Dialog.Root open={shareOpen} onClose={onShareClose} isCentered>
+        <Dialog.Root open={shareOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2681,7 +2661,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Clone modal */}
-        <Dialog.Root open={cloneOpen} onClose={onCloneClose} isCentered>
+        <Dialog.Root open={cloneOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2741,12 +2721,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Save message modal */}
-        <Dialog.Root
-          onEsc={onSaveMessageOpen}
-          onClose={onSaveMessageClose}
-          open={saveMessageOpen}
-          isCentered
-        >
+        <Dialog.Root open={saveMessageOpen} placement={"center"} closeOnEscape>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -2984,12 +2959,12 @@ const Entity = () => {
                                     align={"center"}
                                   >
                                     <Tooltip
-                                      label={
+                                      content={
                                         "Values: " +
                                         entityVersion.attributes[0].values
                                           .length
                                       }
-                                      hasArrow
+                                      showArrow
                                     >
                                       <Tag.Root
                                         key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
@@ -3036,8 +3011,10 @@ const Entity = () => {
                                     align={"center"}
                                   >
                                     <Tooltip
-                                      label={entityVersion.attachments[0].name}
-                                      hasArrow
+                                      content={
+                                        entityVersion.attachments[0].name
+                                      }
+                                      showArrow
                                     >
                                       <Tag.Root
                                         key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
@@ -3122,9 +3099,9 @@ const Entity = () => {
                                   </Flex>
                                 ) : (
                                   <Tooltip
-                                    label={entityVersion.message}
+                                    content={entityVersion.message}
                                     disabled={entityVersion.message.length < 32}
-                                    hasArrow
+                                    showArrow
                                   >
                                     <Text fontSize={"sm"}>
                                       {_.truncate(entityVersion.message, {

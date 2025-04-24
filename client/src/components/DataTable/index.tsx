@@ -7,23 +7,15 @@ import {
   IconButton,
   Select,
   Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   Text,
   Checkbox,
   Menu,
-  MenuButton,
   Button,
-  MenuList,
-  MenuItem,
   useBreakpoint,
   InputGroup,
   Input,
   InputRightElement,
+  Portal,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -125,6 +117,7 @@ const DataTable = (props: DataTableProps) => {
     onColumnVisibilityChange: setColumnVisibility,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         props.setData &&
           props.setData((data) =>
             data.map((row, index) => {
@@ -269,91 +262,84 @@ const DataTable = (props: DataTableProps) => {
 
   return (
     <Flex w={"100%"} direction={"column"}>
-      <TableContainer overflowX={"visible"} overflowY={"visible"}>
-        <Table variant={"simple"} size={"sm"} w={"100%"}>
-          {/* Table head */}
-          <Thead bg={"gray.50"} p={"0"}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta: any = header.column.columnDef.meta;
+      <Table.Root variant={"line"} size={"sm"} w={"100%"}>
+        {/* Table head */}
+        <Table.Header bg={"gray.50"} p={"0"}>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <Table.Row key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const meta: any = header.column.columnDef.meta;
 
-                  // Customize the column widths depending on data contents
-                  let width = "auto";
-                  if (_.isEqual(header.id, "select")) {
-                    // Dynamically set the width for the checkboxes
-                    width = "30px";
-                  } else if (_.isEqual(header.id, "type")) {
-                    width = "100px";
-                  }
+                // Customize the column widths depending on data contents
+                let width = "auto";
+                if (_.isEqual(header.id, "select")) {
+                  // Dynamically set the width for the checkboxes
+                  width = "30px";
+                } else if (_.isEqual(header.id, "type")) {
+                  width = "100px";
+                }
 
-                  return (
-                    <Th
-                      key={header.id}
-                      onClick={getToggleSortingHandler(header)}
-                      isNumeric={meta?.isNumeric}
-                      w={width}
-                      _hover={
-                        canSortColumn(header) ? { cursor: "pointer" } : {}
-                      }
-                      transition={
-                        canSortColumn(header)
-                          ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
-                          : ""
-                      }
-                      p={"1"}
-                    >
-                      <Flex align={"center"} py={"1"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {canSortColumn(header) && (
-                          <Icon
-                            name={
-                              header.column.getIsSorted() === "desc"
-                                ? "sort_up"
-                                : header.column.getIsSorted() === "asc"
-                                  ? "sort_down"
-                                  : "sort"
-                            }
-                            style={{ marginLeft: "4px" }}
-                          />
-                        )}
-                      </Flex>
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-
-          {/* Table body */}
-          <Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Tr id={row.id} key={row.id} w={"auto"}>
-                {row.getVisibleCells().map((cell) => {
-                  const meta: any = cell.column.columnDef.meta;
-                  return (
-                    <Td
-                      id={cell.id}
-                      key={cell.id}
-                      isNumeric={meta?.isNumeric}
-                      px={"1"}
-                      py={"1"}
-                    >
+                return (
+                  <Table.ColumnHeader
+                    key={header.id}
+                    onClick={getToggleSortingHandler(header)}
+                    fontVariantNumeric={meta?.isNumeric}
+                    w={width}
+                    _hover={canSortColumn(header) ? { cursor: "pointer" } : {}}
+                    transition={
+                      canSortColumn(header)
+                        ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
+                        : ""
+                    }
+                    p={"1"}
+                  >
+                    <Flex align={"center"} py={"1"}>
                       {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
+                        header.column.columnDef.header,
+                        header.getContext(),
                       )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+                      {canSortColumn(header) && (
+                        <Icon
+                          name={
+                            header.column.getIsSorted() === "desc"
+                              ? "sort_up"
+                              : header.column.getIsSorted() === "asc"
+                                ? "sort_down"
+                                : "sort"
+                          }
+                          style={{ marginLeft: "4px" }}
+                        />
+                      )}
+                    </Flex>
+                  </Table.ColumnHeader>
+                );
+              })}
+            </Table.Row>
+          ))}
+        </Table.Header>
+
+        {/* Table body */}
+        <Table.Body>
+          {table.getRowModel().rows.map((row) => (
+            <Table.Row id={row.id} key={row.id} w={"auto"}>
+              {row.getVisibleCells().map((cell) => {
+                const meta: any = cell.column.columnDef.meta;
+                return (
+                  <Table.Cell
+                    id={cell.id}
+                    key={cell.id}
+                    fontVariantNumeric={meta?.isNumeric}
+                    px={"1"}
+                    py={"1"}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Table.Cell>
+                );
+              })}
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
 
       <Flex
         direction={"row"}
@@ -367,45 +353,56 @@ const DataTable = (props: DataTableProps) => {
         <Flex gap={"2"} direction={"row"} align={"center"}>
           {/* Actions button */}
           {props.showSelection && (
-            <Menu size={"sm"}>
-              <MenuButton as={Button} colorPalette={"yellow"} size={"sm"}>
-                Actions
-                <Icon name={"lightning"} />
-              </MenuButton>
-              <MenuList>
-                {props.actions &&
-                  props.actions.length > 0 &&
-                  props.actions?.map((action) => {
-                    return (
-                      <MenuItem
-                        onClick={() => {
-                          action.action(table, selectedRows);
-                        }}
-                        key={action.label}
-                        disabled={
-                          (Object.keys(selectedRows).length === 0 ||
-                            _.isUndefined(props.actions) ||
-                            props.actions?.length === 0) &&
-                          action.alwaysEnabled !== true
-                        }
+            <Menu.Root size={"sm"}>
+              <Menu.Trigger asChild>
+                <Button colorPalette={"yellow"} size={"sm"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    {props.actions &&
+                      props.actions.length > 0 &&
+                      props.actions?.map((action) => {
+                        return (
+                          <Menu.Item
+                            onClick={() => {
+                              action.action(table, selectedRows);
+                            }}
+                            key={action.label}
+                            disabled={
+                              (Object.keys(selectedRows).length === 0 ||
+                                _.isUndefined(props.actions) ||
+                                props.actions?.length === 0) &&
+                              action.alwaysEnabled !== true
+                            }
+                            value={action.label}
+                          >
+                            <Flex direction={"row"} gap={"2"} align={"center"}>
+                              <Icon name={action.icon} />
+                              <Text fontSize={"sm"}>{action.label}</Text>
+                            </Flex>
+                          </Menu.Item>
+                        );
+                      })}
+                    {(_.isUndefined(props.actions) ||
+                      props.actions.length === 0) && (
+                      <Menu.Item
+                        key={"no-actions"}
+                        disabled
+                        value={"No actions available"}
                       >
                         <Flex direction={"row"} gap={"2"} align={"center"}>
-                          <Icon name={action.icon} />
-                          <Text fontSize={"sm"}>{action.label}</Text>
+                          <Text fontSize={"sm"}>No Actions available</Text>
                         </Flex>
-                      </MenuItem>
-                    );
-                  })}
-                {(_.isUndefined(props.actions) ||
-                  props.actions.length === 0) && (
-                  <MenuItem key={"no-actions"} disabled>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"sm"}>No Actions available</Text>
-                    </Flex>
-                  </MenuItem>
-                )}
-              </MenuList>
-            </Menu>
+                      </Menu.Item>
+                    )}
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           )}
 
           {columnNames.length > 0 && props.showColumnSelect && (
@@ -421,7 +418,7 @@ const DataTable = (props: DataTableProps) => {
                     size={"sm"}
                     rounded={"md"}
                     disabled={props.viewOnly}
-                    isReadOnly
+                    readOnly
                   />
                   <InputRightElement>
                     {showColumnList ? (

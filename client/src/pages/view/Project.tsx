@@ -745,9 +745,9 @@ const Project = () => {
                   Export Project
                 </MenuItem>
                 <Tooltip
+                  content={"This Project does not contain any Entities."}
                   disabled={projectEntities?.length > 0 || projectArchived}
-                  label={"This Project does not contain any Entities."}
-                  hasArrow
+                  showArrow
                 >
                   <MenuItem
                     onClick={handleExportEntitiesClick}
@@ -1080,7 +1080,7 @@ const Project = () => {
         </Flex>
 
         {/* Modal to add Entities */}
-        <Dialog.Root open={entitiesOpen} onClose={onEntitiesClose} isCentered>
+        <Dialog.Root open={entitiesOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -1130,12 +1130,7 @@ const Project = () => {
         </Dialog.Root>
 
         {/* Dialog to export Entities */}
-        <Dialog.Root
-          open={isExportOpen}
-          onClose={onExportClose}
-          size={"xl"}
-          isCentered
-        >
+        <Dialog.Root open={isExportOpen} size={"xl"} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -1291,11 +1286,11 @@ const Project = () => {
                         {!loading ? (
                           <CheckboxGroup>
                             <Tooltip
-                              label={
+                              content={
                                 "Entities cannot be included when exporting to CSV"
                               }
-                              hasArrow
                               disabled={_.isEqual(exportFormat, "json")}
+                              showArrow
                             >
                               <Checkbox
                                 size={"sm"}
@@ -1369,10 +1364,9 @@ const Project = () => {
 
         {/* Save message modal */}
         <Dialog.Root
-          onEsc={onSaveMessageOpen}
-          onClose={onSaveMessageClose}
           open={isSaveMessageOpen}
-          isCentered
+          placement={"center"}
+          closeOnEscape
         >
           <Dialog.Trigger />
           <Dialog.Backdrop />
@@ -1668,11 +1662,11 @@ const Project = () => {
                                   </Flex>
                                 ) : (
                                   <Tooltip
-                                    label={projectVersion.message}
+                                    content={projectVersion.message}
                                     disabled={
                                       projectVersion.message.length < 32
                                     }
-                                    hasArrow
+                                    showArrow
                                   >
                                     <Text fontSize={"sm"}>
                                       {_.truncate(projectVersion.message, {

@@ -381,7 +381,7 @@ const User = () => {
     workspacesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
+          <Tooltip content={info.getValue()} showArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -396,9 +396,9 @@ const User = () => {
       cell: (info) => {
         return (
           <Tooltip
-            label={"You cannot leave your only Workspace"}
+            content={"You cannot leave your only Workspace"}
             disabled={userWorkspaces.length > 1}
-            hasArrow
+            showArrow
           >
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
               <IconButton
@@ -513,9 +513,9 @@ const User = () => {
                 </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <Fieldset.Root required>
+                <Fieldset.Root>
                   <Fieldset.Content>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Email
                         <Field.RequiredIndicator />
@@ -535,9 +535,9 @@ const User = () => {
                 </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <Fieldset.Root required>
+                <Fieldset.Root>
                   <Fieldset.Content>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Affiliation
                         <Field.RequiredIndicator />

@@ -181,12 +181,12 @@ const User = () => {
             </Tag.Root>
           </Flex>
 
-          <Fieldset.Root required>
+          <Fieldset.Root>
             <Fieldset.Content>
               <Flex direction={"column"} gap={"2"}>
                 <Flex direction={"row"} gap={"2"}>
                   <Flex direction={"column"} w={"100%"}>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         First Name
                         <Field.RequiredIndicator />
@@ -203,7 +203,7 @@ const User = () => {
                     </Field.Root>
                   </Flex>
                   <Flex direction={"column"} w={"100%"}>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Last Name
                         <Field.RequiredIndicator />
@@ -222,7 +222,7 @@ const User = () => {
                 </Flex>
                 <Flex direction={"column"} gap={"2"}>
                   <Flex direction={"column"}>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Email
                         <Field.RequiredIndicator />
@@ -238,7 +238,7 @@ const User = () => {
                     </Field.Root>
                   </Flex>
                   <Flex direction={"column"}>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Affiliation
                         <Field.RequiredIndicator />

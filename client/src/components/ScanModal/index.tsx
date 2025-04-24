@@ -288,10 +288,10 @@ const ScanModal = (props: ScanModalProps) => {
 
   return (
     <Dialog.Root
-      isOpen={props.open}
-      onClose={handleOnClose}
-      isCentered
+      open={props.open}
+      placement={"center"}
       scrollBehavior={"inside"}
+      onExitComplete={handleOnClose}
     >
       <Dialog.Trigger />
       <Dialog.Backdrop />

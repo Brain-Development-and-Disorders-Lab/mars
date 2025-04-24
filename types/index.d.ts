@@ -331,13 +331,10 @@ export type PageProps = {
 // `AlertDialog` component
 export type AlertDialogProps = {
   // Ref for placement
-  dialogRef: React.MutableRefObject<any>;
   header: string;
   children: React.ReactElement | React.ReactElement[];
   // Dialog actions and state
   open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
   // Left and right buttons
   leftButtonLabel?: string;
   leftButtonColor?: string;
@@ -387,8 +384,6 @@ export type PreviewSupport = {
 // `ImportDialog` props
 export type ImportDialogProps = {
   open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
 };
 
 // `ScanModal` props

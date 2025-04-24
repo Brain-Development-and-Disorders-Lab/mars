@@ -122,7 +122,7 @@ const Linky = (props: LinkyProps) => {
   }, [props.id]);
 
   return (
-    <Tooltip hasArrow label={tooltipLabel} bg={"gray.300"} color={"black"}>
+    <Tooltip showArrow content={tooltipLabel}>
       <Button
         color={props.color ? props.color : "gray.700"}
         justifyContent={props.justify ? props.justify : "center"}

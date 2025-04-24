@@ -49,11 +49,10 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       )}
 
       <Dialog.Root
-        onEsc={onClose}
-        onClose={onClose}
-        isOpen={open}
-        isCentered
+        open={open}
         scrollBehavior={"inside"}
+        placement={"center"}
+        closeOnEscape
       >
         <Dialog.Content>
           <Dialog.Header pb={"0"} pt={"2"} px={"2"}>
@@ -176,6 +175,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       onClose();
 
                       // Run the 'cancel' action (if specified)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                       props.cancelCallback ? props.cancelCallback() : {};
                     }}
                   >
@@ -191,6 +191,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       onClose();
 
                       // Run the 'done' action (if specified)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                       props.doneCallback
                         ? props.doneCallback({
                             _id: props.attribute._id,

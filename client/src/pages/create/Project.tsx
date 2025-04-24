@@ -208,9 +208,9 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <Fieldset.Root required invalid={isNameError}>
+              <Fieldset.Root invalid={isNameError}>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root required>
                     <Field.Label>Name</Field.Label>
                     <Input
                       id={"name"}
@@ -219,7 +219,7 @@ const Project = () => {
                       rounded={"md"}
                       placeholder={"Name"}
                       borderColor={"gray.300"}
-                      focusBorderColor={"black"}
+                      focusRingColor={"black"}
                       value={name}
                       onChange={(event) => setName(event.target.value)}
                     />
@@ -278,9 +278,9 @@ const Project = () => {
               borderColor={"gray.300"}
             >
               {/* Project description */}
-              <Fieldset.Root required invalid={isDescriptionError}>
+              <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root required>
                     <Field.Label>Description</Field.Label>
                     <MDEditor
                       height={150}
@@ -426,7 +426,7 @@ const Project = () => {
       </Flex>
 
       {/* Modal to add Entities */}
-      <Dialog.Root isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
+      <Dialog.Root open={isEntitiesOpen} placement={"center"}>
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -474,7 +474,7 @@ const Project = () => {
       </Dialog.Root>
 
       {/* Information modal */}
-      <Dialog.Root isOpen={isOpen} onClose={onClose} isCentered>
+      <Dialog.Root open={isOpen} placement={"center"}>
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>

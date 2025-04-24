@@ -237,7 +237,7 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip label={info.getValue()} placement={"top"}>
+        <Tooltip content={info.getValue()}>
           <Text lineClamp={1} fontWeight={"semibold"}>
             {_.truncate(info.getValue(), { length: 24 })}
           </Text>
@@ -256,8 +256,7 @@ const Dashboard = () => {
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
+            content={info.getValue()}
             disabled={info.getValue().length < 30}
           >
             <Text lineClamp={1}>
@@ -346,8 +345,7 @@ const Dashboard = () => {
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
+            content={info.getValue()}
             disabled={info.getValue().length < 30}
           >
             <Text lineClamp={1}>
@@ -739,7 +737,7 @@ const Dashboard = () => {
                         key={`activity-${activity._id}`}
                         align={"center"}
                       >
-                        <Tooltip label={activity.actor} hasArrow>
+                        <Tooltip content={activity.actor} showArrow>
                           <Avatar.Root size={"sm"} key={activity.actor}>
                             <Avatar.Fallback name={activity.actor} />
                           </Avatar.Root>

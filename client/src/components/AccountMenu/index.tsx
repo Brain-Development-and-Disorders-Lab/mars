@@ -145,7 +145,7 @@ const AccountMenu = () => {
                     {user.firstName} {user.lastName}
                   </Text>
 
-                  <Tooltip label={user.affiliation} hasArrow>
+                  <Tooltip content={user.affiliation} showArrow>
                     <Text
                       fontWeight={"semibold"}
                       fontSize={"sm"}
@@ -176,7 +176,7 @@ const AccountMenu = () => {
             <Menu.Content>
               <Menu.ItemGroup>
                 <Menu.ItemGroupLabel>Account</Menu.ItemGroupLabel>
-                <Menu.Item>
+                <Menu.Item value="profile">
                   <Flex
                     direction={"row"}
                     align={"center"}
@@ -188,7 +188,7 @@ const AccountMenu = () => {
                     <Text fontSize={"sm"}>Profile</Text>
                   </Flex>
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item value={"logout"}>
                   <Flex
                     direction={"row"}
                     align={"center"}

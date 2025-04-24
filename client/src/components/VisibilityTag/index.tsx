@@ -16,7 +16,7 @@ import Tooltip from "@components/Tooltip";
 import { VisibilityTagProps } from "@types";
 
 // Utility functions and libraries
-import * as consola from "consola";
+import consola from "consola";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
@@ -62,10 +62,10 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       <Spacer />
       {props.isInherited ? (
         <Tooltip
-          hasArrow
-          label={
+          content={
             "This visibility state is inherited and cannot be changed directly"
           }
+          showArrow
         >
           <IconButton
             ml={"1"}
@@ -78,8 +78,8 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         </Tooltip>
       ) : (
         <Tooltip
-          hasArrow
-          label={props.isPublic ? "Make Private" : "Make Public"}
+          content={props.isPublic ? "Make Private" : "Make Public"}
+          showArrow
         >
           <IconButton
             ml={"1"}

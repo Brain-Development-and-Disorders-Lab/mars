@@ -111,12 +111,7 @@ const Uploader = (props: {
       {isLoaded && isError ? (
         <Error />
       ) : (
-        <Dialog.Root
-          isOpen={props.open}
-          onClose={props.onClose}
-          isCentered
-          size={"xl"}
-        >
+        <Dialog.Root open={props.open} placement={"center"} size={"xl"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>

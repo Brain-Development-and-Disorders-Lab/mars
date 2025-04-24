@@ -287,7 +287,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                       align={"center"}
                       justify={"space-between"}
                     >
-                      <Tooltip label={accessible.name} hasArrow>
+                      <Tooltip content={accessible.name} showArrow>
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
                           {_.truncate(accessible.name, { length: 24 })}
                         </Text>
@@ -365,9 +365,9 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
       </Menu>
 
       <Dialog.Root
-        isOpen={transitionOpen}
-        onClose={onTransitionClose}
+        open={transitionOpen}
         size={"full"}
+        onExitComplete={onTransitionClose}
         motionPreset={"none"}
       >
         <Dialog.Trigger />

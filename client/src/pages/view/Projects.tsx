@@ -125,8 +125,7 @@ const Projects = () => {
     columnHelper.accessor("name", {
       cell: (info) => (
         <Tooltip
-          label={info.getValue()}
-          placement={"top"}
+          content={info.getValue()}
           disabled={info.getValue().length < 30}
         >
           <Text lineClamp={1} fontWeight={"semibold"}>
@@ -147,8 +146,7 @@ const Projects = () => {
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
+            content={info.getValue()}
             disabled={info.getValue().length < 30}
           >
             <Text lineClamp={1}>

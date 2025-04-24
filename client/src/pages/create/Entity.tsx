@@ -474,9 +474,9 @@ const Entity = () => {
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                <Fieldset.Root required invalid={isNameError || !isNameUnique}>
+                <Fieldset.Root invalid={isNameError || !isNameUnique}>
                   <Fieldset.Content>
-                    <Field.Root>
+                    <Field.Root required>
                       <Field.Label>
                         Name
                         <Field.RequiredIndicator />
@@ -531,7 +531,7 @@ const Entity = () => {
                       )}
                     </Field.Root>
 
-                    <Field.Root invalid={isDateError}>
+                    <Field.Root invalid={isDateError} required>
                       <Field.Label>
                         Created
                         <Field.RequiredIndicator />
@@ -913,7 +913,7 @@ const Entity = () => {
         )}
 
         {/* Information modal */}
-        <Dialog.Root isOpen={isOpen} onClose={onClose} isCentered>
+        <Dialog.Root open={isOpen} placement={"center"}>
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>

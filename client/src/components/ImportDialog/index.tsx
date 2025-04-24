@@ -261,8 +261,8 @@ const ImportDialog = (props: ImportDialogProps) => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              hasArrow
+              content={info.getValue()}
+              showArrow
               disabled={info.getValue().length < 30}
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -872,9 +872,8 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   return (
     <Dialog.Root
-      isOpen={props.open}
-      onClose={props.onClose}
-      isCentered
+      open={props.open}
+      placement={"center"}
       size={"xl"}
       scrollBehavior={"inside"}
     >
@@ -1342,12 +1341,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Fieldset.Content>
                         <Field.Root>
                           <Tooltip
-                            label={
+                            content={
                               templates.length > 0
                                 ? "Select an existing Template"
                                 : "No Templates exist yet"
                             }
-                            hasArrow
+                            showArrow
                           >
                             <Select
                               size={"sm"}

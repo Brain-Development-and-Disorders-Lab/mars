@@ -64,11 +64,7 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Flex>
-            <Tooltip
-              label={info.getValue()}
-              hasArrow
-              disabled={info.getValue().length < 30}
-            >
+            <Tooltip content={info.getValue()} showArrow>
               <Text fontSize={"sm"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 30 })}
               </Text>
@@ -157,9 +153,9 @@ const Entities = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              hasArrow
+              content={info.getValue()}
               disabled={info.getValue().length < 20}
+              showArrow
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 20 })}
@@ -182,9 +178,9 @@ const Entities = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              hasArrow
+              content={info.getValue()}
               disabled={info.getValue().length < 24}
+              showArrow
             >
               <Text fontSize={"sm"}>
                 {_.truncate(info.getValue(), { length: 24 })}
@@ -342,12 +338,7 @@ const Entities = () => {
         </Flex>
       </Flex>
 
-      <Dialog.Root
-        isOpen={isExportOpen}
-        onClose={onExportClose}
-        size={"xl"}
-        isCentered
-      >
+      <Dialog.Root open={isExportOpen} size={"xl"} placement={"center"}>
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>

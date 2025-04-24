@@ -176,9 +176,9 @@ const Template = () => {
               borderColor={"gray.300"}
               rounded={"md"}
             >
-              <Fieldset.Root required>
+              <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root required>
                     <Field.Label>Template Name</Field.Label>
                     <Input
                       size={"sm"}
@@ -220,9 +220,9 @@ const Template = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <Fieldset.Root required>
+              <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root required>
                     <Field.Label>Template Description</Field.Label>
                     <MDEditor
                       height={150}
@@ -257,7 +257,7 @@ const Template = () => {
       </Flex>
 
       {/* Information modal */}
-      <Dialog.Root isOpen={isOpen} onClose={onClose} size={"xl"} isCentered>
+      <Dialog.Root open={isOpen} size={"xl"} placement={"center"}>
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
