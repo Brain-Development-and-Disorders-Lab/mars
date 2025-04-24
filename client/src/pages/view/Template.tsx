@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -8,9 +8,6 @@ import {
   Heading,
   Input,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -53,7 +50,6 @@ const Template = () => {
   );
 
   // State for dialog confirming if user should archive
-  const archiveDialogRef = useRef();
   const {
     open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
@@ -319,28 +315,32 @@ const Template = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu id={"actionsMenu"}>
-              <MenuButton as={Button} size={"sm"} colorPalette={"yellow"}>
-                Actions
-                <Icon name={"lightning"} />
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={<Icon name={"download"} />}
+            <Menu.Root id={"actionsMenu"}>
+              <Menu.Trigger>
+                <Button size={"sm"} colorPalette={"yellow"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Content>
+                <Menu.Item
+                  value={"export"}
                   onClick={handleDownloadClick}
                   disabled={editing || templateArchived}
                 >
+                  <Icon name={"download"} />
                   Export
-                </MenuItem>
-                <MenuItem
+                </Menu.Item>
+                <Menu.Item
+                  value={"archive"}
                   onClick={onArchiveDialogOpen}
-                  icon={<Icon name={"archive"} />}
                   disabled={templateArchived}
                 >
+                  <Icon name={"archive"} />
                   Archive
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Root>
 
             {templateArchived ? (
               <Button
@@ -366,12 +366,9 @@ const Template = () => {
 
             {/* Archive Dialog */}
             <AlertDialog
-              dialogRef={archiveDialogRef}
               header={"Archive Template"}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
             >
               <Text>
                 Are you sure you want to archive this Template? It can be
@@ -406,7 +403,7 @@ const Template = () => {
                     onChange={(event) => {
                       setTemplateName(event.target.value);
                     }}
-                    isReadOnly={!editing}
+                    readOnly={!editing}
                     bg={"white"}
                     rounded={"md"}
                     border={"1px"}

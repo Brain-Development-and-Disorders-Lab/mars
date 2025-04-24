@@ -27,9 +27,6 @@ import {
   IconButton,
   useBreakpoint,
   Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Dialog,
   Separator,
   Fieldset,
@@ -187,7 +184,6 @@ const Entity = () => {
   const [attributeValues, setAttributeValues] = useState(
     [] as IValue<GenericValueType>[],
   );
-  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";
@@ -440,6 +436,7 @@ const Entity = () => {
     });
 
     // Perform the "GET" request to retrieve the data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fileResponse = await requestStatic<any>(response.data.downloadFile, {
       responseType: "blob",
     });
@@ -556,11 +553,7 @@ const Entity = () => {
   const [previewAttachment, setPreviewAttachment] = useState(
     {} as IGenericItem,
   );
-  const {
-    open: previewOpen,
-    onOpen: onPreviewOpen,
-    onClose: onPreviewClose,
-  } = useDisclosure();
+  const { open: previewOpen, onOpen: onPreviewOpen } = useDisclosure();
 
   // Toggle editing status
   const handleEditClick = () => {
@@ -1304,61 +1297,67 @@ const Entity = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
             {/* Actions Menu */}
-            <Menu>
-              <MenuButton as={Button} size={"sm"} colorPalette={"yellow"}>
-                Actions
-                <Icon name={"lightning"} />
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={<Icon name={"print"} />}
-                  fontSize={"sm"}
-                  disabled
-                >
-                  Print
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon name={"share"} />}
-                  fontSize={"sm"}
-                  onClick={handleShareClick}
-                >
-                  Share
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon name={"graph"} />}
-                  onClick={onGraphOpen}
-                  fontSize={"sm"}
-                  disabled={editing || entityArchived}
-                >
-                  Visualize
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon name={"copy"} />}
-                  onClick={() => onCloneOpen()}
-                  fontSize={"sm"}
-                  disabled={entityArchived}
-                >
-                  Clone
-                </MenuItem>
-                <MenuItem
-                  onClick={handleExportClick}
-                  icon={<Icon name={"download"} />}
-                  fontSize={"sm"}
-                  disabled={editing || entityArchived}
-                >
-                  Export
-                </MenuItem>
-                <MenuItem
-                  id={"archiveEntityButton"}
-                  onClick={onArchiveDialogOpen}
-                  icon={<Icon name={"archive"} />}
-                  fontSize={"sm"}
-                  disabled={entityArchived}
-                >
-                  Archive
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Menu.Root>
+              <Menu.Trigger>
+                <Button size={"sm"} colorPalette={"yellow"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item value={"print"} fontSize={"sm"} disabled>
+                    <Icon name={"print"} />
+                    Print
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"share"}
+                    fontSize={"sm"}
+                    onClick={handleShareClick}
+                  >
+                    <Icon name={"share"} />
+                    Share
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"visualize"}
+                    onClick={onGraphOpen}
+                    fontSize={"sm"}
+                    disabled={editing || entityArchived}
+                  >
+                    <Icon name={"graph"} />
+                    Visualize
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"clone"}
+                    onClick={() => onCloneOpen()}
+                    fontSize={"sm"}
+                    disabled={entityArchived}
+                  >
+                    <Icon name={"copy"} />
+                    Clone
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"export"}
+                    onClick={handleExportClick}
+                    fontSize={"sm"}
+                    disabled={editing || entityArchived}
+                  >
+                    <Icon name={"download"} />
+                    Export
+                  </Menu.Item>
+                  <Menu.Item
+                    id={"archiveEntityButton"}
+                    value={"archive"}
+                    onClick={onArchiveDialogOpen}
+                    fontSize={"sm"}
+                    disabled={entityArchived}
+                  >
+                    <Icon name={"archive"} />
+                    Archive
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
 
             {editing && (
               <Button
@@ -1404,12 +1403,9 @@ const Entity = () => {
 
             {/* Archive Dialog */}
             <AlertDialog
-              dialogRef={archiveDialogRef}
               header={"Archive Entity"}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -1781,7 +1777,6 @@ const Entity = () => {
                     collection={templatesCollection}
                     onValueChange={(details) => {
                       if (!_.isEqual(details.items[0], "")) {
-                        setSelectedTemplate(details.items[0]._id);
                         for (const template of templatesCollection.items) {
                           if (_.isEqual(details.items[0], template._id)) {
                             setAttributeName(template.name);

@@ -22,9 +22,6 @@ import {
   Input,
   Link,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Portal,
   Radio,
   RadioGroup,
@@ -95,7 +92,6 @@ const Project = () => {
   } = useDisclosure();
 
   // State for dialog confirming if user should archive Project
-  const archiveDialogRef = useRef();
   const {
     open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
@@ -719,48 +715,55 @@ const Project = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu>
-              <MenuButton as={Button} colorPalette={"yellow"} size={"sm"}>
-                Actions
-                <Icon name={"lightning"} />
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  onClick={handleExportClick}
-                  icon={<Icon name={"download"} />}
-                  fontSize={"sm"}
-                  disabled={exportLoading || projectArchived}
-                >
-                  Export Project
-                </MenuItem>
-                <Tooltip
-                  content={"This Project does not contain any Entities."}
-                  disabled={projectEntities?.length > 0 || projectArchived}
-                  showArrow
-                >
-                  <MenuItem
-                    onClick={handleExportEntitiesClick}
-                    icon={<Icon name={"download"} />}
+            <Menu.Root>
+              <Menu.Trigger>
+                <Button colorPalette={"yellow"} size={"sm"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    value={"export-project"}
+                    onClick={handleExportClick}
                     fontSize={"sm"}
-                    disabled={
-                      projectEntities?.length === 0 ||
-                      exportEntitiesLoading ||
-                      projectArchived
-                    }
+                    disabled={exportLoading || projectArchived}
                   >
-                    Export Entities
-                  </MenuItem>
-                </Tooltip>
-                <MenuItem
-                  icon={<Icon name={"archive"} />}
-                  onClick={onArchiveDialogOpen}
-                  fontSize={"sm"}
-                  disabled={projectArchived}
-                >
-                  Archive
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                    <Icon name={"download"} />
+                    Export Project
+                  </Menu.Item>
+                  <Tooltip
+                    content={"This Project does not contain any Entities."}
+                    disabled={projectEntities?.length > 0 || projectArchived}
+                    showArrow
+                  >
+                    <Menu.Item
+                      value={"export-entities"}
+                      onClick={handleExportEntitiesClick}
+                      fontSize={"sm"}
+                      disabled={
+                        projectEntities?.length === 0 ||
+                        exportEntitiesLoading ||
+                        projectArchived
+                      }
+                    >
+                      <Icon name={"download"} />
+                      Export Entities
+                    </Menu.Item>
+                  </Tooltip>
+                  <Menu.Item
+                    value={"archive"}
+                    onClick={onArchiveDialogOpen}
+                    fontSize={"sm"}
+                    disabled={projectArchived}
+                  >
+                    <Icon name={"archive"} />
+                    Archive
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
 
             {projectArchived ? (
               <Button
@@ -804,12 +807,9 @@ const Project = () => {
 
             {/* Archive Dialog */}
             <AlertDialog
-              dialogRef={archiveDialogRef}
               header={"Archive Project"}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
             >
               <Text>
                 Are you sure you want to archive this Project? No Entities will
