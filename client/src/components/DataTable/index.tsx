@@ -72,7 +72,7 @@ const DataTable = (props: DataTableProps) => {
             {
               id: "select",
               header: ({ table }: any) => (
-                <Checkbox
+                <Checkbox.Root
                   {...{
                     disabled: props.viewOnly,
                     pl: "1",
@@ -81,10 +81,13 @@ const DataTable = (props: DataTableProps) => {
                     invalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
-                />
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
               ),
               cell: ({ row }: any) => (
-                <Checkbox
+                <Checkbox.Root
                   {...{
                     id: `s_${Math.random().toString(16).slice(2)}`,
                     pl: "1",
@@ -94,7 +97,10 @@ const DataTable = (props: DataTableProps) => {
                     invalid: false,
                     onChange: row.getToggleSelectedHandler(),
                   }}
-                />
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
               ),
             },
           ]

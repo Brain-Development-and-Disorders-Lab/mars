@@ -2378,60 +2378,73 @@ const Entity = () => {
                           {!loading ? (
                             <CheckboxGroup size={"sm"}>
                               <Stack gap={2} direction={"column"}>
-                                <Checkbox
+                                <Checkbox.Root
                                   disabled
                                   defaultChecked
                                   fontSize={"sm"}
                                 >
-                                  Name: {entityName}
-                                </Checkbox>
-                                <Checkbox
-                                  isChecked={_.includes(
-                                    exportFields,
-                                    "created",
-                                  )}
-                                  onChange={(event) =>
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label>
+                                    Name: {entityName}
+                                  </Checkbox.Label>
+                                </Checkbox.Root>
+                                <Checkbox.Root
+                                  checked={_.includes(exportFields, "created")}
+                                  onCheckedChange={(details) =>
                                     handleExportCheck(
                                       "created",
-                                      event.target.checked,
+                                      details.checked as boolean,
                                     )
                                   }
                                   fontSize={"sm"}
                                 >
-                                  Created:{" "}
-                                  {dayjs(entityData.created).format(
-                                    "DD MMM YYYY",
-                                  )}
-                                </Checkbox>
-                                <Checkbox
-                                  isChecked={true}
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label>
+                                    Created:{" "}
+                                    {dayjs(entityData.created).format(
+                                      "DD MMM YYYY",
+                                    )}
+                                  </Checkbox.Label>
+                                </Checkbox.Root>
+                                <Checkbox.Root
+                                  checked={true}
                                   disabled
                                   fontSize={"sm"}
                                 >
-                                  Owner: {entityData.owner}
-                                </Checkbox>
-                                <Checkbox
-                                  isChecked={_.includes(
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label>
+                                    Owner: {entityData.owner}
+                                  </Checkbox.Label>
+                                </Checkbox.Root>
+                                <Checkbox.Root
+                                  checked={_.includes(
                                     exportFields,
                                     "description",
                                   )}
-                                  onChange={(event) =>
+                                  onCheckedChange={(details) =>
                                     handleExportCheck(
                                       "description",
-                                      event.target.checked,
+                                      details.checked as boolean,
                                     )
                                   }
                                   disabled={_.isEqual(entityDescription, "")}
                                 >
-                                  <Text lineClamp={1} fontSize={"sm"}>
-                                    Description:{" "}
-                                    {_.isEqual(entityDescription, "")
-                                      ? "No description"
-                                      : _.truncate(entityDescription, {
-                                          length: 32,
-                                        })}
-                                  </Text>
-                                </Checkbox>
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label>
+                                    <Text lineClamp={1} fontSize={"sm"}>
+                                      Description:{" "}
+                                      {_.isEqual(entityDescription, "")
+                                        ? "No description"
+                                        : _.truncate(entityDescription, {
+                                            length: 32,
+                                          })}
+                                    </Text>
+                                  </Checkbox.Label>
+                                </Checkbox.Root>
                               </Stack>
                             </CheckboxGroup>
                           ) : (
@@ -2446,26 +2459,30 @@ const Entity = () => {
                               {entityProjects.map((project) => {
                                 allExportFields.push(`project_${project}`);
                                 return (
-                                  <Checkbox
+                                  <Checkbox.Root
                                     size={"sm"}
                                     key={project}
-                                    isChecked={_.includes(
+                                    checked={_.includes(
                                       exportFields,
                                       `project_${project}`,
                                     )}
-                                    onChange={(event) =>
+                                    onCheckedChange={(details) =>
                                       handleExportCheck(
                                         `project_${project}`,
-                                        event.target.checked,
+                                        details.checked as boolean,
                                       )
                                     }
                                   >
-                                    <Linky
-                                      id={project}
-                                      type={"projects"}
-                                      size={"sm"}
-                                    />
-                                  </Checkbox>
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label>
+                                      <Linky
+                                        id={project}
+                                        type={"projects"}
+                                        size={"sm"}
+                                      />
+                                    </Checkbox.Label>
+                                  </Checkbox.Root>
                                 );
                               })}
                             </Stack>
@@ -2491,27 +2508,31 @@ const Entity = () => {
                                   `relationship_${relationship.target._id}_${relationship.type}`,
                                 );
                                 return (
-                                  <Checkbox
+                                  <Checkbox.Root
                                     size={"sm"}
                                     fontSize={"sm"}
                                     key={relationship.target._id}
-                                    isChecked={_.includes(
+                                    checked={_.includes(
                                       exportFields,
                                       `relationship_${relationship.target._id}_${relationship.type}`,
                                     )}
-                                    onChange={(event) =>
+                                    onCheckedChange={(details) =>
                                       handleExportCheck(
                                         `relationship_${relationship.target._id}_${relationship.type}`,
-                                        event.target.checked,
+                                        details.checked as boolean,
                                       )
                                     }
                                   >
-                                    <Linky
-                                      id={relationship.target._id}
-                                      type={"entities"}
-                                      size={"sm"}
-                                    />
-                                  </Checkbox>
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label>
+                                      <Linky
+                                        id={relationship.target._id}
+                                        type={"entities"}
+                                        size={"sm"}
+                                      />
+                                    </Checkbox.Label>
+                                  </Checkbox.Root>
                                 );
                               })}
                             </Stack>
@@ -2537,23 +2558,27 @@ const Entity = () => {
                                   `attribute_${attribute._id}`,
                                 );
                                 return (
-                                  <Checkbox
+                                  <Checkbox.Root
                                     size={"sm"}
                                     fontSize={"sm"}
                                     key={attribute._id}
-                                    isChecked={_.includes(
+                                    checked={_.includes(
                                       exportFields,
                                       `attribute_${attribute._id}`,
                                     )}
-                                    onChange={(event) =>
+                                    onCheckedChange={(details) =>
                                       handleExportCheck(
                                         `attribute_${attribute._id}`,
-                                        event.target.checked,
+                                        details.checked as boolean,
                                       )
                                     }
                                   >
-                                    {attribute.name}
-                                  </Checkbox>
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label>
+                                      {attribute.name}
+                                    </Checkbox.Label>
+                                  </Checkbox.Root>
                                 );
                               })}
                             </Stack>

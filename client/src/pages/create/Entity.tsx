@@ -764,7 +764,7 @@ const Entity = () => {
                       <CheckboxGroup
                         size={"sm"}
                         value={selectedProjects}
-                        onChange={(event: string[]) => {
+                        onValueChange={(event: string[]) => {
                           if (event) {
                             setSelectedProjects([...event]);
                           }
@@ -773,9 +773,14 @@ const Entity = () => {
                         <Stack gap={[1, 5]} direction={"column"}>
                           {projects.map((project) => {
                             return (
-                              <Checkbox key={project._id} value={project._id}>
-                                {project.name}
-                              </Checkbox>
+                              <Checkbox.Root
+                                key={project._id}
+                                value={project._id}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label>{project.name}</Checkbox.Label>
+                              </Checkbox.Root>
                             );
                           })}
                           {projects.length === 0 && (
