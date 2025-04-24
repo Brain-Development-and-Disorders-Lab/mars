@@ -7,7 +7,6 @@ import {
   Text,
   useToast,
   Heading,
-  Tooltip,
   useBreakpoint,
   IconButton,
   Tag,
@@ -17,6 +16,7 @@ import {
   Fieldset,
   Field,
 } from "@chakra-ui/react";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
@@ -103,9 +103,9 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
     <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"} wrap={"wrap"}>
       <Flex direction={"row"} gap={"1"} align={"center"}>
         <Icon name={"key"} />
-        <Tag colorPalette={isRevoked ? "red" : "blue"} size={"sm"}>
-          {isRevoked ? "revoked" : props.apiKey.scope}
-        </Tag>
+        <Tag.Root colorPalette={isRevoked ? "red" : "blue"} size={"sm"}>
+          <Tag.Label>{isRevoked ? "revoked" : props.apiKey.scope}</Tag.Label>
+        </Tag.Root>
       </Flex>
 
       <Flex gap={"2"} align={"center"}>
@@ -505,7 +505,9 @@ const User = () => {
                   <Fieldset.Content>
                     <Field.Root>
                       <Field.Label>ORCiD</Field.Label>
-                      <Tag.Root colorPalette={"green"}>{userOrcid}</Tag.Root>
+                      <Tag.Root colorPalette={"green"}>
+                        <Tag.Label>{userOrcid}</Tag.Label>
+                      </Tag.Root>
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>

@@ -9,7 +9,6 @@ import {
   Dialog,
   Button,
   useBreakpoint,
-  Tooltip,
   Spacer,
   Tag,
   Link,
@@ -21,6 +20,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
 
 // Existing and custom types
@@ -173,7 +173,11 @@ const Entities = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Flex>
@@ -194,7 +198,11 @@ const Entities = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <Tag.Root>
+            <Tag.Label>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Owner",
       enableHiding: true,

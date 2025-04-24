@@ -11,7 +11,6 @@ import {
   Tag,
   VStack,
   Avatar,
-  Tooltip,
   StatGroup,
   Stat,
   StatLabel,
@@ -31,6 +30,7 @@ import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
+import Tooltip from "@components/Tooltip";
 import Joyride, { ACTIONS, CallBackProps, EVENTS } from "react-joyride";
 
 // Existing and custom types
@@ -248,7 +248,11 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
@@ -268,9 +272,17 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("attributes", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorPalette={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
-        return <Tag colorPalette={"green"}>{info.getValue().length}</Tag>;
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Attributes",
       enableHiding: true,
@@ -309,7 +321,11 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("name", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorPalette={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Text lineClamp={1} fontWeight={"semibold"}>
@@ -322,7 +338,11 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
@@ -342,9 +362,17 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("entities", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorPalette={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
-        return <Tag colorPalette={"green"}>{info.getValue().length}</Tag>;
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Entities",
       enableHiding: true,

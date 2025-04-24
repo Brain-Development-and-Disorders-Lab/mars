@@ -11,11 +11,11 @@ import {
   Spacer,
   Spinner,
   Text,
-  Tooltip,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // GraphQL resources
 import { gql, useLazyQuery, useQuery } from "@apollo/client";

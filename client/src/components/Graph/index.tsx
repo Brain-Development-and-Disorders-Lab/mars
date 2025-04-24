@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 // Existing and custom components
-import { Button, Flex, Text, Tooltip, useToast } from "@chakra-ui/react";
+import { Button, Flex, Text, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -15,6 +15,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { EntityNode, IRelationship } from "@types";

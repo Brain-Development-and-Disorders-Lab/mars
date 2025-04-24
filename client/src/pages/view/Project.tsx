@@ -31,9 +31,7 @@ import {
   Spacer,
   Stack,
   Tag,
-  TagLabel,
   Text,
-  Tooltip,
   VStack,
   useDisclosure,
   useToast,
@@ -47,6 +45,7 @@ import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import MDEditor from "@uiw/react-md-editor";
@@ -1511,9 +1510,9 @@ const Project = () => {
                           <Flex direction={"column"} gap={"2"}>
                             {/* Description */}
                             {_.isEqual(projectVersion.description, "") ? (
-                              <Tag size={"sm"} colorPalette={"orange"}>
-                                No Description
-                              </Tag>
+                              <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                <Tag.Label>No Description</Tag.Label>
+                              </Tag.Root>
                             ) : (
                               <Text fontSize={"sm"}>
                                 {_.truncate(projectVersion.description, {
@@ -1542,18 +1541,18 @@ const Project = () => {
                                     gap={"2"}
                                     align={"center"}
                                   >
-                                    <Tag
+                                    <Tag.Root
                                       key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
                                       size={"sm"}
                                     >
-                                      <TagLabel>
+                                      <Tag.Label>
                                         <Linky
                                           type={"projects"}
                                           id={projectVersion.entities[0]}
                                           size={"sm"}
                                         />
-                                      </TagLabel>
-                                    </Tag>
+                                      </Tag.Label>
+                                    </Tag.Root>
                                     {projectVersion.entities.length > 1 && (
                                       <Text
                                         fontWeight={"semibold"}
@@ -1588,14 +1587,14 @@ const Project = () => {
                                     gap={"2"}
                                     align={"center"}
                                   >
-                                    <Tag
+                                    <Tag.Root
                                       key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
                                       size={"sm"}
                                     >
-                                      <TagLabel>
+                                      <Tag.Label>
                                         {projectVersion.collaborators[0]}
-                                      </TagLabel>
-                                    </Tag>
+                                      </Tag.Label>
+                                    </Tag.Root>
                                     {projectVersion.collaborators.length >
                                       1 && (
                                       <Text
@@ -1641,9 +1640,11 @@ const Project = () => {
                                   gap={"2"}
                                   align={"center"}
                                 >
-                                  <Tag size={"sm"} colorPalette={"green"}>
-                                    {projectVersion.version}
-                                  </Tag>
+                                  <Tag.Root size={"sm"} colorPalette={"green"}>
+                                    <Tag.Label>
+                                      {projectVersion.version}
+                                    </Tag.Label>
+                                  </Tag.Root>
                                 </Flex>
                                 <Text
                                   fontWeight={"semibold"}
@@ -1658,9 +1659,12 @@ const Project = () => {
                                 {_.isEqual(projectVersion.message, "") ||
                                 _.isNull(projectVersion.message) ? (
                                   <Flex>
-                                    <Tag size={"sm"} colorPalette={"orange"}>
-                                      No Message
-                                    </Tag>
+                                    <Tag.Root
+                                      size={"sm"}
+                                      colorPalette={"orange"}
+                                    >
+                                      <Tag.Label>No Message</Tag.Label>
+                                    </Tag.Root>
                                   </Flex>
                                 ) : (
                                   <Tooltip

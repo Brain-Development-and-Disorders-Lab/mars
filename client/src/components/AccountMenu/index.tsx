@@ -10,9 +10,9 @@ import {
   Portal,
   Tag,
   Text,
-  Tooltip,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Custom types
 import { UserModel } from "@types";
@@ -145,7 +145,7 @@ const AccountMenu = () => {
                     {user.firstName} {user.lastName}
                   </Text>
 
-                  <Tooltip.Root label={user.affiliation} hasArrow>
+                  <Tooltip label={user.affiliation} hasArrow>
                     <Text
                       fontWeight={"semibold"}
                       fontSize={"sm"}
@@ -153,16 +153,18 @@ const AccountMenu = () => {
                     >
                       {_.truncate(user.affiliation, { length: 30 })}
                     </Text>
-                  </Tooltip.Root>
+                  </Tooltip>
 
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       ORCiD:
                     </Text>
                     <Tag.Root colorPalette={"green"}>
-                      <Link href={`https://orcid.org/${user._id}`}>
-                        {user._id}
-                      </Link>
+                      <Tag.Label>
+                        <Link href={`https://orcid.org/${user._id}`}>
+                          {user._id}
+                        </Link>
+                      </Tag.Label>
                     </Tag.Root>
                   </Flex>
                 </Flex>

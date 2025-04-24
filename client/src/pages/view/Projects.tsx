@@ -8,7 +8,6 @@ import {
   Spacer,
   Tag,
   Text,
-  Tooltip,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -16,6 +15,7 @@ import { Content } from "@components/Container";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { ProjectModel } from "@types";
@@ -139,7 +139,11 @@ const Projects = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
@@ -158,7 +162,11 @@ const Projects = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <Tag.Root size={"sm"}>
+            <Tag.Label>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Owner",
     }),

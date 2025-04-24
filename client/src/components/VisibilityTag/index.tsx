@@ -4,19 +4,19 @@ import {
   Flex,
   IconButton,
   Spacer,
-  Tooltip,
   Text,
   useBreakpoint,
 } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { VisibilityTagProps } from "@types";
 
 // Utility functions and libraries
-import consola from "consola";
+import * as consola from "consola";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state

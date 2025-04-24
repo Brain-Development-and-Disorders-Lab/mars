@@ -1,7 +1,8 @@
 import React from "react";
-import { Flex, Tooltip, Text, Tag, IconButton, Link } from "@chakra-ui/react";
+import { Flex, Text, Tag, IconButton, Link } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
@@ -89,7 +90,9 @@ const Relationships = (props: RelationshipsProps) => {
       cell: (info) => {
         return (
           <Flex p={"1"}>
-            <Tag>{info.getValue()}</Tag>
+            <Tag.Root>
+              <Tag.Label>{info.getValue()}</Tag.Label>
+            </Tag.Root>
           </Flex>
         );
       },

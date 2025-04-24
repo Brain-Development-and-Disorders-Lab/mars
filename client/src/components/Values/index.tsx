@@ -28,7 +28,6 @@ import {
   Separator,
   Spacer,
   Text,
-  Tooltip,
   VStack,
   useDisclosure,
   useToast,
@@ -38,6 +37,7 @@ import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { DataTableAction, IGenericItem, IValue } from "@types";

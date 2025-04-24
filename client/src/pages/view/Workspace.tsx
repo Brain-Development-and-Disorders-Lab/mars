@@ -8,7 +8,6 @@ import {
   IconButton,
   Text,
   useToast,
-  Tooltip,
   useBreakpoint,
   Heading,
   Code,
@@ -23,6 +22,7 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import TimestampTag from "@components/TimestampTag";
+import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";

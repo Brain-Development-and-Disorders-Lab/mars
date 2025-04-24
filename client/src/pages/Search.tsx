@@ -18,7 +18,6 @@ import {
   Tabs,
   Tag,
   Text,
-  Tooltip,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -27,6 +26,7 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 
 // Existing and custom types
@@ -172,7 +172,11 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorPalette={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
@@ -191,16 +195,22 @@ const Search = () => {
     }),
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <Tag.Root>
+            <Tag.Label>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Owner",
     }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
         return (
-          <Tag size={"sm"}>
-            {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
-          </Tag>
+          <Tag.Root>
+            <Tag.Label>
+              {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
+            </Tag.Label>
+          </Tag.Root>
         );
       },
       header: "Attributes",

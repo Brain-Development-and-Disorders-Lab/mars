@@ -21,7 +21,6 @@ import {
   Box,
   StepTitle,
   StepSeparator,
-  Tooltip,
   Spacer,
   Fieldset,
   Field,
@@ -31,6 +30,7 @@ import Icon from "@components/Icon";
 import Attribute from "@components/AttributeCard";
 import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
+import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 
 // Custom and existing types
@@ -925,10 +925,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                 >
                   Supported formats:
                 </Text>
-                {_.isEqual(importType, "entities") && (
-                  <Tag size={"sm"}>CSV</Tag>
-                )}
-                <Tag size={"sm"}>JSON</Tag>
+                <Tag.Root>
+                  {_.isEqual(importType, "entities") && (
+                    <Tag.Label>CSV</Tag.Label>
+                  )}
+                  <Tag.Label>JSON</Tag.Label>
+                </Tag.Root>
               </Flex>
             </Flex>
 
@@ -1018,15 +1020,14 @@ const ImportDialog = (props: ImportDialogProps) => {
                       </Text>
                       {columns.map((column) => {
                         return (
-                          <Tag
-                            size={"sm"}
+                          <Tag.Root
                             key={column}
                             colorPalette={
                               columnSelected(column) ? "green" : "gray"
                             }
                           >
-                            {column}
-                          </Tag>
+                            <Tag.Label>{column}</Tag.Label>
+                          </Tag.Root>
                         );
                       })}
                     </Flex>

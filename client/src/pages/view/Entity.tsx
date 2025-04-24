@@ -12,9 +12,7 @@ import {
   useToast,
   useDisclosure,
   Tag,
-  TagLabel,
   Select,
-  TagCloseButton,
   CheckboxGroup,
   Checkbox,
   Stack,
@@ -27,7 +25,6 @@ import {
   VStack,
   Card,
   Spacer,
-  Tooltip,
   IconButton,
   useBreakpoint,
   Menu,
@@ -54,6 +51,7 @@ import AlertDialog from "@components/AlertDialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Relationships from "@components/Relationships";
+import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -748,9 +746,9 @@ const Entity = () => {
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
           <Tooltip label={tooltipLabelValue} hasArrow>
-            <Tag colorPalette={"purple"} size={"sm"}>
-              {info.row.original.values.length}
-            </Tag>
+            <Tag.Root colorPalette={"purple"}>
+              <Tag.Label>{info.row.original.values.length}</Tag.Label>
+            </Tag.Root>
           </Tooltip>
         );
       },
@@ -826,7 +824,11 @@ const Entity = () => {
           fileColorScheme = "blue";
         }
 
-        return <Tag colorPalette={fileColorScheme}>{fileExtension}</Tag>;
+        return (
+          <Tag.Root colorPalette={fileColorScheme}>
+            <Tag.Label>{fileExtension}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Type",
     },
@@ -2018,15 +2020,15 @@ const Entity = () => {
                       selectedProjects.map((project) => {
                         if (!_.isEqual(project, "")) {
                           return (
-                            <Tag key={`tag-${project}`}>
-                              <TagLabel>
+                            <Tag.Root key={`tag-${project}`}>
+                              <Tag.Label>
                                 <Linky
                                   id={project}
                                   type={"projects"}
                                   size={"sm"}
                                 />
-                              </TagLabel>
-                              <TagCloseButton
+                              </Tag.Label>
+                              <Tag.CloseTrigger
                                 onClick={() => {
                                   setSelectedProjects([
                                     ...selectedProjects.filter((selected) => {
@@ -2035,7 +2037,7 @@ const Entity = () => {
                                   ]);
                                 }}
                               />
-                            </Tag>
+                            </Tag.Root>
                           );
                         } else {
                           return null;
@@ -2159,27 +2161,31 @@ const Entity = () => {
                       Description:
                     </Text>
                     <Text fontSize={"sm"}>{entityName} is</Text>
-                    <Tag
+                    <Tag.Root
                       fontSize={"sm"}
                       fontWeight={"semibold"}
                       colorPalette={"yellow"}
                     >
-                      {selectedRelationshipType === "general" && "related"}
-                      {selectedRelationshipType === "child" && "a child"}
-                      {selectedRelationshipType === "parent" && "a parent"}
-                    </Tag>
+                      <Tag.Label>
+                        {selectedRelationshipType === "general" && "related"}
+                        {selectedRelationshipType === "child" && "a child"}
+                        {selectedRelationshipType === "parent" && "a parent"}
+                      </Tag.Label>
+                    </Tag.Root>
                     <Text fontSize={"sm"}>
                       {selectedRelationshipType === "general" ? "to" : "of"}
                     </Text>
-                    <Tag
+                    <Tag.Root
                       fontSize={"sm"}
                       fontWeight={"semibold"}
                       colorPalette={"blue"}
                     >
-                      {_.isUndefined(selectedRelationshipTarget.name)
-                        ? "Select Entity"
-                        : selectedRelationshipTarget.name}
-                    </Tag>
+                      <Tag.Label>
+                        {_.isUndefined(selectedRelationshipTarget.name)
+                          ? "Select Entity"
+                          : selectedRelationshipTarget.name}
+                      </Tag.Label>
+                    </Tag.Root>
                   </Flex>
                 </Flex>
               </Dialog.Body>
@@ -2870,9 +2876,9 @@ const Entity = () => {
                             {/* Description */}
                             <Flex w={"100%"}>
                               {_.isEqual(entityVersion.description, "") ? (
-                                <Tag size={"sm"} colorPalette={"orange"}>
-                                  No Description
-                                </Tag>
+                                <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                  <Tag.Label>No Description</Tag.Label>
+                                </Tag.Root>
                               ) : (
                                 <Text fontSize={"sm"}>
                                   {_.truncate(entityVersion.description, {
@@ -2902,18 +2908,18 @@ const Entity = () => {
                                     gap={"2"}
                                     align={"center"}
                                   >
-                                    <Tag
+                                    <Tag.Root
                                       key={`v_c_${entityVersion.timestamp}_${entityVersion.projects[0]}`}
                                       size={"sm"}
                                     >
-                                      <TagLabel>
+                                      <Tag.Label>
                                         <Linky
                                           type={"projects"}
                                           id={entityVersion.projects[0]}
                                           size={"sm"}
                                         />
-                                      </TagLabel>
-                                    </Tag>
+                                      </Tag.Label>
+                                    </Tag.Root>
                                     {entityVersion.projects.length > 1 && (
                                       <Text
                                         fontWeight={"semibold"}
@@ -2944,14 +2950,14 @@ const Entity = () => {
                                 </Text>
                                 <Flex direction={"row"} gap={"2"}>
                                   <Flex w={"100%"}>
-                                    <Tag
+                                    <Tag.Root
                                       key={`v_o_${entityVersion.timestamp}`}
                                       size={"sm"}
                                     >
-                                      <TagLabel>
+                                      <Tag.Label>
                                         {entityVersion?.relationships?.length}
-                                      </TagLabel>
-                                    </Tag>
+                                      </Tag.Label>
+                                    </Tag.Root>
                                   </Flex>
                                 </Flex>
                               </Flex>
@@ -2985,14 +2991,14 @@ const Entity = () => {
                                       }
                                       hasArrow
                                     >
-                                      <Tag
+                                      <Tag.Root
                                         key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
                                         size={"sm"}
                                       >
-                                        <TagLabel>
+                                        <Tag.Label>
                                           {entityVersion.attributes[0].name}
-                                        </TagLabel>
-                                      </Tag>
+                                        </Tag.Label>
+                                      </Tag.Root>
                                     </Tooltip>
                                     {entityVersion.attributes.length > 1 && (
                                       <Text fontSize={"sm"}>
@@ -3033,17 +3039,17 @@ const Entity = () => {
                                       label={entityVersion.attachments[0].name}
                                       hasArrow
                                     >
-                                      <Tag
+                                      <Tag.Root
                                         key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
                                         size={"sm"}
                                       >
-                                        <TagLabel>
+                                        <Tag.Label>
                                           {_.truncate(
                                             entityVersion.attachments[0].name,
                                             { length: 24 },
                                           )}
-                                        </TagLabel>
-                                      </Tag>
+                                        </Tag.Label>
+                                      </Tag.Root>
                                     </Tooltip>
                                     {entityVersion.attachments.length > 1 && (
                                       <Text fontSize={"sm"}>
@@ -3088,9 +3094,11 @@ const Entity = () => {
                                   gap={"2"}
                                   align={"center"}
                                 >
-                                  <Tag size={"sm"} colorPalette={"green"}>
-                                    {entityVersion.version}
-                                  </Tag>
+                                  <Tag.Root size={"sm"} colorPalette={"green"}>
+                                    <Tag.Label>
+                                      {entityVersion.version}
+                                    </Tag.Label>
+                                  </Tag.Root>
                                 </Flex>
                                 <Text
                                   fontWeight={"semibold"}
@@ -3105,9 +3113,12 @@ const Entity = () => {
                                 {_.isEqual(entityVersion.message, "") ||
                                 _.isNull(entityVersion.message) ? (
                                   <Flex>
-                                    <Tag size={"sm"} colorPalette={"orange"}>
-                                      No Message
-                                    </Tag>
+                                    <Tag.Root
+                                      size={"sm"}
+                                      colorPalette={"orange"}
+                                    >
+                                      <Tag.Label>No Message</Tag.Label>
+                                    </Tag.Root>
                                   </Flex>
                                 ) : (
                                   <Tooltip
