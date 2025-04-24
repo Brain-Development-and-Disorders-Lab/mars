@@ -308,7 +308,7 @@ const Graph = (props: {
             aria-label={"View Entity"}
             size={"xs"}
             rightIcon={<Icon name={"a_right"} />}
-            isDisabled={isPrimary}
+            disabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
           >
             View

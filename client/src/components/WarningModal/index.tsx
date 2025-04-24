@@ -44,7 +44,7 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
             <Flex w={"100%"} justify={"space-between"}>
               <Button
                 size={"sm"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 rightIcon={<Icon name={"cross"} />}
                 ref={props.cancelBlockerRef}
                 onClick={() => {
@@ -58,7 +58,7 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
               <Button
                 size={"sm"}
                 rightIcon={<Icon name={"check"} />}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 onClick={() => props.blocker.proceed?.()}
                 ml={3}
               >

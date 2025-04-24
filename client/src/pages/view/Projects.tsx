@@ -127,9 +127,9 @@ const Projects = () => {
         <Tooltip
           label={info.getValue()}
           placement={"top"}
-          isDisabled={info.getValue().length < 30}
+          disabled={info.getValue().length < 30}
         >
-          <Text noOfLines={1} fontWeight={"semibold"}>
+          <Text lineClamp={1} fontWeight={"semibold"}>
             {_.truncate(info.getValue(), { length: 30 })}
           </Text>
         </Tooltip>
@@ -139,15 +139,15 @@ const Projects = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorPalette={"orange"}>Empty</Tag>;
         }
         return (
           <Tooltip
             label={info.getValue()}
             placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -211,7 +211,7 @@ const Projects = () => {
             <Spacer />
             <Button
               rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/project")}
               size={"sm"}
             >

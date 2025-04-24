@@ -172,15 +172,15 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return <Tag colorPalette={"orange"}>No Description</Tag>;
         }
         return (
           <Tooltip
             label={info.getValue()}
             placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -313,13 +313,13 @@ const Search = () => {
         <Tabs
           w={"100%"}
           size={"sm"}
-          colorScheme={"blue"}
+          colorPalette={"blue"}
           variant={"soft-rounded"}
           onChange={onTabChange}
         >
           <TabList p={"2"} gap={"2"} pb={"0"}>
-            <Tab isDisabled={isSearching}>Text</Tab>
-            <Tab isDisabled={isSearching}>Query Builder</Tab>
+            <Tab disabled={isSearching}>Text</Tab>
+            <Tab disabled={isSearching}>Query Builder</Tab>
           </TabList>
 
           <TabPanels>
@@ -370,7 +370,7 @@ const Search = () => {
                         Options:
                       </Text>
                       <Switch
-                        colorScheme={"green"}
+                        colorPalette={"green"}
                         checked={showArchived}
                         onChange={() => setShowArchived(!showArchived)}
                       />
@@ -388,8 +388,8 @@ const Search = () => {
                     aria-label={"Search"}
                     size={"sm"}
                     rightIcon={<Icon name={"search"} />}
-                    colorScheme={"green"}
-                    isDisabled={query === ""}
+                    colorPalette={"green"}
+                    disabled={query === ""}
                     onClick={() => runSearch()}
                   >
                     Search

@@ -192,7 +192,7 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle clicking the `Input` componet dropdown
    */
   const onInputClick = () => {
-    if (props?.isDisabled !== true) {
+    if (props?.disabled !== true) {
       setShowResults(!showResults);
     }
   };
@@ -236,7 +236,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           data-testid={"value-editor"}
           size={"sm"}
           rounded={"md"}
-          isDisabled={props?.isDisabled || false}
+          disabled={props?.disabled || false}
           isReadOnly
         />
         <InputRightElement>
@@ -283,7 +283,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     variant={"ghost"}
                     onClick={() => handleSelectResult(result)}
                     width={"full"}
-                    isDisabled={searchLoading}
+                    disabled={searchLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
@@ -317,7 +317,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     variant={"ghost"}
                     onClick={() => handleSelectResult(option)}
                     width={"full"}
-                    isDisabled={entitiesLoading || projectsLoading}
+                    disabled={entitiesLoading || projectsLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>

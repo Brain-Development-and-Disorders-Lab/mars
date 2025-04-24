@@ -84,7 +84,7 @@ const DataTable = (props: DataTableProps) => {
                     pl: "1",
                     isChecked: table.getIsAllRowsSelected(),
                     isIndeterminate: table.getIsSomeRowsSelected(),
-                    isInvalid: false,
+                    invalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
                 />
@@ -97,7 +97,7 @@ const DataTable = (props: DataTableProps) => {
                     isChecked: row.getIsSelected(),
                     disabled: !row.getCanSelect() || props.viewOnly,
                     isIndeterminate: row.getIsSomeSelected(),
-                    isInvalid: false,
+                    invalid: false,
                     onChange: row.getToggleSelectedHandler(),
                   }}
                 />
@@ -370,7 +370,7 @@ const DataTable = (props: DataTableProps) => {
             <Menu size={"sm"}>
               <MenuButton
                 as={Button}
-                colorScheme={"yellow"}
+                colorPalette={"yellow"}
                 rightIcon={<Icon name={"lightning"} />}
                 size={"sm"}
               >
@@ -386,7 +386,7 @@ const DataTable = (props: DataTableProps) => {
                           action.action(table, selectedRows);
                         }}
                         key={action.label}
-                        isDisabled={
+                        disabled={
                           (Object.keys(selectedRows).length === 0 ||
                             _.isUndefined(props.actions) ||
                             props.actions?.length === 0) &&
@@ -402,7 +402,7 @@ const DataTable = (props: DataTableProps) => {
                   })}
                 {(_.isUndefined(props.actions) ||
                   props.actions.length === 0) && (
-                  <MenuItem key={"no-actions"} isDisabled>
+                  <MenuItem key={"no-actions"} disabled>
                     <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Text fontSize={"sm"}>No Actions available</Text>
                     </Flex>
@@ -424,7 +424,7 @@ const DataTable = (props: DataTableProps) => {
                     cursor={"pointer"}
                     size={"sm"}
                     rounded={"md"}
-                    isDisabled={props.viewOnly}
+                    disabled={props.viewOnly}
                     isReadOnly
                   />
                   <InputRightElement>
@@ -498,7 +498,7 @@ const DataTable = (props: DataTableProps) => {
                 onChange={(event) => {
                   table.setPageSize(Number(event.target.value));
                 }}
-                isInvalid={false}
+                invalid={false}
               >
                 {[10, 20, 50, 100].map((size) => {
                   return (
@@ -517,7 +517,7 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_double_left"} />}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
-                isDisabled={!table.getCanPreviousPage()}
+                disabled={!table.getCanPreviousPage()}
               />
               <IconButton
                 variant={"outline"}
@@ -525,7 +525,7 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_left"} />}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
-                isDisabled={!table.getCanPreviousPage()}
+                disabled={!table.getCanPreviousPage()}
               />
               {table.getPageCount() > 0 && (
                 <Flex gap={"1"}>
@@ -544,7 +544,7 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_right"} />}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
-                isDisabled={!table.getCanNextPage()}
+                disabled={!table.getCanNextPage()}
               />
               <IconButton
                 variant={"outline"}
@@ -552,7 +552,7 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_double_right"} />}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                isDisabled={!table.getCanNextPage()}
+                disabled={!table.getCanNextPage()}
               />
             </Flex>
           </Flex>

@@ -238,7 +238,7 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
         <Tooltip label={info.getValue()} placement={"top"}>
-          <Text noOfLines={1} fontWeight={"semibold"}>
+          <Text lineClamp={1} fontWeight={"semibold"}>
             {_.truncate(info.getValue(), { length: 24 })}
           </Text>
         </Tooltip>
@@ -256,7 +256,7 @@ const Dashboard = () => {
             placement={"top"}
             disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -312,7 +312,7 @@ const Dashboard = () => {
           return <Tag colorPalette={"orange"}>None</Tag>;
         }
         return (
-          <Text noOfLines={1} fontWeight={"semibold"}>
+          <Text lineClamp={1} fontWeight={"semibold"}>
             {info.getValue()}
           </Text>
         );
@@ -330,7 +330,7 @@ const Dashboard = () => {
             placement={"top"}
             disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>

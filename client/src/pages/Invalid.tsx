@@ -71,7 +71,7 @@ const Invalid = () => {
           <Button
             rightIcon={<Icon name={"a_right"} />}
             onClick={() => navigate("/")}
-            colorScheme={"orange"}
+            colorPalette={"orange"}
             size={"sm"}
           >
             Dashboard

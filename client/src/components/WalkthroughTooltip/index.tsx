@@ -30,7 +30,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
         )}
         <IconButton
           size={"sm"}
-          colorScheme={"red"}
+          colorPalette={"red"}
           icon={<Icon name={"cross"} />}
           className={"tooltip__close"}
           {...closeProps}
@@ -70,7 +70,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
                 leftIcon={<Icon name={"c_left"} />}
                 className={"tooltip__button"}
                 {...backProps}
-                colorScheme={"orange"}
+                colorPalette={"orange"}
               >
                 {backProps.title}
               </Button>
@@ -80,7 +80,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
               <Button
                 size={"sm"}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"blue"}
+                colorPalette={"blue"}
                 className={"tooltip__button tooltip__button--primary"}
                 {...primaryProps}
               >

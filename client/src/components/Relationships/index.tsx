@@ -128,7 +128,7 @@ const Relationships = (props: RelationshipsProps) => {
               <IconButton
                 icon={<Icon name={"delete"} />}
                 aria-label={"Remove relationship"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 onClick={() => {
                   removeRelationship(info.row.original);
                 }}

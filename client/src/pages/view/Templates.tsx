@@ -115,7 +115,7 @@ const Templates = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorPalette={"orange"}>Empty</Tag>;
         }
         return (
           <Text fontSize={"sm"}>
@@ -179,7 +179,7 @@ const Templates = () => {
             <Spacer />
             <Button
               rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/template")}
               size={"sm"}
             >

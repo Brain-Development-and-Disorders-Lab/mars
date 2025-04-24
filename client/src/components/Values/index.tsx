@@ -337,7 +337,12 @@ const Values = (props: {
                       >
                         {linkLogo}
                         {validLink ? (
-                          <Link href={value} isExternal noOfLines={1}>
+                          <Link
+                            href={value}
+                            lineClamp={1}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <Text>{shortenedUrl}</Text>
                           </Link>
                         ) : (

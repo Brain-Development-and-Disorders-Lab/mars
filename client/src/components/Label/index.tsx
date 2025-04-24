@@ -26,7 +26,7 @@ const Information = (props: { text: string }) => {
 
 const Warning = (props: { text: string }) => {
   return (
-    <Tag size={"md"} colorScheme={"orange"} gap={"2"} w={"fit-content"}>
+    <Tag size={"md"} colorPalette={"orange"} gap={"2"} w={"fit-content"}>
       <Icon name={"warning"} />
       <TagLabel>{props.text}</TagLabel>
     </Tag>
