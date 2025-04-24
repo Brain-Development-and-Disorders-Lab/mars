@@ -7,8 +7,8 @@ import {
   Card,
   Flex,
   Heading,
+  Separator,
   Stack,
-  StackDivider,
   Tag,
   Text,
 } from "@chakra-ui/react";
@@ -51,7 +51,7 @@ const Create = () => {
             </Flex>
           </Card.Header>
           <Card.Body>
-            <Stack separator={<StackDivider />} gap={"2"}>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -141,7 +141,7 @@ const Create = () => {
             </Flex>
           </Card.Header>
           <Card.Body>
-            <Stack separator={<StackDivider />} gap={"2"}>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -209,7 +209,7 @@ const Create = () => {
             </Flex>
           </Card.Header>
           <Card.Body>
-            <Stack separator={<StackDivider />} gap={"2"}>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description

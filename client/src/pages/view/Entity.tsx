@@ -50,7 +50,7 @@ import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
-import { createColumnHelper } from "@tanstack/react-table";
+import { Cell, createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -521,7 +521,6 @@ const Entity = () => {
   );
 
   // State for dialog confirming if user should archive
-  const archiveDialogRef = useRef();
   const {
     open: archiveDialogOpen,
     onOpen: onArchiveDialogOpen,
@@ -588,7 +587,7 @@ const Entity = () => {
         duration: 2000,
         closable: true,
       });
-    } catch (error: any) {
+    } catch {
       toaster.create({
         title: "Error",
         description: `Entity could not be updated`,
@@ -663,15 +662,15 @@ const Entity = () => {
   // Configure Projects table columns and data
   const projectsTableColumns = [
     {
-      id: (info: any) => info.row.original,
-      cell: (info: any) => (
+      id: (info: Cell<string, string>) => info.row.original,
+      cell: (info: Cell<string, string>) => (
         <Linky id={info.row.original} type={"projects"} size={"sm"} />
       ),
       header: "Name",
     },
     {
       id: "view",
-      cell: (info: any) => {
+      cell: (info: Cell<string, string>) => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
@@ -812,8 +811,9 @@ const Entity = () => {
       header: "Name",
     }),
     {
-      id: (info: any) => `type_${info.row.original.name}`,
-      cell: (info: any) => {
+      id: (info: Cell<IGenericItem, string>) =>
+        `type_${info.row.original.name}`,
+      cell: (info: Cell<IGenericItem, string>) => {
         const fileExtension = _.upperCase(
           _.last(info.row.original.name.split(".")),
         );
@@ -948,7 +948,7 @@ const Entity = () => {
 
       // Close the sidebar
       setHistoryOpen(false);
-    } catch (error: any) {
+    } catch {
       toaster.create({
         title: "Error",
         description: `Entity could not be restored`,

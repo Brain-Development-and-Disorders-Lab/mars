@@ -19,7 +19,6 @@ import {
   Link,
   Menu,
   Portal,
-  Radio,
   RadioGroup,
   Select,
   Spacer,
@@ -52,6 +51,7 @@ import {
   DataTableAction,
   IGenericItem,
 } from "@types";
+import { Cell } from "@tanstack/react-table";
 
 // Apollo client imports
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
@@ -133,7 +133,9 @@ const Project = () => {
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
-  const [exportEntityDetails, setExportEntityDetails] = React.useState("name");
+  const [exportEntityDetails, setExportEntityDetails] = React.useState<
+    string | null
+  >("name");
 
   useEffect(() => {
     if (isLoaded) {
@@ -463,7 +465,7 @@ const Project = () => {
         duration: 2000,
         closable: true,
       });
-    } catch (error: any) {
+    } catch {
       toaster.create({
         title: "Error",
         description: "Project could not be restored",
@@ -625,15 +627,15 @@ const Project = () => {
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
-      id: (info: any) => info.row.original,
-      cell: (info: any) => (
+      id: (info: Cell<string, string>) => info.row.original,
+      cell: (info: Cell<string, string>) => (
         <Linky id={info.row.original} type={"entities"} size={"sm"} />
       ),
       header: "Name",
     },
     {
       id: "view",
-      cell: (info: any) => {
+      cell: (info: Cell<string, string>) => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
@@ -1675,19 +1677,29 @@ const Project = () => {
                           <Text fontSize={"sm"}>Loading details...</Text>
                         )}
                         {_.includes(exportFields, "entities") && (
-                          <RadioGroup
-                            onChange={setExportEntityDetails}
+                          <RadioGroup.Root
                             value={exportEntityDetails}
+                            onValueChange={(event) =>
+                              setExportEntityDetails(event.value)
+                            }
                           >
                             <Stack direction={"row"} gap={"1"}>
-                              <Radio value={"name"} size={"sm"} fontSize={"sm"}>
-                                Names
-                              </Radio>
-                              <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
-                                Identifiers
-                              </Radio>
+                              <RadioGroup.Item value={"name"}>
+                                <RadioGroup.ItemHiddenInput />
+                                <RadioGroup.ItemIndicator />
+                                <RadioGroup.Label fontSize={"sm"}>
+                                  Names
+                                </RadioGroup.Label>
+                              </RadioGroup.Item>
+                              <RadioGroup.Item value={"_id"}>
+                                <RadioGroup.ItemHiddenInput />
+                                <RadioGroup.ItemIndicator />
+                                <RadioGroup.Label fontSize={"sm"}>
+                                  Identifiers
+                                </RadioGroup.Label>
+                              </RadioGroup.Item>
                             </Stack>
-                          </RadioGroup>
+                          </RadioGroup.Root>
                         )}
                       </Field.Root>
                     </Fieldset.Content>

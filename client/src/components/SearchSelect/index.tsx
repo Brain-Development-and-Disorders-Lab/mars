@@ -233,7 +233,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           size={"sm"}
           rounded={"md"}
           disabled={props?.disabled || false}
-          isReadOnly
+          readOnly
         />
         <InputRightElement>
           {showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />}
