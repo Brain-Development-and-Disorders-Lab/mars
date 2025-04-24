@@ -10,22 +10,13 @@ import {
   Input,
   Select,
   Tag,
-  useSteps,
-  Stepper,
-  Step,
-  StepIndicator,
-  StepStatus,
-  StepIcon,
-  StepNumber,
-  Box,
-  StepTitle,
-  StepSeparator,
   Spacer,
   Fieldset,
   Field,
   ListCollection,
   Portal,
   createListCollection,
+  Steps,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -99,26 +90,18 @@ const ImportDialog = (props: ImportDialogProps) => {
   );
 
   // Used to generated numerical steps and a progress bar
+  // Entity steps
   const entitySteps = [
     { title: "Upload File" },
     { title: "Setup Entities" },
     { title: "Apply Templates" },
     { title: "Review" },
   ];
-  const { activeStep: activeEntityStep, setActiveStep: setActiveEntityStep } =
-    useSteps({
-      index: 0,
-      count: entitySteps.length,
-    });
+  const [entityStep, setEntityStep] = useState(0);
 
+  // Template steps
   const templateSteps = [{ title: "Upload File" }, { title: "Review" }];
-  const {
-    activeStep: activeTemplateStep,
-    setActiveStep: setActiveTemplateStep,
-  } = useSteps({
-    index: 0,
-    count: templateSteps.length,
-  });
+  const [templateStep, setTemplateStep] = useState(0);
 
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
@@ -776,7 +759,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
         if (importResult && mappingResult) {
           // Proceed to the next page if both setup steps completed successfully
-          setActiveEntityStep(1);
+          setEntityStep(1);
           setEntityInterfacePage("details");
         }
       } else if (_.isEqual(entityInterfacePage, "details")) {
@@ -788,7 +771,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         });
 
         // Proceed to the next page
-        setActiveEntityStep(2);
+        setEntityStep(2);
         setEntityInterfacePage("mapping");
       } else if (_.isEqual(entityInterfacePage, "mapping")) {
         // Capture event
@@ -806,7 +789,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         }
 
         // Proceed to the next page
-        setActiveEntityStep(3);
+        setEntityStep(3);
         setEntityInterfacePage("review");
       } else if (_.isEqual(entityInterfacePage, "review")) {
         // Capture event
@@ -833,7 +816,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         });
 
         // Proceed to the next page
-        setActiveTemplateStep(1);
+        setTemplateStep(1);
         setTemplateInterfacePage("review");
       } else if (_.isEqual(templateInterfacePage, "review")) {
         // Capture event
@@ -856,9 +839,9 @@ const ImportDialog = (props: ImportDialogProps) => {
     // Reset UI state
     setImportType("entities");
 
-    setActiveEntityStep(0);
+    setEntityStep(0);
     setEntityInterfacePage("upload");
-    setActiveTemplateStep(0);
+    setTemplateStep(0);
     setTemplateInterfacePage("upload");
 
     setContinueDisabled(true);
@@ -969,53 +952,37 @@ const ImportDialog = (props: ImportDialogProps) => {
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
               <Flex pb={"2"}>
-                <Stepper index={activeEntityStep} w={"100%"}>
+                <Steps.Root
+                  step={entityStep}
+                  onStepChange={(event) => setEntityStep(event.step)}
+                  count={entitySteps.length}
+                >
                   {entitySteps.map((step, index) => (
-                    <Step key={index}>
-                      <StepIndicator>
-                        <StepStatus
-                          complete={<StepIcon />}
-                          incomplete={<StepNumber />}
-                          active={<StepNumber />}
-                        />
-                      </StepIndicator>
-
-                      <Box flexShrink={"0"}>
-                        <StepTitle>
-                          <Text fontSize={"sm"}>{step.title}</Text>
-                        </StepTitle>
-                      </Box>
-
-                      <StepSeparator />
-                    </Step>
+                    <Steps.Item key={index} index={index} title={step.title}>
+                      <Steps.Indicator />
+                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Separator />
+                    </Steps.Item>
                   ))}
-                </Stepper>
+                </Steps.Root>
               </Flex>
             )}
 
             {_.isEqual(importType, "template") && (
               <Flex pb={"2"}>
-                <Stepper index={activeTemplateStep} w={"100%"}>
+                <Steps.Root
+                  step={templateStep}
+                  onStepChange={(event) => setTemplateStep(event.step)}
+                  count={templateSteps.length}
+                >
                   {templateSteps.map((step, index) => (
-                    <Step key={index}>
-                      <StepIndicator>
-                        <StepStatus
-                          complete={<StepIcon />}
-                          incomplete={<StepNumber />}
-                          active={<StepNumber />}
-                        />
-                      </StepIndicator>
-
-                      <Box flexShrink={"0"}>
-                        <StepTitle>
-                          <Text fontSize={"sm"}>{step.title}</Text>
-                        </StepTitle>
-                      </Box>
-
-                      <StepSeparator />
-                    </Step>
+                    <Steps.Item key={index} index={index} title={step.title}>
+                      <Steps.Indicator />
+                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Separator />
+                    </Steps.Item>
                   ))}
-                </Stepper>
+                </Steps.Root>
               </Flex>
             )}
 

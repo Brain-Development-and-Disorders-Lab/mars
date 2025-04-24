@@ -162,7 +162,7 @@ const ScanModal = (props: ScanModalProps) => {
 
     if (error || _.isUndefined(results.data)) {
       // Entity does not exist
-      if (!toast.isActive("entityNotExist")) {
+      if (!toaster.isVisible("entityNotExist")) {
         toaster.create({
           id: "entityNotExist",
           title: "Error",

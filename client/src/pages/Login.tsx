@@ -80,7 +80,7 @@ const Login = () => {
       // Provide error information
       if (
         result.message.includes("Unable") &&
-        !toast.isActive("login-graphql-error-toast")
+        !toaster.isVisible("login-graphql-error-toast")
       ) {
         toaster.create({
           id: "login-graphql-error-toast",
@@ -92,7 +92,7 @@ const Login = () => {
         });
       } else if (
         result.message.includes("access") &&
-        !toast.isActive("login-access-error-toast")
+        !toaster.isVisible("login-access-error-toast")
       ) {
         toaster.create({
           id: "login-access-error-toast",
@@ -100,7 +100,11 @@ const Login = () => {
           type: "info",
           description: (
             <Flex direction={"column"}>
-              <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+              <Link
+                href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Text fontWeight={"semibold"}>Join the waitlist here</Text>
                   <Icon name={"a_right"} />
@@ -195,7 +199,7 @@ const Login = () => {
                 colorPalette={"gray"}
                 gap={"4"}
                 onClick={onLoginClick}
-                isLoading={isLoading}
+                loading={isLoading}
                 loadingText={"Logging in..."}
               >
                 <Image

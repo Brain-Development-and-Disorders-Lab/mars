@@ -10,16 +10,11 @@ import {
   Tag,
   VStack,
   Avatar,
-  StatGroup,
   Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
   Spacer,
   Link,
-  useDisclosure,
-  Collapse,
+  Collapsible,
+  Badge,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -146,7 +141,7 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
-  const { isOpen, onToggle } = useDisclosure();
+  const [showStats, setShowStats] = useState(false);
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
@@ -507,16 +502,16 @@ const Dashboard = () => {
                 )}
                 {/* Display toggle for stats */}
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link onClick={onToggle}>
+                  <Link onClick={() => setShowStats(!showStats)}>
                     <Text
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       color={"gray.700"}
                     >
-                      {isOpen ? "Hide" : "Show"} stats{" "}
+                      {showStats ? "Hide" : "Show"} stats{" "}
                     </Text>
                   </Link>
-                  <Icon name={isOpen ? "c_up" : "c_down"} size={"xs"} />
+                  <Icon name={showStats ? "c_up" : "c_down"} size={"xs"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -526,7 +521,7 @@ const Dashboard = () => {
             </Flex>
           </Flex>
 
-          <Collapse in={isOpen} animateOpacity>
+          <Collapsible.Root open={showStats}>
             <Flex
               p={"2"}
               gap={"2"}
@@ -536,47 +531,41 @@ const Dashboard = () => {
               border={"1px"}
               borderColor={"gray.300"}
             >
-              <StatGroup w={"100%"}>
-                <Stat>
-                  <StatLabel>Total Workspace Entities</StatLabel>
-                  <StatNumber>{entityMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {entityMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {entityMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
+              <Stat.Root>
+                <Stat.Label>Total Workspace Entities</Stat.Label>
+                <Stat.ValueText>{entityMetrics.all}</Stat.ValueText>
+                <Badge>
+                  {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                  {entityMetrics.addedDay} in last 24 hours
+                </Badge>
+              </Stat.Root>
 
-                <Stat>
-                  <StatLabel>Total Workspace Projects</StatLabel>
-                  <StatNumber>{projectMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {projectMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {projectMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
+              <Stat.Root>
+                <Stat.Label>Total Workspace Projects</Stat.Label>
+                <Stat.ValueText>{projectMetrics.all}</Stat.ValueText>
+                <Badge>
+                  {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                  {projectMetrics.addedDay} in last 24 hours
+                </Badge>
+              </Stat.Root>
 
-                <Stat>
-                  <StatLabel>Total Workspace Templates</StatLabel>
-                  <StatNumber>{templateMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {templateMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {templateMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
+              <Stat.Root>
+                <Stat.Label>Total Workspace Templates</Stat.Label>
+                <Stat.ValueText>{templateMetrics.all}</Stat.ValueText>
+                <Badge>
+                  {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                  {templateMetrics.addedDay} in last 24 hours
+                </Badge>
+              </Stat.Root>
 
-                <Stat>
-                  <StatLabel>Total Workspace Collaborators</StatLabel>
-                  <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
-                </Stat>
-              </StatGroup>
+              <Stat.Root>
+                <Stat.Label>Total Workspace Collaborators</Stat.Label>
+                <Stat.ValueText>
+                  {workspaceMetrics.collaborators}
+                </Stat.ValueText>
+              </Stat.Root>
             </Flex>
-          </Collapse>
+          </Collapsible.Root>
         </Flex>
 
         <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>

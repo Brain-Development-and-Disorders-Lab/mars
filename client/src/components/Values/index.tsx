@@ -28,7 +28,7 @@ import {
   createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, Row } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -37,7 +37,12 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { DataTableAction, IGenericItem, IValue } from "@types";
+import {
+  DataTableAction,
+  GenericValueType,
+  IGenericItem,
+  IValue,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -51,8 +56,8 @@ import dayjs from "dayjs";
  */
 const Values = (props: {
   viewOnly: boolean;
-  values: IValue<any>[];
-  setValues: Dispatch<SetStateAction<IValue<any>[]>>;
+  values: IValue<GenericValueType>[];
+  setValues: Dispatch<SetStateAction<IValue<GenericValueType>[]>>;
   requireData?: true | false;
   permittedValues?: string[];
 }) => {
@@ -60,7 +65,7 @@ const Values = (props: {
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
 
-  const columnHelper = createColumnHelper<IValue<any>>();
+  const columnHelper = createColumnHelper<IValue<GenericValueType>>();
   const columns = useMemo(
     () => [
       // Value `type` column
@@ -143,7 +148,7 @@ const Values = (props: {
             setValue(initialValue);
           }, [initialValue]);
 
-          const onChange = (event: any) => {
+          const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             setValue(event.target.value);
           };
 
@@ -152,16 +157,21 @@ const Values = (props: {
           };
 
           return (
-            <Input
-              id={`i_${original._id}_name`}
-              value={value}
-              readOnly={props.viewOnly}
-              onChange={onChange}
-              onBlur={onBlur}
-              size={"sm"}
-              rounded={"md"}
-              invalid={_.isEqual(value, "")}
-            />
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root invalid={_.isEqual(value, "")}>
+                  <Input
+                    id={`i_${original._id}_name`}
+                    value={value}
+                    readOnly={props.viewOnly}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    size={"sm"}
+                    rounded={"md"}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           );
         },
         header: "Name",
@@ -185,9 +195,9 @@ const Values = (props: {
            * Handle a Select change event
            * @param event change event data
            */
-          const onSelectChange = (event: any) => {
+          const onSelectChange = (value: GenericValueType) => {
             setValue({
-              selected: event.target.value,
+              selected: value,
               options: initialValue.options,
             });
           };
@@ -212,57 +222,80 @@ const Values = (props: {
             switch (original.type) {
               case "number": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    type={"number"}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    readOnly={props.viewOnly}
-                    onChange={(event) =>
-                      setValue(parseFloat(event.target.value))
-                    }
-                    onBlur={onBlur}
-                    invalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          type={"number"}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) =>
+                            setValue(parseFloat(event.target.value))
+                          }
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
               case "text": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    readOnly={props.viewOnly}
-                    onChange={(event) => setValue(event.target.value)}
-                    onBlur={onBlur}
-                    invalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) => setValue(event.target.value)}
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
               case "url": {
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
-                    <Input
-                      id={`i_${original._id}_data`}
-                      value={value}
-                      size={"sm"}
-                      rounded={"md"}
-                      readOnly={props.viewOnly}
-                      onChange={(event) => setValue(event.target.value)}
-                      onBlur={onBlur}
-                      invalid={
-                        _.isEqual(value, "") &&
-                        _.isEqual(props.requireData, true)
-                      }
-                    />
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root
+                          invalid={
+                            _.isEqual(value, "") &&
+                            _.isEqual(props.requireData, true)
+                          }
+                        >
+                          <Input
+                            id={`i_${original._id}_data`}
+                            value={value}
+                            size={"sm"}
+                            rounded={"md"}
+                            readOnly={props.viewOnly}
+                            onChange={(event) => setValue(event.target.value)}
+                            onBlur={onBlur}
+                          />
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   );
                 } else {
                   // Setup Link display depending on destination URL
@@ -307,7 +340,7 @@ const Values = (props: {
                       linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
                     }
                     validLink = true;
-                  } catch (error) {
+                  } catch {
                     linkTextColor = "orange.700";
                     linkBgColor = "orange.300";
                     linkLogo = <Icon name={"warning"} />;
@@ -520,9 +553,9 @@ const Values = (props: {
     {
       label: "Delete Values",
       icon: "delete",
-      action: (table, rows: any) => {
+      action: (table, rows: Row<IValue<GenericValueType>>) => {
         // Delete rows that have been selected
-        const idToRemove: IValue<any>[] = [];
+        const idToRemove: IValue<GenericValueType>[] = [];
         for (const rowIndex of Object.keys(rows)) {
           idToRemove.push(table.getRow(rowIndex).original);
         }

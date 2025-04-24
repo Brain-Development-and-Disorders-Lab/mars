@@ -275,6 +275,7 @@ const DataTable = (props: DataTableProps) => {
           {table.getHeaderGroups().map((headerGroup) => (
             <Table.Row key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const meta: any = header.column.columnDef.meta;
 
                 // Customize the column widths depending on data contents
@@ -330,6 +331,7 @@ const DataTable = (props: DataTableProps) => {
           {table.getRowModel().rows.map((row) => (
             <Table.Row id={row.id} key={row.id} w={"auto"}>
               {row.getVisibleCells().map((cell) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const meta: any = cell.column.columnDef.meta;
                 return (
                   <Table.Cell

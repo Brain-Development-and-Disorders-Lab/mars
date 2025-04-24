@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -18,21 +17,11 @@ import {
   Select,
   Spacer,
   Stack,
-  Step,
-  StepDescription,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
+  Steps,
   Text,
   VStack,
   createListCollection,
-  useBreakpoint,
   useDisclosure,
-  useSteps,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
@@ -80,22 +69,19 @@ const Entity = () => {
     "start" as "start" | "attributes" | "relationships",
   );
 
+  // Page steps
   const pageSteps = [
     { title: "Start", description: "Basic information" },
     { title: "Relationships", description: "Relationships between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: pageSteps.length,
-  });
+  const [pageStep, setPageStep] = useState(0);
 
   const { isOpen, onOpen } = useDisclosure();
   const { token } = useAuthentication();
 
   // Navigation and routing
   const navigate = useNavigate();
-  const breakpoint = useBreakpoint();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     // Check if this is during the `create` mutation
     if (isSubmitting) {
@@ -281,13 +267,13 @@ const Entity = () => {
       posthog.capture("create_entity_relationships");
 
       setPageState("relationships");
-      setActiveStep(1);
+      setPageStep(1);
     } else if (_.isEqual("relationships", pageState)) {
       // Capture event
       posthog.capture("create_entity_attributes");
 
       setPageState("attributes");
-      setActiveStep(2);
+      setPageStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       // Capture event
       posthog.capture("create_entity_finished");
@@ -354,13 +340,13 @@ const Entity = () => {
       posthog.capture("create_entity_start");
 
       setPageState("start");
-      setActiveStep(0);
+      setPageStep(0);
     } else if (_.isEqual("attributes", pageState)) {
       // Capture event
       posthog.capture("create_entity_relationships");
 
       setPageState("relationships");
-      setActiveStep(1);
+      setPageStep(1);
     }
   };
 
@@ -439,28 +425,19 @@ const Entity = () => {
 
         {/* Main pages */}
         {/* Stepper progress indicator */}
-        <Stepper index={activeStep} p={"2"} size={"sm"}>
+        <Steps.Root
+          step={pageStep}
+          onStepChange={(event) => setPageStep(event.step)}
+          count={pageSteps.length}
+        >
           {pageSteps.map((step, index) => (
-            <Step key={index}>
-              <StepIndicator>
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-
-              <Box flexShrink={"0"}>
-                <StepTitle>{step.title}</StepTitle>
-                {breakpoint !== "base" && (
-                  <StepDescription>{step.description}</StepDescription>
-                )}
-              </Box>
-
-              <StepSeparator />
-            </Step>
+            <Steps.Item key={index} index={index} title={step.title}>
+              <Steps.Indicator />
+              <Steps.Title>{step.title}</Steps.Title>
+              <Steps.Separator />
+            </Steps.Item>
           ))}
-        </Stepper>
+        </Steps.Root>
 
         {/* "Start" page */}
         {_.isEqual("start", pageState) && (
