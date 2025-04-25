@@ -118,6 +118,7 @@ const AccountMenu = () => {
               <Avatar.Root
                 size={"sm"}
                 key={`${user.firstName} ${user.lastName}`}
+                colorScheme={"blue"}
               >
                 <Avatar.Fallback name={`${user.firstName} ${user.lastName}`} />
               </Avatar.Root>

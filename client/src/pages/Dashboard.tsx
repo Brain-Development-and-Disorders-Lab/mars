@@ -141,7 +141,7 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
-  const [showStats, setShowStats] = useState(false);
+  const [openStats, setOpenStats] = useState(false);
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
@@ -292,10 +292,14 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -359,7 +363,7 @@ const Dashboard = () => {
         }
         return (
           <Tag.Root colorPalette={"green"}>
-            <Tag.Label>{info.getValue()}</Tag.Label>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
           </Tag.Root>
         );
       },
@@ -370,10 +374,14 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -478,7 +486,7 @@ const Dashboard = () => {
             <Flex direction={"column"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
                 <Icon name={"dashboard"} size={"md"} />
-                <Heading size={"lg"}>Dashboard</Heading>
+                <Heading size={"xl"}>Dashboard</Heading>
               </Flex>
               <Flex direction={"column"} gap={"1"}>
                 {/* Display last update when on desktop */}
@@ -501,18 +509,6 @@ const Dashboard = () => {
                   </Flex>
                 )}
                 {/* Display toggle for stats */}
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link onClick={() => setShowStats(!showStats)}>
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.700"}
-                    >
-                      {showStats ? "Hide" : "Show"} stats{" "}
-                    </Text>
-                  </Link>
-                  <Icon name={showStats ? "c_up" : "c_down"} size={"xs"} />
-                </Flex>
               </Flex>
             </Flex>
             <Spacer />
@@ -521,50 +517,81 @@ const Dashboard = () => {
             </Flex>
           </Flex>
 
-          <Collapsible.Root open={showStats}>
-            <Flex
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              basis={"30%"}
-              align={"center"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Stat.Root>
-                <Stat.Label>Total Workspace Entities</Stat.Label>
-                <Stat.ValueText>{entityMetrics.all}</Stat.ValueText>
-                <Badge>
-                  {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                  {entityMetrics.addedDay} in last 24 hours
-                </Badge>
-              </Stat.Root>
-
-              <Stat.Root>
-                <Stat.Label>Total Workspace Projects</Stat.Label>
-                <Stat.ValueText>{projectMetrics.all}</Stat.ValueText>
-                <Badge>
-                  {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                  {projectMetrics.addedDay} in last 24 hours
-                </Badge>
-              </Stat.Root>
-
-              <Stat.Root>
-                <Stat.Label>Total Workspace Templates</Stat.Label>
-                <Stat.ValueText>{templateMetrics.all}</Stat.ValueText>
-                <Badge>
-                  {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                  {templateMetrics.addedDay} in last 24 hours
-                </Badge>
-              </Stat.Root>
-
-              <Stat.Root>
-                <Stat.Label>Total Workspace Collaborators</Stat.Label>
-                <Stat.ValueText>
-                  {workspaceMetrics.collaborators}
-                </Stat.ValueText>
-              </Stat.Root>
+          <Collapsible.Root onOpenChange={(event) => setOpenStats(event.open)}>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Collapsible.Trigger>
+                <Link
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.700"}
+                >
+                  {openStats ? "Hide" : "Show"} stats{" "}
+                </Link>
+              </Collapsible.Trigger>
+              <Icon name={openStats ? "c_up" : "c_down"} size={"xs"} />
             </Flex>
+
+            <Collapsible.Content>
+              <Flex
+                p={"2"}
+                gap={"2"}
+                rounded={"md"}
+                basis={"30%"}
+                align={"center"}
+                border={"1px solid"}
+                borderColor={"gray.300"}
+              >
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Entities</Stat.Label>
+                  <Stat.ValueText>{entityMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
+                  >
+                    {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {entityMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Projects</Stat.Label>
+                  <Stat.ValueText>{projectMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={
+                      projectMetrics.addedDay > 0 ? "green" : "gray"
+                    }
+                  >
+                    {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {projectMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Templates</Stat.Label>
+                  <Stat.ValueText>{templateMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={
+                      templateMetrics.addedDay > 0 ? "green" : "gray"
+                    }
+                  >
+                    {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {templateMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Collaborators</Stat.Label>
+                  <Stat.ValueText>
+                    {workspaceMetrics.collaborators}
+                  </Stat.ValueText>
+                </Stat.Root>
+              </Flex>
+            </Collapsible.Content>
           </Collapsible.Root>
         </Flex>
 
@@ -577,13 +604,13 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"project"} size={"md"} />
-                <Heading size={"md"}>Recent Projects</Heading>
+                <Heading size={"lg"}>Recent Projects</Heading>
               </Flex>
 
               {/* Projects table */}
@@ -616,6 +643,7 @@ const Dashboard = () => {
                 <Button
                   key={`view-projects-all`}
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/projects`)}
                 >
@@ -631,13 +659,13 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"entity"} size={"md"} />
-                <Heading size={"md"}>Recent Entities</Heading>
+                <Heading size={"lg"}>Recent Entities</Heading>
               </Flex>
 
               {/* Entities table */}
@@ -674,6 +702,7 @@ const Dashboard = () => {
                 <Button
                   key={`view-entity-all`}
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/entities`)}
                 >
@@ -692,7 +721,7 @@ const Dashboard = () => {
             gap={"2"}
             grow={"1"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             h={"fit-content"}
           >
@@ -704,7 +733,7 @@ const Dashboard = () => {
               my={"2"}
             >
               <Icon name={"activity"} size={"md"} />
-              <Heading size={"md"} color={"gray.700"}>
+              <Heading size={"lg"} color={"gray.700"}>
                 Recent Activity
               </Heading>
             </Flex>
@@ -723,7 +752,11 @@ const Dashboard = () => {
                         align={"center"}
                       >
                         <Tooltip content={activity.actor} showArrow>
-                          <Avatar.Root size={"sm"} key={activity.actor}>
+                          <Avatar.Root
+                            size={"sm"}
+                            key={activity.actor}
+                            colorPalette={"blue"}
+                          >
                             <Avatar.Fallback name={activity.actor} />
                           </Avatar.Root>
                         </Tooltip>

@@ -63,12 +63,12 @@ const ActorTag = (props: ActorTagProps) => {
       justify={"space-around"}
       p={"2"}
       rounded={"md"}
-      border={"1px"}
+      border={"1px solid"}
       borderColor={"gray.300"}
       bg={"white"}
       minW={"120px"}
     >
-      <Avatar.Root size={"sm"} key={actorLabel}>
+      <Avatar.Root size={"sm"} key={actorLabel} colorPalette={"blue"}>
         <Avatar.Fallback name={actorLabel} />
       </Avatar.Root>
       <Flex direction={"column"} gap={"0.5"}>
