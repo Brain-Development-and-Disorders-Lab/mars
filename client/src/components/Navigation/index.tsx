@@ -207,46 +207,52 @@ const Navigation = () => {
             </Button>
           </Flex>
 
-          <Flex direction={"column"} gap={"2"} width={"100%"}>
+          <Flex direction={"column"} gap={"2"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
               Tools
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
-              <Button
-                id={"navImportButtonDesktop"}
-                key={"import"}
-                size={"sm"}
-                rounded={"md"}
-                colorPalette={"blue"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("import_modal_open");
+              <Flex w={"50%"}>
+                <Button
+                  id={"navImportButtonDesktop"}
+                  w={"100%"}
+                  key={"import"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"blue"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("import_modal_open");
 
-                  setImportOpen(true);
-                }}
-                disabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                <Icon name={"upload"} />
-                Import
-              </Button>
+                    setImportOpen(true);
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"upload"} />
+                  Import
+                </Button>
+              </Flex>
 
-              <Button
-                id={"navScanButtonDesktop"}
-                key={"scan"}
-                size={"sm"}
-                rounded={"md"}
-                colorPalette={"green"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("scan_modal_open");
+              <Flex w={"50%"}>
+                <Button
+                  id={"navScanButtonDesktop"}
+                  w={"100%"}
+                  key={"scan"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("scan_modal_open");
 
-                  setScanOpen(true);
-                }}
-                disabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                <Icon name={"scan"} />
-                Scan
-              </Button>
+                    setScanOpen(true);
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"scan"} />
+                  Scan
+                </Button>
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
