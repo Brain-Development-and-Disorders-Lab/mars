@@ -447,7 +447,7 @@ const Values = (props: {
                     <Select.HiddenSelect />
                     <Select.Label>Select Option</Select.Label>
                     <Select.Control>
-                      <Select.Trigger asChild>
+                      <Select.Trigger>
                         <Select.ValueText placeholder={"Select Option"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
@@ -490,7 +490,7 @@ const Values = (props: {
                 <Select.HiddenSelect />
                 <Select.Label>Select Column</Select.Label>
                 <Select.Control>
-                  <Select.Trigger asChild>
+                  <Select.Trigger>
                     <Select.ValueText placeholder={"Select Column"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>

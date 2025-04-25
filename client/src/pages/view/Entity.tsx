@@ -2233,7 +2233,7 @@ const Entity = () => {
                     <Select.HiddenSelect />
                     <Select.Label>Select Template</Select.Label>
                     <Select.Control>
-                      <Select.Trigger asChild>
+                      <Select.Trigger>
                         <Select.ValueText placeholder={"Select Template"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
@@ -2435,7 +2435,7 @@ const Entity = () => {
                           <Select.HiddenSelect />
                           <Select.Label>Select Project</Select.Label>
                           <Select.Control>
-                            <Select.Trigger asChild>
+                            <Select.Trigger>
                               <Select.ValueText
                                 placeholder={"Select Project"}
                               />
@@ -2604,7 +2604,7 @@ const Entity = () => {
                         <Select.HiddenSelect />
                         <Select.Label>Select Relationship Type</Select.Label>
                         <Select.Control>
-                          <Select.Trigger asChild>
+                          <Select.Trigger>
                             <Select.ValueText
                               placeholder={"Select Relationship Type"}
                             />
@@ -2767,7 +2767,7 @@ const Entity = () => {
                             <Select.HiddenSelect />
                             <Select.Label>Select Export Format</Select.Label>
                             <Select.Control>
-                              <Select.Trigger asChild>
+                              <Select.Trigger>
                                 <Select.ValueText
                                   placeholder={"Select Export Format"}
                                 />

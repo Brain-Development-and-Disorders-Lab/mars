@@ -380,7 +380,7 @@ const Entities = () => {
                           <Select.HiddenSelect />
                           <Select.Label>Select Export Format</Select.Label>
                           <Select.Control>
-                            <Select.Trigger asChild>
+                            <Select.Trigger>
                               <Select.ValueText
                                 placeholder={"Select Export Format"}
                               />
