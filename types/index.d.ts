@@ -424,6 +424,7 @@ export type IconNames =
   | "archive"
   | "attachment"
   | "check"
+  | "close"
   | "counter"
   | "info"
   | "search"

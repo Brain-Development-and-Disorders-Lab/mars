@@ -85,8 +85,11 @@ const DataTable = (props: DataTableProps) => {
                     disabled: props.viewOnly,
                     pl: "1",
                     variant: "outline",
-                    checked: table.getIsAllRowsSelected(),
-                    isIndeterminate: table.getIsSomeRowsSelected(),
+                    checked: table.getIsAllRowsSelected()
+                      ? true
+                      : table.getIsSomeRowsSelected()
+                        ? "indeterminate"
+                        : false,
                     invalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
@@ -101,9 +104,12 @@ const DataTable = (props: DataTableProps) => {
                     id: `s_${Math.random().toString(16).slice(2)}`,
                     pl: "1",
                     variant: "outline",
-                    checked: row.getIsSelected(),
+                    checked: row.getIsSelected()
+                      ? true
+                      : row.getIsSomeSelected()
+                        ? "indeterminate"
+                        : false,
                     disabled: !row.getCanSelect() || props.viewOnly,
-                    isIndeterminate: row.getIsSomeSelected(),
                     invalid: false,
                     onChange: row.getToggleSelectedHandler(),
                   }}
@@ -332,7 +338,7 @@ const DataTable = (props: DataTableProps) => {
                         }
                         align={"center"}
                       >
-                        <Text
+                        <Flex
                           fontWeight={"bold"}
                           fontSize={"sm"}
                           color={
@@ -343,7 +349,7 @@ const DataTable = (props: DataTableProps) => {
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
-                        </Text>
+                        </Flex>
                         {canSortColumn(header) && (
                           <Icon
                             name={

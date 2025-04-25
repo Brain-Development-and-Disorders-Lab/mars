@@ -17,6 +17,7 @@ import {
   Portal,
   createListCollection,
   Steps,
+  IconButton,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -678,11 +679,11 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Select.Root
         key={key}
         size={"sm"}
+        rounded={"md"}
         collection={columnsCollection}
         onValueChange={(details) => onValueChange(details.items[0])}
       >
         <Select.HiddenSelect />
-        <Select.Label>Select Column</Select.Label>
         <Select.Control>
           <Select.Trigger>
             <Select.ValueText placeholder={"Select Column"} />
@@ -879,18 +880,29 @@ const ImportDialog = (props: ImportDialogProps) => {
       onEscapeKeyDown={handleOnClose}
       onInteractOutside={handleOnClose}
     >
-      <Dialog.Trigger />
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
             p={"2"}
             mt={"2"}
+            ml={"1"}
             fontWeight={"semibold"}
             fontSize={"lg"}
           >
             Import File
           </Dialog.Header>
+          <Dialog.CloseTrigger asChild>
+            <IconButton
+              bg={"white"}
+              _hover={{ bg: "gray.200" }}
+              variant={"subtle"}
+              color={"black"}
+              onClick={handleOnClose}
+            >
+              <Icon name={"close"} />
+            </IconButton>
+          </Dialog.CloseTrigger>
           <Dialog.Body px={"2"} gap={"2"}>
             <Information
               text={
@@ -1260,63 +1272,65 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Flex direction={"row"} gap={"2"}>
                     <Fieldset.Root>
                       <Fieldset.Content>
-                        {/* Description */}
-                        <Field.Root>
-                          <Field.Label>Description</Field.Label>
-                          {getSelectComponent(
-                            "import_description",
-                            setDescriptionField,
-                          )}
-                          <Field.HelperText>
-                            Column containing Entity descriptions
-                          </Field.HelperText>
-                        </Field.Root>
+                        <Flex direction={"row"} gap={"2"}>
+                          {/* Description */}
+                          <Field.Root w={"50%"}>
+                            <Field.Label>Description</Field.Label>
+                            {getSelectComponent(
+                              "import_description",
+                              setDescriptionField,
+                            )}
+                            <Field.HelperText>
+                              Column containing Entity descriptions
+                            </Field.HelperText>
+                          </Field.Root>
 
-                        {/* Project */}
-                        <Field.Root>
-                          <Field.Label>Project</Field.Label>
-                          <Select.Root
-                            key={"select-project"}
-                            size={"sm"}
-                            collection={projectsCollection}
-                            onValueChange={(details) =>
-                              setProjectField(details.items[0]._id)
-                            }
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Label>Select Project</Select.Label>
-                            <Select.Control>
-                              <Select.Trigger>
-                                <Select.ValueText
-                                  placeholder={"Select Project"}
-                                />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Portal>
-                              <Select.Positioner>
-                                <Select.Content>
-                                  {projectsCollection.items.map(
-                                    (project: IGenericItem) => (
-                                      <Select.Item
-                                        item={project}
-                                        key={project._id}
-                                      >
-                                        {project.name}
-                                        <Select.ItemIndicator />
-                                      </Select.Item>
-                                    ),
-                                  )}
-                                </Select.Content>
-                              </Select.Positioner>
-                            </Portal>
-                          </Select.Root>
-                          <Field.HelperText>
-                            Add Entities to a Project
-                          </Field.HelperText>
-                        </Field.Root>
+                          {/* Project */}
+                          <Field.Root w={"50%"}>
+                            <Field.Label>Project</Field.Label>
+                            <Select.Root
+                              key={"select-project"}
+                              size={"sm"}
+                              rounded={"md"}
+                              collection={projectsCollection}
+                              onValueChange={(details) =>
+                                setProjectField(details.items[0]._id)
+                              }
+                            >
+                              <Select.HiddenSelect />
+                              <Select.Control>
+                                <Select.Trigger>
+                                  <Select.ValueText
+                                    placeholder={"Select Project"}
+                                  />
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                  <Select.Indicator />
+                                </Select.IndicatorGroup>
+                              </Select.Control>
+                              <Portal>
+                                <Select.Positioner>
+                                  <Select.Content>
+                                    {projectsCollection.items.map(
+                                      (project: IGenericItem) => (
+                                        <Select.Item
+                                          item={project}
+                                          key={project._id}
+                                        >
+                                          {project.name}
+                                          <Select.ItemIndicator />
+                                        </Select.Item>
+                                      ),
+                                    )}
+                                  </Select.Content>
+                                </Select.Positioner>
+                              </Portal>
+                            </Select.Root>
+                            <Field.HelperText>
+                              Add Entities to a Project
+                            </Field.HelperText>
+                          </Field.Root>
+                        </Flex>
                       </Fieldset.Content>
                     </Fieldset.Root>
                   </Flex>
@@ -1394,6 +1408,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             <Select.Root
                               key={"select-template"}
                               size={"sm"}
+                              rounded={"md"}
                               collection={templatesCollection}
                               onValueChange={(details) => {
                                 const selectedTemplate = details.items[0];
@@ -1425,11 +1440,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                               disabled={templatesCollection.items.length === 0}
                             >
                               <Select.HiddenSelect />
-                              <Select.Label>Select Project</Select.Label>
                               <Select.Control>
                                 <Select.Trigger>
                                   <Select.ValueText
-                                    placeholder={"Select Project"}
+                                    placeholder={"Select Template"}
                                   />
                                 </Select.Trigger>
                                 <Select.IndicatorGroup>
@@ -1461,6 +1475,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                     <Button
                       size={"sm"}
+                      rounded={"md"}
                       colorPalette={"green"}
                       onClick={() => {
                         // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
@@ -1669,6 +1684,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Button
                 id={"importCancelButton"}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"red"}
                 variant={"outline"}
                 onClick={() => {
@@ -1689,6 +1705,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 <Button
                   id={"importContinueButton"}
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={
                     _.isEqual(templateInterfacePage, "review") ||
                     _.isEqual(entityInterfacePage, "review")

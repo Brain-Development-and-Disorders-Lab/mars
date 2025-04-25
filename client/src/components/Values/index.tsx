@@ -488,7 +488,6 @@ const Values = (props: {
                 disabled={props.viewOnly}
               >
                 <Select.HiddenSelect />
-                <Select.Label>Select Column</Select.Label>
                 <Select.Control>
                   <Select.Trigger>
                     <Select.ValueText placeholder={"Select Column"} />
