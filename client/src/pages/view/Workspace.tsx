@@ -864,7 +864,11 @@ const Workspace = () => {
                   Owner
                 </Text>
                 <Flex>
-                  <ActorTag orcid={owner} fallback={"Unknown User"} />
+                  <ActorTag
+                    orcid={owner}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>
@@ -984,6 +988,7 @@ const Workspace = () => {
                         <ActorTag
                           orcid={collaborator}
                           fallback={"Unknown Collaborator"}
+                          size={"md"}
                         />
                       </Flex>
                       <Spacer />

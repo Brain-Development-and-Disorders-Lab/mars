@@ -12,11 +12,12 @@ import {
   Text,
   useBreakpoint,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { AttributeModel } from "@types";
@@ -121,7 +122,7 @@ const Templates = () => {
         }
         return (
           <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 20 })}
+            {_.truncate(info.getValue(), { length: 36 })}
           </Text>
         );
       },
@@ -131,9 +132,11 @@ const Templates = () => {
     columnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          <Tag.Root size={"sm"}>
-            <Tag.Label>{info.getValue()}</Tag.Label>
-          </Tag.Root>
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
         );
       },
       header: "Owner",
@@ -145,15 +148,25 @@ const Templates = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("values", {
-      cell: (info) => info.getValue().length,
+      cell: (info) => {
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
+      },
       header: "Values",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/templates/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/templates/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -187,6 +200,7 @@ const Templates = () => {
               colorPalette={"green"}
               onClick={() => navigate("/create/template")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
               <Icon name={"add"} />
@@ -194,6 +208,10 @@ const Templates = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Templates in the current Workspace are shown below. Sort the
+            Templates using the column headers.
+          </Text>
           {templates.length > 0 ? (
             <DataTable
               columns={columns}

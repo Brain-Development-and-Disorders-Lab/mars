@@ -382,10 +382,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content
-          // w={"100%"}
-          // h={"100%"}
-          // backdropFilter={"blur(2px)"}
-          // background={"rgba(255, 255, 255, 0.85)"}
+            w={"100%"}
+            h={"100%"}
+            backdropFilter={"blur(1px)"}
+            background={"rgba(255, 255, 255, 0.9)"}
           >
             <Flex
               direction={"column"}
@@ -395,10 +395,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               align={"center"}
               justify={"center"}
             >
-              <Text fontWeight={"semibold"} color={"gray.600"}>
-                Loading Workspace...
+              <Text fontWeight={"semibold"} color={"gray.700"}>
+                Preparing Workspace...
               </Text>
-              <Spinner size={"lg"} color={"gray.600"} />
+              <Spinner size={"xl"} color={"gray.700"} />
             </Flex>
           </Dialog.Content>
         </Dialog.Positioner>

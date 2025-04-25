@@ -513,7 +513,11 @@ const Dashboard = () => {
             </Flex>
             <Spacer />
             <Flex>
-              <ActorTag orcid={token.orcid} fallback={"Unknown User"} />
+              <ActorTag
+                orcid={token.orcid}
+                fallback={"Unknown User"}
+                size={"md"}
+              />
             </Flex>
           </Flex>
 

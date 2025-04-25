@@ -10,12 +10,13 @@ import {
   Text,
   useBreakpoint,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { ProjectModel } from "@types";
@@ -124,10 +125,10 @@ const Projects = () => {
       cell: (info) => (
         <Tooltip
           content={info.getValue()}
-          disabled={info.getValue().length < 30}
+          disabled={info.getValue().length < 36}
         >
           <Text lineClamp={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 30 })}
+            {_.truncate(info.getValue(), { length: 36 })}
           </Text>
         </Tooltip>
       ),
@@ -145,10 +146,10 @@ const Projects = () => {
         return (
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 36}
           >
             <Text lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 30 })}
+              {_.truncate(info.getValue(), { length: 36 })}
             </Text>
           </Tooltip>
         );
@@ -159,9 +160,11 @@ const Projects = () => {
     columnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          <Tag.Root size={"sm"}>
-            <Tag.Label>{info.getValue()}</Tag.Label>
-          </Tag.Root>
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
         );
       },
       header: "Owner",
@@ -172,15 +175,25 @@ const Projects = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("entities", {
-      cell: (info) => info.getValue().length,
+      cell: (info) => {
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
+      },
       header: "Entities",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -217,6 +230,7 @@ const Projects = () => {
               colorPalette={"green"}
               onClick={() => navigate("/create/project")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
               <Icon name={"add"} />
@@ -224,6 +238,10 @@ const Projects = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Projects in the current Workspace are shown below. Sort the
+            Projects using the column headers.
+          </Text>
           {projects.length > 0 ? (
             <DataTable
               columns={columns}

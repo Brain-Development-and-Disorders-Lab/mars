@@ -1328,7 +1328,11 @@ const ImportDialog = (props: ImportDialogProps) => {
                         <Field.Root>
                           <Field.Label>Owner</Field.Label>
                           <Flex>
-                            <ActorTag orcid={ownerField} fallback={"Unknown"} />
+                            <ActorTag
+                              orcid={ownerField}
+                              fallback={"Unknown"}
+                              size={"md"}
+                            />
                           </Flex>
                           <Field.HelperText>
                             Owner of imported Entities

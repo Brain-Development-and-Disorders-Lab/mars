@@ -92,7 +92,11 @@ const AttributeCard = (props: AttributeCardProps) => {
                   <Flex direction={"column"} gap={"1"}>
                     <Text fontSize={"sm"}>Owner</Text>
                     <Flex>
-                      <ActorTag orcid={props.owner} fallback={"Unknown User"} />
+                      <ActorTag
+                        orcid={props.owner}
+                        fallback={"Unknown User"}
+                        size={"md"}
+                      />
                     </Flex>
                   </Flex>
                 </Flex>

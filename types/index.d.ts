@@ -125,6 +125,7 @@ export type LinkyProps = {
 export type ActorTagProps = {
   orcid: string;
   fallback: string;
+  size: "sm" | "md";
 };
 
 // "VisibilityTagProps" component props

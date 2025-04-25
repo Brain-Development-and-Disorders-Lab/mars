@@ -234,7 +234,11 @@ const Project = () => {
                   <Field.Root>
                     <Field.Label>Owner</Field.Label>
                     <Flex>
-                      <ActorTag orcid={owner} fallback={"Unknown User"} />
+                      <ActorTag
+                        orcid={owner}
+                        fallback={"Unknown User"}
+                        size={"md"}
+                      />
                     </Flex>
                   </Field.Root>
 

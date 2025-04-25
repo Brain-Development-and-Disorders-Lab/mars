@@ -19,11 +19,12 @@ import {
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { DataTableAction, EntityModel, IGenericItem } from "@types";
@@ -156,11 +157,11 @@ const Entities = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 36}
               showArrow
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 36 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -181,11 +182,11 @@ const Entities = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 24}
+              disabled={info.getValue().length < 36}
               showArrow
             >
               <Text fontSize={"sm"}>
-                {_.truncate(info.getValue(), { length: 24 })}
+                {_.truncate(info.getValue(), { length: 36 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -197,9 +198,11 @@ const Entities = () => {
     columnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          <Tag.Root>
-            <Tag.Label>{info.getValue()}</Tag.Label>
-          </Tag.Root>
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
         );
       },
       header: "Owner",
@@ -218,8 +221,12 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -305,6 +312,7 @@ const Entities = () => {
               colorPalette={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
               <Icon name={"add"} />
@@ -312,6 +320,10 @@ const Entities = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Entities in the current Workspace are shown below. Sort the
+            Entities using the column headers.
+          </Text>
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <DataTable

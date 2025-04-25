@@ -1096,6 +1096,7 @@ const Project = () => {
                                         <ActorTag
                                           orcid={projectVersion.author}
                                           fallback={"Unknown User"}
+                                          size={"md"}
                                         />
                                       </Flex>
                                     </Flex>
@@ -1197,7 +1198,11 @@ const Project = () => {
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Owner
                   </Text>
-                  <ActorTag orcid={project.owner} fallback={"Unknown User"} />
+                  <ActorTag
+                    orcid={project.owner}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>

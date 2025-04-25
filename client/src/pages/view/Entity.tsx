@@ -1806,6 +1806,7 @@ const Entity = () => {
                                           <ActorTag
                                             orcid={entityVersion.author}
                                             fallback={"Unknown User"}
+                                            size={"md"}
                                           />
                                         </Flex>
                                       </Flex>
@@ -1919,6 +1920,7 @@ const Entity = () => {
                   <ActorTag
                     orcid={entityData.owner}
                     fallback={"Unknown User"}
+                    size={"md"}
                   />
                 </Flex>
               </Flex>

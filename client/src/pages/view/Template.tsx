@@ -429,7 +429,11 @@ const Template = () => {
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Owner
                   </Text>
-                  <ActorTag orcid={template.owner} fallback={"No Owner"} />
+                  <ActorTag
+                    orcid={template.owner}
+                    fallback={"No Owner"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>

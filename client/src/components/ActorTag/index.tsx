@@ -56,33 +56,37 @@ const ActorTag = (props: ActorTagProps) => {
   }, []);
 
   return (
-    <Flex
-      direction={"row"}
-      gap={"2"}
-      align={"center"}
-      justify={"space-around"}
-      p={"2"}
-      rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
-      bg={"white"}
-      minW={"120px"}
-    >
-      <Avatar.Root size={"sm"} key={actorLabel} colorPalette={"blue"}>
-        <Avatar.Fallback name={actorLabel} />
-      </Avatar.Root>
-      <Flex direction={"column"} gap={"0.5"}>
-        <Skeleton loading={loading}>
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
-            {actorLabel}
-          </Text>
-        </Skeleton>
-        <Skeleton loading={loading}>
-          {breakpoint !== "base" && (
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-              {props.orcid}
+    <Flex>
+      <Flex
+        direction={"row"}
+        gap={"2"}
+        align={"center"}
+        justify={"space-around"}
+        p={props.size === "sm" ? "1" : "2"}
+        rounded={"md"}
+        border={"1px solid"}
+        borderColor={"gray.300"}
+        bg={"white"}
+        minW={"120px"}
+      >
+        <Avatar.Root
+          size={props.size === "sm" ? "xs" : "sm"}
+          key={actorLabel}
+          colorPalette={"blue"}
+        >
+          <Avatar.Fallback name={actorLabel} />
+        </Avatar.Root>
+        <Skeleton loading={loading} asChild>
+          <Flex direction={"column"} gap={"0.5"} align={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
+              {actorLabel}
             </Text>
-          )}
+            {breakpoint !== "base" && (
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                {props.orcid}
+              </Text>
+            )}
+          </Flex>
         </Skeleton>
       </Flex>
     </Flex>
