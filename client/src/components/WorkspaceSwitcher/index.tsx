@@ -47,7 +47,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const { logout } = useAuthentication();
 
   // Switcher drop-down visibility state
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // Switcher loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -197,7 +197,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
       // Update the switcher visual state and close the transition overlay
       setLabel(selectedWorkspace.name);
-      setIsOpen(false);
+      setOpen(false);
       setIsLoading(false);
     }
   };
@@ -210,7 +210,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     navigate(`/workspaces/${workspace}`);
 
     // Ensure `WorkspaceSwitcher` is closed
-    setIsOpen(false);
+    setOpen(false);
   };
 
   /**
@@ -221,7 +221,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     navigate("/create/workspace");
 
     // Ensure `WorkspaceSwitcher` is closed
-    setIsOpen(false);
+    setOpen(false);
   };
 
   /**
@@ -229,23 +229,25 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    */
   const handleProfileClick = () => {
     navigate("/profile");
-    setIsOpen(false);
+    setOpen(false);
   };
 
   return (
-    <Flex id={props.id ? props.id : "workspaceSwitcher"} w={"100%"}>
-      <Menu.Root open={isOpen}>
+    <Flex id={props.id ? props.id : "workspaceSwitcher"} pos={"relative"}>
+      <Menu.Root
+        open={open}
+        onEscapeKeyDown={() => setOpen(false)}
+        onInteractOutside={() => setOpen(false)}
+      >
         <Menu.Trigger asChild>
           <Button
             h={"100%"}
             w={"100%"}
+            p={"0"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.300"}
-            color={"black"}
             bg={"white"}
-            _hover={{ bg: "gray.300" }}
-            onClick={() => setIsOpen(!isOpen)}
+            variant={"surface"}
+            onClick={() => setOpen(!open)}
           >
             <Flex
               direction={"row"}
@@ -264,8 +266,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
           </Button>
         </Menu.Trigger>
 
-        <Menu.Positioner>
-          <Menu.Content bg={"white"} w={"100%"}>
+        <Menu.Positioner w={"100%"} rounded={"md"}>
+          <Menu.Content bg={"white"}>
             <Menu.ItemGroup>
               {/* Create a list of all Workspaces the user has access to */}
               {workspaces.length > 0 ? (
@@ -279,16 +281,24 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                       <Flex
                         direction={"row"}
                         gap={"2"}
+                        w={"100%"}
                         align={"center"}
-                        justify={"space-between"}
                       >
                         <Tooltip content={accessible.name} showArrow>
                           <Text fontSize={"sm"} fontWeight={"semibold"}>
                             {_.truncate(accessible.name, { length: 24 })}
                           </Text>
                         </Tooltip>
+
+                        <Spacer />
+
                         {workspace === accessible._id && (
-                          <Icon name={"check"} color={"green.600"} />
+                          <Flex gap={"1"} align={"center"}>
+                            <Text color={"green.600"} fontWeight={"semibold"}>
+                              Active
+                            </Text>
+                            <Icon name={"check"} color={"green.600"} />
+                          </Flex>
                         )}
                       </Flex>
                     </Menu.Item>
@@ -309,6 +319,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 </Menu.Item>
               )}
             </Menu.ItemGroup>
+
+            <Menu.Separator />
 
             <Menu.ItemGroup>
               {/* Option to create a new Workspace */}

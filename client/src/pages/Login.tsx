@@ -181,22 +181,22 @@ const Login = () => {
             bg={"white"}
             align={"center"}
             justify={"center"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
           >
-            <Heading size={"xl"} fontWeight={"semibold"}>
+            <Heading size={"2xl"} fontWeight={"semibold"}>
               Sign in
             </Heading>
 
-            <Text fontWeight={"semibold"} fontSize={"sm"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
               Get started with one of the sign in options below.
             </Text>
 
             <Flex direction={"column"} gap={"2"} pt={"8"}>
               <Button
                 id={"orcidLoginButton"}
-                colorPalette={"gray"}
+                variant={"subtle"}
                 gap={"4"}
                 onClick={onLoginClick}
                 loading={isLoading}
@@ -217,7 +217,12 @@ const Login = () => {
                 </AbsoluteCenter>
               </Box>
 
-              <Button colorPalette={"gray"} gap={"4"} disabled>
+              <Button
+                variant={"subtle"}
+                colorPalette={"gray"}
+                gap={"4"}
+                disabled
+              >
                 More sign in options coming soon.
               </Button>
             </Flex>
