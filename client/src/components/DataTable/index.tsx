@@ -84,6 +84,7 @@ const DataTable = (props: DataTableProps) => {
                   {...{
                     disabled: props.viewOnly,
                     pl: "1",
+                    variant: "outline",
                     checked: table.getIsAllRowsSelected(),
                     isIndeterminate: table.getIsSomeRowsSelected(),
                     invalid: false,
@@ -99,6 +100,7 @@ const DataTable = (props: DataTableProps) => {
                   {...{
                     id: `s_${Math.random().toString(16).slice(2)}`,
                     pl: "1",
+                    variant: "outline",
                     checked: row.getIsSelected(),
                     disabled: !row.getCanSelect() || props.viewOnly,
                     isIndeterminate: row.getIsSomeSelected(),
@@ -312,23 +314,52 @@ const DataTable = (props: DataTableProps) => {
                     }
                     p={"1"}
                   >
-                    <Flex align={"center"} py={"1"}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {canSortColumn(header) && (
-                        <Icon
-                          name={
-                            header.column.getIsSorted() === "desc"
-                              ? "sort_up"
-                              : header.column.getIsSorted() === "asc"
-                                ? "sort_down"
-                                : "sort"
+                    <Flex>
+                      <Flex
+                        px={header.column.getIsSorted() ? "2" : "0"}
+                        py={"1"}
+                        rounded={"full"}
+                        border={canSortColumn(header) ? "1px solid" : ""}
+                        borderColor={
+                          header.column.getIsSorted()
+                            ? "blue.300"
+                            : "transparent"
+                        }
+                        bg={
+                          header.column.getIsSorted()
+                            ? "blue.100"
+                            : "transparent"
+                        }
+                        align={"center"}
+                      >
+                        <Text
+                          fontWeight={"bold"}
+                          fontSize={"sm"}
+                          color={
+                            header.column.getIsSorted() ? "blue.700" : "black"
                           }
-                          style={{ marginLeft: "4px" }}
-                        />
-                      )}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </Text>
+                        {canSortColumn(header) && (
+                          <Icon
+                            name={
+                              header.column.getIsSorted() === "desc"
+                                ? "sort_up"
+                                : header.column.getIsSorted() === "asc"
+                                  ? "sort_down"
+                                  : "sort"
+                            }
+                            color={
+                              header.column.getIsSorted() ? "blue.700" : "black"
+                            }
+                            style={{ marginLeft: "4px" }}
+                          />
+                        )}
+                      </Flex>
                     </Flex>
                   </Table.ColumnHeader>
                 );
@@ -373,7 +404,7 @@ const DataTable = (props: DataTableProps) => {
         <Flex gap={"2"} direction={"row"} align={"center"}>
           {/* Actions button */}
           {props.showSelection && (
-            <Menu.Root size={"sm"}>
+            <Menu.Root>
               <Menu.Trigger asChild>
                 <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
                   Actions
