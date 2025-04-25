@@ -13,7 +13,6 @@ import {
   Spinner,
   Stack,
   Skeleton,
-  Portal,
   IconButton,
   StackSeparator,
 } from "@chakra-ui/react";
@@ -134,126 +133,117 @@ const SearchBox = (props: SearchBoxProps) => {
   };
 
   return (
-    <Flex w={"100%"} p={"0"}>
-      <Popover.Root
-        open={open}
-        onInteractOutside={() => setOpen(false)}
-        onEscapeKeyDown={() => setOpen(false)}
-      >
-        <Popover.Trigger asChild>
-          <Flex w={"100%"} gap={"2"} align={"center"}>
-            <Input
-              value={query}
-              size={"sm"}
-              rounded={"md"}
-              placeholder={"Quick Search"}
-              background={"white"}
-              disabled={workspace === ""}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyUp={(event) => {
-                // Listen for "Enter" key when entering a query
-                if (event.key === "Enter" && query !== "") {
-                  handleClick();
-                }
-              }}
-            />
-            <IconButton
-              size={"sm"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              disabled={query === ""}
-              onClick={() => {
-                if (query !== "") {
-                  handleClick();
-                }
-              }}
-            >
-              <Icon name={"search"} />
-            </IconButton>
-          </Flex>
+    <Popover.Root
+      open={open}
+      onInteractOutside={() => setOpen(false)}
+      onEscapeKeyDown={() => setOpen(false)}
+    >
+      <Flex gap={"2"} align={"center"}>
+        <Popover.Trigger>
+          <Input
+            value={query}
+            size={"sm"}
+            rounded={"md"}
+            placeholder={"Quick Search"}
+            background={"white"}
+            disabled={workspace === ""}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyUp={(event) => {
+              // Listen for "Enter" key when entering a query
+              if (event.key === "Enter" && query !== "") {
+                handleClick();
+              }
+            }}
+          />
         </Popover.Trigger>
+        <IconButton
+          size={"sm"}
+          rounded={"md"}
+          colorPalette={"green"}
+          disabled={query === ""}
+          onClick={() => {
+            if (query !== "") {
+              handleClick();
+            }
+          }}
+        >
+          <Icon name={"search"} />
+        </IconButton>
+      </Flex>
 
-        <Portal>
-          <Popover.Positioner>
-            <Popover.Content w={"100%"}>
-              <Popover.Header>
-                <Flex align={"center"} gap={"1"}>
-                  <Text fontSize={"sm"}>
-                    Showing{" "}
-                    {results.length > MAX_RESULTS
-                      ? MAX_RESULTS
-                      : results.length}{" "}
-                    of
-                  </Text>
-                  {isSearching ? (
-                    <Spinner size={"sm"} />
-                  ) : (
-                    <Text fontWeight={"bold"} fontSize={"sm"}>
-                      {results.length}
-                    </Text>
-                  )}
-                  <Text fontSize={"sm"}>results</Text>
-                </Flex>
-              </Popover.Header>
-
-              <Popover.Body>
-                <Flex gap={"2"} py={"1"}>
-                  {isSearching ? (
-                    <Stack w={"100%"}>
-                      <Skeleton height={"30px"} />
-                      <Skeleton height={"30px"} />
-                      <Skeleton height={"30px"} />
-                    </Stack>
-                  ) : (
-                    hasSearched &&
-                    !isError && (
-                      <VStack
-                        gap={"2"}
-                        separator={<StackSeparator />}
-                        w={"100%"}
-                      >
-                        {results.length > 0 ? (
-                          results.slice(0, MAX_RESULTS).map((result) => {
-                            return (
-                              <Flex
-                                key={result._id}
-                                direction={"row"}
-                                gap={"2"}
-                                w={"100%"}
-                              >
-                                <Text color={"black"} fontSize={"sm"}>
-                                  {result.name}
-                                </Text>
-                                <Spacer />
-                                <Link
-                                  className={"light"}
-                                  color={"black"}
-                                  variant={"underline"}
-                                  fontWeight={"semibold"}
-                                  gap={"1"}
-                                  onClick={() => handleResultClick(result._id)}
-                                >
-                                  View
-                                  <Icon name={"a_right"} color={"black"} />
-                                </Link>
-                              </Flex>
-                            );
-                          })
-                        ) : (
-                          <Flex m={"2"}>
-                            <Text fontWeight={"semibold"} fontSize={"sm"}>
-                              No results found.
+      <Popover.Positioner>
+        <Popover.Content rounded={"md"}>
+          <Popover.Body p={"2"}>
+            <Flex gap={"2"} py={"1"}>
+              {isSearching ? (
+                <Stack w={"100%"}>
+                  <Skeleton height={"30px"} />
+                  <Skeleton height={"30px"} />
+                  <Skeleton height={"30px"} />
+                </Stack>
+              ) : (
+                hasSearched &&
+                !isError && (
+                  <VStack gap={"2"} separator={<StackSeparator />} w={"100%"}>
+                    {results.length > 0 ? (
+                      results.slice(0, MAX_RESULTS).map((result) => {
+                        return (
+                          <Flex
+                            key={result._id}
+                            direction={"row"}
+                            gap={"2"}
+                            w={"100%"}
+                          >
+                            <Text color={"black"} fontSize={"sm"}>
+                              {result.name}
                             </Text>
+                            <Spacer />
+                            <Link
+                              className={"light"}
+                              color={"black"}
+                              variant={"underline"}
+                              fontWeight={"semibold"}
+                              gap={"1"}
+                              onClick={() => handleResultClick(result._id)}
+                            >
+                              View
+                              <Icon name={"a_right"} color={"black"} />
+                            </Link>
                           </Flex>
-                        )}
-                      </VStack>
-                    )
-                  )}
-                </Flex>
-              </Popover.Body>
+                        );
+                      })
+                    ) : (
+                      <Flex m={"2"}>
+                        <Text fontWeight={"semibold"} fontSize={"sm"}>
+                          No results found.
+                        </Text>
+                      </Flex>
+                    )}
+                  </VStack>
+                )
+              )}
+            </Flex>
+          </Popover.Body>
 
-              <Popover.Footer>
-                <Flex width={"100%"} gap={"1"}>
+          <Popover.Footer p={"2"} bg={"gray.50"}>
+            <Flex direction={"column"} gap={"1"}>
+              <Flex width={"100%"} direction={"row"} gap={"1"}>
+                <Text fontSize={"sm"}>
+                  Showing{" "}
+                  {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
+                  of
+                </Text>
+                {isSearching ? (
+                  <Spinner size={"sm"} />
+                ) : (
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    {results.length}
+                  </Text>
+                )}
+                <Text fontSize={"sm"}>results</Text>
+              </Flex>
+              {results.length > 0 && results.length > MAX_RESULTS && (
+                <Flex width={"100%"} direction={"row"} gap={"1"}>
                   <Text fontSize={"sm"} color={"black"}>
                     View all results using{" "}
                   </Text>
@@ -273,12 +263,12 @@ const SearchBox = (props: SearchBoxProps) => {
                     <Icon name={"a_right"} color={"black"} />
                   </Link>
                 </Flex>
-              </Popover.Footer>
-            </Popover.Content>
-          </Popover.Positioner>
-        </Portal>
-      </Popover.Root>
-    </Flex>
+              )}
+            </Flex>
+          </Popover.Footer>
+        </Popover.Content>
+      </Popover.Positioner>
+    </Popover.Root>
   );
 };
 
