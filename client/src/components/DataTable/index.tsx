@@ -12,8 +12,6 @@ import {
   Menu,
   Button,
   useBreakpoint,
-  InputGroup,
-  Input,
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
@@ -41,6 +39,17 @@ import _ from "lodash";
 
 const DataTable = (props: DataTableProps) => {
   const breakpoint = useBreakpoint();
+
+  // Page length collection
+  const [pageLength, setPageLength] = useState<string[]>(["10"]);
+  const pageLengthsCollection = createListCollection({
+    items: [
+      { label: "10", value: "10" },
+      { label: "20", value: "20" },
+      { label: "50", value: "50" },
+      { label: "100", value: "100" },
+    ],
+  });
 
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
@@ -75,7 +84,7 @@ const DataTable = (props: DataTableProps) => {
                   {...{
                     disabled: props.viewOnly,
                     pl: "1",
-                    isChecked: table.getIsAllRowsSelected(),
+                    checked: table.getIsAllRowsSelected(),
                     isIndeterminate: table.getIsSomeRowsSelected(),
                     invalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
@@ -90,7 +99,7 @@ const DataTable = (props: DataTableProps) => {
                   {...{
                     id: `s_${Math.random().toString(16).slice(2)}`,
                     pl: "1",
-                    isChecked: row.getIsSelected(),
+                    checked: row.getIsSelected(),
                     disabled: !row.getCanSelect() || props.viewOnly,
                     isIndeterminate: row.getIsSomeSelected(),
                     invalid: false,
@@ -151,8 +160,10 @@ const DataTable = (props: DataTableProps) => {
   }, [props.visibleColumns]);
 
   // Column selector state
-  const [showColumnList, setShowColumnList] = useState(false);
   const [columnNames, setColumnNames] = useState([] as string[]);
+  const [columnNamesCollection, setColumnNamesCollection] = useState(
+    createListCollection<string>({ items: [] }),
+  );
 
   useEffect(() => {
     // Get a list of all column names
@@ -163,11 +174,12 @@ const DataTable = (props: DataTableProps) => {
       })
       .map((column) => column.id);
     setColumnNames(columns);
+    setColumnNamesCollection(createListCollection({ items: columns }));
 
     // Set the column visibilities
     const updatedVisibility = _.cloneDeep(columnVisibility);
     columns.map((column) => {
-      if (_.isUndefined(columnVisibility[column])) {
+      if (!_.isUndefined(columnVisibility[column])) {
         updatedVisibility[column] = true;
       }
     });
@@ -242,34 +254,33 @@ const DataTable = (props: DataTableProps) => {
   };
 
   /**
-   * Handle clicking the `Column` component dropdown
-   */
-  const onColumnsClick = () => {
-    if (props.viewOnly !== true) {
-      setShowColumnList(!showColumnList);
-    }
-  };
-
-  /**
    * Update the column visibility depending on the column selected
    * @param column Name of the column
    */
-  const onColumnViewClick = (column: string) => {
+  const updateColumnVisibility = (columns: string[]) => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
-    if (
-      _.isUndefined(updatedVisibility[column]) ||
-      updatedVisibility[column] === false
-    ) {
-      updatedVisibility[column] = true;
-    } else {
+
+    // Reset visibility on update
+    for (const column of Object.keys(updatedVisibility)) {
+      // Hide all columns
       updatedVisibility[column] = false;
+    }
+
+    // Re-instate column visibility if defined
+    for (const column of columns) {
+      if (
+        !_.isUndefined(updatedVisibility[column]) ||
+        updatedVisibility[column] === false
+      ) {
+        updatedVisibility[column] = true;
+      }
     }
     setColumnVisibility(updatedVisibility);
   };
 
   return (
     <Flex w={"100%"} direction={"column"}>
-      <Table.Root variant={"line"} size={"sm"} w={"100%"}>
+      <Table.Root variant={"line"} size={"sm"} w={"100%"} interactive>
         {/* Table head */}
         <Table.Header bg={"gray.50"} p={"0"}>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -364,7 +375,7 @@ const DataTable = (props: DataTableProps) => {
           {props.showSelection && (
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"sm"}>
+                <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
                   Actions
                   <Icon name={"lightning"} />
                 </Button>
@@ -415,73 +426,41 @@ const DataTable = (props: DataTableProps) => {
           )}
 
           {columnNames.length > 0 && props.showColumnSelect && (
-            <Flex>
-              <Flex pos={"relative"} w={"100%"}>
-                <InputGroup
-                  onClick={onColumnsClick}
-                  endElement={
-                    showColumnList ? (
-                      <Icon name={"c_up"} />
-                    ) : (
-                      <Icon name={"c_down"} />
-                    )
-                  }
-                >
-                  <Input
-                    placeholder={"Show Columns"}
-                    value={"Show Columns"}
-                    backgroundColor={"white"}
-                    data-testid={"value-editor"}
-                    cursor={"pointer"}
-                    size={"sm"}
-                    rounded={"md"}
-                    disabled={props.viewOnly}
-                    readOnly
-                  />
-                </InputGroup>
-                {showColumnList && (
-                  <Flex
-                    w={"100%"}
-                    p={"2"}
-                    mt={"9"}
-                    gap={"2"}
-                    direction={"column"}
-                    bg={"white"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                    borderRadius={"sm"}
-                    shadow={"md"}
-                    position={"absolute"}
-                    zIndex={"2"}
-                  >
-                    {columnNames.map((column) => {
-                      return (
-                        <Button
-                          key={column}
-                          variant={"ghost"}
-                          onClick={() => onColumnViewClick(column)}
-                          width={"full"}
-                          size={"sm"}
-                          justifyContent={"left"}
-                        >
-                          <Flex
-                            direction={"row"}
-                            gap={"2"}
-                            justify={"space-between"}
-                            w={"100%"}
-                          >
-                            <Text fontSize={"sm"}>{_.capitalize(column)}</Text>
-                            {columnVisibility[column] && (
-                              <Icon name={"check"} color={"green"} />
-                            )}
-                          </Flex>
-                        </Button>
-                      );
-                    })}
-                  </Flex>
-                )}
-              </Flex>
-            </Flex>
+            <Select.Root
+              key={"select-columns"}
+              size={"sm"}
+              w={"200px"}
+              collection={columnNamesCollection}
+              value={Object.keys(columnVisibility).filter(
+                (column) => columnVisibility[column] === true,
+              )}
+              onValueChange={(details) => {
+                updateColumnVisibility(details.items);
+              }}
+              multiple
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger rounded={"md"}>
+                  <Select.ValueText placeholder={"Visible Columns"} />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {columnNamesCollection.items.map((name) => (
+                      <Select.Item item={name} key={name}>
+                        {_.capitalize(name)}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
           )}
         </Flex>
 
@@ -491,46 +470,47 @@ const DataTable = (props: DataTableProps) => {
           itemCountComponent}
 
         {props.showPagination && (
-          <Flex gap={"2"} wrap={"wrap"}>
-            <Flex gap={"2"} align={"center"}>
-              <Text fontSize={"sm"}>Show:</Text>
-              <Select.Root
-                key={"select-pagesize"}
-                size={"sm"}
-                collection={createListCollection({ items: [10, 20, 50, 100] })}
-                onValueChange={(details) =>
-                  table.setPageSize(Number(details.value[0]))
-                }
-              >
-                <Select.HiddenSelect />
-                <Select.Label>Select Page Size</Select.Label>
-                <Select.Control>
-                  <Select.Trigger asChild>
-                    <Select.ValueText placeholder={"Select Page Size"} />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content>
-                      {[10, 20, 50, 100].map((count) => (
-                        <Select.Item item={count} key={count}>
-                          {count}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
-            </Flex>
+          <Flex gap={"2"} align={"center"}>
+            <Text fontSize={"sm"}>Shown Per Page:</Text>
+            <Select.Root
+              key={"select-pagesize"}
+              size={"sm"}
+              w={"150px"}
+              collection={pageLengthsCollection}
+              value={pageLength}
+              onValueChange={(details) => {
+                setPageLength(details.value);
+                table.setPageSize(Number(details.items[0].value));
+              }}
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger rounded={"md"}>
+                  <Select.ValueText placeholder={"Page Size"} />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {pageLengthsCollection.items.map((count) => (
+                      <Select.Item item={count} key={count.value}>
+                        {count.label}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
 
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
+                rounded={"md"}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
@@ -540,6 +520,7 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
+                rounded={"md"}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -560,6 +541,7 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
+                rounded={"md"}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -569,6 +551,7 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
+                rounded={"md"}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
