@@ -36,7 +36,7 @@ import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Uploader from "@components/Uploader";
+import UploadDialog from "@components/UploadDialog";
 import Values from "@components/Values";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
@@ -115,11 +115,7 @@ const Entity = () => {
     onClose: onShareClose,
   } = useDisclosure();
 
-  const {
-    open: addProjectsOpen,
-    onOpen: onAddProjectsOpen,
-    onClose: onAddProjectsClose,
-  } = useDisclosure();
+  const [addProjectsOpen, setAddProjectsOpen] = useState(false);
   const [projectsCollection, setProjectsCollection] = useState(
     createListCollection<ProjectModel>({ items: [] }),
   );
@@ -1242,7 +1238,7 @@ const Entity = () => {
       ...projects.filter((project) => !_.isEqual("", project)),
     ]);
     setSelectedProjects([]);
-    onAddProjectsClose();
+    setAddProjectsOpen(false);
   };
 
   /**
@@ -1250,7 +1246,7 @@ const Entity = () => {
    */
   const onCancelAddProjectsClick = () => {
     setSelectedProjects([]);
-    onAddProjectsClose();
+    setAddProjectsOpen(false);
   };
 
   return (
@@ -1290,71 +1286,81 @@ const Entity = () => {
             {/* Actions Menu */}
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button size={"sm"} colorPalette={"yellow"}>
+                <Button
+                  variant={"solid"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"yellow"}
+                >
                   Actions
                   <Icon name={"lightning"} />
                 </Button>
               </Menu.Trigger>
-              <Menu.Positioner>
-                <Menu.Content>
-                  <Menu.Item value={"print"} fontSize={"sm"} disabled>
-                    <Icon name={"print"} />
-                    Print
-                  </Menu.Item>
-                  <Menu.Item
-                    value={"share"}
-                    fontSize={"sm"}
-                    onClick={handleShareClick}
-                  >
-                    <Icon name={"share"} />
-                    Share
-                  </Menu.Item>
-                  <Menu.Item
-                    value={"visualize"}
-                    onClick={onGraphOpen}
-                    fontSize={"sm"}
-                    disabled={editing || entityArchived}
-                  >
-                    <Icon name={"graph"} />
-                    Visualize
-                  </Menu.Item>
-                  <Menu.Item
-                    value={"clone"}
-                    onClick={() => onCloneOpen()}
-                    fontSize={"sm"}
-                    disabled={entityArchived}
-                  >
-                    <Icon name={"copy"} />
-                    Clone
-                  </Menu.Item>
-                  <Menu.Item
-                    value={"export"}
-                    onClick={handleExportClick}
-                    fontSize={"sm"}
-                    disabled={editing || entityArchived}
-                  >
-                    <Icon name={"download"} />
-                    Export
-                  </Menu.Item>
-                  <Menu.Item
-                    id={"archiveEntityButton"}
-                    value={"archive"}
-                    onClick={onArchiveDialogOpen}
-                    fontSize={"sm"}
-                    disabled={entityArchived}
-                  >
-                    <Icon name={"archive"} />
-                    Archive
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu.Positioner>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item value={"print"} fontSize={"sm"} disabled>
+                      <Icon name={"print"} />
+                      Print
+                    </Menu.Item>
+                    <Menu.Item
+                      value={"share"}
+                      fontSize={"sm"}
+                      onClick={handleShareClick}
+                    >
+                      <Icon name={"share"} />
+                      Share
+                    </Menu.Item>
+                    <Menu.Item
+                      value={"visualize"}
+                      onClick={onGraphOpen}
+                      fontSize={"sm"}
+                      disabled={editing || entityArchived}
+                    >
+                      <Icon name={"graph"} />
+                      Visualize
+                    </Menu.Item>
+                    <Menu.Item
+                      value={"clone"}
+                      onClick={() => onCloneOpen()}
+                      fontSize={"sm"}
+                      disabled={entityArchived}
+                    >
+                      <Icon name={"copy"} />
+                      Clone
+                    </Menu.Item>
+                    <Menu.Item
+                      value={"export"}
+                      onClick={handleExportClick}
+                      fontSize={"sm"}
+                      disabled={editing || entityArchived}
+                    >
+                      <Icon name={"download"} />
+                      Export
+                    </Menu.Item>
+                    <Menu.Item
+                      id={"archiveEntityButton"}
+                      value={"archive"}
+                      onClick={onArchiveDialogOpen}
+                      fontSize={"sm"}
+                      disabled={entityArchived}
+                    >
+                      <Icon name={"archive"} />
+                      Archive
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
             </Menu.Root>
 
             {editing && (
               <Button
-                onClick={handleCancelClick}
+                id={"addProjectsModalButton"}
+                variant={"solid"}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"red"}
+                onClick={handleCancelClick}
               >
                 Cancel
                 <Icon name={"cross"} />
@@ -1363,35 +1369,44 @@ const Entity = () => {
             {entityArchived ? (
               <Button
                 id={"restoreEntityButton"}
-                onClick={handleRestoreFromArchiveClick}
+                variant={"solid"}
                 size={"sm"}
-                colorPalette={"green"}
+                rounded={"md"}
+                colorPalette={"orange"}
+                onClick={handleRestoreFromArchiveClick}
               >
                 Restore
                 <Icon name={"rewind"} />
               </Button>
             ) : (
-              <Flex gap={"2"}>
-                <Button
-                  id={"editEntityButton"}
-                  onClick={handleEditClick}
-                  size={"sm"}
-                  colorPalette={editing ? "green" : "blue"}
-                  loadingText={"Saving..."}
-                  loading={isUpdating}
-                >
-                  {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
-                </Button>
-              </Flex>
+              <Button
+                id={"editEntityButton"}
+                variant={"solid"}
+                size={"sm"}
+                rounded={"md"}
+                colorPalette={editing ? "green" : "blue"}
+                onClick={handleEditClick}
+                loading={isUpdating}
+              >
+                {editing ? "Save" : "Edit"}
+                <Icon name={editing ? "save" : "edit"} />
+              </Button>
             )}
 
             {/* Version history */}
-            <Drawer.Root open={historyOpen} size={"md"}>
+            <Drawer.Root
+              open={historyOpen}
+              size={"md"}
+              onOpenChange={(event) => setHistoryOpen(event.open)}
+              closeOnEscape
+              closeOnInteractOutside
+            >
               <Drawer.Trigger asChild>
                 <Button
+                  id={"historyButton"}
+                  variant={"subtle"}
                   size={"sm"}
-                  colorPalette={"gray"}
+                  rounded={"md"}
                   onClick={() => setHistoryOpen(true)}
                 >
                   History
@@ -1403,7 +1418,10 @@ const Entity = () => {
                 <Drawer.Positioner>
                   <Drawer.Content>
                     <Drawer.CloseTrigger asChild>
-                      <CloseButton size={"sm"} />
+                      <CloseButton
+                        size={"sm"}
+                        onClick={() => setHistoryOpen(false)}
+                      />
                     </Drawer.CloseTrigger>
                     <Drawer.Header pb={"2"}>
                       <Flex direction={"column"} w={"100%"} gap={"2"}>
@@ -1814,13 +1832,15 @@ const Entity = () => {
 
                                     <Flex w={"100%"} justify={"right"}>
                                       <Button
-                                        colorPalette={"orange"}
+                                        variant={"solid"}
                                         size={"sm"}
-                                        onClick={() => {
+                                        rounded={"md"}
+                                        colorPalette={"orange"}
+                                        onClick={() =>
                                           handleRestoreFromHistoryClick(
                                             entityVersion,
-                                          );
-                                        }}
+                                          )
+                                        }
                                         disabled={entityArchived}
                                       >
                                         Restore
@@ -1984,9 +2004,13 @@ const Entity = () => {
                   Projects
                 </Text>
                 <Button
+                  id={"addProjectsModalButton"}
+                  variant={"solid"}
                   size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => setAddProjectsOpen(true)}
                   disabled={!editing}
-                  onClick={onAddProjectsOpen}
                 >
                   Add
                   <Icon name={"add"} />
@@ -2043,9 +2067,12 @@ const Entity = () => {
                 </Text>
                 <Button
                   id={"addAttributeModalButton"}
+                  variant={"solid"}
                   size={"sm"}
-                  disabled={!editing}
+                  rounded={"md"}
+                  colorPalette={"green"}
                   onClick={onAddAttributesOpen}
+                  disabled={!editing}
                 >
                   Add
                   <Icon name={"add"} />
@@ -2105,9 +2132,12 @@ const Entity = () => {
                     Relationships
                   </Text>
                   <Button
+                    variant={"solid"}
                     size={"sm"}
-                    disabled={!editing}
+                    rounded={"md"}
+                    colorPalette={"green"}
                     onClick={onAddRelationshipsOpen}
+                    disabled={!editing}
                   >
                     Add
                     <Icon name={"add"} />
@@ -2161,7 +2191,14 @@ const Entity = () => {
                   <Text fontSize={"sm"} fontWeight={"bold"}>
                     Attachments
                   </Text>
-                  <Button size={"sm"} onClick={onUploadOpen}>
+                  <Button
+                    variant={"solid"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={onUploadOpen}
+                    disabled={!editing}
+                  >
                     Upload
                     <Icon name={"upload"} />
                   </Button>
@@ -2204,8 +2241,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} gap={"2"} */}
+            <Dialog.Content p={"2"} gap={"2"}>
               <Dialog.Header p={"2"}>Add Attribute</Dialog.Header>
               <Dialog.Body p={"2"}>
                 {/* Attribute creation */}
@@ -2352,9 +2388,10 @@ const Entity = () => {
                 <Flex direction={"row"} justify={"center"} gap={"2"}>
                   {/* "Cancel" button */}
                   <Button
-                    colorPalette={"red"}
-                    size={"sm"}
                     variant={"outline"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
                     onClick={onAddAttributesClose}
                   >
                     Cancel
@@ -2364,26 +2401,29 @@ const Entity = () => {
                   <Spacer />
 
                   <Button
-                    colorPalette={"blue"}
+                    variant={"solid"}
                     size={"sm"}
-                    variant={"outline"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
                     onClick={onSaveAsTemplate}
                     disabled={isAttributeError}
                     loading={loadingTemplateCreate}
                   >
-                    Save as Template
+                    Create Template
                     <Icon name={"add"} />
                   </Button>
 
                   <Button
-                    colorPalette={"green"}
+                    variant={"solid"}
                     size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
                     disabled={isAttributeError}
                     onClick={() => {
                       addAttribute();
                     }}
                   >
-                    Done
+                    Save
                     <Icon name={"check"} />
                   </Button>
                 </Flex>
@@ -2393,14 +2433,33 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Add Projects modal */}
-        <Dialog.Root open={addProjectsOpen} placement={"center"}>
+        <Dialog.Root
+          open={addProjectsOpen}
+          onOpenChange={(event) => setAddProjectsOpen(event.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} gap={"2"} w={["lg", "xl", "2xl"]} */}
+            <Dialog.Content w={["lg", "xl", "2xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"}>Add Entity to Projects</Dialog.Header>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                <Icon name={"project"} />
+                Add Entity to Projects
+              </Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setAddProjectsOpen(false)}
+                />
+              </Dialog.CloseTrigger>
               <Dialog.Body p={"2"}>
                 {/* Select component for Projects */}
                 <Flex direction={"column"} gap={"2"}>
@@ -2516,22 +2575,22 @@ const Entity = () => {
 
               <Dialog.Footer p={"2"}>
                 {/* "Cancel" button */}
-                <Flex direction={"row"} justify={"center"} w={"100%"}>
+                <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                   <Button
-                    colorPalette={"red"}
-                    size={"sm"}
                     variant={"outline"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
                     onClick={onCancelAddProjectsClick}
                   >
                     Cancel
                     <Icon name={"cross"} />
                   </Button>
-
-                  <Spacer />
-
                   <Button
-                    colorPalette={"green"}
+                    variant={"solid"}
                     size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
                     onClick={() => {
                       addProjects(selectedProjects);
                     }}
@@ -2556,8 +2615,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} gap={"0"} */}
+            <Dialog.Content p={"2"} gap={"0"}>
               {/* Heading and close button */}
               <Dialog.Header p={"2"}>
                 <Text fontWeight={"bold"} fontSize={"sm"}>
@@ -2680,34 +2738,41 @@ const Entity = () => {
               </Dialog.Body>
 
               <Dialog.Footer p={"2"}>
-                <Button
-                  colorPalette={"red"}
-                  size={"sm"}
-                  variant={"outline"}
-                  onClick={onAddRelationshipsClose}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"space-between"}
                 >
-                  Cancel
-                  <Icon name={"cross"} />
-                </Button>
-
-                <Spacer />
-
-                <Button
-                  colorPalette={"green"}
-                  size={"sm"}
-                  disabled={_.isUndefined(selectedRelationshipTarget._id)}
-                  onClick={() => addRelationship()}
-                >
-                  Done
-                  <Icon name={"check"} />
-                </Button>
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
+                    onClick={onAddRelationshipsClose}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                  <Button
+                    variant={"solid"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
+                    onClick={() => addRelationship()}
+                  >
+                    Done
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Upload modal */}
-        <Uploader
+        {/* Upload dialog */}
+        <UploadDialog
           open={uploadOpen}
           onOpen={onUploadOpen}
           onClose={onUploadClose}
@@ -2721,8 +2786,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} w={["lg", "xl", "2xl"]} gap={"0"} */}
+            <Dialog.Content p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
               {/* Heading and close button */}
               <Dialog.Header p={"2"}>Export Entity</Dialog.Header>
               <Dialog.Body px={"2"} gap={"2"}>
@@ -3047,8 +3111,10 @@ const Entity = () => {
                     align={"center"}
                   >
                     <Button
-                      colorPalette={"blue"}
+                      variant={"solid"}
                       size={"sm"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
                       onClick={() => handleDownloadClick(exportFormat)}
                       loading={exportLoading}
                     >
@@ -3067,8 +3133,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} */}
+            <Dialog.Content p={"2"}>
               <Dialog.Header p={"2"} gap={"2"}>
                 Visualize: {entityName}
               </Dialog.Header>
@@ -3087,8 +3152,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* maxW={"100vw"} w={"fit-content"} */}
+            <Dialog.Content maxW={"100vw"} w={"fit-content"}>
               <Dialog.Header>Attachment Preview</Dialog.Header>
               <Dialog.Body>
                 <Flex justify={"center"} align={"center"} pb={"2"}>
@@ -3104,8 +3168,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
+            <Dialog.Content p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
               <Dialog.Header p={"2"}>Share Entity</Dialog.Header>
               <Dialog.Body p={"2"}>
@@ -3126,7 +3189,9 @@ const Entity = () => {
                       />
                     </Flex>
                     <Button
+                      variant={"plain"}
                       size={"sm"}
+                      rounded={"md"}
                       onClick={async () => {
                         await navigator.clipboard.writeText(
                           `https://app.metadatify.com/entities/${id}`,
@@ -3140,6 +3205,7 @@ const Entity = () => {
                       }}
                     >
                       Copy
+                      <Icon name={"copy"} />
                     </Button>
                   </Flex>
 
@@ -3159,7 +3225,9 @@ const Entity = () => {
                       />
                     </Flex>
                     <Button
+                      variant={"plain"}
                       size={"sm"}
+                      rounded={"md"}
                       onClick={async () => {
                         await navigator.clipboard.writeText(`${id}`);
                         toaster.create({
@@ -3171,6 +3239,7 @@ const Entity = () => {
                       }}
                     >
                       Copy
+                      <Icon name={"copy"} />
                     </Button>
                   </Flex>
 
@@ -3195,8 +3264,10 @@ const Entity = () => {
               <Dialog.Footer p={"2"}>
                 <Spacer />
                 <Button
-                  colorPalette={"green"}
+                  variant={"solid"}
                   size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
                   onClick={onShareClose}
                 >
                   Done
@@ -3241,27 +3312,36 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} justifyContent={"space-between"}>
-                <Button
-                  onClick={onCloneClose}
-                  size={"sm"}
-                  colorPalette={"red"}
-                  variant={"outline"}
+              <Dialog.Footer p={"2"}>
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"space-between"}
                 >
-                  Cancel
-                  <Icon name={"cross"} />
-                </Button>
-                <Button
-                  colorPalette={"green"}
-                  onClick={handleCloneClick}
-                  ml={3}
-                  size={"sm"}
-                  loading={createEntityLoading}
-                  disabled={clonedEntityName === ""}
-                >
-                  Clone
-                  <Icon name={"copy"} />
-                </Button>
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
+                    onClick={onCloneClose}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                  <Button
+                    variant={"solid"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={handleCloneClick}
+                    loading={createEntityLoading}
+                    disabled={clonedEntityName === ""}
+                  >
+                    Clone
+                    <Icon name={"copy"} />
+                  </Button>
+                </Flex>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
@@ -3301,20 +3381,28 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer p={"2"}>
-                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"space-between"}
+                >
                   <Button
+                    variant={"outline"}
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"red"}
-                    onClick={() => onSaveMessageClose()}
+                    onClick={onSaveMessageClose}
                   >
                     Cancel
                     <Icon name={"cross"} />
                   </Button>
-
                   <Button
+                    variant={"solid"}
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => handleSaveMessageDoneClick()}
+                    onClick={handleSaveMessageDoneClick}
                   >
                     Done
                     <Icon name={"check"} />
