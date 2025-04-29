@@ -539,7 +539,7 @@ const Entity = () => {
   const [previewAttachment, setPreviewAttachment] = useState(
     {} as IGenericItem,
   );
-  const { open: previewOpen, onOpen: onPreviewOpen } = useDisclosure();
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Toggle editing status
   const handleEditClick = () => {
@@ -846,20 +846,44 @@ const Entity = () => {
           });
 
           // Open the preview modal
-          onPreviewOpen();
+          setPreviewOpen(true);
         };
 
         return (
           <Flex w={"100%"} justify={"end"} gap={"4"}>
-            <IconButton
-              aria-label={"Preview attachment"}
-              size={"sm"}
-              key={`preview-file-${info.getValue()}`}
-              colorPalette={"gray"}
-              onClick={() => handlePreview()}
+            {/* Attachment preview modal */}
+            <Dialog.Root
+              open={previewOpen}
+              onOpenChange={(event) => setPreviewOpen(event.open)}
+              placement={"center"}
+              closeOnEscape
+              closeOnInteractOutside
             >
-              <Icon name={"expand"} />
-            </IconButton>
+              <Dialog.Trigger asChild>
+                <IconButton
+                  aria-label={"Preview attachment"}
+                  variant={"subtle"}
+                  size={"sm"}
+                  rounded={"md"}
+                  key={`preview-file-${info.getValue()}`}
+                  colorPalette={"gray"}
+                  onClick={() => handlePreview()}
+                >
+                  <Icon name={"expand"} />
+                </IconButton>
+              </Dialog.Trigger>
+              <Dialog.Backdrop />
+              <Dialog.Positioner>
+                <Dialog.Content maxW={"100vw"} w={"fit-content"}>
+                  <Dialog.Header>Attachment Preview</Dialog.Header>
+                  <Dialog.Body>
+                    <Flex justify={"center"} align={"center"} pb={"2"}>
+                      <PreviewModal attachment={previewAttachment} />
+                    </Flex>
+                  </Dialog.Body>
+                </Dialog.Content>
+              </Dialog.Positioner>
+            </Dialog.Root>
             {editing ? (
               <IconButton
                 aria-label={"Remove attachment"}
@@ -3142,22 +3166,6 @@ const Entity = () => {
                   id={entityData._id}
                   entityNavigateHook={handleEntityNodeClick}
                 />
-              </Dialog.Body>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
-
-        {/* Attachment preview modal */}
-        <Dialog.Root open={previewOpen} placement={"center"}>
-          <Dialog.Trigger />
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content maxW={"100vw"} w={"fit-content"}>
-              <Dialog.Header>Attachment Preview</Dialog.Header>
-              <Dialog.Body>
-                <Flex justify={"center"} align={"center"} pb={"2"}>
-                  <PreviewModal attachment={previewAttachment} />
-                </Flex>
               </Dialog.Body>
             </Dialog.Content>
           </Dialog.Positioner>

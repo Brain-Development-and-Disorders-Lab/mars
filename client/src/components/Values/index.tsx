@@ -10,6 +10,7 @@ import React, {
 // Existing and custom components
 import {
   Button,
+  CloseButton,
   Dialog,
   Field,
   Fieldset,
@@ -26,7 +27,6 @@ import {
   Text,
   VStack,
   createListCollection,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { createColumnHelper, Row } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
@@ -61,7 +61,8 @@ const Values = (props: {
   requireData?: true | false;
   permittedValues?: string[];
 }) => {
-  const { open, onOpen, onClose } = useDisclosure();
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [addValueOpen, setAddValueOpen] = useState(false);
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
 
@@ -545,7 +546,7 @@ const Values = (props: {
     setOptions([]);
 
     // Close the modal
-    onClose();
+    setSelectOpen(false);
   };
 
   const actions: DataTableAction[] = [
@@ -581,7 +582,13 @@ const Values = (props: {
         <Text fontSize={"sm"} fontWeight={"bold"}>
           Values
         </Text>
-        <Popover.Root>
+        <Popover.Root
+          size={"xs"}
+          open={addValueOpen}
+          onOpenChange={(event) => setAddValueOpen(event.open)}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Popover.Trigger asChild>
             <Button
               variant={"solid"}
@@ -589,6 +596,8 @@ const Values = (props: {
               className={"add-value-button-form"}
               disabled={props.viewOnly}
               size={"sm"}
+              rounded={"md"}
+              onClick={() => setAddValueOpen(true)}
             >
               Add Value
               <Icon name={"add"} />
@@ -609,11 +618,12 @@ const Values = (props: {
                 <Flex gap={"2"} wrap={"wrap"}>
                   {/* Buttons to add Values */}
                   <Button
-                    bg={"orange.300"}
+                    bg={"orange.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"orange.300"}
-                    _hover={{ bg: "orange.400" }}
+                    _hover={{ bg: "orange.300" }}
                     onClick={() => {
                       props.setValues([
                         ...props.values,
@@ -624,6 +634,7 @@ const Values = (props: {
                           data: dayjs(Date.now()).toISOString(),
                         },
                       ]);
+                      setAddValueOpen(false);
                     }}
                   >
                     Date
@@ -632,11 +643,12 @@ const Values = (props: {
 
                   <Button
                     id="add-value-button-text"
-                    bg={"blue.300"}
+                    bg={"blue.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"blue.300"}
-                    _hover={{ bg: "blue.400" }}
+                    _hover={{ bg: "blue.300" }}
                     onClick={() => {
                       props.setValues([
                         ...props.values,
@@ -647,6 +659,7 @@ const Values = (props: {
                           data: "",
                         },
                       ]);
+                      setAddValueOpen(false);
                     }}
                   >
                     Text
@@ -654,11 +667,12 @@ const Values = (props: {
                   </Button>
 
                   <Button
-                    bg={"green.300"}
+                    bg={"green.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"green.300"}
-                    _hover={{ bg: "green.400" }}
+                    _hover={{ bg: "green.300" }}
                     onClick={() => {
                       props.setValues([
                         ...props.values,
@@ -669,6 +683,7 @@ const Values = (props: {
                           data: 0,
                         },
                       ]);
+                      setAddValueOpen(false);
                     }}
                   >
                     Number
@@ -676,11 +691,12 @@ const Values = (props: {
                   </Button>
 
                   <Button
-                    bg={"yellow.300"}
+                    bg={"yellow.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"yellow.300"}
-                    _hover={{ bg: "yellow.400" }}
+                    _hover={{ bg: "yellow.300" }}
                     onClick={() => {
                       props.setValues([
                         ...props.values,
@@ -691,6 +707,7 @@ const Values = (props: {
                           data: "",
                         },
                       ]);
+                      setAddValueOpen(false);
                     }}
                   >
                     URL
@@ -698,11 +715,12 @@ const Values = (props: {
                   </Button>
 
                   <Button
-                    bg={"purple.300"}
+                    bg={"purple.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"purple.300"}
-                    _hover={{ bg: "purple.400" }}
+                    _hover={{ bg: "purple.300" }}
                     onClick={() => {
                       props.setValues([
                         ...props.values,
@@ -713,6 +731,7 @@ const Values = (props: {
                           data: "",
                         },
                       ]);
+                      setAddValueOpen(false);
                     }}
                   >
                     Entity
@@ -720,14 +739,16 @@ const Values = (props: {
                   </Button>
 
                   <Button
-                    bg={"teal.300"}
+                    bg={"teal.400"}
                     size={"sm"}
+                    rounded={"md"}
                     color={"white"}
                     borderColor={"teal.300"}
-                    _hover={{ bg: "teal.400" }}
+                    _hover={{ bg: "teal.300" }}
                     disabled={!_.isUndefined(props.permittedValues)}
                     onClick={() => {
-                      onOpen();
+                      setSelectOpen(true);
+                      setAddValueOpen(false);
                     }}
                   >
                     Select
@@ -769,12 +790,21 @@ const Values = (props: {
         </Flex>
       )}
 
-      <Dialog.Root open={open} size={"xl"} placement={"center"} closeOnEscape>
-        <Dialog.Trigger />
+      <Dialog.Root
+        open={selectOpen}
+        size={"sm"}
+        placement={"center"}
+        closeOnEscape
+      >
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"}>Add Options</Dialog.Header>
+            <Dialog.Header p={"2"}>
+              Add Options
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size={"sm"} onClick={() => setSelectOpen(false)} />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
             <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
               <Flex direction={"column"} gap={"2"}>
                 <Text fontSize={"sm"}>
@@ -880,13 +910,14 @@ const Values = (props: {
             <Dialog.Footer p={"2"}>
               <Button
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"red"}
                 onClick={() => {
                   // Reset the list of options
                   setOptions([]);
 
                   // Close the modal
-                  onClose();
+                  setSelectOpen(false);
                 }}
               >
                 Cancel
@@ -895,6 +926,7 @@ const Values = (props: {
               <Spacer />
               <Button
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"green"}
                 onClick={addOptions}
                 disabled={_.isEqual(options.length, 0)}

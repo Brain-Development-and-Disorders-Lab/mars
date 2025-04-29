@@ -417,48 +417,46 @@ const DataTable = (props: DataTableProps) => {
                   <Icon name={"lightning"} />
                 </Button>
               </Menu.Trigger>
-              <Portal>
-                <Menu.Positioner>
-                  <Menu.Content>
-                    {props.actions &&
-                      props.actions.length > 0 &&
-                      props.actions?.map((action) => {
-                        return (
-                          <Menu.Item
-                            onClick={() => {
-                              action.action(table, selectedRows);
-                            }}
-                            key={action.label}
-                            disabled={
-                              (Object.keys(selectedRows).length === 0 ||
-                                _.isUndefined(props.actions) ||
-                                props.actions?.length === 0) &&
-                              action.alwaysEnabled !== true
-                            }
-                            value={action.label}
-                          >
-                            <Flex direction={"row"} gap={"2"} align={"center"}>
-                              <Icon name={action.icon} />
-                              <Text fontSize={"sm"}>{action.label}</Text>
-                            </Flex>
-                          </Menu.Item>
-                        );
-                      })}
-                    {(_.isUndefined(props.actions) ||
-                      props.actions.length === 0) && (
-                      <Menu.Item
-                        key={"no-actions"}
-                        disabled
-                        value={"No actions available"}
-                      >
-                        <Flex direction={"row"} gap={"2"} align={"center"}>
-                          <Text fontSize={"sm"}>No Actions available</Text>
-                        </Flex>
-                      </Menu.Item>
-                    )}
-                  </Menu.Content>
-                </Menu.Positioner>
-              </Portal>
+              <Menu.Positioner>
+                <Menu.Content>
+                  {props.actions &&
+                    props.actions.length > 0 &&
+                    props.actions?.map((action) => {
+                      return (
+                        <Menu.Item
+                          onClick={() => {
+                            action.action(table, selectedRows);
+                          }}
+                          key={action.label}
+                          disabled={
+                            (Object.keys(selectedRows).length === 0 ||
+                              _.isUndefined(props.actions) ||
+                              props.actions?.length === 0) &&
+                            action.alwaysEnabled !== true
+                          }
+                          value={action.label}
+                        >
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
+                            <Icon name={action.icon} />
+                            <Text fontSize={"sm"}>{action.label}</Text>
+                          </Flex>
+                        </Menu.Item>
+                      );
+                    })}
+                  {(_.isUndefined(props.actions) ||
+                    props.actions.length === 0) && (
+                    <Menu.Item
+                      key={"no-actions"}
+                      disabled
+                      value={"No actions available"}
+                    >
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Text fontSize={"sm"}>No Actions available</Text>
+                      </Flex>
+                    </Menu.Item>
+                  )}
+                </Menu.Content>
+              </Menu.Positioner>
             </Menu.Root>
           )}
 
