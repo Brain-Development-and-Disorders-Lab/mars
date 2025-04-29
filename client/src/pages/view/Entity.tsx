@@ -128,11 +128,7 @@ const Entity = () => {
   const [addProjectsOpen, setAddProjectsOpen] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
 
-  const {
-    open: addRelationshipsOpen,
-    onOpen: onAddRelationshipsOpen,
-    onClose: onAddRelationshipsClose,
-  } = useDisclosure();
+  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
   const selectRelationshipTypeRef = useRef(null);
   const [selectedRelationshipType, setSelectedRelationshipType] = useState(
     "general" as RelationshipType,
@@ -597,14 +593,15 @@ const Entity = () => {
       });
     }
 
-    // Run a refetch operation
-    await refetch();
+    // Close the save message modal
+    onSaveMessageClose();
+    setSaveMessage("");
 
     setEditing(false);
     setIsUpdating(false);
 
-    // Close the save message modal
-    onSaveMessageClose();
+    // Run a refetch operation
+    await refetch();
   };
 
   /**
@@ -687,9 +684,11 @@ const Entity = () => {
             ) : (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
+                  color={"black"}
+                  fontWeight={"semibold"}
                   onClick={() => navigate(`/projects/${info.row.original}`)}
                 >
-                  <Text fontWeight={"semibold"}>View</Text>
+                  View
                 </Link>
                 <Icon name={"a_right"} />
               </Flex>
@@ -855,7 +854,7 @@ const Entity = () => {
         };
 
         return (
-          <Flex w={"100%"} justify={"end"} gap={"4"}>
+          <Flex w={"100%"} justify={"end"} gap={"2"}>
             {/* Attachment preview modal */}
             <Dialog.Root
               open={previewOpen}
@@ -893,6 +892,7 @@ const Entity = () => {
               <IconButton
                 aria-label={"Remove attachment"}
                 size={"sm"}
+                rounded={"md"}
                 key={`remove-file-${info.getValue()}`}
                 colorPalette={"red"}
                 onClick={() => removeAttachment(info.getValue())}
@@ -903,6 +903,7 @@ const Entity = () => {
               <IconButton
                 aria-label={"Download attachment"}
                 size={"sm"}
+                rounded={"md"}
                 key={`download-file-${info.getValue()}`}
                 colorPalette={"blue"}
                 onClick={() => handleDownload()}
@@ -1166,7 +1167,7 @@ const Entity = () => {
     setSelectedRelationshipType("general");
     setSelectedRelationshipTarget({} as IGenericItem);
 
-    onAddRelationshipsClose();
+    setAddRelationshipsOpen(false);
   };
 
   // Remove a Project from the Entity state
@@ -2165,7 +2166,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={onAddRelationshipsOpen}
+                    onClick={() => setAddRelationshipsOpen(true)}
                     disabled={!editing}
                   >
                     Add
@@ -2661,16 +2662,28 @@ const Entity = () => {
           open={addRelationshipsOpen}
           size={"lg"}
           placement={"center"}
+          onOpenChange={(event) => setAddRelationshipsOpen(event.open)}
+          closeOnEscape
+          closeOnInteractOutside
         >
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"} gap={"0"} ref={selectRelationshipTypeRef}>
+            <Dialog.Content ref={selectRelationshipTypeRef}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
-                  Add Relationship
-                </Text>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Add Relationship
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setAddRelationshipsOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
@@ -2798,7 +2811,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    onClick={onAddRelationshipsClose}
+                    onClick={() => setAddRelationshipsOpen(false)}
                   >
                     Cancel
                     <Icon name={"cross"} />
@@ -3385,8 +3398,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} */}
+            <Dialog.Content p={"2"}>
               <Dialog.Header p={"2"}>
                 <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"save"} />

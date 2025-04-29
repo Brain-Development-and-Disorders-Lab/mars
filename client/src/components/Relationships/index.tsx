@@ -119,11 +119,13 @@ const Relationships = (props: RelationshipsProps) => {
             {props.viewOnly ? (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
+                  color={"black"}
+                  fontWeight={"semibold"}
                   onClick={() =>
                     navigate(`/entities/${info.row.original.target._id}`)
                   }
                 >
-                  <Text fontWeight={"semibold"}>View</Text>
+                  View
                 </Link>
                 <Icon name={"a_right"} />
               </Flex>
