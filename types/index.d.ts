@@ -175,6 +175,12 @@ export type IGenericItem = {
   name: string;
 };
 
+// Utility type used for `Select` component options
+export type ISelectOption = {
+  label: string;
+  value: string;
+};
+
 // Utility type to define set of relationship types
 export type RelationshipType = "parent" | "child" | "general";
 

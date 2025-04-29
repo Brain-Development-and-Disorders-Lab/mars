@@ -2,10 +2,18 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, IAuth, ISession, IValue, UserModel } from "@types";
+import {
+  GenericValueType,
+  IAttribute,
+  IAuth,
+  ISelectOption,
+  ISession,
+  IValue,
+  UserModel,
+} from "@types";
 
 export const isValidValues = (
-  values: IValue<any>[],
+  values: IValue<GenericValueType>[],
   allowEmptyValues = false,
 ) => {
   if (values.length === 0) {
@@ -92,4 +100,27 @@ export const getSession = (sessionKey: string): ISession => {
   return {
     workspace: "",
   };
+};
+
+/**
+ * Generate a collection of `ISelectOption` objects from a collection of objects, enabling the
+ * Chakra UI `Select` component to be populated with options correctly.
+ * @param collection Collection of objects of generic type `T`
+ * @param valueProperty The property attached to `T` that will be the value of the `Select` option
+ * @param labelProperty The property attached to `T` that will be the label of the `Select` option
+ * @return {ISelectOption[]} Collection of `ISelectOption` objects
+ */
+export const createSelectOptions = <T>(
+  collection: T[],
+  valueProperty: keyof T,
+  labelProperty: keyof T,
+): ISelectOption[] => {
+  const options: ISelectOption[] = [];
+  for (const item of collection) {
+    options.push({
+      value: item[valueProperty] as string,
+      label: item[labelProperty] as string,
+    });
+  }
+  return options;
 };

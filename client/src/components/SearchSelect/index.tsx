@@ -15,6 +15,7 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 // Utility imports
 import { debounce } from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
+import _ from "lodash";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -246,7 +247,7 @@ const SearchSelect = (props: SearchSelectProps) => {
         <Flex
           w={"100%"}
           p={"2"}
-          mt={"9"}
+          mt={"10"}
           gap={"2"}
           direction={"column"}
           bg={"white"}
@@ -320,7 +321,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
-                      {option.name}
+                      {_.truncate(option.name, { length: 24 })}
                     </Flex>
                   </Button>
                 </Flex>

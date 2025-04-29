@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -29,6 +29,8 @@ import {
   createListCollection,
   Portal,
   CloseButton,
+  Spinner,
+  HStack,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -62,14 +64,14 @@ import {
   IAttribute,
   IGenericItem,
   IRelationship,
+  ISelectOption,
   IValue,
-  ProjectModel,
   RelationshipType,
 } from "@types";
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { isValidValues } from "src/util";
+import { createSelectOptions, isValidValues } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -115,17 +117,23 @@ const Entity = () => {
     onClose: onShareClose,
   } = useDisclosure();
 
+  const [projects, setProjects] = useState<IGenericItem[]>([]);
+  const projectsCollection = useMemo(() => {
+    const items = createSelectOptions<IGenericItem>(projects, "_id", "name");
+    return createListCollection<ISelectOption>({
+      items: items || [],
+    });
+  }, [projects]);
+  const selectProjectsContainerRef = useRef(null);
   const [addProjectsOpen, setAddProjectsOpen] = useState(false);
-  const [projectsCollection, setProjectsCollection] = useState(
-    createListCollection<ProjectModel>({ items: [] }),
-  );
-  const [selectedProjects, setSelectedProjects] = useState([] as string[]);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
 
   const {
     open: addRelationshipsOpen,
     onOpen: onAddRelationshipsOpen,
     onClose: onAddRelationshipsClose,
   } = useDisclosure();
+  const selectRelationshipTypeRef = useRef(null);
   const [selectedRelationshipType, setSelectedRelationshipType] = useState(
     "general" as RelationshipType,
   );
@@ -368,16 +376,13 @@ const Entity = () => {
     // Unpack Project data
     if (data?.projects) {
       // Filter out existing Project membership or selected Projects
-      const filteredProjects: ProjectModel[] = data.projects.filter(
-        (project: ProjectModel) => {
+      setProjects(
+        data.projects.filter((project: IGenericItem) => {
           return (
             !_.includes(selectedProjects, project._id) &&
             !_.includes(entityProjects, project._id)
           );
-        },
-      );
-      setProjectsCollection(
-        createListCollection<ProjectModel>({ items: filteredProjects }),
+        }),
       );
     }
     // Unpack Template data
@@ -2464,170 +2469,191 @@ const Entity = () => {
           closeOnEscape
           closeOnInteractOutside
         >
-          <Dialog.Trigger />
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content w={["lg", "xl", "2xl"]}>
-              {/* Heading and close button */}
-              <Dialog.Header
-                p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content
+                w={["lg", "xl", "2xl"]}
+                ref={selectProjectsContainerRef}
               >
-                <Icon name={"project"} />
-                Add Entity to Projects
-              </Dialog.Header>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"sm"}
-                  onClick={() => setAddProjectsOpen(false)}
-                />
-              </Dialog.CloseTrigger>
-              <Dialog.Body p={"2"}>
-                {/* Select component for Projects */}
-                <Flex direction={"column"} gap={"2"}>
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Select.Root
-                          key={"select-project"}
-                          size={"sm"}
-                          collection={projectsCollection}
-                          onValueChange={(details) => {
-                            const selectedProject = details.items[0];
-                            if (
-                              selectedProjects.includes(selectedProject._id)
-                            ) {
-                              // Check that the selected Project has not already been selected
-                              toaster.create({
-                                title: "Warning",
-                                description:
-                                  "Project has already been selected.",
-                                type: "warning",
-                                duration: 2000,
-                                closable: true,
-                              });
-                            } else if (!_.isEqual(selectedProject._id, "")) {
-                              // Add the selected Project if not the default option
-                              setSelectedProjects([
-                                ...selectedProjects,
-                                selectedProject._id,
-                              ]);
-                            }
-                          }}
-                        >
-                          <Select.HiddenSelect />
-                          <Select.Label>Select Project</Select.Label>
-                          <Select.Control>
-                            <Select.Trigger>
-                              <Select.ValueText
-                                placeholder={"Select Project"}
-                              />
-                            </Select.Trigger>
-                            <Select.IndicatorGroup>
-                              <Select.Indicator />
-                            </Select.IndicatorGroup>
-                          </Select.Control>
-                          <Portal>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {projectsCollection.items.map((project) => (
-                                  <Select.Item item={project} key={project._id}>
-                                    {project.name}
+                {/* Heading and close button */}
+                <Dialog.Header
+                  p={"2"}
+                  mt={"2"}
+                  fontWeight={"semibold"}
+                  fontSize={"md"}
+                >
+                  <Icon name={"project"} />
+                  Add Entity to Projects
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton
+                      size={"sm"}
+                      onClick={() => setAddProjectsOpen(false)}
+                    />
+                  </Dialog.CloseTrigger>
+                </Dialog.Header>
+                <Dialog.Body p={"2"}>
+                  {/* Select component for Projects */}
+                  <Flex direction={"column"} gap={"2"}>
+                    <Select.Root
+                      id={"select-project"}
+                      size={"sm"}
+                      rounded={"md"}
+                      collection={projectsCollection}
+                      onValueChange={(details) => {
+                        const selectedItem = details.items[0];
+                        if (selectedProjects.includes(selectedItem.value)) {
+                          // Check that the selected Project has not already been selected
+                          toaster.create({
+                            title: "Warning",
+                            description: "Project has already been selected.",
+                            type: "warning",
+                            duration: 2000,
+                            closable: true,
+                          });
+                        } else if (!_.isEqual(selectedItem.value, "")) {
+                          // Add the selected Project if not the default option
+                          setSelectedProjects([
+                            ...selectedProjects,
+                            selectedItem.value,
+                          ]);
+                        }
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger>
+                          <Select.ValueText placeholder={"Select Project"} />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          {loading && (
+                            <Spinner
+                              size={"xs"}
+                              borderWidth={"1.5px"}
+                              color={"fg.muted"}
+                            />
+                          )}
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal container={selectProjectsContainerRef}>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {projectsCollection.items.map(
+                              (item: ISelectOption) => {
+                                return (
+                                  <Select.Item item={item} key={item.value}>
+                                    {item.label}
                                     <Select.ItemIndicator />
                                   </Select.Item>
-                                ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Portal>
-                        </Select.Root>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
+                                );
+                              },
+                            )}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
 
-                  <Flex
-                    direction={"row"}
-                    gap={"2"}
-                    p={"2"}
-                    align={"center"}
-                    justify={"center"}
-                    rounded={"md"}
-                    border={"1px solid"}
-                    borderColor={"gray.300"}
-                    minH={"100px"}
-                  >
-                    {selectedProjects.length > 0 ? (
-                      selectedProjects.map((project) => {
-                        if (!_.isEqual(project, "")) {
-                          return (
-                            <Tag.Root key={`tag-${project}`}>
-                              <Tag.Label>
-                                <Linky
-                                  id={project}
-                                  type={"projects"}
-                                  size={"sm"}
-                                />
-                              </Tag.Label>
-                              <Tag.CloseTrigger
-                                onClick={() => {
-                                  setSelectedProjects([
-                                    ...selectedProjects.filter((selected) => {
-                                      return !_.isEqual(project, selected);
-                                    }),
-                                  ]);
-                                }}
-                              />
-                            </Tag.Root>
-                          );
-                        } else {
-                          return null;
-                        }
-                      })
-                    ) : (
-                      <Text
-                        fontSize={"sm"}
-                        fontWeight={"semibold"}
-                        color={"gray.400"}
-                      >
-                        No Projects selected
-                      </Text>
-                    )}
+                    <HStack
+                      gap={"2"}
+                      p={"2"}
+                      align={"center"}
+                      justify={"center"}
+                      rounded={"md"}
+                      border={"1px solid"}
+                      borderColor={"gray.300"}
+                      minH={"100px"}
+                    >
+                      {selectedProjects.length > 0 ? (
+                        selectedProjects.map((project) => {
+                          if (!_.isEqual(project, "")) {
+                            return (
+                              <Flex key={`tag-${project}`}>
+                                <Tag.Root>
+                                  <Tag.StartElement>
+                                    <Flex
+                                      h={"100%"}
+                                      align={"center"}
+                                      justify={"center"}
+                                    >
+                                      <Icon name={"project"} size={"xs"} />
+                                    </Flex>
+                                  </Tag.StartElement>
+                                  <Tag.Label p={"1"}>
+                                    <Linky
+                                      id={project}
+                                      type={"projects"}
+                                      size={"sm"}
+                                    />
+                                  </Tag.Label>
+                                  <Tag.EndElement>
+                                    <Tag.CloseTrigger
+                                      onClick={() => {
+                                        setSelectedProjects([
+                                          ...selectedProjects.filter(
+                                            (selected) => {
+                                              return !_.isEqual(
+                                                project,
+                                                selected,
+                                              );
+                                            },
+                                          ),
+                                        ]);
+                                      }}
+                                    />
+                                  </Tag.EndElement>
+                                </Tag.Root>
+                              </Flex>
+                            );
+                          } else {
+                            return null;
+                          }
+                        })
+                      ) : (
+                        <Text
+                          fontSize={"sm"}
+                          fontWeight={"semibold"}
+                          color={"gray.400"}
+                        >
+                          No Projects selected
+                        </Text>
+                      )}
+                    </HStack>
                   </Flex>
-                </Flex>
-              </Dialog.Body>
+                </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
-                {/* "Cancel" button */}
-                <Flex direction={"row"} justify={"space-between"} w={"100%"}>
-                  <Button
-                    variant={"outline"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={onCancelAddProjectsClick}
-                  >
-                    Cancel
-                    <Icon name={"cross"} />
-                  </Button>
-                  <Button
-                    variant={"solid"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      addProjects(selectedProjects);
-                    }}
-                    disabled={selectedProjects.length === 0}
-                  >
-                    Add Entity to {selectedProjects.length} Project
-                    {selectedProjects.length === 1 ? "" : "s"}
-                    <Icon name={"check"} />
-                  </Button>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
+                <Dialog.Footer p={"2"}>
+                  {/* "Cancel" button */}
+                  <Flex direction={"row"} justify={"space-between"} w={"100%"}>
+                    <Button
+                      variant={"outline"}
+                      size={"sm"}
+                      rounded={"md"}
+                      colorPalette={"red"}
+                      onClick={onCancelAddProjectsClick}
+                    >
+                      Cancel
+                      <Icon name={"cross"} />
+                    </Button>
+                    <Button
+                      variant={"solid"}
+                      size={"sm"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      onClick={() => {
+                        addProjects(selectedProjects);
+                      }}
+                      disabled={selectedProjects.length === 0}
+                    >
+                      Add Entity to {selectedProjects.length} Project
+                      {selectedProjects.length === 1 ? "" : "s"}
+                      <Icon name={"check"} />
+                    </Button>
+                  </Flex>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
         </Dialog.Root>
 
         {/* Add Relationships modal */}
@@ -2639,7 +2665,7 @@ const Entity = () => {
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"} gap={"0"}>
+            <Dialog.Content p={"2"} gap={"0"} ref={selectRelationshipTypeRef}>
               {/* Heading and close button */}
               <Dialog.Header p={"2"}>
                 <Text fontWeight={"bold"} fontSize={"sm"}>
@@ -2657,7 +2683,7 @@ const Entity = () => {
                     border={"1px solid"}
                     borderColor={"gray.300"}
                   >
-                    <Flex direction={"column"} gap={"1"}>
+                    <Flex direction={"column"} gap={"1"} w={"33%"}>
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
                         Source
                       </Text>
@@ -2669,7 +2695,7 @@ const Entity = () => {
                         disabled
                       />
                     </Flex>
-                    <Flex direction={"column"} gap={"1"}>
+                    <Flex direction={"column"} gap={"1"} w={"33%"}>
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
                         Type
                       </Text>
@@ -2686,7 +2712,6 @@ const Entity = () => {
                         }}
                       >
                         <Select.HiddenSelect />
-                        <Select.Label>Select Relationship Type</Select.Label>
                         <Select.Control>
                           <Select.Trigger>
                             <Select.ValueText
@@ -2697,7 +2722,7 @@ const Entity = () => {
                             <Select.Indicator />
                           </Select.IndicatorGroup>
                         </Select.Control>
-                        <Portal>
+                        <Portal container={selectRelationshipTypeRef}>
                           <Select.Positioner>
                             <Select.Content>
                               {createListCollection({
@@ -2716,7 +2741,7 @@ const Entity = () => {
                         </Portal>
                       </Select.Root>
                     </Flex>
-                    <Flex direction={"column"} gap={"1"}>
+                    <Flex direction={"column"} gap={"1"} w={"33%"}>
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
                         Target
                       </Text>
