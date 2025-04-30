@@ -160,16 +160,17 @@ const Entity = () => {
   const [entityArchived, setEntityArchived] = useState(false);
 
   // Templates
-  const [templatesCollection, setTemplatesCollection] = useState(
-    createListCollection<AttributeModel>({ items: [] }),
-  );
+  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+  const addAttributesContainerRef = useRef(null);
+  const templatesCollection = useMemo(() => {
+    const items = createSelectOptions<AttributeModel>(templates, "_id", "name");
+    return createListCollection<ISelectOption>({
+      items: items || [],
+    });
+  }, [templates]);
 
   // Adding Templates to existing Entity
-  const {
-    open: addAttributesOpen,
-    onOpen: onAddAttributesOpen,
-    onClose: onAddAttributesClose,
-  } = useDisclosure();
+  const [addAttributesOpen, setAddAttributesOpen] = useState(false);
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState(
@@ -383,9 +384,7 @@ const Entity = () => {
     }
     // Unpack Template data
     if (data?.templates) {
-      setTemplatesCollection(
-        createListCollection<AttributeModel>({ items: data.templates }),
-      );
+      setTemplates(data.templates);
     }
   }, [data]);
 
@@ -466,14 +465,7 @@ const Entity = () => {
         duration: 2000,
         closable: true,
       });
-      setTemplatesCollection(
-        createListCollection<AttributeModel>({
-          items: [
-            ...templatesCollection.items,
-            attributeData as AttributeModel,
-          ],
-        }),
-      );
+      setTemplates([...templates, attributeData as AttributeModel]);
     }
 
     if (errorTemplateCreate) {
@@ -1227,7 +1219,7 @@ const Entity = () => {
         values: attributeValues,
       },
     ]);
-    onAddAttributesClose();
+    setAddAttributesOpen(false);
 
     // Reset state of creating an Attribute
     setAttributeName("");
@@ -1250,7 +1242,7 @@ const Entity = () => {
 
   // Handle cancelling adding an Attribute by clearing the state
   const handleCancelAttribute = () => {
-    onAddAttributesClose();
+    setAddAttributesOpen(false);
 
     // Reset state of creating an Attribute
     setAttributeName("");
@@ -2101,7 +2093,7 @@ const Entity = () => {
                   size={"sm"}
                   rounded={"md"}
                   colorPalette={"green"}
-                  onClick={onAddAttributesOpen}
+                  onClick={() => setAddAttributesOpen(true)}
                   disabled={!editing}
                 >
                   Add
@@ -2267,12 +2259,31 @@ const Entity = () => {
         </Flex>
 
         {/* Add Attributes modal */}
-        <Dialog.Root open={addAttributesOpen} size={"xl"} placement={"center"}>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={addAttributesOpen}
+          size={"xl"}
+          placement={"center"}
+          onOpenChange={(event) => setAddAttributesOpen(event.open)}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"} gap={"2"}>
-              <Dialog.Header p={"2"}>Add Attribute</Dialog.Header>
+            <Dialog.Content ref={addAttributesContainerRef}>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Add Attribute
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setAddAttributesOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
               <Dialog.Body p={"2"}>
                 {/* Attribute creation */}
                 <Flex
@@ -2287,7 +2298,7 @@ const Entity = () => {
                     collection={templatesCollection}
                     onValueChange={(details) => {
                       if (!_.isEqual(details.items[0], "")) {
-                        for (const template of templatesCollection.items) {
+                        for (const template of templates) {
                           if (_.isEqual(details.items[0], template._id)) {
                             setAttributeName(template.name);
                             setAttributeDescription(template.description);
@@ -2308,12 +2319,12 @@ const Entity = () => {
                         <Select.Indicator />
                       </Select.IndicatorGroup>
                     </Select.Control>
-                    <Portal>
+                    <Portal container={addAttributesContainerRef}>
                       <Select.Positioner>
                         <Select.Content>
                           {templatesCollection.items.map((template) => (
-                            <Select.Item item={template} key={template._id}>
-                              {template.name}
+                            <Select.Item item={template} key={template.value}>
+                              {template.label}
                               <Select.ItemIndicator />
                             </Select.Item>
                           ))}
@@ -2422,7 +2433,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    onClick={onAddAttributesClose}
+                    onClick={() => setAddAttributesOpen(false)}
                   >
                     Cancel
                     <Icon name={"cross"} />

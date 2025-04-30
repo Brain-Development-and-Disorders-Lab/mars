@@ -126,7 +126,6 @@ const Linky = (props: LinkyProps) => {
       <SkeletonText
         noOfLines={1}
         loading={loadingTemplate || loadingEntity || loadingProject}
-        w={"150px"}
       >
         <Link
           onClick={onClickHandler}

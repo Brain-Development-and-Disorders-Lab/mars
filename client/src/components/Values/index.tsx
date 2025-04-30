@@ -1,11 +1,5 @@
 // React
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -57,14 +51,14 @@ import dayjs from "dayjs";
 const Values = (props: {
   viewOnly: boolean;
   values: IValue<GenericValueType>[];
-  setValues: Dispatch<SetStateAction<IValue<GenericValueType>[]>>;
+  setValues: (value: React.SetStateAction<IValue<GenericValueType>[]>) => void;
   requireData?: true | false;
   permittedValues?: string[];
 }) => {
   const [selectOpen, setSelectOpen] = useState(false);
   const [addValueOpen, setAddValueOpen] = useState(false);
   const [option, setOption] = useState("");
-  const [options, setOptions] = useState([] as string[]);
+  const [options, setOptions] = useState<string[]>([]);
 
   const columnHelper = createColumnHelper<IValue<GenericValueType>>();
   const columns = useMemo(
