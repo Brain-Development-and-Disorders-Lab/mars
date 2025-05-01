@@ -31,6 +31,9 @@ jobs:
       - name: Build website
         working-directory: website
         run: yarn build
+      - name: Build docs
+        working-directory: website
+        run: yarn build:docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
