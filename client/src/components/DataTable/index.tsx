@@ -14,6 +14,8 @@ import {
   useBreakpoint,
   Portal,
   createListCollection,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -50,6 +52,7 @@ const DataTable = (props: DataTableProps) => {
       { label: "100", value: "100" },
     ],
   });
+  const selectPageSizeRef = React.useRef<HTMLDivElement>(null);
 
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
@@ -505,41 +508,47 @@ const DataTable = (props: DataTableProps) => {
           itemCountComponent}
 
         {props.showPagination && (
-          <Flex gap={"2"} align={"center"}>
+          <Flex gap={"2"} align={"center"} ref={selectPageSizeRef}>
             <Text fontSize={"sm"}>Shown Per Page:</Text>
-            <Select.Root
-              key={"select-pagesize"}
-              size={"sm"}
-              w={"150px"}
-              collection={pageLengthsCollection}
-              value={pageLength}
-              onValueChange={(details) => {
-                setPageLength(details.value);
-                table.setPageSize(Number(details.items[0].value));
-              }}
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger rounded={"md"}>
-                  <Select.ValueText placeholder={"Page Size"} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {pageLengthsCollection.items.map((count) => (
-                      <Select.Item item={count} key={count.value}>
-                        {count.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
+            <Fieldset.Root w={"fit-content"}>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Select.Root
+                    key={"select-pagesize"}
+                    size={"sm"}
+                    w={"80px"}
+                    collection={pageLengthsCollection}
+                    value={pageLength}
+                    onValueChange={(details) => {
+                      setPageLength(details.value);
+                      table.setPageSize(parseInt(details.value[0]));
+                    }}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger rounded={"md"}>
+                        <Select.ValueText placeholder={"Page Size"} />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal container={selectPageSizeRef}>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {pageLengthsCollection.items.map((count) => (
+                            <Select.Item item={count} key={count.value}>
+                              {count.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
 
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <IconButton
