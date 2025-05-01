@@ -1,0 +1,27 @@
+site_name: Metadatify Documentation
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: Getting-Started.md
+      - Terminology: Terminology.md
+  - Creating:
+      - Overview: creating/Creating.md
+      - Creating Entities: creating/Creating-Entities.md
+      - Creating Projects: creating/Creating-Projects.md
+      - Creating Templates: creating/Creating-Templates.md
+      - Creating Workspaces: creating/Creating-Workspaces.md
+  - Searching Metadata: Searching.md
+  - Tracking Entities: Tracking.md
+  - Workspaces: Workspaces.md
+  - Users and Sharing:
+      - User Login and Accounts: Accounts.md
+      - Sharing and Collaboration (coming soon): ""
+  - Data Management:
+      - Importing Data: data_management/Importing-Data.md
+      - Exporting Data: data_management/Exporting-Data.md
+  - Developers:
+      - API Usage (coming soon): ""
+      - Self-Hosting (coming soon): ""
+theme:
+  name: readthedocs
+  favicon: /img/Favicon.png

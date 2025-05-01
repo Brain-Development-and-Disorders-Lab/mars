@@ -101,10 +101,12 @@ const App = () => {
               rounded={"full"}
               p={"4"}
               border={"2px"}
-              borderColor={"black"}
+              borderColor={"#2E3192"}
             >
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
-              <Heading size={"md"}>Metadatify</Heading>
+              <Heading size={"md"} color={"#2E3192"}>
+                Metadatify
+              </Heading>
             </Flex>
             <Flex align={"center"} gap={"1"}>
               <Link href={"https://app.metadatify.com"} isExternal>
@@ -274,8 +276,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Your digital and physical assets are linked, so your metadata
-                  should be too. Visualize links between <b>Origin</b> and{" "}
-                  <b>Product</b> metadata Entities.
+                  should be too. Visualize relationships between metadata{" "}
+                  <b>Entities</b>.
                 </Text>
               </Flex>
               <Flex
