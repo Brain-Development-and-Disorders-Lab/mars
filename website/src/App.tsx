@@ -441,9 +441,7 @@ const App = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
-                    href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
-                    }
+                    href={"https://metadatify.com/docs/"}
                     isExternal
                   >
                     Documentation (coming soon)
@@ -509,18 +507,16 @@ const App = () => {
                 <Text fontWeight={"bold"}>Documentation</Text>
                 <Text>
                   Further documentation on usage and development with Metadatify
-                  can be found in the wiki on GitHub.
+                  exists to aid users and developers.
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
-                    href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
-                    }
+                    href={"https://metadatify.com/docs/"}
                     isExternal
                   >
-                    GitHub Wiki
+                    Documentation
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
                 </Flex>
