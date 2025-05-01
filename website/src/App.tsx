@@ -157,6 +157,7 @@ const App = () => {
                   p={"4"}
                   boxShadow={"xs"}
                   colorScheme={"blue"}
+                  as={Link}
                   onClick={() =>
                     featuresRef.current.scrollIntoView({ behavior: "smooth" })
                   }
@@ -174,6 +175,17 @@ const App = () => {
                   }
                 >
                   Get Started
+                </Button>
+                <Button
+                  rounded={"full"}
+                  p={"4"}
+                  boxShadow={"xs"}
+                  colorScheme={"blue"}
+                  as={Link}
+                  href={"https://metadatify.com/docs/"}
+                  isExternal
+                >
+                  Documentation
                 </Button>
               </Flex>
             </Flex>
