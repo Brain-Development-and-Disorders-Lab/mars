@@ -14,6 +14,16 @@ a:hover {
   fill: var(--ifm-font-color-base);
 }
 
+.queryBuilder .chakra-native-select__root {
+  width: fit-content;
+  display: inline-block;
+}
+
+.queryBuilder .chakra-input {
+  width: auto;
+  display: inline-block;
+}
+
 .queryBuilder {
   select,
   input {

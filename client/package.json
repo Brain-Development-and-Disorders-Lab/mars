@@ -55,7 +55,7 @@
     "react-joyride": "^2.9.3",
     "react-pdf": "^7.7.3",
     "react-qr-code": "^2.0.15",
-    "react-querybuilder": "^8.2.0",
+    "react-querybuilder": "^8.5.0",
     "react-router-dom": "^6.3.0",
     "react-zoom-pan-pinch": "^3.6.1",
     "reactflow": "^11.7.0",
