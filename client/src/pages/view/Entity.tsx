@@ -111,11 +111,8 @@ const Entity = () => {
     onClose: onGraphClose,
   } = useDisclosure();
 
-  const {
-    open: shareOpen,
-    onOpen: onShareOpen,
-    onClose: onShareClose,
-  } = useDisclosure();
+  // Share dialog
+  const [shareOpen, setShareOpen] = useState(false);
 
   const [projects, setProjects] = useState<IGenericItem[]>([]);
   const projectsCollection = useMemo(() => {
@@ -515,19 +512,13 @@ const Entity = () => {
     onClose: onArchiveDialogClose,
   } = useDisclosure();
 
-  const {
-    open: exportOpen,
-    onOpen: onExportOpen,
-    onClose: onExportClose,
-  } = useDisclosure();
+  // Export dialog
+  const [exportOpen, setExportOpen] = useState(false);
   const [exportFields, setExportFields] = useState(["owner"] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
 
-  const {
-    open: uploadOpen,
-    onOpen: onUploadOpen,
-    onClose: onUploadClose,
-  } = useDisclosure();
+  // Upload dialog
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const [previewAttachment, setPreviewAttachment] = useState(
     {} as IGenericItem,
@@ -978,13 +969,13 @@ const Entity = () => {
 
   // Handle clicking the "Share" button
   const handleShareClick = () => {
-    onShareOpen();
+    setShareOpen(true);
   };
 
   // Handle clicking the "Export" button
   const handleExportClick = () => {
     setEntityData(entityData);
-    onExportOpen();
+    setExportOpen(true);
   };
 
   // Handle clicking the "Download" button
@@ -1011,7 +1002,7 @@ const Entity = () => {
       );
 
       // Close the "Export" modal
-      onExportClose();
+      setExportOpen(false);
 
       // Reset the export state
       setExportFields([]);
@@ -2218,7 +2209,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={onUploadOpen}
+                    onClick={() => setUploadOpen(true)}
                     disabled={!editing}
                   >
                     Upload
@@ -2847,15 +2838,21 @@ const Entity = () => {
         {/* Upload dialog */}
         <UploadDialog
           open={uploadOpen}
-          onOpen={onUploadOpen}
-          onClose={onUploadClose}
+          setOpen={setUploadOpen}
           uploads={toUploadAttachments}
           setUploads={setToUploadAttachments}
           target={entityData._id}
         />
 
         {/* Export modal */}
-        <Dialog.Root open={exportOpen} size={"xl"} placement={"center"}>
+        <Dialog.Root
+          open={exportOpen}
+          onOpenChange={(event) => setExportOpen(event.open)}
+          size={"xl"}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -3221,13 +3218,31 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Share modal */}
-        <Dialog.Root open={shareOpen} placement={"center"}>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={shareOpen}
+          onOpenChange={(event) => setShareOpen(event.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"}>Share Entity</Dialog.Header>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Share Entity
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setShareOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -3246,7 +3261,7 @@ const Entity = () => {
                       />
                     </Flex>
                     <Button
-                      variant={"plain"}
+                      variant={"subtle"}
                       size={"sm"}
                       rounded={"md"}
                       onClick={async () => {
@@ -3282,7 +3297,7 @@ const Entity = () => {
                       />
                     </Flex>
                     <Button
-                      variant={"plain"}
+                      variant={"subtle"}
                       size={"sm"}
                       rounded={"md"}
                       onClick={async () => {
@@ -3325,7 +3340,7 @@ const Entity = () => {
                   size={"sm"}
                   rounded={"md"}
                   colorPalette={"green"}
-                  onClick={onShareClose}
+                  onClick={() => setShareOpen(false)}
                 >
                   Done
                   <Icon name={"check"} />

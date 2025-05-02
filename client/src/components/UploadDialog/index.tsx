@@ -23,8 +23,7 @@ import { gql, useMutation } from "@apollo/client";
 
 const UploadDialog = (props: {
   open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   target: string;
   uploads: string[];
   setUploads: React.Dispatch<React.SetStateAction<string[]>>;
@@ -73,7 +72,7 @@ const UploadDialog = (props: {
 
       // Reset file upload state
       setFile({} as File);
-      props.onClose();
+      props.setOpen(false);
 
       // Update state
       setIsError(false);
@@ -110,6 +109,14 @@ const UploadDialog = (props: {
       ) : (
         <Dialog.Root
           open={props.open}
+          onOpenChange={(details) => {
+            props.setOpen(details.open);
+            if (!details.open) {
+              setFile({} as File);
+              setDisplayName("");
+              setDisplayType("");
+            }
+          }}
           placement={"center"}
           size={"xl"}
           scrollBehavior={"inside"}
@@ -125,7 +132,7 @@ const UploadDialog = (props: {
                   _hover={{ bg: "gray.200" }}
                   variant={"subtle"}
                   color={"black"}
-                  onClick={props.onClose}
+                  onClick={() => props.setOpen(false)}
                 >
                   <Icon name={"close"} />
                 </IconButton>
@@ -262,7 +269,7 @@ const UploadDialog = (props: {
                     variant={"outline"}
                     onClick={() => {
                       setFile({} as File);
-                      props.onClose();
+                      props.setOpen(false);
                     }}
                   >
                     Cancel
