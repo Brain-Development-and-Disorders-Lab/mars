@@ -638,8 +638,9 @@ const Project = () => {
               <IconButton
                 aria-label={"Remove entity"}
                 colorPalette={"red"}
-                onClick={() => handleRemoveEntity(info.row.original)}
                 size={"sm"}
+                rounded={"md"}
+                onClick={() => handleRemoveEntity(info.row.original)}
               >
                 <Icon name={"delete"} />
               </IconButton>
@@ -693,7 +694,7 @@ const Project = () => {
             align={"center"}
             gap={"2"}
             p={"2"}
-            border={"2px"}
+            border={"2px solid"}
             rounded={"md"}
           >
             <Icon name={"project"} size={"md"} />
@@ -707,7 +708,7 @@ const Project = () => {
             {/* Actions Menu */}
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"sm"}>
+                <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
                   Actions
                   <Icon name={"lightning"} />
                 </Button>
@@ -759,6 +760,7 @@ const Project = () => {
               <Button
                 onClick={handleRestoreClick}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"orange"}
               >
                 Restore
@@ -770,6 +772,7 @@ const Project = () => {
                   <Button
                     onClick={handleCancelClick}
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"red"}
                   >
                     Cancel
@@ -779,10 +782,11 @@ const Project = () => {
                 <Button
                   id={"editProjectButton"}
                   colorPalette={editing ? "green" : "blue"}
+                  size={"sm"}
+                  rounded={"md"}
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   loading={isUpdating}
-                  size={"sm"}
                 >
                   {editing ? "Save" : "Edit"}
                   {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
@@ -797,6 +801,7 @@ const Project = () => {
                   onClick={() => setHistoryOpen(true)}
                   colorPalette={"gray"}
                   size={"sm"}
+                  rounded={"md"}
                 >
                   History
                   <Icon name={"clock"} />
@@ -850,7 +855,7 @@ const Project = () => {
                               key={`v_${projectVersion.timestamp}`}
                               variant={"outline"}
                               rounded={"md"}
-                              border={"1px"}
+                              border={"1px solid"}
                               borderColor={"gray.300"}
                             >
                               <Card.Header p={"0"}>
@@ -895,7 +900,7 @@ const Project = () => {
                                       gap={"1"}
                                       p={"2"}
                                       rounded={"md"}
-                                      border={"1px"}
+                                      border={"1px solid"}
                                       borderColor={"gray.300"}
                                       grow={"1"}
                                     >
@@ -947,7 +952,7 @@ const Project = () => {
                                       gap={"1"}
                                       p={"2"}
                                       rounded={"md"}
-                                      border={"1px"}
+                                      border={"1px solid"}
                                       borderColor={"gray.300"}
                                       grow={"1"}
                                     >
@@ -1102,6 +1107,7 @@ const Project = () => {
                                     <Button
                                       colorPalette={"orange"}
                                       size={"sm"}
+                                      rounded={"md"}
                                       onClick={() => {
                                         handleRestoreFromHistoryClick(
                                           projectVersion,
@@ -1166,14 +1172,14 @@ const Project = () => {
                   <Input
                     id={"projectNameInput"}
                     size={"sm"}
+                    rounded={"md"}
                     value={projectName}
                     onChange={(event) => {
                       setProjectName(event.target.value);
                     }}
                     readOnly={!editing}
                     bg={"white"}
-                    rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                   />
                 </Flex>
@@ -1244,7 +1250,7 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               w={{ base: "100%", md: "50%" }}
             >
@@ -1261,6 +1267,7 @@ const Project = () => {
                   id={"addEntityButton"}
                   onClick={onEntitiesOpen}
                   size={"sm"}
+                  rounded={"md"}
                   disabled={!editing}
                 >
                   Add
@@ -1306,7 +1313,7 @@ const Project = () => {
               p={"2"}
               h={"fit-content"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               grow={"1"}
             >
@@ -1321,8 +1328,8 @@ const Project = () => {
                       <Field.Root>
                         <Input
                           placeholder={"ORCiD"}
-                          rounded={"md"}
                           size={"sm"}
+                          rounded={"md"}
                           value={newCollaborator}
                           onChange={(e) => setNewCollaborator(e.target.value)}
                           disabled={!editing}
@@ -1334,6 +1341,7 @@ const Project = () => {
                   <Button
                     colorPalette={"green"}
                     size={"sm"}
+                    rounded={"md"}
                     disabled={!editing}
                     onClick={() => {
                       // Prevent adding empty or duplicate collaborator
@@ -1420,6 +1428,7 @@ const Project = () => {
                 <Button
                   colorPalette={"red"}
                   size={"sm"}
+                  rounded={"md"}
                   variant={"outline"}
                   onClick={onEntitiesClose}
                 >
@@ -1433,6 +1442,7 @@ const Project = () => {
                   id={"addEntityDoneButton"}
                   colorPalette={"green"}
                   size={"sm"}
+                  rounded={"md"}
                   onClick={() => {
                     if (id) {
                       // Add the Origin to the Entity
@@ -1491,6 +1501,7 @@ const Project = () => {
                           <Select.Root
                             key={"select-export-format"}
                             size={"sm"}
+                            rounded={"md"}
                             collection={createListCollection({
                               items: ["JSON", "CSV"],
                             })}
@@ -1552,7 +1563,7 @@ const Project = () => {
                   p={"2"}
                   gap={"4"}
                   rounded={"md"}
-                  border={"1px"}
+                  border={"1px solid"}
                   borderColor={"gray.300"}
                 >
                   <Fieldset.Root>
@@ -1566,6 +1577,7 @@ const Project = () => {
                                 disabled
                                 defaultChecked
                                 size={"sm"}
+                                rounded={"md"}
                                 fontSize={"sm"}
                               >
                                 <Checkbox.HiddenInput />
@@ -1576,6 +1588,7 @@ const Project = () => {
                               </Checkbox.Root>
                               <Checkbox.Root
                                 size={"sm"}
+                                rounded={"md"}
                                 fontSize={"sm"}
                                 checked={_.includes(exportFields, "created")}
                                 onCheckedChange={(details) =>
@@ -1594,6 +1607,7 @@ const Project = () => {
                               </Checkbox.Root>
                               <Checkbox.Root
                                 size={"sm"}
+                                rounded={"md"}
                                 checked={_.includes(exportFields, "owner")}
                                 onCheckedChange={(details) =>
                                   handleExportCheck(
@@ -1610,6 +1624,7 @@ const Project = () => {
                               </Checkbox.Root>
                               <Checkbox.Root
                                 size={"sm"}
+                                rounded={"md"}
                                 checked={_.includes(
                                   exportFields,
                                   "description",
@@ -1654,6 +1669,7 @@ const Project = () => {
                             >
                               <Checkbox.Root
                                 size={"sm"}
+                                rounded={"md"}
                                 checked={_.includes(exportFields, "entities")}
                                 onCheckedChange={(details) =>
                                   handleExportCheck(
@@ -1723,6 +1739,7 @@ const Project = () => {
                     <Button
                       colorPalette={"blue"}
                       size={"sm"}
+                      rounded={"md"}
                       onClick={() => handleDownloadClick(exportFormat)}
                       loading={exportLoading}
                     >
@@ -1777,6 +1794,7 @@ const Project = () => {
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"red"}
                     onClick={() => onSaveMessageClose()}
                   >
@@ -1787,6 +1805,7 @@ const Project = () => {
                   <Button
                     id={"saveMessageDoneButton"}
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => handleSaveMessageDoneClick()}
                   >
