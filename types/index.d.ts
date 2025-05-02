@@ -342,6 +342,7 @@ export type AlertDialogProps = {
   children: React.ReactElement | React.ReactElement[];
   // Dialog actions and state
   open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
   // Left and right buttons
   leftButtonLabel?: string;
   leftButtonColor?: string;

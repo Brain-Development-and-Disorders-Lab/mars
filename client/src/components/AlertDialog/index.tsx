@@ -22,16 +22,29 @@ const AlertDialog = (props: AlertDialogProps) => {
   };
 
   return (
-    <Dialog.Root open={props.open} placement={"center"}>
-      <Dialog.Trigger />
+    <Dialog.Root
+      open={props.open}
+      onOpenChange={(details) => props.setOpen(details.open)}
+      placement={"center"}
+      closeOnEscape
+      closeOnInteractOutside
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"4"}>{header}</Dialog.Header>
-          <Dialog.Body px={"4"}>{props.children}</Dialog.Body>
-          <Dialog.Footer px={"4"}>
+          <Dialog.Header
+            p={"2"}
+            mt={"2"}
+            fontWeight={"semibold"}
+            fontSize={"md"}
+          >
+            {header}
+          </Dialog.Header>
+          <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
+          <Dialog.Footer p={"2"}>
             <Button
               size={"sm"}
+              rounded={"md"}
               variant={"outline"}
               colorPalette={leftButtonColor}
               onClick={leftButtonAction}
@@ -42,6 +55,7 @@ const AlertDialog = (props: AlertDialogProps) => {
             <Spacer />
             <Button
               size={"sm"}
+              rounded={"md"}
               colorPalette={rightButtonColor}
               onClick={rightButtonAction}
             >

@@ -305,7 +305,7 @@ const Graph = (props: {
           <Button
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
-            size={"xs"}
+            size={"2xs"}
             disabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
           >

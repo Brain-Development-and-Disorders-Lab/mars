@@ -39,7 +39,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       gap={"2"}
       p={"2"}
       rounded={"md"}
-      border={"1px"}
+      border={"1px solid"}
       borderColor={"gray.300"}
       bg={"white"}
       minW={"120px"}

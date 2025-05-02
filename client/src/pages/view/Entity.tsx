@@ -105,11 +105,8 @@ const Entity = () => {
   // Authentication
   const { token } = useAuthentication();
 
-  const {
-    open: graphOpen,
-    onOpen: onGraphOpen,
-    onClose: onGraphClose,
-  } = useDisclosure();
+  // Graph dialog
+  const [graphOpen, setGraphOpen] = useState(false);
 
   // Share dialog
   const [shareOpen, setShareOpen] = useState(false);
@@ -135,19 +132,11 @@ const Entity = () => {
   );
 
   // Save message modal
-  const {
-    open: saveMessageOpen,
-    onOpen: onSaveMessageOpen,
-    onClose: onSaveMessageClose,
-  } = useDisclosure();
+  const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
   // Clone modal
-  const {
-    open: cloneOpen,
-    onOpen: onCloneOpen,
-    onClose: onCloneClose,
-  } = useDisclosure();
+  const [cloneOpen, setCloneOpen] = useState(false);
   const [clonedEntityName, setClonedEntityName] = useState("");
 
   // History drawer
@@ -505,12 +494,8 @@ const Entity = () => {
     [] as string[],
   );
 
-  // State for dialog confirming if user should archive
-  const {
-    open: archiveDialogOpen,
-    onOpen: onArchiveDialogOpen,
-    onClose: onArchiveDialogClose,
-  } = useDisclosure();
+  // Archive dialog
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // Export dialog
   const [exportOpen, setExportOpen] = useState(false);
@@ -529,7 +514,7 @@ const Entity = () => {
   const handleEditClick = () => {
     if (editing) {
       // Open the save message modal
-      onSaveMessageOpen();
+      setSaveMessageOpen(true);
     } else {
       setEditing(true);
     }
@@ -577,7 +562,7 @@ const Entity = () => {
     }
 
     // Close the save message modal
-    onSaveMessageClose();
+    setSaveMessageOpen(false);
     setSaveMessage("");
 
     setEditing(false);
@@ -1069,7 +1054,7 @@ const Entity = () => {
     });
 
     if (response.data.createEntity.success) {
-      onCloneClose();
+      setCloneOpen(false);
 
       toaster.create({
         title: "Cloned Successfully",
@@ -1110,7 +1095,7 @@ const Entity = () => {
         closable: true,
       });
       setEntityArchived(true);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
       toaster.create({
         title: "Error",
@@ -1125,7 +1110,7 @@ const Entity = () => {
   };
 
   const handleEntityNodeClick = (id: string) => {
-    onGraphClose();
+    setGraphOpen(false);
     navigate(`/entities/${id}`);
   };
 
@@ -1326,7 +1311,7 @@ const Entity = () => {
                     </Menu.Item>
                     <Menu.Item
                       value={"visualize"}
-                      onClick={onGraphOpen}
+                      onClick={() => setGraphOpen(true)}
                       fontSize={"sm"}
                       disabled={editing || entityArchived}
                     >
@@ -1335,7 +1320,7 @@ const Entity = () => {
                     </Menu.Item>
                     <Menu.Item
                       value={"clone"}
-                      onClick={() => onCloneOpen()}
+                      onClick={() => setCloneOpen(true)}
                       fontSize={"sm"}
                       disabled={entityArchived}
                     >
@@ -1354,7 +1339,7 @@ const Entity = () => {
                     <Menu.Item
                       id={"archiveEntityButton"}
                       value={"archive"}
-                      onClick={onArchiveDialogOpen}
+                      onClick={() => setArchiveDialogOpen(true)}
                       fontSize={"sm"}
                       disabled={entityArchived}
                     >
@@ -1880,10 +1865,12 @@ const Entity = () => {
             {/* Archive Dialog */}
             <AlertDialog
               header={"Archive Entity"}
+              leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
+              setOpen={setArchiveDialogOpen}
             >
-              <Flex gap={"2"} direction={"column"}>
+              <Flex gap={"2"} direction={"column"} p={"0"}>
                 <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Are you sure you want to archive this Entity?
                 </Text>
@@ -2668,7 +2655,6 @@ const Entity = () => {
           closeOnEscape
           closeOnInteractOutside
         >
-          <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content ref={selectRelationshipTypeRef}>
@@ -3199,13 +3185,28 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Graph modal */}
-        <Dialog.Root open={graphOpen} size={"full"} closeOnEscape>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={graphOpen}
+          onOpenChange={(event) => setGraphOpen(event.open)}
+          size={"full"}
+          closeOnEscape
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"}>
-              <Dialog.Header p={"2"} gap={"2"}>
+            <Dialog.Content>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
                 Visualize: {entityName}
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setAddRelationshipsOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Graph
@@ -3351,13 +3352,31 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Clone modal */}
-        <Dialog.Root open={cloneOpen} placement={"center"}>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={cloneOpen}
+          onOpenChange={(details) => setCloneOpen(details.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              {/* p={"2"} */}
-              <Dialog.Header p={"2"}>Clone Entity</Dialog.Header>
+              {/* Heading and close button */}
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Clone Entity
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setCloneOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"sm"} color={"gray.600"}>
@@ -3396,7 +3415,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    onClick={onCloneClose}
+                    onClick={() => setCloneOpen(false)}
                   >
                     Cancel
                     <Icon name={"cross"} />
@@ -3420,16 +3439,24 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Save message modal */}
-        <Dialog.Root open={saveMessageOpen} placement={"center"} closeOnEscape>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={saveMessageOpen}
+          onOpenChange={(details) => setSaveMessageOpen(details.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content p={"2"}>
-              <Dialog.Header p={"2"}>
-                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"save"} />
-                  <Text fontWeight={"semibold"}>Saving Changes</Text>
-                </Flex>
+            <Dialog.Content>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                <Icon name={"save"} />
+                Saving Changes
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
@@ -3463,7 +3490,7 @@ const Entity = () => {
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    onClick={onSaveMessageClose}
+                    onClick={() => setSaveMessageOpen(false)}
                   >
                     Cancel
                     <Icon name={"cross"} />

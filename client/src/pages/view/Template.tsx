@@ -2,15 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Heading,
-  Input,
-  Menu,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Button, Flex, Heading, Input, Menu, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -50,11 +42,7 @@ const Template = () => {
   );
 
   // State for dialog confirming if user should archive
-  const {
-    open: archiveDialogOpen,
-    onOpen: onArchiveDialogOpen,
-    onClose: onArchiveDialogClose,
-  } = useDisclosure();
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // GraphQL operations
   const GET_TEMPLATE = gql`
@@ -165,7 +153,7 @@ const Template = () => {
         closable: true,
       });
       setTemplateArchived(true);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
       toaster.create({
         title: "Error",
@@ -196,7 +184,7 @@ const Template = () => {
         closable: true,
       });
       setTemplateArchived(false);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
       toaster.create({
         title: "Error",
@@ -333,7 +321,7 @@ const Template = () => {
                 </Menu.Item>
                 <Menu.Item
                   value={"archive"}
-                  onClick={onArchiveDialogOpen}
+                  onClick={() => setArchiveDialogOpen(true)}
                   disabled={templateArchived}
                 >
                   <Icon name={"archive"} />
@@ -367,8 +355,10 @@ const Template = () => {
             {/* Archive Dialog */}
             <AlertDialog
               header={"Archive Template"}
+              leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
+              setOpen={setArchiveDialogOpen}
             >
               <Text>
                 Are you sure you want to archive this Template? It can be

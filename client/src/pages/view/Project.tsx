@@ -88,11 +88,7 @@ const Project = () => {
   } = useDisclosure();
 
   // State for dialog confirming if user should archive Project
-  const {
-    open: archiveDialogOpen,
-    onOpen: onArchiveDialogOpen,
-    onClose: onArchiveDialogClose,
-  } = useDisclosure();
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // History drawer
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -366,7 +362,7 @@ const Project = () => {
         closable: true,
       });
       setProjectArchived(true);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
       toaster.create({
         title: "Error",
@@ -748,7 +744,7 @@ const Project = () => {
                   </Tooltip>
                   <Menu.Item
                     value={"archive"}
-                    onClick={onArchiveDialogOpen}
+                    onClick={() => setArchiveDialogOpen(true)}
                     fontSize={"sm"}
                     disabled={projectArchived}
                   >
@@ -1136,8 +1132,10 @@ const Project = () => {
             {/* Archive Dialog */}
             <AlertDialog
               header={"Archive Project"}
+              leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
               open={archiveDialogOpen}
+              setOpen={setArchiveDialogOpen}
             >
               <Text>
                 Are you sure you want to archive this Project? No Entities will
