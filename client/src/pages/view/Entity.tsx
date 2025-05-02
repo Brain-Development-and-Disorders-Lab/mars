@@ -531,7 +531,10 @@ const Entity = () => {
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
-  const [exportFields, setExportFields] = useState(["owner"] as string[]);
+  const [exportFields, setExportFields] = useState([
+    "name",
+    "owner",
+  ] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
 
   const {
