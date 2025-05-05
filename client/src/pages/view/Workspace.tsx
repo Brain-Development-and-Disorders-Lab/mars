@@ -520,6 +520,7 @@ const Workspace = () => {
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"View Entity"}
               onClick={() => navigate(`/entities/${info.row.original._id}`)}
             >
@@ -528,6 +529,7 @@ const Workspace = () => {
             </Button>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Entity"}
               colorPalette={showArchivedEntities ? "green" : "red"}
               onClick={() =>
@@ -585,6 +587,7 @@ const Workspace = () => {
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"View Project"}
               onClick={() => navigate(`/projects/${info.row.original._id}`)}
             >
@@ -593,6 +596,7 @@ const Workspace = () => {
             </Button>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Project"}
               colorPalette={showArchivedProjects ? "green" : "red"}
               onClick={() =>
@@ -650,6 +654,7 @@ const Workspace = () => {
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"View Template"}
               onClick={() => navigate(`/templates/${info.row.original._id}`)}
             >
@@ -658,6 +663,7 @@ const Workspace = () => {
             </Button>
             <Button
               size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Template"}
               colorPalette={showArchivedTemplates ? "green" : "red"}
               onClick={() =>
@@ -778,7 +784,13 @@ const Workspace = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"2"}
+          p={"2"}
+          border={"2px solid"}
+          rounded={"md"}
+        >
           <Icon name={"workspace"} size={"md"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             {name}
@@ -787,6 +799,7 @@ const Workspace = () => {
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Button
             size={"sm"}
+            rounded={"md"}
             colorPalette={"red"}
             onClick={() => navigate("/")}
           >
@@ -796,6 +809,7 @@ const Workspace = () => {
           <Button
             id={"modalWorkspaceCreateButton"}
             size={"sm"}
+            rounded={"md"}
             colorPalette={"green"}
             disabled={name === ""}
             loading={
@@ -880,7 +894,7 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
@@ -914,7 +928,7 @@ const Workspace = () => {
             p={"2"}
             gap={"2"}
             h={"fit-content"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
@@ -933,8 +947,8 @@ const Workspace = () => {
                   <Field.Root>
                     <Input
                       placeholder={"ORCiD"}
-                      rounded={"md"}
                       size={"sm"}
+                      rounded={"md"}
                       w={"100%"}
                       value={collaborator}
                       onChange={(event) => setCollaborator(event.target.value)}
@@ -948,6 +962,7 @@ const Workspace = () => {
               <Button
                 colorPalette={"green"}
                 size={"sm"}
+                rounded={"md"}
                 disabled={collaborator === ""}
                 onClick={() => {
                   // Prevent adding empty or duplicate collaborator
@@ -994,6 +1009,7 @@ const Workspace = () => {
                       <Spacer />
                       <IconButton
                         size={"sm"}
+                        rounded={"md"}
                         aria-label={"Remove collaborator"}
                         colorPalette={
                           token.orcid === collaborator ? "orange" : "red"
@@ -1028,7 +1044,7 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
@@ -1039,6 +1055,7 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
+                rounded={"md"}
                 onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
                 {showArchivedEntities ? "Hide" : "Show"} Archive
@@ -1077,7 +1094,7 @@ const Workspace = () => {
             p={"2"}
             gap={"2"}
             h={"fit-content"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
@@ -1088,6 +1105,7 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
+                rounded={"md"}
                 onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
                 {showArchivedProjects ? "Hide" : "Show"} Archive
@@ -1124,7 +1142,7 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
@@ -1135,6 +1153,7 @@ const Workspace = () => {
               </Text>
               <Button
                 size={"sm"}
+                rounded={"md"}
                 onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
               >
                 {showArchivedTemplates ? "Hide" : "Show"} Archive
@@ -1173,7 +1192,7 @@ const Workspace = () => {
             p={"2"}
             gap={"2"}
             h={"fit-content"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
