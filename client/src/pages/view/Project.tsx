@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   Checkbox,
-  CheckboxGroup,
   CloseButton,
   Dialog,
   Drawer,
@@ -81,11 +80,7 @@ const Project = () => {
   const cancelBlockerRef = useRef(null);
 
   // Add Entities
-  const {
-    open: entitiesOpen,
-    onOpen: onEntitiesOpen,
-    onClose: onEntitiesClose,
-  } = useDisclosure();
+  const [entitiesOpen, setEntitiesOpen] = useState(false);
 
   // State for dialog confirming if user should archive Project
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -111,22 +106,15 @@ const Project = () => {
   const [newCollaborator, setNewCollaborator] = useState("");
 
   // Save message modal
-  const {
-    open: isSaveMessageOpen,
-    onOpen: onSaveMessageOpen,
-    onClose: onSaveMessageClose,
-  } = useDisclosure();
+  const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
   // Entities that can be added
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
 
   // Export modal state and data
-  const {
-    open: isExportOpen,
-    onOpen: onExportOpen,
-    onClose: onExportClose,
-  } = useDisclosure();
+  const selectExportFormatRef = useRef(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [exportFields, setExportFields] = useState([] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
   const [exportEntityDetails, setExportEntityDetails] = React.useState<
@@ -265,7 +253,7 @@ const Project = () => {
    */
   const addEntities = (entity: IGenericItem): void => {
     setProjectEntities([...projectEntities, entity._id]);
-    onEntitiesClose();
+    setEntitiesOpen(false);
   };
 
   /**
@@ -274,7 +262,7 @@ const Project = () => {
   const handleEditClick = () => {
     if (editing) {
       // Open the save message modal
-      onSaveMessageOpen();
+      setSaveMessageOpen(true);
     } else {
       setEditing(true);
     }
@@ -343,7 +331,7 @@ const Project = () => {
     setIsUpdating(false);
 
     // Close the save message modal
-    onSaveMessageClose();
+    setSaveMessageOpen(false);
   };
 
   // Archive the Project when confirmed
@@ -490,7 +478,7 @@ const Project = () => {
   // Handle clicking the "Export" button
   const handleExportClick = () => {
     setProject(project);
-    onExportOpen();
+    setExportOpen(true);
   };
 
   // Handle clicking the "Export" button
@@ -549,7 +537,7 @@ const Project = () => {
       );
 
       // Close the "Export" modal
-      onExportClose();
+      setExportOpen(false);
 
       // Reset the export state
       setExportFields([]);
@@ -795,7 +783,13 @@ const Project = () => {
             )}
 
             {/* Version history */}
-            <Drawer.Root open={historyOpen} size={"md"}>
+            <Drawer.Root
+              open={historyOpen}
+              onOpenChange={(details) => setHistoryOpen(details.open)}
+              size={"md"}
+              closeOnEscape
+              closeOnInteractOutside
+            >
               <Drawer.Trigger asChild>
                 <Button
                   onClick={() => setHistoryOpen(true)}
@@ -811,7 +805,10 @@ const Project = () => {
               <Drawer.Positioner>
                 <Drawer.Content>
                   <Drawer.CloseTrigger asChild>
-                    <CloseButton size="sm" />
+                    <CloseButton
+                      size={"sm"}
+                      onClick={() => setHistoryOpen(false)}
+                    />
                   </Drawer.CloseTrigger>
                   <Drawer.Header pb={"2"}>
                     <Flex direction={"column"} w={"100%"} gap={"2"}>
@@ -1216,7 +1213,7 @@ const Project = () => {
               direction={"column"}
               p={"2"}
               gap={"1"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
               basis={"40%"}
@@ -1265,7 +1262,7 @@ const Project = () => {
                 </Text>
                 <Button
                   id={"addEntityButton"}
-                  onClick={onEntitiesOpen}
+                  onClick={() => setEntitiesOpen(true)}
                   size={"sm"}
                   rounded={"md"}
                   disabled={!editing}
@@ -1407,15 +1404,33 @@ const Project = () => {
         </Flex>
 
         {/* Modal to add Entities */}
-        <Dialog.Root open={entitiesOpen} placement={"center"}>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={entitiesOpen}
+          onOpenChange={(details) => setEntitiesOpen(details.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
+            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"}>Add Entity</Dialog.Header>
-              <Dialog.Body p={"2"}>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Add Entity
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setEntitiesOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body p={"2"} gap={"2"}>
+                <Text>Select an Entity to add to the Project.</Text>
                 <SearchSelect
                   id={"entitySearchSelect"}
                   resultType={"entity"}
@@ -1430,7 +1445,7 @@ const Project = () => {
                   size={"sm"}
                   rounded={"md"}
                   variant={"outline"}
-                  onClick={onEntitiesClose}
+                  onClick={() => setEntitiesOpen(false)}
                 >
                   Cancel
                   <Icon name={"cross"} />
@@ -1459,14 +1474,32 @@ const Project = () => {
         </Dialog.Root>
 
         {/* Dialog to export Entities */}
-        <Dialog.Root open={isExportOpen} size={"xl"} placement={"center"}>
-          <Dialog.Trigger />
+        <Dialog.Root
+          open={exportOpen}
+          onOpenChange={(details) => setExportOpen(details.open)}
+          size={"xl"}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              {/* p={"2"} w={["lg", "xl", "2xl"]} gap={"0"} */}
+            <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"}>Export Project</Dialog.Header>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Export Project
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setExportOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
               <Dialog.Body px={"2"} gap={"2"}>
                 {/* Export information */}
                 {_.isEqual(exportFormat, "json") && (
@@ -1490,36 +1523,28 @@ const Project = () => {
                   gap={"2"}
                   justify={"space-between"}
                   align={"center"}
+                  ref={selectExportFormatRef}
                 >
-                  <Flex gap={"1"} align={"center"}>
+                  <Flex gap={"2"} align={"center"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       Format:
                     </Text>
-                    <Fieldset.Root>
+                    <Fieldset.Root w={"fit-content"}>
                       <Fieldset.Content>
                         <Field.Root>
                           <Select.Root
                             key={"select-export-format"}
+                            w={"120px"}
                             size={"sm"}
-                            rounded={"md"}
                             collection={createListCollection({
                               items: ["JSON", "CSV"],
                             })}
-                            onValueChange={(details) => {
-                              setExportFormat(details.items[0].toLowerCase());
-
-                              // Remove `entities` field if currently selected and switching to CSV format
-                              if (details.items[0].toLowerCase() === "csv") {
-                                setExportFields([
-                                  ...exportFields.filter(
-                                    (field) => field !== "entities",
-                                  ),
-                                ]);
-                              }
-                            }}
+                            defaultValue={["JSON"]}
+                            onValueChange={(details) =>
+                              setExportFormat(details.items[0].toLowerCase())
+                            }
                           >
                             <Select.HiddenSelect />
-                            <Select.Label>Select Export Format</Select.Label>
                             <Select.Control>
                               <Select.Trigger>
                                 <Select.ValueText
@@ -1530,7 +1555,7 @@ const Project = () => {
                                 <Select.Indicator />
                               </Select.IndicatorGroup>
                             </Select.Control>
-                            <Portal>
+                            <Portal container={selectExportFormatRef}>
                               <Select.Positioner>
                                 <Select.Content>
                                   {createListCollection({
@@ -1568,159 +1593,150 @@ const Project = () => {
                 >
                   <Fieldset.Root>
                     <Fieldset.Content>
-                      <Field.Root>
-                        <Field.Label>Details</Field.Label>
-                        {!loading ? (
-                          <CheckboxGroup>
-                            <Stack gap={2} direction={"column"}>
-                              <Checkbox.Root
-                                disabled
-                                defaultChecked
-                                size={"sm"}
-                                rounded={"md"}
-                                fontSize={"sm"}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  Name: {projectName}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                              <Checkbox.Root
-                                size={"sm"}
-                                rounded={"md"}
-                                fontSize={"sm"}
-                                checked={_.includes(exportFields, "created")}
-                                onCheckedChange={(details) =>
-                                  handleExportCheck(
-                                    "created",
-                                    details.checked as boolean,
-                                  )
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  Created:{" "}
-                                  {dayjs(project.created).format("DD MMM YYYY")}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                              <Checkbox.Root
-                                size={"sm"}
-                                rounded={"md"}
-                                checked={_.includes(exportFields, "owner")}
-                                onCheckedChange={(details) =>
-                                  handleExportCheck(
-                                    "owner",
-                                    details.checked as boolean,
-                                  )
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  Owner: {project.owner}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                              <Checkbox.Root
-                                size={"sm"}
-                                rounded={"md"}
-                                checked={_.includes(
-                                  exportFields,
-                                  "description",
-                                )}
-                                onCheckedChange={(details) =>
-                                  handleExportCheck(
-                                    "description",
-                                    details.checked as boolean,
-                                  )
-                                }
-                                disabled={_.isEqual(projectDescription, "")}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  <Text lineClamp={1} fontSize={"sm"}>
-                                    Description:{" "}
-                                    {_.isEqual(projectDescription, "")
-                                      ? "No description"
-                                      : _.truncate(projectDescription, {
-                                          length: 32,
-                                        })}
-                                  </Text>
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            </Stack>
-                          </CheckboxGroup>
-                        ) : (
-                          <Text fontSize={"sm"}>Loading details...</Text>
-                        )}
-                      </Field.Root>
-                      <Field.Root>
-                        <Field.Label>Entities</Field.Label>
-                        {!loading ? (
-                          <CheckboxGroup>
-                            <Tooltip
-                              content={
-                                "Entities cannot be included when exporting to CSV"
-                              }
-                              disabled={_.isEqual(exportFormat, "json")}
-                              showArrow
-                            >
-                              <Checkbox.Root
-                                size={"sm"}
-                                rounded={"md"}
-                                checked={_.includes(exportFields, "entities")}
-                                onCheckedChange={(details) =>
-                                  handleExportCheck(
-                                    "entities",
-                                    details.checked as boolean,
-                                  )
-                                }
-                                disabled={
-                                  _.isEqual(projectEntities.length, 0) ||
-                                  _.isEqual(exportFormat, "csv")
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  <Text lineClamp={1} fontSize={"sm"}>
-                                    Export Entities
-                                  </Text>
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            </Tooltip>
-                          </CheckboxGroup>
-                        ) : (
-                          <Text fontSize={"sm"}>Loading details...</Text>
-                        )}
-                        {_.includes(exportFields, "entities") && (
-                          <RadioGroup.Root
-                            value={exportEntityDetails}
-                            onValueChange={(event) =>
-                              setExportEntityDetails(event.value)
+                      <Fieldset.Legend>Details</Fieldset.Legend>
+                      {!loading ? (
+                        <Stack gap={2} direction={"column"}>
+                          <Checkbox.Root
+                            disabled
+                            defaultChecked
+                            size={"sm"}
+                            rounded={"md"}
+                            fontSize={"sm"}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>Name: {projectName}</Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            fontSize={"sm"}
+                            checked={_.includes(exportFields, "created")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "created",
+                                details.checked as boolean,
+                              )
                             }
                           >
-                            <Stack direction={"row"} gap={"1"}>
-                              <RadioGroup.Item value={"name"}>
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.Label fontSize={"sm"}>
-                                  Names
-                                </RadioGroup.Label>
-                              </RadioGroup.Item>
-                              <RadioGroup.Item value={"_id"}>
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.Label fontSize={"sm"}>
-                                  Identifiers
-                                </RadioGroup.Label>
-                              </RadioGroup.Item>
-                            </Stack>
-                          </RadioGroup.Root>
-                        )}
-                      </Field.Root>
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              Created:{" "}
+                              {dayjs(project.created).format("DD MMM YYYY")}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "owner")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "owner",
+                                details.checked as boolean,
+                              )
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              Owner: {project.owner}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "description")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "description",
+                                details.checked as boolean,
+                              )
+                            }
+                            disabled={_.isEqual(projectDescription, "")}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              <Text lineClamp={1} fontSize={"sm"}>
+                                Description:{" "}
+                                {_.isEqual(projectDescription, "")
+                                  ? "No description"
+                                  : _.truncate(projectDescription, {
+                                      length: 32,
+                                    })}
+                              </Text>
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        </Stack>
+                      ) : (
+                        <Text fontSize={"sm"}>Loading details...</Text>
+                      )}
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Fieldset.Legend>Entities</Fieldset.Legend>
+                      {!loading ? (
+                        <Tooltip
+                          content={
+                            "Entities cannot be included when exporting to CSV"
+                          }
+                          disabled={_.isEqual(exportFormat, "json")}
+                          showArrow
+                        >
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "entities")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "entities",
+                                details.checked as boolean,
+                              )
+                            }
+                            disabled={
+                              _.isEqual(projectEntities.length, 0) ||
+                              _.isEqual(exportFormat, "csv")
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              <Text lineClamp={1} fontSize={"sm"}>
+                                Export Entities
+                              </Text>
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        </Tooltip>
+                      ) : (
+                        <Text fontSize={"sm"}>Loading details...</Text>
+                      )}
+                      {_.includes(exportFields, "entities") && (
+                        <RadioGroup.Root
+                          value={exportEntityDetails}
+                          onValueChange={(event) =>
+                            setExportEntityDetails(event.value)
+                          }
+                        >
+                          <Stack direction={"row"} gap={"1"}>
+                            <RadioGroup.Item value={"name"}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.Label fontSize={"sm"}>
+                                Names
+                              </RadioGroup.Label>
+                            </RadioGroup.Item>
+                            <RadioGroup.Item value={"_id"}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.Label fontSize={"sm"}>
+                                Identifiers
+                              </RadioGroup.Label>
+                            </RadioGroup.Item>
+                          </Stack>
+                        </RadioGroup.Root>
+                      )}
                     </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
@@ -1755,20 +1771,23 @@ const Project = () => {
 
         {/* Save message modal */}
         <Dialog.Root
-          open={isSaveMessageOpen}
+          open={saveMessageOpen}
+          onOpenChange={(details) => setSaveMessageOpen(details.open)}
           placement={"center"}
           closeOnEscape
+          closeOnInteractOutside
         >
-          <Dialog.Trigger />
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              {/* p={"2"} */}
-              <Dialog.Header p={"2"}>
-                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"save"} />
-                  <Text fontWeight={"semibold"}>Saving Changes</Text>
-                </Flex>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                <Icon name={"save"} />
+                Saving Changes
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
@@ -1791,23 +1810,28 @@ const Project = () => {
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer p={"2"}>
-                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"space-between"}
+                >
                   <Button
+                    variant={"outline"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    onClick={() => onSaveMessageClose()}
+                    onClick={() => setSaveMessageOpen(false)}
                   >
                     Cancel
                     <Icon name={"cross"} />
                   </Button>
-
                   <Button
-                    id={"saveMessageDoneButton"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => handleSaveMessageDoneClick()}
+                    onClick={handleSaveMessageDoneClick}
                   >
                     Done
                     <Icon name={"check"} />
