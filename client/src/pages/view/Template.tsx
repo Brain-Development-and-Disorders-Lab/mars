@@ -253,9 +253,9 @@ const Template = () => {
       );
 
       toaster.create({
-        title: "Info",
+        title: "Success",
         description: `Generated JSON file`,
-        type: "info",
+        type: "success",
         duration: 2000,
         closable: true,
       });
@@ -291,7 +291,7 @@ const Template = () => {
             align={"center"}
             gap={"2"}
             p={"2"}
-            border={"2px"}
+            border={"2px solid"}
             rounded={"md"}
           >
             <Icon name={"template"} size={"md"} />
@@ -310,24 +310,26 @@ const Template = () => {
                   <Icon name={"lightning"} />
                 </Button>
               </Menu.Trigger>
-              <Menu.Content>
-                <Menu.Item
-                  value={"export"}
-                  onClick={handleDownloadClick}
-                  disabled={editing || templateArchived}
-                >
-                  <Icon name={"download"} />
-                  Export
-                </Menu.Item>
-                <Menu.Item
-                  value={"archive"}
-                  onClick={() => setArchiveDialogOpen(true)}
-                  disabled={templateArchived}
-                >
-                  <Icon name={"archive"} />
-                  Archive
-                </Menu.Item>
-              </Menu.Content>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    value={"export"}
+                    onClick={handleDownloadClick}
+                    disabled={editing || templateArchived}
+                  >
+                    <Icon name={"download"} />
+                    Export
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"archive"}
+                    onClick={() => setArchiveDialogOpen(true)}
+                    disabled={templateArchived}
+                  >
+                    <Icon name={"archive"} />
+                    Archive
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
             </Menu.Root>
 
             {templateArchived ? (
@@ -396,7 +398,7 @@ const Template = () => {
                     readOnly={!editing}
                     bg={"white"}
                     rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                   />
                 </Flex>
@@ -433,7 +435,7 @@ const Template = () => {
               direction={"column"}
               p={"2"}
               gap={"1"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
               basis={"40%"}
@@ -460,9 +462,8 @@ const Template = () => {
 
           <Flex
             p={"2"}
-            pb={"0"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
           >
             <Values
