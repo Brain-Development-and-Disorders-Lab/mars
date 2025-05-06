@@ -115,6 +115,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   // Manage relationships
+  const selectRelationshipTypeRef = useRef(null);
   const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState(
     {} as IGenericItem,
   );
@@ -416,6 +417,7 @@ const Entity = () => {
             <Spacer />
             <Button
               size={"sm"}
+              rounded={"md"}
               variant={"outline"}
               onClick={() => setInformationOpen(true)}
             >
@@ -431,14 +433,17 @@ const Entity = () => {
           step={pageStep}
           onStepChange={(event) => setPageStep(event.step)}
           count={pageSteps.length}
+          px={"2"}
         >
-          {pageSteps.map((step, index) => (
-            <Steps.Item key={index} index={index} title={step.title}>
-              <Steps.Indicator />
-              <Steps.Title>{step.title}</Steps.Title>
-              <Steps.Separator />
-            </Steps.Item>
-          ))}
+          <Steps.List>
+            {pageSteps.map((step, index) => (
+              <Steps.Item key={index} index={index} title={step.title}>
+                <Steps.Indicator />
+                <Steps.Title>{step.title}</Steps.Title>
+                <Steps.Separator />
+              </Steps.Item>
+            ))}
+          </Steps.List>
         </Steps.Root>
 
         {/* "Start" page */}
@@ -457,7 +462,7 @@ const Entity = () => {
                 direction={"column"}
                 p={"2"}
                 gap={"2"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
@@ -482,6 +487,7 @@ const Entity = () => {
                               value={name}
                               placeholder={"Name"}
                               size={"sm"}
+                              minW={"240px"}
                               rounded={"md"}
                               onChange={(event) => {
                                 setName(event.target.value);
@@ -493,6 +499,7 @@ const Entity = () => {
                         <Flex>
                           <Button
                             size={"sm"}
+                            rounded={"md"}
                             onClick={() => {
                               setUseCounter(!useCounter);
 
@@ -557,7 +564,7 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 {/* Description */}
@@ -603,94 +610,95 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
-                <Fieldset.Root>
-                  <Fieldset.Content>
-                    <Field.Root>
-                      <Field.Label>Relationships</Field.Label>
-                      <Flex
-                        direction={"row"}
-                        gap={"2"}
-                        justify={"space-between"}
-                      >
-                        <Flex direction={"row"} gap={"2"} align={"center"}>
-                          <Flex>
-                            <Input size={"sm"} value={name} disabled readOnly />
-                          </Flex>
-                          <Flex>
-                            <Select.Root
-                              key={"select-relationship-type"}
-                              size={"sm"}
-                              collection={createListCollection({
-                                items: ["General", "Parent", "Child"],
-                              })}
-                              onValueChange={(details) =>
-                                setSelectedRelationshipType(
-                                  details.items[0].toLowerCase() as RelationshipType,
-                                )
-                              }
-                            >
-                              <Select.HiddenSelect />
-                              <Select.Label>Select Option</Select.Label>
-                              <Select.Control>
-                                <Select.Trigger>
-                                  <Select.ValueText
-                                    placeholder={"Select Option"}
-                                  />
-                                </Select.Trigger>
-                                <Select.IndicatorGroup>
-                                  <Select.Indicator />
-                                </Select.IndicatorGroup>
-                              </Select.Control>
-                              <Portal>
-                                <Select.Positioner>
-                                  <Select.Content>
-                                    {createListCollection({
-                                      items: ["General", "Parent", "Child"],
-                                    }).items.map((relationship: string) => (
-                                      <Select.Item
-                                        item={relationship}
-                                        key={relationship.toLowerCase()}
-                                      >
-                                        {relationship}
-                                        <Select.ItemIndicator />
-                                      </Select.Item>
-                                    ))}
-                                  </Select.Content>
-                                </Select.Positioner>
-                              </Portal>
-                            </Select.Root>
-                          </Flex>
-                          <Flex>
-                            <SearchSelect
-                              id={"relationshipTargetSelect"}
-                              resultType={"entity"}
-                              value={selectedRelationshipTarget}
-                              onChange={setSelectedRelationshipTarget}
-                            />
-                          </Flex>
-                        </Flex>
-                        <Button
-                          colorPalette={"green"}
-                          size={"sm"}
-                          disabled={_.isUndefined(
-                            selectedRelationshipTarget._id,
-                          )}
-                          onClick={() => addRelationship()}
-                        >
-                          Add
-                          <Icon name={"add"} />
-                        </Button>
-                      </Flex>
-                      <Field.HelperText>
-                        Create relationships between this Entity and other
-                        existing Entities.
-                      </Field.HelperText>
-                    </Field.Root>
-                  </Fieldset.Content>
-                </Fieldset.Root>
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  justify={"space-between"}
+                  p={"2"}
+                  align={"end"}
+                >
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Source
+                    </Text>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      value={name}
+                      readOnly
+                      disabled
+                    />
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Type
+                    </Text>
+                    <Select.Root
+                      key={"select-relationship-type"}
+                      size={"sm"}
+                      collection={createListCollection({
+                        items: ["General", "Parent", "Child"],
+                      })}
+                      onValueChange={(details) => {
+                        setSelectedRelationshipType(
+                          details.items[0].toLowerCase() as RelationshipType,
+                        );
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger>
+                          <Select.ValueText
+                            placeholder={"Select Relationship Type"}
+                          />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal container={selectRelationshipTypeRef}>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {createListCollection({
+                              items: ["General", "Parent", "Child"],
+                            }).items.map((relationship) => (
+                              <Select.Item
+                                item={relationship}
+                                key={relationship}
+                              >
+                                {relationship}
+                                <Select.ItemIndicator />
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Target
+                    </Text>
+                    <SearchSelect
+                      resultType={"entity"}
+                      value={selectedRelationshipTarget}
+                      onChange={setSelectedRelationshipTarget}
+                    />
+                  </Flex>
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    rounded={"md"}
+                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
+                    onClick={() => addRelationship()}
+                  >
+                    Add
+                    <Icon name={"add"} />
+                  </Button>
+                </Flex>
 
                 {relationships.length > 0 ? (
                   <Relationships
@@ -733,54 +741,52 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 <Fieldset.Root>
-                  <Fieldset.Content>
-                    <Field.Root>
-                      <Field.Label>Projects</Field.Label>
-                      <CheckboxGroup
-                        size={"sm"}
-                        value={selectedProjects}
-                        onValueChange={(event: string[]) => {
-                          if (event) {
-                            setSelectedProjects([...event]);
-                          }
-                        }}
-                      >
-                        <Stack gap={[1, 5]} direction={"column"}>
-                          {projects.map((project) => {
-                            return (
-                              <Checkbox.Root
-                                key={project._id}
-                                value={project._id}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>{project.name}</Checkbox.Label>
-                              </Checkbox.Root>
-                            );
-                          })}
-                          {projects.length === 0 && (
-                            <Text
-                              fontWeight={"semibold"}
-                              color={"gray.400"}
-                              fontSize={"sm"}
+                  <CheckboxGroup
+                    size={"sm"}
+                    value={selectedProjects}
+                    onValueChange={(event: string[]) => {
+                      if (event) {
+                        setSelectedProjects([...event]);
+                      }
+                    }}
+                  >
+                    <Fieldset.Legend>Projects</Fieldset.Legend>
+                    <Fieldset.Content>
+                      <Stack gap={[1, 5]} direction={"column"}>
+                        {projects.map((project) => {
+                          return (
+                            <Checkbox.Root
+                              key={project._id}
+                              value={project._id}
                             >
-                              No Projects.
-                            </Text>
-                          )}
-                        </Stack>
-                      </CheckboxGroup>
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label>{project.name}</Checkbox.Label>
+                            </Checkbox.Root>
+                          );
+                        })}
+                        {projects.length === 0 && (
+                          <Text
+                            fontWeight={"semibold"}
+                            color={"gray.400"}
+                            fontSize={"sm"}
+                          >
+                            No Projects.
+                          </Text>
+                        )}
+                      </Stack>
 
-                      <Field.HelperText>
+                      <Fieldset.HelperText>
                         Specify the Projects that this new Entity should be
                         included with. The Entity will then be contained within
                         the specified Projects.
-                      </Field.HelperText>
-                    </Field.Root>
-                  </Fieldset.Content>
+                      </Fieldset.HelperText>
+                    </Fieldset.Content>
+                  </CheckboxGroup>
                 </Fieldset.Root>
               </Flex>
             </Flex>
@@ -808,7 +814,7 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
@@ -850,7 +856,6 @@ const Entity = () => {
                           disabled={templatesCollection.items.length === 0}
                         >
                           <Select.HiddenSelect />
-                          <Select.Label>Select Template</Select.Label>
                           <Select.Control>
                             <Select.Trigger>
                               <Select.ValueText
@@ -886,6 +891,7 @@ const Entity = () => {
 
                 <Button
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={"green"}
                   onClick={() => {
                     // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
@@ -1007,6 +1013,7 @@ const Entity = () => {
         <Flex gap={"4"}>
           <Button
             size={"sm"}
+            rounded={"md"}
             colorPalette={"red"}
             variant={"outline"}
             onClick={() => navigate("/entities")}
@@ -1029,6 +1036,7 @@ const Entity = () => {
 
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
           onClick={onPageNext}
           disabled={!isValidInput() || isNameError}

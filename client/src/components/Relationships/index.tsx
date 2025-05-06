@@ -137,6 +137,7 @@ const Relationships = (props: RelationshipsProps) => {
                   removeRelationship(info.row.original);
                 }}
                 size={"sm"}
+                rounded={"md"}
               >
                 <Icon name={"delete"} />
               </IconButton>

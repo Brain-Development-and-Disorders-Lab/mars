@@ -57,7 +57,7 @@ const AttributeCard = (props: AttributeCardProps) => {
           align={"center"}
           gap={"2"}
           p={"2"}
-          border={"2px"}
+          border={"2px solid"}
           rounded={"md"}
           w={"fit-content"}
         >
@@ -67,87 +67,114 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Text>
         </Flex>
       </Card.Header>
-      <Card.Body p={"2"} pb={"0"}>
-        <Flex direction={"column"} gap={"2"}>
-          <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-            <Fieldset.Root>
-              <Fieldset.Content>
-                <Flex
-                  direction={"column"}
-                  gap={"2"}
-                  w={{ base: "100%", md: "50%" }}
-                >
-                  <Field.Root>
-                    <Field.Label>Name</Field.Label>
-                    <Input
-                      size={"sm"}
-                      placeholder={"Name"}
-                      value={name}
-                      disabled={finished}
-                      rounded={"md"}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </Field.Root>
-
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"sm"}>Owner</Text>
-                    <Flex>
-                      <ActorTag
-                        orcid={props.owner}
-                        fallback={"Unknown User"}
-                        size={"md"}
+      <Card.Body p={"2"}>
+        <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+          {/* Attribute name */}
+          <Flex
+            direction={"column"}
+            p={"2"}
+            h={"fit-content"}
+            w={{ base: "100%", md: "50%" }}
+            gap={"2"}
+            bg={"gray.100"}
+            rounded={"md"}
+          >
+            <Flex direction={"row"} gap={"2"}>
+              <Flex grow={"1"}>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root required>
+                      <Field.Label>
+                        Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        bg={"white"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Name"}
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
                       />
-                    </Flex>
-                  </Flex>
-                </Flex>
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
+              </Flex>
+            </Flex>
 
-                <Flex w={{ base: "100%", md: "50%" }}>
-                  <Field.Root required invalid={isDescriptionError} w={"100%"}>
-                    <Field.Label>Description</Field.Label>
-                    <MDEditor
-                      height={150}
-                      minHeight={100}
-                      maxHeight={400}
-                      style={{ width: "100%" }}
-                      value={description}
-                      preview={finished ? "preview" : "edit"}
-                      extraCommands={[]}
-                      onChange={(value) => {
-                        setDescription(value || "");
-                      }}
-                    />
-                  </Field.Root>
+            {/* "Owner" field */}
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
+                  Owner
+                </Text>
+                <Flex>
+                  <ActorTag
+                    orcid={attributeCardData.owner}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                  />
                 </Flex>
-              </Fieldset.Content>
-              <Fieldset.ErrorText>
-                Some fields are invalid. Please check them.
-              </Fieldset.ErrorText>
-            </Fieldset.Root>
+              </Flex>
+            </Flex>
           </Flex>
 
-          {attributeCardData.restrictDataValues ? (
-            // Restrict the data to options from a drop-down
-            <Values
-              viewOnly={finished}
-              values={values}
-              setValues={setValues}
-              permittedValues={props.permittedDataValues}
-              requireData
-            />
-          ) : (
-            <Values
-              viewOnly={finished}
-              values={values}
-              setValues={setValues}
-              requireData
-            />
-          )}
+          {/* Attribute description */}
+          <Flex
+            direction={"row"}
+            p={"2"}
+            h={"fit-content"}
+            gap={"2"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+            rounded={"md"}
+            grow={"1"}
+          >
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Field.Label>Description</Field.Label>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    style={{ width: "100%" }}
+                    value={description}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
+          </Flex>
         </Flex>
+
+        {attributeCardData.restrictDataValues ? (
+          // Restrict the data to options from a drop-down
+          <Values
+            viewOnly={finished}
+            values={values}
+            setValues={setValues}
+            permittedValues={props.permittedDataValues}
+            requireData
+          />
+        ) : (
+          <Values
+            viewOnly={finished}
+            values={values}
+            setValues={setValues}
+            requireData
+          />
+        )}
       </Card.Body>
 
       <Card.Footer p={"2"} pt={"0"}>
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -163,6 +190,7 @@ const AttributeCard = (props: AttributeCardProps) => {
 
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={"green"}
           onClick={() => {
             setFinished(true);

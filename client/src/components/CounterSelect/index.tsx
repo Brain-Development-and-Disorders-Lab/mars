@@ -1,27 +1,32 @@
 // React
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
   Button,
+  CloseButton,
   createListCollection,
   Dialog,
   Field,
   Fieldset,
   Flex,
   Input,
-  ListCollection,
   Portal,
   Select,
   Text,
-  useDisclosure,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { Information } from "@components/Label";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { CounterModel, CounterProps, ICounter, ResponseData } from "@types";
+import {
+  CounterModel,
+  CounterProps,
+  ICounter,
+  ISelectOption,
+  ResponseData,
+} from "@types";
 
 // Custom hooks
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -29,6 +34,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Utility functions and libraries
 import _ from "lodash";
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { createSelectOptions } from "src/util";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state
@@ -57,16 +63,19 @@ const CounterSelect = (props: CounterProps) => {
   const [nextCounterPreview, setNextCounterPreview] = useState("");
 
   // Counter collection for `Select`
-  const [counterCollection, setCounterCollection] = useState(
-    {} as ListCollection<CounterModel>,
-  );
+  const counterCollection = useMemo(() => {
+    const items = createSelectOptions<CounterModel>(counters, "_id", "name");
+    return createListCollection<ISelectOption>({
+      items: items || [],
+    });
+  }, [counters]);
 
   // Overall error state
   const isValidInput =
     counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
 
   // Create Counter modal disclosure
-  const { open, onOpen, onClose } = useDisclosure();
+  const [open, setOpen] = useState(false);
 
   // Workspace context value
   const { workspace } = useWorkspace();
@@ -136,7 +145,7 @@ const CounterSelect = (props: CounterProps) => {
    */
   const handleSelectCounter = (details: {
     value: string[];
-    items: CounterModel[];
+    items: ISelectOption[];
   }) => {
     if (details.value.length > 0) {
       updateSelectedCounter(details.value[0]);
@@ -147,11 +156,6 @@ const CounterSelect = (props: CounterProps) => {
   useEffect(() => {
     if (counterData?.counters) {
       setCounters(counterData.counters);
-      setCounterCollection(
-        createListCollection<CounterModel>({
-          items: counterData,
-        }),
-      );
     }
   }, [counterData]);
 
@@ -227,7 +231,7 @@ const CounterSelect = (props: CounterProps) => {
 
       // Update the selected Counter
       setSelected(selectedCounter);
-      onClose();
+      setOpen(false);
     }
   };
 
@@ -282,9 +286,15 @@ const CounterSelect = (props: CounterProps) => {
           (counterInitial + counterIncrement).toString(),
         ),
       );
-    } else {
+    } else if (!_isValidFormat) {
       setCurrentCounterPreview("Provide a valid format string");
       setNextCounterPreview("Provide a valid format string");
+    } else if (!_isValidInitial) {
+      setCurrentCounterPreview("Provide a valid initial value");
+      setNextCounterPreview("Provide a valid initial value");
+    } else if (!_isValidIncrement) {
+      setCurrentCounterPreview("Provide a valid initial increment");
+      setNextCounterPreview("Provide a valid initial increment");
     }
 
     // Store the valid state
@@ -299,11 +309,12 @@ const CounterSelect = (props: CounterProps) => {
         <Select.Root
           key={"select-counter"}
           size={"sm"}
+          rounded={"md"}
+          minW={"200px"}
           collection={counterCollection}
           onValueChange={handleSelectCounter}
         >
           <Select.HiddenSelect />
-          <Select.Label>Select Counter</Select.Label>
           <Select.Control>
             <Select.Trigger>
               <Select.ValueText placeholder={"Select Counter"} />
@@ -316,8 +327,8 @@ const CounterSelect = (props: CounterProps) => {
             <Select.Positioner>
               <Select.Content>
                 {counterCollection.items.map((counter) => (
-                  <Select.Item item={counter} key={counter._id}>
-                    {counter.name}
+                  <Select.Item item={counter} key={counter.value}>
+                    {counter.label}
                     <Select.ItemIndicator />
                   </Select.Item>
                 ))}
@@ -329,7 +340,12 @@ const CounterSelect = (props: CounterProps) => {
         {/* Button to create new Counter */}
         {props.showCreate && (
           <Flex>
-            <Button size={"sm"} colorPalette={"green"} onClick={() => onOpen()}>
+            <Button
+              size={"sm"}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => setOpen(true)}
+            >
               Create
               <Icon name={"add"} />
             </Button>
@@ -360,18 +376,29 @@ const CounterSelect = (props: CounterProps) => {
 
       <Dialog.Root
         open={open}
+        onOpenChange={(details) => setOpen(details.open)}
         size={"xl"}
         placement={"center"}
         scrollBehavior={"inside"}
         closeOnEscape
+        closeOnInteractOutside
       >
         <Dialog.Positioner />
         <Dialog.Backdrop />
 
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"}>Create Counter</Dialog.Header>
-            <Dialog.CloseTrigger />
+            <Dialog.Header
+              p={"2"}
+              mt={"2"}
+              fontWeight={"semibold"}
+              fontSize={"md"}
+            >
+              Create Counter
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size={"sm"} onClick={() => setOpen(false)} />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
 
             <Dialog.Body px={"2"} gap={"2"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
@@ -487,13 +514,26 @@ const CounterSelect = (props: CounterProps) => {
             </Dialog.Body>
             <Dialog.Footer p={"2"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                <Button variant={"outline"} colorPalette={"red"} size={"sm"}>
+                <Button
+                  variant={"outline"}
+                  colorPalette={"red"}
+                  size={"sm"}
+                  rounded={"md"}
+                  onClick={() => {
+                    setOpen(false);
+                    setCounterName("");
+                    setCounterFormat("");
+                    setCounterInitial(0);
+                    setCounterIncrement(1);
+                  }}
+                >
                   Cancel
                   <Icon name={"cross"} />
                 </Button>
 
                 <Button
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={"green"}
                   disabled={
                     !isValidFormat ||

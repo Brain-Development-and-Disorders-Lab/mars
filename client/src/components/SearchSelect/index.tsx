@@ -249,6 +249,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           p={"2"}
           mt={"10"}
           gap={"2"}
+          minW={"200px"}
           direction={"column"}
           bg={"white"}
           border={"1px"}

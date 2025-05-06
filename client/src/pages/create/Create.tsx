@@ -41,7 +41,7 @@ const Create = () => {
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
           <Card.Header>
@@ -112,6 +112,7 @@ const Create = () => {
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createEntityButton"}
+                rounded={"md"}
                 size={"sm"}
                 colorPalette={"green"}
                 onClick={() => {
@@ -131,7 +132,7 @@ const Create = () => {
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
           <Card.Header>
@@ -181,6 +182,7 @@ const Create = () => {
               <Button
                 id={"createTemplateButton"}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"green"}
                 onClick={() => {
                   posthog.capture("create_template_click");
@@ -199,7 +201,7 @@ const Create = () => {
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
           <Card.Header>
@@ -245,6 +247,7 @@ const Create = () => {
               <Button
                 id={"createProjectButton"}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"green"}
                 onClick={() => {
                   posthog.capture("create_project_click");
