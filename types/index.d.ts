@@ -110,6 +110,13 @@ export type IValue<D> = {
   onUpdate?: (data: D) => void;
 };
 
+// "Collaborators" component props
+export type CollaboratorsProps = {
+  editing: boolean;
+  projectCollaborators: string[];
+  setProjectCollaborators: (value: React.SetStateAction<string[]>) => void;
+};
+
 // "Linky" component props
 export type LinkyProps = {
   type: "entities" | "templates" | "projects";
@@ -464,6 +471,8 @@ export type IconNames =
   | "settings"
   | "print"
   | "view"
+  | "visibility_show"
+  | "visibility_hide"
   | "workspace"
   | "zoom_in"
   | "zoom_out"
