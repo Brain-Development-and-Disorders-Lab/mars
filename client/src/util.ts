@@ -71,6 +71,18 @@ export const isValidUser = (user: UserModel): boolean => {
 };
 
 /**
+ * Check if an ORCID is a valid format
+ * @param {string} orcid the ORCID to check
+ * @returns {boolean}
+ */
+export const isValidOrcid = (orcid: string): boolean => {
+  if (_.isUndefined(orcid) || _.isEqual(orcid, "")) {
+    return false;
+  }
+  return /^(\d{4}-){3}\d{3}(\d|X)$/.test(orcid);
+};
+
+/**
  * Retrieve an authentication token from session storage
  * @param {string} tokenKey the key of the token in storage
  * @returns {any}

@@ -1,23 +1,23 @@
 // React and Chakra UI components
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Flex,
   Spacer,
   Input,
   Button,
-  VStack,
-  Tag,
-  IconButton,
   Text,
   Heading,
   Fieldset,
   Field,
+  useDisclosure,
 } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
+import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import MDEditor from "@uiw/react-md-editor";
 
 // Custom types
@@ -27,7 +27,7 @@ import { IResponseMessage, WorkspaceModel } from "@types";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Routing and navigation
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -42,6 +42,17 @@ const CreateWorkspace = () => {
   // Access token to set the active Workspace
   const { token } = useAuthentication();
   const navigate = useNavigate();
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    // Check if this is during the `create` mutation
+    if (isSubmitting) {
+      return false;
+    }
+
+    // Default blocker condition
+    return name !== "" && currentLocation.pathname !== nextLocation.pathname;
+  });
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
 
   // Get contexts
   const { workspace, activateWorkspace } = useWorkspace();
@@ -52,8 +63,10 @@ const CreateWorkspace = () => {
   const [description, setDescription] = useState("");
 
   // State for Workspace collaborators
-  const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
+
+  // State for submitting the form
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
@@ -93,6 +106,9 @@ const CreateWorkspace = () => {
   const handleCreateWorkspaceClick = async () => {
     // Capture event
     posthog?.capture("create_workspace_finish");
+
+    // Set submitting state
+    setIsSubmitting(true);
 
     const result = await createWorkspace({
       variables: {
@@ -175,49 +191,22 @@ const CreateWorkspace = () => {
             <Icon name={"workspace"} size={"md"} />
             <Heading size={"md"}>Create Workspace</Heading>
           </Flex>
-          <Spacer />
-          <Flex gap={"2"} align={"center"}>
-            {workspace === "" && (
-              <Button size={"sm"} onClick={() => logout()}>
-                Logout
-              </Button>
-            )}
-            {workspace !== "" && (
-              <Button
-                size={"sm"}
-                colorPalette={"red"}
-                onClick={() => handleCancelClick()}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button
-              id={"modalWorkspaceCreateButton"}
-              size={"sm"}
-              colorPalette={"green"}
-              onClick={() => handleCreateWorkspaceClick()}
-              loading={createLoading}
-              disabled={name === ""}
-            >
-              Create
-            </Button>
-          </Flex>
         </Flex>
 
         <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
           {workspace === "" ? (
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
               Before you can get started using Metadatify, you must be invited
               as Collaborator on an existing Workspace or create a new Workspace
               below.
             </Text>
           ) : (
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
               Workspaces can be used to organize Entities and Projects, as well
               as inviting collaborators to work together on experiments.
             </Text>
           )}
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
             Use the Workspace switcher in the navigation bar to view all
             Workspaces and switch the active Workspace.
           </Text>
@@ -237,7 +226,7 @@ const CreateWorkspace = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root>
@@ -267,7 +256,7 @@ const CreateWorkspace = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root>
@@ -293,113 +282,68 @@ const CreateWorkspace = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            p={"0"}
-            gap={"2"}
-            wrap={"wrap"}
-            w={{ base: "100%", md: "40%" }}
-          >
-            {/* Workspace collaborators */}
-            <Flex
-              direction={"column"}
-              h={"fit-content"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Collaborators
-              </Text>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Add Collaborators by their ORCiD, and they will have access to
-                this Workspace when they next sign into Metadatify.
-              </Text>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Fieldset.Root>
-                  <Fieldset.Content>
-                    <Field.Root>
-                      <Input
-                        placeholder={"ORCiD"}
-                        rounded={"md"}
-                        size={"sm"}
-                        value={collaborator}
-                        onChange={(event) =>
-                          setCollaborator(event.target.value)
-                        }
-                      />
-                    </Field.Root>
-                  </Fieldset.Content>
-                </Fieldset.Root>
-                <Spacer />
-                <Button
-                  colorPalette={"green"}
-                  size={"sm"}
-                  disabled={collaborator === ""}
-                  onClick={() => {
-                    // Prevent adding empty or duplicate collaborator
-                    if (collaborator && !collaborators.includes(collaborator)) {
-                      setCollaborators((collaborators) => [
-                        ...collaborators,
-                        collaborator,
-                      ]);
-                      setCollaborator("");
-                    }
-                  }}
-                >
-                  Add
-                  <Icon name={"add"} />
-                </Button>
-              </Flex>
-              <Flex
-                w={"100%"}
-                justify={collaborators.length === 0 ? "center" : ""}
-                align={"center"}
-                minH={collaborators.length > 0 ? "fit-content" : "200px"}
-              >
-                {collaborators.length === 0 ? (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No Collaborators
-                  </Text>
-                ) : (
-                  <VStack w={"100%"}>
-                    {collaborators.map((collaborator, index) => (
-                      <Flex
-                        key={index}
-                        align={"center"}
-                        gap={"2"}
-                        py={"2"}
-                        w={"100%"}
-                      >
-                        <Tag.Root colorPalette={"green"}>
-                          <Tag.Label>{collaborator}</Tag.Label>
-                        </Tag.Root>
-                        <Spacer />
-                        <IconButton
-                          size={"sm"}
-                          aria-label={"Remove collaborator"}
-                          colorPalette={"red"}
-                          onClick={() =>
-                            setCollaborators((collaborators) =>
-                              collaborators.filter(
-                                (existing) => existing !== collaborator,
-                              ),
-                            )
-                          }
-                        >
-                          <Icon name="delete" />
-                        </IconButton>
-                      </Flex>
-                    ))}
-                  </VStack>
-                )}
-              </Flex>
-            </Flex>
-          </Flex>
+          {/* Workspace collaborators */}
+          <Collaborators
+            editing={true}
+            projectCollaborators={collaborators}
+            setProjectCollaborators={setCollaborators}
+          />
         </Flex>
       </Flex>
+
+      {/* Place the action buttons at the bottom of the screen on desktop */}
+      <Spacer />
+
+      <Flex
+        p={"2"}
+        gap={"2"}
+        align={"center"}
+        w={"100%"}
+        justify={"space-between"}
+      >
+        {workspace === "" && (
+          <Button
+            size={"sm"}
+            colorPalette={"orange"}
+            rounded={"md"}
+            onClick={() => logout()}
+          >
+            Logout
+            <Icon name={"exit"} />
+          </Button>
+        )}
+        {workspace !== "" && (
+          <Button
+            size={"sm"}
+            rounded={"md"}
+            colorPalette={"red"}
+            onClick={() => handleCancelClick()}
+          >
+            Cancel
+            <Icon name={"cross"} />
+          </Button>
+        )}
+        <Button
+          id={"modalWorkspaceCreateButton"}
+          size={"sm"}
+          rounded={"md"}
+          colorPalette={"green"}
+          onClick={() => handleCreateWorkspaceClick()}
+          loading={createLoading}
+          disabled={name === ""}
+        >
+          Create
+          <Icon name={"check"} />
+        </Button>
+      </Flex>
+
+      {/* Blocker warning message */}
+      <UnsavedChangesModal
+        blocker={blocker}
+        cancelBlockerRef={cancelBlockerRef}
+        onClose={onBlockerClose}
+        callback={onBlockerClose}
+      />
     </Content>
   );
 };
