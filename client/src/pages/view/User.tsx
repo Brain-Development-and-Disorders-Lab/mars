@@ -11,9 +11,9 @@ import {
   Tag,
   Separator,
   Spacer,
-  VStack,
   Fieldset,
   Field,
+  Stack,
 } from "@chakra-ui/react";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -98,7 +98,13 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"} wrap={"wrap"}>
-      <Flex direction={"row"} gap={"1"} align={"center"}>
+      <Flex
+        direction={"row"}
+        gap={"1"}
+        align={"center"}
+        minW={"100px"}
+        justify={"start"}
+      >
         <Icon name={"key"} />
         <Tag.Root colorPalette={isRevoked ? "red" : "blue"} size={"sm"}>
           <Tag.Label>{isRevoked ? "revoked" : props.apiKey.scope}</Tag.Label>
@@ -107,28 +113,37 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
       <Flex gap={"2"} align={"center"}>
         <Input
-          type={showValue || isRevoked ? "text" : "password"}
+          type={showValue ? "text" : "password"}
           value={props.apiKey.value}
-          maxW={"200px"}
+          maxW={"240px"}
           size={"sm"}
           rounded={"md"}
-          disabled={isRevoked}
           readOnly
         />
-        <Button
+        <IconButton
+          variant={"subtle"}
           size={"sm"}
+          rounded={"md"}
           onClick={() => setShowValue(!showValue)}
-          disabled={isRevoked}
         >
-          {showValue ? "Hide" : "Show"}
-        </Button>
+          <Icon name={showValue ? "visibility_hide" : "visibility_show"} />
+        </IconButton>
         <Button
+          variant={"subtle"}
           size={"sm"}
+          rounded={"md"}
           onClick={async () => {
             await navigator.clipboard.writeText(props.apiKey.value);
+            toaster.create({
+              title: "Copied to clipboard",
+              type: "success",
+              duration: 2000,
+              closable: true,
+            });
           }}
         >
           Copy
+          <Icon name={"copy"} />
         </Button>
       </Flex>
 
@@ -151,6 +166,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
           <Button
             size={"sm"}
+            rounded={"md"}
             colorPalette={"red"}
             onClick={() => handleRevokeClick()}
             loading={revokeKeyLoading}
@@ -378,7 +394,7 @@ const User = () => {
           <Tooltip content={info.getValue()} showArrow>
             <Text>
               {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
+                length: truncateTableText ? 24 : 36,
               })}
             </Text>
           </Tooltip>
@@ -397,6 +413,7 @@ const User = () => {
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
               <IconButton
                 size={"sm"}
+                rounded={"md"}
                 aria-label={"Leave Workspace"}
                 colorPalette={"orange"}
                 disabled={!editing || userWorkspaces.length === 1}
@@ -438,7 +455,13 @@ const User = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"2"}
+          p={"2"}
+          border={"2px solid"}
+          rounded={"md"}
+        >
           <Icon name={"person"} size={"md"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             {staticName}
@@ -448,6 +471,7 @@ const User = () => {
           <Flex direction={"row"} align={"center"} gap={"2"}>
             <Button
               size={"sm"}
+              rounded={"md"}
               colorPalette={"red"}
               onClick={() => handleCancelClick()}
             >
@@ -457,6 +481,7 @@ const User = () => {
             <Button
               id={"userDoneButton"}
               size={"sm"}
+              rounded={"md"}
               colorPalette={"green"}
               loading={userUpdateLoading}
               onClick={() => handleUpdateClick()}
@@ -468,6 +493,7 @@ const User = () => {
         ) : (
           <Button
             size={"sm"}
+            rounded={"md"}
             colorPalette={"blue"}
             onClick={() => setEditing(true)}
           >
@@ -491,7 +517,7 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Flex direction={"row"} p={"0"} gap={"2"}>
@@ -566,7 +592,7 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -607,7 +633,7 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Flex direction={"column"} p={"0"} gap={"2"}>
@@ -621,6 +647,7 @@ const User = () => {
                   </Text>
                   <Button
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => handleGenerateKeyClick()}
                     loading={generateKeyLoading}
@@ -631,7 +658,7 @@ const User = () => {
                 </Flex>
                 <Flex
                   rounded={"md"}
-                  border={"1px"}
+                  border={"1px solid"}
                   borderColor={"gray.200"}
                   p={"2"}
                   minH={userKeys.length > 0 ? "" : "100px"}
@@ -639,10 +666,10 @@ const User = () => {
                   justify={userKeys.length > 0 ? "start" : "center"}
                 >
                   {userKeys.length > 0 ? (
-                    <VStack
+                    <Stack
                       direction={"column"}
                       w={"100%"}
-                      separator={<Separator />}
+                      separator={<Separator variant={"solid"} />}
                       gap={"2"}
                       justify={"left"}
                     >
@@ -651,7 +678,7 @@ const User = () => {
                           <APIKeyItem key={`api_key_${index}`} apiKey={key} />
                         );
                       })}
-                    </VStack>
+                    </Stack>
                   ) : (
                     <Text
                       fontWeight={"semibold"}

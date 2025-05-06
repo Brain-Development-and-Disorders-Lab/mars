@@ -58,13 +58,6 @@ const Collaborators = (props: CollaboratorsProps) => {
                   onChange={(e) => setNewCollaborator(e.target.value)}
                   disabled={!props.editing}
                 />
-                {newCollaborator !== "" && !validOrcid && (
-                  <Field.ErrorText>
-                    <Text fontSize={"xs"} color={"red.500"}>
-                      {validOrcid ? "" : "Invalid ORCiD"}
-                    </Text>
-                  </Field.ErrorText>
-                )}
               </Field.Root>
             </Fieldset.Content>
           </Fieldset.Root>

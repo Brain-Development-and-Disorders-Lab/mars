@@ -18,8 +18,8 @@ import {
   Select,
   Separator,
   Spacer,
+  Stack,
   Text,
-  VStack,
   createListCollection,
 } from "@chakra-ui/react";
 import { createColumnHelper, Row } from "@tanstack/react-table";
@@ -843,7 +843,7 @@ const Values = (props: {
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <VStack gap={"1"} separator={<Separator />}>
+                  <Stack gap={"1"} separator={<Separator />}>
                     {options.length > 0 ? (
                       options.map((option, index) => {
                         return (
@@ -897,7 +897,7 @@ const Values = (props: {
                         </Text>
                       </Flex>
                     )}
-                  </VStack>
+                  </Stack>
                 </Flex>
               </Flex>
             </Dialog.Body>

@@ -235,6 +235,17 @@ const Template = () => {
     }
   };
 
+  const handleCancelClick = () => {
+    // Disable editing
+    setEditing(false);
+
+    // Reset Project state values
+    setTemplate(template);
+    setTemplateName(template.name);
+    setTemplateDescription(template.description);
+    setTemplateValues(template.values);
+  };
+
   /**
    * Handle the export button being clicked
    */
@@ -305,7 +316,7 @@ const Template = () => {
             {/* Actions Menu */}
             <Menu.Root id={"actionsMenu"}>
               <Menu.Trigger asChild>
-                <Button size={"sm"} colorPalette={"yellow"}>
+                <Button size={"sm"} rounded={"md"} colorPalette={"yellow"}>
                   Actions
                   <Icon name={"lightning"} />
                 </Button>
@@ -337,21 +348,38 @@ const Template = () => {
                 id={"restoreTemplateButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"orange"}
               >
                 Restore
                 <Icon name={"rewind"} />
               </Button>
             ) : (
-              <Button
-                id={"editTemplateButton"}
-                size={"sm"}
-                colorPalette={editing ? "green" : "blue"}
-                onClick={handleEditClick}
-              >
-                {editing ? "Done" : "Edit"}
-                {editing ? <Icon name={"check"} /> : <Icon name={"edit"} />}
-              </Button>
+              <Flex gap={"2"}>
+                {editing && (
+                  <Button
+                    onClick={handleCancelClick}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                )}
+                <Button
+                  id={"editTemplateButton"}
+                  colorPalette={editing ? "green" : "blue"}
+                  size={"sm"}
+                  rounded={"md"}
+                  onClick={handleEditClick}
+                  loadingText={"Saving..."}
+                  loading={updateLoading}
+                >
+                  {editing ? "Save" : "Edit"}
+                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
+                </Button>
+              </Flex>
             )}
 
             {/* Archive Dialog */}

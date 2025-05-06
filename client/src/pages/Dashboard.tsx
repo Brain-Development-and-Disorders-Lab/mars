@@ -8,13 +8,13 @@ import {
   Text,
   useBreakpoint,
   Tag,
-  VStack,
   Avatar,
   Stat,
   Spacer,
   Link,
   Collapsible,
   Badge,
+  Stack,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -745,7 +745,7 @@ const Dashboard = () => {
             {/* Activity list */}
             {activityData.length > 0 ? (
               <Flex p={"0"} w={"100%"} overflowY={"auto"}>
-                <VStack gap={"3"} w={"95%"}>
+                <Stack gap={"3"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
                       <Flex
@@ -790,7 +790,7 @@ const Dashboard = () => {
                       </Flex>
                     );
                   })}
-                </VStack>
+                </Stack>
               </Flex>
             ) : (
               <Flex

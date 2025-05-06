@@ -15,7 +15,6 @@ import {
   Checkbox,
   Stack,
   Drawer,
-  VStack,
   Card,
   Spacer,
   IconButton,
@@ -1454,7 +1453,7 @@ const Entity = () => {
                     </Drawer.Header>
 
                     <Drawer.Body>
-                      <VStack gap={"2"}>
+                      <Stack gap={"2"}>
                         {entityHistory.length > 0 ? (
                           entityHistory.map((entityVersion) => {
                             return (
@@ -1855,7 +1854,7 @@ const Entity = () => {
                             No History.
                           </Text>
                         )}
-                      </VStack>
+                      </Stack>
                     </Drawer.Body>
                   </Drawer.Content>
                 </Drawer.Positioner>

@@ -24,12 +24,12 @@ import {
   Stack,
   Tag,
   Text,
-  VStack,
   createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
+import Collaborators from "@components/Collaborators";
+import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
@@ -103,7 +103,6 @@ const Project = () => {
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
   );
-  const [newCollaborator, setNewCollaborator] = useState("");
 
   // Save message modal
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -635,9 +634,11 @@ const Project = () => {
             ) : (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
+                  fontWeight={"semibold"}
+                  color={"black"}
                   onClick={() => navigate(`/entities/${info.row.original}`)}
                 >
-                  <Text fontWeight={"semibold"}>View</Text>
+                  View
                 </Link>
                 <Icon name={"a_right"} />
               </Flex>
@@ -843,7 +844,7 @@ const Project = () => {
                   </Drawer.Header>
 
                   <Drawer.Body>
-                    <VStack gap={"2"}>
+                    <Stack gap={"2"}>
                       {projectHistory && projectHistory.length > 0 ? (
                         projectHistory.map((projectVersion) => {
                           return (
@@ -1126,7 +1127,7 @@ const Project = () => {
                           No previous versions.
                         </Text>
                       )}
-                    </VStack>
+                    </Stack>
                   </Drawer.Body>
                 </Drawer.Content>
               </Drawer.Positioner>
@@ -1261,6 +1262,7 @@ const Project = () => {
                   Entities
                 </Text>
                 <Button
+                  colorPalette={"green"}
                   id={"addEntityButton"}
                   onClick={() => setEntitiesOpen(true)}
                   size={"sm"}
@@ -1304,102 +1306,11 @@ const Project = () => {
             </Flex>
 
             {/* Collaborators */}
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              h={"fit-content"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-              grow={"1"}
-            >
-              {/* Collaborators display */}
-              <Flex direction={"column"}>
-                <Text fontSize={"sm"} fontWeight={"bold"} mb={"2"}>
-                  Collaborators
-                </Text>
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Input
-                          placeholder={"ORCiD"}
-                          size={"sm"}
-                          rounded={"md"}
-                          value={newCollaborator}
-                          onChange={(e) => setNewCollaborator(e.target.value)}
-                          disabled={!editing}
-                        />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                  <Spacer />
-                  <Button
-                    colorPalette={"green"}
-                    size={"sm"}
-                    rounded={"md"}
-                    disabled={!editing}
-                    onClick={() => {
-                      // Prevent adding empty or duplicate collaborator
-                      if (
-                        newCollaborator &&
-                        !projectCollaborators.includes(newCollaborator)
-                      ) {
-                        setProjectCollaborators((collaborators) => [
-                          ...collaborators,
-                          newCollaborator,
-                        ]);
-                        setNewCollaborator(""); // Clear the input after adding
-                      }
-                    }}
-                  >
-                    Add
-                    <Icon name={"add"} />
-                  </Button>
-                </Flex>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={"center"}
-                  minH={
-                    projectCollaborators.length > 0 ? "fit-content" : "200px"
-                  }
-                >
-                  {projectCollaborators.length === 0 ? (
-                    <Text
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                    >
-                      No Collaborators
-                    </Text>
-                  ) : (
-                    <VStack align={"start"}>
-                      {projectCollaborators.map((collaborator, index) => (
-                        <Flex key={index} align="center">
-                          <Text mr="4">{collaborator}</Text>
-                          {editing && (
-                            <IconButton
-                              aria-label="Remove collaborator"
-                              onClick={() =>
-                                setProjectCollaborators((collaborators) =>
-                                  collaborators.filter(
-                                    (c) => c !== collaborator,
-                                  ),
-                                )
-                              }
-                            >
-                              <Icon name="delete" />
-                            </IconButton>
-                          )}
-                        </Flex>
-                      ))}
-                    </VStack>
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
+            <Collaborators
+              editing={editing}
+              projectCollaborators={projectCollaborators}
+              setProjectCollaborators={setProjectCollaborators}
+            />
           </Flex>
         </Flex>
 

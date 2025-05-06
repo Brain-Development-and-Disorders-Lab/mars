@@ -9,12 +9,11 @@ import {
   Popover,
   Link,
   Spacer,
-  VStack,
   Spinner,
   Stack,
   Skeleton,
   IconButton,
-  StackSeparator,
+  Separator,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -184,7 +183,7 @@ const SearchBox = (props: SearchBoxProps) => {
               ) : (
                 hasSearched &&
                 !isError && (
-                  <VStack gap={"2"} separator={<StackSeparator />} w={"100%"}>
+                  <Stack gap={"2"} separator={<Separator />} w={"100%"}>
                     {results.length > 0 ? (
                       results.slice(0, MAX_RESULTS).map((result) => {
                         return (
@@ -219,7 +218,7 @@ const SearchBox = (props: SearchBoxProps) => {
                         </Text>
                       </Flex>
                     )}
-                  </VStack>
+                  </Stack>
                 )
               )}
             </Flex>

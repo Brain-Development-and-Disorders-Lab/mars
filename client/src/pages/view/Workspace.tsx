@@ -2,21 +2,19 @@
 import React, { useEffect, useState } from "react";
 import {
   Flex,
-  Spacer,
   Input,
   Button,
-  IconButton,
   Text,
   useBreakpoint,
   Heading,
   Code,
   Fieldset,
   Field,
-  Separator,
 } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
+import Collaborators from "@components/Collaborators";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
@@ -47,14 +45,10 @@ import _ from "lodash";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
 
 const Workspace = () => {
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
-
-  // Authentication
-  const { token } = useAuthentication();
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -208,7 +202,6 @@ const Workspace = () => {
   const [showArchivedTemplates, setShowArchivedTemplates] = useState(false);
 
   // State for Workspace collaborators
-  const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
 
   // State for Workspace Counters
@@ -521,23 +514,24 @@ const Workspace = () => {
             <Button
               size={"sm"}
               rounded={"md"}
-              aria-label={"View Entity"}
-              onClick={() => navigate(`/entities/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-            <Button
-              size={"sm"}
-              rounded={"md"}
               aria-label={"Archive Entity"}
-              colorPalette={showArchivedEntities ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveEntity(info.row.original._id, !showArchivedEntities)
               }
             >
               {showArchivedEntities ? "Restore" : "Archive"}
               {<Icon name={showArchivedEntities ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -588,23 +582,24 @@ const Workspace = () => {
             <Button
               size={"sm"}
               rounded={"md"}
-              aria-label={"View Project"}
-              onClick={() => navigate(`/projects/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-            <Button
-              size={"sm"}
-              rounded={"md"}
               aria-label={"Archive Project"}
-              colorPalette={showArchivedProjects ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveProject(info.row.original._id, !showArchivedProjects)
               }
             >
               {showArchivedProjects ? "Restore" : "Archive"}
               {<Icon name={showArchivedProjects ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Project"}
+              onClick={() => navigate(`/projects/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -655,23 +650,24 @@ const Workspace = () => {
             <Button
               size={"sm"}
               rounded={"md"}
-              aria-label={"View Template"}
-              onClick={() => navigate(`/templates/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-            <Button
-              size={"sm"}
-              rounded={"md"}
               aria-label={"Archive Template"}
-              colorPalette={showArchivedTemplates ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveTemplate(info.row.original._id, !showArchivedTemplates)
               }
             >
               {showArchivedTemplates ? "Restore" : "Archive"}
               {<Icon name={showArchivedTemplates ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Template"}
+              onClick={() => navigate(`/templates/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -833,10 +829,10 @@ const Workspace = () => {
             direction={"column"}
             p={"2"}
             h={"fit-content"}
+            w={{ base: "100%", md: "50%" }}
             gap={"2"}
             bg={"gray.100"}
             rounded={"md"}
-            basis={"50%"}
           >
             <Flex direction={"row"} gap={"2"}>
               <Flex grow={"1"}>
@@ -867,14 +863,14 @@ const Workspace = () => {
             {/* "Visibility" and "Owner" fields */}
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Visibility
                 </Text>
                 <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Owner
                 </Text>
                 <Flex>
@@ -923,119 +919,12 @@ const Workspace = () => {
 
         <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
           {/* Workspace collaborators */}
-          <Flex
-            direction={"column"}
-            p={"2"}
-            gap={"2"}
-            h={"fit-content"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-            rounded={"md"}
-            basis={"50%"}
-          >
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Collaborators
-            </Text>
-            <Flex>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Add Collaborators by their ORCiD.
-              </Text>
-            </Flex>
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Field.Root>
-                    <Input
-                      placeholder={"ORCiD"}
-                      size={"sm"}
-                      rounded={"md"}
-                      w={"100%"}
-                      value={collaborator}
-                      onChange={(event) => setCollaborator(event.target.value)}
-                    />
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
-
-              <Separator />
-
-              <Button
-                colorPalette={"green"}
-                size={"sm"}
-                rounded={"md"}
-                disabled={collaborator === ""}
-                onClick={() => {
-                  // Prevent adding empty or duplicate collaborator
-                  if (collaborator && !collaborators.includes(collaborator)) {
-                    setCollaborators((collaborators) => [
-                      ...collaborators,
-                      collaborator,
-                    ]);
-                    setCollaborator("");
-                  }
-                }}
-              >
-                Add
-                <Icon name={"add"} />
-              </Button>
-            </Flex>
-            <Flex
-              w={"100%"}
-              justify={collaborators.length === 0 ? "center" : ""}
-              align={"center"}
-              minH={collaborators.length > 0 ? "fit-content" : "200px"}
-            >
-              {collaborators.length === 0 ? (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No Collaborators
-                </Text>
-              ) : (
-                <Flex w={"100%"} direction={"column"} gap={"2"}>
-                  {collaborators.map((collaborator, index) => (
-                    <Flex
-                      key={index}
-                      align={"center"}
-                      gap={"2"}
-                      py={"2"}
-                      w={"100%"}
-                    >
-                      <Flex>
-                        <ActorTag
-                          orcid={collaborator}
-                          fallback={"Unknown Collaborator"}
-                          size={"md"}
-                        />
-                      </Flex>
-                      <Spacer />
-                      <IconButton
-                        size={"sm"}
-                        rounded={"md"}
-                        aria-label={"Remove collaborator"}
-                        colorPalette={
-                          token.orcid === collaborator ? "orange" : "red"
-                        }
-                        onClick={() =>
-                          setCollaborators((collaborators) =>
-                            collaborators.filter(
-                              (existing) => existing !== collaborator,
-                            ),
-                          )
-                        }
-                        disabled={
-                          collaborator === owner && token.orcid !== owner
-                        }
-                      >
-                        <Icon
-                          name={
-                            token.orcid === collaborator ? "b_right" : "delete"
-                          }
-                        />
-                      </IconButton>
-                    </Flex>
-                  ))}
-                </Flex>
-              )}
-            </Flex>
+          <Flex w={{ base: "100%", md: "50%" }}>
+            <Collaborators
+              editing={true}
+              projectCollaborators={collaborators}
+              setProjectCollaborators={setCollaborators}
+            />
           </Flex>
 
           {/* Workspace Entities */}
@@ -1054,11 +943,12 @@ const Workspace = () => {
                 {showArchivedEntities ? "Archived " : ""}Entities
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
                 rounded={"md"}
                 onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
-                {showArchivedEntities ? "Hide" : "Show"} Archive
+                {showArchivedEntities ? "Hide" : "Show"} Archived
                 <Icon name={"archive"} />
               </Button>
             </Flex>
@@ -1104,11 +994,12 @@ const Workspace = () => {
                 {showArchivedProjects ? "Archived " : ""}Projects
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
                 rounded={"md"}
                 onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
-                {showArchivedProjects ? "Hide" : "Show"} Archive
+                {showArchivedProjects ? "Hide" : "Show"} Archived
                 <Icon name={"archive"} />
               </Button>
             </Flex>
@@ -1152,11 +1043,12 @@ const Workspace = () => {
                 {showArchivedTemplates ? "Archived " : ""}Templates
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
                 rounded={"md"}
                 onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
               >
-                {showArchivedTemplates ? "Hide" : "Show"} Archive
+                {showArchivedTemplates ? "Hide" : "Show"} Archived
                 <Icon name={"archive"} />
               </Button>
             </Flex>

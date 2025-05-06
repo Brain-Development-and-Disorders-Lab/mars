@@ -19,7 +19,6 @@ import {
   Stack,
   Steps,
   Text,
-  VStack,
   createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -918,7 +917,7 @@ const Entity = () => {
             >
               {/* Display all Attributes */}
               {selectedAttributes.length > 0 ? (
-                <VStack gap={"2"} w={"100%"}>
+                <Stack gap={"2"} w={"100%"}>
                   {selectedAttributes.map((attribute) => {
                     return (
                       <AttributeCard
@@ -935,7 +934,7 @@ const Entity = () => {
                       />
                     );
                   })}
-                </VStack>
+                </Stack>
               ) : (
                 <Flex w={"100%"} h={"100%"} align={"center"} justify={"center"}>
                   <Text
