@@ -988,6 +988,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             {_.isEqual(importType, "entities") && (
               <Steps.Root
                 step={entityStep}
+                colorPalette={"blue"}
                 onStepChange={(event) => setEntityStep(event.step)}
                 count={entitySteps.length}
                 pb={"2"}
@@ -1007,6 +1008,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             {_.isEqual(importType, "template") && (
               <Steps.Root
                 step={templateStep}
+                colorPalette={"blue"}
                 onStepChange={(event) => setTemplateStep(event.step)}
                 count={templateSteps.length}
                 pb={"2"}

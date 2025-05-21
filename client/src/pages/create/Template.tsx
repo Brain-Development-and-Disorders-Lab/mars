@@ -10,6 +10,7 @@ import {
   Fieldset,
   Flex,
   Heading,
+  IconButton,
   Input,
   Spacer,
   Text,
@@ -151,6 +152,7 @@ const Template = () => {
             <Spacer />
             <Button
               size={"sm"}
+              rounded={"md"}
               variant={"outline"}
               onClick={() => setInformationOpen(true)}
             >
@@ -173,7 +175,7 @@ const Template = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
             >
@@ -218,7 +220,7 @@ const Template = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root>
@@ -270,10 +272,30 @@ const Template = () => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            {/* p={"2"} w={["lg", "xl", "2xl"]} */}
-            <Dialog.Header p={"2"}>Template Attributes</Dialog.Header>
+            <Dialog.CloseTrigger asChild>
+              <IconButton
+                bg={"white"}
+                _hover={{ bg: "gray.200" }}
+                variant={"subtle"}
+                color={"black"}
+                onClick={() => setInformationOpen(false)}
+              >
+                <Icon name={"close"} />
+              </IconButton>
+            </Dialog.CloseTrigger>
+            <Dialog.Header
+              p={"2"}
+              mt={"2"}
+              fontWeight={"semibold"}
+              fontSize={"md"}
+            >
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"project"} size={"sm"} />
+                Template Attributes
+              </Flex>
+            </Dialog.Header>
             <Dialog.Body p={"2"}>
-              <Flex gap={"4"} direction={"column"}>
+              <Flex gap={"2"} direction={"column"}>
                 <Flex direction={"column"} gap={"2"}>
                   <Heading size={"sm"}>Overview</Heading>
                   <Text fontSize={"sm"}>
@@ -361,6 +383,7 @@ const Template = () => {
       <Flex direction={"row"} wrap={"wrap"} p={"2"}>
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={"red"}
           variant={"outline"}
           onClick={() => navigate("/templates")}
@@ -371,6 +394,7 @@ const Template = () => {
         <Spacer />
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={"green"}
           onClick={onSubmit}
           disabled={isDetailsError || isValueError || isSubmitting}

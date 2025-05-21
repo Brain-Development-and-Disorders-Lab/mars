@@ -286,6 +286,7 @@ const Navigation = () => {
               display={{ base: "flex", lg: "none" }}
               size={"md"}
               bg={"white"}
+              color={"gray.500"}
             >
               <Icon name={"list"} />
             </IconButton>

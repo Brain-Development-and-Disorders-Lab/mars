@@ -182,6 +182,7 @@ const Project = () => {
             <Spacer />
             <Button
               size={"sm"}
+              rounded={"md"}
               variant={"outline"}
               onClick={() => setInformationOpen(true)}
             >
@@ -206,7 +207,7 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root invalid={isNameError}>
@@ -279,7 +280,7 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Project description */}
@@ -318,6 +319,7 @@ const Project = () => {
             </Text>
             <Button
               size={"sm"}
+              rounded={"md"}
               colorPalette={"green"}
               onClick={() => setEntitiesOpen(true)}
             >
@@ -331,7 +333,7 @@ const Project = () => {
             gap={"2"}
             w={"100%"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
@@ -383,6 +385,7 @@ const Project = () => {
       >
         <Button
           size={"sm"}
+          rounded={"md"}
           colorPalette={"red"}
           variant={"outline"}
           onClick={() => navigate("/projects")}
@@ -394,6 +397,7 @@ const Project = () => {
         <Button
           id={"finishCreateProjectButton"}
           size={"sm"}
+          rounded={"md"}
           colorPalette={"green"}
           onClick={async () => {
             // Capture event
@@ -458,6 +462,7 @@ const Project = () => {
               <Button
                 colorPalette={"red"}
                 size={"sm"}
+                rounded={"md"}
                 variant={"outline"}
                 onClick={() => setEntitiesOpen(false)}
               >
@@ -471,6 +476,7 @@ const Project = () => {
                 id={"addEntityDoneButton"}
                 colorPalette={"green"}
                 size={"sm"}
+                rounded={"md"}
                 onClick={() => {
                   // Add the Origin to the Entity
                   addEntities(selectedEntity);
@@ -496,10 +502,30 @@ const Project = () => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            {/* px={"2"} gap={"0"} w={["xl", "2xl"]} */}
-            <Dialog.Header p={"2"}>Projects</Dialog.Header>
-            <Dialog.Body p={"0"}>
-              <Flex direction={"column"} gap={"2"} p={"2"}>
+            <Dialog.CloseTrigger asChild>
+              <IconButton
+                bg={"white"}
+                _hover={{ bg: "gray.200" }}
+                variant={"subtle"}
+                color={"black"}
+                onClick={() => setInformationOpen(false)}
+              >
+                <Icon name={"close"} />
+              </IconButton>
+            </Dialog.CloseTrigger>
+            <Dialog.Header
+              p={"2"}
+              mt={"2"}
+              fontWeight={"semibold"}
+              fontSize={"md"}
+            >
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"project"} size={"sm"} />
+                Projects
+              </Flex>
+            </Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
                 <Text fontSize={"sm"}>
                   Projects can be used to organize and share Entities.
                 </Text>

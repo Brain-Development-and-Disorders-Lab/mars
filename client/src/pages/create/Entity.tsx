@@ -11,6 +11,7 @@ import {
   Fieldset,
   Flex,
   Heading,
+  IconButton,
   Input,
   ListCollection,
   Portal,
@@ -431,6 +432,7 @@ const Entity = () => {
         {/* Stepper progress indicator */}
         <Steps.Root
           step={pageStep}
+          colorPalette={"blue"}
           onStepChange={(event) => setPageStep(event.step)}
           count={pageSteps.length}
           px={"2"}
@@ -968,10 +970,31 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"}>Entities</Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <IconButton
+                  bg={"white"}
+                  _hover={{ bg: "gray.200" }}
+                  variant={"subtle"}
+                  color={"black"}
+                  onClick={() => setInformationOpen(false)}
+                >
+                  <Icon name={"close"} />
+                </IconButton>
+              </Dialog.CloseTrigger>
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"entity"} size={"sm"} />
+                  Entities
+                </Flex>
+              </Dialog.Header>
               <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"4"} p={"2"}>
-                  <Heading size={"md"}>Overview</Heading>
+                <Flex direction={"column"} gap={"2"}>
+                  <Heading size={"sm"}>1. Start</Heading>
                   <Text>
                     Specify some basic details about this Entity. Relations
                     between Entities and membership to Projects can be specified
@@ -979,12 +1002,12 @@ const Entity = () => {
                     this Entity should be specified using Attributes and
                     corresponding Values.
                   </Text>
-                  <Heading size={"md"}>Relationships</Heading>
+                  <Heading size={"sm"}>2. Relationships</Heading>
                   <Text>
                     Relations between Entities and membership to Projects can be
                     specified using Relationships.
                   </Text>
-                  <Heading size={"md"}>Attributes</Heading>
+                  <Heading size={"sm"}>3. Attributes</Heading>
                   <Text>
                     The metadata associated with this Entity should be specified
                     using Attributes and corresponding Values.
