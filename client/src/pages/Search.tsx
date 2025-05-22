@@ -18,6 +18,7 @@ import {
   Text,
   useBreakpoint,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
@@ -209,9 +210,11 @@ const Search = () => {
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          <Tag.Root>
-            <Tag.Label>{info.getValue()}</Tag.Label>
-          </Tag.Root>
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
         );
       },
       header: "Owner",
@@ -219,7 +222,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
         return (
-          <Tag.Root>
+          <Tag.Root colorPalette={"green"}>
             <Tag.Label>
               {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
             </Tag.Label>
@@ -252,10 +255,14 @@ const Search = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
