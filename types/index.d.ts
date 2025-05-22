@@ -449,6 +449,7 @@ export type IconNames =
   | "expand"
   | "delete"
   | "download"
+  | "filter"
   | "upload"
   | "cross"
   | "list"

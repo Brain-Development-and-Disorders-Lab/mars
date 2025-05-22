@@ -8,9 +8,10 @@ import {
   Heading,
   Input,
   Link,
+  Menu,
+  Portal,
   Spacer,
   Spinner,
-  Switch,
   Tabs,
   Tag,
   Text,
@@ -21,7 +22,6 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import { Information } from "@components/Label";
 import { toaster } from "@components/Toast";
 
 // `react-querybuilder` imports
@@ -152,7 +152,6 @@ const Search = () => {
 
   const onTabChange = () => {
     // Reset search state
-    setQuery("");
     setHasSearched(false);
     setResults([]);
   };
@@ -652,6 +651,7 @@ const Search = () => {
           w={"100%"}
           size={"sm"}
           colorPalette={"blue"}
+          defaultValue={"text"}
           onChange={onTabChange}
         >
           <Tabs.List p={"2"} gap={"2"} pb={"0"}>
@@ -666,23 +666,72 @@ const Search = () => {
           {/* Text search */}
           <Tabs.Content value={"text"} p={"2"}>
             <Flex direction={"column"} gap={"2"}>
-              <Information
-                text={
-                  "Use text search to search for terms appearing in Entities within the Workspace."
-                }
-              />
+              {/* Search options */}
+              <Flex justify={"space-between"} align={"center"}>
+                <Menu.Root>
+                  <Menu.Trigger asChild>
+                    <Button
+                      variant={"outline"}
+                      colorPalette={"gray"}
+                      size={"sm"}
+                      rounded={"md"}
+                    >
+                      <Icon name={"settings"} />
+                      Options
+                    </Button>
+                  </Menu.Trigger>
+                  <Portal>
+                    <Menu.Positioner>
+                      <Menu.Content>
+                        <Menu.ItemGroup>
+                          <Menu.ItemGroupLabel>Options</Menu.ItemGroupLabel>
+                          <Menu.CheckboxItem
+                            key={"archived"}
+                            value={"archived"}
+                            checked={showArchived}
+                            onCheckedChange={(event) => setShowArchived(event)}
+                          >
+                            Show Archived
+                            <Menu.ItemIndicator />
+                          </Menu.CheckboxItem>
+                        </Menu.ItemGroup>
+                      </Menu.Content>
+                    </Menu.Positioner>
+                  </Portal>
+                </Menu.Root>
 
+                <Menu.Root>
+                  <Menu.Trigger asChild>
+                    <Button
+                      variant={"outline"}
+                      colorPalette={"gray"}
+                      size={"sm"}
+                      rounded={"md"}
+                      disabled
+                    >
+                      <Icon name={"filter"} />
+                      Filters
+                    </Button>
+                  </Menu.Trigger>
+                  <Portal>
+                    <Menu.Positioner>
+                      <Menu.Content></Menu.Content>
+                    </Menu.Positioner>
+                  </Portal>
+                </Menu.Root>
+              </Flex>
+
+              {/* Search input and submit */}
               <Flex
                 w={"100%"}
                 direction={"row"}
                 gap={"2"}
                 align={"center"}
-                p={"2"}
                 border={"1px"}
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                <Flex w={"60%"} maxW={"xl"}>
+                <Flex w={"100%"}>
                   <Input
                     size={"sm"}
                     rounded={"md"}
@@ -700,40 +749,26 @@ const Search = () => {
 
                 <Spacer />
 
-                {breakpoint !== "base" && (
-                  <Flex gap={"2"} align={"center"}>
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.800"}
-                    >
-                      Options:
-                    </Text>
-                    <Switch.Root
-                      checked={showArchived}
-                      onCheckedChange={(event) =>
-                        setShowArchived(event.checked)
-                      }
-                    >
-                      <Switch.HiddenInput />
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                      <Switch.Label />
-                    </Switch.Root>
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.600"}
-                    >
-                      Include Archived
-                    </Text>
-                  </Flex>
-                )}
+                <Button
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"gray"}
+                  variant={"outline"}
+                  disabled={query === ""}
+                  onClick={() => {
+                    setQuery("");
+                    setHasSearched(false);
+                    setResults([]);
+                    setIsSearching(false);
+                  }}
+                >
+                  Clear
+                </Button>
 
                 <Button
                   aria-label={"Search"}
                   size={"sm"}
+                  rounded={"md"}
                   colorPalette={"green"}
                   disabled={query === ""}
                   onClick={() => runSearch()}
@@ -748,12 +783,6 @@ const Search = () => {
           {/* Query builder */}
           <Tabs.Content value={"advanced"} p={"2"}>
             <Flex direction={"column"} gap={"2"}>
-              <Information
-                text={
-                  "Use the query builder to construct advanced queries to search for Entities within the Workspace."
-                }
-              />
-
               <Flex direction={"column"} gap={"2"}>
                 <QueryBuilderChakra>
                   <QueryBuilderDnD
@@ -775,6 +804,7 @@ const Search = () => {
                     aria-label={"Run Query"}
                     colorPalette={"green"}
                     size={"sm"}
+                    rounded={"md"}
                     onClick={() => onSearchBuiltQuery()}
                     disabled={!isValid}
                   >
