@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Input,
@@ -152,8 +153,8 @@ const Search = () => {
 
   const onTabChange = () => {
     // Reset search state
-    setHasSearched(false);
     setResults([]);
+    setHasSearched(false);
   };
 
   // Effect to adjust column visibility
@@ -650,17 +651,24 @@ const Search = () => {
         <Tabs.Root
           w={"100%"}
           size={"sm"}
-          colorPalette={"blue"}
           defaultValue={"text"}
-          onChange={onTabChange}
+          variant={"subtle"}
+          onValueChange={onTabChange}
         >
           <Tabs.List p={"2"} gap={"2"} pb={"0"}>
-            <Tabs.Trigger value={"text"} disabled={isSearching}>
-              Text
-            </Tabs.Trigger>
-            <Tabs.Trigger value={"advanced"} disabled={isSearching}>
-              Query Builder
-            </Tabs.Trigger>
+            <Flex gap={"2"} align={"center"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Search Using:
+              </Text>
+              <Tabs.Trigger value={"text"} disabled={isSearching}>
+                <Icon name={"text"} size={"sm"} />
+                Text
+              </Tabs.Trigger>
+              <Tabs.Trigger value={"advanced"} disabled={isSearching}>
+                <Icon name={"search_query"} />
+                Query Builder
+              </Tabs.Trigger>
+            </Flex>
           </Tabs.List>
 
           {/* Text search */}
@@ -793,13 +801,28 @@ const Search = () => {
                         queryBuilder: "queryBuilder-branches",
                       }}
                       fields={advancedQueryFields}
+                      query={advancedQuery}
                       onQueryChange={setAdvancedQuery}
                       controlElements={{ valueEditor: SearchQueryValue }}
                       enableDragAndDrop
                     />
                   </QueryBuilderDnD>
                 </QueryBuilderChakra>
-                <Flex>
+                <Flex justify={"right"} gap={"2"}>
+                  <Button
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"gray"}
+                    variant={"outline"}
+                    disabled={advancedQuery.rules.length === 0}
+                    onClick={() => {
+                      setAdvancedQuery(initialAdvancedQuery);
+                      setHasSearched(false);
+                      setResults([]);
+                    }}
+                  >
+                    Clear
+                  </Button>
                   <Button
                     aria-label={"Run Query"}
                     colorPalette={"green"}
@@ -808,7 +831,7 @@ const Search = () => {
                     onClick={() => onSearchBuiltQuery()}
                     disabled={!isValid}
                   >
-                    Run Query
+                    Search
                     <Icon name={"search"} />
                   </Button>
                 </Flex>
@@ -869,6 +892,19 @@ const Search = () => {
                 </Flex>
               )}
             </Flex>
+          )}
+
+          {!hasSearched && !isSearching && (
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"search"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>
+                  Enter a search query to find Entities
+                </EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

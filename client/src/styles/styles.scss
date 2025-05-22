@@ -28,11 +28,11 @@ a:hover {
   select,
   input {
     height: var(--input-height);
-    width: fit-content;
+    background: var(--chakra-colors-white);
+    border-radius: var(--chakra-radii-md);
     --input-font-size: var(--chakra-fontSizes-sm);
     --input-border-radius: var(--chakra-radii-md);
     --input-height: var(--chakra-sizes-8);
-    background: var(--chakra-colors-white);
   }
   button {
     display: inline-flex;
@@ -40,12 +40,13 @@ a:hover {
     height: var(--chakra-sizes-8);
     align-items: center;
     justify-content: center;
+    border-radius: var(--chakra-radii-md);
   }
 
   .ruleGroup {
     display: flex;
     width: 100%;
-    gap: var(--chakra-space-2);
+    gap: var(--chakra-spacing-2);
     flex-direction: column;
     background: white;
     border-radius: var(--chakra-radii-md);
@@ -84,11 +85,11 @@ a:hover {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: var(--chakra-space-2);
+  gap: var(--chakra-spacing-2);
   flex-wrap: wrap;
 
   .ruleGroup-notToggle {
-    gap: var(--chakra-space-2);
+    gap: var(--chakra-spacing-2);
   }
 
   .ruleGroup-combinators {
@@ -98,7 +99,8 @@ a:hover {
 
   .ruleGroup-addRule,
   .ruleGroup-addGroup {
-    padding: var(--chakra-space-2);
+    font-size: var(--chakra-font-sizes-sm);
+    padding: var(--chakra-spacing-2);
     background: var(--chakra-colors-blue-500);
     color: var(--chakra-colors-white);
     svg {
@@ -111,10 +113,12 @@ a:hover {
   }
 
   .ruleGroup-remove {
-    padding: var(--chakra-space-2);
+    padding: var(--chakra-spacing-2);
     background: var(--chakra-colors-red-500);
     svg {
       color: var(--chakra-colors-white);
+      width: var(--chakra-sizes-3);
+      height: var(--chakra-sizes-3);
     }
   }
   .ruleGroup-remove:hover {
@@ -122,7 +126,7 @@ a:hover {
   }
 
   .ruleGroup-cloneGroup {
-    padding: var(--chakra-space-2);
+    padding: var(--chakra-spacing-2);
     background: var(--chakra-colors-yellow-400);
   }
   .ruleGroup-cloneGroup:hover {
@@ -139,9 +143,12 @@ a:hover {
   flex-direction: column;
 
   .rule-remove {
+    padding: var(--chakra-spacing-2);
     background: var(--chakra-colors-red-500);
     svg {
       color: var(--chakra-colors-white);
+      width: var(--chakra-sizes-3);
+      height: var(--chakra-sizes-3);
     }
   }
   .rule-remove:hover {
@@ -149,7 +156,7 @@ a:hover {
   }
 
   .rule-cloneRule {
-    padding: var(--chakra-space-2);
+    padding: var(--chakra-spacing-2);
     background: var(--chakra-colors-yellow-400);
   }
   .rule-cloneRule:hover {
@@ -158,13 +165,16 @@ a:hover {
 
   .rule {
     display: flex;
-    gap: var(--chakra-space-2);
+    gap: var(--chakra-spacing-2);
     flex-wrap: wrap;
 
     .rule-remove {
+      padding: var(--chakra-spacing-2);
       background: var(--chakra-colors-red-500);
       svg {
         color: var(--chakra-colors-white);
+        width: var(--chakra-sizes-3);
+        height: var(--chakra-sizes-3);
       }
     }
     .rule-remove:hover {
