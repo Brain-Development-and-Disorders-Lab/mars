@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Dialog, Flex, Input, Spinner, Text } from "@chakra-ui/react";
+import {
+  Button,
+  CloseButton,
+  Dialog,
+  Flex,
+  Input,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
@@ -288,8 +296,18 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"}>Scan Identifier</Dialog.Header>
-          <Dialog.Body px={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
+          <Dialog.Header
+            p={"2"}
+            mt={"2"}
+            fontWeight={"semibold"}
+            fontSize={"md"}
+          >
+            Scan Label
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size={"sm"} onClick={handleOnClose} />
+            </Dialog.CloseTrigger>
+          </Dialog.Header>
+          <Dialog.Body p={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
             {/* Camera view */}
             <Flex justify={"center"} align={"center"}>
               <Flex
@@ -310,6 +328,7 @@ const ScanModal = (props: ScanModalProps) => {
               <Flex
                 w={"100%"}
                 h={"100%"}
+                minH={"200px"}
                 justify={"center"}
                 align={"center"}
                 p={"2"}
@@ -317,7 +336,7 @@ const ScanModal = (props: ScanModalProps) => {
               >
                 <Spinner />
                 <Text fontWeight={"semibold"} fontSize={"sm"}>
-                  Initializing camera...
+                  Preparing camera...
                 </Text>
               </Flex>
             )}
@@ -325,7 +344,7 @@ const ScanModal = (props: ScanModalProps) => {
             {/* Manual entry field */}
             <Flex
               align={"center"}
-              mt={"4"}
+              mt={"2"}
               w={"100%"}
               justify={"center"}
               gap={"2"}
@@ -334,10 +353,11 @@ const ScanModal = (props: ScanModalProps) => {
                 <Flex>
                   <Button
                     size={"sm"}
+                    rounded={"md"}
                     colorPalette={"blue"}
                     onClick={handleManualInputSelect}
                   >
-                    Enter manually
+                    Enter Identifier
                   </Button>
                 </Flex>
               )}
@@ -358,6 +378,8 @@ const ScanModal = (props: ScanModalProps) => {
 
                   <Button
                     size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
                     loading={loading}
                     onClick={runManualSearch}
                   >
@@ -367,6 +389,7 @@ const ScanModal = (props: ScanModalProps) => {
 
                   <Button
                     size={"sm"}
+                    rounded={"md"}
                     loading={loading}
                     colorPalette={"red"}
                     onClick={() => setShowInput(false)}
