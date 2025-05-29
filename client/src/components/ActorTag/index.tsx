@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Skeleton, Text, useBreakpoint } from "@chakra-ui/react";
+import { Avatar, Flex, Skeleton, Text } from "@chakra-ui/react";
 
 // Existing and custom types
 import { ActorTagProps, UserModel } from "@types";
@@ -11,6 +11,9 @@ import { ActorTagProps, UserModel } from "@types";
 import _ from "lodash";
 import { gql, useQuery } from "@apollo/client";
 
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
+
 const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 
 const ActorTag = (props: ActorTagProps) => {
@@ -18,8 +21,7 @@ const ActorTag = (props: ActorTagProps) => {
   const [actorLabel, setActorLabel] = useState(props.fallback);
 
   // Breakpoint state
-  const breakpoint = useBreakpoint();
-
+  const { isBreakpointActive } = useBreakpoint();
   // GraphQL operations
   const GET_USER = gql`
     query GetUser($_id: String) {
@@ -81,7 +83,7 @@ const ActorTag = (props: ActorTagProps) => {
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
               {actorLabel}
             </Text>
-            {breakpoint !== "base" && (
+            {isBreakpointActive("xl", "up") && (
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                 {props.orcid}
               </Text>

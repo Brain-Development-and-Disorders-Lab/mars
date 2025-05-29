@@ -1,16 +1,13 @@
 // React
 import React from "react";
-import {
-  Flex,
-  IconButton,
-  Spacer,
-  Text,
-  useBreakpoint,
-} from "@chakra-ui/react";
+import { Flex, IconButton, Spacer, Text } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
+
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Existing and custom types
 import { VisibilityTagProps } from "@types";
@@ -20,7 +17,7 @@ import consola from "consola";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
-  const breakpoint = useBreakpoint();
+  const { isBreakpointActive } = useBreakpoint();
 
   /**
    * Handler function for visibility toggle button
@@ -53,7 +50,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         <Text fontSize={"sm"} fontWeight={"semibold"}>
           {props.isPublic ? "Public" : "Private"}
         </Text>
-        {breakpoint !== "base" && (
+        {isBreakpointActive("xl", "up") && (
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
             {props.isPublic ? "Everyone" : "Workspace Users only"}
           </Text>

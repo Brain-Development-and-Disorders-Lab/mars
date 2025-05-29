@@ -11,7 +11,6 @@ import {
   Checkbox,
   Menu,
   Button,
-  useBreakpoint,
   Portal,
   createListCollection,
   Fieldset,
@@ -27,6 +26,9 @@ import {
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
+
 // Existing and custom types
 import { DataTableProps } from "@types";
 declare module "@tanstack/react-table" {
@@ -40,7 +42,8 @@ declare module "@tanstack/react-table" {
 import _ from "lodash";
 
 const DataTable = (props: DataTableProps) => {
-  const breakpoint = useBreakpoint();
+  // Breakpoint state
+  const { isBreakpointActive } = useBreakpoint();
 
   // Page length collection
   const [pageLength, setPageLength] = useState<string[]>(["10"]);
@@ -504,7 +507,7 @@ const DataTable = (props: DataTableProps) => {
 
         {/* Table item counter */}
         {props.showItemCount &&
-          _.includes(["xl", "2xl"], breakpoint) &&
+          isBreakpointActive("xl", "up") &&
           itemCountComponent}
 
         {props.showPagination && (
