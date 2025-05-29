@@ -10,7 +10,6 @@ import {
   Spacer,
   Tag,
   Text,
-  useBreakpoint,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
@@ -30,8 +29,9 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
-// Workspace context
+// Context and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -88,20 +88,21 @@ const Templates = () => {
     }
   }, [workspace]);
 
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    timestamp: true,
+    owner: true,
+  });
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, timestamp: false, owner: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      timestamp: !isMobile,
+      owner: !isMobile,
+    });
   }, [breakpoint]);
 
   // Configure table columns and data

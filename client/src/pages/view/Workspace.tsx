@@ -5,7 +5,6 @@ import {
   Input,
   Button,
   Text,
-  useBreakpoint,
   Heading,
   Code,
   Fieldset,
@@ -43,11 +42,11 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import _ from "lodash";
 
-// Contexts
+// Contexts and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 const Workspace = () => {
-  const breakpoint = useBreakpoint();
   const navigate = useNavigate();
 
   // Query to get a Workspace
@@ -415,10 +414,8 @@ const Workspace = () => {
     }
   };
 
-  const truncateTableText =
-    _.isEqual(breakpoint, "sm") ||
-    _.isEqual(breakpoint, "base") ||
-    _.isUndefined(breakpoint);
+  const { isBreakpointActive } = useBreakpoint();
+  const truncateTableText = !isBreakpointActive("md", "up");
 
   // Utility functions for archiving or restoring Workspace contents
   const archiveEntity = async (_id: string, state: boolean) => {

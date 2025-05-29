@@ -6,7 +6,6 @@ import {
   Button,
   Text,
   Heading,
-  useBreakpoint,
   IconButton,
   Tag,
   Separator,
@@ -37,8 +36,9 @@ import {
 // GraphQL imports
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
-// Authentication context
+// Context and hooks
 import { useAuthentication } from "@hooks/useAuthentication";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -181,7 +181,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 };
 
 const User = () => {
-  const breakpoint = useBreakpoint();
+  const { isBreakpointActive } = useBreakpoint();
 
   // Authentication
   const { token } = useAuthentication();
@@ -365,10 +365,7 @@ const User = () => {
     }
   };
 
-  const truncateTableText =
-    _.isEqual(breakpoint, "sm") ||
-    _.isEqual(breakpoint, "base") ||
-    _.isUndefined(breakpoint);
+  const truncateTableText = !isBreakpointActive("md", "up");
 
   // Utility functions for removing Workspace contents
   const removeWorkspace = (_id: string) => {

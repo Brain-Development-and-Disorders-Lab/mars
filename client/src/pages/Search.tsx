@@ -16,7 +16,6 @@ import {
   Tabs,
   Tag,
   Text,
-  useBreakpoint,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -43,6 +42,9 @@ import { QueryBuilderChakra } from "@react-querybuilder/chakra";
 
 // SearchQueryValue component for searching Entity fields
 import SearchQueryValue from "@components/SearchQueryValue";
+
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -71,7 +73,7 @@ const Search = () => {
   const [isError, setIsError] = useState(false);
 
   const navigate = useNavigate();
-  const breakpoint = useBreakpoint();
+  const { breakpoint } = useBreakpoint();
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
@@ -160,15 +162,12 @@ const Search = () => {
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, owner: false, created: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      owner: !isMobile,
+      created: !isMobile,
+    });
   }, [breakpoint]);
 
   const searchResultColumnHelper = createColumnHelper<EntityModel>();

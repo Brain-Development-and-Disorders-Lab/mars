@@ -8,7 +8,6 @@ import {
   Spacer,
   Tag,
   Text,
-  useBreakpoint,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -28,7 +27,8 @@ import dayjs from "dayjs";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Workspace context
+// Context and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
@@ -53,34 +53,25 @@ const Projects = () => {
   const navigate = useNavigate();
 
   // Effect to adjust column visibility
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    created: true,
+    owner: true,
+    entities: true,
+  });
+
   useEffect(() => {
-    if (
-      _.includes(["md", "sm", "base"], breakpoint) ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({
-        description: false,
-        created: false,
-        owner: false,
-        entities: false,
-      });
-    } else if (_.includes(["lg"], breakpoint)) {
-      setVisibleColumns({
-        description: false,
-        created: false,
-        owner: true,
-        entities: true,
-      });
-    } else {
-      setVisibleColumns({
-        description: true,
-        created: true,
-        owner: true,
-        entities: true,
-      });
-    }
+    const isMobile =
+      breakpoint === "base" || breakpoint === "sm" || breakpoint === "md";
+    const isTablet = breakpoint === "lg";
+
+    setVisibleColumns({
+      description: !isMobile && !isTablet,
+      created: !isMobile && !isTablet,
+      owner: !isMobile,
+      entities: !isMobile,
+    });
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation

@@ -6,7 +6,6 @@ import {
   Flex,
   Heading,
   Text,
-  useBreakpoint,
   Tag,
   Avatar,
   Stat,
@@ -51,9 +50,10 @@ import { useNavigate } from "react-router-dom";
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
 
-// Contexts
+// Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -143,6 +143,24 @@ const Dashboard = () => {
   );
   const [openStats, setOpenStats] = useState(false);
 
+  // Use custom breakpoint hook
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    attributes: true,
+    created: true,
+  });
+
+  // Update column visibility when breakpoint changes
+  useEffect(() => {
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      attributes: !isMobile,
+      created: !isMobile,
+    });
+  }, [breakpoint]);
+
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
@@ -201,21 +219,6 @@ const Dashboard = () => {
       });
     }
   }, [error]);
-
-  // Effect to adjust column visibility
-  const breakpoint = useBreakpoint({ ssr: false });
-  const [visibleColumns, setVisibleColumns] = useState({});
-  useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, attributes: false });
-    } else {
-      setVisibleColumns({});
-    }
-  }, [breakpoint]);
 
   // Configure Entity table
   const entityTableData: {

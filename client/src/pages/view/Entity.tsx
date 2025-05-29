@@ -18,7 +18,6 @@ import {
   Card,
   Spacer,
   IconButton,
-  useBreakpoint,
   Menu,
   Dialog,
   Separator,
@@ -83,13 +82,14 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
-// Contexts
+// Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 const Entity = () => {
   const { id } = useParams();
-  const breakpoint = useBreakpoint();
+  const { breakpoint } = useBreakpoint();
 
   // Navigation and routing
   const navigate = useNavigate();

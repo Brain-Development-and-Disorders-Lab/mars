@@ -8,7 +8,6 @@ import {
   Text,
   Dialog,
   Button,
-  useBreakpoint,
   Spacer,
   Tag,
   Link,
@@ -32,7 +31,8 @@ import { DataTableAction, EntityModel, IGenericItem } from "@types";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Workspace context
+// Context and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
@@ -47,8 +47,12 @@ const Entities = () => {
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    owner: true,
+    created: true,
+  });
 
   // Entities export modal
   const {
@@ -59,6 +63,12 @@ const Entities = () => {
 
   const [toExport, setToExport] = useState([] as IGenericItem[]);
   const [exportFormat, setExportFormat] = useState("json");
+
+  // Add state for export table columns
+  const [exportTableVisibleColumns] = useState({
+    name: true,
+    _id: true,
+  });
 
   // Setup columns for review table
   const exportTableColumnHelper = createColumnHelper<IGenericItem>();
@@ -135,17 +145,14 @@ const Entities = () => {
     }
   }, [workspace]);
 
-  // Effect to adjust column visibility
+  // Update column visibility when breakpoint changes
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, owner: false, created: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      owner: !isMobile,
+      created: !isMobile,
+    });
   }, [breakpoint]);
 
   // Configure table columns and data
@@ -434,7 +441,7 @@ const Entities = () => {
                 <DataTable
                   columns={exportTableColumns}
                   data={toExport}
-                  visibleColumns={{}}
+                  visibleColumns={exportTableVisibleColumns}
                   selectedRows={{}}
                   showPagination
                   showItemCount
