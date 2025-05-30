@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  EmptyState,
   Field,
   Fieldset,
   Flex,
@@ -94,9 +95,16 @@ const Collaborators = (props: CollaboratorsProps) => {
           minH={props.projectCollaborators.length > 0 ? "fit-content" : "200px"}
         >
           {props.projectCollaborators.length === 0 ? (
-            <Text color={"gray.400"} fontWeight={"semibold"} fontSize={"sm"}>
-              No Collaborators
-            </Text>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"person"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>
+                  No Collaborators
+                </EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           ) : (
             <Stack
               gap={"2"}

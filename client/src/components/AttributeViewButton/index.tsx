@@ -10,6 +10,7 @@ import {
   Dialog,
   Text,
   CloseButton,
+  EmptyState,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -162,9 +163,13 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                         setValues={setValues}
                       />
                     ) : (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>
-                        No Values
-                      </Text>
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Description>
+                            No Values
+                          </EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
                     )}
                   </Flex>
                 </Flex>

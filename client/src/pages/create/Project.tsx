@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Dialog,
+  EmptyState,
   Field,
   Fieldset,
   Flex,
@@ -356,15 +357,14 @@ const Project = () => {
                   showItemCount
                 />
               ) : (
-                <Flex w={"100%"} justify={"center"} align={"center"}>
-                  <Text
-                    color={"gray.400"}
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                  >
-                    No Entities
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Entities</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>

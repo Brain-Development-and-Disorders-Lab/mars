@@ -14,6 +14,7 @@ import {
   Collapsible,
   Badge,
   Stack,
+  EmptyState,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -633,17 +634,14 @@ const Dashboard = () => {
 
               {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(projectData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Projects.
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"project"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Projects</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
 
               <Flex justify={"right"}>
@@ -692,17 +690,14 @@ const Dashboard = () => {
 
               {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(entityData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Entities.
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Entities</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
 
               <Flex justify={"right"}>
@@ -747,7 +742,7 @@ const Dashboard = () => {
 
             {/* Activity list */}
             {activityData.length > 0 ? (
-              <Flex p={"0"} w={"100%"} overflowY={"auto"}>
+              <Flex py={"2"} w={"100%"} h={"auto"} overflowY={"auto"}>
                 <Stack gap={"3"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
@@ -796,17 +791,16 @@ const Dashboard = () => {
                 </Stack>
               </Flex>
             ) : (
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={"200px"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No Activity yet.
-                </Text>
-              </Flex>
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"activity"} size={"lg"} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>
+                    No recent Activity.
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
             )}
           </Flex>
         </Flex>

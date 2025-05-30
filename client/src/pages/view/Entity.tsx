@@ -28,6 +28,7 @@ import {
   CloseButton,
   Spinner,
   HStack,
+  EmptyState,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -2022,13 +2023,16 @@ const Entity = () => {
                 minH={entityProjects.length > 0 ? "fit-content" : "200px"}
               >
                 {entityProjects.length === 0 ? (
-                  <Text
-                    color={"gray.400"}
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                  >
-                    No Projects
-                  </Text>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"project"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>
+                        No Projects
+                      </EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 ) : (
                   <DataTable
                     data={entityProjects}
@@ -2085,13 +2089,16 @@ const Entity = () => {
                 minH={entityAttributes.length > 0 ? "fit-content" : "200px"}
               >
                 {entityAttributes.length === 0 ? (
-                  <Text
-                    color={"gray.400"}
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                  >
-                    No Attributes
-                  </Text>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"attribute"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>
+                        No Attributes
+                      </EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 ) : (
                   <DataTable
                     data={entityAttributes}
@@ -2157,13 +2164,16 @@ const Entity = () => {
                       viewOnly={!editing}
                     />
                   ) : (
-                    <Text
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                    >
-                      No Relationships
-                    </Text>
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"graph"} size={"lg"} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>
+                          No Relationships
+                        </EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
                   )}
                 </Flex>
               </Flex>
@@ -2210,13 +2220,16 @@ const Entity = () => {
                   minH={entityAttachments.length > 0 ? "fit-content" : "200px"}
                 >
                   {entityAttachments.length === 0 ? (
-                    <Text
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                    >
-                      No Attachments
-                    </Text>
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"attachment"} size={"lg"} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>
+                          No Attachments
+                        </EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
                   ) : (
                     <DataTable
                       data={entityAttachments}

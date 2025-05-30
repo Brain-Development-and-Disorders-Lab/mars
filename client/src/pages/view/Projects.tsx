@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Link,
@@ -245,17 +246,14 @@ const Projects = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Projects.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"project"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Projects</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

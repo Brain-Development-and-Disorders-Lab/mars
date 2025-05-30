@@ -7,6 +7,7 @@ import {
   Checkbox,
   CheckboxGroup,
   Dialog,
+  EmptyState,
   Field,
   Fieldset,
   Flex,
@@ -709,20 +710,16 @@ const Entity = () => {
                     viewOnly={false}
                   />
                 ) : (
-                  <Flex
-                    w={"100%"}
-                    minH={"200px"}
-                    align={"center"}
-                    justify={"center"}
-                  >
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.400"}
-                    >
-                      No Relationships
-                    </Text>
-                  </Flex>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"graph"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>
+                        No Relationships
+                      </EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 )}
               </Flex>
             </Flex>
@@ -772,13 +769,16 @@ const Entity = () => {
                           );
                         })}
                         {projects.length === 0 && (
-                          <Text
-                            fontWeight={"semibold"}
-                            color={"gray.400"}
-                            fontSize={"sm"}
-                          >
-                            No Projects.
-                          </Text>
+                          <EmptyState.Root>
+                            <EmptyState.Content>
+                              <EmptyState.Indicator>
+                                <Icon name={"project"} size={"lg"} />
+                              </EmptyState.Indicator>
+                              <EmptyState.Description>
+                                No Projects
+                              </EmptyState.Description>
+                            </EmptyState.Content>
+                          </EmptyState.Root>
                         )}
                       </Stack>
 
@@ -944,15 +944,16 @@ const Entity = () => {
                   })}
                 </Stack>
               ) : (
-                <Flex w={"100%"} h={"100%"} align={"center"} justify={"center"}>
-                  <Text
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    color={"gray.400"}
-                  >
-                    No Attributes
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"attribute"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No Attributes
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>

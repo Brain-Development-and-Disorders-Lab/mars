@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Link,
@@ -225,17 +226,14 @@ const Templates = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Templates.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"template"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Templates</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

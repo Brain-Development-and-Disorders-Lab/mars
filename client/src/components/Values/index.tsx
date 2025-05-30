@@ -6,6 +6,7 @@ import {
   Button,
   CloseButton,
   Dialog,
+  EmptyState,
   Field,
   Fieldset,
   Flex,
@@ -778,9 +779,11 @@ const Values = (props: {
           border={"1px"}
           borderColor={"gray.300"}
         >
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-            No Values
-          </Text>
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Description>No Values</EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
         </Flex>
       )}
 

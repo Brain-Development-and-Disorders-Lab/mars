@@ -9,6 +9,7 @@ import {
   Code,
   Fieldset,
   Field,
+  EmptyState,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -966,9 +967,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedEntities ? "archived " : ""}Entities
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedEntities ? "archived " : ""}Entities
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1017,9 +1025,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedProjects ? "archived " : ""}Projects
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"project"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedProjects ? "archived " : ""}Projects
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1066,9 +1081,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedTemplates ? "archived " : ""}Templates
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"template"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedTemplates ? "archived " : ""}Templates
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1106,9 +1128,16 @@ const Workspace = () => {
                         showPagination
                       />
                     ) : (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>
-                        No Counters
-                      </Text>
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"counter"} size={"lg"} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>
+                            No Counters
+                          </EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
                     )}
                   </Flex>
                 </Field.Root>

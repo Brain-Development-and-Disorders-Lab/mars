@@ -11,7 +11,7 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
     <Dialog.Root open={props.blocker.state === "blocked"} placement={"center"}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content p={"2"}>
+        <Dialog.Content>
           <Dialog.Header p={"2"}>
             <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
               <Icon name={"warning"} />

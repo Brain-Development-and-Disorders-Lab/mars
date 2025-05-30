@@ -17,6 +17,7 @@ import {
   Field,
   Portal,
   createListCollection,
+  EmptyState,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -347,17 +348,14 @@ const Entities = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Entities.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"entity"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Entities</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>
