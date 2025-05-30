@@ -28,13 +28,15 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {step.title}
           </Text>
         )}
+
         <IconButton
           size={"sm"}
-          colorPalette={"red"}
+          rounded={"md"}
+          variant={"ghost"}
           className={"tooltip__close"}
           {...closeProps}
         >
-          <Icon name={"cross"} />
+          <Icon name={"close"} />
         </IconButton>
       </Flex>
 
@@ -58,7 +60,13 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
           justify={"space-between"}
         >
           {/* Skip button */}
-          <Button size={"sm"} className={"tooltip__button"} {...skipProps}>
+          <Button
+            size={"sm"}
+            rounded={"md"}
+            colorPalette={"orange"}
+            className={"tooltip__button"}
+            {...skipProps}
+          >
             {skipProps.title}
           </Button>
 
@@ -67,10 +75,10 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {index > 0 && (
               <Button
                 size={"sm"}
-                variant={"outline"}
+                rounded={"md"}
+                colorPalette={"blue"}
                 className={"tooltip__button"}
                 {...backProps}
-                colorPalette={"orange"}
               >
                 <Icon name={"c_left"} />
                 {backProps.title}
@@ -80,6 +88,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {continuous && (
               <Button
                 size={"sm"}
+                rounded={"md"}
                 colorPalette={"blue"}
                 className={"tooltip__button tooltip__button--primary"}
                 {...primaryProps}

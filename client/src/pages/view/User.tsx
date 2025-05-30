@@ -418,7 +418,7 @@ const User = () => {
                   removeWorkspace(info.row.original._id);
                 }}
               >
-                <Icon name={"b_right"} />
+                <Icon name={"logout"} />
               </IconButton>
             </Flex>
           </Tooltip>

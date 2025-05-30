@@ -363,7 +363,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   gap={"2"}
                   align={"center"}
                 >
-                  <Icon name={"b_right"} />
+                  <Icon name={"logout"} />
                   <Text fontSize={"sm"}>Log out</Text>
                 </Flex>
               </Menu.Item>

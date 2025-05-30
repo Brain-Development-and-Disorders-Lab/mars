@@ -455,6 +455,7 @@ export type IconNames =
   | "cross"
   | "list"
   | "save"
+  | "logout"
   | "person"
   | "warning"
   | "exclamation"
@@ -469,8 +470,8 @@ export type IconNames =
   | "link"
   | "scan"
   | "lock"
-  | "exit"
   | "settings"
+  | "power"
   | "print"
   | "text"
   | "view"
@@ -495,7 +496,6 @@ export type IconNames =
 
   // Arrows
   | "a_right"
-  | "b_right"
 
   // Chevrons
   | "c_left"

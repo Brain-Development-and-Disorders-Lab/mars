@@ -38,7 +38,7 @@ const Invalid = () => {
           direction={"column"}
           justify={"center"}
           align={"center"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
           rounded={"md"}
         >
@@ -72,6 +72,7 @@ const Invalid = () => {
             onClick={() => navigate("/")}
             colorPalette={"orange"}
             size={"sm"}
+            rounded={"md"}
           >
             Dashboard
             <Icon name={"a_right"} />

@@ -66,8 +66,8 @@ import {
   BsTrashFill,
   BsType,
   BsUpcScan,
-  BsX,
   BsXCircleFill,
+  BsXLg,
   BsZoomIn,
   BsZoomOut,
 } from "react-icons/bs";
@@ -104,7 +104,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   attachment: BsPaperclip,
   check: BsCheckCircleFill,
   counter: BsCalculator,
-  close: BsX,
+  close: BsXLg,
   info: BsInfoCircleFill,
   search: BsSearch,
   search_query: BsBraces,
@@ -120,6 +120,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   cross: BsXCircleFill,
   list: BsList,
   save: BsFloppyFill,
+  logout: BsBoxArrowRight,
   person: BsFillPersonFill,
   warning: BsFillExclamationTriangleFill,
   exclamation: BsExclamationOctagonFill,
@@ -160,7 +161,6 @@ const SYSTEM_ICONS: Record<string, IconType> = {
 
   // Arrows
   a_right: BsArrowRight,
-  b_right: BsBoxArrowRight,
 
   // Chevrons
   c_left: BsChevronLeft,

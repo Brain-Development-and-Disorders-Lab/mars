@@ -114,7 +114,7 @@ const Setup = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
           rounded={"md"}
         >
@@ -221,6 +221,7 @@ const Setup = () => {
                   id={"userDoneButton"}
                   colorPalette={"green"}
                   size={"sm"}
+                  rounded={"md"}
                   onClick={() => onDoneClick()}
                   loading={isLoading}
                   disabled={!userComplete}

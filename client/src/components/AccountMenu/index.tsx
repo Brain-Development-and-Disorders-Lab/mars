@@ -197,8 +197,8 @@ const AccountMenu = () => {
                     ml={"2"}
                     onClick={() => logout()}
                   >
-                    <Icon name={"exit"} />
-                    <Text fontSize={"sm"}>Logout</Text>
+                    <Icon name={"logout"} />
+                    <Text fontSize={"sm"}>Log out</Text>
                   </Flex>
                 </Menu.Item>
               </Menu.ItemGroup>

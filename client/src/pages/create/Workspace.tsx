@@ -308,8 +308,8 @@ const CreateWorkspace = () => {
             rounded={"md"}
             onClick={() => logout()}
           >
-            Logout
-            <Icon name={"exit"} />
+            Log out
+            <Icon name={"logout"} />
           </Button>
         )}
         {workspace !== "" && (
