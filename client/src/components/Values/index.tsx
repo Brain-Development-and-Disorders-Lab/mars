@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -37,6 +37,7 @@ import {
   GenericValueType,
   IGenericItem,
   IValue,
+  IValueType,
 } from "@types";
 
 // Utility functions and libraries
@@ -61,13 +62,60 @@ const Values = (props: {
   const [option, setOption] = useState("");
   const [options, setOptions] = useState<string[]>([]);
 
+  // Value type dropdown ref
+  const selectValueTypeRef = useRef(null);
+
   const columnHelper = createColumnHelper<IValue<GenericValueType>>();
   const columns = useMemo(
     () => [
       // Value `type` column
       columnHelper.accessor("type", {
-        cell: ({ getValue }) => {
-          let valueType: string = getValue();
+        cell: ({ getValue, row: { index }, column: { id }, table }) => {
+          const initialValue = getValue();
+          const [valueType, setValueType] = useState<IValueType>(initialValue);
+
+          useEffect(() => {
+            setValueType(initialValue);
+          }, [initialValue]);
+
+          const onTypeChange = (value: string) => {
+            const typedValue = value as IValueType;
+            setValueType(typedValue);
+
+            // Update the type in the table
+            table.options.meta?.updateData(index, id, typedValue);
+
+            // Reset the data field based on the new type
+            let data: GenericValueType;
+            switch (typedValue) {
+              case "number":
+                data = 0;
+                break;
+              case "text":
+                data = "";
+                break;
+              case "url":
+                data = "";
+                break;
+              case "date":
+                data = dayjs(Date.now()).toISOString();
+                break;
+              case "entity":
+                data = "";
+                break;
+              case "select":
+                data = {
+                  selected: "",
+                  options: [],
+                };
+                break;
+              default:
+                data = "";
+            }
+
+            // Update the data field
+            table.options.meta?.updateData(index, "data", data);
+          };
 
           // Setup icon for value type
           let typeIcon: React.ReactElement;
@@ -111,23 +159,91 @@ const Values = (props: {
             }
           }
 
-          // Apply casing
+          // Apply casing for display
+          let displayType: string;
           if (valueType === "url") {
-            valueType = _.upperCase(valueType);
+            displayType = _.upperCase(valueType);
           } else {
-            valueType = _.capitalize(valueType);
+            displayType = _.capitalize(valueType);
           }
 
-          return (
-            <Flex align={"center"} justify={"left"} gap={"2"} w={"100%"}>
-              <Flex>{typeIcon}</Flex>
-              <Text fontWeight={"semibold"} color={"gray.500"}>
-                {valueType}
-              </Text>
-            </Flex>
-          );
+          // Show dropdown in edit mode, otherwise show read-only display
+          if (!props.viewOnly) {
+            const typeOptions = [
+              { value: "number", label: "Number" },
+              { value: "text", label: "Text" },
+              { value: "url", label: "URL" },
+              { value: "date", label: "Date" },
+              { value: "entity", label: "Entity" },
+              { value: "select", label: "Select" },
+            ];
+
+            return (
+              <Flex
+                align={"center"}
+                justify={"left"}
+                gap={"3"}
+                w={"100%"}
+                minW={"140px"}
+              >
+                <Flex flexShrink={0}>{typeIcon}</Flex>
+                <Select.Root
+                  size={"sm"}
+                  collection={createListCollection<{
+                    value: string;
+                    label: string;
+                  }>({
+                    items: typeOptions,
+                  })}
+                  onValueChange={(details) =>
+                    onTypeChange(details.items[0].value)
+                  }
+                >
+                  <Select.HiddenSelect />
+                  <Select.Control>
+                    <Select.Trigger minW={"100px"}>
+                      <Select.ValueText placeholder={displayType} />
+                    </Select.Trigger>
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal container={selectValueTypeRef}>
+                    <Select.Positioner>
+                      <Select.Content zIndex={9999}>
+                        {typeOptions.map((option) => (
+                          <Select.Item item={option} key={option.value}>
+                            {option.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
+              </Flex>
+            );
+          } else {
+            return (
+              <Flex
+                align={"center"}
+                justify={"left"}
+                gap={"3"}
+                w={"100%"}
+                minW={"140px"}
+              >
+                <Flex flexShrink={0}>{typeIcon}</Flex>
+                <Text fontWeight={"semibold"} color={"gray.500"}>
+                  {displayType}
+                </Text>
+              </Flex>
+            );
+          }
         },
         header: "Type",
+        size: 160,
+        minSize: 160,
+        maxSize: 160,
       }),
 
       // Value `name` column
@@ -171,6 +287,9 @@ const Values = (props: {
           );
         },
         header: "Name",
+        size: 200,
+        minSize: 200,
+        maxSize: 200,
       }),
 
       // Value `data` column
@@ -452,7 +571,7 @@ const Values = (props: {
                     </Select.Control>
                     <Portal>
                       <Select.Positioner>
-                        <Select.Content>
+                        <Select.Content zIndex={9999}>
                           {createListCollection<IGenericItem>({
                             items: value.options,
                           }).items.map((option: IGenericItem) => (
@@ -494,7 +613,7 @@ const Values = (props: {
                 </Select.Control>
                 <Portal>
                   <Select.Positioner>
-                    <Select.Content>
+                    <Select.Content zIndex={9999}>
                       {createListCollection<string>({
                         items: props.permittedValues,
                       }).items.map((value: string) => (
@@ -517,6 +636,9 @@ const Values = (props: {
           );
         },
         header: "Value Data",
+        size: 300,
+        minSize: 300,
+        maxSize: 300,
       }),
     ],
     [props.viewOnly],
