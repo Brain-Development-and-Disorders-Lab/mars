@@ -97,7 +97,11 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"sm"} onClick={() => setOpen(false)} />
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setOpen(false)}
+                  _hover={{ bg: "gray.300" }}
+                />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 

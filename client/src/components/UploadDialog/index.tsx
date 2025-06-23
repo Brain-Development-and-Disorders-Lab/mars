@@ -1,21 +1,21 @@
 // React
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Flex,
-  Text,
-  Input,
-  Tag,
-  Fieldset,
-  Field,
   Button,
   Dialog,
-  IconButton,
+  CloseButton,
+  Field,
+  Fieldset,
+  Flex,
+  Input,
+  Tag,
+  Text,
 } from "@chakra-ui/react";
 import Error from "@components/Error";
-import { toaster } from "@components/Toast";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -28,79 +28,132 @@ const UploadDialog = (props: {
   uploads: string[];
   setUploads: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
-  // File to be uploaded
-  const [file, setFile] = useState({} as File);
-  const [isError, setIsError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Display name and type of the file
-  const [displayName, setDisplayName] = useState("");
-  const [displayType, setDisplayType] = useState("");
+  const [file, setFile] = useState<File>({} as File);
+  const [displayName, setDisplayName] = useState<string>("");
+  const [displayType, setDisplayType] = useState<string>("");
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const UPLOAD_ATTACHMENT = gql`
     mutation UploadAttachment($target: String!, $file: Upload!) {
       uploadAttachment(target: $target, file: $file) {
         success
         message
+        data {
+          _id
+        }
       }
     }
   `;
   const [uploadAttachment, { loading, error }] = useMutation(UPLOAD_ATTACHMENT);
 
-  const performUpload = async () => {
-    const response = await uploadAttachment({
-      variables: {
-        target: props.target,
-        file: file,
-      },
-    });
-
-    if (error) {
-      toaster.create({
-        title: "Upload Error",
-        type: "error",
-        description: "Error occurred while uploading file",
-        duration: 4000,
-        closable: true,
-      });
-      setIsError(true);
+  // Update display name and type when file changes
+  useEffect(() => {
+    if (!_.isEqual(file, {})) {
+      setDisplayName(file.name);
+      setDisplayType(file.type);
+    } else {
+      setDisplayName("");
+      setDisplayType("");
     }
+  }, [file]);
 
-    if (response.data.uploadAttachment.success) {
-      // Add the upload to the existing list of uploads
-      props.setUploads([...props.uploads, file.name]);
+  const performUpload = async () => {
+    if (_.isEqual(file, {})) return;
 
-      // Reset file upload state
-      setFile({} as File);
-      props.setOpen(false);
+    try {
+      const response = await uploadAttachment({
+        variables: {
+          target: props.target,
+          file: file,
+        },
+      });
 
-      // Update state
-      setIsError(false);
-      setIsLoaded(true);
+      if (error) {
+        toaster.create({
+          title: "Upload Error",
+          type: "error",
+          description: "Error occurred while uploading file",
+          duration: 4000,
+          closable: true,
+        });
+        setIsError(true);
+        return;
+      }
 
+      if (response.data.uploadAttachment.success) {
+        // Add the upload to the existing list of uploads
+        props.setUploads([
+          ...props.uploads,
+          response.data.uploadAttachment.data._id,
+        ]);
+
+        // Reset file upload state
+        setFile({} as File);
+        props.setOpen(false);
+
+        // Update state
+        setIsError(false);
+        setIsLoaded(true);
+
+        toaster.create({
+          title: "Uploaded",
+          type: "success",
+          description: `Uploaded file successfully`,
+          duration: 4000,
+          closable: true,
+        });
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
       toaster.create({
-        title: "Uploaded",
-        type: "success",
-        description: `Uploaded file successfully`,
+        title: "Error",
+        description: "Failed to upload file",
+        type: "error",
         duration: 4000,
         closable: true,
       });
     }
   };
 
-  // Set the display name and type of the file when uploaded
-  useEffect(() => {
-    if (file.type === "application/pdf") {
-      setDisplayName(file.name);
-      setDisplayType("PDF file");
-    } else if (file.type === "image/jpeg" || file.type === "image/png") {
-      setDisplayName(file.name);
-      setDisplayType("Image file");
-    } else if (_.endsWith(file.name, ".dna")) {
-      setDisplayName(file.name);
-      setDisplayType("Sequence file");
+  const handleDropZoneClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      const droppedFile = event.dataTransfer.files[0];
+
+      // Only accept image or PDF files
+      if (
+        _.includes(
+          ["image/jpeg", "image/png", "application/pdf"],
+          droppedFile.type,
+        ) ||
+        _.endsWith(droppedFile.name, ".dna")
+      ) {
+        setFile(droppedFile);
+      } else {
+        toaster.create({
+          title: "Warning",
+          type: "warning",
+          description:
+            "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
+          duration: 4000,
+          closable: true,
+        });
+      }
     }
-  }, [file]);
+  };
 
   return (
     <>
@@ -126,25 +179,37 @@ const UploadDialog = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.CloseTrigger asChild>
-                <IconButton
-                  bg={"white"}
-                  _hover={{ bg: "gray.200" }}
-                  variant={"subtle"}
-                  color={"black"}
-                  onClick={() => props.setOpen(false)}
-                >
-                  <Icon name={"close"} />
-                </IconButton>
-              </Dialog.CloseTrigger>
               <Dialog.Header
                 p={"2"}
-                mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                roundedTop={"md"}
+                bg={"gray.100"}
               >
-                <Icon name={"upload"} />
-                Upload Attachment
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                  wrap={"wrap"}
+                >
+                  <Flex
+                    align={"center"}
+                    gap={"2"}
+                    p={"2"}
+                    border={"2px"}
+                    rounded={"md"}
+                  >
+                    <Icon name={"upload"} />
+                    Upload Attachment
+                  </Flex>
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton
+                      size={"sm"}
+                      onClick={() => props.setOpen(false)}
+                      _hover={{ bg: "gray.300" }}
+                    />
+                  </Dialog.CloseTrigger>
+                </Flex>
               </Dialog.Header>
               <Dialog.Body p={"2"} gap={"2"}>
                 <Flex gap={"2"} direction={"column"}>
@@ -177,6 +242,10 @@ const UploadDialog = (props: {
                           borderColor={"gray.300"}
                           bg={"gray.50"}
                           rounded={"md"}
+                          cursor={"pointer"}
+                          onClick={handleDropZoneClick}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
                         >
                           {_.isEqual(file, {}) ? (
                             <Flex
@@ -212,6 +281,7 @@ const UploadDialog = (props: {
                         </Flex>
                         <Field.Root h={"100%"} w={"100%"}>
                           <Input
+                            ref={fileInputRef}
                             type={"file"}
                             h={"100%"}
                             w={"100%"}
@@ -260,13 +330,13 @@ const UploadDialog = (props: {
                   </Flex>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"2"}>
+              <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
-                    variant={"outline"}
+                    variant={"solid"}
                     onClick={() => {
                       setFile({} as File);
                       props.setOpen(false);
