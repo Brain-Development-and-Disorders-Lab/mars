@@ -65,8 +65,18 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       >
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header pb={"0"} pt={"2"} px={"2"}>
+          <Dialog.Content
+            maxH={"90vh"}
+            display={"flex"}
+            flexDirection={"column"}
+          >
+            <Dialog.Header
+              p={"2"}
+              flexShrink={0}
+              bg={"gray.100"}
+              borderBottom={"2px"}
+              roundedTop={"md"}
+            >
               <Flex
                 direction={"row"}
                 justify={"space-between"}
@@ -91,7 +101,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
-            <Dialog.Body p={"0"}>
+            <Dialog.Body p={"0"} flex={"1"} overflow={"auto"}>
               <Flex direction={"column"} p={"2"} gap={"2"}>
                 <Flex
                   gap={"2"}
@@ -173,66 +183,75 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     )}
                   </Flex>
                 </Flex>
-
-                {isEditing && (
-                  <Flex
-                    direction={"row"}
-                    justify={"space-between"}
-                    gap={"4"}
-                    mt={"4"}
-                  >
-                    <Button
-                      colorPalette={"red"}
-                      size={"sm"}
-                      rounded={"md"}
-                      variant={"outline"}
-                      onClick={() => {
-                        // Reset the changes made to the Attribute
-                        setDescription(attribute.description);
-                        setValues(attribute.values);
-
-                        // Close the modal
-                        setOpen(false);
-
-                        // Run the 'cancel' action (if specified)
-                        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                        props.cancelCallback ? props.cancelCallback() : {};
-                      }}
-                    >
-                      Cancel
-                      <Icon name={"cross"} />
-                    </Button>
-
-                    <Button
-                      colorPalette={"green"}
-                      size={"sm"}
-                      rounded={"md"}
-                      onClick={() => {
-                        // Close the modal
-                        setOpen(false);
-
-                        // Run the 'done' action (if specified)
-                        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                        props.doneCallback
-                          ? props.doneCallback({
-                              _id: props.attribute._id,
-                              name: name,
-                              timestamp: props.attribute.timestamp,
-                              owner: props.attribute.owner,
-                              archived: false,
-                              description: description,
-                              values: values,
-                            })
-                          : {};
-                      }}
-                    >
-                      Done
-                      <Icon name={"check"} />
-                    </Button>
-                  </Flex>
-                )}
               </Flex>
             </Dialog.Body>
+
+            {isEditing && (
+              <Dialog.Footer
+                p={"2"}
+                flexShrink={0}
+                bg={"gray.100"}
+                roundedBottom={"md"}
+                borderTop={"1px"}
+                borderColor={"gray.200"}
+              >
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  gap={"4"}
+                  w={"100%"}
+                >
+                  <Button
+                    colorPalette={"red"}
+                    size={"sm"}
+                    rounded={"md"}
+                    variant={"solid"}
+                    onClick={() => {
+                      // Reset the changes made to the Attribute
+                      setDescription(attribute.description);
+                      setValues(attribute.values);
+
+                      // Close the modal
+                      setOpen(false);
+
+                      // Run the 'cancel' action (if specified)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                      props.cancelCallback ? props.cancelCallback() : {};
+                    }}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    rounded={"md"}
+                    onClick={() => {
+                      // Close the modal
+                      setOpen(false);
+
+                      // Run the 'done' action (if specified)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                      props.doneCallback
+                        ? props.doneCallback({
+                            _id: props.attribute._id,
+                            name: name,
+                            timestamp: props.attribute.timestamp,
+                            owner: props.attribute.owner,
+                            archived: false,
+                            description: description,
+                            values: values,
+                          })
+                        : {};
+                    }}
+                  >
+                    Done
+                    <Icon name={"check"} />
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            )}
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>

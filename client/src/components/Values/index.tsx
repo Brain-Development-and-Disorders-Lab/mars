@@ -10,11 +10,9 @@ import {
   Field,
   Fieldset,
   Flex,
-  Heading,
   IconButton,
   Input,
   Link,
-  Popover,
   Portal,
   Select,
   Separator,
@@ -58,9 +56,9 @@ const Values = (props: {
   permittedValues?: string[];
 }) => {
   const [selectOpen, setSelectOpen] = useState(false);
-  const [addValueOpen, setAddValueOpen] = useState(false);
   const [option, setOption] = useState("");
   const [options, setOptions] = useState<string[]>([]);
+  const [editingValueId, setEditingValueId] = useState<string | null>(null);
 
   // Value type dropdown ref
   const selectValueTypeRef = useRef(null);
@@ -106,7 +104,7 @@ const Values = (props: {
               case "select":
                 data = {
                   selected: "",
-                  options: [],
+                  options: [] as IGenericItem[],
                 };
                 break;
               default:
@@ -545,46 +543,66 @@ const Values = (props: {
                 break;
               }
               case "select": {
-                dataInput = (
-                  <Select.Root
-                    key={"select-option"}
-                    size={"sm"}
-                    invalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                    collection={createListCollection<IGenericItem>({
-                      items: value.options,
-                    })}
-                    onValueChange={(details) =>
-                      onSelectChange(details.items[0])
-                    }
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Label>Select Option</Select.Label>
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder={"Select Option"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content zIndex={9999}>
-                          {createListCollection<IGenericItem>({
-                            items: value.options,
-                          }).items.map((option: IGenericItem) => (
-                            <Select.Item item={option} key={option._id}>
-                              {option.name}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                );
+                if (value.options && value.options.length > 0) {
+                  // Show dropdown when options exist
+                  dataInput = (
+                    <Select.Root
+                      key={"select-option"}
+                      size={"sm"}
+                      invalid={
+                        _.isEqual(value, "") &&
+                        _.isEqual(props.requireData, true)
+                      }
+                      collection={createListCollection<IGenericItem>({
+                        items: value.options || [],
+                      })}
+                      onValueChange={(details) =>
+                        onSelectChange(details.items[0])
+                      }
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger>
+                          <Select.ValueText placeholder={"Select Option"} />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal>
+                        <Select.Positioner>
+                          <Select.Content zIndex={9999}>
+                            {(value.options || []).map(
+                              (option: IGenericItem) => (
+                                <Select.Item item={option} key={option._id}>
+                                  {option.name}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ),
+                            )}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  );
+                } else {
+                  // Show "Add Options" button when no options exist
+                  dataInput = (
+                    <Button
+                      size={"sm"}
+                      variant={"solid"}
+                      colorPalette={"green"}
+                      rounded={"md"}
+                      onClick={() => {
+                        setEditingValueId(original._id);
+                        setSelectOpen(true);
+                      }}
+                    >
+                      Add Options
+                      <Icon name={"add"} />
+                    </Button>
+                  );
+                }
                 break;
               }
             }
@@ -645,22 +663,30 @@ const Values = (props: {
   );
 
   const addOptions = () => {
-    // Add the Select value with the defined options
-    props.setValues([
-      ...props.values,
-      {
-        _id: `p_select_${Math.round(performance.now())}`,
-        name: "",
-        type: "select",
-        data: {
-          selected: option,
-          options: [..._.cloneDeep(options)],
-        },
-      },
-    ]);
+    if (editingValueId) {
+      // Update the existing Select value with the defined options
+      const updatedValues = props.values.map((value) => {
+        if (value._id === editingValueId) {
+          return {
+            ...value,
+            data: {
+              selected: "",
+              options: options.map((opt) => ({
+                _id: `option_${Math.round(performance.now())}_${opt}`,
+                name: opt,
+              })),
+            },
+          };
+        }
+        return value;
+      });
 
-    // Reset the options
+      props.setValues(updatedValues);
+    }
+
+    // Reset the options and editing state
     setOptions([]);
+    setEditingValueId(null);
 
     // Close the modal
     setSelectOpen(false);
@@ -699,183 +725,28 @@ const Values = (props: {
         <Text fontSize={"sm"} fontWeight={"bold"}>
           Values
         </Text>
-        <Popover.Root
-          size={"xs"}
-          open={addValueOpen}
-          onOpenChange={(event) => setAddValueOpen(event.open)}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Popover.Trigger asChild>
-            <Button
-              variant={"solid"}
-              colorPalette={"green"}
-              className={"add-value-button-form"}
-              disabled={props.viewOnly}
-              size={"sm"}
-              rounded={"md"}
-              onClick={() => setAddValueOpen(true)}
-            >
-              Add Value
-              <Icon name={"add"} />
-            </Button>
-          </Popover.Trigger>
-
-          <Popover.Positioner>
-            <Popover.Content>
-              <Popover.Arrow />
-              <Popover.Header>
-                <Flex>
-                  <Heading fontWeight={"semibold"} size={"xs"}>
-                    Select Type
-                  </Heading>
-                </Flex>
-              </Popover.Header>
-              <Popover.Body>
-                <Flex gap={"2"} wrap={"wrap"}>
-                  {/* Buttons to add Values */}
-                  <Button
-                    bg={"orange.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"orange.300"}
-                    _hover={{ bg: "orange.300" }}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_date_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "date",
-                          data: dayjs(Date.now()).toISOString(),
-                        },
-                      ]);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    Date
-                    <Icon name={"v_date"} />
-                  </Button>
-
-                  <Button
-                    id="add-value-button-text"
-                    bg={"blue.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"blue.300"}
-                    _hover={{ bg: "blue.300" }}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_text_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "text",
-                          data: "",
-                        },
-                      ]);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    Text
-                    <Icon name={"v_text"} />
-                  </Button>
-
-                  <Button
-                    bg={"green.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"green.300"}
-                    _hover={{ bg: "green.300" }}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_number_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "number",
-                          data: 0,
-                        },
-                      ]);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    Number
-                    <Icon name={"v_number"} />
-                  </Button>
-
-                  <Button
-                    bg={"yellow.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"yellow.300"}
-                    _hover={{ bg: "yellow.300" }}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_url_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "url",
-                          data: "",
-                        },
-                      ]);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    URL
-                    <Icon name={"v_url"} />
-                  </Button>
-
-                  <Button
-                    bg={"purple.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"purple.300"}
-                    _hover={{ bg: "purple.300" }}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `p_entity_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "entity",
-                          data: "",
-                        },
-                      ]);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    Entity
-                    <Icon name={"entity"} />
-                  </Button>
-
-                  <Button
-                    bg={"teal.400"}
-                    size={"sm"}
-                    rounded={"md"}
-                    color={"white"}
-                    borderColor={"teal.300"}
-                    _hover={{ bg: "teal.300" }}
-                    disabled={!_.isUndefined(props.permittedValues)}
-                    onClick={() => {
-                      setSelectOpen(true);
-                      setAddValueOpen(false);
-                    }}
-                  >
-                    Select
-                    <Icon name={"v_select"} />
-                  </Button>
-                </Flex>
-              </Popover.Body>
-            </Popover.Content>
-          </Popover.Positioner>
-        </Popover.Root>
+        {!props.viewOnly && (
+          <Button
+            variant={"solid"}
+            colorPalette={"green"}
+            size={"sm"}
+            rounded={"md"}
+            onClick={() => {
+              props.setValues([
+                ...props.values,
+                {
+                  _id: `v_text_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "text",
+                  data: "",
+                },
+              ]);
+            }}
+          >
+            Add Value
+            <Icon name={"add"} />
+          </Button>
+        )}
       </Flex>
 
       {props.values.length > 0 ? (
@@ -927,13 +798,13 @@ const Values = (props: {
             <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
               <Flex direction={"column"} gap={"2"}>
                 <Text fontSize={"sm"}>
-                  For a Select value, set the options to be displayed.
-                  Duplicates are not permitted.
-                </Text>
-                <Text fontSize={"sm"}>
                   Name the option, then click "Add" to add it to the collection
                   of options associated with this Select value. Click "Continue"
-                  to add this Select value to the Attribute.
+                  to save the options.
+                </Text>
+                <Text fontSize={"sm"}>
+                  For a Select value, set the options to be displayed.
+                  Duplicates are not permitted.
                 </Text>
                 <Flex direction={"row"} gap={"4"}>
                   <Input
@@ -1032,8 +903,9 @@ const Values = (props: {
                 rounded={"md"}
                 colorPalette={"red"}
                 onClick={() => {
-                  // Reset the list of options
+                  // Reset the list of options and editing state
                   setOptions([]);
+                  setEditingValueId(null);
 
                   // Close the modal
                   setSelectOpen(false);
