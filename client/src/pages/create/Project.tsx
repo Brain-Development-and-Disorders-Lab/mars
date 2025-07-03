@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  CloseButton,
   Dialog,
   EmptyState,
   Field,
@@ -446,24 +447,41 @@ const Project = () => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            {/* p={"2"} gap={"0"} w={["md", "lg", "xl"]} */}
             {/* Heading and close button */}
-            <Dialog.Header p={"2"}>Add Entity</Dialog.Header>
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon name={"add"} />
+                Add Entity
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setEntitiesOpen(false)}
+                  _hover={{ bg: "gray.200" }}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
             <Dialog.Body p={"2"}>
-              <SearchSelect
-                id={"entitySearchSelect"}
-                resultType={"entity"}
-                value={selectedEntity}
-                onChange={setSelectedEntity}
-              />
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"}>
+                  Select an Entity to add to the Project.
+                </Text>
+
+                <SearchSelect
+                  id={"entitySearchSelect"}
+                  resultType={"entity"}
+                  value={selectedEntity}
+                  onChange={setSelectedEntity}
+                />
+              </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"}>
+            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
               <Button
                 colorPalette={"red"}
                 size={"sm"}
                 rounded={"md"}
-                variant={"outline"}
+                variant={"solid"}
                 onClick={() => setEntitiesOpen(false)}
               >
                 Cancel

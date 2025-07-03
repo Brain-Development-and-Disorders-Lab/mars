@@ -6,13 +6,13 @@ import {
   Button,
   Checkbox,
   CheckboxGroup,
+  CloseButton,
   Dialog,
   EmptyState,
   Field,
   Fieldset,
   Flex,
   Heading,
-  IconButton,
   Input,
   ListCollection,
   Portal,
@@ -971,27 +971,24 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.CloseTrigger asChild>
-                <IconButton
-                  bg={"white"}
-                  _hover={{ bg: "gray.200" }}
-                  variant={"subtle"}
-                  color={"black"}
-                  onClick={() => setInformationOpen(false)}
-                >
-                  <Icon name={"close"} />
-                </IconButton>
-              </Dialog.CloseTrigger>
               <Dialog.Header
-                p={"2"}
-                mt={"2"}
+                px={"2"}
+                py={"4"}
                 fontWeight={"semibold"}
-                fontSize={"md"}
+                roundedTop={"md"}
+                bg={"gray.100"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"entity"} size={"sm"} />
                   Entities
                 </Flex>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setInformationOpen(false)}
+                    _hover={{ bg: "gray.200" }}
+                  />
+                </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>

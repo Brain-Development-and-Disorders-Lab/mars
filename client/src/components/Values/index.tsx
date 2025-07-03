@@ -785,14 +785,22 @@ const Values = (props: {
         size={"sm"}
         placement={"center"}
         closeOnEscape
+        closeOnInteractOutside
       >
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"}>
-              Add Options
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon name={"add"} />
+                Add Options
+              </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"sm"} onClick={() => setSelectOpen(false)} />
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setSelectOpen(false)}
+                  _hover={{ bg: "gray.200" }}
+                />
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
@@ -897,7 +905,7 @@ const Values = (props: {
                 </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"2"}>
+            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
               <Button
                 size={"sm"}
                 rounded={"md"}

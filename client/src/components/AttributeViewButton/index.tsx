@@ -100,7 +100,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 <CloseButton
                   size={"sm"}
                   onClick={() => setOpen(false)}
-                  _hover={{ bg: "gray.300" }}
+                  _hover={{ bg: "gray.200" }}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>

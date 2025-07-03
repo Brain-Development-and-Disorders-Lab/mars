@@ -389,10 +389,12 @@ const CounterSelect = (props: CounterProps) => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header
-              p={"2"}
-              mt={"2"}
+              px={"2"}
+              py={"4"}
               fontWeight={"semibold"}
               fontSize={"md"}
+              roundedTop={"md"}
+              bg={"gray.100"}
             >
               Create Counter
               <Dialog.CloseTrigger asChild>
@@ -512,10 +514,10 @@ const CounterSelect = (props: CounterProps) => {
                 </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"2"}>
+            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
-                  variant={"outline"}
+                  variant={"solid"}
                   colorPalette={"red"}
                   size={"sm"}
                   rounded={"md"}

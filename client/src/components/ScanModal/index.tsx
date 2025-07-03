@@ -297,14 +297,22 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
-            p={"2"}
-            mt={"2"}
+            px={"2"}
+            py={"4"}
             fontWeight={"semibold"}
-            fontSize={"md"}
+            roundedTop={"md"}
+            bg={"gray.100"}
           >
-            Scan Label
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"scan"} />
+              Scan Label
+            </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"sm"} onClick={handleOnClose} />
+              <CloseButton
+                size={"sm"}
+                onClick={handleOnClose}
+                _hover={{ bg: "gray.200" }}
+              />
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"2"} gap={"2"} w={"100%"} alignContent={"center"}>

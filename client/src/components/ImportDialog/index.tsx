@@ -17,7 +17,7 @@ import {
   Portal,
   createListCollection,
   Steps,
-  IconButton,
+  CloseButton,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -25,7 +25,6 @@ import Attribute from "@components/AttributeCard";
 import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
 import Tooltip from "@components/Tooltip";
-import { Information } from "@components/Label";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
@@ -884,106 +883,25 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
-            p={"2"}
-            mt={"2"}
-            ml={"1"}
+            px={"2"}
+            py={"4"}
             fontWeight={"semibold"}
-            fontSize={"lg"}
+            roundedTop={"md"}
+            bg={"gray.100"}
           >
-            Import File
-          </Dialog.Header>
-          <Dialog.CloseTrigger asChild>
-            <IconButton
-              bg={"white"}
-              _hover={{ bg: "gray.200" }}
-              variant={"subtle"}
-              color={"black"}
-              onClick={handleOnClose}
-            >
-              <Icon name={"close"} />
-            </IconButton>
-          </Dialog.CloseTrigger>
-          <Dialog.Body px={"2"} gap={"2"}>
-            <Information
-              text={
-                "Files can be imported into Metadatify and used to create Entities or update existing Entities. Templates can also be imported. Select the file type being imported, then upload the file to continue."
-              }
-            />
-
-            {/* Select file type of import */}
-            <Flex
-              direction={"row"}
-              gap={"2"}
-              align={"center"}
-              justify={"left"}
-              w={"100%"}
-              py={"2"}
-            >
-              <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
-                File contents:
-              </Text>
-              <Select.Root
-                key={"select-import-type"}
-                w={"sm"}
-                size={"sm"}
-                rounded={"md"}
-                collection={createListCollection({
-                  items: ["Entities", "Template"],
-                })}
-                onValueChange={(details) =>
-                  setImportType(
-                    details.items[0].toLowerCase() as "entities" | "template",
-                  )
-                }
-                disabled={isTypeSelectDisabled}
-              >
-                <Select.HiddenSelect />
-                <Select.Control>
-                  <Select.Trigger>
-                    <Select.ValueText placeholder={"Select Export Type"} />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content>
-                      {createListCollection({
-                        items: ["Entities", "Template"],
-                      }).items.map((exportType: string) => (
-                        <Select.Item
-                          item={exportType}
-                          key={exportType.toLowerCase()}
-                        >
-                          {exportType}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
-              <Spacer />
-              <Flex py={"2"} gap={"1"} align={"center"}>
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.600"}
-                >
-                  Supported formats:
-                </Text>
-                {_.isEqual(importType, "entities") && (
-                  <Tag.Root>
-                    <Tag.Label>CSV</Tag.Label>
-                  </Tag.Root>
-                )}
-                <Tag.Root>
-                  <Tag.Label>JSON</Tag.Label>
-                </Tag.Root>
-              </Flex>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"upload"} />
+              Import File
             </Flex>
-
+            <Dialog.CloseTrigger asChild>
+              <CloseButton
+                size={"sm"}
+                onClick={handleOnClose}
+                _hover={{ bg: "gray.200" }}
+              />
+            </Dialog.CloseTrigger>
+          </Dialog.Header>
+          <Dialog.Body px={"2"} gap={"2"}>
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
               <Steps.Root
@@ -1024,6 +942,80 @@ const ImportDialog = (props: ImportDialogProps) => {
                 </Steps.List>
               </Steps.Root>
             )}
+
+            {/* Select file type of import */}
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              justify={"left"}
+              w={"100%"}
+              py={"2"}
+            >
+              <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
+                File contents:
+              </Text>
+              <Select.Root
+                key={"select-import-type"}
+                w={"sm"}
+                size={"sm"}
+                rounded={"md"}
+                collection={createListCollection({
+                  items: ["Entities", "Template"],
+                })}
+                onValueChange={(details) =>
+                  setImportType(
+                    details.items[0].toLowerCase() as "entities" | "template",
+                  )
+                }
+                disabled={isTypeSelectDisabled}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder={"Select file contents"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {createListCollection({
+                        items: ["Entities", "Template"],
+                      }).items.map((importType: string) => (
+                        <Select.Item
+                          item={importType}
+                          key={importType.toLowerCase()}
+                        >
+                          {importType}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+              <Spacer />
+              <Flex py={"2"} gap={"1"} align={"center"}>
+                <Text
+                  fontSize={"sm"}
+                  fontWeight={"semibold"}
+                  color={"gray.600"}
+                >
+                  Supported formats:
+                </Text>
+                {_.isEqual(importType, "entities") && (
+                  <Tag.Root>
+                    <Tag.Label>CSV</Tag.Label>
+                  </Tag.Root>
+                )}
+                <Tag.Root>
+                  <Tag.Label>JSON</Tag.Label>
+                </Tag.Root>
+              </Flex>
+            </Flex>
 
             {/* Display filename and list of columns if a CSV file after upload */}
             {_.isEqual(importType, "entities") &&
@@ -1087,7 +1079,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Field.Root>
                         <Flex
                           direction={"column"}
-                          minH={"50vh"}
+                          minH={"40vh"}
                           w={"100%"}
                           align={"center"}
                           justify={"center"}
@@ -1681,14 +1673,14 @@ const ImportDialog = (props: ImportDialogProps) => {
               )}
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"}>
+          <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
               <Button
                 id={"importCancelButton"}
                 size={"sm"}
                 rounded={"md"}
                 colorPalette={"red"}
-                variant={"outline"}
+                variant={"solid"}
                 onClick={() => {
                   // Capture event
                   posthog.capture("import_cancelled", {
