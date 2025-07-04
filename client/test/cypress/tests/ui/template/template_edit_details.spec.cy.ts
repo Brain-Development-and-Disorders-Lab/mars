@@ -23,19 +23,20 @@ describe("Template Page", () => {
     cy.get("#attributeNameInput").clear().type("New Template Name");
     cy.get("#attributeDescriptionInput").clear().type("New Description");
     cy.get("#editTemplateButton").click();
-    cy.get(".chakra-toast").contains("Updated Successfully");
+    cy.get(".chakra-toast__root").contains("Updated Successfully");
   });
 
   it("archives the Template", () => {
-    cy.get("#menu-button-actionsMenu").click();
-    cy.contains("button", "Archive").click();
+    cy.get("[data-testid='templateActionsButton']").click();
+
+    cy.get("[data-value='archive']").click();
     cy.contains("button", "Confirm").click();
-    cy.get(".chakra-toast").contains("Archived Successfully");
+    cy.get(".chakra-toast__root").contains("Archived Successfully");
   });
 
   it("exports the Template", () => {
-    cy.get("#menu-button-actionsMenu").click();
-    cy.contains("button", "Export").click();
-    cy.get(".chakra-toast").contains("Generated JSON file");
+    cy.get("[data-testid='templateActionsButton']").click();
+    cy.get("[data-value='export']").click();
+    cy.get(".chakra-toast__root").contains("Generated JSON file");
   });
 });

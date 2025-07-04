@@ -314,9 +314,14 @@ const Template = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu.Root id={"actionsMenu"}>
+            <Menu.Root>
               <Menu.Trigger asChild>
-                <Button size={"sm"} rounded={"md"} colorPalette={"yellow"}>
+                <Button
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"yellow"}
+                  data-testid={"templateActionsButton"}
+                >
                   Actions
                   <Icon name={"lightning"} />
                 </Button>
