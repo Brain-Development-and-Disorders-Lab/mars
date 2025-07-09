@@ -8,6 +8,7 @@
   "scripts": {
     "start": "webpack serve --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
+    "build:docs": "mkdocs build -d dist/docs",
     "clean": "rm -rf dist"
   },
   "dependencies": {

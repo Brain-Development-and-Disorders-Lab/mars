@@ -501,6 +501,7 @@ const Entity = () => {
   const selectExportFormatRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFields, setExportFields] = useState(["owner"] as string[]);
+
   const [exportFormat, setExportFormat] = useState("json");
 
   // Upload dialog

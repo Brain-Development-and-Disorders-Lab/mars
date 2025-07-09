@@ -101,10 +101,12 @@ const App = () => {
               rounded={"full"}
               p={"4"}
               border={"2px"}
-              borderColor={"black"}
+              borderColor={"#2E3192"}
             >
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
-              <Heading size={"md"}>Metadatify</Heading>
+              <Heading size={"md"} color={"#2E3192"}>
+                Metadatify
+              </Heading>
             </Flex>
             <Flex align={"center"} gap={"1"}>
               <Link href={"https://app.metadatify.com"} isExternal>
@@ -155,6 +157,7 @@ const App = () => {
                   p={"4"}
                   boxShadow={"xs"}
                   colorScheme={"blue"}
+                  as={Link}
                   onClick={() =>
                     featuresRef.current.scrollIntoView({ behavior: "smooth" })
                   }
@@ -172,6 +175,17 @@ const App = () => {
                   }
                 >
                   Get Started
+                </Button>
+                <Button
+                  rounded={"full"}
+                  p={"4"}
+                  boxShadow={"xs"}
+                  colorScheme={"blue"}
+                  as={Link}
+                  href={"https://metadatify.com/docs/"}
+                  isExternal
+                >
+                  Documentation
                 </Button>
               </Flex>
             </Flex>
@@ -274,8 +288,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Your digital and physical assets are linked, so your metadata
-                  should be too. Visualize links between <b>Origin</b> and{" "}
-                  <b>Product</b> metadata Entities.
+                  should be too. Visualize relationships between metadata{" "}
+                  <b>Entities</b>.
                 </Text>
               </Flex>
               <Flex
@@ -439,9 +453,7 @@ const App = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
-                    href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
-                    }
+                    href={"https://metadatify.com/docs/"}
                     isExternal
                   >
                     Documentation (coming soon)
@@ -507,18 +519,16 @@ const App = () => {
                 <Text fontWeight={"bold"}>Documentation</Text>
                 <Text>
                   Further documentation on usage and development with Metadatify
-                  can be found in the wiki on GitHub.
+                  exists to aid users and developers.
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
-                    href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
-                    }
+                    href={"https://metadatify.com/docs/"}
                     isExternal
                   >
-                    GitHub Wiki
+                    Documentation
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
                 </Flex>

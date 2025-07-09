@@ -860,6 +860,7 @@ export class Entities {
       } else {
         const formatted: Partial<EntityModel> = {
           _id: entity._id,
+          name: entity.name,
           owner: entity.owner,
         };
 
