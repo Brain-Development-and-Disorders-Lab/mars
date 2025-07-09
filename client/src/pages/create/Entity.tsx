@@ -653,7 +653,9 @@ const Entity = () => {
                     >
                       <Select.HiddenSelect />
                       <Select.Control>
-                        <Select.Trigger>
+                        <Select.Trigger
+                          data-testid={"select-relationship-type"}
+                        >
                           <Select.ValueText
                             placeholder={"Select Relationship Type"}
                           />
@@ -859,7 +861,9 @@ const Entity = () => {
                         >
                           <Select.HiddenSelect />
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger
+                              data-testid={"select-template-trigger"}
+                            >
                               <Select.ValueText
                                 placeholder={"Select Template"}
                               />

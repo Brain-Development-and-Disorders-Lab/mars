@@ -727,6 +727,7 @@ const Values = (props: {
         </Text>
         {!props.viewOnly && (
           <Button
+            data-testid={"add-value-button"}
             variant={"solid"}
             colorPalette={"green"}
             size={"sm"}

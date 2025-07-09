@@ -227,6 +227,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   return (
     <Flex id={props.id || "searchSelect"} pos={"relative"} w={"100%"}>
       <InputGroup
+        data-testid={"search-select"}
         onClick={onInputClick}
         endElement={
           showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />

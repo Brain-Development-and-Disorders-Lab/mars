@@ -69,7 +69,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions, isValidValues } from "src/util";
+import { createSelectOptions } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -466,7 +466,8 @@ const Entity = () => {
 
   useEffect(() => {
     setIsAttributeValueError(
-      !isValidValues(attributeValues) || attributeValues.length === 0,
+      attributeValues.length === 0 ||
+        attributeValues.some((value) => value.name === ""),
     );
   }, [attributeValues]);
 
@@ -2445,6 +2446,7 @@ const Entity = () => {
                   </Button>
 
                   <Button
+                    data-testid={"save-add-attribute-button"}
                     variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
