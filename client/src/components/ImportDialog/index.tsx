@@ -13,7 +13,6 @@ import {
   Spacer,
   Fieldset,
   Field,
-  ListCollection,
   Portal,
   createListCollection,
   Steps,
@@ -106,17 +105,17 @@ const ImportDialog = (props: ImportDialogProps) => {
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
   const [columnsCollection, setColumnsCollection] = useState(
-    {} as ListCollection<string>,
+    createListCollection({ items: [] as string[] }),
   );
 
   // Projects
   const [projectsCollection, setProjectsCollection] = useState(
-    {} as ListCollection<IGenericItem>,
+    createListCollection({ items: [] as IGenericItem[] }),
   );
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
-    {} as ListCollection<AttributeModel>,
+    createListCollection({ items: [] as AttributeModel[] }),
   );
 
   // Fields to be assigned to columns
@@ -694,12 +693,12 @@ const ImportDialog = (props: ImportDialogProps) => {
         <Portal>
           <Select.Positioner>
             <Select.Content>
-              {columnsCollection.items.map((column: string) => (
+              {columnsCollection.items?.map((column: string) => (
                 <Select.Item item={column} key={column}>
                   {column}
                   <Select.ItemIndicator />
                 </Select.Item>
-              ))}
+              )) || []}
             </Select.Content>
           </Select.Positioner>
         </Portal>
@@ -858,7 +857,12 @@ const ImportDialog = (props: ImportDialogProps) => {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setTemplatesCollection({} as ListCollection<AttributeModel>);
+    setProjectsCollection(
+      createListCollection({ items: [] as IGenericItem[] }),
+    );
+    setTemplatesCollection(
+      createListCollection({ items: [] as AttributeModel[] }),
+    );
     setAttributesField([]);
   };
 
@@ -1270,12 +1274,24 @@ const ImportDialog = (props: ImportDialogProps) => {
                           {/* Description */}
                           <Field.Root w={"50%"}>
                             <Field.Label>Description</Field.Label>
-                            {getSelectComponent(
-                              "description",
-                              setDescriptionField,
+                            {fileType === CSV_MIME_TYPE ? (
+                              getSelectComponent(
+                                "description",
+                                setDescriptionField,
+                              )
+                            ) : (
+                              <Input
+                                size={"sm"}
+                                rounded={"md"}
+                                placeholder={"Defined in JSON"}
+                                disabled
+                                readOnly
+                              />
                             )}
                             <Field.HelperText>
-                              Column containing Entity descriptions
+                              {fileType === CSV_MIME_TYPE
+                                ? "Column containing Entity descriptions"
+                                : "Field containing Entity descriptions"}
                             </Field.HelperText>
                           </Field.Root>
 
@@ -1309,7 +1325,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               <Portal>
                                 <Select.Positioner>
                                   <Select.Content>
-                                    {projectsCollection.items.map(
+                                    {projectsCollection.items?.map(
                                       (project: IGenericItem) => (
                                         <Select.Item
                                           item={project}
@@ -1319,7 +1335,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                           <Select.ItemIndicator />
                                         </Select.Item>
                                       ),
-                                    )}
+                                    ) || []}
                                   </Select.Content>
                                 </Select.Positioner>
                               </Portal>
@@ -1397,7 +1413,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         <Field.Root>
                           <Tooltip
                             content={
-                              templatesCollection.items.length > 0
+                              templatesCollection.items?.length > 0
                                 ? "Select an existing Template"
                                 : "No Templates exist yet"
                             }
@@ -1411,7 +1427,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                               onValueChange={(details) => {
                                 const selectedTemplate = details.items[0];
                                 if (!_.isEqual(selectedTemplate._id, "")) {
-                                  for (const template of templatesCollection.items) {
+                                  for (const template of templatesCollection.items ||
+                                    []) {
                                     if (
                                       _.isEqual(
                                         selectedTemplate._id,
@@ -1435,7 +1452,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   }
                                 }
                               }}
-                              disabled={templatesCollection.items.length === 0}
+                              disabled={templatesCollection.items?.length === 0}
                             >
                               <Select.HiddenSelect />
                               <Select.Control>
@@ -1451,7 +1468,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               <Portal>
                                 <Select.Positioner>
                                   <Select.Content>
-                                    {templatesCollection.items.map(
+                                    {templatesCollection.items?.map(
                                       (template: AttributeModel) => (
                                         <Select.Item
                                           item={template}
@@ -1461,7 +1478,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                           <Select.ItemIndicator />
                                         </Select.Item>
                                       ),
-                                    )}
+                                    ) || []}
                                   </Select.Content>
                                 </Select.Positioner>
                               </Portal>
