@@ -6,6 +6,7 @@ import { Flex } from "@chakra-ui/react";
 import Navigation from "@components/Navigation";
 import Error from "@components/Error";
 import Loading from "@components/Loading";
+import { Toaster } from "@components/Toast";
 
 // Existing and custom types
 import { ContentProps } from "@types";
@@ -31,6 +32,9 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
       maxH={{ base: "100%" }}
       overflowY={"auto"}
     >
+      {/* Toast notification provider */}
+      <Toaster />
+
       {/* Present an error screen */}
       {isError && <Error />}
 

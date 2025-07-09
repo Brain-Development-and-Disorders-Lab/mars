@@ -27,7 +27,7 @@ describe("Create Entities", () => {
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
-    cy.get("label").contains("Relationships");
+    cy.get(".chakra-empty-state__description").contains("No Relationships");
 
     // Click on the "Back" button to return to the start step
     cy.get("button").contains("Back").click();
@@ -35,19 +35,19 @@ describe("Create Entities", () => {
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
-    cy.get("label").contains("Relationships");
+    cy.get(".chakra-empty-state__description").contains("No Relationships");
 
     // Click on the "Continue" button to go to the Attributes step
     cy.get("button").contains("Continue").click();
-    cy.get("select").get("option").contains("Template");
+    cy.get(".chakra-empty-state__description").contains("No Attributes");
 
     // Click on the "Back" button to return to the Relationships step
     cy.get("button").contains("Back").click();
-    cy.get("label").contains("Relationships");
+    cy.get(".chakra-empty-state__description").contains("No Relationships");
 
     // Click on the "Continue" button to go to the Attributes step
     cy.get("button").contains("Continue").click();
-    cy.get("select").get("option").contains("Template");
+    cy.get(".chakra-empty-state__description").contains("No Attributes");
   });
 
   it("should allow adding Relationships", () => {
@@ -60,12 +60,12 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").click();
 
     // Add a relationship
-    cy.get("#relationshipTargetSelect").click();
+    cy.get("[data-testid='search-select']").click();
     cy.get("button").contains("Test Entity").click();
     cy.get("button").contains("Add").click();
 
     // Check if the relationship is displayed in a table
-    cy.get(".chakra-table").should("exist");
+    cy.get(".chakra-table__root").should("exist");
     cy.get("#0_target").should("exist");
     cy.get("#0_target").contains("Test Entity");
   });
@@ -83,10 +83,11 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").click();
 
     // Add an Attribute
-    cy.get("select").select("Test Template"); // Select a Template
+    cy.get("[data-testid='select-template-trigger']").click();
+    cy.get(".chakra-select__content").contains("Test Template").click();
 
     // Check if the Attribute is displayed
-    cy.get(".chakra-card").should("exist"); // Adjust selector based on actual Attribute display
+    cy.get(".chakra-card__root").should("exist"); // Adjust selector based on actual Attribute display
 
     // Save the Attribute and finish creating the Entity
     cy.get("button").contains("Save").click();
@@ -104,11 +105,11 @@ describe("Create Entities", () => {
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
-    cy.get("label").contains("Relationships");
+    cy.get(".chakra-empty-state__description").contains("No Relationships");
 
     // Click on the "Continue" button to go to the Attributes step
     cy.get("button").contains("Continue").click();
-    cy.get("select").get("option").contains("Template");
+    cy.get(".chakra-empty-state__description").contains("No Attributes");
 
     // Click the button to finish creating the Entity
     cy.get("button").contains("Finish").click();

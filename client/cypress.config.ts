@@ -13,7 +13,7 @@ import {
 
 export default cypress.defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on) {
       on("task", {
         // Database setup tasks
         "database:setup": () => {
@@ -39,5 +39,7 @@ export default cypress.defineConfig({
     specPattern: "test/cypress/tests/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "test/cypress/support/database.{js,jsx,ts,tsx}",
     screenshotsFolder: "test/cypress/screenshots",
+    viewportWidth: 1280,
+    viewportHeight: 720,
   },
 });

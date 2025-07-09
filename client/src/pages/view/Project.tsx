@@ -5,59 +5,43 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Checkbox,
-  CheckboxGroup,
+  CloseButton,
+  Dialog,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
+  EmptyState,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   IconButton,
   Input,
   Link,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Radio,
+  Portal,
   RadioGroup,
   Select,
   Spacer,
   Stack,
   Tag,
-  TagLabel,
   Text,
-  Tooltip,
-  VStack,
+  createListCollection,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
-import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
+import Collaborators from "@components/Collaborators";
+import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Dialog from "@components/Dialog";
+import AlertDialog from "@components/AlertDialog";
 import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -67,6 +51,7 @@ import {
   DataTableAction,
   IGenericItem,
 } from "@types";
+import { Cell } from "@tanstack/react-table";
 
 // Apollo client imports
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
@@ -85,7 +70,6 @@ import slugify from "slugify";
 
 const Project = () => {
   const { id } = useParams();
-  const toast = useToast();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -97,26 +81,13 @@ const Project = () => {
   const cancelBlockerRef = useRef(null);
 
   // Add Entities
-  const {
-    isOpen: isEntitiesOpen,
-    onOpen: onEntitiesOpen,
-    onClose: onEntitiesClose,
-  } = useDisclosure();
+  const [entitiesOpen, setEntitiesOpen] = useState(false);
 
   // State for dialog confirming if user should archive Project
-  const archiveDialogRef = useRef();
-  const {
-    isOpen: isArchiveDialogOpen,
-    onOpen: onArchiveDialogOpen,
-    onClose: onArchiveDialogClose,
-  } = useDisclosure();
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // History drawer
-  const {
-    isOpen: isHistoryOpen,
-    onOpen: onHistoryOpen,
-    onClose: onHistoryClose,
-  } = useDisclosure();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -133,28 +104,22 @@ const Project = () => {
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
   );
-  const [newCollaborator, setNewCollaborator] = useState("");
 
   // Save message modal
-  const {
-    isOpen: isSaveMessageOpen,
-    onOpen: onSaveMessageOpen,
-    onClose: onSaveMessageClose,
-  } = useDisclosure();
+  const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
   // Entities that can be added
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
 
   // Export modal state and data
-  const {
-    isOpen: isExportOpen,
-    onOpen: onExportOpen,
-    onClose: onExportClose,
-  } = useDisclosure();
+  const selectExportFormatRef = useRef(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [exportFields, setExportFields] = useState([] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
-  const [exportEntityDetails, setExportEntityDetails] = React.useState("name");
+  const [exportEntityDetails, setExportEntityDetails] = React.useState<
+    string | null
+  >("name");
 
   useEffect(() => {
     if (isLoaded) {
@@ -272,13 +237,12 @@ const Project = () => {
   useEffect(() => {
     if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Project information",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [loading, error]);
@@ -289,7 +253,7 @@ const Project = () => {
    */
   const addEntities = (entity: IGenericItem): void => {
     setProjectEntities([...projectEntities, entity._id]);
-    onEntitiesClose();
+    setEntitiesOpen(false);
   };
 
   /**
@@ -298,7 +262,7 @@ const Project = () => {
   const handleEditClick = () => {
     if (editing) {
       // Open the save message modal
-      onSaveMessageOpen();
+      setSaveMessageOpen(true);
     } else {
       setEditing(true);
     }
@@ -342,22 +306,20 @@ const Project = () => {
           message: saveMessage,
         },
       });
-      toast({
+      toaster.create({
         title: "Updated Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } catch {
       if (updateError) {
-        toast({
+        toaster.create({
           title: "Error",
           description: updateError.message,
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }
@@ -369,7 +331,7 @@ const Project = () => {
     setIsUpdating(false);
 
     // Close the save message modal
-    onSaveMessageClose();
+    setSaveMessageOpen(false);
   };
 
   // Archive the Project when confirmed
@@ -381,23 +343,21 @@ const Project = () => {
       },
     });
     if (response.data.archiveProject.success) {
-      toast({
+      toaster.create({
         title: "Archived Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setProjectArchived(true);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred when archiving Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
     setEditing(false);
@@ -412,22 +372,20 @@ const Project = () => {
       },
     });
     if (response.data.archiveProject.success) {
-      toast({
+      toaster.create({
         title: "Restored Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setProjectArchived(false);
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred when restoring Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
     setEditing(false);
@@ -484,27 +442,25 @@ const Project = () => {
           message: `Restored Project version ${projectVersion.version}`,
         },
       });
-      toast({
+      toaster.create({
         title: "Success",
         description: `Restored Project version ${projectVersion.version}`,
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
-    } catch (error: any) {
-      toast({
+    } catch {
+      toaster.create({
         title: "Error",
         description: "Project could not be restored",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     // Close the drawer
-    onHistoryClose();
+    setHistoryOpen(false);
 
     // Apply updated state
     setProject(updateData);
@@ -522,7 +478,7 @@ const Project = () => {
   // Handle clicking the "Export" button
   const handleExportClick = () => {
     setProject(project);
-    onExportOpen();
+    setExportOpen(true);
   };
 
   // Handle clicking the "Export" button
@@ -542,13 +498,12 @@ const Project = () => {
     }
 
     if (exportEntitiesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Project Entities could not be exported",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -582,29 +537,27 @@ const Project = () => {
       );
 
       // Close the "Export" modal
-      onExportClose();
+      setExportOpen(false);
 
       // Reset the export state
       setExportFields([]);
 
-      toast({
+      toaster.create({
         title: "Info",
         description: `Generated ${format.toUpperCase()} file`,
-        status: "info",
+        type: "info",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (exportError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred exporting this Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -658,31 +611,35 @@ const Project = () => {
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
-      id: (info: any) => info.row.original,
-      cell: (info: any) => (
+      id: (info: Cell<string, string>) => info.row.original,
+      cell: (info: Cell<string, string>) => (
         <Linky id={info.row.original} type={"entities"} size={"sm"} />
       ),
       header: "Name",
     },
     {
       id: "view",
-      cell: (info: any) => {
+      cell: (info: Cell<string, string>) => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
               <IconButton
-                icon={<Icon name={"delete"} />}
                 aria-label={"Remove entity"}
-                colorScheme={"red"}
-                onClick={() => handleRemoveEntity(info.row.original)}
+                colorPalette={"red"}
                 size={"sm"}
-              />
+                rounded={"md"}
+                onClick={() => handleRemoveEntity(info.row.original)}
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             ) : (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
+                  fontWeight={"semibold"}
+                  color={"black"}
                   onClick={() => navigate(`/entities/${info.row.original}`)}
                 >
-                  <Text fontWeight={"semibold"}>View</Text>
+                  View
                 </Link>
                 <Icon name={"a_right"} />
               </Flex>
@@ -727,7 +684,7 @@ const Project = () => {
             align={"center"}
             gap={"2"}
             p={"2"}
-            border={"2px"}
+            border={"2px solid"}
             rounded={"md"}
           >
             <Icon name={"project"} size={"md"} />
@@ -739,61 +696,65 @@ const Project = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu>
-              <MenuButton
-                as={Button}
-                colorScheme={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-                size={"sm"}
-              >
-                Actions
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  onClick={handleExportClick}
-                  icon={<Icon name={"download"} />}
-                  fontSize={"sm"}
-                  isDisabled={exportLoading || projectArchived}
-                >
-                  Export Project
-                </MenuItem>
-                <Tooltip
-                  isDisabled={projectEntities?.length > 0 || projectArchived}
-                  label={"This Project does not contain any Entities."}
-                  hasArrow
-                >
-                  <MenuItem
-                    onClick={handleExportEntitiesClick}
-                    icon={<Icon name={"download"} />}
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    value={"export-project"}
+                    onClick={handleExportClick}
                     fontSize={"sm"}
-                    isDisabled={
-                      projectEntities?.length === 0 ||
-                      exportEntitiesLoading ||
-                      projectArchived
-                    }
+                    disabled={exportLoading || projectArchived}
                   >
-                    Export Entities
-                  </MenuItem>
-                </Tooltip>
-                <MenuItem
-                  icon={<Icon name={"archive"} />}
-                  onClick={onArchiveDialogOpen}
-                  fontSize={"sm"}
-                  isDisabled={projectArchived}
-                >
-                  Archive
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                    <Icon name={"download"} />
+                    Export Project
+                  </Menu.Item>
+                  <Tooltip
+                    content={"This Project does not contain any Entities."}
+                    disabled={projectEntities?.length > 0 || projectArchived}
+                    showArrow
+                  >
+                    <Menu.Item
+                      value={"export-entities"}
+                      onClick={handleExportEntitiesClick}
+                      fontSize={"sm"}
+                      disabled={
+                        projectEntities?.length === 0 ||
+                        exportEntitiesLoading ||
+                        projectArchived
+                      }
+                    >
+                      <Icon name={"download"} />
+                      Export Entities
+                    </Menu.Item>
+                  </Tooltip>
+                  <Menu.Item
+                    value={"archive"}
+                    onClick={() => setArchiveDialogOpen(true)}
+                    fontSize={"sm"}
+                    disabled={projectArchived}
+                  >
+                    <Icon name={"archive"} />
+                    Archive
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
 
             {projectArchived ? (
               <Button
                 onClick={handleRestoreClick}
                 size={"sm"}
-                colorScheme={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
+                rounded={"md"}
+                colorPalette={"orange"}
               >
                 Restore
+                <Icon name={"rewind"} />
               </Button>
             ) : (
               <Flex gap={"2"}>
@@ -801,51 +762,392 @@ const Project = () => {
                   <Button
                     onClick={handleCancelClick}
                     size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
+                    rounded={"md"}
+                    colorPalette={"red"}
                   >
                     Cancel
+                    <Icon name={"cross"} />
                   </Button>
                 )}
                 <Button
                   id={"editProjectButton"}
-                  colorScheme={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
-                  }
+                  colorPalette={editing ? "green" : "blue"}
+                  size={"sm"}
+                  rounded={"md"}
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
-                  isLoading={isUpdating}
-                  size={"sm"}
+                  loading={isUpdating}
                 >
                   {editing ? "Save" : "Edit"}
+                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
                 </Button>
               </Flex>
             )}
 
-            <Button
-              onClick={onHistoryOpen}
-              colorScheme={"gray"}
-              size={"sm"}
-              rightIcon={<Icon name={"clock"} />}
+            {/* Version history */}
+            <Drawer.Root
+              open={historyOpen}
+              onOpenChange={(details) => setHistoryOpen(details.open)}
+              size={"md"}
+              closeOnEscape
+              closeOnInteractOutside
             >
-              History
-            </Button>
+              <Drawer.Trigger asChild>
+                <Button
+                  onClick={() => setHistoryOpen(true)}
+                  variant={"subtle"}
+                  colorPalette={"gray"}
+                  size={"sm"}
+                  rounded={"md"}
+                >
+                  History
+                  <Icon name={"clock"} />
+                </Button>
+              </Drawer.Trigger>
+              <Drawer.Backdrop />
+              <Drawer.Positioner>
+                <Drawer.Content>
+                  <Drawer.CloseTrigger asChild>
+                    <CloseButton
+                      size={"sm"}
+                      onClick={() => setHistoryOpen(false)}
+                    />
+                  </Drawer.CloseTrigger>
+                  <Drawer.Header pb={"2"}>
+                    <Flex direction={"column"} w={"100%"} gap={"2"}>
+                      <Text fontSize={"sm"} fontWeight={"bold"}>
+                        History
+                      </Text>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        justify={"space-between"}
+                      >
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                            {projectHistory.length > 0
+                              ? dayjs(projectHistory[0].timestamp).fromNow()
+                              : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            Previous Versions:
+                          </Text>
+                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                            {projectHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                    </Flex>
+                  </Drawer.Header>
+
+                  <Drawer.Body>
+                    <Stack gap={"2"}>
+                      {projectHistory && projectHistory.length > 0 ? (
+                        projectHistory.map((projectVersion) => {
+                          return (
+                            <Card.Root
+                              w={"100%"}
+                              key={`v_${projectVersion.timestamp}`}
+                              variant={"outline"}
+                              rounded={"md"}
+                              border={"1px solid"}
+                              borderColor={"gray.300"}
+                            >
+                              <Card.Header p={"0"}>
+                                <Flex
+                                  direction={"column"}
+                                  w={"100%"}
+                                  gap={"1"}
+                                  p={"2"}
+                                >
+                                  <Text
+                                    fontWeight={"semibold"}
+                                    fontSize={"sm"}
+                                    color={"gray.700"}
+                                  >
+                                    {projectVersion.name}
+                                  </Text>
+                                </Flex>
+                              </Card.Header>
+
+                              <Card.Body px={"2"} py={"0"}>
+                                <Flex direction={"column"} gap={"2"}>
+                                  {/* Description */}
+                                  {_.isEqual(projectVersion.description, "") ? (
+                                    <Tag.Root
+                                      size={"sm"}
+                                      colorPalette={"orange"}
+                                    >
+                                      <Tag.Label>No Description</Tag.Label>
+                                    </Tag.Root>
+                                  ) : (
+                                    <Text fontSize={"sm"}>
+                                      {_.truncate(projectVersion.description, {
+                                        length: 56,
+                                      })}
+                                    </Text>
+                                  )}
+
+                                  <Flex direction={"row"} gap={"2"}>
+                                    {/* Entities */}
+                                    <Flex
+                                      direction={"column"}
+                                      gap={"1"}
+                                      p={"2"}
+                                      rounded={"md"}
+                                      border={"1px solid"}
+                                      borderColor={"gray.300"}
+                                      grow={"1"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Entities
+                                      </Text>
+                                      {projectVersion.entities.length > 0 ? (
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Tag.Root
+                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
+                                            size={"sm"}
+                                          >
+                                            <Tag.Label>
+                                              <Linky
+                                                type={"projects"}
+                                                id={projectVersion.entities[0]}
+                                                size={"sm"}
+                                              />
+                                            </Tag.Label>
+                                          </Tag.Root>
+                                          {projectVersion.entities.length >
+                                            1 && (
+                                            <Text
+                                              fontWeight={"semibold"}
+                                              fontSize={"sm"}
+                                            >
+                                              and{" "}
+                                              {projectVersion.entities.length -
+                                                1}{" "}
+                                              others
+                                            </Text>
+                                          )}
+                                        </Flex>
+                                      ) : (
+                                        <Text fontSize={"sm"}>No Entities</Text>
+                                      )}
+                                    </Flex>
+
+                                    {/* Collaborators */}
+                                    <Flex
+                                      direction={"column"}
+                                      gap={"1"}
+                                      p={"2"}
+                                      rounded={"md"}
+                                      border={"1px solid"}
+                                      borderColor={"gray.300"}
+                                      grow={"1"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Collaborators
+                                      </Text>
+                                      {projectVersion.collaborators.length >
+                                      0 ? (
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Tag.Root
+                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
+                                            size={"sm"}
+                                          >
+                                            <Tag.Label>
+                                              {projectVersion.collaborators[0]}
+                                            </Tag.Label>
+                                          </Tag.Root>
+                                          {projectVersion.collaborators.length >
+                                            1 && (
+                                            <Text
+                                              fontWeight={"semibold"}
+                                              fontSize={"sm"}
+                                            >
+                                              and{" "}
+                                              {projectVersion.collaborators
+                                                .length - 1}{" "}
+                                              others
+                                            </Text>
+                                          )}
+                                        </Flex>
+                                      ) : (
+                                        <Text fontSize={"sm"}>
+                                          No Collaborators
+                                        </Text>
+                                      )}
+                                    </Flex>
+                                  </Flex>
+                                </Flex>
+                              </Card.Body>
+
+                              <Card.Footer p={"2"}>
+                                {/* Version information */}
+                                <Flex direction={"column"} gap={"2"} w={"100%"}>
+                                  <Flex
+                                    direction={"row"}
+                                    gap={"2"}
+                                    bg={"gray.100"}
+                                    justify={"center"}
+                                    rounded={"md"}
+                                  >
+                                    <Flex
+                                      direction={"column"}
+                                      w={"100%"}
+                                      gap={"1"}
+                                      p={"2"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Version
+                                      </Text>
+                                      <Flex
+                                        direction={"row"}
+                                        gap={"2"}
+                                        align={"center"}
+                                      >
+                                        <Tag.Root
+                                          size={"sm"}
+                                          colorPalette={"green"}
+                                        >
+                                          <Tag.Label>
+                                            {projectVersion.version}
+                                          </Tag.Label>
+                                        </Tag.Root>
+                                      </Flex>
+                                      <Text
+                                        fontWeight={"semibold"}
+                                        fontSize={"xs"}
+                                        color={"gray.400"}
+                                      >
+                                        {dayjs(
+                                          projectVersion.timestamp,
+                                        ).fromNow()}
+                                      </Text>
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Message
+                                      </Text>
+                                      {_.isEqual(projectVersion.message, "") ||
+                                      _.isNull(projectVersion.message) ? (
+                                        <Flex>
+                                          <Tag.Root
+                                            size={"sm"}
+                                            colorPalette={"orange"}
+                                          >
+                                            <Tag.Label>No Message</Tag.Label>
+                                          </Tag.Root>
+                                        </Flex>
+                                      ) : (
+                                        <Tooltip
+                                          content={projectVersion.message}
+                                          disabled={
+                                            projectVersion.message.length < 32
+                                          }
+                                          showArrow
+                                        >
+                                          <Text fontSize={"sm"}>
+                                            {_.truncate(
+                                              projectVersion.message,
+                                              {
+                                                length: 32,
+                                              },
+                                            )}
+                                          </Text>
+                                        </Tooltip>
+                                      )}
+                                    </Flex>
+
+                                    <Flex
+                                      direction={"column"}
+                                      w={"100%"}
+                                      gap={"1"}
+                                      p={"2"}
+                                    >
+                                      <Text
+                                        fontSize={"sm"}
+                                        fontWeight={"semibold"}
+                                      >
+                                        Author
+                                      </Text>
+                                      <Flex>
+                                        <ActorTag
+                                          orcid={projectVersion.author}
+                                          fallback={"Unknown User"}
+                                          size={"md"}
+                                        />
+                                      </Flex>
+                                    </Flex>
+                                  </Flex>
+
+                                  <Flex w={"100%"} justify={"right"}>
+                                    <Button
+                                      colorPalette={"orange"}
+                                      size={"sm"}
+                                      rounded={"md"}
+                                      onClick={() => {
+                                        handleRestoreFromHistoryClick(
+                                          projectVersion,
+                                        );
+                                      }}
+                                      disabled={projectArchived}
+                                    >
+                                      Restore
+                                      <Icon name={"rewind"} />
+                                    </Button>
+                                  </Flex>
+                                </Flex>
+                              </Card.Footer>
+                            </Card.Root>
+                          );
+                        })
+                      ) : (
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          No previous versions.
+                        </Text>
+                      )}
+                    </Stack>
+                  </Drawer.Body>
+                </Drawer.Content>
+              </Drawer.Positioner>
+            </Drawer.Root>
 
             {/* Archive Dialog */}
-            <Dialog
-              dialogRef={archiveDialogRef}
+            <AlertDialog
               header={"Archive Project"}
+              leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
+              open={archiveDialogOpen}
+              setOpen={setArchiveDialogOpen}
             >
               <Text>
                 Are you sure you want to archive this Project? No Entities will
                 be deleted. This Project will be moved to the Workspace archive.
               </Text>
-            </Dialog>
+            </AlertDialog>
           </Flex>
         </Flex>
 
@@ -870,14 +1172,14 @@ const Project = () => {
                   <Input
                     id={"projectNameInput"}
                     size={"sm"}
+                    rounded={"md"}
                     value={projectName}
                     onChange={(event) => {
                       setProjectName(event.target.value);
                     }}
-                    isReadOnly={!editing}
+                    readOnly={!editing}
                     bg={"white"}
-                    rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                   />
                 </Flex>
@@ -900,7 +1202,11 @@ const Project = () => {
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Owner
                   </Text>
-                  <ActorTag orcid={project.owner} fallback={"Unknown User"} />
+                  <ActorTag
+                    orcid={project.owner}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>
@@ -910,7 +1216,7 @@ const Project = () => {
               direction={"column"}
               p={"2"}
               gap={"1"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
               basis={"40%"}
@@ -944,7 +1250,7 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               w={{ base: "100%", md: "50%" }}
             >
@@ -958,13 +1264,15 @@ const Project = () => {
                   Entities
                 </Text>
                 <Button
+                  colorPalette={"green"}
                   id={"addEntityButton"}
-                  rightIcon={<Icon name={"add"} />}
-                  onClick={onEntitiesOpen}
+                  onClick={() => setEntitiesOpen(true)}
                   size={"sm"}
-                  isDisabled={!editing}
+                  rounded={"md"}
+                  disabled={!editing}
                 >
                   Add
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
               <Flex
@@ -986,434 +1294,467 @@ const Project = () => {
                     showItemCount
                   />
                 ) : (
-                  <Flex w={"100%"} justify={"center"} align={"center"}>
-                    <Text
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                    >
-                      No Entities
-                    </Text>
-                  </Flex>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"entity"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>
+                        No Entities
+                      </EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 )}
               </Flex>
             </Flex>
 
             {/* Collaborators */}
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              h={"fit-content"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              grow={"1"}
-            >
-              {/* Collaborators display */}
-              <Flex direction={"column"}>
-                <Text fontSize={"sm"} fontWeight={"bold"} mb={"2"}>
-                  Collaborators
-                </Text>
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <FormControl>
-                    <Input
-                      placeholder={"ORCiD"}
-                      rounded={"md"}
-                      size={"sm"}
-                      value={newCollaborator}
-                      onChange={(e) => setNewCollaborator(e.target.value)}
-                      isDisabled={!editing}
-                    />
-                  </FormControl>
-                  <Spacer />
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"add"} />}
-                    size={"sm"}
-                    isDisabled={!editing}
-                    onClick={() => {
-                      // Prevent adding empty or duplicate collaborator
-                      if (
-                        newCollaborator &&
-                        !projectCollaborators.includes(newCollaborator)
-                      ) {
-                        setProjectCollaborators((collaborators) => [
-                          ...collaborators,
-                          newCollaborator,
-                        ]);
-                        setNewCollaborator(""); // Clear the input after adding
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </Flex>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={"center"}
-                  minH={
-                    projectCollaborators.length > 0 ? "fit-content" : "200px"
-                  }
-                >
-                  {projectCollaborators.length === 0 ? (
-                    <Text
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                    >
-                      No Collaborators
-                    </Text>
-                  ) : (
-                    <VStack align="start">
-                      {projectCollaborators.map((collaborator, index) => (
-                        <Flex key={index} align="center">
-                          <Text mr="4">{collaborator}</Text>
-                          {editing && (
-                            <IconButton
-                              aria-label="Remove collaborator"
-                              icon={<Icon name="delete" />}
-                              onClick={() =>
-                                setProjectCollaborators((collaborators) =>
-                                  collaborators.filter(
-                                    (c) => c !== collaborator,
-                                  ),
-                                )
-                              }
-                            />
-                          )}
-                        </Flex>
-                      ))}
-                    </VStack>
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
+            <Collaborators
+              editing={editing}
+              projectCollaborators={projectCollaborators}
+              setProjectCollaborators={setProjectCollaborators}
+            />
           </Flex>
         </Flex>
 
         {/* Modal to add Entities */}
-        <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Entity</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              <SearchSelect
-                id={"entitySearchSelect"}
-                resultType={"entity"}
-                value={selectedEntity}
-                onChange={setSelectedEntity}
-              />
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Button
-                colorScheme={"red"}
-                size={"sm"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onEntitiesClose}
-              >
-                Cancel
-              </Button>
-
-              <Spacer />
-
-              <Button
-                id={"addEntityDoneButton"}
-                colorScheme={"green"}
-                size={"sm"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Origin to the Entity
-                    addEntities(selectedEntity);
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        <Modal
-          isOpen={isExportOpen}
-          onClose={onExportClose}
-          size={"2xl"}
-          isCentered
+        <Dialog.Root
+          open={entitiesOpen}
+          onOpenChange={(details) => setEntitiesOpen(details.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
         >
-          <ModalOverlay />
-          <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Export Project</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody px={"2"} gap={"2"}>
-              {/* Export information */}
-              {_.isEqual(exportFormat, "json") && (
-                <Information
-                  text={"JSON files can be re-imported into Metadatify."}
-                />
-              )}
-              {_.isEqual(exportFormat, "csv") && (
-                <Information
-                  text={
-                    " To export Entities alongside Project details, use JSON format."
-                  }
-                />
-              )}
-
-              {/* Select export format */}
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                py={"2"}
-                gap={"2"}
-                justify={"space-between"}
-                align={"center"}
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
+              {/* Heading and close button */}
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
               >
-                <Flex gap={"1"} align={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Format:
+                Add Entity
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setEntitiesOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body p={"2"} gap={"2"}>
+                <Text>Select an Entity to add to the Project.</Text>
+                <SearchSelect
+                  id={"entitySearchSelect"}
+                  resultType={"entity"}
+                  value={selectedEntity}
+                  onChange={setSelectedEntity}
+                />
+              </Dialog.Body>
+
+              <Dialog.Footer p={"2"}>
+                <Button
+                  colorPalette={"red"}
+                  size={"sm"}
+                  rounded={"md"}
+                  variant={"outline"}
+                  onClick={() => setEntitiesOpen(false)}
+                >
+                  Cancel
+                  <Icon name={"cross"} />
+                </Button>
+
+                <Spacer />
+
+                <Button
+                  id={"addEntityDoneButton"}
+                  colorPalette={"green"}
+                  size={"sm"}
+                  rounded={"md"}
+                  onClick={() => {
+                    if (id) {
+                      // Add the Origin to the Entity
+                      addEntities(selectedEntity);
+                    }
+                  }}
+                >
+                  Done
+                  <Icon name={"check"} />
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+
+        {/* Dialog to export Entities */}
+        <Dialog.Root
+          open={exportOpen}
+          onOpenChange={(details) => setExportOpen(details.open)}
+          size={"xl"}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
+              {/* Heading and close button */}
+              <Dialog.Header
+                p={"2"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
+              >
+                Export Project
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setExportOpen(false)}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body px={"2"} gap={"2"}>
+                {/* Export information */}
+                {_.isEqual(exportFormat, "json") && (
+                  <Information
+                    text={"JSON files can be re-imported into Metadatify."}
+                  />
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Information
+                    text={
+                      " To export Entities alongside Project details, use JSON format."
+                    }
+                  />
+                )}
+
+                {/* Select export format */}
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  py={"2"}
+                  gap={"2"}
+                  justify={"space-between"}
+                  align={"center"}
+                  ref={selectExportFormatRef}
+                >
+                  <Flex gap={"2"} align={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Format:
+                    </Text>
+                    <Fieldset.Root w={"fit-content"}>
+                      <Fieldset.Content>
+                        <Field.Root>
+                          <Select.Root
+                            key={"select-export-format"}
+                            w={"120px"}
+                            size={"sm"}
+                            collection={createListCollection({
+                              items: ["JSON", "CSV"],
+                            })}
+                            defaultValue={["JSON"]}
+                            onValueChange={(details) =>
+                              setExportFormat(details.items[0].toLowerCase())
+                            }
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText
+                                  placeholder={"Select Export Format"}
+                                />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal container={selectExportFormatRef}>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {createListCollection({
+                                    items: ["JSON", "CSV"],
+                                  }).items.map((valueType) => (
+                                    <Select.Item
+                                      item={valueType}
+                                      key={valueType}
+                                    >
+                                      {valueType}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ))}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
+                  </Flex>
+                  <Text fontSize={"sm"}>
+                    Select the Project fields to be exported.
                   </Text>
-                  <FormControl>
-                    <Select
+                </Flex>
+
+                {/* Selection content */}
+                <Flex
+                  direction={"row"}
+                  p={"2"}
+                  gap={"4"}
+                  rounded={"md"}
+                  border={"1px solid"}
+                  borderColor={"gray.300"}
+                >
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Fieldset.Legend>Details</Fieldset.Legend>
+                      {!loading ? (
+                        <Stack gap={2} direction={"column"}>
+                          <Checkbox.Root
+                            disabled
+                            defaultChecked
+                            size={"sm"}
+                            rounded={"md"}
+                            fontSize={"sm"}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>Name: {projectName}</Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            fontSize={"sm"}
+                            checked={_.includes(exportFields, "created")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "created",
+                                details.checked as boolean,
+                              )
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              Created:{" "}
+                              {dayjs(project.created).format("DD MMM YYYY")}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "owner")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "owner",
+                                details.checked as boolean,
+                              )
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              Owner: {project.owner}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "description")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "description",
+                                details.checked as boolean,
+                              )
+                            }
+                            disabled={_.isEqual(projectDescription, "")}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              <Text lineClamp={1} fontSize={"sm"}>
+                                Description:{" "}
+                                {_.isEqual(projectDescription, "")
+                                  ? "No description"
+                                  : _.truncate(projectDescription, {
+                                      length: 32,
+                                    })}
+                              </Text>
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        </Stack>
+                      ) : (
+                        <Text fontSize={"sm"}>Loading details...</Text>
+                      )}
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Fieldset.Legend>Entities</Fieldset.Legend>
+                      {!loading ? (
+                        <Tooltip
+                          content={
+                            "Entities cannot be included when exporting to CSV"
+                          }
+                          disabled={_.isEqual(exportFormat, "json")}
+                          showArrow
+                        >
+                          <Checkbox.Root
+                            size={"sm"}
+                            rounded={"md"}
+                            checked={_.includes(exportFields, "entities")}
+                            onCheckedChange={(details) =>
+                              handleExportCheck(
+                                "entities",
+                                details.checked as boolean,
+                              )
+                            }
+                            disabled={
+                              _.isEqual(projectEntities.length, 0) ||
+                              _.isEqual(exportFormat, "csv")
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label>
+                              <Text lineClamp={1} fontSize={"sm"}>
+                                Export Entities
+                              </Text>
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        </Tooltip>
+                      ) : (
+                        <Text fontSize={"sm"}>Loading details...</Text>
+                      )}
+                      {_.includes(exportFields, "entities") && (
+                        <RadioGroup.Root
+                          value={exportEntityDetails}
+                          onValueChange={(event) =>
+                            setExportEntityDetails(event.value)
+                          }
+                        >
+                          <Stack direction={"row"} gap={"1"}>
+                            <RadioGroup.Item value={"name"}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.Label fontSize={"sm"}>
+                                Names
+                              </RadioGroup.Label>
+                            </RadioGroup.Item>
+                            <RadioGroup.Item value={"_id"}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.Label fontSize={"sm"}>
+                                Identifiers
+                              </RadioGroup.Label>
+                            </RadioGroup.Item>
+                          </Stack>
+                        </RadioGroup.Root>
+                      )}
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                </Flex>
+              </Dialog.Body>
+
+              <Dialog.Footer p={"2"}>
+                <Flex direction={"column"} w={"30%"} gap={"2"}>
+                  {/* "Download" button */}
+                  <Flex
+                    direction={"row"}
+                    w={"100%"}
+                    gap={"2"}
+                    justify={"right"}
+                    align={"center"}
+                  >
+                    <Button
+                      colorPalette={"blue"}
                       size={"sm"}
                       rounded={"md"}
-                      value={exportFormat}
-                      onChange={(event) => {
-                        setExportFormat(event.target.value);
-
-                        // Remove `entities` field if currently selected and switching to CSV format
-                        if (event.target.value === "csv") {
-                          setExportFields([
-                            ...exportFields.filter(
-                              (field) => field !== "entities",
-                            ),
-                          ]);
-                        }
-                      }}
+                      onClick={() => handleDownloadClick(exportFormat)}
+                      loading={exportLoading}
                     >
-                      <option key={"json"} value={"json"}>
-                        JSON
-                      </option>
-                      <option key={"csv"} value={"csv"}>
-                        CSV
-                      </option>
-                    </Select>
-                  </FormControl>
+                      Download
+                      <Icon name={"download"} />
+                    </Button>
+                  </Flex>
                 </Flex>
-                <Text fontSize={"sm"}>
-                  Select the Project fields to be exported.
-                </Text>
-              </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
-              {/* Selection content */}
-              <Flex
-                direction={"row"}
+        {/* Save message modal */}
+        <Dialog.Root
+          open={saveMessageOpen}
+          onOpenChange={(details) => setSaveMessageOpen(details.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header
                 p={"2"}
-                gap={"4"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
+                mt={"2"}
+                fontWeight={"semibold"}
+                fontSize={"md"}
               >
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Details</FormLabel>
-                  {!loading ? (
-                    <CheckboxGroup>
-                      <Stack spacing={2} direction={"column"}>
-                        <Checkbox
-                          disabled
-                          defaultChecked
-                          size={"sm"}
-                          fontSize={"sm"}
-                        >
-                          Name: {projectName}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          fontSize={"sm"}
-                          isChecked={_.includes(exportFields, "created")}
-                          onChange={(event) =>
-                            handleExportCheck("created", event.target.checked)
-                          }
-                        >
-                          Created:{" "}
-                          {dayjs(project.created).format("DD MMM YYYY")}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "owner")}
-                          onChange={(event) =>
-                            handleExportCheck("owner", event.target.checked)
-                          }
-                        >
-                          Owner: {project.owner}
-                        </Checkbox>
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "description")}
-                          onChange={(event) =>
-                            handleExportCheck(
-                              "description",
-                              event.target.checked,
-                            )
-                          }
-                          isDisabled={_.isEqual(projectDescription, "")}
-                        >
-                          <Text noOfLines={1} fontSize={"sm"}>
-                            Description:{" "}
-                            {_.isEqual(projectDescription, "")
-                              ? "No description"
-                              : _.truncate(projectDescription, { length: 32 })}
-                          </Text>
-                        </Checkbox>
-                      </Stack>
-                    </CheckboxGroup>
-                  ) : (
-                    <Text fontSize={"sm"}>Loading details...</Text>
-                  )}
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Entities</FormLabel>
-                  {!loading ? (
-                    <CheckboxGroup>
-                      <Tooltip
-                        label={
-                          "Entities cannot be included when exporting to CSV"
-                        }
-                        hasArrow
-                        isDisabled={_.isEqual(exportFormat, "json")}
-                      >
-                        <Checkbox
-                          size={"sm"}
-                          isChecked={_.includes(exportFields, "entities")}
-                          onChange={(event) =>
-                            handleExportCheck("entities", event.target.checked)
-                          }
-                          isDisabled={
-                            _.isEqual(projectEntities.length, 0) ||
-                            _.isEqual(exportFormat, "csv")
-                          }
-                        >
-                          <Text noOfLines={1} fontSize={"sm"}>
-                            Export Entities
-                          </Text>
-                        </Checkbox>
-                      </Tooltip>
-                    </CheckboxGroup>
-                  ) : (
-                    <Text fontSize={"sm"}>Loading details...</Text>
-                  )}
-                  {_.includes(exportFields, "entities") && (
-                    <RadioGroup
-                      onChange={setExportEntityDetails}
-                      value={exportEntityDetails}
-                    >
-                      <Stack direction={"row"} gap={"1"}>
-                        <Radio value={"name"} size={"sm"} fontSize={"sm"}>
-                          Names
-                        </Radio>
-                        <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
-                          Identifiers
-                        </Radio>
-                      </Stack>
-                    </RadioGroup>
-                  )}
-                </FormControl>
-              </Flex>
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Flex direction={"column"} w={"30%"} gap={"2"}>
-                {/* "Download" button */}
+                <Icon name={"save"} />
+                Saving Changes
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"sm"} color={"gray.600"}>
+                    Specify a description of the changes made to the Project.
+                  </Text>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    id={"saveMessageInput"}
+                    style={{ width: "100%" }}
+                    value={saveMessage}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setSaveMessage(value || "");
+                    }}
+                  />
+                </Flex>
+              </Dialog.Body>
+              <Dialog.Footer p={"2"}>
                 <Flex
                   direction={"row"}
                   w={"100%"}
                   gap={"2"}
-                  justify={"right"}
-                  align={"center"}
+                  justify={"space-between"}
                 >
                   <Button
-                    rightIcon={<Icon name={"download"} />}
-                    colorScheme={"blue"}
+                    variant={"outline"}
                     size={"sm"}
-                    onClick={() => handleDownloadClick(exportFormat)}
-                    isLoading={exportLoading}
+                    rounded={"md"}
+                    colorPalette={"red"}
+                    onClick={() => setSaveMessageOpen(false)}
                   >
-                    Download
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                  <Button
+                    variant={"solid"}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={handleSaveMessageDoneClick}
+                  >
+                    Done
+                    <Icon name={"check"} />
                   </Button>
                 </Flex>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Save message modal */}
-        <Modal
-          onEsc={onSaveMessageOpen}
-          onClose={onSaveMessageClose}
-          isOpen={isSaveMessageOpen}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent p={"2"}>
-            <ModalHeader p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"save"} />
-                <Text fontWeight={"semibold"}>Saving Changes</Text>
-              </Flex>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"} color={"gray.600"}>
-                  Specify a description of the changes made to the Project.
-                </Text>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  id={"saveMessageInput"}
-                  style={{ width: "100%" }}
-                  value={saveMessage}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setSaveMessage(value || "");
-                  }}
-                />
-              </Flex>
-            </ModalBody>
-            <ModalFooter p={"2"}>
-              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                <Button
-                  size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={() => onSaveMessageClose()}
-                >
-                  Cancel
-                </Button>
-
-                <Button
-                  id={"saveMessageDoneButton"}
-                  size={"sm"}
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => handleSaveMessageDoneClick()}
-                >
-                  Done
-                </Button>
-              </Flex>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
         {/* Blocker warning message */}
         <UnsavedChangesModal
@@ -1422,291 +1763,6 @@ const Project = () => {
           onClose={onBlockerClose}
           callback={onBlockerClose}
         />
-
-        <Drawer
-          isOpen={isHistoryOpen}
-          placement={"right"}
-          size={"md"}
-          onClose={onHistoryClose}
-        >
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader pb={"2"}>
-              <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text fontSize={"sm"} fontWeight={"bold"}>
-                  History
-                </Text>
-                <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Last modified:
-                    </Text>
-                    <Text fontSize={"sm"} fontWeight={"normal"}>
-                      {projectHistory.length > 0
-                        ? dayjs(projectHistory[0].timestamp).fromNow()
-                        : "never"}
-                    </Text>
-                  </Flex>
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Previous Versions:
-                    </Text>
-                    <Text fontSize={"sm"} fontWeight={"normal"}>
-                      {projectHistory.length}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </DrawerHeader>
-
-            <DrawerBody>
-              <VStack spacing={"2"}>
-                {projectHistory && projectHistory.length > 0 ? (
-                  projectHistory.map((projectVersion) => {
-                    return (
-                      <Card
-                        w={"100%"}
-                        key={`v_${projectVersion.timestamp}`}
-                        variant={"simple"}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                      >
-                        <CardHeader p={"0"}>
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            gap={"1"}
-                            p={"2"}
-                          >
-                            <Text
-                              fontWeight={"semibold"}
-                              fontSize={"sm"}
-                              color={"gray.700"}
-                            >
-                              {projectVersion.name}
-                            </Text>
-                          </Flex>
-                        </CardHeader>
-
-                        <CardBody px={"2"} py={"0"}>
-                          <Flex direction={"column"} gap={"2"}>
-                            {/* Description */}
-                            {_.isEqual(projectVersion.description, "") ? (
-                              <Tag size={"sm"} colorScheme={"orange"}>
-                                No Description
-                              </Tag>
-                            ) : (
-                              <Text fontSize={"sm"}>
-                                {_.truncate(projectVersion.description, {
-                                  length: 56,
-                                })}
-                              </Text>
-                            )}
-
-                            <Flex direction={"row"} gap={"2"}>
-                              {/* Entities */}
-                              <Flex
-                                direction={"column"}
-                                gap={"1"}
-                                p={"2"}
-                                rounded={"md"}
-                                border={"1px"}
-                                borderColor={"gray.300"}
-                                grow={"1"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Entities
-                                </Text>
-                                {projectVersion.entities.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tag
-                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
-                                      size={"sm"}
-                                    >
-                                      <TagLabel>
-                                        <Linky
-                                          type={"projects"}
-                                          id={projectVersion.entities[0]}
-                                          size={"sm"}
-                                        />
-                                      </TagLabel>
-                                    </Tag>
-                                    {projectVersion.entities.length > 1 && (
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"sm"}
-                                      >
-                                        and {projectVersion.entities.length - 1}{" "}
-                                        others
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>No Entities</Text>
-                                )}
-                              </Flex>
-
-                              {/* Collaborators */}
-                              <Flex
-                                direction={"column"}
-                                gap={"1"}
-                                p={"2"}
-                                rounded={"md"}
-                                border={"1px"}
-                                borderColor={"gray.300"}
-                                grow={"1"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Collaborators
-                                </Text>
-                                {projectVersion.collaborators.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tag
-                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
-                                      size={"sm"}
-                                    >
-                                      <TagLabel>
-                                        {projectVersion.collaborators[0]}
-                                      </TagLabel>
-                                    </Tag>
-                                    {projectVersion.collaborators.length >
-                                      1 && (
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"sm"}
-                                      >
-                                        and{" "}
-                                        {projectVersion.collaborators.length -
-                                          1}{" "}
-                                        others
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>No Collaborators</Text>
-                                )}
-                              </Flex>
-                            </Flex>
-                          </Flex>
-                        </CardBody>
-
-                        <CardFooter p={"2"}>
-                          {/* Version information */}
-                          <Flex direction={"column"} gap={"2"} w={"100%"}>
-                            <Flex
-                              direction={"row"}
-                              gap={"2"}
-                              bg={"gray.100"}
-                              justify={"center"}
-                              rounded={"md"}
-                            >
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                gap={"1"}
-                                p={"2"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Version
-                                </Text>
-                                <Flex
-                                  direction={"row"}
-                                  gap={"2"}
-                                  align={"center"}
-                                >
-                                  <Tag size={"sm"} colorScheme={"green"}>
-                                    {projectVersion.version}
-                                  </Tag>
-                                </Flex>
-                                <Text
-                                  fontWeight={"semibold"}
-                                  fontSize={"xs"}
-                                  color={"gray.400"}
-                                >
-                                  {dayjs(projectVersion.timestamp).fromNow()}
-                                </Text>
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Message
-                                </Text>
-                                {_.isEqual(projectVersion.message, "") ||
-                                _.isNull(projectVersion.message) ? (
-                                  <Flex>
-                                    <Tag size={"sm"} colorScheme={"orange"}>
-                                      No Message
-                                    </Tag>
-                                  </Flex>
-                                ) : (
-                                  <Tooltip
-                                    label={projectVersion.message}
-                                    isDisabled={
-                                      projectVersion.message.length < 32
-                                    }
-                                    hasArrow
-                                  >
-                                    <Text fontSize={"sm"}>
-                                      {_.truncate(projectVersion.message, {
-                                        length: 32,
-                                      })}
-                                    </Text>
-                                  </Tooltip>
-                                )}
-                              </Flex>
-
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                gap={"1"}
-                                p={"2"}
-                              >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Author
-                                </Text>
-                                <Flex>
-                                  <ActorTag
-                                    orcid={projectVersion.author}
-                                    fallback={"Unknown User"}
-                                  />
-                                </Flex>
-                              </Flex>
-                            </Flex>
-
-                            <Flex w={"100%"} justify={"right"}>
-                              <Button
-                                colorScheme={"orange"}
-                                size={"sm"}
-                                rightIcon={<Icon name={"rewind"} />}
-                                onClick={() => {
-                                  handleRestoreFromHistoryClick(projectVersion);
-                                }}
-                                isDisabled={projectArchived}
-                              >
-                                Restore
-                              </Button>
-                            </Flex>
-                          </Flex>
-                        </CardFooter>
-                      </Card>
-                    );
-                  })
-                ) : (
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    No previous versions.
-                  </Text>
-                )}
-              </VStack>
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
       </Flex>
     </Content>
   );

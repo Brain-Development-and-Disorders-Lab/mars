@@ -3,19 +3,19 @@ import {
   Input,
   Button,
   Flex,
-  useToast,
   InputGroup,
-  InputRightElement,
   Text,
   Spinner,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import { debounce } from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
+import _ from "lodash";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -84,13 +84,12 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
 
     if (entitiesError || projectsError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Error while retrieving options for selection",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -152,8 +151,6 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [showResults, setShowResults] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const toast = useToast();
-
   // Function to fetch results based on the search term
   const fetchResults = debounce(async (query) => {
     const results = await searchText({
@@ -175,13 +172,12 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
 
     if (searchError) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: searchError.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       setShowResults(true);
@@ -192,7 +188,7 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle clicking the `Input` componet dropdown
    */
   const onInputClick = () => {
-    if (props?.isDisabled !== true) {
+    if (props?.disabled !== true) {
       setShowResults(!showResults);
     }
   };
@@ -201,7 +197,9 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle search text input
    * @param event Input event
    */
-  const handleInputChange = async (event: any) => {
+  const handleInputChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (event.target.value === "") {
       // Case where search input is empty, reset `hasSearched` state
       setHasSearched(false);
@@ -228,7 +226,13 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   return (
     <Flex id={props.id || "searchSelect"} pos={"relative"} w={"100%"}>
-      <InputGroup size={"sm"} onClick={onInputClick}>
+      <InputGroup
+        data-testid={"search-select"}
+        onClick={onInputClick}
+        endElement={
+          showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />
+        }
+      >
         <Input
           placeholder={placeholder}
           value={props.value?.name || ""}
@@ -236,19 +240,17 @@ const SearchSelect = (props: SearchSelectProps) => {
           data-testid={"value-editor"}
           size={"sm"}
           rounded={"md"}
-          isDisabled={props?.isDisabled || false}
-          isReadOnly
+          disabled={props?.disabled || false}
+          readOnly
         />
-        <InputRightElement>
-          {showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />}
-        </InputRightElement>
       </InputGroup>
       {showResults && (
         <Flex
           w={"100%"}
           p={"2"}
-          mt={"9"}
+          mt={"10"}
           gap={"2"}
+          minW={"200px"}
           direction={"column"}
           bg={"white"}
           border={"1px"}
@@ -283,7 +285,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     variant={"ghost"}
                     onClick={() => handleSelectResult(result)}
                     width={"full"}
-                    isDisabled={searchLoading}
+                    disabled={searchLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
@@ -317,11 +319,11 @@ const SearchSelect = (props: SearchSelectProps) => {
                     variant={"ghost"}
                     onClick={() => handleSelectResult(option)}
                     width={"full"}
-                    isDisabled={entitiesLoading || projectsLoading}
+                    disabled={entitiesLoading || projectsLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
-                      {option.name}
+                      {_.truncate(option.name, { length: 24 })}
                     </Flex>
                   </Button>
                 </Flex>

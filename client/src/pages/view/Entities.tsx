@@ -6,27 +6,25 @@ import {
   Flex,
   Heading,
   Text,
+  Dialog,
   Button,
-  useBreakpoint,
-  Tooltip,
   Spacer,
   Tag,
   Link,
   useDisclosure,
-  ModalBody,
-  Modal,
-  FormControl,
   Select,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalFooter,
+  Fieldset,
+  Field,
+  Portal,
+  createListCollection,
+  EmptyState,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { DataTableAction, EntityModel, IGenericItem } from "@types";
@@ -34,7 +32,8 @@ import { DataTableAction, EntityModel, IGenericItem } from "@types";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Workspace context
+// Context and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
@@ -49,18 +48,28 @@ const Entities = () => {
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    owner: true,
+    created: true,
+  });
 
   // Entities export modal
   const {
-    isOpen: isExportOpen,
+    open: isExportOpen,
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
 
   const [toExport, setToExport] = useState([] as IGenericItem[]);
   const [exportFormat, setExportFormat] = useState("json");
+
+  // Add state for export table columns
+  const [exportTableVisibleColumns] = useState({
+    name: true,
+    _id: true,
+  });
 
   // Setup columns for review table
   const exportTableColumnHelper = createColumnHelper<IGenericItem>();
@@ -69,11 +78,7 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Flex>
-            <Tooltip
-              label={info.getValue()}
-              hasArrow
-              isDisabled={info.getValue().length < 30}
-            >
+            <Tooltip content={info.getValue()} showArrow>
               <Text fontSize={"sm"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 30 })}
               </Text>
@@ -141,17 +146,14 @@ const Entities = () => {
     }
   }, [workspace]);
 
-  // Effect to adjust column visibility
+  // Update column visibility when breakpoint changes
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, owner: false, created: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      owner: !isMobile,
+      created: !isMobile,
+    });
   }, [breakpoint]);
 
   // Configure table columns and data
@@ -162,12 +164,12 @@ const Entities = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              hasArrow
-              isDisabled={info.getValue().length < 20}
+              content={info.getValue()}
+              disabled={info.getValue().length < 36}
+              showArrow
             >
               <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 36 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -178,17 +180,21 @@ const Entities = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              hasArrow
-              isDisabled={info.getValue().length < 24}
+              content={info.getValue()}
+              disabled={info.getValue().length < 36}
+              showArrow
             >
               <Text fontSize={"sm"}>
-                {_.truncate(info.getValue(), { length: 24 })}
+                {_.truncate(info.getValue(), { length: 36 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -199,7 +205,13 @@ const Entities = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
+        );
       },
       header: "Owner",
       enableHiding: true,
@@ -217,8 +229,12 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -232,6 +248,7 @@ const Entities = () => {
     {
       label: `Export Selected`,
       icon: "download",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, rows: any) => {
         // Export rows that have been selected
         const selectedEntities: IGenericItem[] = [];
@@ -264,7 +281,9 @@ const Entities = () => {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
         slugify(
-          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`,
+          `export_entities_${dayjs(Date.now()).format(
+            "YYYY_MM_DD",
+          )}.${exportFormat}`,
         ),
       );
     }
@@ -298,16 +317,21 @@ const Entities = () => {
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Entities in the current Workspace are shown below. Sort the
+            Entities using the column headers.
+          </Text>
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <DataTable
@@ -324,108 +348,129 @@ const Entities = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Entities.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"entity"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Entities</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>
 
-      <Modal
-        isOpen={isExportOpen}
-        onClose={onExportClose}
-        size={"2xl"}
-        isCentered
-      >
-        <ModalOverlay />
-        <ModalContent>
-          {/* Heading and close button */}
-          <ModalHeader p={"2"}>Export Entities</ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody px={"2"} gap={"2"}>
-            {/* Select export format */}
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              py={"2"}
-              gap={"2"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex gap={"1"} align={"center"}>
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                  Format:
-                </Text>
-                <FormControl>
-                  <Select
-                    size={"sm"}
-                    rounded={"md"}
-                    value={exportFormat}
-                    onChange={(event) => setExportFormat(event.target.value)}
-                  >
-                    <option key={"json"} value={"json"}>
-                      JSON
-                    </option>
-                    <option key={"csv"} value={"csv"}>
-                      CSV
-                    </option>
-                  </Select>
-                </FormControl>
-              </Flex>
-            </Flex>
-
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
-              <DataTable
-                columns={exportTableColumns}
-                data={toExport}
-                visibleColumns={{}}
-                selectedRows={{}}
-                showPagination
-                showItemCount
-              />
-            </Flex>
-          </ModalBody>
-          <ModalFooter p={"2"}>
-            <Flex direction={"column"} w={"30%"} gap={"2"}>
-              {/* "Export" button */}
+      <Dialog.Root open={isExportOpen} size={"xl"} placement={"center"}>
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            {/* Heading and close button */}
+            <Dialog.Header p={"2"}>Export Entities</Dialog.Header>
+            <Dialog.Body px={"2"} gap={"2"}>
+              {/* Select export format */}
               <Flex
-                direction={"row"}
                 w={"100%"}
+                direction={"row"}
+                py={"2"}
                 gap={"2"}
-                justify={"right"}
+                justify={"space-between"}
                 align={"center"}
               >
-                <Button
-                  rightIcon={<Icon name={"download"} />}
-                  colorScheme={"blue"}
-                  size={"sm"}
-                  onClick={() => onExportClick()}
-                  isLoading={exportLoading}
-                >
-                  Export
-                </Button>
+                <Flex gap={"1"} align={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    Format:
+                  </Text>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Select.Root
+                          key={"select-export-format"}
+                          size={"sm"}
+                          collection={createListCollection({
+                            items: ["JSON", "CSV"],
+                          })}
+                          onValueChange={(details) =>
+                            setExportFormat(details.items[0].toLowerCase())
+                          }
+                        >
+                          <Select.HiddenSelect />
+                          <Select.Label>Select Export Format</Select.Label>
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText
+                                placeholder={"Select Export Format"}
+                              />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Portal>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {createListCollection({
+                                  items: ["JSON", "CSV"],
+                                }).items.map((valueType) => (
+                                  <Select.Item item={valueType} key={valueType}>
+                                    {valueType}
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                ))}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Portal>
+                        </Select.Root>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                </Flex>
               </Flex>
-            </Flex>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                <DataTable
+                  columns={exportTableColumns}
+                  data={toExport}
+                  visibleColumns={exportTableVisibleColumns}
+                  selectedRows={{}}
+                  showPagination
+                  showItemCount
+                />
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p={"2"}>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Export" button */}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"2"}
+                  justify={"right"}
+                  align={"center"}
+                >
+                  <Button
+                    colorPalette={"blue"}
+                    size={"sm"}
+                    onClick={() => onExportClick()}
+                    loading={exportLoading}
+                  >
+                    Export
+                    <Icon name={"download"} />
+                  </Button>
+                </Flex>
+              </Flex>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Content>
   );
 };

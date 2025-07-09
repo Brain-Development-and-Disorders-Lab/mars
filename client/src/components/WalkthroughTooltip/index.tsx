@@ -28,13 +28,16 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {step.title}
           </Text>
         )}
+
         <IconButton
           size={"sm"}
-          colorScheme={"red"}
-          icon={<Icon name={"cross"} />}
+          rounded={"md"}
+          variant={"ghost"}
           className={"tooltip__close"}
           {...closeProps}
-        />
+        >
+          <Icon name={"close"} />
+        </IconButton>
       </Flex>
 
       <Flex
@@ -57,7 +60,13 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
           justify={"space-between"}
         >
           {/* Skip button */}
-          <Button size={"sm"} className={"tooltip__button"} {...skipProps}>
+          <Button
+            size={"sm"}
+            rounded={"md"}
+            colorPalette={"orange"}
+            className={"tooltip__button"}
+            {...skipProps}
+          >
             {skipProps.title}
           </Button>
 
@@ -66,12 +75,12 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {index > 0 && (
               <Button
                 size={"sm"}
-                variant={"outline"}
-                leftIcon={<Icon name={"c_left"} />}
+                rounded={"md"}
+                colorPalette={"blue"}
                 className={"tooltip__button"}
                 {...backProps}
-                colorScheme={"orange"}
               >
+                <Icon name={"c_left"} />
                 {backProps.title}
               </Button>
             )}
@@ -79,12 +88,13 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
             {continuous && (
               <Button
                 size={"sm"}
-                rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"blue"}
+                rounded={"md"}
+                colorPalette={"blue"}
                 className={"tooltip__button tooltip__button--primary"}
                 {...primaryProps}
               >
                 {primaryProps.title}
+                <Icon name={"c_right"} />
               </Button>
             )}
           </Flex>

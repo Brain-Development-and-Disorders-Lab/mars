@@ -7,23 +7,14 @@ import {
   IconButton,
   Select,
   Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   Text,
   Checkbox,
   Menu,
-  MenuButton,
   Button,
-  MenuList,
-  MenuItem,
-  useBreakpoint,
-  InputGroup,
-  Input,
-  InputRightElement,
+  Portal,
+  createListCollection,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -35,9 +26,13 @@ import {
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
+
 // Existing and custom types
 import { DataTableProps } from "@types";
 declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
   }
@@ -47,7 +42,20 @@ declare module "@tanstack/react-table" {
 import _ from "lodash";
 
 const DataTable = (props: DataTableProps) => {
-  const breakpoint = useBreakpoint();
+  // Breakpoint state
+  const { isBreakpointActive } = useBreakpoint();
+
+  // Page length collection
+  const [pageLength, setPageLength] = useState<string[]>(["10"]);
+  const pageLengthsCollection = createListCollection({
+    items: [
+      { label: "10", value: "10" },
+      { label: "20", value: "20" },
+      { label: "50", value: "50" },
+      { label: "100", value: "100" },
+    ],
+  });
+  const selectPageSizeRef = React.useRef<HTMLDivElement>(null);
 
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
@@ -78,29 +86,43 @@ const DataTable = (props: DataTableProps) => {
             {
               id: "select",
               header: ({ table }: any) => (
-                <Checkbox
+                <Checkbox.Root
                   {...{
                     disabled: props.viewOnly,
                     pl: "1",
-                    isChecked: table.getIsAllRowsSelected(),
-                    isIndeterminate: table.getIsSomeRowsSelected(),
-                    isInvalid: false,
+                    variant: "outline",
+                    checked: table.getIsAllRowsSelected()
+                      ? true
+                      : table.getIsSomeRowsSelected()
+                        ? "indeterminate"
+                        : false,
+                    invalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
-                />
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
               ),
               cell: ({ row }: any) => (
-                <Checkbox
+                <Checkbox.Root
                   {...{
                     id: `s_${Math.random().toString(16).slice(2)}`,
                     pl: "1",
-                    isChecked: row.getIsSelected(),
+                    variant: "outline",
+                    checked: row.getIsSelected()
+                      ? true
+                      : row.getIsSomeSelected()
+                        ? "indeterminate"
+                        : false,
                     disabled: !row.getCanSelect() || props.viewOnly,
-                    isIndeterminate: row.getIsSomeSelected(),
-                    isInvalid: false,
+                    invalid: false,
                     onChange: row.getToggleSelectedHandler(),
                   }}
-                />
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
               ),
             },
           ]
@@ -125,6 +147,7 @@ const DataTable = (props: DataTableProps) => {
     onColumnVisibilityChange: setColumnVisibility,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         props.setData &&
           props.setData((data) =>
             data.map((row, index) => {
@@ -151,8 +174,10 @@ const DataTable = (props: DataTableProps) => {
   }, [props.visibleColumns]);
 
   // Column selector state
-  const [showColumnList, setShowColumnList] = useState(false);
   const [columnNames, setColumnNames] = useState([] as string[]);
+  const [columnNamesCollection, setColumnNamesCollection] = useState(
+    createListCollection<string>({ items: [] }),
+  );
 
   useEffect(() => {
     // Get a list of all column names
@@ -163,11 +188,12 @@ const DataTable = (props: DataTableProps) => {
       })
       .map((column) => column.id);
     setColumnNames(columns);
+    setColumnNamesCollection(createListCollection({ items: columns }));
 
     // Set the column visibilities
     const updatedVisibility = _.cloneDeep(columnVisibility);
     columns.map((column) => {
-      if (_.isUndefined(columnVisibility[column])) {
+      if (!_.isUndefined(columnVisibility[column])) {
         updatedVisibility[column] = true;
       }
     });
@@ -242,72 +268,94 @@ const DataTable = (props: DataTableProps) => {
   };
 
   /**
-   * Handle clicking the `Column` component dropdown
-   */
-  const onColumnsClick = () => {
-    if (props.viewOnly !== true) {
-      setShowColumnList(!showColumnList);
-    }
-  };
-
-  /**
    * Update the column visibility depending on the column selected
    * @param column Name of the column
    */
-  const onColumnViewClick = (column: string) => {
+  const updateColumnVisibility = (columns: string[]) => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
-    if (
-      _.isUndefined(updatedVisibility[column]) ||
-      updatedVisibility[column] === false
-    ) {
-      updatedVisibility[column] = true;
-    } else {
+
+    // Reset visibility on update
+    for (const column of Object.keys(updatedVisibility)) {
+      // Hide all columns
       updatedVisibility[column] = false;
+    }
+
+    // Re-instate column visibility if defined
+    for (const column of columns) {
+      if (
+        !_.isUndefined(updatedVisibility[column]) ||
+        updatedVisibility[column] === false
+      ) {
+        updatedVisibility[column] = true;
+      }
     }
     setColumnVisibility(updatedVisibility);
   };
 
   return (
     <Flex w={"100%"} direction={"column"}>
-      <TableContainer overflowX={"visible"} overflowY={"visible"}>
-        <Table variant={"simple"} size={"sm"} w={"100%"}>
-          {/* Table head */}
-          <Thead bg={"gray.50"} p={"0"}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta: any = header.column.columnDef.meta;
+      <Table.Root variant={"line"} size={"sm"} w={"100%"} interactive>
+        {/* Table head */}
+        <Table.Header bg={"gray.50"} p={"0"}>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <Table.Row key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const meta: any = header.column.columnDef.meta;
 
-                  // Customize the column widths depending on data contents
-                  let width = "auto";
-                  if (_.isEqual(header.id, "select")) {
-                    // Dynamically set the width for the checkboxes
-                    width = "30px";
-                  } else if (_.isEqual(header.id, "type")) {
-                    width = "100px";
-                  }
+                // Customize the column widths depending on data contents
+                let width = "auto";
+                if (_.isEqual(header.id, "select")) {
+                  // Dynamically set the width for the checkboxes
+                  width = "30px";
+                } else if (_.isEqual(header.id, "type")) {
+                  width = "100px";
+                }
 
-                  return (
-                    <Th
-                      key={header.id}
-                      onClick={getToggleSortingHandler(header)}
-                      isNumeric={meta?.isNumeric}
-                      w={width}
-                      _hover={
-                        canSortColumn(header) ? { cursor: "pointer" } : {}
-                      }
-                      transition={
-                        canSortColumn(header)
-                          ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
-                          : ""
-                      }
-                      p={"1"}
-                    >
-                      <Flex align={"center"} py={"1"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                return (
+                  <Table.ColumnHeader
+                    key={header.id}
+                    onClick={getToggleSortingHandler(header)}
+                    fontVariantNumeric={meta?.isNumeric}
+                    w={width}
+                    _hover={canSortColumn(header) ? { cursor: "pointer" } : {}}
+                    transition={
+                      canSortColumn(header)
+                        ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
+                        : ""
+                    }
+                    p={"1"}
+                  >
+                    <Flex>
+                      <Flex
+                        px={header.column.getIsSorted() ? "2" : "0"}
+                        py={"1"}
+                        rounded={"full"}
+                        border={canSortColumn(header) ? "1px solid" : ""}
+                        borderColor={
+                          header.column.getIsSorted()
+                            ? "blue.300"
+                            : "transparent"
+                        }
+                        bg={
+                          header.column.getIsSorted()
+                            ? "blue.100"
+                            : "transparent"
+                        }
+                        align={"center"}
+                      >
+                        <Flex
+                          fontWeight={"bold"}
+                          fontSize={"sm"}
+                          color={
+                            header.column.getIsSorted() ? "blue.700" : "black"
+                          }
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </Flex>
                         {canSortColumn(header) && (
                           <Icon
                             name={
@@ -317,43 +365,44 @@ const DataTable = (props: DataTableProps) => {
                                   ? "sort_down"
                                   : "sort"
                             }
+                            color={
+                              header.column.getIsSorted() ? "blue.700" : "black"
+                            }
                             style={{ marginLeft: "4px" }}
                           />
                         )}
                       </Flex>
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
+                    </Flex>
+                  </Table.ColumnHeader>
+                );
+              })}
+            </Table.Row>
+          ))}
+        </Table.Header>
 
-          {/* Table body */}
-          <Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Tr id={row.id} key={row.id} w={"auto"}>
-                {row.getVisibleCells().map((cell) => {
-                  const meta: any = cell.column.columnDef.meta;
-                  return (
-                    <Td
-                      id={cell.id}
-                      key={cell.id}
-                      isNumeric={meta?.isNumeric}
-                      px={"1"}
-                      py={"1"}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+        {/* Table body */}
+        <Table.Body>
+          {table.getRowModel().rows.map((row) => (
+            <Table.Row id={row.id} key={row.id} w={"auto"}>
+              {row.getVisibleCells().map((cell) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const meta: any = cell.column.columnDef.meta;
+                return (
+                  <Table.Cell
+                    id={cell.id}
+                    key={cell.id}
+                    fontVariantNumeric={meta?.isNumeric}
+                    px={"1"}
+                    py={"1"}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Table.Cell>
+                );
+              })}
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
 
       <Flex
         direction={"row"}
@@ -367,166 +416,164 @@ const DataTable = (props: DataTableProps) => {
         <Flex gap={"2"} direction={"row"} align={"center"}>
           {/* Actions button */}
           {props.showSelection && (
-            <Menu size={"sm"}>
-              <MenuButton
-                as={Button}
-                colorScheme={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-                size={"sm"}
-              >
-                Actions
-              </MenuButton>
-              <MenuList>
-                {props.actions &&
-                  props.actions.length > 0 &&
-                  props.actions?.map((action) => {
-                    return (
-                      <MenuItem
-                        onClick={() => {
-                          action.action(table, selectedRows);
-                        }}
-                        key={action.label}
-                        isDisabled={
-                          (Object.keys(selectedRows).length === 0 ||
-                            _.isUndefined(props.actions) ||
-                            props.actions?.length === 0) &&
-                          action.alwaysEnabled !== true
-                        }
-                      >
-                        <Flex direction={"row"} gap={"2"} align={"center"}>
-                          <Icon name={action.icon} />
-                          <Text fontSize={"sm"}>{action.label}</Text>
-                        </Flex>
-                      </MenuItem>
-                    );
-                  })}
-                {(_.isUndefined(props.actions) ||
-                  props.actions.length === 0) && (
-                  <MenuItem key={"no-actions"} isDisabled>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"sm"}>No Actions available</Text>
-                    </Flex>
-                  </MenuItem>
-                )}
-              </MenuList>
-            </Menu>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  {props.actions &&
+                    props.actions.length > 0 &&
+                    props.actions?.map((action) => {
+                      return (
+                        <Menu.Item
+                          onClick={() => {
+                            action.action(table, selectedRows);
+                          }}
+                          key={action.label}
+                          disabled={
+                            (Object.keys(selectedRows).length === 0 ||
+                              _.isUndefined(props.actions) ||
+                              props.actions?.length === 0) &&
+                            action.alwaysEnabled !== true
+                          }
+                          value={action.label}
+                        >
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
+                            <Icon name={action.icon} />
+                            <Text fontSize={"sm"}>{action.label}</Text>
+                          </Flex>
+                        </Menu.Item>
+                      );
+                    })}
+                  {(_.isUndefined(props.actions) ||
+                    props.actions.length === 0) && (
+                    <Menu.Item
+                      key={"no-actions"}
+                      disabled
+                      value={"No actions available"}
+                    >
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Text fontSize={"sm"}>No Actions available</Text>
+                      </Flex>
+                    </Menu.Item>
+                  )}
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
           )}
 
           {columnNames.length > 0 && props.showColumnSelect && (
-            <Flex>
-              <Flex pos={"relative"} w={"100%"}>
-                <InputGroup size={"sm"} onClick={onColumnsClick}>
-                  <Input
-                    placeholder={"Show Columns"}
-                    value={"Show Columns"}
-                    backgroundColor={"white"}
-                    data-testid={"value-editor"}
-                    cursor={"pointer"}
-                    size={"sm"}
-                    rounded={"md"}
-                    isDisabled={props.viewOnly}
-                    isReadOnly
-                  />
-                  <InputRightElement>
-                    {showColumnList ? (
-                      <Icon name={"c_up"} />
-                    ) : (
-                      <Icon name={"c_down"} />
-                    )}
-                  </InputRightElement>
-                </InputGroup>
-                {showColumnList && (
-                  <Flex
-                    w={"100%"}
-                    p={"2"}
-                    mt={"9"}
-                    gap={"2"}
-                    direction={"column"}
-                    bg={"white"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                    borderRadius={"sm"}
-                    shadow={"md"}
-                    position={"absolute"}
-                    zIndex={"2"}
-                  >
-                    {columnNames.map((column) => {
-                      return (
-                        <Button
-                          key={column}
-                          variant={"ghost"}
-                          onClick={() => onColumnViewClick(column)}
-                          width={"full"}
-                          size={"sm"}
-                          justifyContent={"left"}
-                        >
-                          <Flex
-                            direction={"row"}
-                            gap={"2"}
-                            justify={"space-between"}
-                            w={"100%"}
-                          >
-                            <Text fontSize={"sm"}>{_.capitalize(column)}</Text>
-                            {columnVisibility[column] && (
-                              <Icon name={"check"} color={"green"} />
-                            )}
-                          </Flex>
-                        </Button>
-                      );
-                    })}
-                  </Flex>
-                )}
-              </Flex>
-            </Flex>
+            <Select.Root
+              key={"select-columns"}
+              size={"sm"}
+              w={"200px"}
+              collection={columnNamesCollection}
+              value={Object.keys(columnVisibility).filter(
+                (column) => columnVisibility[column] === true,
+              )}
+              onValueChange={(details) => {
+                updateColumnVisibility(details.items);
+              }}
+              multiple
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger rounded={"md"}>
+                  <Select.ValueText placeholder={"Visible Columns"} />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {columnNamesCollection.items.map((name) => (
+                      <Select.Item item={name} key={name}>
+                        {_.capitalize(name)}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
           )}
         </Flex>
 
         {/* Table item counter */}
         {props.showItemCount &&
-          _.includes(["xl", "2xl"], breakpoint) &&
+          isBreakpointActive("xl", "up") &&
           itemCountComponent}
 
         {props.showPagination && (
-          <Flex gap={"2"} wrap={"wrap"}>
-            <Flex gap={"2"} align={"center"}>
-              <Text fontSize={"sm"}>Show:</Text>
-              <Select
-                id={"select-page-size"}
-                size={"sm"}
-                rounded={"md"}
-                value={table.getState().pagination.pageSize}
-                onChange={(event) => {
-                  table.setPageSize(Number(event.target.value));
-                }}
-                isInvalid={false}
-              >
-                {[10, 20, 50, 100].map((size) => {
-                  return (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  );
-                })}
-              </Select>
-            </Flex>
+          <Flex gap={"2"} align={"center"} ref={selectPageSizeRef}>
+            <Text fontSize={"sm"}>Shown Per Page:</Text>
+            <Fieldset.Root w={"fit-content"}>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Select.Root
+                    key={"select-pagesize"}
+                    size={"sm"}
+                    w={"80px"}
+                    collection={pageLengthsCollection}
+                    value={pageLength}
+                    onValueChange={(details) => {
+                      setPageLength(details.value);
+                      table.setPageSize(parseInt(details.value[0]));
+                    }}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger rounded={"md"}>
+                        <Select.ValueText placeholder={"Page Size"} />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal container={selectPageSizeRef}>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {pageLengthsCollection.items.map((count) => (
+                            <Select.Item item={count} key={count.value}>
+                              {count.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
 
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_double_left"} />}
+                rounded={"md"}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
-                isDisabled={!table.getCanPreviousPage()}
-              />
+                disabled={!table.getCanPreviousPage()}
+              >
+                <Icon name={"c_double_left"} />
+              </IconButton>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_left"} />}
+                rounded={"md"}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
-                isDisabled={!table.getCanPreviousPage()}
-              />
+                disabled={!table.getCanPreviousPage()}
+              >
+                <Icon name={"c_left"} />
+              </IconButton>
               {table.getPageCount() > 0 && (
                 <Flex gap={"1"}>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -541,19 +588,23 @@ const DataTable = (props: DataTableProps) => {
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_right"} />}
+                rounded={"md"}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
-                isDisabled={!table.getCanNextPage()}
-              />
+                disabled={!table.getCanNextPage()}
+              >
+                <Icon name={"c_right"} />
+              </IconButton>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
-                icon={<Icon name={"c_double_right"} />}
+                rounded={"md"}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                isDisabled={!table.getCanNextPage()}
-              />
+                disabled={!table.getCanNextPage()}
+              >
+                <Icon name={"c_double_right"} />
+              </IconButton>
             </Flex>
           </Flex>
         )}

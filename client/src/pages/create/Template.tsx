@@ -3,31 +3,24 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
+  Dialog,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
+  IconButton,
   Input,
-  List,
-  ListItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Spacer,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -48,10 +41,9 @@ import { usePostHog } from "posthog-js/react";
 
 const Template = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
-
   const { token } = useAuthentication();
+
+  const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -134,13 +126,12 @@ const Template = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: error.message,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -161,11 +152,12 @@ const Template = () => {
             <Spacer />
             <Button
               size={"sm"}
-              rightIcon={<Icon name={"info"} />}
+              rounded={"md"}
               variant={"outline"}
-              onClick={onOpen}
+              onClick={() => setInformationOpen(true)}
             >
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
@@ -183,29 +175,33 @@ const Template = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
             >
-              <FormControl isRequired>
-                <FormLabel fontSize={"sm"}>Template Name</FormLabel>
-                <Input
-                  size={"sm"}
-                  placeholder={"Name"}
-                  rounded={"md"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-                {isNameError && (
-                  <FormErrorMessage fontSize={"sm"}>
-                    A name must be specified for the Template.
-                  </FormErrorMessage>
-                )}
-                <FormHelperText fontSize={"sm"}>
-                  Provide a concise and descriptive name for the Template.
-                </FormHelperText>
-              </FormControl>
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root required>
+                    <Field.Label>Template Name</Field.Label>
+                    <Input
+                      size={"sm"}
+                      placeholder={"Name"}
+                      rounded={"md"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      required
+                    />
+                    {isNameError && (
+                      <Field.ErrorText>
+                        A name must be specified for the Template.
+                      </Field.ErrorText>
+                    )}
+                    <Field.HelperText>
+                      Provide a concise and descriptive name for the Template.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
 
@@ -224,32 +220,36 @@ const Template = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
-              <FormControl isRequired>
-                <FormLabel fontSize={"sm"}>Template Description</FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-                {isDescriptionError && (
-                  <FormErrorMessage fontSize={"sm"}>
-                    A description should be provided for the Template.
-                  </FormErrorMessage>
-                )}
-                <FormHelperText fontSize={"sm"}>
-                  Describe the purpose and contents of this Template.
-                </FormHelperText>
-              </FormControl>
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root required>
+                    <Field.Label>Template Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={"edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                    {isDescriptionError && (
+                      <Field.ErrorText>
+                        A description should be provided for the Template.
+                      </Field.ErrorText>
+                    )}
+                    <Field.HelperText>
+                      Describe the purpose and contents of this Template.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
         </Flex>
@@ -260,34 +260,62 @@ const Template = () => {
       </Flex>
 
       {/* Information modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size={"2xl"} isCentered>
-        <ModalOverlay />
-        <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
-          <ModalHeader p={"2"}>Template Attributes</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody p={"2"}>
-            <Flex gap={"4"} direction={"column"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Heading size={"sm"}>Overview</Heading>
-                <Text fontSize={"sm"}>
-                  Create a new template Attribute to be used to specify metadata
-                  associated with Entities. Using Values, predefined metadata
-                  fields can be associated with Entities. After creating a
-                  template Attribute, it can be used during the Entity creation
-                  process to pre-populate Attribute information and Entity
-                  metadata.
-                </Text>
+      <Dialog.Root
+        open={informationOpen}
+        onOpenChange={(event) => setInformationOpen(event.open)}
+        size={"xl"}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.CloseTrigger asChild>
+              <IconButton
+                bg={"white"}
+                _hover={{ bg: "gray.200" }}
+                variant={"subtle"}
+                color={"black"}
+                onClick={() => setInformationOpen(false)}
+              >
+                <Icon name={"close"} />
+              </IconButton>
+            </Dialog.CloseTrigger>
+            <Dialog.Header
+              p={"2"}
+              mt={"2"}
+              fontWeight={"semibold"}
+              fontSize={"md"}
+            >
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"project"} size={"sm"} />
+                Template Attributes
               </Flex>
+            </Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <Flex gap={"2"} direction={"column"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Heading size={"sm"}>Overview</Heading>
+                  <Text fontSize={"sm"}>
+                    Create a new template Attribute to be used to specify
+                    metadata associated with Entities. Using Values, predefined
+                    metadata fields can be associated with Entities. After
+                    creating a template Attribute, it can be used during the
+                    Entity creation process to pre-populate Attribute
+                    information and Entity metadata.
+                  </Text>
+                </Flex>
 
-              <Flex direction={"column"} gap={"2"}>
-                <Heading size={"sm"}>Values</Heading>
-                <Text fontSize={"sm"}>
-                  Values can be added to the template Attribute by clicking "Add
-                  Value" and selecting the specific type of Value. There are six
-                  supported Value types:
-                </Text>
-                <List spacing={"1"}>
-                  <ListItem>
+                <Flex direction={"column"} gap={"2"}>
+                  <Heading size={"sm"}>Values</Heading>
+                  <Text fontSize={"sm"}>
+                    Values can be added to the template Attribute by clicking
+                    "Add Value" and selecting the specific type of Value. There
+                    are six supported Value types:
+                  </Text>
+                  <Box as={"ul"} listStyleType={"circle"}>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_date"} color={"orange.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -297,8 +325,6 @@ const Template = () => {
                         Used to specify a point in time.
                       </Text>
                     </Flex>
-                  </ListItem>
-                  <ListItem>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_text"} color={"blue.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -308,8 +334,6 @@ const Template = () => {
                         Used to specify text of variable length.
                       </Text>
                     </Flex>
-                  </ListItem>
-                  <ListItem>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_number"} color={"green.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -319,8 +343,6 @@ const Template = () => {
                         Used to specify a numerical value.
                       </Text>
                     </Flex>
-                  </ListItem>
-                  <ListItem>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_url"} color={"yellow.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -328,8 +350,6 @@ const Template = () => {
                       </Text>
                       <Text fontSize={"sm"}>Used to specify a link.</Text>
                     </Flex>
-                  </ListItem>
-                  <ListItem>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"entity"} color={"purple.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -339,8 +359,6 @@ const Template = () => {
                         Used to specify a relation to another Entity.
                       </Text>
                     </Flex>
-                  </ListItem>
-                  <ListItem>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_select"} color={"teal.300"} />
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
@@ -350,13 +368,13 @@ const Template = () => {
                         Used to specify an option from a group of options.
                       </Text>
                     </Flex>
-                  </ListItem>
-                </List>
+                  </Box>
+                </Flex>
               </Flex>
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
 
       {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
@@ -365,22 +383,24 @@ const Template = () => {
       <Flex direction={"row"} wrap={"wrap"} p={"2"}>
         <Button
           size={"sm"}
-          colorScheme={"red"}
+          rounded={"md"}
+          colorPalette={"red"}
           variant={"outline"}
-          rightIcon={<Icon name={"cross"} />}
           onClick={() => navigate("/templates")}
         >
           Cancel
+          <Icon name={"cross"} />
         </Button>
         <Spacer />
         <Button
           size={"sm"}
-          colorScheme={"green"}
-          rightIcon={<Icon name={"check"} />}
+          rounded={"md"}
+          colorPalette={"green"}
           onClick={onSubmit}
-          isDisabled={isDetailsError || isValueError || isSubmitting}
+          disabled={isDetailsError || isValueError || isSubmitting}
         >
           Finish
+          <Icon name={"check"} />
         </Button>
       </Flex>
 

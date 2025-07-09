@@ -1,7 +1,8 @@
 import React from "react";
-import { Flex, Tooltip, Text, Tag, IconButton, Link } from "@chakra-ui/react";
+import { Flex, Text, Tag, IconButton, Link } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
@@ -74,7 +75,7 @@ const Relationships = (props: RelationshipsProps) => {
     relationshipTableColumnHelper.accessor("source", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue().name} hasArrow>
+          <Tooltip content={info.getValue().name} showArrow>
             <Text>
               {_.truncate(info.getValue().name, {
                 length: 24,
@@ -89,7 +90,9 @@ const Relationships = (props: RelationshipsProps) => {
       cell: (info) => {
         return (
           <Flex p={"1"}>
-            <Tag>{info.getValue()}</Tag>
+            <Tag.Root>
+              <Tag.Label>{info.getValue()}</Tag.Label>
+            </Tag.Root>
           </Flex>
         );
       },
@@ -98,7 +101,7 @@ const Relationships = (props: RelationshipsProps) => {
     relationshipTableColumnHelper.accessor("target", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue().name} hasArrow>
+          <Tooltip content={info.getValue().name} showArrow>
             <Text>
               {_.truncate(info.getValue().name, {
                 length: 24,
@@ -116,24 +119,28 @@ const Relationships = (props: RelationshipsProps) => {
             {props.viewOnly ? (
               <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
                 <Link
+                  color={"black"}
+                  fontWeight={"semibold"}
                   onClick={() =>
                     navigate(`/entities/${info.row.original.target._id}`)
                   }
                 >
-                  <Text fontWeight={"semibold"}>View</Text>
+                  View
                 </Link>
                 <Icon name={"a_right"} />
               </Flex>
             ) : (
               <IconButton
-                icon={<Icon name={"delete"} />}
                 aria-label={"Remove relationship"}
-                colorScheme={"red"}
+                colorPalette={"red"}
                 onClick={() => {
                   removeRelationship(info.row.original);
                 }}
                 size={"sm"}
-              />
+                rounded={"md"}
+              >
+                <Icon name={"delete"} />
+              </IconButton>
             )}
           </Flex>
         );

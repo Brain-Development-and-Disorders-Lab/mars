@@ -1,19 +1,16 @@
-import { extendTheme } from "@chakra-ui/react";
+import { createSystem, defaultConfig } from "@chakra-ui/react";
 
-export const theme = extendTheme({
-  styles: {
-    global: () => ({
-      body: {
-        minH: "100vh",
+export const theme = createSystem(defaultConfig, {
+  theme: {
+    tokens: {
+      colors: {
+        brand: { value: "#2E3192" },
+        primary: { value: "#2E3192" },
+        secondary: { value: "#1B98E0" },
+        background: { value: "#FFFFFF" },
+        "accent-1": { value: "#419D78" },
+        "accent-2": { value: "#F78E69" },
       },
-    }),
-  },
-  colors: {
-    brand: "#2E3192",
-    primary: "#2E3192",
-    secondary: "#1B98E0",
-    background: "#FFFFFF",
-    "accent-1": "#419D78",
-    "accent-2": "#F78E69",
+    },
   },
 });

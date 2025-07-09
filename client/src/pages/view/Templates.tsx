@@ -4,19 +4,20 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Link,
   Spacer,
   Tag,
   Text,
-  useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
-import Icon from "@components/Icon";
 import { Content } from "@components/Container";
+import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { AttributeModel } from "@types";
@@ -29,12 +30,12 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
-// Workspace context
+// Context and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 const Templates = () => {
   const navigate = useNavigate();
-  const toast = useToast();
 
   // Page state
   const [templates, setTemplates] = useState([] as AttributeModel[]);
@@ -69,13 +70,12 @@ const Templates = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Unable to retrieve Templates",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -89,20 +89,21 @@ const Templates = () => {
     }
   }, [workspace]);
 
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    timestamp: true,
+    owner: true,
+  });
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, timestamp: false, owner: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      timestamp: !isMobile,
+      owner: !isMobile,
+    });
   }, [breakpoint]);
 
   // Configure table columns and data
@@ -115,11 +116,15 @@ const Templates = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 20 })}
+            {_.truncate(info.getValue(), { length: 36 })}
           </Text>
         );
       },
@@ -128,7 +133,13 @@ const Templates = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
+        );
       },
       header: "Owner",
       enableHiding: true,
@@ -139,15 +150,25 @@ const Templates = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("values", {
-      cell: (info) => info.getValue().length,
+      cell: (info) => {
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
+      },
       header: "Values",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/templates/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/templates/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -178,16 +199,21 @@ const Templates = () => {
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/template")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Templates in the current Workspace are shown below. Sort the
+            Templates using the column headers.
+          </Text>
           {templates.length > 0 ? (
             <DataTable
               columns={columns}
@@ -200,17 +226,14 @@ const Templates = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Templates.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"template"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Templates</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

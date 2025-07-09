@@ -2,21 +2,20 @@
 import React, { useEffect, useState } from "react";
 import {
   Flex,
-  FormControl,
-  FormLabel,
   Input,
   Button,
   Text,
-  useToast,
   Heading,
-  Tooltip,
-  useBreakpoint,
   IconButton,
   Tag,
+  Separator,
   Spacer,
-  VStack,
-  Divider,
+  Fieldset,
+  Field,
+  Stack,
 } from "@chakra-ui/react";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
@@ -37,8 +36,9 @@ import {
 // GraphQL imports
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
-// Authentication context
+// Context and hooks
 import { useAuthentication } from "@hooks/useAuthentication";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -50,7 +50,6 @@ import dayjs from "dayjs";
  * @return {React.JSX.Element}
  */
 const APIKeyItem = (props: { apiKey: APIKey }) => {
-  const toast = useToast();
   const [isRevoked, setIsRevoked] = useState(
     dayjs(props.apiKey.expires).diff(Date.now()) < 0,
   );
@@ -77,61 +76,74 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
     if (result.data?.revokeKey && result.data.revokeKey.success) {
       setIsRevoked(true);
-      toast({
+      toaster.create({
         title: "Success",
         description: "API key revoked successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (revokeKeyError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to revoke API key",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"} wrap={"wrap"}>
-      <Flex direction={"row"} gap={"1"} align={"center"}>
+      <Flex
+        direction={"row"}
+        gap={"1"}
+        align={"center"}
+        minW={"100px"}
+        justify={"start"}
+      >
         <Icon name={"key"} />
-        <Tag colorScheme={isRevoked ? "red" : "blue"} size={"sm"}>
-          {isRevoked ? "revoked" : props.apiKey.scope}
-        </Tag>
+        <Tag.Root colorPalette={isRevoked ? "red" : "blue"} size={"sm"}>
+          <Tag.Label>{isRevoked ? "revoked" : props.apiKey.scope}</Tag.Label>
+        </Tag.Root>
       </Flex>
 
       <Flex gap={"2"} align={"center"}>
         <Input
-          type={showValue || isRevoked ? "text" : "password"}
+          type={showValue ? "text" : "password"}
           value={props.apiKey.value}
-          maxW={"200px"}
+          maxW={"240px"}
           size={"sm"}
           rounded={"md"}
-          isDisabled={isRevoked}
           readOnly
         />
-        <Button
+        <IconButton
+          variant={"subtle"}
           size={"sm"}
+          rounded={"md"}
           onClick={() => setShowValue(!showValue)}
-          isDisabled={isRevoked}
         >
-          {showValue ? "Hide" : "Show"}
-        </Button>
+          <Icon name={showValue ? "visibility_hide" : "visibility_show"} />
+        </IconButton>
         <Button
+          variant={"subtle"}
           size={"sm"}
+          rounded={"md"}
           onClick={async () => {
             await navigator.clipboard.writeText(props.apiKey.value);
+            toaster.create({
+              title: "Copied to clipboard",
+              type: "success",
+              duration: 2000,
+              closable: true,
+            });
           }}
         >
           Copy
+          <Icon name={"copy"} />
         </Button>
       </Flex>
 
@@ -154,12 +166,13 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 
           <Button
             size={"sm"}
-            colorScheme={"red"}
-            rightIcon={<Icon name={"delete"} />}
+            rounded={"md"}
+            colorPalette={"red"}
             onClick={() => handleRevokeClick()}
-            isLoading={revokeKeyLoading}
+            loading={revokeKeyLoading}
           >
             Revoke
+            <Icon name={"delete"} />
           </Button>
         </Flex>
       )}
@@ -168,8 +181,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
 };
 
 const User = () => {
-  const toast = useToast();
-  const breakpoint = useBreakpoint();
+  const { isBreakpointActive } = useBreakpoint();
 
   // Authentication
   const { token } = useAuthentication();
@@ -300,13 +312,12 @@ const User = () => {
     });
 
     if (userUpdateError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update User information",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       // Update the displayed name
@@ -340,13 +351,12 @@ const User = () => {
     });
 
     if (generateKeyError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update User information",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -355,10 +365,7 @@ const User = () => {
     }
   };
 
-  const truncateTableText =
-    _.isEqual(breakpoint, "sm") ||
-    _.isEqual(breakpoint, "base") ||
-    _.isUndefined(breakpoint);
+  const truncateTableText = !isBreakpointActive("md", "up");
 
   // Utility functions for removing Workspace contents
   const removeWorkspace = (_id: string) => {
@@ -381,10 +388,10 @@ const User = () => {
     workspacesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
+          <Tooltip content={info.getValue()} showArrow>
             <Text>
               {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
+                length: truncateTableText ? 24 : 36,
               })}
             </Text>
           </Tooltip>
@@ -396,21 +403,23 @@ const User = () => {
       cell: (info) => {
         return (
           <Tooltip
-            label={"You cannot leave your only Workspace"}
-            isDisabled={userWorkspaces.length > 1}
-            hasArrow
+            content={"You cannot leave your only Workspace"}
+            disabled={userWorkspaces.length > 1}
+            showArrow
           >
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
               <IconButton
-                icon={<Icon name={"b_right"} />}
                 size={"sm"}
+                rounded={"md"}
                 aria-label={"Leave Workspace"}
-                colorScheme={"orange"}
-                isDisabled={!editing || userWorkspaces.length === 1}
+                colorPalette={"orange"}
+                disabled={!editing || userWorkspaces.length === 1}
                 onClick={() => {
                   removeWorkspace(info.row.original._id);
                 }}
-              />
+              >
+                <Icon name={"logout"} />
+              </IconButton>
             </Flex>
           </Tooltip>
         );
@@ -443,7 +452,13 @@ const User = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"2"}
+          p={"2"}
+          border={"2px solid"}
+          rounded={"md"}
+        >
           <Icon name={"person"} size={"md"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             {staticName}
@@ -453,31 +468,34 @@ const User = () => {
           <Flex direction={"row"} align={"center"} gap={"2"}>
             <Button
               size={"sm"}
-              colorScheme={"red"}
-              rightIcon={<Icon name={"cross"} />}
+              rounded={"md"}
+              colorPalette={"red"}
               onClick={() => handleCancelClick()}
             >
               Cancel
+              <Icon name={"cross"} />
             </Button>
             <Button
               id={"userDoneButton"}
               size={"sm"}
-              colorScheme={"green"}
-              rightIcon={<Icon name={"check"} />}
-              isLoading={userUpdateLoading}
+              rounded={"md"}
+              colorPalette={"green"}
+              loading={userUpdateLoading}
               onClick={() => handleUpdateClick()}
             >
               Done
+              <Icon name={"check"} />
             </Button>
           </Flex>
         ) : (
           <Button
             size={"sm"}
-            colorScheme={"blue"}
-            rightIcon={<Icon name={"edit"} />}
+            rounded={"md"}
+            colorPalette={"blue"}
             onClick={() => setEditing(true)}
           >
             Edit
+            <Icon name={"edit"} />
           </Button>
         )}
       </Flex>
@@ -496,49 +514,65 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    ORCiD
-                  </FormLabel>
-                  <Tag colorScheme={"green"}>{userOrcid}</Tag>
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>ORCiD</Field.Label>
+                      <Tag.Root colorPalette={"green"}>
+                        <Tag.Label>{userOrcid}</Tag.Label>
+                      </Tag.Root>
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Email
-                  </FormLabel>
-                  <Input
-                    id={"modalUserEmail"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Email"}
-                    type={"email"}
-                    value={userEmail}
-                    isDisabled={!editing}
-                    onChange={(event) => setUserEmail(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root required>
+                      <Field.Label>
+                        Email
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserEmail"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Email"}
+                        type={"email"}
+                        value={userEmail}
+                        disabled={!editing}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Affiliation
-                  </FormLabel>
-                  <Input
-                    id={"modalUserAffiliation"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Affiliation"}
-                    value={userAffiliation}
-                    isDisabled={!editing}
-                    onChange={(event) => setUserAffiliation(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root required>
+                      <Field.Label>
+                        Affiliation
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserAffiliation"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Affiliation"}
+                        value={userAffiliation}
+                        disabled={!editing}
+                        onChange={(event) =>
+                          setUserAffiliation(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
             </Flex>
           </Flex>
@@ -555,12 +589,12 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
                 Workspaces
-              </FormLabel>
+              </Text>
               <Flex
                 w={"100%"}
                 justify={"center"}
@@ -596,7 +630,7 @@ const User = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Flex direction={"column"} p={"0"} gap={"2"}>
@@ -610,17 +644,18 @@ const User = () => {
                   </Text>
                   <Button
                     size={"sm"}
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"add"} />}
+                    rounded={"md"}
+                    colorPalette={"green"}
                     onClick={() => handleGenerateKeyClick()}
-                    isLoading={generateKeyLoading}
+                    loading={generateKeyLoading}
                   >
                     Add API Key
+                    <Icon name={"add"} />
                   </Button>
                 </Flex>
                 <Flex
                   rounded={"md"}
-                  border={"1px"}
+                  border={"1px solid"}
                   borderColor={"gray.200"}
                   p={"2"}
                   minH={userKeys.length > 0 ? "" : "100px"}
@@ -628,11 +663,11 @@ const User = () => {
                   justify={userKeys.length > 0 ? "start" : "center"}
                 >
                   {userKeys.length > 0 ? (
-                    <VStack
+                    <Stack
                       direction={"column"}
                       w={"100%"}
-                      divider={<Divider />}
-                      spacing={"2"}
+                      separator={<Separator variant={"solid"} />}
+                      gap={"2"}
                       justify={"left"}
                     >
                       {userKeys.map((key, index) => {
@@ -640,7 +675,7 @@ const User = () => {
                           <APIKeyItem key={`api_key_${index}`} apiKey={key} />
                         );
                       })}
-                    </VStack>
+                    </Stack>
                   ) : (
                     <Text
                       fontWeight={"semibold"}

@@ -5,13 +5,10 @@ import React from "react";
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Flex,
   Heading,
+  Separator,
   Stack,
-  StackDivider,
   Tag,
   Text,
 } from "@chakra-ui/react";
@@ -40,21 +37,21 @@ const Create = () => {
         wrap={"wrap"}
       >
         {/* Entity card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"entity"} size={"md"} />
               <Heading size={"md"}>Entity</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -76,8 +73,12 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Created</Tag>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Created</Tag.Label>
+                  </Tag.Root>
                 </Flex>
 
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
@@ -88,49 +89,60 @@ const Create = () => {
                   >
                     Optional:
                   </Text>
-                  <Tag>Description</Tag>
-                  <Tag>Projects</Tag>
-                  <Tag>Origins</Tag>
-                  <Tag>Products</Tag>
-                  <Tag>Attributes</Tag>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Projects</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Origins</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Products</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Attributes</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createEntityButton"}
+                rounded={"md"}
                 size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
+                colorPalette={"green"}
                 onClick={() => {
                   posthog.capture("create_entity_click");
                   navigate("/create/entity");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
-          </CardFooter>
-        </Card>
+          </Card.Footer>
+        </Card.Root>
 
         {/* Template card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"template"} size={"md"} />
               <Heading size={"md"}>Template</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -152,47 +164,54 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Description</Tag>
-                  <Tag>Values</Tag>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Values</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createTemplateButton"}
                 size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
+                rounded={"md"}
+                colorPalette={"green"}
                 onClick={() => {
                   posthog.capture("create_template_click");
                   navigate("/create/template");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
-          </CardFooter>
-        </Card>
+          </Card.Footer>
+        </Card.Root>
 
         {/* Project card */}
-        <Card
+        <Card.Root
           maxW={"sm"}
           h={"md"}
           variant={"outline"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
-          <CardHeader>
+          <Card.Header>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"project"} size={"md"} />
               <Heading size={"md"}>Project</Heading>
             </Flex>
-          </CardHeader>
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing={"2"}>
+          </Card.Header>
+          <Card.Body>
+            <Stack separator={<Separator />} gap={"2"}>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
@@ -213,29 +232,34 @@ const Create = () => {
                   >
                     Required:
                   </Text>
-                  <Tag>Name</Tag>
-                  <Tag>Description</Tag>
+                  <Tag.Root>
+                    <Tag.Label>Name</Tag.Label>
+                  </Tag.Root>
+                  <Tag.Root>
+                    <Tag.Label>Description</Tag.Label>
+                  </Tag.Root>
                 </Flex>
               </Flex>
             </Stack>
-          </CardBody>
-          <CardFooter>
+          </Card.Body>
+          <Card.Footer>
             <Flex w={"100%"} justify={"center"}>
               <Button
                 id={"createProjectButton"}
                 size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
+                rounded={"md"}
+                colorPalette={"green"}
                 onClick={() => {
                   posthog.capture("create_project_click");
                   navigate("/create/project");
                 }}
               >
                 Create
+                <Icon name={"add"} />
               </Button>
             </Flex>
-          </CardFooter>
-        </Card>
+          </Card.Footer>
+        </Card.Root>
       </Flex>
     </Content>
   );

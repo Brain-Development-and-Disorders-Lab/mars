@@ -74,24 +74,27 @@ const ImageControls = () => {
     >
       <IconButton
         size={"sm"}
-        icon={<Icon name={"zoom_out"} />}
-        colorScheme={"blue"}
+        colorPalette={"blue"}
         aria-label={"Zoom out"}
         onClick={() => zoomOut()}
-      />
+      >
+        <Icon name={"zoom_out"} />
+      </IconButton>
       <IconButton
         size={"sm"}
-        icon={<Icon name={"zoom_in"} />}
-        colorScheme={"blue"}
+        colorPalette={"blue"}
         aria-label={"Zoom in"}
         onClick={() => zoomIn()}
-      />
+      >
+        <Icon name={"zoom_in"} />
+      </IconButton>
       <IconButton
         size={"sm"}
-        icon={<Icon name={"reload"} />}
         aria-label={"Reset"}
         onClick={() => resetTransform()}
-      />
+      >
+        <Icon name={"reload"} />
+      </IconButton>
     </Flex>
   );
 };
@@ -296,22 +299,24 @@ const PreviewModal = (props: PreviewModalProps) => {
                   <IconButton
                     aria-label={"Previous page"}
                     size={"sm"}
-                    colorScheme={"blue"}
+                    colorPalette={"blue"}
                     onClick={previousPage}
-                    icon={<Icon name={"c_left"} />}
-                    isDisabled={previewIndex === 1}
-                  />
+                    disabled={previewIndex === 1}
+                  >
+                    <Icon name={"c_left"} />
+                  </IconButton>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
                     Page {previewIndex} of {previewPages}
                   </Text>
                   <IconButton
                     aria-label={"Next page"}
                     size={"sm"}
-                    colorScheme={"blue"}
+                    colorPalette={"blue"}
                     onClick={nextPage}
-                    icon={<Icon name={"c_right"} />}
-                    isDisabled={previewIndex === previewPages}
-                  />
+                    disabled={previewIndex === previewPages}
+                  >
+                    <Icon name={"c_right"} />
+                  </IconButton>
                 </Flex>
               </Flex>
             ) : (

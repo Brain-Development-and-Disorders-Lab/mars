@@ -5,27 +5,18 @@ import React, { useState } from "react";
 import {
   Flex,
   Input,
-  useToast,
   Text,
   Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverCloseButton,
-  PopoverHeader,
-  PopoverBody,
-  useDisclosure,
   Link,
   Spacer,
-  VStack,
-  StackDivider,
   Spinner,
   Stack,
   Skeleton,
-  PopoverFooter,
-  InputGroup,
-  InputLeftElement,
+  IconButton,
+  Separator,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { IGenericItem, SearchBoxProps } from "@types";
@@ -42,9 +33,8 @@ const MAX_RESULTS = 5;
 
 const SearchBox = (props: SearchBoxProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
 
-  const { isOpen, onToggle, onClose } = useDisclosure();
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   // Workspace context
@@ -107,13 +97,12 @@ const SearchBox = (props: SearchBoxProps) => {
 
     if (error) {
       setIsError(true);
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -126,73 +115,64 @@ const SearchBox = (props: SearchBoxProps) => {
     setQuery("");
 
     // Existing `onClose` function
-    onClose();
+    setOpen(false);
   };
 
   // Basic handler to display results
   const handleClick = () => {
-    onToggle();
+    setOpen(true);
     runSearch();
   };
 
   // Basic handler to navigate to a result
   const handleResultClick = (id: string) => {
     setQuery("");
-    onClose();
+    setOpen(false);
     navigate(`/entities/${id}`);
   };
 
   return (
-    <Flex w={"100%"} p={"0"}>
-      <Popover
-        isOpen={isOpen}
-        onClose={onCloseWrapper}
-        placement={"bottom-end"}
-      >
-        <PopoverTrigger>
-          <Flex w={"100%"} gap={"4"}>
-            <InputGroup size={"sm"}>
-              <InputLeftElement pointerEvents={"none"}>
-                <Icon name={"search"} />
-              </InputLeftElement>
-              <Input
-                value={query}
-                rounded={"md"}
-                placeholder={"Quick Search"}
-                background={"white"}
-                isDisabled={workspace === ""}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyUp={(event) => {
-                  // Listen for "Enter" key when entering a query
-                  if (event.key === "Enter" && query !== "") {
-                    handleClick();
-                  }
-                }}
-              />
-            </InputGroup>
-          </Flex>
-        </PopoverTrigger>
+    <Popover.Root
+      open={open}
+      onInteractOutside={() => setOpen(false)}
+      onEscapeKeyDown={() => setOpen(false)}
+    >
+      <Flex gap={"2"} align={"center"}>
+        <Popover.Trigger>
+          <Input
+            value={query}
+            size={"sm"}
+            rounded={"md"}
+            placeholder={"Quick Search"}
+            background={"white"}
+            disabled={workspace === ""}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyUp={(event) => {
+              // Listen for "Enter" key when entering a query
+              if (event.key === "Enter" && query !== "") {
+                handleClick();
+              }
+            }}
+          />
+        </Popover.Trigger>
+        <IconButton
+          size={"sm"}
+          rounded={"md"}
+          colorPalette={"green"}
+          disabled={query === ""}
+          onClick={() => {
+            if (query !== "") {
+              handleClick();
+            }
+          }}
+        >
+          <Icon name={"search"} />
+        </IconButton>
+      </Flex>
 
-        <PopoverContent w={"100%"}>
-          <PopoverCloseButton />
-          <PopoverHeader>
-            <Flex align={"center"} gap={"1"}>
-              <Text fontSize={"sm"}>
-                Showing{" "}
-                {results.length > MAX_RESULTS ? MAX_RESULTS : results.length} of
-              </Text>
-              {isSearching ? (
-                <Spinner size={"sm"} />
-              ) : (
-                <Text fontWeight={"bold"} fontSize={"sm"}>
-                  {results.length}
-                </Text>
-              )}
-              <Text fontSize={"sm"}>results</Text>
-            </Flex>
-          </PopoverHeader>
-
-          <PopoverBody>
+      <Popover.Positioner>
+        <Popover.Content rounded={"md"}>
+          <Popover.Body p={"2"}>
             <Flex gap={"2"} py={"1"}>
               {isSearching ? (
                 <Stack w={"100%"}>
@@ -203,11 +183,7 @@ const SearchBox = (props: SearchBoxProps) => {
               ) : (
                 hasSearched &&
                 !isError && (
-                  <VStack
-                    gap={"1"}
-                    divider={<StackDivider borderColor={"gray.300"} />}
-                    w={"100%"}
-                  >
+                  <Stack gap={"2"} separator={<Separator />} w={"100%"}>
                     {results.length > 0 ? (
                       results.slice(0, MAX_RESULTS).map((result) => {
                         return (
@@ -217,19 +193,20 @@ const SearchBox = (props: SearchBoxProps) => {
                             gap={"2"}
                             w={"100%"}
                           >
-                            <Text fontWeight={"semibold"} fontSize={"sm"}>
+                            <Text color={"black"} fontSize={"sm"}>
                               {result.name}
                             </Text>
                             <Spacer />
-                            <Link onClick={() => handleResultClick(result._id)}>
-                              <Flex
-                                gap={"1"}
-                                direction={"row"}
-                                align={"center"}
-                              >
-                                <Text fontSize={"sm"}>View</Text>
-                                <Icon name={"a_right"} />
-                              </Flex>
+                            <Link
+                              className={"light"}
+                              color={"black"}
+                              variant={"underline"}
+                              fontWeight={"semibold"}
+                              gap={"1"}
+                              onClick={() => handleResultClick(result._id)}
+                            >
+                              View
+                              <Icon name={"a_right"} color={"black"} />
                             </Link>
                           </Flex>
                         );
@@ -241,32 +218,56 @@ const SearchBox = (props: SearchBoxProps) => {
                         </Text>
                       </Flex>
                     )}
-                  </VStack>
+                  </Stack>
                 )
               )}
             </Flex>
-          </PopoverBody>
+          </Popover.Body>
 
-          <PopoverFooter>
-            <Flex width={"100%"} gap={"1"}>
-              <Text fontSize={"sm"}>View all results using </Text>
-              <Link
-                onClick={() => {
-                  // Close the popover and navigate to the `/search` route
-                  onCloseWrapper();
-                  navigate("/search");
-                }}
-              >
-                <Flex gap={"1"} direction={"row"} align={"center"}>
-                  <Text fontSize={"sm"}>Search</Text>
-                  <Icon name={"a_right"} />
+          <Popover.Footer p={"2"} bg={"gray.50"}>
+            <Flex direction={"column"} gap={"1"}>
+              <Flex width={"100%"} direction={"row"} gap={"1"}>
+                <Text fontSize={"sm"}>
+                  Showing{" "}
+                  {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
+                  of
+                </Text>
+                {isSearching ? (
+                  <Spinner size={"sm"} />
+                ) : (
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    {results.length}
+                  </Text>
+                )}
+                <Text fontSize={"sm"}>results</Text>
+              </Flex>
+              {results.length > 0 && results.length > MAX_RESULTS && (
+                <Flex width={"100%"} direction={"row"} gap={"1"}>
+                  <Text fontSize={"sm"} color={"black"}>
+                    View all results using{" "}
+                  </Text>
+                  <Link
+                    className={"light"}
+                    color={"black"}
+                    variant={"underline"}
+                    fontWeight={"semibold"}
+                    gap={"1"}
+                    onClick={() => {
+                      // Close the popover and navigate to the `/search` route
+                      onCloseWrapper();
+                      navigate("/search");
+                    }}
+                  >
+                    Search
+                    <Icon name={"a_right"} color={"black"} />
+                  </Link>
                 </Flex>
-              </Link>
+              )}
             </Flex>
-          </PopoverFooter>
-        </PopoverContent>
-      </Popover>
-    </Flex>
+          </Popover.Footer>
+        </Popover.Content>
+      </Popover.Positioner>
+    </Popover.Root>
   );
 };
 

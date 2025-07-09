@@ -8,10 +8,10 @@ import {
   Button,
   Image,
   Text,
-  FormControl,
   Tag,
-  FormLabel,
   Input,
+  Fieldset,
+  Field,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -114,7 +114,7 @@ const Setup = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
           rounded={"md"}
         >
@@ -135,71 +135,103 @@ const Setup = () => {
             pt={"8"}
           >
             <Text fontWeight={"semibold"}>ORCiD:</Text>
-            <Tag colorScheme={"green"}>{token.orcid}</Tag>
+            <Tag.Root colorPalette={"green"}>
+              <Tag.Label>{token.orcid}</Tag.Label>
+            </Tag.Root>
           </Flex>
 
-          <FormControl isRequired>
-            <Flex direction={"column"} gap={"2"}>
-              <Flex direction={"row"} gap={"2"}>
-                <Flex direction={"column"} w={"100%"}>
-                  <FormLabel>First Name</FormLabel>
-                  <Input
-                    id={"userFirstNameInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userFirstName}
-                    onChange={(event) => setUserFirstName(event.target.value)}
-                  />
-                </Flex>
-                <Flex direction={"column"} w={"100%"}>
-                  <FormLabel>Last Name</FormLabel>
-                  <Input
-                    id={"userLastNameInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userLastName}
-                    onChange={(event) => setUserLastName(event.target.value)}
-                  />
-                </Flex>
-              </Flex>
+          <Fieldset.Root>
+            <Fieldset.Content>
               <Flex direction={"column"} gap={"2"}>
-                <Flex direction={"column"}>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    id={"userEmailInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    type={"email"}
-                    value={userEmail}
-                    onChange={(event) => setUserEmail(event.target.value)}
-                  />
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"column"} w={"100%"}>
+                    <Field.Root required>
+                      <Field.Label>
+                        First Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userFirstNameInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userFirstName}
+                        onChange={(event) =>
+                          setUserFirstName(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
+                  <Flex direction={"column"} w={"100%"}>
+                    <Field.Root required>
+                      <Field.Label>
+                        Last Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userLastNameInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userLastName}
+                        onChange={(event) =>
+                          setUserLastName(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
                 </Flex>
-                <Flex direction={"column"}>
-                  <FormLabel>Affiliation</FormLabel>
-                  <Input
-                    id={"userAffiliationInput"}
-                    size={"sm"}
-                    rounded={"md"}
-                    value={userAffiliation}
-                    onChange={(event) => setUserAffiliation(event.target.value)}
-                  />
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"column"}>
+                    <Field.Root>
+                      <Field.Label>
+                        Email
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userEmailInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        type={"email"}
+                        value={userEmail}
+                        onChange={(event) => setUserEmail(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Flex>
+                  <Flex direction={"column"}>
+                    <Field.Root>
+                      <Field.Label>
+                        Affiliation
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"userAffiliationInput"}
+                        size={"sm"}
+                        rounded={"md"}
+                        value={userAffiliation}
+                        onChange={(event) =>
+                          setUserAffiliation(event.target.value)
+                        }
+                      />
+                    </Field.Root>
+                  </Flex>
                 </Flex>
               </Flex>
-            </Flex>
-          </FormControl>
-          <Flex align={"center"} justify={"right"} w={"100%"}>
-            <Button
-              id={"userDoneButton"}
-              rightIcon={<Icon name={"check"} />}
-              colorScheme={"green"}
-              size={"sm"}
-              onClick={() => onDoneClick()}
-              isLoading={isLoading}
-              isDisabled={!userComplete}
-            >
-              Done
-            </Button>
-          </Flex>
+
+              <Flex align={"center"} justify={"right"} w={"100%"}>
+                <Button
+                  id={"userDoneButton"}
+                  colorPalette={"green"}
+                  size={"sm"}
+                  rounded={"md"}
+                  onClick={() => onDoneClick()}
+                  loading={isLoading}
+                  disabled={!userComplete}
+                >
+                  Done
+                  <Icon name={"check"} />
+                </Button>
+              </Flex>
+            </Fieldset.Content>
+          </Fieldset.Root>
         </Flex>
       </Flex>
     </Content>

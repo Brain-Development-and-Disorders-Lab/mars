@@ -8,14 +8,14 @@ import {
   Button,
   Image,
   Text,
-  useToast,
   Link,
-  Divider,
+  Separator,
   Box,
   AbsoluteCenter,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,8 +41,6 @@ const useParameters = () => {
 };
 
 const Login = () => {
-  const toast = useToast();
-
   const { token, login } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
 
@@ -82,28 +80,31 @@ const Login = () => {
       // Provide error information
       if (
         result.message.includes("Unable") &&
-        !toast.isActive("login-graphql-error-toast")
+        !toaster.isVisible("login-graphql-error-toast")
       ) {
-        toast({
+        toaster.create({
           id: "login-graphql-error-toast",
           title: "Login Error",
-          status: "error",
+          type: "error",
           description: result.message,
           duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       } else if (
         result.message.includes("access") &&
-        !toast.isActive("login-access-error-toast")
+        !toaster.isVisible("login-access-error-toast")
       ) {
-        toast({
+        toaster.create({
           id: "login-access-error-toast",
           title: "Access Unavailable",
-          status: "info",
+          type: "info",
           description: (
             <Flex direction={"column"}>
-              <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+              <Link
+                href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Text fontWeight={"semibold"}>Join the waitlist here</Text>
                   <Icon name={"a_right"} />
@@ -111,9 +112,7 @@ const Login = () => {
               </Link>
             </Flex>
           ),
-          duration: null,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     }
@@ -182,25 +181,25 @@ const Login = () => {
             bg={"white"}
             align={"center"}
             justify={"center"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
           >
-            <Heading size={"xl"} fontWeight={"semibold"}>
+            <Heading size={"2xl"} fontWeight={"semibold"}>
               Sign in
             </Heading>
 
-            <Text fontWeight={"semibold"} fontSize={"sm"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
               Get started with one of the sign in options below.
             </Text>
 
             <Flex direction={"column"} gap={"2"} pt={"8"}>
               <Button
                 id={"orcidLoginButton"}
-                colorScheme={"gray"}
+                variant={"subtle"}
                 gap={"4"}
                 onClick={onLoginClick}
-                isLoading={isLoading}
+                loading={isLoading}
                 loadingText={"Logging in..."}
               >
                 <Image
@@ -212,13 +211,18 @@ const Login = () => {
               </Button>
 
               <Box position={"relative"} p={"4"}>
-                <Divider />
+                <Separator />
                 <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
                   or
                 </AbsoluteCenter>
               </Box>
 
-              <Button colorScheme={"gray"} gap={"4"} isDisabled>
+              <Button
+                variant={"subtle"}
+                colorPalette={"gray"}
+                gap={"4"}
+                disabled
+              >
                 More sign in options coming soon.
               </Button>
             </Flex>

@@ -4,30 +4,47 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Input,
   Link,
+  Menu,
+  Portal,
   Spacer,
   Spinner,
-  Switch,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
   Tabs,
   Tag,
   Text,
-  Tooltip,
-  useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
-import SearchQueryBuilder from "@components/SearchQueryBuilder";
-import { Information } from "@components/Label";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
+
+// `react-querybuilder` imports
+import QueryBuilder, {
+  defaultOperators,
+  defaultRuleProcessorMongoDB,
+  Field,
+  formatQuery,
+  RuleGroupType,
+  RuleProcessor,
+  RuleType,
+} from "react-querybuilder";
+import { QueryBuilderDnD } from "@react-querybuilder/dnd";
+import * as ReactDnD from "react-dnd";
+import * as ReactDndHtml5Backend from "react-dnd-html5-backend";
+import { QueryBuilderChakra } from "@react-querybuilder/chakra";
+
+// SearchQueryValue component for searching Entity fields
+import SearchQueryValue from "@components/SearchQueryValue";
+
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -39,10 +56,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// Utility libraries and functions
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
 import { gql, useLazyQuery } from "@apollo/client";
+import { JSONPath } from "jsonpath-plus";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -53,8 +73,7 @@ const Search = () => {
   const [isError, setIsError] = useState(false);
 
   const navigate = useNavigate();
-  const breakpoint = useBreakpoint();
-  const toast = useToast();
+  const { breakpoint } = useBreakpoint();
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
@@ -123,13 +142,12 @@ const Search = () => {
 
     if (error) {
       setIsError(true);
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -138,22 +156,18 @@ const Search = () => {
 
   const onTabChange = () => {
     // Reset search state
-    setQuery("");
-    setHasSearched(false);
     setResults([]);
+    setHasSearched(false);
   };
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, owner: false, created: false });
-    } else {
-      setVisibleColumns({});
-    }
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      owner: !isMobile,
+      created: !isMobile,
+    });
   }, [breakpoint]);
 
   const searchResultColumnHelper = createColumnHelper<EntityModel>();
@@ -172,15 +186,18 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            content={info.getValue()}
+            disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -191,16 +208,24 @@ const Search = () => {
     }),
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
+        );
       },
       header: "Owner",
     }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
         return (
-          <Tag size={"sm"}>
-            {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
-          </Tag>
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>
+              {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
+            </Tag.Label>
+          </Tag.Root>
         );
       },
       header: "Attributes",
@@ -229,10 +254,14 @@ const Search = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -293,6 +322,321 @@ const Search = () => {
     },
   ];
 
+  const advancedQueryFields: Field[] = [
+    {
+      name: "name",
+      label: "Name",
+      operators: [
+        { name: "=", label: "is" },
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain", "beginsWith", "endsWith"].includes(
+            operator.name,
+          ),
+        ),
+      ],
+    },
+    {
+      name: "description",
+      label: "Description",
+      operators: [
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain"].includes(operator.name),
+        ),
+      ],
+    },
+    {
+      name: "projects",
+      label: "Projects",
+      operators: [
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain"].includes(operator.name),
+        ),
+      ],
+    },
+    {
+      name: "relationships",
+      label: "Relationships",
+      operators: [
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain"].includes(operator.name),
+        ),
+      ],
+    },
+    {
+      name: "attributes",
+      label: "Attributes",
+      operators: [
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain"].includes(operator.name),
+        ),
+      ],
+    },
+  ];
+
+  // Setup the initial query
+  const initialAdvancedQuery: RuleGroupType = {
+    combinator: "and",
+    rules: [],
+  };
+
+  /**
+   * Custom function for processing specific fields within a search query,
+   * specifically `relationships`
+   * @param {RuleType} rule Rule for processing value
+   * @return {any}
+   */
+  const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
+    if (rule.field === "name") {
+      const value = { $regex: new RegExp(rule.value, "gi").toString() };
+      if (rule.operator === "doesNotContain") {
+        return {
+          name: {
+            $not: value,
+          },
+        };
+      } else if (rule.operator === "contains") {
+        return {
+          name: value,
+        };
+      } else {
+        return defaultRuleProcessorMongoDB(rule);
+      }
+    } else if (rule.field === "relationships") {
+      // Handle `relationships` field
+      if (rule.operator === "doesNotContain") {
+        // If `doesNotContain`, include `$not`
+        return {
+          relationships: {
+            $not: {
+              $elemMatch: {
+                "target._id": rule.value,
+              },
+            },
+          },
+        };
+      } else {
+        return {
+          relationships: {
+            $elemMatch: {
+              "target._id": rule.value,
+            },
+          },
+        };
+      }
+    } else if (rule.field === "attributes") {
+      // Parse the custom rule
+      const customRule = JSON.parse(rule.value);
+
+      // Create a base custom rule structure
+      const processedCustomRules: Record<string, any>[] = [
+        { "attributes.values.type": customRule.type },
+      ];
+
+      // Append query components depending on the specified operator
+      if (customRule.operator === "contains") {
+        processedCustomRules.push({
+          "attributes.values.data": {
+            $regex: new RegExp(customRule.value, "gi").toString(),
+          },
+        });
+      } else if (customRule.operator === "does not contain") {
+        processedCustomRules.push({
+          "attributes.values.data": {
+            $not: {
+              $regex: new RegExp(customRule.value, "gi").toString(),
+            },
+          },
+        });
+      } else if (customRule.operator === "equals") {
+        if (customRule.type === "number") {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $eq: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      } else if (customRule.operator === ">") {
+        if (customRule.type === "number") {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $gt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      } else if (customRule.operator === "<") {
+        if (customRule.type === "number") {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $lt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          processedCustomRules.push({
+            "attributes.values.data": {
+              $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      }
+
+      // Handle the operator
+      if (rule.operator === "doesNotContain") {
+        return { $nor: processedCustomRules };
+      } else {
+        return { $and: processedCustomRules };
+      }
+    }
+
+    // Default rule applied
+    return defaultRuleProcessorMongoDB(rule);
+  };
+
+  // Query to search by text value
+  const SEARCH_ADVANCED = gql`
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+    ) {
+      search(
+        query: $query
+        resultType: $resultType
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+      ) {
+        __typename
+        ... on Entity {
+          _id
+          name
+          owner
+          archived
+          description
+          projects
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
+        }
+      }
+    }
+  `;
+  const [searchAdvanced, { error: searchAdvancedError }] =
+    useLazyQuery(SEARCH_ADVANCED);
+
+  // State to hold the query
+  const [advancedQuery, setAdvancedQuery] = useState(initialAdvancedQuery);
+  const [isValid, setIsValid] = useState(false);
+
+  const onSearchBuiltQuery = async () => {
+    setIsSearching(true);
+    setHasSearched(true);
+
+    // Format the query in `mongodb` format before sending
+    const results = await searchAdvanced({
+      variables: {
+        query: JSON.stringify(
+          formatQuery(advancedQuery, {
+            format: "mongodb_query",
+            ruleProcessor: ruleProcessor,
+          }),
+        ),
+        resultType: "entity",
+        isBuilder: true,
+        showArchived: false,
+      },
+      fetchPolicy: "network-only",
+    });
+
+    if (results.data.search) {
+      setResults(results.data.search);
+    }
+
+    if (searchAdvancedError) {
+      toaster.create({
+        title: "Error",
+        type: "error",
+        description: searchAdvancedError.message,
+        duration: 4000,
+        closable: true,
+      });
+    }
+
+    setIsSearching(false);
+  };
+
+  /**
+   * Validate the query as it changes
+   * @param {RuleGroupType} query Query to validate
+   */
+  const validateQuery = (query: RuleGroupType) => {
+    if (query.rules.length > 0) {
+      // Validation involves making sure all fields have a value
+      // Extract all `value` statements from the query
+      const values = JSONPath({
+        path: "$..value",
+        json: query,
+        resultType: "path",
+      });
+      for (const value of values) {
+        // Break the path down into an array of keys
+        const path: string[] = [];
+        for (let key of value.slice(2, -1).split("][")) {
+          // Remove the quotes from the key
+          key = key.replace(/'/g, "");
+          path.push(key);
+        }
+
+        // Iterate down the path until the `value` statement is found
+        let currentLevel = query as any;
+        for (const key of path) {
+          if (key in currentLevel) {
+            // If the key is a `value` statement, check if it is valid
+            if (key === "value") {
+              if (
+                _.isUndefined(currentLevel[key]) ||
+                currentLevel[key] === ""
+              ) {
+                setIsValid(false);
+                return;
+              }
+            } else {
+              // Otherwise, continue down the path
+              currentLevel = currentLevel[key];
+            }
+          }
+        }
+      }
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
+  };
+
+  useEffect(() => {
+    // Validate the query as it changes
+    validateQuery(advancedQuery);
+  }, [advancedQuery]);
+
   return (
     <Content isError={isError}>
       <Flex direction={"column"} p={"2"} gap={"4"}>
@@ -310,102 +654,197 @@ const Search = () => {
         </Flex>
 
         {/* Search components */}
-        <Tabs
+        <Tabs.Root
           w={"100%"}
           size={"sm"}
-          colorScheme={"blue"}
-          variant={"soft-rounded"}
-          onChange={onTabChange}
+          defaultValue={"text"}
+          variant={"subtle"}
+          onValueChange={onTabChange}
         >
-          <TabList p={"2"} gap={"2"} pb={"0"}>
-            <Tab isDisabled={isSearching}>Text</Tab>
-            <Tab isDisabled={isSearching}>Query Builder</Tab>
-          </TabList>
+          <Tabs.List p={"2"} gap={"2"} pb={"0"}>
+            <Flex gap={"2"} align={"center"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Search Using:
+              </Text>
+              <Tabs.Trigger value={"text"} disabled={isSearching}>
+                <Icon name={"text"} size={"sm"} />
+                Text
+              </Tabs.Trigger>
+              <Tabs.Trigger value={"advanced"} disabled={isSearching}>
+                <Icon name={"search_query"} />
+                Query Builder
+              </Tabs.Trigger>
+            </Flex>
+          </Tabs.List>
 
-          <TabPanels>
-            {/* Text search */}
-            <TabPanel p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Information
-                  text={
-                    "Use text search to search for terms appearing in Entities within the Workspace."
-                  }
-                />
-
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  gap={"2"}
-                  align={"center"}
-                  p={"2"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
-                  <Flex w={"60%"} maxW={"xl"}>
-                    <Input
+          {/* Text search */}
+          <Tabs.Content value={"text"} p={"2"}>
+            <Flex direction={"column"} gap={"2"}>
+              {/* Search options */}
+              <Flex justify={"space-between"} align={"center"}>
+                <Menu.Root>
+                  <Menu.Trigger asChild>
+                    <Button
+                      variant={"outline"}
+                      colorPalette={"gray"}
                       size={"sm"}
                       rounded={"md"}
-                      value={query}
-                      placeholder={"Search..."}
-                      onChange={(event) => setQuery(event.target.value)}
-                      onKeyUp={(event) => {
-                        // Listen for "Enter" key when entering a query
-                        if (event.key === "Enter" && query !== "") {
-                          runSearch();
-                        }
-                      }}
-                    />
-                  </Flex>
+                    >
+                      <Icon name={"settings"} />
+                      Options
+                    </Button>
+                  </Menu.Trigger>
+                  <Portal>
+                    <Menu.Positioner>
+                      <Menu.Content>
+                        <Menu.ItemGroup>
+                          <Menu.ItemGroupLabel>Options</Menu.ItemGroupLabel>
+                          <Menu.CheckboxItem
+                            key={"archived"}
+                            value={"archived"}
+                            checked={showArchived}
+                            onCheckedChange={(event) => setShowArchived(event)}
+                          >
+                            Show Archived
+                            <Menu.ItemIndicator />
+                          </Menu.CheckboxItem>
+                        </Menu.ItemGroup>
+                      </Menu.Content>
+                    </Menu.Positioner>
+                  </Portal>
+                </Menu.Root>
 
-                  <Spacer />
+                <Menu.Root>
+                  <Menu.Trigger asChild>
+                    <Button
+                      variant={"outline"}
+                      colorPalette={"gray"}
+                      size={"sm"}
+                      rounded={"md"}
+                      disabled
+                    >
+                      <Icon name={"filter"} />
+                      Filters
+                    </Button>
+                  </Menu.Trigger>
+                  <Portal>
+                    <Menu.Positioner>
+                      <Menu.Content></Menu.Content>
+                    </Menu.Positioner>
+                  </Portal>
+                </Menu.Root>
+              </Flex>
 
-                  {breakpoint !== "base" && (
-                    <Flex gap={"2"} align={"center"}>
-                      <Text
-                        fontWeight={"semibold"}
-                        fontSize={"sm"}
-                        color={"gray.800"}
-                      >
-                        Options:
-                      </Text>
-                      <Switch
-                        colorScheme={"green"}
-                        checked={showArchived}
-                        onChange={() => setShowArchived(!showArchived)}
-                      />
-                      <Text
-                        fontWeight={"semibold"}
-                        fontSize={"sm"}
-                        color={"gray.600"}
-                      >
-                        Include Archived
-                      </Text>
-                    </Flex>
-                  )}
-
-                  <Button
-                    aria-label={"Search"}
+              {/* Search input and submit */}
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                <Flex w={"100%"}>
+                  <Input
                     size={"sm"}
-                    rightIcon={<Icon name={"search"} />}
-                    colorScheme={"green"}
-                    isDisabled={query === ""}
-                    onClick={() => runSearch()}
+                    rounded={"md"}
+                    value={query}
+                    placeholder={"Search..."}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyUp={(event) => {
+                      // Listen for "Enter" key when entering a query
+                      if (event.key === "Enter" && query !== "") {
+                        runSearch();
+                      }
+                    }}
+                  />
+                </Flex>
+
+                <Spacer />
+
+                <Button
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"gray"}
+                  variant={"outline"}
+                  disabled={query === ""}
+                  onClick={() => {
+                    setQuery("");
+                    setHasSearched(false);
+                    setResults([]);
+                    setIsSearching(false);
+                  }}
+                >
+                  Clear
+                </Button>
+
+                <Button
+                  aria-label={"Search"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  disabled={query === ""}
+                  onClick={() => runSearch()}
+                >
+                  Search
+                  <Icon name={"search"} />
+                </Button>
+              </Flex>
+            </Flex>
+          </Tabs.Content>
+
+          {/* Query builder */}
+          <Tabs.Content value={"advanced"} p={"2"}>
+            <Flex direction={"column"} gap={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <QueryBuilderChakra>
+                  <QueryBuilderDnD
+                    dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}
+                  >
+                    <QueryBuilder
+                      controlClassnames={{
+                        queryBuilder: "queryBuilder-branches",
+                      }}
+                      fields={advancedQueryFields}
+                      query={advancedQuery}
+                      onQueryChange={setAdvancedQuery}
+                      controlElements={{ valueEditor: SearchQueryValue }}
+                      enableDragAndDrop
+                    />
+                  </QueryBuilderDnD>
+                </QueryBuilderChakra>
+                <Flex justify={"right"} gap={"2"}>
+                  <Button
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"gray"}
+                    variant={"outline"}
+                    disabled={advancedQuery.rules.length === 0}
+                    onClick={() => {
+                      setAdvancedQuery(initialAdvancedQuery);
+                      setHasSearched(false);
+                      setResults([]);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    aria-label={"Run Query"}
+                    colorPalette={"green"}
+                    size={"sm"}
+                    rounded={"md"}
+                    onClick={() => onSearchBuiltQuery()}
+                    disabled={!isValid}
                   >
                     Search
+                    <Icon name={"search"} />
                   </Button>
                 </Flex>
               </Flex>
-            </TabPanel>
-
-            {/* Query builder */}
-            <SearchQueryBuilder
-              setHasSearched={setHasSearched}
-              setResults={setResults}
-              setIsSearching={setIsSearching}
-            />
-          </TabPanels>
-        </Tabs>
+            </Flex>
+          </Tabs.Content>
+        </Tabs.Root>
 
         {/* Search Results */}
         <Flex gap={"2"} p={"2"} w={"100%"}>
@@ -459,6 +898,19 @@ const Search = () => {
                 </Flex>
               )}
             </Flex>
+          )}
+
+          {!hasSearched && !isSearching && (
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"search"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>
+                  Enter a search query to find Entities
+                </EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

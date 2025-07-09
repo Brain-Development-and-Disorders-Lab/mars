@@ -22,20 +22,14 @@ describe("Entity, edit Attributes", () => {
     cy.get("#addAttributeModalButton").click();
     cy.get("#formName").type("Attribute Name");
     cy.get("#formDescription").type("Attribute Description");
-    cy.get(".add-value-button-form").click();
-    cy.get("#add-value-button-text").click();
+    cy.get("[data-testid='add-value-button']").click();
     cy.get("input").eq(-2).type("Value Name");
     cy.get("input").eq(-1).type("Value Data");
-    cy.get("input").eq(-1).click();
-
-    cy.get(".chakra-modal__body").click();
-
-    cy.get(".chakra-modal__body").get("button").eq(-1).click();
-
-    cy.contains("button", "Save").click();
-    cy.contains("button", "Done").click();
+    cy.get("[data-testid='save-add-attribute-button']").click();
 
     cy.contains("No Attributes").should("not.exist");
+    cy.get("#editEntityButton").click();
+    cy.contains("button", "Done").click();
     cy.reload();
 
     // Check that Attribute is added

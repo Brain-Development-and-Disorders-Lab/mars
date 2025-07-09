@@ -46,6 +46,14 @@ module.exports = {
       "@hooks": path.resolve(__dirname, "./src/hooks/"),
       "@pages": path.resolve(__dirname, "./src/pages/"),
       "@types": path.resolve(__dirname, "../types"),
+      "entities/decode": path.resolve(
+        __dirname,
+        "./node_modules/parse5/node_modules/entities/dist/commonjs/decode.js",
+      ),
+      "entities/escape": path.resolve(
+        __dirname,
+        "./node_modules/parse5/node_modules/entities/dist/commonjs/escape.js",
+      ),
     },
     extensions: [".tsx", ".ts", ".js"],
   },

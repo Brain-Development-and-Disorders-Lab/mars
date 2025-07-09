@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
+  Button,
+  Dialog,
   Flex,
   Menu,
-  MenuButton,
-  MenuDivider,
-  MenuGroup,
-  MenuItem,
-  MenuList,
-  Modal,
-  ModalContent,
-  ModalOverlay,
   Spacer,
   Spinner,
   Text,
-  Tooltip,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 
 // GraphQL resources
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
@@ -36,12 +30,11 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
 
 const WorkspaceSwitcher = (props: { id?: string }) => {
-  const toast = useToast();
   const navigate = useNavigate();
 
   // Modal state for transition overlay
   const {
-    isOpen: isTransitionOpen,
+    open: transitionOpen,
     onOpen: onTransitionOpen,
     onClose: onTransitionClose,
   } = useDisclosure();
@@ -54,7 +47,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const { logout } = useAuthentication();
 
   // Switcher drop-down visibility state
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // Switcher loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -104,13 +97,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     });
 
     if (_.isUndefined(workspaceResult.data) && !_.isUndefined(workspaceError)) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to get name of current Workspace",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (!_.isUndefined(workspaceResult.data)) {
       setLabel(workspaceResult.data.workspace.name);
@@ -148,13 +140,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     setIsLoading(false);
 
     if (workspacesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update list of Workspaces",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -172,13 +163,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
 
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Workspaces",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [loading]);
@@ -207,7 +197,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
       // Update the switcher visual state and close the transition overlay
       setLabel(selectedWorkspace.name);
-      setIsOpen(false);
+      setOpen(false);
       setIsLoading(false);
     }
   };
@@ -220,7 +210,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     navigate(`/workspaces/${workspace}`);
 
     // Ensure `WorkspaceSwitcher` is closed
-    setIsOpen(false);
+    setOpen(false);
   };
 
   /**
@@ -231,7 +221,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     navigate("/create/workspace");
 
     // Ensure `WorkspaceSwitcher` is closed
-    setIsOpen(false);
+    setOpen(false);
   };
 
   /**
@@ -239,161 +229,180 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    */
   const handleProfileClick = () => {
     navigate("/profile");
-    setIsOpen(false);
+    setOpen(false);
   };
 
   return (
-    <Flex id={props.id ? props.id : "workspaceSwitcher"}>
-      <Menu isOpen={isOpen} autoSelect={false}>
-        <MenuButton
-          h={"100%"}
-          w={"100%"}
-          rounded={"md"}
-          border={"1px"}
-          borderColor={"gray.300"}
-          bg={"white"}
-          _hover={{ bg: "gray.300" }}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            align={"center"}
-            p={"2"}
-            ml={"2"}
-            mr={"2"}
+    <Flex id={props.id ? props.id : "workspaceSwitcher"} pos={"relative"}>
+      <Menu.Root
+        open={open}
+        onEscapeKeyDown={() => setOpen(false)}
+        onInteractOutside={() => setOpen(false)}
+      >
+        <Menu.Trigger asChild>
+          <Button
+            h={"100%"}
+            w={"100%"}
+            p={"0"}
+            rounded={"md"}
+            bg={"white"}
+            variant={"surface"}
+            onClick={() => setOpen(!open)}
           >
-            <Icon name={"workspace"} />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(label, { length: 14 })}
-            </Text>
-            <Spacer />
-            <Icon name={"c_expand"} />
-          </Flex>
-        </MenuButton>
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              p={"2"}
+              w={"100%"}
+            >
+              <Icon name={"workspace"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(label, { length: 14 })}
+              </Text>
+              <Spacer />
+              <Icon name={"c_expand"} />
+            </Flex>
+          </Button>
+        </Menu.Trigger>
 
-        <MenuList bg={"white"}>
-          <MenuGroup>
-            {/* Create a list of all Workspaces the user has access to */}
-            {workspaces.length > 0 ? (
-              workspaces.map((accessible) => {
-                return (
-                  <MenuItem
-                    onClick={() => handleWorkspaceClick(accessible)}
-                    key={"w_" + accessible._id}
-                  >
-                    <Flex
-                      direction={"row"}
-                      gap={"2"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"space-between"}
+        <Menu.Positioner w={"100%"} rounded={"md"}>
+          <Menu.Content bg={"white"}>
+            <Menu.ItemGroup>
+              {/* Create a list of all Workspaces the user has access to */}
+              {workspaces.length > 0 ? (
+                workspaces.map((accessible) => {
+                  return (
+                    <Menu.Item
+                      value={accessible.name}
+                      onClick={() => handleWorkspaceClick(accessible)}
+                      key={"w_" + accessible._id}
                     >
-                      <Tooltip label={accessible.name} hasArrow>
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          {_.truncate(accessible.name, { length: 24 })}
-                        </Text>
-                      </Tooltip>
-                      {workspace === accessible._id && (
-                        <Icon name={"check"} color={"green.600"} />
-                      )}
-                    </Flex>
-                  </MenuItem>
-                );
-              })
-            ) : (
-              <MenuItem isDisabled>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        w={"100%"}
+                        align={"center"}
+                      >
+                        <Tooltip content={accessible.name} showArrow>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            {_.truncate(accessible.name, { length: 24 })}
+                          </Text>
+                        </Tooltip>
+
+                        <Spacer />
+
+                        {workspace === accessible._id && (
+                          <Flex gap={"1"} align={"center"}>
+                            <Text color={"green.600"} fontWeight={"semibold"}>
+                              Active
+                            </Text>
+                            <Icon name={"check"} color={"green.600"} />
+                          </Flex>
+                        )}
+                      </Flex>
+                    </Menu.Item>
+                  );
+                })
+              ) : (
+                <Menu.Item value={"no-workspaces"} disabled>
+                  <Flex
+                    direction={"row"}
+                    gap={"2"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      No Workspaces
+                    </Text>
+                  </Flex>
+                </Menu.Item>
+              )}
+            </Menu.ItemGroup>
+
+            <Menu.Separator />
+
+            <Menu.ItemGroup>
+              {/* Option to create a new Workspace */}
+              <Menu.Item
+                value={"edit"}
+                onClick={() => handleUpdateClick()}
+                disabled={workspaces.length === 0}
+              >
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"edit"} />
+                  <Text fontSize={"sm"}>Edit workspace</Text>
+                </Flex>
+              </Menu.Item>
+              <Menu.Item value={"create"} onClick={() => handleCreateClick()}>
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"add"} />
+                  <Text fontSize={"sm"}>Create workspace</Text>
+                </Flex>
+              </Menu.Item>
+            </Menu.ItemGroup>
+
+            <Menu.Separator />
+
+            <Menu.ItemGroup>
+              <Menu.Item value={"account"} onClick={() => handleProfileClick()}>
                 <Flex
+                  id={"accountSettingsItem"}
                   direction={"row"}
                   gap={"2"}
-                  w={"100%"}
                   align={"center"}
-                  justify={"space-between"}
                 >
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    No Workspaces
-                  </Text>
+                  <Icon name={"person"} />
+                  <Text fontSize={"sm"}>Account settings</Text>
                 </Flex>
-              </MenuItem>
-            )}
-          </MenuGroup>
+              </Menu.Item>
+              <Menu.Item value={"logout"} onClick={() => logout()}>
+                <Flex
+                  id={"accountLogoutItem"}
+                  direction={"row"}
+                  gap={"2"}
+                  align={"center"}
+                >
+                  <Icon name={"logout"} />
+                  <Text fontSize={"sm"}>Log out</Text>
+                </Flex>
+              </Menu.Item>
+            </Menu.ItemGroup>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Menu.Root>
 
-          <MenuGroup>
-            {/* Option to create a new Workspace */}
-            <MenuItem
-              onClick={() => handleUpdateClick()}
-              isDisabled={workspaces.length === 0}
-            >
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"edit"} />
-                <Text fontSize={"sm"}>Edit workspace</Text>
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={() => handleCreateClick()}>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"add"} />
-                <Text fontSize={"sm"}>Create workspace</Text>
-              </Flex>
-            </MenuItem>
-          </MenuGroup>
-
-          <MenuDivider />
-
-          <MenuGroup>
-            <MenuItem onClick={() => handleProfileClick()}>
-              <Flex
-                id={"accountSettingsItem"}
-                direction={"row"}
-                gap={"2"}
-                align={"center"}
-              >
-                <Icon name={"person"} />
-                <Text fontSize={"sm"}>Account settings</Text>
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={() => logout()}>
-              <Flex
-                id={"accountLogoutItem"}
-                direction={"row"}
-                gap={"2"}
-                align={"center"}
-              >
-                <Icon name={"b_right"} />
-                <Text fontSize={"sm"}>Log out</Text>
-              </Flex>
-            </MenuItem>
-          </MenuGroup>
-        </MenuList>
-      </Menu>
-
-      <Modal
-        isOpen={isTransitionOpen}
-        onClose={onTransitionClose}
+      <Dialog.Root
+        open={transitionOpen}
         size={"full"}
+        onExitComplete={onTransitionClose}
         motionPreset={"none"}
       >
-        <ModalOverlay />
-        <ModalContent
-          w={"100%"}
-          h={"100%"}
-          backdropFilter={"blur(2px)"}
-          background={"rgba(255, 255, 255, 0.85)"}
-        >
-          <Flex
-            direction={"column"}
-            gap={"4"}
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content
             w={"100%"}
             h={"100%"}
-            align={"center"}
-            justify={"center"}
+            backdropFilter={"blur(1px)"}
+            background={"rgba(255, 255, 255, 0.9)"}
           >
-            <Text fontWeight={"semibold"} color={"gray.600"}>
-              Loading Workspace...
-            </Text>
-            <Spinner size={"lg"} color={"gray.600"} />
-          </Flex>
-        </ModalContent>
-      </Modal>
+            <Flex
+              direction={"column"}
+              gap={"4"}
+              w={"100%"}
+              h={"100%"}
+              align={"center"}
+              justify={"center"}
+            >
+              <Text fontWeight={"semibold"} color={"gray.700"}>
+                Preparing Workspace...
+              </Text>
+              <Spinner size={"xl"} color={"gray.700"} />
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

@@ -2,26 +2,25 @@
 import React, { useEffect, useState } from "react";
 import {
   Flex,
-  Spacer,
-  FormControl,
-  FormLabel,
   Input,
   Button,
-  IconButton,
   Text,
-  useToast,
-  Tooltip,
-  useBreakpoint,
   Heading,
   Code,
+  Fieldset,
+  Field,
+  EmptyState,
 } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
+import Collaborators from "@components/Collaborators";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import TimestampTag from "@components/TimestampTag";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -44,17 +43,12 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import _ from "lodash";
 
-// Contexts
+// Contexts and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
 
 const Workspace = () => {
-  const toast = useToast();
-  const breakpoint = useBreakpoint();
   const navigate = useNavigate();
-
-  // Authentication
-  const { token } = useAuthentication();
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -208,7 +202,6 @@ const Workspace = () => {
   const [showArchivedTemplates, setShowArchivedTemplates] = useState(false);
 
   // State for Workspace collaborators
-  const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
 
   // State for Workspace Counters
@@ -270,13 +263,12 @@ const Workspace = () => {
       }
 
       if (workspaceError || workspaceDataError) {
-        toast({
+        toaster.create({
           title: "Error",
           description: "Unable to refresh Workspace information",
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
     };
@@ -387,50 +379,44 @@ const Workspace = () => {
     });
 
     if (workspaceUpdateError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to update Workspace",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveEntitiesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Entities",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveProjectsError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Projects",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else if (archiveTemplatesError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to apply archive state to Templates",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       navigate("/");
     }
   };
 
-  const truncateTableText =
-    _.isEqual(breakpoint, "sm") ||
-    _.isEqual(breakpoint, "base") ||
-    _.isUndefined(breakpoint);
+  const { isBreakpointActive } = useBreakpoint();
+  const truncateTableText = !isBreakpointActive("md", "up");
 
   // Utility functions for archiving or restoring Workspace contents
   const archiveEntity = async (_id: string, state: boolean) => {
@@ -504,9 +490,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
-              hasArrow
+              content={info.getValue()}
+              disabled={info.getValue().length < 24}
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -524,25 +510,26 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
-              aria-label={"View Entity"}
-              onClick={() => navigate(`/entities/${info.row.original._id}`)}
-            >
-              View
-            </Button>
-            <Button
-              rightIcon={
-                <Icon name={showArchivedEntities ? "rewind" : "archive"} />
-              }
-              size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Entity"}
-              colorScheme={showArchivedEntities ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveEntity(info.row.original._id, !showArchivedEntities)
               }
             >
               {showArchivedEntities ? "Restore" : "Archive"}
+              {<Icon name={showArchivedEntities ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -571,9 +558,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
-              hasArrow
+              content={info.getValue()}
+              disabled={info.getValue().length < 24}
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -591,25 +578,26 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
-              aria-label={"View Project"}
-              onClick={() => navigate(`/projects/${info.row.original._id}`)}
-            >
-              View
-            </Button>
-            <Button
-              rightIcon={
-                <Icon name={showArchivedProjects ? "rewind" : "archive"} />
-              }
-              size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Project"}
-              colorScheme={showArchivedProjects ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveProject(info.row.original._id, !showArchivedProjects)
               }
             >
               {showArchivedProjects ? "Restore" : "Archive"}
+              {<Icon name={showArchivedProjects ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Project"}
+              onClick={() => navigate(`/projects/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -638,9 +626,9 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
-              hasArrow
+              content={info.getValue()}
+              disabled={info.getValue().length < 24}
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -658,25 +646,26 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
             <Button
-              rightIcon={<Icon name={"a_right"} />}
               size={"sm"}
-              aria-label={"View Template"}
-              onClick={() => navigate(`/templates/${info.row.original._id}`)}
-            >
-              View
-            </Button>
-            <Button
-              rightIcon={
-                <Icon name={showArchivedTemplates ? "rewind" : "archive"} />
-              }
-              size={"sm"}
+              rounded={"md"}
               aria-label={"Archive Template"}
-              colorScheme={showArchivedTemplates ? "green" : "red"}
+              colorPalette={"orange"}
               onClick={() =>
                 archiveTemplate(info.row.original._id, !showArchivedTemplates)
               }
             >
               {showArchivedTemplates ? "Restore" : "Archive"}
+              {<Icon name={showArchivedTemplates ? "rewind" : "archive"} />}
+            </Button>
+            <Button
+              variant={"subtle"}
+              size={"sm"}
+              rounded={"md"}
+              aria-label={"View Template"}
+              onClick={() => navigate(`/templates/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Button>
           </Flex>
         );
@@ -705,9 +694,9 @@ const Workspace = () => {
         return (
           <Flex py={"2"}>
             <Tooltip
-              label={info.getValue()}
-              isDisabled={info.getValue().length < 24}
-              hasArrow
+              content={info.getValue()}
+              disabled={info.getValue().length < 24}
+              showArrow
             >
               <Text>
                 {_.truncate(info.getValue(), {
@@ -725,10 +714,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 'Counter format string, where "{}" represents the position of the numeric value'
               }
-              hasArrow
+              showArrow
             >
               <Code>{info.getValue()}</Code>
             </Tooltip>
@@ -742,10 +731,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 "Current numeric value to be substituted into the Counter format string"
               }
-              hasArrow
+              showArrow
             >
               <Text fontWeight={"semibold"}>{info.getValue()}</Text>
             </Tooltip>
@@ -759,10 +748,10 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              label={
+              content={
                 "After a Counter value is consumed, the numeric value is increment by this value"
               }
-              hasArrow
+              showArrow
             >
               <Text fontWeight={"semibold"}>{info.getValue()}</Text>
             </Tooltip>
@@ -789,7 +778,13 @@ const Workspace = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"2"}
+          p={"2"}
+          border={"2px solid"}
+          rounded={"md"}
+        >
           <Icon name={"workspace"} size={"md"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             {name}
@@ -798,19 +793,20 @@ const Workspace = () => {
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Button
             size={"sm"}
-            colorScheme={"red"}
-            rightIcon={<Icon name={"cross"} />}
+            rounded={"md"}
+            colorPalette={"red"}
             onClick={() => navigate("/")}
           >
             Cancel
+            <Icon name={"cross"} />
           </Button>
           <Button
             id={"modalWorkspaceCreateButton"}
             size={"sm"}
-            colorScheme={"green"}
-            rightIcon={<Icon name={"save"} />}
-            isDisabled={name === ""}
-            isLoading={
+            rounded={"md"}
+            colorPalette={"green"}
+            disabled={name === ""}
+            loading={
               workspaceUpdateLoading ||
               archiveEntitiesLoading ||
               archiveProjectsLoading ||
@@ -819,6 +815,7 @@ const Workspace = () => {
             onClick={() => handleUpdateClick()}
           >
             Save
+            <Icon name={"save"} />
           </Button>
         </Flex>
       </Flex>
@@ -830,27 +827,32 @@ const Workspace = () => {
             direction={"column"}
             p={"2"}
             h={"fit-content"}
+            w={{ base: "100%", md: "50%" }}
             gap={"2"}
             bg={"gray.100"}
             rounded={"md"}
-            basis={"50%"}
           >
             <Flex direction={"row"} gap={"2"}>
               <Flex grow={"1"}>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"} mb={"1"}>
-                    Name
-                  </FormLabel>
-                  <Input
-                    id={"modalWorkspaceName"}
-                    bg={"white"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Name"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root required>
+                      <Field.Label>
+                        Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalWorkspaceName"}
+                        bg={"white"}
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Name"}
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
 
               <TimestampTag timestamp={created} description={"Created"} />
@@ -859,18 +861,22 @@ const Workspace = () => {
             {/* "Visibility" and "Owner" fields */}
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Visibility
                 </Text>
                 <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"bold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Owner
                 </Text>
                 <Flex>
-                  <ActorTag orcid={owner} fallback={"Unknown User"} />
+                  <ActorTag
+                    orcid={owner}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>
@@ -882,140 +888,41 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                Description
-              </FormLabel>
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                style={{ width: "100%" }}
-                value={description}
-                preview={"edit"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setDescription(value || "");
-                }}
-              />
-            </FormControl>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Field.Label>Description</Field.Label>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    style={{ width: "100%" }}
+                    value={description}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Flex>
         </Flex>
 
         <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
           {/* Workspace collaborators */}
-          <Flex
-            direction={"column"}
-            p={"2"}
-            gap={"2"}
-            h={"fit-content"}
-            border={"1px"}
-            borderColor={"gray.300"}
-            rounded={"md"}
-            basis={"50%"}
-          >
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Collaborators
-            </Text>
-            <Flex>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Add Collaborators by their ORCiD.
-              </Text>
-            </Flex>
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              <FormControl>
-                <Input
-                  placeholder={"ORCiD"}
-                  rounded={"md"}
-                  size={"sm"}
-                  w={"100%"}
-                  value={collaborator}
-                  onChange={(event) => setCollaborator(event.target.value)}
-                />
-              </FormControl>
-              {/* <Spacer /> */}
-              <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
-                size={"sm"}
-                isDisabled={collaborator === ""}
-                onClick={() => {
-                  // Prevent adding empty or duplicate collaborator
-                  if (collaborator && !collaborators.includes(collaborator)) {
-                    setCollaborators((collaborators) => [
-                      ...collaborators,
-                      collaborator,
-                    ]);
-                    setCollaborator("");
-                  }
-                }}
-              >
-                Add
-              </Button>
-            </Flex>
-            <Flex
-              w={"100%"}
-              justify={collaborators.length === 0 ? "center" : ""}
-              align={"center"}
-              minH={collaborators.length > 0 ? "fit-content" : "200px"}
-            >
-              {collaborators.length === 0 ? (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No Collaborators
-                </Text>
-              ) : (
-                <Flex w={"100%"} direction={"column"} gap={"2"}>
-                  {collaborators.map((collaborator, index) => (
-                    <Flex
-                      key={index}
-                      align={"center"}
-                      gap={"2"}
-                      py={"2"}
-                      w={"100%"}
-                    >
-                      <Flex>
-                        <ActorTag
-                          orcid={collaborator}
-                          fallback={"Unknown Collaborator"}
-                        />
-                      </Flex>
-                      <Spacer />
-                      <IconButton
-                        size={"sm"}
-                        aria-label={"Remove collaborator"}
-                        icon={
-                          <Icon
-                            name={
-                              token.orcid === collaborator
-                                ? "b_right"
-                                : "delete"
-                            }
-                          />
-                        }
-                        colorScheme={
-                          token.orcid === collaborator ? "orange" : "red"
-                        }
-                        onClick={() =>
-                          setCollaborators((collaborators) =>
-                            collaborators.filter(
-                              (existing) => existing !== collaborator,
-                            ),
-                          )
-                        }
-                        isDisabled={
-                          collaborator === owner && token.orcid !== owner
-                        }
-                      />
-                    </Flex>
-                  ))}
-                </Flex>
-              )}
-            </Flex>
+          <Flex w={{ base: "100%", md: "50%" }}>
+            <Collaborators
+              editing={true}
+              projectCollaborators={collaborators}
+              setProjectCollaborators={setCollaborators}
+            />
           </Flex>
 
           {/* Workspace Entities */}
@@ -1024,7 +931,7 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
@@ -1034,11 +941,13 @@ const Workspace = () => {
                 {showArchivedEntities ? "Archived " : ""}Entities
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
+                rounded={"md"}
                 onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
-                {showArchivedEntities ? "Hide" : "Show"} Archive
+                {showArchivedEntities ? "Hide" : "Show"} Archived
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex
@@ -1058,9 +967,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedEntities ? "archived " : ""}Entities
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedEntities ? "archived " : ""}Entities
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1073,7 +989,7 @@ const Workspace = () => {
             p={"2"}
             gap={"2"}
             h={"fit-content"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
@@ -1083,11 +999,13 @@ const Workspace = () => {
                 {showArchivedProjects ? "Archived " : ""}Projects
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
+                rounded={"md"}
                 onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
-                {showArchivedProjects ? "Hide" : "Show"} Archive
+                {showArchivedProjects ? "Hide" : "Show"} Archived
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex
@@ -1107,9 +1025,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedProjects ? "archived " : ""}Projects
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"project"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedProjects ? "archived " : ""}Projects
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1120,7 +1045,7 @@ const Workspace = () => {
             p={"2"}
             h={"fit-content"}
             gap={"2"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
@@ -1130,11 +1055,13 @@ const Workspace = () => {
                 {showArchivedTemplates ? "Archived " : ""}Templates
               </Text>
               <Button
+                colorPalette={"blue"}
                 size={"sm"}
-                rightIcon={<Icon name={"archive"} />}
+                rounded={"md"}
                 onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
               >
-                {showArchivedTemplates ? "Hide" : "Show"} Archive
+                {showArchivedTemplates ? "Hide" : "Show"} Archived
+                <Icon name={"archive"} />
               </Button>
             </Flex>
             <Flex
@@ -1154,9 +1081,16 @@ const Workspace = () => {
                   showSelection
                 />
               ) : (
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No {showArchivedTemplates ? "archived " : ""}Templates
-                </Text>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"template"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No {showArchivedTemplates ? "archived " : ""}Templates
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -1169,37 +1103,46 @@ const Workspace = () => {
             p={"2"}
             gap={"2"}
             h={"fit-content"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
           >
-            <FormControl>
-              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                Counters
-              </FormLabel>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={counters.length > 0 ? "" : "center"}
-                minH={counters.length > 0 ? "fit-content" : "200px"}
-              >
-                {counters.length > 0 ? (
-                  <DataTable
-                    data={counters}
-                    columns={countersTableColumns}
-                    visibleColumns={{}}
-                    actions={[]}
-                    selectedRows={{}}
-                    showPagination
-                  />
-                ) : (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No Counters
-                  </Text>
-                )}
-              </Flex>
-            </FormControl>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root>
+                  <Field.Label>Counters</Field.Label>
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={counters.length > 0 ? "" : "center"}
+                    minH={counters.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {counters.length > 0 ? (
+                      <DataTable
+                        data={counters}
+                        columns={countersTableColumns}
+                        visibleColumns={{}}
+                        actions={[]}
+                        selectedRows={{}}
+                        showPagination
+                      />
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"counter"} size={"lg"} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>
+                            No Counters
+                          </EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
+                  </Flex>
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Flex>
         </Flex>
       </Flex>

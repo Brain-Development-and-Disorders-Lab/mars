@@ -110,6 +110,13 @@ export type IValue<D> = {
   onUpdate?: (data: D) => void;
 };
 
+// "Collaborators" component props
+export type CollaboratorsProps = {
+  editing: boolean;
+  projectCollaborators: string[];
+  setProjectCollaborators: (value: React.SetStateAction<string[]>) => void;
+};
+
 // "Linky" component props
 export type LinkyProps = {
   type: "entities" | "templates" | "projects";
@@ -125,13 +132,14 @@ export type LinkyProps = {
 export type ActorTagProps = {
   orcid: string;
   fallback: string;
+  size: "sm" | "md";
 };
 
 // "VisibilityTagProps" component props
 export type VisibilityTagProps = {
   isPublic: boolean;
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
-  isDisabled?: boolean; // Disable changing the visibility
+  disabled?: boolean; // Disable changing the visibility
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
@@ -172,6 +180,12 @@ export type ProjectHistory = {
 export type IGenericItem = {
   _id: string;
   name: string;
+};
+
+// Utility type used for `Select` component options
+export type ISelectOption = {
+  label: string;
+  value: string;
 };
 
 // Utility type to define set of relationship types
@@ -328,16 +342,14 @@ export type PageProps = {
   children: React.ReactElement | React.ReactElement[];
 };
 
-// Dialog component
-export type DialogProps = {
+// `AlertDialog` component
+export type AlertDialogProps = {
   // Ref for placement
-  dialogRef: React.MutableRefObject<any>;
   header: string;
   children: React.ReactElement | React.ReactElement[];
   // Dialog actions and state
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
   // Left and right buttons
   leftButtonLabel?: string;
   leftButtonColor?: string;
@@ -384,18 +396,16 @@ export type PreviewSupport = {
   sequence: boolean;
 };
 
-// `ImportModal` props
-export type ImportModalProps = {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+// `ImportDialog` props
+export type ImportDialogProps = {
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
 // `ScanModal` props
 export type ScanModalProps = {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
 // `UnsavedChangesModal` props
@@ -428,9 +438,11 @@ export type IconNames =
   | "archive"
   | "attachment"
   | "check"
+  | "close"
   | "counter"
   | "info"
   | "search"
+  | "search_query"
   | "bell"
   | "add"
   | "copy"
@@ -438,10 +450,12 @@ export type IconNames =
   | "expand"
   | "delete"
   | "download"
+  | "filter"
   | "upload"
   | "cross"
   | "list"
   | "save"
+  | "logout"
   | "person"
   | "warning"
   | "exclamation"
@@ -456,10 +470,13 @@ export type IconNames =
   | "link"
   | "scan"
   | "lock"
-  | "exit"
   | "settings"
+  | "power"
   | "print"
+  | "text"
   | "view"
+  | "visibility_show"
+  | "visibility_hide"
   | "workspace"
   | "zoom_in"
   | "zoom_out"
@@ -479,7 +496,6 @@ export type IconNames =
 
   // Arrows
   | "a_right"
-  | "b_right"
 
   // Chevrons
   | "c_left"
@@ -513,7 +529,7 @@ export type SearchSelectProps = {
   resultType: "entity" | "project";
   placeholder?: string;
   onChange?: (value: any) => void;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 // SearchBox props
