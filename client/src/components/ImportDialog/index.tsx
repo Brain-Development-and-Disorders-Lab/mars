@@ -684,7 +684,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       >
         <Select.HiddenSelect />
         <Select.Control>
-          <Select.Trigger>
+          <Select.Trigger data-testid={`import-column-select-trigger-${key}`}>
             <Select.ValueText placeholder={"Select Column"} />
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -1215,7 +1215,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               Name
                               <Field.RequiredIndicator />
                             </Field.Label>
-                            {getSelectComponent("import_name", setNameField)}
+                            {getSelectComponent("name", setNameField)}
                             <Field.HelperText>
                               Column containing Entity names
                             </Field.HelperText>
@@ -1271,7 +1271,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Field.Root w={"50%"}>
                             <Field.Label>Description</Field.Label>
                             {getSelectComponent(
-                              "import_description",
+                              "description",
                               setDescriptionField,
                             )}
                             <Field.HelperText>
@@ -1293,7 +1293,11 @@ const ImportDialog = (props: ImportDialogProps) => {
                             >
                               <Select.HiddenSelect />
                               <Select.Control>
-                                <Select.Trigger>
+                                <Select.Trigger
+                                  data-testid={
+                                    "import-column-select-trigger-project"
+                                  }
+                                >
                                   <Select.ValueText
                                     placeholder={"Select Project"}
                                   />

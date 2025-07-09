@@ -24,17 +24,10 @@ describe("CSV Import Test", () => {
       cy.wait(3000); // Wait for toast to disappear
       cy.get("#importContinueButton").scrollIntoView().click();
       cy.wait(100);
-      cy.get("select#import_name")
-        .find('option[value="Name"]')
-        .first()
-        .parent()
-        .select("Name");
-      cy.get("select#import_projects")
-        .find("option")
-        .first()
-        .parent()
-        .select("My First Project") // Default created Project
-        .first();
+      cy.get('[data-testid="import-column-select-trigger-name"]').click();
+      cy.contains('[role="option"]', "Name").click();
+      cy.get('[data-testid="import-column-select-trigger-project"]').click();
+      cy.contains('[role="option"]', "My First Project").click();
       cy.get("#importContinueButton").click(); // Go to Attributes page
       cy.get("#importContinueButton").click(); // Go to Review page
       cy.wait(1000); // Wait for GraphQL request to complete
