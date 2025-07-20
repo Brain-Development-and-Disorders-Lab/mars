@@ -15,6 +15,7 @@ import {
   createListCollection,
   Fieldset,
   Field,
+  Input,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -22,7 +23,9 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   RowData,
+  ColumnFiltersState,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 
@@ -40,6 +43,155 @@ declare module "@tanstack/react-table" {
 
 // Utility functions and libraries
 import _ from "lodash";
+
+// Custom filter function for array inclusion
+const includesSome = (row: any, columnId: string, filterValue: unknown[]) => {
+  if (
+    !filterValue ||
+    (Array.isArray(filterValue) && filterValue.length === 0)
+  ) {
+    return true;
+  }
+  return Array.isArray(filterValue)
+    ? filterValue.includes(row.getValue(columnId))
+    : true;
+};
+// Auto remove when filter array empty
+(includesSome as any).autoRemove = (val: unknown) =>
+  !val || (Array.isArray(val) && val.length === 0);
+
+type ColumnFilterMenuProps = {
+  columnId: string;
+  data: any[];
+  table: any;
+};
+
+const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
+  const [query, setQuery] = useState("");
+
+  // Helper function to convert values to display strings
+  const getDisplayValue = (val: any) => {
+    if (val === null || val === undefined) return "Empty";
+    if (Array.isArray(val)) return `${val.length} items`;
+    if (typeof val === "object") return JSON.stringify(val);
+    return String(val);
+  };
+
+  // Helper function to get filter key (what we actually filter by)
+  const getFilterKey = (val: any) => {
+    if (val === null || val === undefined) return "empty";
+    if (Array.isArray(val)) return val.length.toString();
+    if (typeof val === "object") return JSON.stringify(val);
+    return String(val);
+  };
+
+  const values = React.useMemo(
+    () =>
+      _.uniq(data.map((row) => row[columnId])).filter(
+        (val) => val !== null && val !== undefined,
+      ),
+    [data, columnId],
+  );
+
+  const filtered = React.useMemo(
+    () =>
+      values.filter((val) =>
+        getDisplayValue(val).toLowerCase().includes(query.toLowerCase()),
+      ),
+    [values, query],
+  );
+
+  const currentFilter =
+    (table.getColumn(columnId)?.getFilterValue() as unknown[]) || [];
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <Button
+          variant="ghost"
+          size="xs"
+          p="1"
+          minW="auto"
+          h="auto"
+          style={{ marginLeft: "4px" }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Icon
+            name="filter"
+            style={{
+              cursor: "pointer",
+              color: currentFilter.length > 0 ? "#3182ce" : "inherit",
+            }}
+          />
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <Flex direction="column" p="2" gap="2" minW="200px" maxW="300px">
+              <Input
+                size="sm"
+                rounded="md"
+                placeholder="Search values..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <Flex direction="row" gap="2">
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    table.getColumn(columnId)?.setFilterValue(values);
+                  }}
+                >
+                  Select All
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    table.getColumn(columnId)?.setFilterValue([]);
+                  }}
+                >
+                  Clear All
+                </Button>
+              </Flex>
+              <Flex direction="column" maxH="200px" overflowY="auto" gap="1">
+                {filtered.map((value, index) => (
+                  <Menu.CheckboxItem
+                    key={`${columnId}_${getFilterKey(value)}_${index}`}
+                    value={getFilterKey(value)}
+                    checked={currentFilter.includes(value)}
+                    closeOnSelect={false}
+                    onCheckedChange={(checked) => {
+                      const prev = currentFilter;
+                      const next = checked
+                        ? [...prev, value]
+                        : prev.filter((v) => v !== value);
+                      table.getColumn(columnId)?.setFilterValue(next);
+                    }}
+                  >
+                    {getDisplayValue(value)}
+                    <Menu.ItemIndicator />
+                  </Menu.CheckboxItem>
+                ))}
+                {filtered.length === 0 && (
+                  <Text fontSize="sm" color="gray.500" p="2" textAlign="center">
+                    No values found
+                  </Text>
+                )}
+              </Flex>
+            </Flex>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  );
+};
 
 const DataTable = (props: DataTableProps) => {
   // Breakpoint state
@@ -64,6 +216,11 @@ const DataTable = (props: DataTableProps) => {
 
   // Table row selection state
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
+
+  // Column filters state
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+    props.columnFilters ?? [],
+  );
 
   // `useEffect` for when the rows are selected
   useEffect(() => {
@@ -127,12 +284,13 @@ const DataTable = (props: DataTableProps) => {
             },
           ]
         : []),
-      ...props.columns,
+      ...props.columns.map((col) => ({ ...col, filterFn: includesSome })),
     ],
     data: props.data,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     autoResetPageIndex: false,
     initialState: {
       pagination: {
@@ -142,9 +300,14 @@ const DataTable = (props: DataTableProps) => {
     state: {
       columnVisibility: columnVisibility,
       rowSelection: selectedRows,
+      columnFilters: columnFilters,
     },
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters,
+    filterFns: {
+      includesSome,
+    },
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -204,6 +367,16 @@ const DataTable = (props: DataTableProps) => {
   useEffect(() => {
     setSelectedRows(props.selectedRows);
   }, [props.selectedRows]);
+
+  // When column filters change, notify parent if needed
+  useEffect(() => {
+    props.onColumnFiltersChange && props.onColumnFiltersChange(columnFilters);
+  }, [columnFilters]);
+
+  // Effect to update the column filters
+  useEffect(() => {
+    setColumnFilters(props.columnFilters ?? []);
+  }, [props.columnFilters]);
 
   // Add a counter for the number of presented paginated items
   const [itemCountComponent, setItemCountComponent] = useState(<Flex></Flex>);
@@ -369,6 +542,13 @@ const DataTable = (props: DataTableProps) => {
                               header.column.getIsSorted() ? "blue.700" : "black"
                             }
                             style={{ marginLeft: "4px" }}
+                          />
+                        )}
+                        {canSortColumn(header) && (
+                          <ColumnFilterMenu
+                            columnId={header.id}
+                            data={props.data}
+                            table={table}
                           />
                         )}
                       </Flex>

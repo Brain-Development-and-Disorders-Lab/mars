@@ -16,7 +16,7 @@ import {
   Stack,
   EmptyState,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -151,6 +151,10 @@ const Dashboard = () => {
     attributes: true,
     created: true,
   });
+
+  // Column filters state for entity table
+  const [entityColumnFilters, setEntityColumnFilters] =
+    useState<ColumnFiltersState>([]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -685,6 +689,8 @@ const Dashboard = () => {
                   )}
                   visibleColumns={visibleColumns}
                   selectedRows={{}}
+                  columnFilters={entityColumnFilters}
+                  onColumnFiltersChange={setEntityColumnFilters}
                 />
               )}
 
