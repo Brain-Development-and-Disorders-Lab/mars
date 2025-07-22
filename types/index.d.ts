@@ -365,6 +365,8 @@ export type DataTableProps = {
   visibleColumns: Record<string, boolean>;
   selectedRows: any;
   onSelectedRowsChange?: (selectedRows: any[]) => void;
+  columnFilters?: any;
+  onColumnFiltersChange?: (filters: any) => void;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;

@@ -24,7 +24,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
 import { DataTableAction, EntityModel, IGenericItem } from "@types";
@@ -54,6 +54,9 @@ const Entities = () => {
     owner: true,
     created: true,
   });
+
+  // Column filters state for entity table
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   // Entities export modal
   const {
@@ -346,6 +349,8 @@ const Entities = () => {
               showSelection
               showPagination
               showItemCount
+              columnFilters={columnFilters}
+              onColumnFiltersChange={setColumnFilters}
             />
           ) : (
             <EmptyState.Root>
