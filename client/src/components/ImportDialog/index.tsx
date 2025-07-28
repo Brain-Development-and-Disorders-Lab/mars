@@ -78,6 +78,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [importType, setImportType] = useState(
     "entities" as "entities" | "template",
   );
+  const [importTypeSelected, setImportTypeSelected] = useState(false);
   const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
 
   // State management to generate and present different pages
@@ -284,10 +285,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload") && fileName !== "") {
+    if (
+      _.isEqual(entityInterfacePage, "upload") &&
+      fileName !== "" &&
+      importTypeSelected
+    ) {
       setContinueDisabled(false);
     }
-  }, [fileName]);
+  }, [fileName, importTypeSelected]);
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
@@ -837,6 +842,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const resetState = () => {
     // Reset UI state
     setImportType("entities");
+    setImportTypeSelected(false);
 
     setEntityStep(0);
     setEntityInterfacePage("upload");
@@ -967,11 +973,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                 collection={createListCollection({
                   items: ["Entities", "Template"],
                 })}
-                onValueChange={(details) =>
+                onValueChange={(details) => {
                   setImportType(
                     details.items[0].toLowerCase() as "entities" | "template",
-                  )
-                }
+                  );
+                  setImportTypeSelected(true);
+                }}
                 disabled={isTypeSelectDisabled}
               >
                 <Select.HiddenSelect />
