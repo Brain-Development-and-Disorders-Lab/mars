@@ -1593,45 +1593,45 @@ const ImportDialog = (props: ImportDialogProps) => {
                 >
                   <Fieldset.Root>
                     <Fieldset.Content>
-                      <Flex
-                        direction={"column"}
-                        minH={"50vh"}
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        border={"2px"}
-                        borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={"gray.300"}
-                        rounded={"md"}
-                        background={fileName === "" ? "gray.50" : "white"}
-                      >
-                        {_.isEqual(file, {}) ? (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontSize={"sm"} fontWeight={"semibold"}>
-                              Drag file here
-                            </Text>
-                            <Text fontSize={"sm"}>or click to upload</Text>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontSize={"sm"} fontWeight={"semibold"}>
-                              {file.name}
-                            </Text>
-                          </Flex>
-                        )}
-                      </Flex>
-
                       <Field.Root>
+                        <Flex
+                          direction={"column"}
+                          minH={"40vh"}
+                          w={"100%"}
+                          align={"center"}
+                          justify={"center"}
+                          border={"2px"}
+                          borderStyle={fileName === "" ? "dashed" : "solid"}
+                          borderColor={"gray.300"}
+                          rounded={"md"}
+                          background={fileName === "" ? "gray.50" : "white"}
+                        >
+                          {_.isEqual(file, {}) ? (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Drag file here
+                              </Text>
+                              <Text fontSize={"sm"}>or click to upload</Text>
+                            </Flex>
+                          ) : (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                {file.name}
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+
                         <Input
                           type={"file"}
                           h={"100%"}
@@ -1649,8 +1649,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                             ) {
                               // Only accept defined file types
                               if (
-                                _.isEqual(
-                                  JSON_MIME_TYPE,
+                                _.includes(
+                                  [JSON_MIME_TYPE],
                                   event.target.files[0].type,
                                 )
                               ) {
