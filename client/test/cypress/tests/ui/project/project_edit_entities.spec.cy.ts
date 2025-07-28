@@ -69,7 +69,7 @@ describe("Project, edit Entities", () => {
     cy.reload();
 
     // Remove the the Entity
-    cy.get("tr > td > div > div > a").click();
+    cy.get("tr > td > div > div > a").eq(0).click();
     cy.get("#editEntityButton").click();
     cy.get("tr > td > div > button").eq(0).click();
     cy.contains("button", "Save").click();

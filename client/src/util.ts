@@ -2,10 +2,18 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, IAuth, ISession, IValue, UserModel } from "@types";
+import {
+  GenericValueType,
+  IAttribute,
+  IAuth,
+  ISelectOption,
+  ISession,
+  IValue,
+  UserModel,
+} from "@types";
 
 export const isValidValues = (
-  values: IValue<any>[],
+  values: IValue<GenericValueType>[],
   allowEmptyValues = false,
 ) => {
   if (values.length === 0) {
@@ -63,6 +71,18 @@ export const isValidUser = (user: UserModel): boolean => {
 };
 
 /**
+ * Check if an ORCID is a valid format
+ * @param {string} orcid the ORCID to check
+ * @returns {boolean}
+ */
+export const isValidOrcid = (orcid: string): boolean => {
+  if (_.isUndefined(orcid) || _.isEqual(orcid, "")) {
+    return false;
+  }
+  return /^(\d{4}-){3}\d{3}(\d|X)$/.test(orcid);
+};
+
+/**
  * Retrieve an authentication token from session storage
  * @param {string} tokenKey the key of the token in storage
  * @returns {any}
@@ -92,4 +112,27 @@ export const getSession = (sessionKey: string): ISession => {
   return {
     workspace: "",
   };
+};
+
+/**
+ * Generate a collection of `ISelectOption` objects from a collection of objects, enabling the
+ * Chakra UI `Select` component to be populated with options correctly.
+ * @param collection Collection of objects of generic type `T`
+ * @param valueProperty The property attached to `T` that will be the value of the `Select` option
+ * @param labelProperty The property attached to `T` that will be the label of the `Select` option
+ * @return {ISelectOption[]} Collection of `ISelectOption` objects
+ */
+export const createSelectOptions = <T>(
+  collection: T[],
+  valueProperty: keyof T,
+  labelProperty: keyof T,
+): ISelectOption[] => {
+  const options: ISelectOption[] = [];
+  for (const item of collection) {
+    options.push({
+      value: item[valueProperty] as string,
+      label: item[labelProperty] as string,
+    });
+  }
+  return options;
 };

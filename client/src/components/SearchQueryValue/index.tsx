@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Input, Flex, Select } from "@chakra-ui/react";
+import {
+  Input,
+  Flex,
+  Select,
+  createListCollection,
+  Portal,
+} from "@chakra-ui/react";
 import { ValueEditorProps } from "react-querybuilder";
 
 // Custom components
@@ -18,7 +24,9 @@ const SearchQueryValue = ({
 }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
   const [selected, setSelected] = useState({} as IGenericItem);
-  const [operators, setOperators] = useState(["contains", "does not contain"]);
+  const [operatorsCollection, setOperatorsCollection] = useState(
+    createListCollection({ items: ["contains", "does not contain"] }),
+  );
 
   // `Attribute` field state
   const [attributeValue, setAttributeValue] = useState("");
@@ -35,17 +43,23 @@ const SearchQueryValue = ({
       case "text":
       case "url":
         setAttributeValueInputType("text");
-        setOperators(["contains", "does not contain"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["contains", "does not contain"] }),
+        );
         setAttributeValueOperator("contains");
         break;
       case "date":
         setAttributeValueInputType("date");
-        setOperators(["equals", ">", "<"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["equals", ">", "<"] }),
+        );
         setAttributeValueOperator("equals");
         break;
       case "number":
         setAttributeValueInputType("number");
-        setOperators(["equals", ">", "<"]);
+        setOperatorsCollection(
+          createListCollection({ items: ["equals", ">", "<"] }),
+        );
         setAttributeValueOperator("equals");
         break;
     }
@@ -64,7 +78,7 @@ const SearchQueryValue = ({
    * Handle the input value changing
    * @param event Event object and data
    */
-  const handleInputChange = (event: any) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (_.isEqual(field, "attributes")) {
       // Handle `attributes` field differently
       setAttributeValue(event.target.value);
@@ -130,49 +144,144 @@ const SearchQueryValue = ({
           gap={"2"}
           direction={"column"}
           align={"center"}
+          w={"100%"}
           p={"2"}
           rounded={"md"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
-          w={"100%"}
+          backgroundColor={"white"}
         >
-          <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-            <Select
-              className={"rule-value-type"}
-              value={attributeValueType}
-              onChange={(event) =>
-                updateValueType(event.target.value as IValueType)
+          {/* Value type, operator, and value grouped visually */}
+          <Flex gap={"2"} align={"center"} rounded={"md"} direction={"row"}>
+            {/* Value type `Select` */}
+            <Select.Root
+              id={"rule-value-type"}
+              size={"xs"}
+              collection={createListCollection({
+                items: ["Text", "URL", "Number", "Date"],
+              })}
+              onValueChange={(details) =>
+                updateValueType(details.items[0].toLowerCase() as IValueType)
               }
             >
-              <option value={"text"}>Text</option>
-              <option value={"url"}>URL</option>
-              <option value={"number"}>Number</option>
-              <option value={"date"}>Date</option>
-            </Select>
-            <Select
-              className={"rule-value-operators"}
-              value={attributeValueOperator}
-              onChange={(event) => handleOperatorChange(event.target.value)}
+              <Select.HiddenSelect />
+              <Select.Control
+                minW={"90px"}
+                maxW={"120px"}
+                fontSize={"sm"}
+                h={"28px"}
+                style={{ justifyContent: "flex-start" }}
+              >
+                <Select.Trigger
+                  minW={"90px"}
+                  maxW={"120px"}
+                  fontSize={"sm"}
+                  h={"28px"}
+                  style={{ justifyContent: "flex-start" }}
+                  data-testid={"rule-value-type-trigger"}
+                >
+                  <Select.ValueText
+                    placeholder={"Type"}
+                    fontSize={"sm"}
+                    style={{ textAlign: "left" }}
+                  />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content fontSize={"sm"}>
+                    {["Text", "URL", "Number", "Date"].map((valueType) => (
+                      <Select.Item
+                        item={valueType}
+                        key={valueType}
+                        fontSize={"sm"}
+                        h={"28px"}
+                        style={{ textAlign: "left" }}
+                      >
+                        {valueType}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
+
+            {/* Operator `Select` */}
+            <Select.Root
+              id={"rule-value-operators"}
+              size={"xs"}
+              collection={operatorsCollection}
+              onValueChange={(details) =>
+                handleOperatorChange(details.items[0])
+              }
             >
-              {operators.map((operator) => (
-                <option key={operator} value={operator}>
-                  {operator}
-                </option>
-              ))}
-            </Select>
+              <Select.HiddenSelect />
+              <Select.Control
+                minW={"120px"}
+                maxW={"150px"}
+                fontSize={"sm"}
+                h={"28px"}
+                style={{ justifyContent: "flex-start" }}
+              >
+                <Select.Trigger
+                  minW={"120px"}
+                  maxW={"150px"}
+                  fontSize={"sm"}
+                  h={"28px"}
+                  style={{ justifyContent: "flex-start" }}
+                  data-testid={"rule-value-operators-trigger"}
+                >
+                  <Select.ValueText
+                    placeholder={"Condition"}
+                    fontSize={"sm"}
+                    style={{ textAlign: "left" }}
+                  />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content fontSize={"sm"}>
+                    {operatorsCollection.items.map((operator) => (
+                      <Select.Item
+                        item={operator}
+                        key={operator}
+                        fontSize={"sm"}
+                        h={"28px"}
+                        style={{ textAlign: "left" }}
+                      >
+                        {operator}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
           </Flex>
-          <Flex w={"100%"}>
+
+          <Flex direction={"row"} align={"center"} gap={"2"} w={"100%"}>
+            {/* Value Input */}
             <Input
-              className={"rule-value-input"}
+              id={"rule-value-input"}
               type={attributeValueInputType}
               placeholder={"Value"}
               value={attributeValue}
               onChange={handleInputChange}
-              minW={"200px"}
+              flex={"1"}
+              minW={"80px"}
               rounded={"md"}
-              size={"sm"}
-              backgroundColor={"white"}
+              size={"xs"}
+              fontSize={"sm"}
+              height={"28px"}
               data-testid={"value-editor"}
+              style={{ textAlign: "left" }}
             />
           </Flex>
         </Flex>

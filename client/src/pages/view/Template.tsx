@@ -1,26 +1,15 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Heading,
-  Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Text,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { Button, Flex, Heading, Input, Menu, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import Dialog from "@components/Dialog";
+import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
+import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -41,7 +30,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 const Template = () => {
   const { id } = useParams();
-  const toast = useToast();
 
   const [editing, setEditing] = useState(false);
 
@@ -54,12 +42,7 @@ const Template = () => {
   );
 
   // State for dialog confirming if user should archive
-  const archiveDialogRef = useRef();
-  const {
-    isOpen: isArchiveDialogOpen,
-    onOpen: onArchiveDialogOpen,
-    onClose: onArchiveDialogClose,
-  } = useDisclosure();
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // GraphQL operations
   const GET_TEMPLATE = gql`
@@ -134,13 +117,12 @@ const Template = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: "Unable to retrieve Template information",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -164,23 +146,21 @@ const Template = () => {
     });
 
     if (response.data.archiveTemplate.success) {
-      toast({
+      toaster.create({
         title: "Archived Successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setTemplateArchived(true);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while archiving Template",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -197,23 +177,21 @@ const Template = () => {
     });
 
     if (response.data.archiveTemplate.success) {
-      toast({
+      toaster.create({
         title: "Restored Template successfully",
-        status: "success",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
       setTemplateArchived(false);
-      onArchiveDialogClose();
+      setArchiveDialogOpen(false);
     } else {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred while restoring Template",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
@@ -236,27 +214,36 @@ const Template = () => {
         },
       });
       if (response.data.updateTemplate.success) {
-        toast({
+        toaster.create({
           title: "Updated Successfully",
-          status: "success",
+          type: "success",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       } else {
-        toast({
+        toaster.create({
           title: "Error",
           description: "An error occurred when saving updates.",
-          status: "error",
+          type: "error",
           duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+          closable: true,
         });
       }
       setEditing(false);
     } else {
       setEditing(true);
     }
+  };
+
+  const handleCancelClick = () => {
+    // Disable editing
+    setEditing(false);
+
+    // Reset Project state values
+    setTemplate(template);
+    setTemplateName(template.name);
+    setTemplateDescription(template.description);
+    setTemplateValues(template.values);
   };
 
   /**
@@ -276,24 +263,22 @@ const Template = () => {
         slugify(`${templateName.replace(" ", "")}_export.json`),
       );
 
-      toast({
-        title: "Info",
+      toaster.create({
+        title: "Success",
         description: `Generated JSON file`,
-        status: "info",
+        type: "success",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
 
     if (exportError) {
-      toast({
+      toaster.create({
         title: "Error",
         description: "An error occurred exporting this Project",
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   };
@@ -317,7 +302,7 @@ const Template = () => {
             align={"center"}
             gap={"2"}
             p={"2"}
-            border={"2px"}
+            border={"2px solid"}
             rounded={"md"}
           >
             <Icon name={"template"} size={"md"} />
@@ -329,71 +314,92 @@ const Template = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu id={"actionsMenu"}>
-              <MenuButton
-                as={Button}
-                size={"sm"}
-                colorScheme={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-              >
-                Actions
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={<Icon name={"download"} />}
-                  onClick={handleDownloadClick}
-                  isDisabled={editing || templateArchived}
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"yellow"}
+                  data-testid={"templateActionsButton"}
                 >
-                  Export
-                </MenuItem>
-                <MenuItem
-                  onClick={onArchiveDialogOpen}
-                  icon={<Icon name={"archive"} />}
-                  isDisabled={templateArchived}
-                >
-                  Archive
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  Actions
+                  <Icon name={"lightning"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    value={"export"}
+                    onClick={handleDownloadClick}
+                    disabled={editing || templateArchived}
+                  >
+                    <Icon name={"download"} />
+                    Export
+                  </Menu.Item>
+                  <Menu.Item
+                    value={"archive"}
+                    onClick={() => setArchiveDialogOpen(true)}
+                    disabled={templateArchived}
+                  >
+                    <Icon name={"archive"} />
+                    Archive
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
 
             {templateArchived ? (
               <Button
                 id={"restoreTemplateButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
-                colorScheme={"orange"}
-                rightIcon={<Icon name={"rewind"} />}
+                rounded={"md"}
+                colorPalette={"orange"}
               >
                 Restore
+                <Icon name={"rewind"} />
               </Button>
             ) : (
-              <Button
-                id={"editTemplateButton"}
-                size={"sm"}
-                colorScheme={editing ? "green" : "blue"}
-                rightIcon={
-                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                }
-                onClick={handleEditClick}
-              >
-                {editing ? "Done" : "Edit"}
-              </Button>
+              <Flex gap={"2"}>
+                {editing && (
+                  <Button
+                    onClick={handleCancelClick}
+                    size={"sm"}
+                    rounded={"md"}
+                    colorPalette={"red"}
+                  >
+                    Cancel
+                    <Icon name={"cross"} />
+                  </Button>
+                )}
+                <Button
+                  id={"editTemplateButton"}
+                  colorPalette={editing ? "green" : "blue"}
+                  size={"sm"}
+                  rounded={"md"}
+                  onClick={handleEditClick}
+                  loadingText={"Saving..."}
+                  loading={updateLoading}
+                >
+                  {editing ? "Save" : "Edit"}
+                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
+                </Button>
+              </Flex>
             )}
 
             {/* Archive Dialog */}
-            <Dialog
-              dialogRef={archiveDialogRef}
+            <AlertDialog
               header={"Archive Template"}
+              leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
-              isOpen={isArchiveDialogOpen}
-              onOpen={onArchiveDialogOpen}
-              onClose={onArchiveDialogClose}
+              open={archiveDialogOpen}
+              setOpen={setArchiveDialogOpen}
             >
               <Text>
                 Are you sure you want to archive this Template? It can be
                 restored any time from the Workspace archives.
               </Text>
-            </Dialog>
+            </AlertDialog>
           </Flex>
         </Flex>
 
@@ -422,10 +428,10 @@ const Template = () => {
                     onChange={(event) => {
                       setTemplateName(event.target.value);
                     }}
-                    isReadOnly={!editing}
+                    readOnly={!editing}
                     bg={"white"}
                     rounded={"md"}
-                    border={"1px"}
+                    border={"1px solid"}
                     borderColor={"gray.300"}
                   />
                 </Flex>
@@ -448,7 +454,11 @@ const Template = () => {
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Owner
                   </Text>
-                  <ActorTag orcid={template.owner} fallback={"No Owner"} />
+                  <ActorTag
+                    orcid={template.owner}
+                    fallback={"No Owner"}
+                    size={"md"}
+                  />
                 </Flex>
               </Flex>
             </Flex>
@@ -458,7 +468,7 @@ const Template = () => {
               direction={"column"}
               p={"2"}
               gap={"1"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
               rounded={"md"}
               basis={"40%"}
@@ -485,9 +495,8 @@ const Template = () => {
 
           <Flex
             p={"2"}
-            pb={"0"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
           >
             <Values

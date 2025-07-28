@@ -2,7 +2,7 @@
 import React from "react";
 
 // Existing and custom components
-import { Flex, Tag, TagLabel, Text } from "@chakra-ui/react";
+import { Flex, Tag, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 const Information = (props: { text: string }) => {
@@ -26,10 +26,12 @@ const Information = (props: { text: string }) => {
 
 const Warning = (props: { text: string }) => {
   return (
-    <Tag size={"md"} colorScheme={"orange"} gap={"2"} w={"fit-content"}>
-      <Icon name={"warning"} />
-      <TagLabel>{props.text}</TagLabel>
-    </Tag>
+    <Tag.Root colorPalette={"orange"} w={"fit-content"}>
+      <Tag.StartElement>
+        <Icon name={"warning"} />
+      </Tag.StartElement>
+      <Tag.Label>{props.text}</Tag.Label>
+    </Tag.Root>
   );
 };
 

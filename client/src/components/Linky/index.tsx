@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Link, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Link, SkeletonText } from "@chakra-ui/react";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { IGenericItem, LinkyProps } from "@types";
@@ -121,25 +122,20 @@ const Linky = (props: LinkyProps) => {
   }, [props.id]);
 
   return (
-    <Tooltip hasArrow label={tooltipLabel} bg={"gray.300"} color={"black"}>
-      <Button
-        variant={"link"}
-        color={props.color ? props.color : "gray.700"}
-        justifyContent={props.justify ? props.justify : "center"}
-        as={Link}
-        onClick={onClickHandler}
+    <Tooltip showArrow content={tooltipLabel}>
+      <SkeletonText
+        noOfLines={1}
+        loading={loadingTemplate || loadingEntity || loadingProject}
       >
-        <Skeleton
-          isLoaded={!loadingTemplate && !loadingEntity && !loadingProject}
+        <Link
+          onClick={onClickHandler}
+          fontWeight={"semibold"}
+          color={showDeleted ? "gray.400" : "black"}
+          fontSize={props.size ? props.size : ""}
         >
-          <Text
-            color={showDeleted ? "gray.400" : "black"}
-            fontSize={props.size ? props.size : ""}
-          >
-            {linkLabel}
-          </Text>
-        </Skeleton>
-      </Button>
+          {linkLabel}
+        </Link>
+      </SkeletonText>
     </Tooltip>
   );
 };

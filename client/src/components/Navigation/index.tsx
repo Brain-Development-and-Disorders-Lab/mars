@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import {
@@ -7,17 +7,12 @@ import {
   IconButton,
   Image,
   Button,
-  useDisclosure,
   Text,
-  MenuButton,
   Menu,
-  MenuList,
-  MenuItem,
-  MenuGroup,
   Spacer,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import ImportModal from "@components/ImportModal";
+import ImportDialog from "@components/ImportDialog";
 import ScanModal from "@components/ScanModal";
 import SearchBox from "@components/SearchBox";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
@@ -42,17 +37,9 @@ const Navigation = () => {
   // Workspace context value
   const { workspace } = useWorkspace();
 
-  const {
-    isOpen: isImportOpen,
-    onOpen: onImportOpen,
-    onClose: onImportClose,
-  } = useDisclosure();
-
-  const {
-    isOpen: isScanOpen,
-    onOpen: onScanOpen,
-    onClose: onScanClose,
-  } = useDisclosure();
+  // Modal open states
+  const [importOpen, setImportOpen] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
 
   return (
     <Flex w={"100%"} p={"2"} bg={"gray.100"}>
@@ -61,7 +48,6 @@ const Navigation = () => {
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
         gap={"4"}
-        w={"100%"}
       >
         {/* Heading */}
         <Flex
@@ -79,7 +65,7 @@ const Navigation = () => {
         </Flex>
 
         {/* Workspace menu items */}
-        <Flex direction={"column"} align={"self-start"} gap={"6"}>
+        <Flex direction={"column"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
             <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             <SearchBox resultType={"entity"} />
@@ -95,12 +81,15 @@ const Navigation = () => {
               key={"dashboard"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
-              leftIcon={<Icon name={"dashboard"} />}
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"dashboard"} />
               Dashboard
             </Button>
 
@@ -109,16 +98,19 @@ const Navigation = () => {
               key={"search"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/search")
                   ? "#ffffff"
                   : "gray.100"
               }
-              leftIcon={<Icon name={"search"} />}
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/search")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"search"} />
               Search
             </Button>
 
@@ -127,16 +119,19 @@ const Navigation = () => {
               key={"create"}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/create")
                   ? "#ffffff"
                   : "gray.100"
               }
-              leftIcon={<Icon name={"add"} />}
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/create")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"add"} />
               Create
             </Button>
 
@@ -146,9 +141,9 @@ const Navigation = () => {
 
             <Button
               id={"navEntitiesButtonDesktop"}
-              leftIcon={<Icon name={"entity"} />}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/entit") &&
@@ -156,9 +151,12 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/entities")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"entity"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -166,9 +164,9 @@ const Navigation = () => {
 
             <Button
               id={"navProjectsButtonDesktop"}
-              leftIcon={<Icon name={"project"} />}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/project") &&
@@ -176,9 +174,12 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/projects")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"project"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -186,9 +187,9 @@ const Navigation = () => {
 
             <Button
               id={"navTemplatesButtonDesktop"}
-              leftIcon={<Icon name={"template"} />}
               size={"sm"}
               w={"100%"}
+              rounded={"md"}
               justifyContent={"left"}
               bg={
                 _.includes(location.pathname, "/template") &&
@@ -196,53 +197,62 @@ const Navigation = () => {
                   ? "#ffffff"
                   : "gray.100"
               }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
               onClick={() => navigate("/templates")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={workspace === "" || _.isUndefined(workspace)}
             >
+              <Icon name={"template"} />
               Templates
             </Button>
           </Flex>
 
-          <Flex direction={"column"} gap={"2"} width={"100%"}>
+          <Flex direction={"column"} gap={"2"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
               Tools
             </Text>
-            <Flex direction={"row"} gap={"2"}>
-              <Button
-                id={"navImportButtonDesktop"}
-                key={"import"}
-                size={"sm"}
-                w={"100%"}
-                colorScheme={"blue"}
-                leftIcon={<Icon name={"upload"} />}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("import_modal_open");
+            <Flex direction={"row"} gap={"2"} w={"100%"}>
+              <Flex w={"50%"}>
+                <Button
+                  id={"navImportButtonDesktop"}
+                  w={"100%"}
+                  key={"import"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"blue"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("import_modal_open");
 
-                  onImportOpen();
-                }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                Import
-              </Button>
+                    setImportOpen(true);
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"upload"} />
+                  Import
+                </Button>
+              </Flex>
 
-              <Button
-                id={"navScanButtonDesktop"}
-                key={"scan"}
-                size={"sm"}
-                w={"100%"}
-                colorScheme={"green"}
-                leftIcon={<Icon name={"scan"} />}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("scan_modal_open");
+              <Flex w={"50%"}>
+                <Button
+                  id={"navScanButtonDesktop"}
+                  w={"100%"}
+                  key={"scan"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("scan_modal_open");
 
-                  onScanOpen();
-                }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                Scan
-              </Button>
+                    setScanOpen(true);
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"scan"} />
+                  Scan
+                </Button>
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
@@ -269,107 +279,118 @@ const Navigation = () => {
         gap={"2"}
       >
         {/* Navigation items */}
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label={"Open Menu"}
-            display={{ base: "flex", lg: "none" }}
-            size={"md"}
-            bg={"white"}
-            icon={<Icon name={"list"} />}
-          />
-          <MenuList>
-            <MenuGroup title={"Menu"}>
-              <MenuItem
-                id={"navDashboardButtonMobile"}
-                icon={<Icon name={"dashboard"} />}
-                onClick={() => navigate("/")}
-              >
-                Dashboard
-              </MenuItem>
-              <MenuItem
-                id={"navSearchButtonMobile"}
-                icon={<Icon name={"search"} />}
-                onClick={() => navigate("/search")}
-              >
-                Search
-              </MenuItem>
-              <MenuItem
-                id={"navProjectButtonMobile"}
-                icon={<Icon name={"project"} />}
-                onClick={() => navigate("/projects")}
-              >
-                Projects
-              </MenuItem>
-              <MenuItem
-                id={"navEntitiesButtonMobile"}
-                icon={<Icon name={"entity"} />}
-                onClick={() => navigate("/entities")}
-              >
-                Entities
-              </MenuItem>
-              <MenuItem
-                id={"navTemplatesButtonMobile"}
-                icon={<Icon name={"template"} />}
-                onClick={() => navigate("/templates")}
-              >
-                Templates
-              </MenuItem>
-            </MenuGroup>
-            <MenuGroup title={"Tools"}>
-              <MenuItem
-                id={"navCreateButtonMobile"}
-                icon={<Icon name={"add"} />}
-                onClick={() => navigate("/create")}
-              >
-                Create
-              </MenuItem>
-              <MenuItem
-                id={"navScanButtonMobile"}
-                icon={<Icon name={"scan"} />}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("scan_modal_open");
-
-                  onScanOpen();
-                }}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                Scan
-              </MenuItem>
-            </MenuGroup>
-
-            {/* Version number */}
-            <Flex
-              direction={"row"}
-              gap={"2"}
-              align={"center"}
-              justify={"center"}
+        <Menu.Root>
+          <Menu.Trigger asChild>
+            <IconButton
+              aria-label={"Open Menu"}
+              display={{ base: "flex", lg: "none" }}
+              size={"md"}
+              bg={"white"}
+              color={"gray.500"}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                v{process.env.VERSION}
-              </Text>
-            </Flex>
-          </MenuList>
-        </Menu>
+              <Icon name={"list"} />
+            </IconButton>
+          </Menu.Trigger>
+          <Menu.Positioner>
+            <Menu.Content>
+              <Menu.ItemGroup title={"Menu"}>
+                <Menu.ItemGroupLabel>Menu</Menu.ItemGroupLabel>
+                <Menu.Item
+                  id={"navDashboardButtonMobile"}
+                  value={"dashboard"}
+                  onClick={() => navigate("/")}
+                >
+                  <Icon name={"dashboard"} />
+                  Dashboard
+                </Menu.Item>
+                <Menu.Item
+                  id={"navSearchButtonMobile"}
+                  value={"search"}
+                  onClick={() => navigate("/search")}
+                >
+                  <Icon name={"search"} />
+                  Search
+                </Menu.Item>
+                <Menu.Item
+                  id={"navProjectButtonMobile"}
+                  value={"projects"}
+                  onClick={() => navigate("/projects")}
+                >
+                  <Icon name={"project"} />
+                  Projects
+                </Menu.Item>
+                <Menu.Item
+                  id={"navEntitiesButtonMobile"}
+                  value={"entities"}
+                  onClick={() => navigate("/entities")}
+                >
+                  <Icon name={"entity"} />
+                  Entities
+                </Menu.Item>
+                <Menu.Item
+                  id={"navTemplatesButtonMobile"}
+                  value={"templates"}
+                  onClick={() => navigate("/templates")}
+                >
+                  <Icon name={"template"} />
+                  Templates
+                </Menu.Item>
+              </Menu.ItemGroup>
+
+              <Menu.ItemGroup title={"Tools"}>
+                <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
+                <Menu.Item
+                  id={"navCreateButtonMobile"}
+                  value={"create"}
+                  onClick={() => navigate("/create")}
+                >
+                  <Icon name={"add"} />
+                  Create
+                </Menu.Item>
+                <Menu.Item
+                  id={"navScanButtonMobile"}
+                  value={"scan"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("scan_modal_open");
+
+                    setScanOpen(true);
+                  }}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"scan"} />
+                  Scan
+                </Menu.Item>
+              </Menu.ItemGroup>
+
+              {/* Version number */}
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+                justify={"center"}
+              >
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.400"}
+                >
+                  v{process.env.VERSION}
+                </Text>
+              </Flex>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Menu.Root>
 
         {/* Workspace switcher */}
         <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
       </Flex>
 
-      {/* `ImportModal` component */}
-      <ImportModal
-        isOpen={isImportOpen}
-        onOpen={onImportOpen}
-        onClose={onImportClose}
-      />
+      {/* `ImportDialog` component */}
+      <ImportDialog open={importOpen} setOpen={setImportOpen} />
 
       {/* `ScanModal` component */}
-      <ScanModal
-        isOpen={isScanOpen}
-        onOpen={onScanOpen}
-        onClose={onScanClose}
-      />
+      <ScanModal open={scanOpen} setOpen={setScanOpen} />
     </Flex>
   );
 };

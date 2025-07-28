@@ -2,20 +2,21 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  EmptyState,
   Flex,
   Heading,
   Link,
   Spacer,
   Tag,
   Text,
-  Tooltip,
-  useBreakpoint,
-  useToast,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { ProjectModel } from "@types";
@@ -27,7 +28,8 @@ import dayjs from "dayjs";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Workspace context
+// Context and hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
@@ -49,38 +51,28 @@ const GET_PROJECTS = gql`
 `;
 
 const Projects = () => {
-  const toast = useToast();
   const navigate = useNavigate();
 
   // Effect to adjust column visibility
-  const breakpoint = useBreakpoint();
-  const [visibleColumns, setVisibleColumns] = useState({});
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    created: true,
+    owner: true,
+    entities: true,
+  });
+
   useEffect(() => {
-    if (
-      _.includes(["md", "sm", "base"], breakpoint) ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({
-        description: false,
-        created: false,
-        owner: false,
-        entities: false,
-      });
-    } else if (_.includes(["lg"], breakpoint)) {
-      setVisibleColumns({
-        description: false,
-        created: false,
-        owner: true,
-        entities: true,
-      });
-    } else {
-      setVisibleColumns({
-        description: true,
-        created: true,
-        owner: true,
-        entities: true,
-      });
-    }
+    const isMobile =
+      breakpoint === "base" || breakpoint === "sm" || breakpoint === "md";
+    const isTablet = breakpoint === "lg";
+
+    setVisibleColumns({
+      description: !isMobile && !isTablet,
+      created: !isMobile && !isTablet,
+      owner: !isMobile,
+      entities: !isMobile,
+    });
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
@@ -108,13 +100,12 @@ const Projects = () => {
   useEffect(() => {
     if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Unable to retrieve Projects",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error, loading]);
@@ -125,12 +116,11 @@ const Projects = () => {
     columnHelper.accessor("name", {
       cell: (info) => (
         <Tooltip
-          label={info.getValue()}
-          placement={"top"}
-          isDisabled={info.getValue().length < 30}
+          content={info.getValue()}
+          disabled={info.getValue().length < 36}
         >
-          <Text noOfLines={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 30 })}
+          <Text lineClamp={1} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 36 })}
           </Text>
         </Tooltip>
       ),
@@ -139,16 +129,19 @@ const Projects = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            content={info.getValue()}
+            disabled={info.getValue().length < 36}
           >
-            <Text noOfLines={1}>
-              {_.truncate(info.getValue(), { length: 30 })}
+            <Text lineClamp={1}>
+              {_.truncate(info.getValue(), { length: 36 })}
             </Text>
           </Tooltip>
         );
@@ -158,7 +151,13 @@ const Projects = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+        return (
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+          />
+        );
       },
       header: "Owner",
     }),
@@ -168,15 +167,25 @@ const Projects = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("entities", {
-      cell: (info) => info.getValue().length,
+      cell: (info) => {
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
+      },
       header: "Entities",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              fontWeight={"semibold"}
+              color={"black"}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
+            >
+              View
             </Link>
             <Icon name={"a_right"} />
           </Flex>
@@ -210,16 +219,21 @@ const Projects = () => {
             </Heading>
             <Spacer />
             <Button
-              rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
+              colorPalette={"green"}
               onClick={() => navigate("/create/project")}
               size={"sm"}
+              rounded={"md"}
             >
               Create
+              <Icon name={"add"} />
             </Button>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Text fontSize={"sm"}>
+            All Projects in the current Workspace are shown below. Sort the
+            Projects using the column headers.
+          </Text>
           {projects.length > 0 ? (
             <DataTable
               columns={columns}
@@ -232,17 +246,14 @@ const Projects = () => {
               showItemCount
             />
           ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Projects.
-              </Text>
-            </Flex>
+            <EmptyState.Root>
+              <EmptyState.Content>
+                <EmptyState.Indicator>
+                  <Icon name={"project"} size={"lg"} />
+                </EmptyState.Indicator>
+                <EmptyState.Description>No Projects</EmptyState.Description>
+              </EmptyState.Content>
+            </EmptyState.Root>
           )}
         </Flex>
       </Flex>

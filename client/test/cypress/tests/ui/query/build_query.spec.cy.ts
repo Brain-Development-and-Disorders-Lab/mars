@@ -18,7 +18,7 @@ describe("Search Query Builder", () => {
 
     // Create a test query
     cy.contains("button", "Rule").click();
-    cy.get(".rule-operators").select("contains");
+    cy.get(".rule-operators > select").select("contains");
     cy.get('[data-testid="value-editor"]').type("Entity");
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
@@ -35,7 +35,7 @@ describe("Search Query Builder", () => {
 
     // Create a test query
     cy.contains("button", "Rule").click();
-    cy.get(".rule-operators").select("does not contain");
+    cy.get(".rule-operators > select").select("does not contain");
     cy.get('[data-testid="value-editor"]').type("Entity");
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
@@ -52,14 +52,22 @@ describe("Search Query Builder", () => {
 
     // Create a test query
     cy.contains("button", "Rule").click();
-    cy.get(".rule-operators").select("contains");
+    cy.get(".rule-operators > select").select("contains");
     cy.get('[data-testid="value-editor"]').type("Entity");
 
     cy.contains("button", "Rule").click();
-    cy.get(".rule-fields").eq(1).select("Attributes");
-    cy.get(".rule-operators").eq(1).select("contains");
-    cy.get(".rule-value-type").select("Text");
-    cy.get(".rule-value-operators").select("contains");
+    cy.get(".rule-fields > select").eq(1).select("Attributes");
+    cy.get(".rule-operators > select").eq(1).select("contains");
+
+    // Select the "Text" value type
+    cy.get('[data-testid="rule-value-type-trigger"]').click();
+    cy.contains('[role="option"]', "Text").click();
+
+    // Select the "contains" operator
+    cy.get('[data-testid="rule-value-operators-trigger"]').click();
+    cy.contains('[role="option"]', "contains").click();
+
+    // Type the value "Test" into the value input
     cy.get('[data-testid="value-editor"]').eq(1).type("Test");
 
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
@@ -77,14 +85,22 @@ describe("Search Query Builder", () => {
 
     // Create a test query
     cy.contains("button", "Rule").click();
-    cy.get(".rule-operators").select("contains");
+    cy.get(".rule-operators > select").select("contains");
     cy.get('[data-testid="value-editor"]').type("Entity");
 
     cy.contains("button", "Rule").click();
-    cy.get(".rule-fields").eq(1).select("Attributes");
-    cy.get(".rule-operators").eq(1).select("contains");
-    cy.get(".rule-value-type").select("Number");
-    cy.get(".rule-value-operators").select(">");
+    cy.get(".rule-fields > select").eq(1).select("Attributes");
+    cy.get(".rule-operators > select").eq(1).select("contains");
+
+    // Select the "Number" value type
+    cy.get('[data-testid="rule-value-type-trigger"]').click();
+    cy.contains('[role="option"]', "Number").click();
+
+    // Select the ">" operator
+    cy.get('[data-testid="rule-value-operators-trigger"]').click();
+    cy.contains('[role="option"]', ">").click();
+
+    // Type the value "120" into the value input
     cy.get('[data-testid="value-editor"]').eq(1).type("120");
 
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button

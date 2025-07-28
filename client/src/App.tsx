@@ -65,7 +65,7 @@ import { theme } from "./styles/theme";
  */
 const Providers = (): React.JSX.Element => {
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider value={theme}>
       <AuthenticationProvider>
         <WorkspaceProvider>
           <Outlet />

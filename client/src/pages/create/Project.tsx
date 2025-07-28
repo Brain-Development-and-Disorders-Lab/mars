@@ -4,25 +4,18 @@ import React, { useEffect, useRef, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  CloseButton,
+  Dialog,
+  EmptyState,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
   IconButton,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spacer,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -31,6 +24,7 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Utility functions and libraries
@@ -43,6 +37,7 @@ import { gql, useMutation } from "@apollo/client";
 
 // Custom types
 import { IGenericItem, ResponseData } from "@types";
+import { Cell } from "@tanstack/react-table";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -52,9 +47,10 @@ import { usePostHog } from "posthog-js/react";
 
 const Project = () => {
   const posthog = usePostHog();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
   const { token } = useAuthentication();
+
+  // Information dialog state
+  const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [created, setCreated] = useState(
@@ -80,11 +76,7 @@ const Project = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
-  const {
-    isOpen: isEntitiesOpen,
-    onOpen: onEntitiesOpen,
-    onClose: onEntitiesClose,
-  } = useDisclosure();
+  const [entitiesOpen, setEntitiesOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
   const [entities, setEntities] = useState([] as string[]);
 
@@ -105,13 +97,12 @@ const Project = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
         description: error.message,
-        status: "error",
+        type: "error",
         duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -130,24 +121,25 @@ const Project = () => {
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
-      id: (info: any) => info.row.original,
-      cell: (info: any) => (
+      id: (info: Cell<string, string>) => info.row.original,
+      cell: (info: Cell<string, string>) => (
         <Linky id={info.row.original} type={"entities"} size={"sm"} />
       ),
       header: "Name",
     },
     {
       id: "view",
-      cell: (info: any) => {
+      cell: (info: Cell<string, string>) => {
         return (
           <Flex w={"100%"} justify={"end"}>
             <IconButton
-              icon={<Icon name={"delete"} />}
               aria-label={"Remove entity"}
-              colorScheme={"red"}
+              colorPalette={"red"}
               onClick={() => removeEntity(info.row.original)}
               size={"sm"}
-            />
+            >
+              <Icon name={"delete"} />
+            </IconButton>
           </Flex>
         );
       },
@@ -163,7 +155,7 @@ const Project = () => {
     if (!_.includes(entities, entity._id)) {
       setEntities([...entities, entity._id]);
     }
-    onEntitiesClose();
+    setEntitiesOpen(false);
   };
 
   /**
@@ -192,11 +184,12 @@ const Project = () => {
             <Spacer />
             <Button
               size={"sm"}
-              rightIcon={<Icon name={"info"} />}
+              rounded={"md"}
               variant={"outline"}
-              onClick={onOpen}
+              onClick={() => setInformationOpen(true)}
             >
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
@@ -216,67 +209,61 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
-              <FormControl isRequired isInvalid={isNameError}>
-                <FormLabel htmlFor={"name"} fontSize={"sm"}>
-                  Name
-                </FormLabel>
-                <Input
-                  id={"name"}
-                  name={"name"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  borderColor={"gray.300"}
-                  focusBorderColor={"black"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                {isNameError && (
-                  <FormErrorMessage>
-                    A name to identify the Project must be specified.
-                  </FormErrorMessage>
-                )}
-              </FormControl>
+              <Fieldset.Root invalid={isNameError}>
+                <Fieldset.Content>
+                  <Field.Root required>
+                    <Field.Label>Name</Field.Label>
+                    <Input
+                      id={"name"}
+                      name={"name"}
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Name"}
+                      borderColor={"gray.300"}
+                      focusRingColor={"black"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                    {isNameError && (
+                      <Field.ErrorText>
+                        A name to identify the Project must be specified.
+                      </Field.ErrorText>
+                    )}
+                  </Field.Root>
 
-              <FormControl isRequired>
-                <FormLabel
-                  htmlFor={"owner"}
-                  fontWeight={"semibold"}
-                  fontSize={"sm"}
-                >
-                  Owner
-                </FormLabel>
-                <Flex>
-                  <ActorTag orcid={owner} fallback={"Unknown User"} />
-                </Flex>
-              </FormControl>
+                  <Field.Root>
+                    <Field.Label>Owner</Field.Label>
+                    <Flex>
+                      <ActorTag
+                        orcid={owner}
+                        fallback={"Unknown User"}
+                        size={"md"}
+                      />
+                    </Flex>
+                  </Field.Root>
 
-              <FormControl>
-                <FormLabel
-                  htmlFor="date"
-                  fontWeight={"semibold"}
-                  fontSize={"sm"}
-                >
-                  Created
-                </FormLabel>
-                <Input
-                  size={"sm"}
-                  rounded={"md"}
-                  type={"datetime-local"}
-                  value={created}
-                  onChange={(event) =>
-                    setCreated(
-                      dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"),
-                    )
-                  }
-                />
-                <FormHelperText fontSize={"xs"}>
-                  Specify a timestamp for the Project.
-                </FormHelperText>
-              </FormControl>
+                  <Field.Root>
+                    <Field.Label>Created</Field.Label>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      type={"datetime-local"}
+                      value={created}
+                      onChange={(event) =>
+                        setCreated(
+                          dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"),
+                        )
+                      }
+                    />
+                    <Field.HelperText>
+                      Specify a timestamp for the Project.
+                    </Field.HelperText>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
 
@@ -295,32 +282,34 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Project description */}
-              <FormControl isRequired isInvalid={isDescriptionError}>
-                <FormLabel htmlFor="description" fontSize={"sm"}>
-                  Description
-                </FormLabel>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-                {isDescriptionError && (
-                  <FormErrorMessage>
-                    A description must be provided.
-                  </FormErrorMessage>
-                )}
-              </FormControl>
+              <Fieldset.Root invalid={isDescriptionError}>
+                <Fieldset.Content>
+                  <Field.Root required>
+                    <Field.Label>Description</Field.Label>
+                    <MDEditor
+                      height={150}
+                      minHeight={100}
+                      maxHeight={400}
+                      style={{ width: "100%" }}
+                      value={description}
+                      preview={"edit"}
+                      extraCommands={[]}
+                      onChange={(value) => {
+                        setDescription(value || "");
+                      }}
+                    />
+                    {isDescriptionError && (
+                      <Field.ErrorText>
+                        A description must be provided.
+                      </Field.ErrorText>
+                    )}
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
             </Flex>
           </Flex>
         </Flex>
@@ -332,11 +321,12 @@ const Project = () => {
             </Text>
             <Button
               size={"sm"}
-              colorScheme={"green"}
-              rightIcon={<Icon name={"add"} />}
-              onClick={() => onEntitiesOpen()}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => setEntitiesOpen(true)}
             >
               Add Entity
+              <Icon name={"add"} />
             </Button>
           </Flex>
           <Flex
@@ -345,7 +335,7 @@ const Project = () => {
             gap={"2"}
             w={"100%"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
@@ -368,15 +358,14 @@ const Project = () => {
                   showItemCount
                 />
               ) : (
-                <Flex w={"100%"} justify={"center"} align={"center"}>
-                  <Text
-                    color={"gray.400"}
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                  >
-                    No Entities
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Entities</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
@@ -397,19 +386,20 @@ const Project = () => {
       >
         <Button
           size={"sm"}
-          colorScheme={"red"}
-          rightIcon={<Icon name={"cross"} />}
+          rounded={"md"}
+          colorPalette={"red"}
           variant={"outline"}
           onClick={() => navigate("/projects")}
         >
           Cancel
+          <Icon name={"cross"} />
         </Button>
 
         <Button
           id={"finishCreateProjectButton"}
           size={"sm"}
-          colorScheme={"green"}
-          rightIcon={<Icon name={"check"} />}
+          rounded={"md"}
+          colorPalette={"green"}
           onClick={async () => {
             // Capture event
             posthog.capture("create_project_finish");
@@ -438,97 +428,154 @@ const Project = () => {
             }
             setIsSubmitting(false);
           }}
-          isDisabled={isDetailsError && !isSubmitting}
+          disabled={isDetailsError && !isSubmitting}
         >
           Finish
+          <Icon name={"check"} />
         </Button>
       </Flex>
 
       {/* Modal to add Entities */}
-      <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
-        <ModalOverlay />
-        <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-          {/* Heading and close button */}
-          <ModalHeader p={"2"}>Add Entity</ModalHeader>
-          <ModalCloseButton />
+      <Dialog.Root
+        open={entitiesOpen}
+        onOpenChange={(event) => setEntitiesOpen(event.open)}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            {/* Heading and close button */}
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon name={"add"} />
+                Add Entity
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setEntitiesOpen(false)}
+                  _hover={{ bg: "gray.200" }}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"}>
+                  Select an Entity to add to the Project.
+                </Text>
 
-          <ModalBody p={"2"}>
-            <SearchSelect
-              id={"entitySearchSelect"}
-              resultType={"entity"}
-              value={selectedEntity}
-              onChange={setSelectedEntity}
-            />
-          </ModalBody>
+                <SearchSelect
+                  id={"entitySearchSelect"}
+                  resultType={"entity"}
+                  value={selectedEntity}
+                  onChange={setSelectedEntity}
+                />
+              </Flex>
+            </Dialog.Body>
 
-          <ModalFooter p={"2"}>
-            <Button
-              colorScheme={"red"}
-              size={"sm"}
-              variant={"outline"}
-              rightIcon={<Icon name={"cross"} />}
-              onClick={onEntitiesClose}
-            >
-              Cancel
-            </Button>
+            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+              <Button
+                colorPalette={"red"}
+                size={"sm"}
+                rounded={"md"}
+                variant={"solid"}
+                onClick={() => setEntitiesOpen(false)}
+              >
+                Cancel
+                <Icon name={"cross"} />
+              </Button>
 
-            <Spacer />
+              <Spacer />
 
-            <Button
-              id={"addEntityDoneButton"}
-              colorScheme={"green"}
-              size={"sm"}
-              rightIcon={<Icon name={"check"} />}
-              onClick={() => {
-                // Add the Origin to the Entity
-                addEntities(selectedEntity);
-              }}
-            >
-              Done
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <Button
+                id={"addEntityDoneButton"}
+                colorPalette={"green"}
+                size={"sm"}
+                rounded={"md"}
+                onClick={() => {
+                  // Add the Origin to the Entity
+                  addEntities(selectedEntity);
+                }}
+              >
+                Done
+                <Icon name={"check"} />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
 
       {/* Information modal */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent px={"2"} gap={"0"} w={["xl", "2xl"]}>
-          <ModalHeader p={"2"}>Projects</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody p={"0"}>
-            <Flex direction={"column"} gap={"2"} p={"2"}>
-              <Text fontSize={"sm"}>
-                Projects can be used to organize and share Entities.
-              </Text>
-              <Text fontSize={"sm"}>
-                Any type of Entity can be included in a Project. Entities can be
-                added and removed from a Project after it has been created.
-              </Text>
+      <Dialog.Root
+        open={informationOpen}
+        onOpenChange={(event) => setInformationOpen(event.open)}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Trigger />
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.CloseTrigger asChild>
+              <IconButton
+                bg={"white"}
+                _hover={{ bg: "gray.200" }}
+                variant={"subtle"}
+                color={"black"}
+                onClick={() => setInformationOpen(false)}
+              >
+                <Icon name={"close"} />
+              </IconButton>
+            </Dialog.CloseTrigger>
+            <Dialog.Header
+              p={"2"}
+              mt={"2"}
+              fontWeight={"semibold"}
+              fontSize={"md"}
+            >
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"project"} size={"sm"} />
+                Projects
+              </Flex>
+            </Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"}>
+                  Projects can be used to organize and share Entities.
+                </Text>
+                <Text fontSize={"sm"}>
+                  Any type of Entity can be included in a Project. Entities can
+                  be added and removed from a Project after it has been created.
+                </Text>
 
-              <Heading size={"sm"}>Name</Heading>
-              <Text fontSize={"sm"}>
-                Specify the name of a Project. This should be unique and will
-                act as a searchable identifier.
-              </Text>
+                <Heading size={"sm"}>Name</Heading>
+                <Text fontSize={"sm"}>
+                  Specify the name of a Project. This should be unique and will
+                  act as a searchable identifier.
+                </Text>
 
-              <Heading size={"sm"}>Date Created or Started</Heading>
-              <Text fontSize={"sm"}>
-                A timestamp assigned to the Project. For example, if this is a
-                set of Entities used in a specific experiment, this date could
-                represent when work on the experiment commenced. Otherwise, this
-                timestamp may simply represent when this Project was created in
-                Metadatify.
-              </Text>
+                <Heading size={"sm"}>Date Created or Started</Heading>
+                <Text fontSize={"sm"}>
+                  A timestamp assigned to the Project. For example, if this is a
+                  set of Entities used in a specific experiment, this date could
+                  represent when work on the experiment commenced. Otherwise,
+                  this timestamp may simply represent when this Project was
+                  created in Metadatify.
+                </Text>
 
-              <Heading size={"sm"}>Description</Heading>
-              <Text fontSize={"sm"}>
-                A brief description of the Project contents.
-              </Text>
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+                <Heading size={"sm"}>Description</Heading>
+                <Text fontSize={"sm"}>
+                  A brief description of the Project contents.
+                </Text>
+              </Flex>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
 
       {/* Blocker warning message */}
       <UnsavedChangesModal

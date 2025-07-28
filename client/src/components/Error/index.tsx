@@ -55,11 +55,14 @@ const Error = () => {
         </Flex>
 
         <Button
-          rightIcon={<Icon name={"reload"} />}
           onClick={() => navigate(0)}
           size={"sm"}
+          rounded={"md"}
+          variant={"subtle"}
+          colorPalette={"red"}
         >
           Reload Page
+          <Icon name={"reload"} />
         </Button>
       </Flex>
     </Flex>

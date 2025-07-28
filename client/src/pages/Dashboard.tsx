@@ -6,24 +6,17 @@ import {
   Flex,
   Heading,
   Text,
-  useToast,
-  useBreakpoint,
   Tag,
-  VStack,
   Avatar,
-  Tooltip,
-  StatGroup,
   Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
   Spacer,
   Link,
-  useDisclosure,
-  Collapse,
+  Collapsible,
+  Badge,
+  Stack,
+  EmptyState,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -31,6 +24,8 @@ import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 import Joyride, { ACTIONS, CallBackProps, EVENTS } from "react-joyride";
 
 // Existing and custom types
@@ -56,9 +51,10 @@ import { useNavigate } from "react-router-dom";
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
 
-// Contexts
+// Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -118,9 +114,6 @@ const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
 
-  // Toast to show errors
-  const toast = useToast();
-
   // Workspace context
   const { workspace } = useWorkspace();
   const { token, setToken } = useAuthentication();
@@ -149,7 +142,29 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
-  const { isOpen, onToggle } = useDisclosure();
+  const [openStats, setOpenStats] = useState(false);
+
+  // Use custom breakpoint hook
+  const { breakpoint } = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({
+    description: true,
+    attributes: true,
+    created: true,
+  });
+
+  // Column filters state for entity table
+  const [entityColumnFilters, setEntityColumnFilters] =
+    useState<ColumnFiltersState>([]);
+
+  // Update column visibility when breakpoint changes
+  useEffect(() => {
+    const isMobile = breakpoint === "base" || breakpoint === "sm";
+    setVisibleColumns({
+      description: !isMobile,
+      attributes: !isMobile,
+      created: !isMobile,
+    });
+  }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
@@ -200,31 +215,15 @@ const Dashboard = () => {
   useEffect(() => {
     if (error) {
       // Raised GraphQL error
-      toast({
+      toaster.create({
         title: "Error",
         description: "Could not retrieve data for Dashboard",
-        status: "error",
+        type: "error",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
-
-  // Effect to adjust column visibility
-  const breakpoint = useBreakpoint({ ssr: false });
-  const [visibleColumns, setVisibleColumns] = useState({});
-  useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
-      _.isUndefined(breakpoint)
-    ) {
-      setVisibleColumns({ description: false, attributes: false });
-    } else {
-      setVisibleColumns({});
-    }
-  }, [breakpoint]);
 
   // Configure Entity table
   const entityTableData: {
@@ -237,8 +236,8 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip label={info.getValue()} placement={"top"}>
-          <Text noOfLines={1} fontWeight={"semibold"}>
+        <Tooltip content={info.getValue()}>
+          <Text lineClamp={1} fontWeight={"semibold"}>
             {_.truncate(info.getValue(), { length: 24 })}
           </Text>
         </Tooltip>
@@ -248,15 +247,18 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            content={info.getValue()}
+            disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -268,9 +270,17 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("attributes", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
-        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Attributes",
       enableHiding: true,
@@ -290,10 +300,14 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -309,10 +323,14 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("name", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
-          <Text noOfLines={1} fontWeight={"semibold"}>
+          <Text lineClamp={1} fontWeight={"semibold"}>
             {info.getValue()}
           </Text>
         );
@@ -322,15 +340,18 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>No Description</Tag.Label>
+            </Tag.Root>
+          );
         }
         return (
           <Tooltip
-            label={info.getValue()}
-            placement={"top"}
-            isDisabled={info.getValue().length < 30}
+            content={info.getValue()}
+            disabled={info.getValue().length < 30}
           >
-            <Text noOfLines={1}>
+            <Text lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -342,9 +363,17 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("entities", {
       cell: (info) => {
         if (_.isEqual(info.getValue().length, 0)) {
-          return <Tag colorScheme={"orange"}>None</Tag>;
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
         }
-        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+        return (
+          <Tag.Root colorPalette={"green"}>
+            <Tag.Label>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
+        );
       },
       header: "Entities",
       enableHiding: true,
@@ -353,10 +382,14 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
-              <Text fontWeight={"semibold"}>View</Text>
+            <Link
+              color={"black"}
+              fontWeight={"semibold"}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
+            >
+              View
+              <Icon name={"a_right"} />
             </Link>
-            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -461,7 +494,7 @@ const Dashboard = () => {
             <Flex direction={"column"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
                 <Icon name={"dashboard"} size={"md"} />
-                <Heading size={"lg"}>Dashboard</Heading>
+                <Heading size={"xl"}>Dashboard</Heading>
               </Flex>
               <Flex direction={"column"} gap={"1"}>
                 {/* Display last update when on desktop */}
@@ -484,77 +517,94 @@ const Dashboard = () => {
                   </Flex>
                 )}
                 {/* Display toggle for stats */}
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link onClick={onToggle}>
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.700"}
-                    >
-                      {isOpen ? "Hide" : "Show"} stats{" "}
-                    </Text>
-                  </Link>
-                  <Icon name={isOpen ? "c_up" : "c_down"} size={"xs"} />
-                </Flex>
               </Flex>
             </Flex>
             <Spacer />
             <Flex>
-              <ActorTag orcid={token.orcid} fallback={"Unknown User"} />
+              <ActorTag
+                orcid={token.orcid}
+                fallback={"Unknown User"}
+                size={"md"}
+              />
             </Flex>
           </Flex>
 
-          <Collapse in={isOpen} animateOpacity>
-            <Flex
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              basis={"30%"}
-              align={"center"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <StatGroup w={"100%"}>
-                <Stat>
-                  <StatLabel>Total Workspace Entities</StatLabel>
-                  <StatNumber>{entityMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {entityMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {entityMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
-
-                <Stat>
-                  <StatLabel>Total Workspace Projects</StatLabel>
-                  <StatNumber>{projectMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {projectMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {projectMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
-
-                <Stat>
-                  <StatLabel>Total Workspace Templates</StatLabel>
-                  <StatNumber>{templateMetrics.all}</StatNumber>
-                  <StatHelpText>
-                    {templateMetrics.addedDay > 0 && (
-                      <StatArrow type={"increase"} />
-                    )}
-                    {templateMetrics.addedDay} in last 24 hours
-                  </StatHelpText>
-                </Stat>
-
-                <Stat>
-                  <StatLabel>Total Workspace Collaborators</StatLabel>
-                  <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
-                </Stat>
-              </StatGroup>
+          <Collapsible.Root onOpenChange={(event) => setOpenStats(event.open)}>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Collapsible.Trigger>
+                <Link
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.700"}
+                >
+                  {openStats ? "Hide" : "Show"} stats{" "}
+                </Link>
+              </Collapsible.Trigger>
+              <Icon name={openStats ? "c_up" : "c_down"} size={"xs"} />
             </Flex>
-          </Collapse>
+
+            <Collapsible.Content>
+              <Flex
+                p={"2"}
+                gap={"2"}
+                rounded={"md"}
+                basis={"30%"}
+                align={"center"}
+                border={"1px solid"}
+                borderColor={"gray.300"}
+              >
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Entities</Stat.Label>
+                  <Stat.ValueText>{entityMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
+                  >
+                    {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {entityMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Projects</Stat.Label>
+                  <Stat.ValueText>{projectMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={
+                      projectMetrics.addedDay > 0 ? "green" : "gray"
+                    }
+                  >
+                    {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {projectMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Templates</Stat.Label>
+                  <Stat.ValueText>{templateMetrics.all}</Stat.ValueText>
+                  <Badge
+                    px={"0"}
+                    variant={"plain"}
+                    colorPalette={
+                      templateMetrics.addedDay > 0 ? "green" : "gray"
+                    }
+                  >
+                    {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                    {templateMetrics.addedDay} in last 24 hours
+                  </Badge>
+                </Stat.Root>
+
+                <Stat.Root>
+                  <Stat.Label>Total Workspace Collaborators</Stat.Label>
+                  <Stat.ValueText>
+                    {workspaceMetrics.collaborators}
+                  </Stat.ValueText>
+                </Stat.Root>
+              </Flex>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </Flex>
 
         <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
@@ -566,13 +616,13 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"project"} size={"md"} />
-                <Heading size={"md"}>Recent Projects</Heading>
+                <Heading size={"lg"}>Recent Projects</Heading>
               </Flex>
 
               {/* Projects table */}
@@ -588,28 +638,26 @@ const Dashboard = () => {
 
               {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(projectData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Projects.
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"project"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Projects</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
 
               <Flex justify={"right"}>
                 <Button
                   key={`view-projects-all`}
                   size={"sm"}
-                  colorScheme={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
+                  rounded={"md"}
+                  colorPalette={"blue"}
                   onClick={() => navigate(`/projects`)}
                 >
                   All Projects
+                  <Icon name={"c_right"} />
                 </Button>
               </Flex>
             </Flex>
@@ -620,13 +668,13 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"2"}
-              border={"1px"}
+              border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"entity"} size={"md"} />
-                <Heading size={"md"}>Recent Entities</Heading>
+                <Heading size={"lg"}>Recent Entities</Heading>
               </Flex>
 
               {/* Entities table */}
@@ -641,33 +689,33 @@ const Dashboard = () => {
                   )}
                   visibleColumns={visibleColumns}
                   selectedRows={{}}
+                  columnFilters={entityColumnFilters}
+                  onColumnFiltersChange={setEntityColumnFilters}
                 />
               )}
 
               {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(entityData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Entities.
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"entity"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Entities</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
 
               <Flex justify={"right"}>
                 <Button
                   key={`view-entity-all`}
                   size={"sm"}
-                  colorScheme={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
+                  rounded={"md"}
+                  colorPalette={"blue"}
                   onClick={() => navigate(`/entities`)}
                 >
                   All Entities
+                  <Icon name={"c_right"} />
                 </Button>
               </Flex>
             </Flex>
@@ -681,7 +729,7 @@ const Dashboard = () => {
             gap={"2"}
             grow={"1"}
             rounded={"md"}
-            border={"1px"}
+            border={"1px solid"}
             borderColor={"gray.300"}
             h={"fit-content"}
           >
@@ -693,15 +741,15 @@ const Dashboard = () => {
               my={"2"}
             >
               <Icon name={"activity"} size={"md"} />
-              <Heading size={"md"} color={"gray.700"}>
+              <Heading size={"lg"} color={"gray.700"}>
                 Recent Activity
               </Heading>
             </Flex>
 
             {/* Activity list */}
             {activityData.length > 0 ? (
-              <Flex p={"0"} w={"100%"} overflowY={"auto"}>
-                <VStack spacing={"3"} w={"95%"}>
+              <Flex py={"2"} w={"100%"} h={"auto"} overflowY={"auto"}>
+                <Stack gap={"3"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
                       <Flex
@@ -711,8 +759,14 @@ const Dashboard = () => {
                         key={`activity-${activity._id}`}
                         align={"center"}
                       >
-                        <Tooltip label={activity.actor} hasArrow>
-                          <Avatar name={activity.actor} size={"sm"} />
+                        <Tooltip content={activity.actor} showArrow>
+                          <Avatar.Root
+                            size={"sm"}
+                            key={activity.actor}
+                            colorPalette={"blue"}
+                          >
+                            <Avatar.Fallback name={activity.actor} />
+                          </Avatar.Root>
                         </Tooltip>
                         <Flex direction={"column"} w={"100%"}>
                           <Flex direction={"row"} gap={"1"}>
@@ -740,20 +794,19 @@ const Dashboard = () => {
                       </Flex>
                     );
                   })}
-                </VStack>
+                </Stack>
               </Flex>
             ) : (
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={"200px"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No Activity yet.
-                </Text>
-              </Flex>
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"activity"} size={"lg"} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>
+                    No recent Activity.
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
             )}
           </Flex>
         </Flex>

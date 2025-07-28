@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 // Existing and custom components
-import { Button, Flex, Text, Tooltip, useToast } from "@chakra-ui/react";
+import { Button, Flex, Text } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -15,6 +15,8 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
 import { EntityNode, IRelationship } from "@types";
@@ -28,8 +30,6 @@ const Graph = (props: {
   id: string;
   entityNavigateHook: (id: string) => void;
 }) => {
-  const toast = useToast();
-
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -81,13 +81,12 @@ const Graph = (props: {
   const setupGraph = async () => {
     const entity = await getEntityData(props.id);
     if (error) {
-      toast({
+      toaster.create({
         title: "Graph Error",
-        status: "error",
+        type: "error",
         description: "Could not setup initial Entity node.",
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     } else {
       const initialNodes = [] as Node[];
@@ -284,7 +283,7 @@ const Graph = (props: {
           align={"center"}
         >
           <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
-          <Tooltip key={`tooltip_${id}`} label={name}>
+          <Tooltip key={`tooltip_${id}`} content={name}>
             <Text
               key={`inner_label_text_${id}`}
               fontWeight={"semibold"}
@@ -306,12 +305,12 @@ const Graph = (props: {
           <Button
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
-            size={"xs"}
-            rightIcon={<Icon name={"a_right"} />}
-            isDisabled={isPrimary}
+            size={"2xs"}
+            disabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
           >
             View
+            <Icon name={"a_right"} />
           </Button>
         </Flex>
       </Flex>
@@ -405,28 +404,28 @@ const Graph = (props: {
           });
         }
 
-        if (!toast.isActive("toast-retrieved-relationships")) {
+        if (!toaster.isVisible("toast-retrieved-relationships")) {
           // Generate an update message
-          toast({
+          toaster.create({
             id: "toast-retrieved-relationships",
             title: "Retrieved relationships",
-            status: "success",
-            description: `Showing ${addedRelationshipCount} relationship${addedRelationshipCount > 1 ? "s" : ""} for Entity "${entity.name}"`,
+            type: "success",
+            description: `Showing ${addedRelationshipCount} relationship${
+              addedRelationshipCount > 1 ? "s" : ""
+            } for Entity "${entity.name}"`,
             duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
+            closable: true,
           });
         }
       } else {
-        if (!toast.isActive("toast-no-updates")) {
-          toast({
+        if (!toaster.isVisible("toast-no-updates")) {
+          toaster.create({
             id: "toast-no-updates",
             title: "No Updates",
-            status: "info",
+            type: "info",
             description: `All Entities related to "${entity.name}" are shown`,
             duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
+            closable: true,
           });
         }
       }
@@ -471,6 +470,7 @@ const Graph = (props: {
           fitView
         >
           <MiniMap
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             nodeStrokeColor={(node: any) => {
               // Check for defined custom colors
               if (node.style?.background) return node.style.background;
@@ -483,6 +483,7 @@ const Graph = (props: {
 
               return "#EEE";
             }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             nodeColor={(node: any) => {
               if (node.style?.background) return node.style.background;
 

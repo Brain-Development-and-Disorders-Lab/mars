@@ -1,6 +1,6 @@
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "^@components/(.*)$": "<rootDir>/src/components/$1",
@@ -14,5 +14,5 @@ module.exports = {
   transform: {
     "^.+\\.[t|j]sx?$": "babel-jest",
   },
-  setupFilesAfterEnv: ["./test/enzyme/setup.js"], // Update the path as needed
+  setupFilesAfterEnv: ["<rootDir>/test/setup.js"],
 };

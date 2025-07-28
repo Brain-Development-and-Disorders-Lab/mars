@@ -3,41 +3,26 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   Checkbox,
   CheckboxGroup,
+  CloseButton,
+  Dialog,
+  EmptyState,
+  Field,
+  Fieldset,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
+  ListCollection,
+  Portal,
   Select,
   Spacer,
   Stack,
-  Step,
-  StepDescription,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
+  Steps,
   Text,
-  VStack,
-  useBreakpoint,
+  createListCollection,
   useDisclosure,
-  useSteps,
-  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
@@ -47,6 +32,7 @@ import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
+import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -84,23 +70,19 @@ const Entity = () => {
     "start" as "start" | "attributes" | "relationships",
   );
 
+  // Page steps
   const pageSteps = [
     { title: "Start", description: "Basic information" },
     { title: "Relationships", description: "Relationships between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: pageSteps.length,
-  });
+  const [pageStep, setPageStep] = useState(0);
 
-  const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [informationOpen, setInformationOpen] = useState(false);
   const { token } = useAuthentication();
 
   // Navigation and routing
   const navigate = useNavigate();
-  const breakpoint = useBreakpoint();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     // Check if this is during the `create` mutation
     if (isSubmitting) {
@@ -113,8 +95,13 @@ const Entity = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
+  // Projects
   const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
+
+  // Templates collection
+  const [templatesCollection, setTemplatesCollection] = useState(
+    {} as ListCollection<AttributeModel>,
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -130,6 +117,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   // Manage relationships
+  const selectRelationshipTypeRef = useRef(null);
   const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState(
     {} as IGenericItem,
   );
@@ -214,7 +202,9 @@ const Entity = () => {
       setProjects(data.projects);
     }
     if (data?.templates) {
-      setTemplates(data.templates);
+      setTemplatesCollection(
+        createListCollection<AttributeModel>({ items: data.templates }),
+      );
     }
   }, [data]);
 
@@ -245,13 +235,12 @@ const Entity = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
+      toaster.create({
         title: "Error",
-        status: "error",
+        type: "error",
         description: error.message,
         duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        closable: true,
       });
     }
   }, [error]);
@@ -279,13 +268,13 @@ const Entity = () => {
       posthog.capture("create_entity_relationships");
 
       setPageState("relationships");
-      setActiveStep(1);
+      setPageStep(1);
     } else if (_.isEqual("relationships", pageState)) {
       // Capture event
       posthog.capture("create_entity_attributes");
 
       setPageState("attributes");
-      setActiveStep(2);
+      setPageStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       // Capture event
       posthog.capture("create_entity_finished");
@@ -304,13 +293,12 @@ const Entity = () => {
 
         if (incrementCounterError) {
           // Raise an error and cancel the create operation
-          toast({
+          toaster.create({
             title: "Error",
-            status: "error",
+            type: "error",
             description: incrementCounterError.message,
             duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
+            closable: true,
           });
           setIsSubmitting(false);
           return;
@@ -353,13 +341,13 @@ const Entity = () => {
       posthog.capture("create_entity_start");
 
       setPageState("start");
-      setActiveStep(0);
+      setPageStep(0);
     } else if (_.isEqual("attributes", pageState)) {
       // Capture event
       posthog.capture("create_entity_relationships");
 
       setPageState("relationships");
-      setActiveStep(1);
+      setPageStep(1);
     }
   };
 
@@ -431,39 +419,35 @@ const Entity = () => {
             <Spacer />
             <Button
               size={"sm"}
-              rightIcon={<Icon name={"info"} />}
+              rounded={"md"}
               variant={"outline"}
-              onClick={onOpen}
+              onClick={() => setInformationOpen(true)}
             >
               Info
+              <Icon name={"info"} />
             </Button>
           </Flex>
         </Flex>
 
         {/* Main pages */}
         {/* Stepper progress indicator */}
-        <Stepper index={activeStep} p={"2"} size={"sm"}>
-          {pageSteps.map((step, index) => (
-            <Step key={index}>
-              <StepIndicator>
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-
-              <Box flexShrink={"0"}>
-                <StepTitle>{step.title}</StepTitle>
-                {breakpoint !== "base" && (
-                  <StepDescription>{step.description}</StepDescription>
-                )}
-              </Box>
-
-              <StepSeparator />
-            </Step>
-          ))}
-        </Stepper>
+        <Steps.Root
+          step={pageStep}
+          colorPalette={"blue"}
+          onStepChange={(event) => setPageStep(event.step)}
+          count={pageSteps.length}
+          px={"2"}
+        >
+          <Steps.List>
+            {pageSteps.map((step, index) => (
+              <Steps.Item key={index} index={index} title={step.title}>
+                <Steps.Indicator />
+                <Steps.Title>{step.title}</Steps.Title>
+                <Steps.Separator />
+              </Steps.Item>
+            ))}
+          </Steps.List>
+        </Steps.Root>
 
         {/* "Start" page */}
         {_.isEqual("start", pageState) && (
@@ -481,81 +465,90 @@ const Entity = () => {
                 direction={"column"}
                 p={"2"}
                 gap={"2"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                <FormControl
-                  isRequired
-                  isInvalid={isNameError || !isNameUnique}
-                >
-                  <FormLabel fontSize={"sm"}>Name</FormLabel>
-                  <Flex gap={"2"} justify={"space-between"}>
-                    {useCounter ? (
-                      <CounterSelect
-                        counter={counter}
-                        setCounter={setCounter}
-                        showCreate
-                      />
-                    ) : (
-                      <Flex w={"100%"}>
-                        <Input
-                          name={"name"}
-                          value={name}
-                          placeholder={"Name"}
-                          size={"sm"}
-                          rounded={"md"}
-                          onChange={(event) => {
-                            setName(event.target.value);
-                            checkEntityName(event.target.value);
-                          }}
-                        />
+                <Fieldset.Root invalid={isNameError || !isNameUnique}>
+                  <Fieldset.Content>
+                    <Field.Root required>
+                      <Field.Label>
+                        Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Flex gap={"2"} justify={"space-between"}>
+                        {useCounter ? (
+                          <CounterSelect
+                            counter={counter}
+                            setCounter={setCounter}
+                            showCreate
+                          />
+                        ) : (
+                          <Flex w={"100%"}>
+                            <Input
+                              name={"name"}
+                              value={name}
+                              placeholder={"Name"}
+                              size={"sm"}
+                              minW={"240px"}
+                              rounded={"md"}
+                              onChange={(event) => {
+                                setName(event.target.value);
+                                checkEntityName(event.target.value);
+                              }}
+                            />
+                          </Flex>
+                        )}
+                        <Flex>
+                          <Button
+                            size={"sm"}
+                            rounded={"md"}
+                            onClick={() => {
+                              setUseCounter(!useCounter);
+
+                              // Reset the stored name and counter
+                              setName("");
+                              setCounter("");
+                            }}
+                            colorPalette={"blue"}
+                          >
+                            Use {useCounter ? "Text" : "Counter"}
+                          </Button>
+                        </Flex>
                       </Flex>
-                    )}
-                    <Flex>
-                      <Button
+                      {(isNameError || !isNameUnique) && !useCounter && (
+                        <Field.ErrorText>
+                          A name or ID must be specified and unique.
+                        </Field.ErrorText>
+                      )}
+                      {(isNameError || !isNameUnique) && useCounter && (
+                        <Field.ErrorText>
+                          A Counter must be selected or created.
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    <Field.Root invalid={isDateError} required>
+                      <Field.Label>
+                        Created
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        placeholder={"Select Date and Time"}
                         size={"sm"}
-                        onClick={() => {
-                          setUseCounter(!useCounter);
-
-                          // Reset the stored name and counter
-                          setName("");
-                          setCounter("");
-                        }}
-                        colorScheme={"blue"}
-                      >
-                        Use {useCounter ? "Text" : "Counter"}
-                      </Button>
-                    </Flex>
-                  </Flex>
-                  {(isNameError || !isNameUnique) && !useCounter && (
-                    <FormErrorMessage fontSize={"sm"}>
-                      A name or ID must be specified and unique.
-                    </FormErrorMessage>
-                  )}
-                  {(isNameError || !isNameUnique) && useCounter && (
-                    <FormErrorMessage fontSize={"sm"}>
-                      A Counter must be selected or created.
-                    </FormErrorMessage>
-                  )}
-                </FormControl>
-
-                <FormControl isInvalid={isDateError}>
-                  <FormLabel fontSize={"sm"}>Created</FormLabel>
-                  <Input
-                    placeholder={"Select Date and Time"}
-                    size={"sm"}
-                    rounded={"md"}
-                    type={"date"}
-                    value={created}
-                    onChange={(event) => setCreated(event.target.value)}
-                  />
-                  {isDateError && (
-                    <FormErrorMessage fontSize={"sm"}>
-                      A created date must be specified.
-                    </FormErrorMessage>
-                  )}
-                </FormControl>
+                        rounded={"md"}
+                        type={"date"}
+                        value={created}
+                        onChange={(event) => setCreated(event.target.value)}
+                      />
+                      {isDateError && (
+                        <Field.ErrorText>
+                          A created date must be specified.
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
             </Flex>
 
@@ -574,25 +567,29 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 {/* Description */}
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Description</FormLabel>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    style={{ width: "100%" }}
-                    value={description}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setDescription(value || "");
-                    }}
-                  />
-                </FormControl>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>Description</Field.Label>
+                      <MDEditor
+                        height={150}
+                        minHeight={100}
+                        maxHeight={400}
+                        style={{ width: "100%" }}
+                        value={description}
+                        preview={"edit"}
+                        extraCommands={[]}
+                        onChange={(value) => {
+                          setDescription(value || "");
+                        }}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
             </Flex>
           </Flex>
@@ -616,58 +613,97 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Relationships</FormLabel>
-                  <Flex direction={"row"} gap={"2"} justify={"space-between"}>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Flex>
-                        <Select size={"sm"} rounded={"md"} isDisabled>
-                          <option>{name}</option>
-                        </Select>
-                      </Flex>
-                      <Flex>
-                        <Select
-                          size={"sm"}
-                          rounded={"md"}
-                          value={selectedRelationshipType}
-                          onChange={(event) =>
-                            setSelectedRelationshipType(
-                              event.target.value as RelationshipType,
-                            )
-                          }
-                        >
-                          <option value={"general"}>General</option>
-                          <option value={"parent"}>Parent</option>
-                          <option value={"child"}>Child</option>
-                        </Select>
-                      </Flex>
-                      <Flex>
-                        <SearchSelect
-                          id={"relationshipTargetSelect"}
-                          resultType={"entity"}
-                          value={selectedRelationshipTarget}
-                          onChange={setSelectedRelationshipTarget}
-                        />
-                      </Flex>
-                    </Flex>
-                    <Button
-                      rightIcon={<Icon name={"add"} />}
-                      colorScheme={"green"}
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  justify={"space-between"}
+                  p={"2"}
+                  align={"end"}
+                >
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Source
+                    </Text>
+                    <Input
                       size={"sm"}
-                      isDisabled={_.isUndefined(selectedRelationshipTarget._id)}
-                      onClick={() => addRelationship()}
-                    >
-                      Add
-                    </Button>
+                      rounded={"md"}
+                      value={name}
+                      readOnly
+                      disabled
+                    />
                   </Flex>
-                  <FormHelperText fontSize={"sm"}>
-                    Create relationships between this Entity and other existing
-                    Entities.
-                  </FormHelperText>
-                </FormControl>
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Type
+                    </Text>
+                    <Select.Root
+                      key={"select-relationship-type"}
+                      size={"sm"}
+                      collection={createListCollection({
+                        items: ["General", "Parent", "Child"],
+                      })}
+                      onValueChange={(details) => {
+                        setSelectedRelationshipType(
+                          details.items[0].toLowerCase() as RelationshipType,
+                        );
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger
+                          data-testid={"select-relationship-type"}
+                        >
+                          <Select.ValueText
+                            placeholder={"Select Relationship Type"}
+                          />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal container={selectRelationshipTypeRef}>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {createListCollection({
+                              items: ["General", "Parent", "Child"],
+                            }).items.map((relationship) => (
+                              <Select.Item
+                                item={relationship}
+                                key={relationship}
+                              >
+                                {relationship}
+                                <Select.ItemIndicator />
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"} w={"33%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Target
+                    </Text>
+                    <SearchSelect
+                      resultType={"entity"}
+                      value={selectedRelationshipTarget}
+                      onChange={setSelectedRelationshipTarget}
+                    />
+                  </Flex>
+                  <Button
+                    colorPalette={"green"}
+                    size={"sm"}
+                    rounded={"md"}
+                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
+                    onClick={() => addRelationship()}
+                  >
+                    Add
+                    <Icon name={"add"} />
+                  </Button>
+                </Flex>
 
                 {relationships.length > 0 ? (
                   <Relationships
@@ -676,20 +712,16 @@ const Entity = () => {
                     viewOnly={false}
                   />
                 ) : (
-                  <Flex
-                    w={"100%"}
-                    minH={"200px"}
-                    align={"center"}
-                    justify={"center"}
-                  >
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.400"}
-                    >
-                      No Relationships
-                    </Text>
-                  </Flex>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"graph"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>
+                        No Relationships
+                      </EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 )}
               </Flex>
             </Flex>
@@ -710,45 +742,56 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Projects</FormLabel>
+                <Fieldset.Root>
                   <CheckboxGroup
                     size={"sm"}
                     value={selectedProjects}
-                    onChange={(event: string[]) => {
+                    onValueChange={(event: string[]) => {
                       if (event) {
                         setSelectedProjects([...event]);
                       }
                     }}
                   >
-                    <Stack spacing={[1, 5]} direction={"column"}>
-                      {projects.map((project) => {
-                        return (
-                          <Checkbox key={project._id} value={project._id}>
-                            {project.name}
-                          </Checkbox>
-                        );
-                      })}
-                      {projects.length === 0 && (
-                        <Text
-                          fontWeight={"semibold"}
-                          color={"gray.400"}
-                          fontSize={"sm"}
-                        >
-                          No Projects.
-                        </Text>
-                      )}
-                    </Stack>
+                    <Fieldset.Legend>Projects</Fieldset.Legend>
+                    <Fieldset.Content>
+                      <Stack gap={[1, 5]} direction={"column"}>
+                        {projects.map((project) => {
+                          return (
+                            <Checkbox.Root
+                              key={project._id}
+                              value={project._id}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label>{project.name}</Checkbox.Label>
+                            </Checkbox.Root>
+                          );
+                        })}
+                        {projects.length === 0 && (
+                          <EmptyState.Root>
+                            <EmptyState.Content>
+                              <EmptyState.Indicator>
+                                <Icon name={"project"} size={"lg"} />
+                              </EmptyState.Indicator>
+                              <EmptyState.Description>
+                                No Projects
+                              </EmptyState.Description>
+                            </EmptyState.Content>
+                          </EmptyState.Root>
+                        )}
+                      </Stack>
+
+                      <Fieldset.HelperText>
+                        Specify the Projects that this new Entity should be
+                        included with. The Entity will then be contained within
+                        the specified Projects.
+                      </Fieldset.HelperText>
+                    </Fieldset.Content>
                   </CheckboxGroup>
-                  <FormHelperText fontSize={"sm"}>
-                    Specify the Projects that this new Entity should be included
-                    with. The Entity will then be contained within the specified
-                    Projects.
-                  </FormHelperText>
-                </FormControl>
+                </Fieldset.Root>
               </Flex>
             </Flex>
           </Flex>
@@ -775,7 +818,7 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={"1px"}
+                border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
@@ -783,54 +826,79 @@ const Entity = () => {
                     Select Template:
                   </Text>
                   {/* Drop-down to select Templates */}
-                  <FormControl maxW={"sm"}>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Template"}
-                      isDisabled={templates.length === 0}
-                      onChange={(event) => {
-                        if (!_.isEqual(event.target.value.toString(), "")) {
-                          for (const template of templates) {
-                            if (
-                              _.isEqual(
-                                event.target.value.toString(),
-                                template._id,
-                              )
-                            ) {
-                              setSelectedAttributes([
-                                ...selectedAttributes,
-                                {
-                                  _id: `a-${nanoid(6)}`,
-                                  name: template.name,
-                                  timestamp: template.timestamp,
-                                  owner: template.owner,
-                                  archived: false,
-                                  description: template.description,
-                                  values: template.values,
-                                },
-                              ]);
-                              break;
+                  <Fieldset.Root maxW={"sm"}>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Select.Root
+                          key={"select-template"}
+                          size={"sm"}
+                          collection={templatesCollection}
+                          onValueChange={(details) => {
+                            const selectedTemplate = details.items[0];
+                            if (!_.isEqual(selectedTemplate._id, "")) {
+                              for (const template of templatesCollection.items) {
+                                if (
+                                  _.isEqual(selectedTemplate._id, template._id)
+                                ) {
+                                  setSelectedAttributes([
+                                    ...selectedAttributes,
+                                    {
+                                      _id: `a-${nanoid(6)}`,
+                                      name: template.name,
+                                      timestamp: template.timestamp,
+                                      owner: template.owner,
+                                      archived: false,
+                                      description: template.description,
+                                      values: template.values,
+                                    },
+                                  ]);
+                                  break;
+                                }
+                              }
                             }
-                          }
-                        }
-                      }}
-                    >
-                      {templates.map((template) => {
-                        return (
-                          <option key={template._id} value={template._id}>
-                            {template.name}
-                          </option>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
+                          }}
+                          disabled={templatesCollection.items.length === 0}
+                        >
+                          <Select.HiddenSelect />
+                          <Select.Control>
+                            <Select.Trigger
+                              data-testid={"select-template-trigger"}
+                            >
+                              <Select.ValueText
+                                placeholder={"Select Template"}
+                              />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Portal>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {templatesCollection.items.map(
+                                  (template: AttributeModel) => (
+                                    <Select.Item
+                                      item={template}
+                                      key={template._id}
+                                    >
+                                      {template.name}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ),
+                                )}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Portal>
+                        </Select.Root>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
 
                 <Button
                   size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
-                  colorScheme={"green"}
+                  rounded={"md"}
+                  colorPalette={"green"}
                   onClick={() => {
                     // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                     setSelectedAttributes([
@@ -848,6 +916,7 @@ const Entity = () => {
                   }}
                 >
                   Create
+                  <Icon name={"add"} />
                 </Button>
               </Flex>
             </Flex>
@@ -860,7 +929,7 @@ const Entity = () => {
             >
               {/* Display all Attributes */}
               {selectedAttributes.length > 0 ? (
-                <VStack gap={"2"} w={"100%"}>
+                <Stack gap={"2"} w={"100%"}>
                   {selectedAttributes.map((attribute) => {
                     return (
                       <AttributeCard
@@ -877,52 +946,79 @@ const Entity = () => {
                       />
                     );
                   })}
-                </VStack>
+                </Stack>
               ) : (
-                <Flex w={"100%"} h={"100%"} align={"center"} justify={"center"}>
-                  <Text
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    color={"gray.400"}
-                  >
-                    No Attributes
-                  </Text>
-                </Flex>
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"attribute"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No Attributes
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
               )}
             </Flex>
           </Flex>
         )}
 
         {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
-            <ModalHeader p={"2"}>Entities</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"4"} p={"2"}>
-                <Heading size={"md"}>Overview</Heading>
-                <Text>
-                  Specify some basic details about this Entity. Relations
-                  between Entities and membership to Projects can be specified
-                  on the following page. Finally, the metadata associated with
-                  this Entity should be specified using Attributes and
-                  corresponding Values.
-                </Text>
-                <Heading size={"md"}>Relationships</Heading>
-                <Text>
-                  Relations between Entities and membership to Projects can be
-                  specified using Relationships.
-                </Text>
-                <Heading size={"md"}>Attributes</Heading>
-                <Text>
-                  The metadata associated with this Entity should be specified
-                  using Attributes and corresponding Values.
-                </Text>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <Dialog.Root
+          open={informationOpen}
+          onOpenChange={(event) => setInformationOpen(event.open)}
+          placement={"center"}
+          closeOnEscape
+          closeOnInteractOutside
+        >
+          <Dialog.Trigger />
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header
+                px={"2"}
+                py={"4"}
+                fontWeight={"semibold"}
+                roundedTop={"md"}
+                bg={"gray.100"}
+              >
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"entity"} size={"sm"} />
+                  Entities
+                </Flex>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setInformationOpen(false)}
+                    _hover={{ bg: "gray.200" }}
+                  />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Heading size={"sm"}>1. Start</Heading>
+                  <Text>
+                    Specify some basic details about this Entity. Relations
+                    between Entities and membership to Projects can be specified
+                    on the following page. Finally, the metadata associated with
+                    this Entity should be specified using Attributes and
+                    corresponding Values.
+                  </Text>
+                  <Heading size={"sm"}>2. Relationships</Heading>
+                  <Text>
+                    Relations between Entities and membership to Projects can be
+                    specified using Relationships.
+                  </Text>
+                  <Heading size={"sm"}>3. Attributes</Heading>
+                  <Text>
+                    The metadata associated with this Entity should be specified
+                    using Attributes and corresponding Values.
+                  </Text>
+                </Flex>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
       </Flex>
 
       {/* Place the action buttons at the bottom of the screen on desktop */}
@@ -942,41 +1038,41 @@ const Entity = () => {
         <Flex gap={"4"}>
           <Button
             size={"sm"}
-            colorScheme={"red"}
+            rounded={"md"}
+            colorPalette={"red"}
             variant={"outline"}
-            rightIcon={<Icon name={"cross"} />}
             onClick={() => navigate("/entities")}
           >
             Cancel
+            <Icon name={"cross"} />
           </Button>
           {!_.isEqual("start", pageState) && (
             <Button
               size={"sm"}
-              colorScheme={"orange"}
+              colorPalette={"orange"}
               variant={"outline"}
-              rightIcon={<Icon name={"c_left"} />}
               onClick={onPageBack}
             >
               Back
+              <Icon name={"c_left"} />
             </Button>
           )}
         </Flex>
 
         <Button
           size={"sm"}
-          colorScheme={_.isEqual("attributes", pageState) ? "green" : "blue"}
-          rightIcon={
-            _.isEqual("attributes", pageState) ? (
-              <Icon name={"check"} />
-            ) : (
-              <Icon name={"c_right"} />
-            )
-          }
+          rounded={"md"}
+          colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
           onClick={onPageNext}
-          isDisabled={!isValidInput() || isNameError}
-          isLoading={isSubmitting}
+          disabled={!isValidInput() || isNameError}
+          loading={isSubmitting}
         >
           {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
+          {_.isEqual("attributes", pageState) ? (
+            <Icon name={"check"} />
+          ) : (
+            <Icon name={"c_right"} />
+          )}
         </Button>
       </Flex>
 

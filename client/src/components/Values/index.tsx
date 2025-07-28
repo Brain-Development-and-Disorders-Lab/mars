@@ -1,52 +1,42 @@
 // React
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
   Button,
-  Divider,
+  CloseButton,
+  Dialog,
+  EmptyState,
+  Field,
+  Fieldset,
   Flex,
-  Heading,
   IconButton,
   Input,
   Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger,
-  ScaleFade,
+  Portal,
   Select,
+  Separator,
   Spacer,
+  Stack,
   Text,
-  Tooltip,
-  VStack,
-  useDisclosure,
-  useToast,
+  createListCollection,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, Row } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import Tooltip from "@components/Tooltip";
+import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { DataTableAction, IGenericItem, IValue } from "@types";
+import {
+  DataTableAction,
+  GenericValueType,
+  IGenericItem,
+  IValue,
+  IValueType,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -60,24 +50,70 @@ import dayjs from "dayjs";
  */
 const Values = (props: {
   viewOnly: boolean;
-  values: IValue<any>[];
-  setValues: Dispatch<SetStateAction<IValue<any>[]>>;
+  values: IValue<GenericValueType>[];
+  setValues: (value: React.SetStateAction<IValue<GenericValueType>[]>) => void;
   requireData?: true | false;
   permittedValues?: string[];
 }) => {
-  const toast = useToast();
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectOpen, setSelectOpen] = useState(false);
   const [option, setOption] = useState("");
-  const [options, setOptions] = useState([] as string[]);
+  const [options, setOptions] = useState<string[]>([]);
+  const [editingValueId, setEditingValueId] = useState<string | null>(null);
 
-  const columnHelper = createColumnHelper<IValue<any>>();
+  // Value type dropdown ref
+  const selectValueTypeRef = useRef(null);
+
+  const columnHelper = createColumnHelper<IValue<GenericValueType>>();
   const columns = useMemo(
     () => [
       // Value `type` column
       columnHelper.accessor("type", {
-        cell: ({ getValue }) => {
-          let valueType: string = getValue();
+        cell: ({ getValue, row: { index }, column: { id }, table }) => {
+          const initialValue = getValue();
+          const [valueType, setValueType] = useState<IValueType>(initialValue);
+
+          useEffect(() => {
+            setValueType(initialValue);
+          }, [initialValue]);
+
+          const onTypeChange = (value: string) => {
+            const typedValue = value as IValueType;
+            setValueType(typedValue);
+
+            // Update the type in the table
+            table.options.meta?.updateData(index, id, typedValue);
+
+            // Reset the data field based on the new type
+            let data: GenericValueType;
+            switch (typedValue) {
+              case "number":
+                data = 0;
+                break;
+              case "text":
+                data = "";
+                break;
+              case "url":
+                data = "";
+                break;
+              case "date":
+                data = dayjs(Date.now()).toISOString();
+                break;
+              case "entity":
+                data = "";
+                break;
+              case "select":
+                data = {
+                  selected: "",
+                  options: [] as IGenericItem[],
+                };
+                break;
+              default:
+                data = "";
+            }
+
+            // Update the data field
+            table.options.meta?.updateData(index, "data", data);
+          };
 
           // Setup icon for value type
           let typeIcon: React.ReactElement;
@@ -121,23 +157,91 @@ const Values = (props: {
             }
           }
 
-          // Apply casing
+          // Apply casing for display
+          let displayType: string;
           if (valueType === "url") {
-            valueType = _.upperCase(valueType);
+            displayType = _.upperCase(valueType);
           } else {
-            valueType = _.capitalize(valueType);
+            displayType = _.capitalize(valueType);
           }
 
-          return (
-            <Flex align={"center"} justify={"left"} gap={"2"} w={"100%"}>
-              <Flex>{typeIcon}</Flex>
-              <Text fontWeight={"semibold"} color={"gray.500"}>
-                {valueType}
-              </Text>
-            </Flex>
-          );
+          // Show dropdown in edit mode, otherwise show read-only display
+          if (!props.viewOnly) {
+            const typeOptions = [
+              { value: "number", label: "Number" },
+              { value: "text", label: "Text" },
+              { value: "url", label: "URL" },
+              { value: "date", label: "Date" },
+              { value: "entity", label: "Entity" },
+              { value: "select", label: "Select" },
+            ];
+
+            return (
+              <Flex
+                align={"center"}
+                justify={"left"}
+                gap={"3"}
+                w={"100%"}
+                minW={"140px"}
+              >
+                <Flex flexShrink={0}>{typeIcon}</Flex>
+                <Select.Root
+                  size={"sm"}
+                  collection={createListCollection<{
+                    value: string;
+                    label: string;
+                  }>({
+                    items: typeOptions,
+                  })}
+                  onValueChange={(details) =>
+                    onTypeChange(details.items[0].value)
+                  }
+                >
+                  <Select.HiddenSelect />
+                  <Select.Control>
+                    <Select.Trigger minW={"100px"}>
+                      <Select.ValueText placeholder={displayType} />
+                    </Select.Trigger>
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal container={selectValueTypeRef}>
+                    <Select.Positioner>
+                      <Select.Content zIndex={9999}>
+                        {typeOptions.map((option) => (
+                          <Select.Item item={option} key={option.value}>
+                            {option.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
+              </Flex>
+            );
+          } else {
+            return (
+              <Flex
+                align={"center"}
+                justify={"left"}
+                gap={"3"}
+                w={"100%"}
+                minW={"140px"}
+              >
+                <Flex flexShrink={0}>{typeIcon}</Flex>
+                <Text fontWeight={"semibold"} color={"gray.500"}>
+                  {displayType}
+                </Text>
+              </Flex>
+            );
+          }
         },
         header: "Type",
+        size: 160,
+        minSize: 160,
+        maxSize: 160,
       }),
 
       // Value `name` column
@@ -154,7 +258,7 @@ const Values = (props: {
             setValue(initialValue);
           }, [initialValue]);
 
-          const onChange = (event: any) => {
+          const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             setValue(event.target.value);
           };
 
@@ -163,19 +267,27 @@ const Values = (props: {
           };
 
           return (
-            <Input
-              id={`i_${original._id}_name`}
-              value={value}
-              isReadOnly={props.viewOnly}
-              onChange={onChange}
-              onBlur={onBlur}
-              size={"sm"}
-              rounded={"md"}
-              isInvalid={_.isEqual(value, "")}
-            />
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root invalid={_.isEqual(value, "")}>
+                  <Input
+                    id={`i_${original._id}_name`}
+                    value={value}
+                    readOnly={props.viewOnly}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    size={"sm"}
+                    rounded={"md"}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           );
         },
         header: "Name",
+        size: 200,
+        minSize: 200,
+        maxSize: 200,
       }),
 
       // Value `data` column
@@ -196,9 +308,9 @@ const Values = (props: {
            * Handle a Select change event
            * @param event change event data
            */
-          const onSelectChange = (event: any) => {
+          const onSelectChange = (value: GenericValueType) => {
             setValue({
-              selected: event.target.value,
+              selected: value,
               options: initialValue.options,
             });
           };
@@ -223,57 +335,80 @@ const Values = (props: {
             switch (original.type) {
               case "number": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    type={"number"}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    isReadOnly={props.viewOnly}
-                    onChange={(event) =>
-                      setValue(parseFloat(event.target.value))
-                    }
-                    onBlur={onBlur}
-                    isInvalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          type={"number"}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) =>
+                            setValue(parseFloat(event.target.value))
+                          }
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
               case "text": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    isReadOnly={props.viewOnly}
-                    onChange={(event) => setValue(event.target.value)}
-                    onBlur={onBlur}
-                    isInvalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) => setValue(event.target.value)}
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
               case "url": {
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
-                    <Input
-                      id={`i_${original._id}_data`}
-                      value={value}
-                      size={"sm"}
-                      rounded={"md"}
-                      isReadOnly={props.viewOnly}
-                      onChange={(event) => setValue(event.target.value)}
-                      onBlur={onBlur}
-                      isInvalid={
-                        _.isEqual(value, "") &&
-                        _.isEqual(props.requireData, true)
-                      }
-                    />
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root
+                          invalid={
+                            _.isEqual(value, "") &&
+                            _.isEqual(props.requireData, true)
+                          }
+                        >
+                          <Input
+                            id={`i_${original._id}_data`}
+                            value={value}
+                            size={"sm"}
+                            rounded={"md"}
+                            readOnly={props.viewOnly}
+                            onChange={(event) => setValue(event.target.value)}
+                            onBlur={onBlur}
+                          />
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   );
                 } else {
                   // Setup Link display depending on destination URL
@@ -318,7 +453,7 @@ const Values = (props: {
                       linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
                     }
                     validLink = true;
-                  } catch (error) {
+                  } catch {
                     linkTextColor = "orange.700";
                     linkBgColor = "orange.300";
                     linkLogo = <Icon name={"warning"} />;
@@ -327,7 +462,7 @@ const Values = (props: {
                   }
 
                   dataInput = (
-                    <Tooltip label={tooltipText} hasArrow>
+                    <Tooltip content={tooltipText} showArrow>
                       <Flex
                         direction={"row"}
                         align={"center"}
@@ -343,7 +478,12 @@ const Values = (props: {
                       >
                         {linkLogo}
                         {validLink ? (
-                          <Link href={value} isExternal noOfLines={1}>
+                          <Link
+                            href={value}
+                            lineClamp={1}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <Text>{shortenedUrl}</Text>
                           </Link>
                         ) : (
@@ -358,19 +498,27 @@ const Values = (props: {
               }
               case "date": {
                 dataInput = (
-                  <Input
-                    id={`i_${original._id}_data`}
-                    type={"date"}
-                    value={value}
-                    size={"sm"}
-                    rounded={"md"}
-                    isReadOnly={props.viewOnly}
-                    onChange={(event) => setValue(event.target.value)}
-                    onBlur={onBlur}
-                    isInvalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  />
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root
+                        invalid={
+                          _.isEqual(value, "") &&
+                          _.isEqual(props.requireData, true)
+                        }
+                      >
+                        <Input
+                          id={`i_${original._id}_data`}
+                          type={"date"}
+                          value={value}
+                          size={"sm"}
+                          rounded={"md"}
+                          readOnly={props.viewOnly}
+                          onChange={(event) => setValue(event.target.value)}
+                          onBlur={onBlur}
+                        />
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 );
                 break;
               }
@@ -382,7 +530,7 @@ const Values = (props: {
                       resultType={"entity"}
                       value={value}
                       onChange={onSearchSelectChange}
-                      isDisabled={props.viewOnly}
+                      disabled={props.viewOnly}
                     />
                   );
                 } else {
@@ -395,57 +543,107 @@ const Values = (props: {
                 break;
               }
               case "select": {
-                dataInput = (
-                  <Select
-                    title="Select Option"
-                    id={`s_${original._id}_data`}
-                    value={value.selected}
-                    size={"sm"}
-                    rounded={"md"}
-                    isDisabled={props.viewOnly}
-                    onChange={onSelectChange}
-                    onBlur={onBlur}
-                    isInvalid={
-                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                    }
-                  >
-                    {value.options &&
-                      value.options.map((value: string) => {
-                        return (
-                          <option key={value} value={value}>
-                            {value}
-                          </option>
-                        );
+                if (value.options && value.options.length > 0) {
+                  // Show dropdown when options exist
+                  dataInput = (
+                    <Select.Root
+                      key={"select-option"}
+                      size={"sm"}
+                      invalid={
+                        _.isEqual(value, "") &&
+                        _.isEqual(props.requireData, true)
+                      }
+                      collection={createListCollection<IGenericItem>({
+                        items: value.options || [],
                       })}
-                  </Select>
-                );
+                      onValueChange={(details) =>
+                        onSelectChange(details.items[0])
+                      }
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger>
+                          <Select.ValueText placeholder={"Select Option"} />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal>
+                        <Select.Positioner>
+                          <Select.Content zIndex={9999}>
+                            {(value.options || []).map(
+                              (option: IGenericItem) => (
+                                <Select.Item item={option} key={option._id}>
+                                  {option.name}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ),
+                            )}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  );
+                } else {
+                  // Show "Add Options" button when no options exist
+                  dataInput = (
+                    <Button
+                      size={"sm"}
+                      variant={"solid"}
+                      colorPalette={"green"}
+                      rounded={"md"}
+                      onClick={() => {
+                        setEditingValueId(original._id);
+                        setSelectOpen(true);
+                      }}
+                    >
+                      Add Options
+                      <Icon name={"add"} />
+                    </Button>
+                  );
+                }
                 break;
               }
             }
           } else {
             dataInput = (
-              <Select
-                title="Select Column"
-                id={`s_${original._id}_data`}
-                value={value}
-                placeholder={"Column"}
+              <Select.Root
+                key={"select-column"}
                 size={"sm"}
-                rounded={"md"}
-                isDisabled={props.viewOnly}
-                onChange={(event) => setValue(event.target.value)}
-                onBlur={onBlur}
-                isInvalid={
+                invalid={
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)
                 }
-              >
-                {props.permittedValues.map((value) => {
-                  return (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  );
+                collection={createListCollection<string>({
+                  items: props.permittedValues,
                 })}
-              </Select>
+                onValueChange={(details) => setValue(details.items[0])}
+                disabled={props.viewOnly}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder={"Select Column"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content zIndex={9999}>
+                      {createListCollection<string>({
+                        items: props.permittedValues,
+                      }).items.map((value: string) => (
+                        <Select.Item item={value} key={value}>
+                          {value}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
             );
           }
 
@@ -456,40 +654,51 @@ const Values = (props: {
           );
         },
         header: "Value Data",
+        size: 300,
+        minSize: 300,
+        maxSize: 300,
       }),
     ],
     [props.viewOnly],
   );
 
   const addOptions = () => {
-    // Add the Select value with the defined options
-    props.setValues([
-      ...props.values,
-      {
-        _id: `p_select_${Math.round(performance.now())}`,
-        name: "",
-        type: "select",
-        data: {
-          selected: option,
-          options: [..._.cloneDeep(options)],
-        },
-      },
-    ]);
+    if (editingValueId) {
+      // Update the existing Select value with the defined options
+      const updatedValues = props.values.map((value) => {
+        if (value._id === editingValueId) {
+          return {
+            ...value,
+            data: {
+              selected: "",
+              options: options.map((opt) => ({
+                _id: `option_${Math.round(performance.now())}_${opt}`,
+                name: opt,
+              })),
+            },
+          };
+        }
+        return value;
+      });
 
-    // Reset the options
+      props.setValues(updatedValues);
+    }
+
+    // Reset the options and editing state
     setOptions([]);
+    setEditingValueId(null);
 
     // Close the modal
-    onClose();
+    setSelectOpen(false);
   };
 
   const actions: DataTableAction[] = [
     {
       label: "Delete Values",
       icon: "delete",
-      action: (table, rows: any) => {
+      action: (table, rows: Row<IValue<GenericValueType>>) => {
         // Delete rows that have been selected
-        const idToRemove: IValue<any>[] = [];
+        const idToRemove: IValue<GenericValueType>[] = [];
         for (const rowIndex of Object.keys(rows)) {
           idToRemove.push(table.getRow(rowIndex).original);
         }
@@ -516,161 +725,29 @@ const Values = (props: {
         <Text fontSize={"sm"} fontWeight={"bold"}>
           Values
         </Text>
-        <Popover>
-          <PopoverTrigger>
-            <Button
-              variant={"solid"}
-              colorScheme={"green"}
-              rightIcon={<Icon name={"add"} />}
-              className={"add-value-button-form"}
-              isDisabled={props.viewOnly}
-              size={"sm"}
-            >
-              Add Value
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <PopoverArrow />
-            <PopoverCloseButton />
-            <PopoverHeader>
-              <Flex>
-                <Heading fontWeight={"semibold"} size={"xs"}>
-                  Select Type
-                </Heading>
-              </Flex>
-            </PopoverHeader>
-            <PopoverBody>
-              <Flex gap={"2"} wrap={"wrap"}>
-                {/* Buttons to add Values */}
-                <Button
-                  bg={"orange.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"orange.300"}
-                  _hover={{ bg: "orange.400" }}
-                  rightIcon={<Icon name={"v_date"} />}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_date_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "date",
-                        data: dayjs(Date.now()).toISOString(),
-                      },
-                    ]);
-                  }}
-                >
-                  Date
-                </Button>
-
-                <Button
-                  id="add-value-button-text"
-                  bg={"blue.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"blue.300"}
-                  _hover={{ bg: "blue.400" }}
-                  rightIcon={<Icon name={"v_text"} />}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_text_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "text",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  Text
-                </Button>
-
-                <Button
-                  bg={"green.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"green.300"}
-                  _hover={{ bg: "green.400" }}
-                  rightIcon={<Icon name={"v_number"} />}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_number_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "number",
-                        data: 0,
-                      },
-                    ]);
-                  }}
-                >
-                  Number
-                </Button>
-
-                <Button
-                  bg={"yellow.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"yellow.300"}
-                  _hover={{ bg: "yellow.400" }}
-                  rightIcon={<Icon name={"v_url"} />}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `v_url_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "url",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  URL
-                </Button>
-
-                <Button
-                  bg={"purple.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"purple.300"}
-                  _hover={{ bg: "purple.400" }}
-                  rightIcon={<Icon name={"entity"} />}
-                  onClick={() => {
-                    props.setValues([
-                      ...props.values,
-                      {
-                        _id: `p_entity_${Math.round(performance.now())}`,
-                        name: "",
-                        type: "entity",
-                        data: "",
-                      },
-                    ]);
-                  }}
-                >
-                  Entity
-                </Button>
-
-                <Button
-                  bg={"teal.300"}
-                  size={"sm"}
-                  color={"white"}
-                  borderColor={"teal.300"}
-                  _hover={{ bg: "teal.400" }}
-                  rightIcon={<Icon name={"v_select"} />}
-                  isDisabled={!_.isUndefined(props.permittedValues)}
-                  onClick={() => {
-                    onOpen();
-                  }}
-                >
-                  Select
-                </Button>
-              </Flex>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+        {!props.viewOnly && (
+          <Button
+            data-testid={"add-value-button"}
+            variant={"solid"}
+            colorPalette={"green"}
+            size={"sm"}
+            rounded={"md"}
+            onClick={() => {
+              props.setValues([
+                ...props.values,
+                {
+                  _id: `v_text_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "text",
+                  data: "",
+                },
+              ]);
+            }}
+          >
+            Add Value
+            <Icon name={"add"} />
+          </Button>
+        )}
       </Flex>
 
       {props.values.length > 0 ? (
@@ -696,34 +773,47 @@ const Values = (props: {
           border={"1px"}
           borderColor={"gray.300"}
         >
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-            No Values
-          </Text>
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Description>No Values</EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
         </Flex>
       )}
 
-      <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal
-          onEsc={onClose}
-          onClose={onClose}
-          isOpen={isOpen}
-          size={"3xl"}
-          isCentered
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader p={"2"}>Add Options</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody p={"2"} gap={"2"} pb={"0"}>
+      <Dialog.Root
+        open={selectOpen}
+        size={"sm"}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon name={"add"} />
+                Add Options
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size={"sm"}
+                  onClick={() => setSelectOpen(false)}
+                  _hover={{ bg: "gray.200" }}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
               <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"}>
-                  For a Select value, set the options to be displayed.
-                  Duplicates are not permitted.
-                </Text>
                 <Text fontSize={"sm"}>
                   Name the option, then click "Add" to add it to the collection
                   of options associated with this Select value. Click "Continue"
-                  to add this Select value to the Attribute.
+                  to save the options.
+                </Text>
+                <Text fontSize={"sm"}>
+                  For a Select value, set the options to be displayed.
+                  Duplicates are not permitted.
                 </Text>
                 <Flex direction={"row"} gap={"4"}>
                   <Input
@@ -734,32 +824,31 @@ const Values = (props: {
                     onChange={(event) => setOption(event.target.value)}
                   />
                   <Button
-                    colorScheme={"green"}
+                    colorPalette={"green"}
                     size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
                     onClick={() => {
                       if (!_.includes(options, option)) {
                         setOptions([...options, option.toString()]);
                         setOption("");
                       } else {
-                        toast({
+                        toaster.create({
                           title: "Warning",
                           description: "Can't add duplicate options.",
-                          status: "warning",
+                          type: "warning",
                           duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
+                          closable: true,
                         });
                       }
                     }}
-                    isDisabled={_.isEqual(option, "")}
+                    disabled={_.isEqual(option, "")}
                   >
                     Add
+                    <Icon name={"add"} />
                   </Button>
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <VStack gap={"1"} divider={<Divider />}>
+                  <Stack gap={"1"} separator={<Separator />}>
                     {options.length > 0 ? (
                       options.map((option, index) => {
                         return (
@@ -779,8 +868,7 @@ const Values = (props: {
                             <IconButton
                               aria-label={`remove_${index}`}
                               size={"sm"}
-                              colorScheme={"red"}
-                              icon={<Icon name={"delete"} />}
+                              colorPalette={"red"}
                               onClick={() => {
                                 setOptions([
                                   ...options.filter(
@@ -789,7 +877,9 @@ const Values = (props: {
                                   ),
                                 ]);
                               }}
-                            />
+                            >
+                              <Icon name={"delete"} />
+                            </IconButton>
                           </Flex>
                         );
                       })
@@ -812,39 +902,42 @@ const Values = (props: {
                         </Text>
                       </Flex>
                     )}
-                  </VStack>
+                  </Stack>
                 </Flex>
               </Flex>
-            </ModalBody>
-            <ModalFooter p={"2"}>
+            </Dialog.Body>
+            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
               <Button
                 size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
+                rounded={"md"}
+                colorPalette={"red"}
                 onClick={() => {
-                  // Reset the list of options
+                  // Reset the list of options and editing state
                   setOptions([]);
+                  setEditingValueId(null);
 
                   // Close the modal
-                  onClose();
+                  setSelectOpen(false);
                 }}
               >
                 Cancel
+                <Icon name={"cross"} />
               </Button>
               <Spacer />
               <Button
                 size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"c_right"} />}
+                rounded={"md"}
+                colorPalette={"green"}
                 onClick={addOptions}
-                isDisabled={_.isEqual(options.length, 0)}
+                disabled={_.isEqual(options.length, 0)}
               >
                 Continue
+                <Icon name={"c_right"} />
               </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </ScaleFade>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

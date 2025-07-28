@@ -1,16 +1,13 @@
 // React
 import React from "react";
-import {
-  Flex,
-  IconButton,
-  Spacer,
-  Tooltip,
-  Text,
-  useBreakpoint,
-} from "@chakra-ui/react";
+import { Flex, IconButton, Spacer, Text } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
+
+// Custom hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Existing and custom types
 import { VisibilityTagProps } from "@types";
@@ -20,7 +17,7 @@ import consola from "consola";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
-  const breakpoint = useBreakpoint();
+  const { isBreakpointActive } = useBreakpoint();
 
   /**
    * Handler function for visibility toggle button
@@ -39,7 +36,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       gap={"2"}
       p={"2"}
       rounded={"md"}
-      border={"1px"}
+      border={"1px solid"}
       borderColor={"gray.300"}
       bg={"white"}
       minW={"120px"}
@@ -53,7 +50,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         <Text fontSize={"sm"} fontWeight={"semibold"}>
           {props.isPublic ? "Public" : "Private"}
         </Text>
-        {breakpoint !== "base" && (
+        {isBreakpointActive("xl", "up") && (
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
             {props.isPublic ? "Everyone" : "Workspace Users only"}
           </Text>
@@ -62,33 +59,35 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       <Spacer />
       {props.isInherited ? (
         <Tooltip
-          hasArrow
-          label={
+          content={
             "This visibility state is inherited and cannot be changed directly"
           }
+          showArrow
         >
           <IconButton
             ml={"1"}
             aria-label={"set-visibility"}
             size={"sm"}
-            isDisabled
-            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
-          />
+            disabled
+          >
+            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+          </IconButton>
         </Tooltip>
       ) : (
         <Tooltip
-          hasArrow
-          label={props.isPublic ? "Make Private" : "Make Public"}
+          content={props.isPublic ? "Make Private" : "Make Public"}
+          showArrow
         >
           <IconButton
             ml={"1"}
             aria-label={"set-visibility"}
             size={"sm"}
-            colorScheme={"green"}
-            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
-            isDisabled={props.isDisabled}
+            colorPalette={"green"}
+            disabled={props.disabled}
             onClick={handleVisibilityClick}
-          />
+          >
+            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+          </IconButton>
         </Tooltip>
       )}
     </Flex>
