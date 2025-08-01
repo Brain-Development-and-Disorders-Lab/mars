@@ -341,6 +341,13 @@ export const typedefs = `#graphql
     data: String
   }
 
+  # "ResponseData"-type containing data with type "String[]"
+  type ResponseDataStringArray {
+    success: Boolean
+    message: String
+    data: [String]
+  }
+
   # "ResponseData"-type containing data with type "Auth"
   type ResponseDataAuth {
     success: Boolean
@@ -479,6 +486,7 @@ export const typedefs = `#graphql
     counters: [Counter]
     currentCounterValue(_id: String): ResponseDataString
     nextCounterValue(_id: String): ResponseDataString
+    nextCounterValues(_id: String, count: Int): ResponseDataStringArray
   }
 
   # Define mutation types
