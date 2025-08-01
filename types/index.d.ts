@@ -284,29 +284,22 @@ export type EntityImportReview = {
 export type IRow = Record<string, any>;
 export type IColumnMapping = Record<string, any>;
 
-// Utility types for standardizing import arguments
-export type ImportOptions<T> = {
-  type: "CSV" | "JSON"; // The file type
-  options: T; // The required file options
-};
-
 // Import options for CSV files
 export type CSVImportOptions = {
-  columns: IColumnMapping; // Column mappings
-  counters: {
-    field: string; // Typically the "name" or "description" field
-    _id: string;
-  }[];
+  counters: { field: string; _id: string }[];
+};
+
+// Import data for CSV files, including mappings and options
+export type CSVImportData = {
+  columnMapping: IColumnMapping;
+  options: CSVImportOptions;
+  file: File;
 };
 
 // Import options for JSON files
 export type JSONImportOptions = {
   project: string; // Project to add all Entities
   attributes: AttributeModel[]; // Created attrbutes
-  counters: {
-    field: string; // Typically the "name" or "description" field
-    _id: string;
-  }[];
 };
 
 // Attachment data

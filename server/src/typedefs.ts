@@ -286,6 +286,24 @@ export const typedefs = `#graphql
     attributes: [AttributeInput]
   }
 
+  # "CounterInput" input
+  input CounterInput {
+    field: String
+    _id: String
+  }
+
+  # "OptionsInput" input
+  input OptionsInput {
+    counters: [CounterInput]
+  }
+
+  # "CSVImportOptions" input
+  input CSVImportDataInput {
+    columnMapping: ColumnMappingInput
+    options: OptionsInput
+    file: [Upload]!
+  }
+
   # "Workspace" type
   type Workspace {
     _id: String!
@@ -529,7 +547,7 @@ export const typedefs = `#graphql
     # Data import CSV mutations
     prepareEntityCSV(file: [Upload]!): [String]
     reviewEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
-    importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+    importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!, options: OptionsInput): ResponseMessage
 
     # Data import JSON mutations
     reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview

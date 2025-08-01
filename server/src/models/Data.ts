@@ -12,6 +12,7 @@ import {
   IColumnMapping,
   IRow,
   GenericValueType,
+  CSVImportOptions,
 } from "@types";
 
 // Utility functions and libraries
@@ -24,6 +25,7 @@ import _ from "lodash";
 
 // Models
 import { Activity } from "./Activity";
+import { Counters } from "./Counters";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
 import { Templates } from "./Templates";
@@ -296,6 +298,7 @@ export class Data {
   static importEntityCSV = async (
     columnMapping: IColumnMapping,
     file: IFile[],
+    options: CSVImportOptions,
     context: Context,
   ): Promise<IResponseMessage> => {
     const { createReadStream } = await file[0];
@@ -317,6 +320,17 @@ export class Data {
 
       // Iterate over all Entities
       for await (const entity of entities) {
+        // Apply specified options
+        if (options.counters.length > 0) {
+          const currentCounterValue = await Counters.getCurrentValue(
+            options.counters[0]._id,
+          );
+          if (currentCounterValue.success) {
+            entity.name = currentCounterValue.data;
+            await Counters.incrementValue(options.counters[0]._id);
+          }
+        }
+
         // Create the Entity and add to Workspace
         const response = await Entities.create(entity);
 

@@ -36,6 +36,7 @@ import {
   ImportDialogProps,
   IColumnMapping,
   EntityModel,
+  CSVImportData,
 } from "@types";
 
 // Routing and navigation
@@ -203,8 +204,13 @@ const ImportDialog = (props: ImportDialogProps) => {
     mutation ImportEntityCSV(
       $columnMapping: ColumnMappingInput
       $file: [Upload]!
+      $options: OptionsInput
     ) {
-      importEntityCSV(columnMapping: $columnMapping, file: $file) {
+      importEntityCSV(
+        columnMapping: $columnMapping
+        file: $file
+        options: $options
+      ) {
         success
         message
       }
@@ -668,7 +674,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const finishImportEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
+    const importData: CSVImportData = {
       columnMapping: {
         namePrefix: namePrefixField,
         name: nameField,
@@ -678,14 +684,15 @@ const ImportDialog = (props: ImportDialogProps) => {
         project: projectField,
         attributes: attributesField,
       },
+      options: {
+        counters: nameUseCounter ? [{ field: "name", _id: counter }] : [],
+      },
       file: file,
     };
+
     setImportLoading(true);
     await importEntityCSV({
-      variables: {
-        columnMapping: mappingData.columnMapping,
-        file: mappingData.file,
-      },
+      variables: importData,
     });
     setImportLoading(false);
 
