@@ -23,7 +23,7 @@ describe("CSV Import Test", () => {
         });
       cy.wait(3000); // Wait for toast to disappear
       cy.get('[data-testid="import-type-select-trigger"]').click();
-      cy.contains('[role="option"]', "Entities").click();
+      cy.contains('[role="option"]', "Entities").click(); // Select "Entities"
       cy.get("#importContinueButton").scrollIntoView().click();
       cy.wait(100);
       cy.get('[data-testid="import-column-select-trigger-name"]').click();
