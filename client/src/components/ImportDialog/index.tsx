@@ -19,10 +19,11 @@ import {
   CloseButton,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import Icon from "@components/Icon";
-import Attribute from "@components/AttributeCard";
-import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
+import Attribute from "@components/AttributeCard";
+import CounterSelect from "@components/CounterSelect";
+import DataTable from "@components/DataTable";
+import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -35,6 +36,7 @@ import {
   ImportDialogProps,
   IColumnMapping,
   EntityModel,
+  CSVImportData,
 } from "@types";
 
 // Routing and navigation
@@ -54,6 +56,7 @@ import { useAuthentication } from "@hooks/useAuthentication";
 // Variables
 const JSON_MIME_TYPE = "application/json";
 const CSV_MIME_TYPE = "text/csv";
+const MAX_DISPLAYED_COLUMNS = 10;
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -78,6 +81,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [importType, setImportType] = useState(
     "entities" as "entities" | "template",
   );
+  const [importTypeSelected, setImportTypeSelected] = useState(false);
   const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
 
   // State management to generate and present different pages
@@ -121,6 +125,8 @@ const ImportDialog = (props: ImportDialogProps) => {
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
   const [nameField, setNameField] = useState("");
+  const [nameUseCounter, setNameUseCounter] = useState(false);
+  const [counter, setCounter] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
@@ -182,12 +188,29 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [reviewEntityCSV, { error: reviewEntityCSVError }] =
     useMutation(REVIEW_ENTITY_CSV);
 
+  const GET_COUNTER_VALUES = gql`
+    query GetCounterValues($_id: String!, $count: Int!) {
+      nextCounterValues(_id: $_id, count: $count) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [getCounterValues, { error: counterValuesError }] =
+    useLazyQuery(GET_COUNTER_VALUES);
+
   const IMPORT_ENTITY_CSV = gql`
     mutation ImportEntityCSV(
       $columnMapping: ColumnMappingInput
       $file: [Upload]!
+      $options: OptionsInput
     ) {
-      importEntityCSV(columnMapping: $columnMapping, file: $file) {
+      importEntityCSV(
+        columnMapping: $columnMapping
+        file: $file
+        options: $options
+      ) {
         success
         message
       }
@@ -284,10 +307,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload") && fileName !== "") {
+    if (
+      _.isEqual(entityInterfacePage, "upload") &&
+      fileName !== "" &&
+      importTypeSelected
+    ) {
       setContinueDisabled(false);
     }
-  }, [fileName]);
+  }, [fileName, importTypeSelected]);
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
@@ -297,8 +324,14 @@ const ImportDialog = (props: ImportDialogProps) => {
       fileType === CSV_MIME_TYPE
     ) {
       setContinueDisabled(false);
+    } else if (
+      _.isEqual(entityInterfacePage, "details") &&
+      !_.isEqual(counter, "") &&
+      nameUseCounter
+    ) {
+      setContinueDisabled(false);
     }
-  }, [nameField]);
+  }, [nameField, counter]);
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
@@ -549,20 +582,56 @@ const ImportDialog = (props: ImportDialogProps) => {
     };
 
     setImportLoading(true);
-    const response = await reviewEntityCSV({
+    const reviewResponse = await reviewEntityCSV({
       variables: mappingData,
     });
     setImportLoading(false);
 
-    if (response.data && response.data.reviewEntityCSV.data) {
-      setReviewEntities(response.data.reviewEntityCSV.data);
+    if (reviewResponse.data && reviewResponse.data.reviewEntityCSV.data) {
+      setReviewEntities(reviewResponse.data.reviewEntityCSV.data);
+    }
+
+    // Retrieve and splice in counter values if being used for names
+    if (nameUseCounter) {
+      const counterResponse = await getCounterValues({
+        variables: {
+          _id: counter,
+          count: reviewResponse.data.reviewEntityCSV.data.length,
+        },
+      });
+
+      if (counterResponse.data.nextCounterValues.data.length > 0) {
+        const counterValuesSpliced =
+          reviewResponse.data.reviewEntityCSV.data.map(
+            (entity: EntityImportReview, index: number) => {
+              return {
+                ...entity,
+                name: counterResponse.data.nextCounterValues.data[index],
+              };
+            },
+          );
+        setReviewEntities(counterValuesSpliced);
+      }
+
+      if (
+        counterValuesError ||
+        counterResponse.data.nextCounterValues.data.length === 0
+      ) {
+        toaster.create({
+          title: "CSV Import Error",
+          type: "error",
+          description: "Error while retrieving counter values",
+          duration: 4000,
+          closable: true,
+        });
+      }
     }
 
     if (reviewEntityCSVError) {
       toaster.create({
         title: "CSV Import Error",
         type: "error",
-        description: "Error while reviewing CSV file",
+        description: "Error while generating Entities for review",
         duration: 4000,
         closable: true,
       });
@@ -605,7 +674,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const finishImportEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
+    const importData: CSVImportData = {
       columnMapping: {
         namePrefix: namePrefixField,
         name: nameField,
@@ -615,14 +684,15 @@ const ImportDialog = (props: ImportDialogProps) => {
         project: projectField,
         attributes: attributesField,
       },
+      options: {
+        counters: nameUseCounter ? [{ field: "name", _id: counter }] : [],
+      },
       file: file,
     };
+
     setImportLoading(true);
     await importEntityCSV({
-      variables: {
-        columnMapping: mappingData.columnMapping,
-        file: mappingData.file,
-      },
+      variables: importData,
     });
     setImportLoading(false);
 
@@ -837,6 +907,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const resetState = () => {
     // Reset UI state
     setImportType("entities");
+    setImportTypeSelected(false);
 
     setEntityStep(0);
     setEntityInterfacePage("upload");
@@ -855,6 +926,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     setColumns([]);
     setColumnsCollection(createListCollection({ items: [] as string[] }));
     setNameField("");
+    setNameUseCounter(false);
+    setCounter("");
     setDescriptionField("");
     setProjectField("");
     setProjectsCollection(
@@ -967,16 +1040,17 @@ const ImportDialog = (props: ImportDialogProps) => {
                 collection={createListCollection({
                   items: ["Entities", "Template"],
                 })}
-                onValueChange={(details) =>
+                onValueChange={(details) => {
                   setImportType(
                     details.items[0].toLowerCase() as "entities" | "template",
-                  )
-                }
+                  );
+                  setImportTypeSelected(true);
+                }}
                 disabled={isTypeSelectDisabled}
               >
                 <Select.HiddenSelect />
                 <Select.Control>
-                  <Select.Trigger>
+                  <Select.Trigger data-testid={"import-type-select-trigger"}>
                     <Select.ValueText placeholder={"Select file contents"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>
@@ -1052,18 +1126,25 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
                         Columns:
                       </Text>
-                      {columns.map((column) => {
+                      {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
                         return (
                           <Tag.Root
                             key={column}
                             colorPalette={
-                              columnSelected(column) ? "green" : "gray"
+                              columnSelected(column) ? "green" : "blue"
                             }
                           >
                             <Tag.Label>{column}</Tag.Label>
                           </Tag.Root>
                         );
                       })}
+                      {columns.length > MAX_DISPLAYED_COLUMNS && (
+                        <Tag.Root>
+                          <Tag.Label>
+                            and {columns.length - MAX_DISPLAYED_COLUMNS} more
+                          </Tag.Label>
+                        </Tag.Root>
+                      )}
                     </Flex>
                   )}
                 </Flex>
@@ -1181,16 +1262,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  {columns.length > 0 && (
-                    <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Text fontSize={"sm"}>
-                        Each row in the CSV file represents a new Entity that
-                        will be created. Assign a column to populate the Entity
-                        fields shown below.
-                      </Text>
-                    </Flex>
-                  )}
-
                   {fileType === CSV_MIME_TYPE && (
                     <Fieldset.Root>
                       <Fieldset.Content>
@@ -1213,16 +1284,46 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                           <Field.Root
                             required
-                            invalid={_.isEqual(nameField, "")}
+                            invalid={
+                              (!nameUseCounter && _.isEqual(nameField, "")) ||
+                              (nameUseCounter && _.isEqual(counter, ""))
+                            }
                           >
                             <Field.Label>
                               Name
                               <Field.RequiredIndicator />
                             </Field.Label>
-                            {getSelectComponent("name", setNameField)}
-                            <Field.HelperText>
-                              Column containing Entity names
-                            </Field.HelperText>
+                            <Flex direction={"row"} gap={"2"} w={"100%"}>
+                              {!nameUseCounter &&
+                                getSelectComponent("name", setNameField)}
+                              {nameUseCounter && (
+                                <CounterSelect
+                                  counter={counter}
+                                  setCounter={setCounter}
+                                  showCreate
+                                />
+                              )}
+                              <Button
+                                size={"sm"}
+                                rounded={"md"}
+                                colorPalette={"blue"}
+                                onClick={() => {
+                                  setNameUseCounter(!nameUseCounter);
+                                  // Reset state of name and counter fields
+                                  setNameField("");
+                                  setCounter("");
+                                  // Disable 'Continue' button
+                                  setContinueDisabled(true);
+                                }}
+                              >
+                                Use {nameUseCounter ? "Column" : "Counter"}
+                              </Button>
+                            </Flex>
+                            {!nameUseCounter && (
+                              <Field.HelperText>
+                                Column containing Entity names
+                              </Field.HelperText>
+                            )}
                           </Field.Root>
                         </Flex>
                       </Fieldset.Content>
@@ -1586,45 +1687,45 @@ const ImportDialog = (props: ImportDialogProps) => {
                 >
                   <Fieldset.Root>
                     <Fieldset.Content>
-                      <Flex
-                        direction={"column"}
-                        minH={"50vh"}
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        border={"2px"}
-                        borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={"gray.300"}
-                        rounded={"md"}
-                        background={fileName === "" ? "gray.50" : "white"}
-                      >
-                        {_.isEqual(file, {}) ? (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontSize={"sm"} fontWeight={"semibold"}>
-                              Drag file here
-                            </Text>
-                            <Text fontSize={"sm"}>or click to upload</Text>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            justify={"center"}
-                            align={"center"}
-                          >
-                            <Text fontSize={"sm"} fontWeight={"semibold"}>
-                              {file.name}
-                            </Text>
-                          </Flex>
-                        )}
-                      </Flex>
-
                       <Field.Root>
+                        <Flex
+                          direction={"column"}
+                          minH={"40vh"}
+                          w={"100%"}
+                          align={"center"}
+                          justify={"center"}
+                          border={"2px"}
+                          borderStyle={fileName === "" ? "dashed" : "solid"}
+                          borderColor={"gray.300"}
+                          rounded={"md"}
+                          background={fileName === "" ? "gray.50" : "white"}
+                        >
+                          {_.isEqual(file, {}) ? (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Drag file here
+                              </Text>
+                              <Text fontSize={"sm"}>or click to upload</Text>
+                            </Flex>
+                          ) : (
+                            <Flex
+                              direction={"column"}
+                              w={"100%"}
+                              justify={"center"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                {file.name}
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+
                         <Input
                           type={"file"}
                           h={"100%"}
@@ -1642,8 +1743,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                             ) {
                               // Only accept defined file types
                               if (
-                                _.isEqual(
-                                  JSON_MIME_TYPE,
+                                _.includes(
+                                  [JSON_MIME_TYPE],
                                   event.target.files[0].type,
                                 )
                               ) {

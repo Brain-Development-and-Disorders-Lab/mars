@@ -20,6 +20,9 @@ describe("JSON Import Test", () => {
         mimeType: "application/json",
         contents: fileContent,
       });
+      cy.wait(500);
+      cy.get('[data-testid="import-type-select-trigger"]').click();
+      cy.contains('[role="option"]', "Entities").click(); // Select "Entities"
       cy.get("#importContinueButton").scrollIntoView().click();
 
       // Skip the remaining import screens

@@ -2,6 +2,7 @@
 import {
   AttributeModel,
   Context,
+  CSVImportOptions,
   EntityImportReview,
   IColumnMapping,
   IFile,
@@ -74,12 +75,21 @@ export const DataResolvers = {
     // Map CSV file columns to Entity fields
     importEntityCSV: async (
       _parent: IResolverParent,
-      args: { columnMapping: IColumnMapping; file: IFile[] },
+      args: {
+        columnMapping: IColumnMapping;
+        file: IFile[];
+        options: CSVImportOptions;
+      },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.importEntityCSV(args.columnMapping, args.file, context);
+      return await Data.importEntityCSV(
+        args.columnMapping,
+        args.file,
+        args.options,
+        context,
+      );
     },
 
     // Review a JSON file, return collection of Entity names and their updates

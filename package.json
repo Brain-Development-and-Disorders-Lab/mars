@@ -4,7 +4,7 @@
   "main": "index.js",
   "repository": "https://github.com/Brain-Development-and-Disorders-Lab/mars.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
-  "license": "MIT",
+  "license": "",
   "scripts": {
     "lint:check": "prettier . --check",
     "lint:fix": "prettier . --write",

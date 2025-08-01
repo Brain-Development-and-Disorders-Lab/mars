@@ -112,6 +112,40 @@ export class Counters {
     };
   };
 
+  static getNextValues = async (
+    _id: string,
+    count: number,
+  ): Promise<ResponseData<string[]>> => {
+    const counter = await Counters.getCounter(_id);
+
+    // Cover the case of no Counter found
+    if (_.isNull(counter)) {
+      return {
+        success: false,
+        message: "Counter does not exist",
+        data: [],
+      };
+    }
+
+    let current = counter.current + counter.increment;
+    const values = [];
+    // Generate the next values
+    for (let i = 0; i < count; i++) {
+      const generated = counter.format.replace("{}", current.toString());
+      values.push(generated);
+
+      // Increment the current value
+      current += counter.increment;
+    }
+
+    // Return the generatedvalues
+    return {
+      success: true,
+      message: `Generated ${count} next values for Counter "${counter.name}"`,
+      data: values,
+    };
+  };
+
   static incrementValue = async (
     _id: string,
   ): Promise<ResponseData<string>> => {
