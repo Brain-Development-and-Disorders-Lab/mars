@@ -187,6 +187,18 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [reviewEntityCSV, { error: reviewEntityCSVError }] =
     useMutation(REVIEW_ENTITY_CSV);
 
+  const GET_COUNTER_VALUES = gql`
+    query GetCounterValues($_id: String!, $count: Int!) {
+      nextCounterValues(_id: $_id, count: $count) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [getCounterValues, { error: counterValuesError }] =
+    useLazyQuery(GET_COUNTER_VALUES);
+
   const IMPORT_ENTITY_CSV = gql`
     mutation ImportEntityCSV(
       $columnMapping: ColumnMappingInput
@@ -564,20 +576,56 @@ const ImportDialog = (props: ImportDialogProps) => {
     };
 
     setImportLoading(true);
-    const response = await reviewEntityCSV({
+    const reviewResponse = await reviewEntityCSV({
       variables: mappingData,
     });
     setImportLoading(false);
 
-    if (response.data && response.data.reviewEntityCSV.data) {
-      setReviewEntities(response.data.reviewEntityCSV.data);
+    if (reviewResponse.data && reviewResponse.data.reviewEntityCSV.data) {
+      setReviewEntities(reviewResponse.data.reviewEntityCSV.data);
+    }
+
+    // Retrieve and splice in counter values if being used for names
+    if (nameUseCounter) {
+      const counterResponse = await getCounterValues({
+        variables: {
+          _id: counter,
+          count: reviewResponse.data.reviewEntityCSV.data.length,
+        },
+      });
+
+      if (counterResponse.data.nextCounterValues.data.length > 0) {
+        const counterValuesSpliced =
+          reviewResponse.data.reviewEntityCSV.data.map(
+            (entity: EntityImportReview, index: number) => {
+              return {
+                ...entity,
+                name: counterResponse.data.nextCounterValues.data[index],
+              };
+            },
+          );
+        setReviewEntities(counterValuesSpliced);
+      }
+
+      if (
+        counterValuesError ||
+        counterResponse.data.nextCounterValues.data.length === 0
+      ) {
+        toaster.create({
+          title: "CSV Import Error",
+          type: "error",
+          description: "Error while retrieving counter values",
+          duration: 4000,
+          closable: true,
+        });
+      }
     }
 
     if (reviewEntityCSVError) {
       toaster.create({
         title: "CSV Import Error",
         type: "error",
-        description: "Error while reviewing CSV file",
+        description: "Error while generating Entities for review",
         duration: 4000,
         closable: true,
       });
@@ -871,6 +919,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     setColumns([]);
     setColumnsCollection(createListCollection({ items: [] as string[] }));
     setNameField("");
+    setNameUseCounter(false);
+    setCounter("");
     setDescriptionField("");
     setProjectField("");
     setProjectsCollection(
