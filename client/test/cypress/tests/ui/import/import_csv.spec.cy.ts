@@ -22,6 +22,8 @@ describe("CSV Import Test", () => {
           contents: Cypress.Buffer.from(fileContent),
         });
       cy.wait(3000); // Wait for toast to disappear
+      cy.get('[data-testid="import-type-select-trigger"]').click();
+      cy.contains('[role="option"]', "Entities").click();
       cy.get("#importContinueButton").scrollIntoView().click();
       cy.wait(100);
       cy.get('[data-testid="import-column-select-trigger-name"]').click();

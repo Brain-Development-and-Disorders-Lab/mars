@@ -1050,7 +1050,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               >
                 <Select.HiddenSelect />
                 <Select.Control>
-                  <Select.Trigger>
+                  <Select.Trigger data-testid={"import-type-select-trigger"}>
                     <Select.ValueText placeholder={"Select file contents"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>
