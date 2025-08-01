@@ -116,3 +116,7 @@ To run unit tests, run `yarn test` in the `/server` directory.
 
 - Henry Burgess
 - Robin Fievet
+
+**License:**
+
+See the LICENSE file for license details.
