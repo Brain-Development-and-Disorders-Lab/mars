@@ -16,7 +16,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import { Information } from "@components/Label";
 import { toaster } from "@components/Toast";
 
 // Custom types
@@ -287,14 +286,14 @@ const CounterSelect = (props: CounterProps) => {
         ),
       );
     } else if (!_isValidFormat) {
-      setCurrentCounterPreview("Provide a valid format string");
-      setNextCounterPreview("Provide a valid format string");
+      setCurrentCounterPreview("Invalid format string");
+      setNextCounterPreview("Invalid format string");
     } else if (!_isValidInitial) {
-      setCurrentCounterPreview("Provide a valid initial value");
-      setNextCounterPreview("Provide a valid initial value");
+      setCurrentCounterPreview("Invalid initial value");
+      setNextCounterPreview("Invalid initial value");
     } else if (!_isValidIncrement) {
-      setCurrentCounterPreview("Provide a valid initial increment");
-      setNextCounterPreview("Provide a valid initial increment");
+      setCurrentCounterPreview("Invalid increment");
+      setNextCounterPreview("Invalid increment");
     }
 
     // Store the valid state
@@ -304,7 +303,7 @@ const CounterSelect = (props: CounterProps) => {
   }, [counterFormat, counterInitial, counterIncrement]);
 
   return (
-    <Flex direction={"column"} gap={"2"} w={"100%"}>
+    <Flex direction={"column"} gap={"1"} w={"100%"}>
       <Flex w={"100%"} gap={"2"}>
         <Select.Root
           key={"select-counter"}
@@ -368,8 +367,8 @@ const CounterSelect = (props: CounterProps) => {
             </Text>
           </Flex>
         ) : (
-          <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
-            Select a Counter to preview a value
+          <Text fontSize={"xs"} color={"gray.600"}>
+            Select Counter to preview the next value
           </Text>
         )}
       </Flex>
@@ -377,7 +376,7 @@ const CounterSelect = (props: CounterProps) => {
       <Dialog.Root
         open={open}
         onOpenChange={(details) => setOpen(details.open)}
-        size={"xl"}
+        size={"lg"}
         placement={"center"}
         scrollBehavior={"inside"}
         closeOnEscape
@@ -404,11 +403,13 @@ const CounterSelect = (props: CounterProps) => {
 
             <Dialog.Body px={"2"} gap={"2"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Information
-                  text={
-                    "Counters are used to standardize name formats using letters and a number."
-                  }
-                />
+                <Text fontSize={"sm"} color={"gray.600"} lineHeight={"1.5"}>
+                  Counters are used to standardize name formats using letters
+                  and a number.
+                  <br />
+                  The format string must contain one "{"{}"}" marking the
+                  position of the numeric value.
+                </Text>
 
                 <Flex>
                   <Fieldset.Root>
@@ -448,6 +449,10 @@ const CounterSelect = (props: CounterProps) => {
                             {formatErrorMessage}
                           </Field.ErrorText>
                         )}
+                        <Field.HelperText>
+                          Example: "Counter_{"{}"}" generates "Counter_1",
+                          "Counter_2", etc.
+                        </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -458,7 +463,7 @@ const CounterSelect = (props: CounterProps) => {
                     <Fieldset.Content>
                       <Field.Root>
                         <Field.Label>
-                          Initial Numeric Value
+                          Initial Value
                           <Field.RequiredIndicator />
                         </Field.Label>
                         <Input
