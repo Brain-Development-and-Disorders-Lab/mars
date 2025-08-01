@@ -39,7 +39,7 @@ const CounterSelect = (props: CounterProps) => {
   // Counter state
   const [counters, setCounters] = useState([] as CounterModel[]);
   const [selected, setSelected] = useState({} as CounterModel);
-  const [nextValue, setNextValue] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
 
   // Counter creation state
   const [counterName, setCounterName] = useState("");
@@ -94,9 +94,9 @@ const CounterSelect = (props: CounterProps) => {
   const { data: counterData, refetch: refetchCounterData } =
     useQuery(GET_COUNTERS);
 
-  const GET_COUNTER_NEXT = gql`
-    query GetCounterNext($_id: String) {
-      nextCounterValue(_id: $_id) {
+  const GET_COUNTER_CURRENT = gql`
+    query GetCounterCurrent($_id: String) {
+      currentCounterValue(_id: $_id) {
         success
         message
         data
@@ -104,10 +104,10 @@ const CounterSelect = (props: CounterProps) => {
     }
   `;
   const [
-    nextCounterValue,
-    { loading: nextValueLoading, error: nextValueError },
-  ] = useLazyQuery<{ nextCounterValue: ResponseData<string> }>(
-    GET_COUNTER_NEXT,
+    currentCounterValue,
+    { loading: currentValueLoading, error: currentValueError },
+  ] = useLazyQuery<{ currentCounterValue: ResponseData<string> }>(
+    GET_COUNTER_CURRENT,
   );
 
   const CREATE_COUNTER = gql`
@@ -159,20 +159,22 @@ const CounterSelect = (props: CounterProps) => {
   }, [counterData]);
 
   const getCounterPreview = async () => {
-    const result = await nextCounterValue({ variables: { _id: selected._id } });
+    const result = await currentCounterValue({
+      variables: { _id: selected._id },
+    });
 
     // Handle any errors
-    if (nextValueError) {
+    if (currentValueError) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: nextValueError.message,
+        description: currentValueError.message,
         duration: 4000,
         closable: true,
       });
     }
 
-    setNextValue(result.data?.nextCounterValue.data || "Invalid");
+    setCurrentValue(result.data?.currentCounterValue.data || "Invalid");
   };
 
   const onNameInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -361,9 +363,9 @@ const CounterSelect = (props: CounterProps) => {
             </Text>
             <Text
               fontSize={"sm"}
-              color={nextValueLoading ? "gray.400" : "black"}
+              color={currentValueLoading ? "gray.400" : "black"}
             >
-              {nextValueLoading ? "Loading" : nextValue}
+              {currentValueLoading ? "Loading" : currentValue}
             </Text>
           </Flex>
         ) : (
