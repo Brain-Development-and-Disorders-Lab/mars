@@ -108,6 +108,9 @@ const CounterSelect = (props: CounterProps) => {
     { loading: currentValueLoading, error: currentValueError },
   ] = useLazyQuery<{ currentCounterValue: ResponseData<string> }>(
     GET_COUNTER_CURRENT,
+    {
+      fetchPolicy: "network-only",
+    },
   );
 
   const CREATE_COUNTER = gql`

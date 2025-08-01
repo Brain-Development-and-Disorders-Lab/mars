@@ -171,6 +171,20 @@ const Entity = () => {
   `;
   const { loading, error, data, refetch } = useQuery(GET_CREATE_ENTITIES_DATA);
 
+  const GET_COUNTER_CURRENT = gql`
+    query GetCounterCurrent($_id: String) {
+      currentCounterValue(_id: $_id) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [currentCounterValue, { error: currentCounterValueError }] =
+    useLazyQuery<{
+      currentCounterValue: ResponseData<string>;
+    }>(GET_COUNTER_CURRENT);
+
   const INCREMENT_COUNTER = gql`
     mutation IncrementCounter($_id: String) {
       incrementCounter(_id: $_id) {
@@ -284,19 +298,19 @@ const Entity = () => {
       // Steps to use the Counter if selected
       let generatedName = name;
       if (useCounter) {
-        // Increment the Counter and substitute the name value
-        const incrementResult = await incrementCounter({
+        // Get the current value of the Counter and substitute the name value
+        const currentCounterValueResult = await currentCounterValue({
           variables: {
             _id: counter,
           },
         });
 
-        if (incrementCounterError) {
+        if (currentCounterValueError) {
           // Raise an error and cancel the create operation
           toaster.create({
             title: "Error",
             type: "error",
-            description: incrementCounterError.message,
+            description: currentCounterValueError.message,
             duration: 4000,
             closable: true,
           });
@@ -304,9 +318,27 @@ const Entity = () => {
           return;
         }
 
-        // Else, handle updating the name with the latest Counter value
-        if (incrementResult.data?.incrementCounter) {
-          generatedName = incrementResult.data.incrementCounter.data;
+        // Else, handle updating the name with the current Counter value
+        if (currentCounterValueResult.data?.currentCounterValue) {
+          generatedName =
+            currentCounterValueResult.data.currentCounterValue.data;
+
+          // Increment the Counter value
+          await incrementCounter({
+            variables: {
+              _id: counter,
+            },
+          });
+
+          if (incrementCounterError) {
+            toaster.create({
+              title: "Error",
+              type: "error",
+              description: incrementCounterError.message,
+              duration: 4000,
+              closable: true,
+            });
+          }
         }
       }
 
