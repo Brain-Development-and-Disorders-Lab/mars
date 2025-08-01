@@ -19,10 +19,11 @@ import {
   CloseButton,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import Icon from "@components/Icon";
-import Attribute from "@components/AttributeCard";
-import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
+import Attribute from "@components/AttributeCard";
+import CounterSelect from "@components/CounterSelect";
+import DataTable from "@components/DataTable";
+import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -54,6 +55,7 @@ import { useAuthentication } from "@hooks/useAuthentication";
 // Variables
 const JSON_MIME_TYPE = "application/json";
 const CSV_MIME_TYPE = "text/csv";
+const MAX_DISPLAYED_COLUMNS = 10;
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -122,6 +124,8 @@ const ImportDialog = (props: ImportDialogProps) => {
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
   const [nameField, setNameField] = useState("");
+  const [nameUseCounter, setNameUseCounter] = useState(false);
+  const [counter, setCounter] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
@@ -302,8 +306,14 @@ const ImportDialog = (props: ImportDialogProps) => {
       fileType === CSV_MIME_TYPE
     ) {
       setContinueDisabled(false);
+    } else if (
+      _.isEqual(entityInterfacePage, "details") &&
+      !_.isEqual(counter, "") &&
+      nameUseCounter
+    ) {
+      setContinueDisabled(false);
     }
-  }, [nameField]);
+  }, [nameField, counter]);
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
@@ -1059,18 +1069,25 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Text fontWeight={"semibold"} fontSize={"sm"}>
                         Columns:
                       </Text>
-                      {columns.map((column) => {
+                      {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
                         return (
                           <Tag.Root
                             key={column}
                             colorPalette={
-                              columnSelected(column) ? "green" : "gray"
+                              columnSelected(column) ? "green" : "blue"
                             }
                           >
                             <Tag.Label>{column}</Tag.Label>
                           </Tag.Root>
                         );
                       })}
+                      {columns.length > MAX_DISPLAYED_COLUMNS && (
+                        <Tag.Root>
+                          <Tag.Label>
+                            and {columns.length - MAX_DISPLAYED_COLUMNS} more
+                          </Tag.Label>
+                        </Tag.Root>
+                      )}
                     </Flex>
                   )}
                 </Flex>
@@ -1188,16 +1205,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  {columns.length > 0 && (
-                    <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Text fontSize={"sm"}>
-                        Each row in the CSV file represents a new Entity that
-                        will be created. Assign a column to populate the Entity
-                        fields shown below.
-                      </Text>
-                    </Flex>
-                  )}
-
                   {fileType === CSV_MIME_TYPE && (
                     <Fieldset.Root>
                       <Fieldset.Content>
@@ -1220,16 +1227,46 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                           <Field.Root
                             required
-                            invalid={_.isEqual(nameField, "")}
+                            invalid={
+                              (!nameUseCounter && _.isEqual(nameField, "")) ||
+                              (nameUseCounter && _.isEqual(counter, ""))
+                            }
                           >
                             <Field.Label>
                               Name
                               <Field.RequiredIndicator />
                             </Field.Label>
-                            {getSelectComponent("name", setNameField)}
-                            <Field.HelperText>
-                              Column containing Entity names
-                            </Field.HelperText>
+                            <Flex direction={"row"} gap={"2"} w={"100%"}>
+                              {!nameUseCounter &&
+                                getSelectComponent("name", setNameField)}
+                              {nameUseCounter && (
+                                <CounterSelect
+                                  counter={counter}
+                                  setCounter={setCounter}
+                                  showCreate
+                                />
+                              )}
+                              <Button
+                                size={"sm"}
+                                rounded={"md"}
+                                colorPalette={"blue"}
+                                onClick={() => {
+                                  setNameUseCounter(!nameUseCounter);
+                                  // Reset state of name and counter fields
+                                  setNameField("");
+                                  setCounter("");
+                                  // Disable 'Continue' button
+                                  setContinueDisabled(true);
+                                }}
+                              >
+                                Use {nameUseCounter ? "Column" : "Counter"}
+                              </Button>
+                            </Flex>
+                            {!nameUseCounter && (
+                              <Field.HelperText>
+                                Column containing Entity names
+                              </Field.HelperText>
+                            )}
                           </Field.Root>
                         </Flex>
                       </Fieldset.Content>
