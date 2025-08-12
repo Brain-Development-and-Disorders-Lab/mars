@@ -770,11 +770,31 @@ const Values = (props: {
           justify={"center"}
           minH={"200px"}
           rounded={"md"}
-          border={"1px"}
+          border={"1px solid"}
           borderColor={"gray.300"}
         >
           <EmptyState.Root>
             <EmptyState.Content>
+              <Flex direction={"row"} gap={"2"}>
+                <EmptyState.Indicator>
+                  <Icon name={"v_text"} size={"sm"} />
+                </EmptyState.Indicator>
+                <EmptyState.Indicator>
+                  <Icon name={"v_number"} size={"sm"} />
+                </EmptyState.Indicator>
+                <EmptyState.Indicator>
+                  <Icon name={"v_url"} size={"sm"} />
+                </EmptyState.Indicator>
+                <EmptyState.Indicator>
+                  <Icon name={"v_date"} size={"sm"} />
+                </EmptyState.Indicator>
+                <EmptyState.Indicator>
+                  <Icon name={"v_select"} size={"sm"} />
+                </EmptyState.Indicator>
+                <EmptyState.Indicator>
+                  <Icon name={"entity"} size={"sm"} />
+                </EmptyState.Indicator>
+              </Flex>
               <EmptyState.Description>No Values</EmptyState.Description>
             </EmptyState.Content>
           </EmptyState.Root>

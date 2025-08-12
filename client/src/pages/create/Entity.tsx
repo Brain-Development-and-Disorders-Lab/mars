@@ -855,7 +855,7 @@ const Entity = () => {
               >
                 <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Select Template:
+                    Use Template ({templatesCollection.items.length} available)
                   </Text>
                   {/* Drop-down to select Templates */}
                   <Fieldset.Root maxW={"sm"}>
