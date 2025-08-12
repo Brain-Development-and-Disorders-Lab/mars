@@ -1358,7 +1358,7 @@ const Project = () => {
                   colorPalette={"red"}
                   size={"sm"}
                   rounded={"md"}
-                  variant={"outline"}
+                  variant={"solid"}
                   onClick={() => setEntitiesOpen(false)}
                 >
                   Cancel
@@ -1731,7 +1731,7 @@ const Project = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}

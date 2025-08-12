@@ -388,7 +388,7 @@ const Project = () => {
           size={"sm"}
           rounded={"md"}
           colorPalette={"red"}
-          variant={"outline"}
+          variant={"solid"}
           onClick={() => navigate("/projects")}
         >
           Cancel

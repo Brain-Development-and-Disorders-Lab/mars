@@ -2669,7 +2669,7 @@ const Entity = () => {
                   {/* "Cancel" button */}
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
-                      variant={"outline"}
+                      variant={"solid"}
                       size={"sm"}
                       rounded={"md"}
                       colorPalette={"red"}
@@ -2848,7 +2848,7 @@ const Entity = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
@@ -3473,7 +3473,7 @@ const Entity = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}

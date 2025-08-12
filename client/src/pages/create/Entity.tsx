@@ -1072,7 +1072,7 @@ const Entity = () => {
             size={"sm"}
             rounded={"md"}
             colorPalette={"red"}
-            variant={"outline"}
+            variant={"solid"}
             onClick={() => navigate("/entities")}
           >
             Cancel
@@ -1081,8 +1081,9 @@ const Entity = () => {
           {!_.isEqual("start", pageState) && (
             <Button
               size={"sm"}
+              rounded={"md"}
               colorPalette={"orange"}
-              variant={"outline"}
+              variant={"solid"}
               onClick={onPageBack}
             >
               Back
