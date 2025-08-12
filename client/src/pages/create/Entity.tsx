@@ -1053,7 +1053,6 @@ const Entity = () => {
         </Dialog.Root>
       </Flex>
 
-      {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
 
       {/* Action buttons */}
