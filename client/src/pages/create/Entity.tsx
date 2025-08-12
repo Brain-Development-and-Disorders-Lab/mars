@@ -842,21 +842,19 @@ const Entity = () => {
             >
               <Information
                 text={
-                  "Add Attributes containing metadata about this Entity. Attributes can be created from an existing Template or created manually."
+                  "Add Attributes containing metadata about this Entity. Attributes can use an existing Template or be created manually."
                 }
               />
               <Flex
                 direction={"row"}
                 p={"2"}
                 gap={"2"}
+                align={"end"}
                 rounded={"md"}
                 border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Use Template ({templatesCollection.items.length} available)
-                  </Text>
                   {/* Drop-down to select Templates */}
                   <Fieldset.Root maxW={"sm"}>
                     <Fieldset.Content>
@@ -865,6 +863,8 @@ const Entity = () => {
                           key={"select-template"}
                           size={"sm"}
                           collection={templatesCollection}
+                          disabled={templatesCollection.items.length === 0}
+                          rounded={"md"}
                           onValueChange={(details) => {
                             const selectedTemplate = details.items[0];
                             if (!_.isEqual(selectedTemplate._id, "")) {
@@ -889,9 +889,12 @@ const Entity = () => {
                               }
                             }
                           }}
-                          disabled={templatesCollection.items.length === 0}
                         >
                           <Select.HiddenSelect />
+                          <Select.Label>
+                            Use Template ({templatesCollection.items.length}{" "}
+                            available)
+                          </Select.Label>
                           <Select.Control>
                             <Select.Trigger
                               data-testid={"select-template-trigger"}
@@ -947,7 +950,7 @@ const Entity = () => {
                     ]);
                   }}
                 >
-                  Create
+                  Create new Attribute
                   <Icon name={"add"} />
                 </Button>
               </Flex>

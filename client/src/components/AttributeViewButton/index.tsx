@@ -12,6 +12,7 @@ import {
   CloseButton,
   EmptyState,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import MDEditor from "@uiw/react-md-editor";
@@ -109,17 +110,20 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               <Flex direction={"column"} p={"2"} gap={"2"}>
                 <Flex
                   gap={"2"}
-                  p={"2"}
+                  p={"0"}
                   rounded={"md"}
                   direction={"row"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
                   wrap={"wrap"}
                 >
                   <Flex
                     direction={"column"}
+                    h={"fit-content"}
                     gap={"2"}
                     w={{ base: "100%", md: "50%" }}
+                    p={"2"}
+                    border={"1px solid"}
+                    borderColor={"gray.300"}
+                    rounded={"md"}
                   >
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       Name
@@ -131,9 +135,29 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       onChange={(event) => setName(event.target.value)}
                       readOnly={!isEditing}
                     />
+                    <Flex direction={"column"} gap={"1"}>
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Owner
+                      </Text>
+                      <Flex>
+                        <ActorTag
+                          orcid={props.attribute.owner}
+                          fallback={"Unknown User"}
+                          size={"md"}
+                        />
+                      </Flex>
+                    </Flex>
                   </Flex>
 
-                  <Flex direction={"column"} gap={"2"} grow={"1"}>
+                  <Flex
+                    direction={"column"}
+                    gap={"2"}
+                    grow={"1"}
+                    p={"2"}
+                    border={"1px solid"}
+                    borderColor={"gray.300"}
+                    rounded={"md"}
+                  >
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
                       Description
                     </Text>
@@ -159,9 +183,6 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   grow={"1"}
                   h={"fit-content"}
                   bg={"white"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
                 >
                   <Flex
                     direction={"column"}

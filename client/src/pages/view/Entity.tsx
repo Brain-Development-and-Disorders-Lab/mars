@@ -2476,12 +2476,12 @@ const Entity = () => {
                   variant={"solid"}
                   size={"sm"}
                   rounded={"md"}
-                  colorPalette={"blue"}
+                  colorPalette={"green"}
                   onClick={onSaveAsTemplate}
                   disabled={isAttributeError}
                   loading={loadingTemplateCreate}
                 >
-                  Create Template
+                  Save as Template
                   <Icon name={"add"} />
                 </Button>
 
