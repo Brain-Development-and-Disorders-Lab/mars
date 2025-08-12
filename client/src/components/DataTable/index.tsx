@@ -201,6 +201,7 @@ const DataTable = (props: DataTableProps) => {
   const [pageLength, setPageLength] = useState<string[]>(["10"]);
   const pageLengthsCollection = createListCollection({
     items: [
+      { label: "5", value: "5" },
       { label: "10", value: "10" },
       { label: "20", value: "20" },
       { label: "50", value: "50" },

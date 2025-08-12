@@ -488,7 +488,6 @@ const Entity = () => {
               direction={"column"}
               w={{ base: "100%", md: "50%" }}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               grow={"1"}
               rounded={"md"}
@@ -633,7 +632,6 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               grow={"1"}
               basis={"50%"}
@@ -836,7 +834,6 @@ const Entity = () => {
               direction={"column"}
               p={"2"}
               w={"100%"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               rounded={"md"}
             >
