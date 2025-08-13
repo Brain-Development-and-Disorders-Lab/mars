@@ -961,7 +961,11 @@ const Entity = () => {
             >
               {/* Display all Attributes */}
               {selectedAttributes.length > 0 ? (
-                <Stack gap={"2"} w={"100%"}>
+                <Stack
+                  gap={"2"}
+                  w={"100%"}
+                  data-testid={"create-entity-attributes"}
+                >
                   {selectedAttributes.map((attribute) => {
                     return (
                       <AttributeCard

@@ -87,7 +87,7 @@ describe("Create Entities", () => {
     cy.get(".chakra-select__content").contains("Test Template").click();
 
     // Check if the Attribute is displayed
-    cy.get(".chakra-card__root").should("exist"); // Adjust selector based on actual Attribute display
+    cy.get("[data-testid='create-entity-attributes']").should("exist");
 
     // Save the Attribute and finish creating the Entity
     cy.get("button").contains("Save").click();
