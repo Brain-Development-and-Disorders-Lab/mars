@@ -27,7 +27,7 @@ export const ProjectsResolvers = {
     // Retrieve all Projects
     projects: async (
       _parent: IResolverParent,
-      args: { limit: 100 },
+      args: { limit: 100; archived: boolean },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -46,6 +46,13 @@ export const ProjectsResolvers = {
       // Filter by ownership and Workspace membership
       const projects = await Projects.all();
       return projects
+        .filter((project) => {
+          if (args.archived === true) {
+            return true;
+          } else {
+            return project.archived === false;
+          }
+        })
         .filter((project) => _.includes(workspace.projects, project._id))
         .slice(0, args.limit);
     },
