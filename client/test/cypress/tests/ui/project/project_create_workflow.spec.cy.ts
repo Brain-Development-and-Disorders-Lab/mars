@@ -24,6 +24,7 @@ describe("Create Project", () => {
     cy.get('input[name="name"]').type("Test Project");
     cy.get('input[type="datetime-local"]').type("2023-10-01T12:00:00");
     cy.get("textarea").type("This is a test Project.");
+    cy.wait(1000);
 
     // Submit the form
     cy.get("button").contains("Finish").click(); // Click to finish creating the Project
