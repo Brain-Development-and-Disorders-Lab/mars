@@ -789,18 +789,20 @@ const Entity = () => {
                     <Fieldset.Legend>Projects</Fieldset.Legend>
                     <Fieldset.Content>
                       <Stack gap={[1, 5]} direction={"column"}>
-                        {projects.map((project) => {
-                          return (
-                            <Checkbox.Root
-                              key={project._id}
-                              value={project._id}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>{project.name}</Checkbox.Label>
-                            </Checkbox.Root>
-                          );
-                        })}
+                        {projects &&
+                          projects.length > 0 &&
+                          projects.map((project) => {
+                            return (
+                              <Checkbox.Root
+                                key={project._id}
+                                value={project._id}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label>{project.name}</Checkbox.Label>
+                              </Checkbox.Root>
+                            );
+                          })}
                         {projects.length === 0 && (
                           <EmptyState.Root>
                             <EmptyState.Content>
@@ -908,17 +910,19 @@ const Entity = () => {
                           <Portal>
                             <Select.Positioner>
                               <Select.Content>
-                                {templatesCollection.items.map(
-                                  (template: AttributeModel) => (
-                                    <Select.Item
-                                      item={template}
-                                      key={template._id}
-                                    >
-                                      {template.name}
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  ),
-                                )}
+                                {templatesCollection.items &&
+                                  templatesCollection.items.length > 0 &&
+                                  templatesCollection.items.map(
+                                    (template: AttributeModel) => (
+                                      <Select.Item
+                                        item={template}
+                                        key={template._id}
+                                      >
+                                        {template.name}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ),
+                                  )}
                               </Select.Content>
                             </Select.Positioner>
                           </Portal>
