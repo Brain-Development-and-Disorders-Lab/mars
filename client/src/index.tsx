@@ -2,6 +2,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+// Components
+import { toaster } from "src/components/Toast";
+
 // Apollo imports
 import {
   ApolloClient,
@@ -10,6 +13,7 @@ import {
   ApolloLink,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 // Posthog
@@ -60,8 +64,41 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+/**
+ * Error handling for GraphQL errors that occur throughout the application
+ */
+const errorLink = onError(({ graphQLErrors }) => {
+  if (graphQLErrors) {
+    for (const err of graphQLErrors) {
+      if (err.message === "Could not validate token") {
+        toaster.create({
+          title: "Authentication Error",
+          description: "Unable to authenticate user. Please log in again.",
+          type: "error",
+          closable: false,
+          action: {
+            label: "Login",
+            onClick: () => {
+              // Navigate to the login page
+              window.location.href = "/login";
+            },
+          },
+        });
+
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(SESSION_KEY);
+        return;
+      }
+    }
+  }
+});
+
 const client = new ApolloClient({
-  link: ApolloLink.from([authLink, httpLink as unknown as ApolloLink]),
+  link: ApolloLink.from([
+    errorLink,
+    authLink,
+    httpLink as unknown as ApolloLink,
+  ]),
   cache: new InMemoryCache({
     addTypename: false,
     typePolicies: {
