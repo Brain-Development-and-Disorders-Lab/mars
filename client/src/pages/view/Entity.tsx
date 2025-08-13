@@ -2371,7 +2371,10 @@ const Entity = () => {
                           <Flex grow={"1"}>
                             <Fieldset.Root>
                               <Fieldset.Content>
-                                <Field.Root required>
+                                <Field.Root
+                                  data-testid={"create-attribute-name"}
+                                  required
+                                >
                                   <Field.Label>
                                     Name
                                     <Field.RequiredIndicator />
@@ -2422,7 +2425,9 @@ const Entity = () => {
                       >
                         <Fieldset.Root>
                           <Fieldset.Content>
-                            <Field.Root>
+                            <Field.Root
+                              data-testid={"create-attribute-description"}
+                            >
                               <Field.Label>Description</Field.Label>
                               <MDEditor
                                 height={150}

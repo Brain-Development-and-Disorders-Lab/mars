@@ -20,8 +20,10 @@ describe("Entity, edit Attributes", () => {
 
     // Add Attribute
     cy.get("#addAttributeModalButton").click();
-    cy.get("#formName").type("Attribute Name");
-    cy.get("#formDescription").type("Attribute Description");
+    cy.get("[data-testid='create-attribute-name']").type("Attribute Name");
+    cy.get("[data-testid='create-attribute-description']").type(
+      "Attribute Description",
+    );
     cy.get("[data-testid='add-value-button']").click();
     cy.get("input").eq(-2).type("Value Name");
     cy.get("input").eq(-1).type("Value Data");
