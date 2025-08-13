@@ -21,7 +21,7 @@ describe("Create Entities", () => {
 
   it("should navigate through the steps", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 
@@ -72,7 +72,7 @@ describe("Create Entities", () => {
 
   it("should allow adding Template Attributes", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 
@@ -87,7 +87,7 @@ describe("Create Entities", () => {
     cy.get(".chakra-select__content").contains("Test Template").click();
 
     // Check if the Attribute is displayed
-    cy.get(".chakra-card__root").should("exist"); // Adjust selector based on actual Attribute display
+    cy.get("[data-testid='create-entity-attributes']").should("exist");
 
     // Save the Attribute and finish creating the Entity
     cy.get("button").contains("Save").click();
@@ -99,7 +99,7 @@ describe("Create Entities", () => {
 
   it("should complete Entity creation", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 

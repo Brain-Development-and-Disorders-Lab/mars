@@ -28,7 +28,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
     <Flex
       direction={"column"}
       w={"100%"}
-      h={"100vh"}
+      minH={{ base: "92vh", lg: "100vh" }}
       maxH={{ base: "100%" }}
       overflowY={"auto"}
     >
@@ -62,7 +62,6 @@ const Page: FC = () => {
     return (
       <Flex
         direction={{ base: "column", lg: "row" }}
-        minH={"100vh"}
         w={"100%"}
         p={"0"}
         m={"0"}

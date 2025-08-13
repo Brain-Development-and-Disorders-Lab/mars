@@ -488,7 +488,6 @@ const Entity = () => {
               direction={"column"}
               w={{ base: "100%", md: "50%" }}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               grow={"1"}
               rounded={"md"}
@@ -518,6 +517,7 @@ const Entity = () => {
                         ) : (
                           <Flex w={"100%"}>
                             <Input
+                              data-testid={"create-entity-name"}
                               name={"name"}
                               value={name}
                               placeholder={"Name"}
@@ -633,7 +633,6 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               grow={"1"}
               basis={"50%"}
@@ -790,18 +789,20 @@ const Entity = () => {
                     <Fieldset.Legend>Projects</Fieldset.Legend>
                     <Fieldset.Content>
                       <Stack gap={[1, 5]} direction={"column"}>
-                        {projects.map((project) => {
-                          return (
-                            <Checkbox.Root
-                              key={project._id}
-                              value={project._id}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>{project.name}</Checkbox.Label>
-                            </Checkbox.Root>
-                          );
-                        })}
+                        {projects &&
+                          projects.length > 0 &&
+                          projects.map((project) => {
+                            return (
+                              <Checkbox.Root
+                                key={project._id}
+                                value={project._id}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label>{project.name}</Checkbox.Label>
+                              </Checkbox.Root>
+                            );
+                          })}
                         {projects.length === 0 && (
                           <EmptyState.Root>
                             <EmptyState.Content>
@@ -836,27 +837,24 @@ const Entity = () => {
               direction={"column"}
               p={"2"}
               w={"100%"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
               rounded={"md"}
             >
               <Information
                 text={
-                  "Add Attributes containing metadata about this Entity. Attributes can be created from an existing Template or created manually."
+                  "Add Attributes containing metadata about this Entity. Attributes can use an existing Template or be created manually."
                 }
               />
               <Flex
                 direction={"row"}
                 p={"2"}
                 gap={"2"}
+                align={"end"}
                 rounded={"md"}
                 border={"1px solid"}
                 borderColor={"gray.300"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    Select Template:
-                  </Text>
                   {/* Drop-down to select Templates */}
                   <Fieldset.Root maxW={"sm"}>
                     <Fieldset.Content>
@@ -865,6 +863,8 @@ const Entity = () => {
                           key={"select-template"}
                           size={"sm"}
                           collection={templatesCollection}
+                          disabled={templatesCollection.items.length === 0}
+                          rounded={"md"}
                           onValueChange={(details) => {
                             const selectedTemplate = details.items[0];
                             if (!_.isEqual(selectedTemplate._id, "")) {
@@ -889,9 +889,12 @@ const Entity = () => {
                               }
                             }
                           }}
-                          disabled={templatesCollection.items.length === 0}
                         >
                           <Select.HiddenSelect />
+                          <Select.Label>
+                            Use Template ({templatesCollection.items.length}{" "}
+                            available)
+                          </Select.Label>
                           <Select.Control>
                             <Select.Trigger
                               data-testid={"select-template-trigger"}
@@ -907,17 +910,19 @@ const Entity = () => {
                           <Portal>
                             <Select.Positioner>
                               <Select.Content>
-                                {templatesCollection.items.map(
-                                  (template: AttributeModel) => (
-                                    <Select.Item
-                                      item={template}
-                                      key={template._id}
-                                    >
-                                      {template.name}
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  ),
-                                )}
+                                {templatesCollection.items &&
+                                  templatesCollection.items.length > 0 &&
+                                  templatesCollection.items.map(
+                                    (template: AttributeModel) => (
+                                      <Select.Item
+                                        item={template}
+                                        key={template._id}
+                                      >
+                                        {template.name}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ),
+                                  )}
                               </Select.Content>
                             </Select.Positioner>
                           </Portal>
@@ -947,7 +952,7 @@ const Entity = () => {
                     ]);
                   }}
                 >
-                  Create
+                  Create new Attribute
                   <Icon name={"add"} />
                 </Button>
               </Flex>
@@ -961,7 +966,11 @@ const Entity = () => {
             >
               {/* Display all Attributes */}
               {selectedAttributes.length > 0 ? (
-                <Stack gap={"2"} w={"100%"}>
+                <Stack
+                  gap={"2"}
+                  w={"100%"}
+                  data-testid={"create-entity-attributes"}
+                >
                   {selectedAttributes.map((attribute) => {
                     return (
                       <AttributeCard
@@ -1053,7 +1062,6 @@ const Entity = () => {
         </Dialog.Root>
       </Flex>
 
-      {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
 
       {/* Action buttons */}
@@ -1072,7 +1080,7 @@ const Entity = () => {
             size={"sm"}
             rounded={"md"}
             colorPalette={"red"}
-            variant={"outline"}
+            variant={"solid"}
             onClick={() => navigate("/entities")}
           >
             Cancel
@@ -1081,8 +1089,9 @@ const Entity = () => {
           {!_.isEqual("start", pageState) && (
             <Button
               size={"sm"}
+              rounded={"md"}
               colorPalette={"orange"}
-              variant={"outline"}
+              variant={"solid"}
               onClick={onPageBack}
             >
               Back

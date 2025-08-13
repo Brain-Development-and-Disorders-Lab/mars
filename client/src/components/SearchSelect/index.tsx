@@ -312,6 +312,8 @@ const SearchSelect = (props: SearchSelectProps) => {
             {/* Has not yet searched, search operation complete */}
             {!hasSearched &&
               searchLoading === false &&
+              options &&
+              options.length > 0 &&
               options.map((option: IGenericItem) => (
                 <Flex key={`o_${option._id}`}>
                   <Button

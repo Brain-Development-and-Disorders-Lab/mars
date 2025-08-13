@@ -385,7 +385,7 @@ const Template = () => {
           size={"sm"}
           rounded={"md"}
           colorPalette={"red"}
-          variant={"outline"}
+          variant={"solid"}
           onClick={() => navigate("/templates")}
         >
           Cancel

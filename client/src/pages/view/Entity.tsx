@@ -195,6 +195,7 @@ const Entity = () => {
           _id
           name
           description
+          owner
           values {
             _id
             name
@@ -232,6 +233,7 @@ const Entity = () => {
           attributes {
             _id
             name
+            owner
             description
             values {
               _id
@@ -1425,9 +1427,12 @@ const Entity = () => {
                     </Drawer.CloseTrigger>
                     <Drawer.Header pb={"2"}>
                       <Flex direction={"column"} w={"100%"} gap={"2"}>
-                        <Text fontSize={"sm"} fontWeight={"bold"}>
-                          History
-                        </Text>
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
+                          <Icon name={"clock"} size={"md"} />
+                          <Text fontSize={"md"} fontWeight={"semibold"}>
+                            History
+                          </Text>
+                        </Flex>
                         <Flex
                           direction={"row"}
                           gap={"1"}
@@ -1452,10 +1457,24 @@ const Entity = () => {
                             </Text>
                           </Flex>
                         </Flex>
+                        <Flex
+                          direction={"row"}
+                          gap={"1"}
+                          justify={"space-between"}
+                        >
+                          <Flex direction={"row"} gap={"1"}>
+                            <Text fontSize={"sm"} fontWeight={"semibold"}>
+                              Sorted:
+                            </Text>
+                            <Text fontSize={"sm"} fontWeight={"normal"}>
+                              Newest &rarr; Oldest
+                            </Text>
+                          </Flex>
+                        </Flex>
                       </Flex>
                     </Drawer.Header>
 
-                    <Drawer.Body>
+                    <Drawer.Body pt={"0"}>
                       <Stack gap={"2"}>
                         {entityHistory.length > 0 ? (
                           entityHistory.map((entityVersion) => {
@@ -1468,7 +1487,113 @@ const Entity = () => {
                                 border={"1px solid"}
                                 borderColor={"gray.300"}
                               >
-                                <Card.Body p={"2"} pb={"0"}>
+                                <Card.Body p={"2"} pb={"0"} gap={"2"}>
+                                  {/* Version information */}
+                                  <Flex
+                                    direction={"column"}
+                                    gap={"2"}
+                                    w={"100%"}
+                                  >
+                                    <Flex
+                                      direction={"row"}
+                                      gap={"2"}
+                                      bg={"gray.100"}
+                                      rounded={"md"}
+                                      w={"100%"}
+                                      justify={"space-between"}
+                                    >
+                                      <Flex
+                                        direction={"column"}
+                                        gap={"1"}
+                                        p={"2"}
+                                      >
+                                        <Text
+                                          fontSize={"sm"}
+                                          fontWeight={"semibold"}
+                                        >
+                                          Version
+                                        </Text>
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Tag.Root
+                                            size={"sm"}
+                                            colorPalette={"green"}
+                                          >
+                                            <Tag.Label>
+                                              {entityVersion.version}
+                                            </Tag.Label>
+                                          </Tag.Root>
+                                        </Flex>
+                                        <Text
+                                          fontWeight={"semibold"}
+                                          fontSize={"xs"}
+                                          color={"gray.400"}
+                                        >
+                                          {dayjs(
+                                            entityVersion.timestamp,
+                                          ).fromNow()}
+                                        </Text>
+                                        <Text
+                                          fontSize={"sm"}
+                                          fontWeight={"semibold"}
+                                        >
+                                          Message
+                                        </Text>
+                                        {_.isEqual(entityVersion.message, "") ||
+                                        _.isNull(entityVersion.message) ? (
+                                          <Flex>
+                                            <Tag.Root
+                                              size={"sm"}
+                                              colorPalette={"orange"}
+                                            >
+                                              <Tag.Label>No Message</Tag.Label>
+                                            </Tag.Root>
+                                          </Flex>
+                                        ) : (
+                                          <Tooltip
+                                            content={entityVersion.message}
+                                            disabled={
+                                              entityVersion.message.length < 32
+                                            }
+                                            showArrow
+                                          >
+                                            <Text fontSize={"sm"}>
+                                              {_.truncate(
+                                                entityVersion.message,
+                                                {
+                                                  length: 32,
+                                                },
+                                              )}
+                                            </Text>
+                                          </Tooltip>
+                                        )}
+                                      </Flex>
+
+                                      <Flex
+                                        direction={"column"}
+                                        gap={"1"}
+                                        p={"2"}
+                                      >
+                                        <Text
+                                          fontSize={"sm"}
+                                          fontWeight={"semibold"}
+                                        >
+                                          Author
+                                        </Text>
+                                        <Flex>
+                                          <ActorTag
+                                            orcid={entityVersion.author}
+                                            fallback={"Unknown User"}
+                                            size={"md"}
+                                          />
+                                        </Flex>
+                                      </Flex>
+                                    </Flex>
+                                  </Flex>
+
                                   <Flex direction={"column"} gap={"2"}>
                                     {/* Name */}
                                     <Text
@@ -1724,129 +1849,22 @@ const Entity = () => {
                                 </Card.Body>
 
                                 <Card.Footer p={"2"}>
-                                  {/* Version information */}
-                                  <Flex
-                                    direction={"column"}
-                                    gap={"2"}
-                                    w={"100%"}
-                                  >
-                                    <Flex
-                                      direction={"row"}
-                                      gap={"2"}
-                                      bg={"gray.100"}
-                                      justify={"center"}
+                                  <Flex w={"100%"} justify={"right"}>
+                                    <Button
+                                      variant={"solid"}
+                                      size={"sm"}
                                       rounded={"md"}
+                                      colorPalette={"orange"}
+                                      onClick={() =>
+                                        handleRestoreFromHistoryClick(
+                                          entityVersion,
+                                        )
+                                      }
+                                      disabled={entityArchived}
                                     >
-                                      <Flex
-                                        direction={"column"}
-                                        w={"100%"}
-                                        gap={"1"}
-                                        p={"2"}
-                                      >
-                                        <Text
-                                          fontSize={"sm"}
-                                          fontWeight={"semibold"}
-                                        >
-                                          Version
-                                        </Text>
-                                        <Flex
-                                          direction={"row"}
-                                          gap={"2"}
-                                          align={"center"}
-                                        >
-                                          <Tag.Root
-                                            size={"sm"}
-                                            colorPalette={"green"}
-                                          >
-                                            <Tag.Label>
-                                              {entityVersion.version}
-                                            </Tag.Label>
-                                          </Tag.Root>
-                                        </Flex>
-                                        <Text
-                                          fontWeight={"semibold"}
-                                          fontSize={"xs"}
-                                          color={"gray.400"}
-                                        >
-                                          {dayjs(
-                                            entityVersion.timestamp,
-                                          ).fromNow()}
-                                        </Text>
-                                        <Text
-                                          fontSize={"sm"}
-                                          fontWeight={"semibold"}
-                                        >
-                                          Message
-                                        </Text>
-                                        {_.isEqual(entityVersion.message, "") ||
-                                        _.isNull(entityVersion.message) ? (
-                                          <Flex>
-                                            <Tag.Root
-                                              size={"sm"}
-                                              colorPalette={"orange"}
-                                            >
-                                              <Tag.Label>No Message</Tag.Label>
-                                            </Tag.Root>
-                                          </Flex>
-                                        ) : (
-                                          <Tooltip
-                                            content={entityVersion.message}
-                                            disabled={
-                                              entityVersion.message.length < 32
-                                            }
-                                            showArrow
-                                          >
-                                            <Text fontSize={"sm"}>
-                                              {_.truncate(
-                                                entityVersion.message,
-                                                {
-                                                  length: 32,
-                                                },
-                                              )}
-                                            </Text>
-                                          </Tooltip>
-                                        )}
-                                      </Flex>
-
-                                      <Flex
-                                        direction={"column"}
-                                        w={"100%"}
-                                        gap={"1"}
-                                        p={"2"}
-                                      >
-                                        <Text
-                                          fontSize={"sm"}
-                                          fontWeight={"semibold"}
-                                        >
-                                          Author
-                                        </Text>
-                                        <Flex>
-                                          <ActorTag
-                                            orcid={entityVersion.author}
-                                            fallback={"Unknown User"}
-                                            size={"md"}
-                                          />
-                                        </Flex>
-                                      </Flex>
-                                    </Flex>
-
-                                    <Flex w={"100%"} justify={"right"}>
-                                      <Button
-                                        variant={"solid"}
-                                        size={"sm"}
-                                        rounded={"md"}
-                                        colorPalette={"orange"}
-                                        onClick={() =>
-                                          handleRestoreFromHistoryClick(
-                                            entityVersion,
-                                          )
-                                        }
-                                        disabled={entityArchived}
-                                      >
-                                        Restore
-                                        <Icon name={"rewind"} />
-                                      </Button>
-                                    </Flex>
+                                      Restore
+                                      <Icon name={"rewind"} />
+                                    </Button>
                                   </Flex>
                                 </Card.Footer>
                               </Card.Root>
@@ -2263,10 +2281,12 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content ref={addAttributesContainerRef}>
               <Dialog.Header
-                p={"2"}
-                mt={"2"}
+                px={"2"}
+                py={"4"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                roundedTop={"md"}
+                bg={"gray.100"}
               >
                 Add Attribute
                 <Dialog.CloseTrigger asChild>
@@ -2288,6 +2308,7 @@ const Entity = () => {
                     key={"select-template"}
                     size={"sm"}
                     collection={templatesCollection}
+                    disabled={templatesCollection.items.length === 0}
                     onValueChange={(details) => {
                       if (!_.isEqual(details.items[0], "")) {
                         for (const template of templates) {
@@ -2302,7 +2323,10 @@ const Entity = () => {
                     }}
                   >
                     <Select.HiddenSelect />
-                    <Select.Label>Select Template</Select.Label>
+                    <Select.Label>
+                      Use Template ({templatesCollection.items.length}{" "}
+                      available)
+                    </Select.Label>
                     <Select.Control>
                       <Select.Trigger>
                         <Select.ValueText placeholder={"Select Template"} />
@@ -2324,21 +2348,6 @@ const Entity = () => {
                       </Select.Positioner>
                     </Portal>
                   </Select.Root>
-                  <Text fontSize="sm">
-                    Don't see the Template you're looking for? You can
-                    <Link
-                      onClick={() => navigate("/create/template")}
-                      style={{
-                        color: "#3182ce",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      create
-                    </Link>
-                    a new Template here.
-                  </Text>
 
                   <Flex
                     direction={"column"}
@@ -2346,61 +2355,97 @@ const Entity = () => {
                     w={"100%"}
                     justify={"center"}
                   >
-                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <Fieldset.Root>
-                        <Fieldset.Content>
-                          <Field.Root required>
-                            <Field.Label>
-                              Name
-                              <Field.RequiredIndicator />
-                            </Field.Label>
-                            <Input
-                              size={"sm"}
-                              placeholder={"Name"}
-                              id="formName"
-                              rounded={"md"}
-                              value={attributeName}
-                              onChange={(event) =>
-                                setAttributeName(event.target.value)
-                              }
-                              required
-                            />
-                            {isAttributeNameError && (
-                              <Field.ErrorText>
-                                A name must be specified for the Attribute.
-                              </Field.ErrorText>
-                            )}
-                          </Field.Root>
+                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                      {/* Attribute name */}
+                      <Flex
+                        direction={"column"}
+                        p={"2"}
+                        h={"fit-content"}
+                        w={{ base: "100%", md: "50%" }}
+                        gap={"2"}
+                        rounded={"md"}
+                        border={"1px solid"}
+                        borderColor={"gray.300"}
+                      >
+                        <Flex direction={"row"} gap={"2"}>
+                          <Flex grow={"1"}>
+                            <Fieldset.Root>
+                              <Fieldset.Content>
+                                <Field.Root
+                                  data-testid={"create-attribute-name"}
+                                  required
+                                >
+                                  <Field.Label>
+                                    Name
+                                    <Field.RequiredIndicator />
+                                  </Field.Label>
+                                  <Input
+                                    bg={"white"}
+                                    size={"sm"}
+                                    rounded={"md"}
+                                    placeholder={"Name"}
+                                    value={attributeName}
+                                    onChange={(event) =>
+                                      setAttributeName(event.target.value)
+                                    }
+                                  />
+                                </Field.Root>
+                              </Fieldset.Content>
+                            </Fieldset.Root>
+                          </Flex>
+                        </Flex>
 
-                          <Field.Root required>
-                            <Field.Label>
-                              Description
-                              <Field.RequiredIndicator />
-                            </Field.Label>
-                            <MDEditor
-                              height={150}
-                              minHeight={100}
-                              maxHeight={400}
-                              style={{ width: "100%" }}
-                              value={attributeDescription}
-                              preview={editing ? "edit" : "preview"}
-                              id={"formDescription"}
-                              extraCommands={[]}
-                              onChange={(value) => {
-                                setAttributeDescription(value || "");
-                              }}
-                            />
-                            {isAttributeDescriptionError && (
-                              <Field.ErrorText>
-                                A description should be provided for the
-                                Attribute.
-                              </Field.ErrorText>
-                            )}
-                          </Field.Root>
-                        </Fieldset.Content>
-                      </Fieldset.Root>
+                        {/* "Owner" field */}
+                        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                          <Flex direction={"column"} gap={"1"}>
+                            <Text fontWeight={"semibold"} fontSize={"sm"}>
+                              Owner
+                            </Text>
+                            <Flex>
+                              <ActorTag
+                                orcid={token.orcid}
+                                fallback={"Unknown User"}
+                                size={"md"}
+                              />
+                            </Flex>
+                          </Flex>
+                        </Flex>
+                      </Flex>
+
+                      {/* Attribute description */}
+                      <Flex
+                        direction={"row"}
+                        p={"2"}
+                        h={"fit-content"}
+                        gap={"2"}
+                        border={"1px solid"}
+                        borderColor={"gray.300"}
+                        rounded={"md"}
+                        grow={"1"}
+                      >
+                        <Fieldset.Root>
+                          <Fieldset.Content>
+                            <Field.Root
+                              data-testid={"create-attribute-description"}
+                            >
+                              <Field.Label>Description</Field.Label>
+                              <MDEditor
+                                height={150}
+                                minHeight={100}
+                                maxHeight={400}
+                                style={{ width: "100%" }}
+                                value={attributeDescription}
+                                preview={"edit"}
+                                extraCommands={[]}
+                                onChange={(value) => {
+                                  setAttributeDescription(value || "");
+                                }}
+                              />
+                            </Field.Root>
+                          </Fieldset.Content>
+                        </Fieldset.Root>
+                      </Flex>
                     </Flex>
-
                     <Flex>
                       <Fieldset.Root invalid={isAttributeValueError}>
                         <Fieldset.Content>
@@ -2416,52 +2461,50 @@ const Entity = () => {
                     </Flex>
                   </Flex>
                 </Flex>
-
-                {/* Modal buttons */}
-                <Flex direction={"row"} justify={"center"} gap={"2"}>
-                  {/* "Cancel" button */}
-                  <Button
-                    variant={"outline"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setAddAttributesOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} />
-                  </Button>
-
-                  <Spacer />
-
-                  <Button
-                    variant={"solid"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={onSaveAsTemplate}
-                    disabled={isAttributeError}
-                    loading={loadingTemplateCreate}
-                  >
-                    Create Template
-                    <Icon name={"add"} />
-                  </Button>
-
-                  <Button
-                    data-testid={"save-add-attribute-button"}
-                    variant={"solid"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    disabled={isAttributeError}
-                    onClick={() => {
-                      addAttribute();
-                    }}
-                  >
-                    Save
-                    <Icon name={"check"} />
-                  </Button>
-                </Flex>
               </Dialog.Body>
+              <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+                {/* "Cancel" button */}
+                <Button
+                  variant={"solid"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"red"}
+                  onClick={() => setAddAttributesOpen(false)}
+                >
+                  Cancel
+                  <Icon name={"cross"} />
+                </Button>
+
+                <Spacer />
+
+                <Button
+                  variant={"solid"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={onSaveAsTemplate}
+                  disabled={isAttributeError}
+                  loading={loadingTemplateCreate}
+                >
+                  Save as Template
+                  <Icon name={"add"} />
+                </Button>
+
+                <Button
+                  data-testid={"save-add-attribute-button"}
+                  variant={"solid"}
+                  size={"sm"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  disabled={isAttributeError}
+                  onClick={() => {
+                    addAttribute();
+                  }}
+                >
+                  Save
+                  <Icon name={"check"} />
+                </Button>
+              </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
@@ -2631,7 +2674,7 @@ const Entity = () => {
                   {/* "Cancel" button */}
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
-                      variant={"outline"}
+                      variant={"solid"}
                       size={"sm"}
                       rounded={"md"}
                       colorPalette={"red"}
@@ -2810,7 +2853,7 @@ const Entity = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
@@ -3435,7 +3478,7 @@ const Entity = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}
@@ -3475,18 +3518,40 @@ const Entity = () => {
             <Dialog.Content>
               <Dialog.Header
                 p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
+                flexShrink={0}
+                bg={"gray.100"}
+                borderBottom={"2px"}
+                roundedTop={"md"}
               >
-                <Icon name={"save"} />
-                Saving Changes
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                  wrap={"wrap"}
+                >
+                  <Flex
+                    align={"center"}
+                    gap={"2"}
+                    p={"2"}
+                    border={"2px"}
+                    rounded={"md"}
+                  >
+                    <Icon name={"save"} />
+                    <Text fontSize={"md"} fontWeight={"semibold"}>
+                      Saving Changes
+                    </Text>
+                  </Flex>
+                </Flex>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton
+                    size={"sm"}
+                    onClick={() => setSaveMessageOpen(false)}
+                    _hover={{ bg: "gray.200" }}
+                  />
+                </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"sm"} color={"gray.600"}>
-                    Specify a description of the changes made to the Entity.
-                  </Text>
                   <MDEditor
                     height={150}
                     minHeight={100}
@@ -3496,6 +3561,10 @@ const Entity = () => {
                     value={saveMessage}
                     preview={"edit"}
                     extraCommands={[]}
+                    textareaProps={{
+                      placeholder:
+                        "Enter a description of the changes made to the Entity.",
+                    }}
                     onChange={(value) => {
                       setSaveMessage(value || "");
                     }}
@@ -3510,7 +3579,7 @@ const Entity = () => {
                   justify={"space-between"}
                 >
                   <Button
-                    variant={"outline"}
+                    variant={"solid"}
                     size={"sm"}
                     rounded={"md"}
                     colorPalette={"red"}

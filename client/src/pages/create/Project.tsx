@@ -217,7 +217,7 @@ const Project = () => {
                   <Field.Root required>
                     <Field.Label>Name</Field.Label>
                     <Input
-                      id={"name"}
+                      data-testid={"create-project-name"}
                       name={"name"}
                       size={"sm"}
                       rounded={"md"}
@@ -388,7 +388,7 @@ const Project = () => {
           size={"sm"}
           rounded={"md"}
           colorPalette={"red"}
-          variant={"outline"}
+          variant={"solid"}
           onClick={() => navigate("/projects")}
         >
           Cancel
