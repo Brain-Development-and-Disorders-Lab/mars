@@ -47,6 +47,11 @@ const Setup = () => {
    * Handle the "Done" button being clicked after user information is entered
    */
   const onDoneClick = async () => {
+    if (!token.orcid || !token.token) {
+      navigate("/login");
+      return;
+    }
+
     setIsLoading(true);
 
     const result = await setup({
@@ -70,10 +75,16 @@ const Setup = () => {
    * Utility function to examine the setup state, as a composition of state components
    */
   const checkSetupState = async () => {
+    if (!token.orcid || !token.token) {
+      navigate("/login");
+      return;
+    }
+
     if (token.setup === true) {
       // Activate a Workspace and navigate to the dashboard
       await activateWorkspace("");
       navigate("/");
+      return;
     } else if (
       token.orcid === "" &&
       token.setup === false &&
@@ -81,6 +92,7 @@ const Setup = () => {
     ) {
       // Attempting to access setup without ORCiD, navigate to login page
       navigate("/login");
+      return;
     }
     setIsLoading(false);
   };
@@ -91,149 +103,169 @@ const Setup = () => {
 
   return (
     <Content isLoaded={!isLoading}>
-      <Flex h={"10vh"} p={"4"}>
-        <Flex gap={"2"} align={"center"} p={"4"}>
-          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
-          <Heading size={"md"}>Metadatify</Heading>
-        </Flex>
-      </Flex>
-      <Flex
-        direction={"column"}
-        justify={"center"}
-        align={"center"}
-        alignSelf={"center"}
-        gap={"8"}
-        w={["sm", "md", "lg"]}
-        h={"80vh"} // Header is 10vh, so 90vh - 10vh = 80vh
-        wrap={"wrap"}
-      >
+      {!token.orcid || !token.token ? (
         <Flex
           direction={"column"}
-          p={"8"}
-          gap={"4"}
-          bg={"white"}
-          align={"center"}
           justify={"center"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
-          rounded={"md"}
+          align={"center"}
+          h={"100vh"}
         >
-          <Heading size={"xl"} fontWeight={"semibold"}>
-            Create your account
-          </Heading>
-
-          <Text fontWeight={"semibold"} fontSize={"sm"}>
-            Complete your account information before continuing.
-          </Text>
-
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            w={"100%"}
-            align={"center"}
-            justify={"left"}
-            pt={"8"}
-          >
-            <Text fontWeight={"semibold"}>ORCiD:</Text>
-            <Tag.Root colorPalette={"green"}>
-              <Tag.Label>{token.orcid}</Tag.Label>
-            </Tag.Root>
-          </Flex>
-
-          <Fieldset.Root>
-            <Fieldset.Content>
-              <Flex direction={"column"} gap={"2"}>
-                <Flex direction={"row"} gap={"2"}>
-                  <Flex direction={"column"} w={"100%"}>
-                    <Field.Root required>
-                      <Field.Label>
-                        First Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userFirstNameInput"}
-                        size={"sm"}
-                        rounded={"md"}
-                        value={userFirstName}
-                        onChange={(event) =>
-                          setUserFirstName(event.target.value)
-                        }
-                      />
-                    </Field.Root>
-                  </Flex>
-                  <Flex direction={"column"} w={"100%"}>
-                    <Field.Root required>
-                      <Field.Label>
-                        Last Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userLastNameInput"}
-                        size={"sm"}
-                        rounded={"md"}
-                        value={userLastName}
-                        onChange={(event) =>
-                          setUserLastName(event.target.value)
-                        }
-                      />
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex direction={"column"}>
-                    <Field.Root>
-                      <Field.Label>
-                        Email
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userEmailInput"}
-                        size={"sm"}
-                        rounded={"md"}
-                        type={"email"}
-                        value={userEmail}
-                        onChange={(event) => setUserEmail(event.target.value)}
-                      />
-                    </Field.Root>
-                  </Flex>
-                  <Flex direction={"column"}>
-                    <Field.Root>
-                      <Field.Label>
-                        Affiliation
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userAffiliationInput"}
-                        size={"sm"}
-                        rounded={"md"}
-                        value={userAffiliation}
-                        onChange={(event) =>
-                          setUserAffiliation(event.target.value)
-                        }
-                      />
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-              </Flex>
-
-              <Flex align={"center"} justify={"right"} w={"100%"}>
-                <Button
-                  id={"userDoneButton"}
-                  colorPalette={"green"}
-                  size={"sm"}
-                  rounded={"md"}
-                  onClick={() => onDoneClick()}
-                  loading={isLoading}
-                  disabled={!userComplete}
-                >
-                  Done
-                  <Icon name={"check"} />
-                </Button>
-              </Flex>
-            </Fieldset.Content>
-          </Fieldset.Root>
+          <Text>Redirecting to login...</Text>
         </Flex>
-      </Flex>
+      ) : (
+        <>
+          <Flex h={"10vh"} p={"4"}>
+            <Flex gap={"2"} align={"center"} p={"4"}>
+              <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
+              <Heading size={"md"} color={"primary"}>
+                Metadatify
+              </Heading>
+            </Flex>
+          </Flex>
+          <Flex
+            direction={"column"}
+            justify={"center"}
+            align={"center"}
+            alignSelf={"center"}
+            gap={"8"}
+            w={["sm", "md"]}
+            h={"80vh"}
+            wrap={"wrap"}
+          >
+            <Flex
+              direction={"column"}
+              p={"8"}
+              gap={"4"}
+              bg={"white"}
+              align={"center"}
+              justify={"center"}
+              border={"1px solid"}
+              borderColor={"gray.300"}
+              rounded={"md"}
+            >
+              <Heading size={"xl"} fontWeight={"semibold"}>
+                Complete your Metadatify account
+              </Heading>
+
+              <Text color={"gray.500"} fontWeight={"semibold"} fontSize={"sm"}>
+                Please provide some additional information about yourself before
+                continuing.
+              </Text>
+
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                w={"100%"}
+                align={"center"}
+                justify={"left"}
+                pt={"8"}
+              >
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Your ORCiD:
+                </Text>
+                <Tag.Root colorPalette={"green"}>
+                  <Tag.Label>{token.orcid}</Tag.Label>
+                </Tag.Root>
+              </Flex>
+
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Flex direction={"column"} gap={"2"}>
+                    <Flex direction={"row"} gap={"2"}>
+                      <Flex direction={"column"} w={"100%"}>
+                        <Field.Root required>
+                          <Field.Label>
+                            First Name
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Input
+                            id={"userFirstNameInput"}
+                            size={"sm"}
+                            rounded={"md"}
+                            value={userFirstName}
+                            onChange={(event) =>
+                              setUserFirstName(event.target.value)
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                      <Flex direction={"column"} w={"100%"}>
+                        <Field.Root required>
+                          <Field.Label>
+                            Last Name
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Input
+                            id={"userLastNameInput"}
+                            size={"sm"}
+                            rounded={"md"}
+                            value={userLastName}
+                            onChange={(event) =>
+                              setUserLastName(event.target.value)
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                    </Flex>
+                    <Flex direction={"column"} gap={"2"}>
+                      <Flex direction={"column"}>
+                        <Field.Root required>
+                          <Field.Label>
+                            Email
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Input
+                            id={"userEmailInput"}
+                            size={"sm"}
+                            rounded={"md"}
+                            type={"email"}
+                            value={userEmail}
+                            onChange={(event) =>
+                              setUserEmail(event.target.value)
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                      <Flex direction={"column"}>
+                        <Field.Root required>
+                          <Field.Label>
+                            Institution
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Input
+                            id={"userAffiliationInput"}
+                            size={"sm"}
+                            rounded={"md"}
+                            value={userAffiliation}
+                            onChange={(event) =>
+                              setUserAffiliation(event.target.value)
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+
+                  <Flex align={"center"} justify={"right"} w={"100%"}>
+                    <Button
+                      id={"userDoneButton"}
+                      colorPalette={"green"}
+                      size={"sm"}
+                      rounded={"md"}
+                      onClick={() => onDoneClick()}
+                      loading={isLoading}
+                      disabled={!userComplete}
+                    >
+                      Done
+                      <Icon name={"check"} />
+                    </Button>
+                  </Flex>
+                </Fieldset.Content>
+              </Fieldset.Root>
+            </Flex>
+          </Flex>
+        </>
+      )}
     </Content>
   );
 };
