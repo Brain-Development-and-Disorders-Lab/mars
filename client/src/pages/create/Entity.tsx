@@ -517,6 +517,7 @@ const Entity = () => {
                         ) : (
                           <Flex w={"100%"}>
                             <Input
+                              data-testid={"create-entity-name"}
                               name={"name"}
                               value={name}
                               placeholder={"Name"}

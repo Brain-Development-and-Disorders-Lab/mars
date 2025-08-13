@@ -21,7 +21,7 @@ describe("Create Entities", () => {
 
   it("should navigate through the steps", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 
@@ -72,7 +72,7 @@ describe("Create Entities", () => {
 
   it("should allow adding Template Attributes", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 
@@ -99,7 +99,7 @@ describe("Create Entities", () => {
 
   it("should complete Entity creation", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']").type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("textarea").type("This is a test entity.");
 
