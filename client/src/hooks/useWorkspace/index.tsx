@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 // GraphQL
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useApolloClient } from "@apollo/client";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -27,6 +27,7 @@ const WorkspaceContext = createContext({} as WorkspaceContextValue);
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   const [session, setSession] = useSession();
   const [activeWorkspace, setActiveWorkspace] = useState(session.workspace);
+  const client = useApolloClient();
 
   // If the active Workspace is updated and store the identifier in the session token
   useEffect(() => {
@@ -74,8 +75,11 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
           message: "User is not a member of any Workspaces",
         };
       }
+
+      await client.clearStore();
       setActiveWorkspace(workspacesData[0]._id);
     } else {
+      await client.clearStore();
       setActiveWorkspace(workspace);
     }
 
