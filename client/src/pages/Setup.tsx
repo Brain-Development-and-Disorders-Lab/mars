@@ -13,19 +13,22 @@ import {
   Fieldset,
   Field,
   Spinner,
+  Select,
+  createListCollection,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { isValidEmail } from "src/util";
 
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 const Setup = () => {
-  const { token, setup } = useAuthentication();
+  const { token, setup, logout } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
 
   const navigate = useNavigate();
@@ -38,11 +41,44 @@ const Setup = () => {
   const [userLastName, setUserLastName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userAffiliation, setUserAffiliation] = useState("");
+
+  // Email validation state
+  const [emailError, setEmailError] = useState("");
+  const [isEmailValid, setIsEmailValid] = useState(false);
+
   const userComplete =
     userFirstName !== "" &&
     userLastName !== "" &&
     userEmail !== "" &&
-    userAffiliation !== "";
+    userAffiliation !== "" &&
+    isEmailValid;
+
+  // Affiliation options collection
+  const affiliationCollection = createListCollection({
+    items: [
+      { label: "No Affiliation", value: "No Affiliation" },
+      {
+        label: "Washington University in St. Louis",
+        value: "Washington University in St. Louis",
+      },
+    ],
+  });
+
+  /**
+   * Validate email format and update validation state
+   */
+  const validateEmail = (email: string) => {
+    const isValid = isValidEmail(email);
+    setIsEmailValid(isValid);
+
+    if (email === "") {
+      setEmailError("");
+    } else if (!isValid) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
 
   /**
    * Handle the "Done" button being clicked after user information is entered
@@ -232,7 +268,7 @@ const Setup = () => {
                     </Flex>
                     <Flex direction={"column"} gap={"4"}>
                       <Flex direction={"column"}>
-                        <Field.Root required>
+                        <Field.Root invalid={emailError !== ""} required>
                           <Field.Label>
                             Email
                             <Field.RequiredIndicator />
@@ -242,46 +278,87 @@ const Setup = () => {
                             size={"sm"}
                             rounded={"md"}
                             type={"email"}
-                            borderColor={"gray.300"}
+                            borderColor={emailError ? "red.300" : "gray.300"}
                             _focus={{
                               borderColor: "primary",
                               boxShadow:
                                 "0 0 0 1px var(--chakra-colors-primary)",
                             }}
                             value={userEmail}
-                            onChange={(event) =>
-                              setUserEmail(event.target.value)
-                            }
+                            onChange={(event) => {
+                              setUserEmail(event.target.value);
+                              validateEmail(event.target.value);
+                            }}
                           />
+                          <Field.ErrorText
+                            color={"red.500"}
+                            fontSize={"xs"}
+                            mt={"1"}
+                          >
+                            {emailError}
+                          </Field.ErrorText>
                         </Field.Root>
                       </Flex>
                       <Flex direction={"column"}>
                         <Field.Root required>
                           <Field.Label>
-                            Institution
+                            Affiliation
                             <Field.RequiredIndicator />
                           </Field.Label>
-                          <Input
-                            id={"userAffiliationInput"}
+                          <Select.Root
+                            collection={affiliationCollection}
                             size={"sm"}
-                            rounded={"md"}
-                            borderColor={"gray.300"}
-                            _focus={{
-                              borderColor: "primary",
-                              boxShadow:
-                                "0 0 0 1px var(--chakra-colors-primary)",
-                            }}
-                            value={userAffiliation}
-                            onChange={(event) =>
-                              setUserAffiliation(event.target.value)
+                            value={userAffiliation ? [userAffiliation] : []}
+                            onValueChange={(details) =>
+                              setUserAffiliation(details.value[0] || "")
                             }
-                          />
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText
+                                  placeholder={"Select your affiliation"}
+                                />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {affiliationCollection.items.map(
+                                  (affiliation) => (
+                                    <Select.Item
+                                      item={affiliation}
+                                      key={affiliation.value}
+                                    >
+                                      {affiliation.label}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  ),
+                                )}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Select.Root>
                         </Field.Root>
                       </Flex>
                     </Flex>
                   </Flex>
 
-                  <Flex align={"center"} justify={"right"} w={"100%"}>
+                  <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                    <Button
+                      id={"userDoneButton"}
+                      colorPalette={"orange"}
+                      size={"sm"}
+                      rounded={"md"}
+                      onClick={() => {
+                        logout();
+                        navigate("/login");
+                      }}
+                    >
+                      Logout
+                      <Icon name={"logout"} />
+                    </Button>
                     <Button
                       id={"userDoneButton"}
                       colorPalette={"green"}
