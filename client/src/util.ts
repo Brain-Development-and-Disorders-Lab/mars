@@ -83,6 +83,19 @@ export const isValidOrcid = (orcid: string): boolean => {
 };
 
 /**
+ * Check if an email is in valid format
+ * @param {string} email the email to validate
+ * @returns {boolean}
+ */
+export const isValidEmail = (email: string): boolean => {
+  if (_.isUndefined(email) || _.isEqual(email, "")) {
+    return false;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+/**
  * Retrieve an authentication token from session storage
  * @param {string} tokenKey the key of the token in storage
  * @returns {any}

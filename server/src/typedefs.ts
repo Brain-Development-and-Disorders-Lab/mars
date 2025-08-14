@@ -456,7 +456,7 @@ export const typedefs = `#graphql
     user(_id: String): User
 
     # Project queries
-    projects(limit: Int): [Project]
+    projects(limit: Int, archived: Boolean): [Project]
     project(_id: String): Project
     projectMetrics: ProjectMetrics
 

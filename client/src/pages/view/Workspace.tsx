@@ -71,13 +71,16 @@ const Workspace = () => {
 
   // Queries
   const GET_WORKSPACE_DATA = gql`
-    query GetWorkspaceData($archived: Boolean) {
-      projects {
+    query GetWorkspaceData(
+      $projectsArchived: Boolean
+      $entitiesArchived: Boolean
+    ) {
+      projects(archived: $projectsArchived) {
         _id
         name
         archived
       }
-      entities(archived: $archived) {
+      entities(archived: $entitiesArchived) {
         _id
         name
         archived
@@ -107,7 +110,8 @@ const Workspace = () => {
   }>(GET_WORKSPACE_DATA, {
     fetchPolicy: "network-only",
     variables: {
-      archived: true,
+      projectsArchived: true,
+      entitiesArchived: true,
     },
   });
 

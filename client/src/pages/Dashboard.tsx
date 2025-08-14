@@ -59,12 +59,13 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 // Queries
 const GET_DASHBOARD = gql`
   query GetDashboard(
-    $projectLimit: Int
     $entityLimit: Int
     $entitiesArchived: Boolean
+    $projectLimit: Int
+    $projectsArchived: Boolean
     $activityLimit: Int
   ) {
-    projects(limit: $projectLimit) {
+    projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
       name
       description

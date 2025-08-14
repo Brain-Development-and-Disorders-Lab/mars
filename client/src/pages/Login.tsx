@@ -159,7 +159,9 @@ const Login = () => {
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
           <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
-          <Heading size={"md"}>Metadatify</Heading>
+          <Heading size={"md"} color={"primary"}>
+            Metadatify
+          </Heading>
         </Flex>
       </Flex>
       <Flex
@@ -169,28 +171,29 @@ const Login = () => {
         alignSelf={"center"}
         gap={"8"}
         w={["sm", "md", "lg"]}
-        h={"80vh"} // Header is 10vh, so 90vh - 10vh = 80vh
+        h={"80vh"}
         wrap={"wrap"}
       >
         <Flex direction={"column"} gap={"4"}>
           <Flex
             direction={"column"}
             p={"8"}
-            gap={"4"}
+            gap={"6"}
             h={"md"}
             bg={"white"}
             align={"center"}
             justify={"center"}
             border={"1px solid"}
-            borderColor={"gray.300"}
-            rounded={"md"}
+            borderColor={"gray.200"}
+            rounded={"lg"}
+            shadow={"sm"}
           >
             <Heading size={"2xl"} fontWeight={"semibold"}>
               Sign in
             </Heading>
 
             <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
-              Get started with one of the sign in options below.
+              Use one of the sign in options below to get started.
             </Text>
 
             <Flex direction={"column"} gap={"2"} pt={"8"}>
@@ -222,7 +225,9 @@ const Login = () => {
                 colorPalette={"gray"}
                 gap={"4"}
                 disabled
+                opacity={0.6}
               >
+                <Icon name={"clock"} />
                 More sign in options coming soon.
               </Button>
             </Flex>
