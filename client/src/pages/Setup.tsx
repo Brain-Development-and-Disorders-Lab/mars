@@ -308,6 +308,7 @@ const Setup = () => {
                           <Select.Root
                             collection={affiliationCollection}
                             size={"sm"}
+                            rounded={"md"}
                             value={userAffiliation ? [userAffiliation] : []}
                             onValueChange={(details) =>
                               setUserAffiliation(details.value[0] || "")
@@ -315,7 +316,7 @@ const Setup = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger data-testid="affiliation-select-trigger">
                                 <Select.ValueText
                                   placeholder={"Select your affiliation"}
                                 />
