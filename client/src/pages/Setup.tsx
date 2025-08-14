@@ -12,6 +12,7 @@ import {
   Input,
   Fieldset,
   Field,
+  Spinner,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -109,8 +110,12 @@ const Setup = () => {
           justify={"center"}
           align={"center"}
           h={"100vh"}
+          gap={"4"}
         >
-          <Text>Redirecting to login...</Text>
+          <Spinner size={"md"} color={"primary"} />
+          <Text color={"gray.500"} fontWeight={"semibold"} fontSize={"sm"}>
+            Redirecting to login...
+          </Text>
         </Flex>
       ) : (
         <>
@@ -135,19 +140,25 @@ const Setup = () => {
             <Flex
               direction={"column"}
               p={"8"}
-              gap={"4"}
+              gap={"6"}
               bg={"white"}
               align={"center"}
               justify={"center"}
               border={"1px solid"}
-              borderColor={"gray.300"}
-              rounded={"md"}
+              borderColor={"gray.200"}
+              rounded={"lg"}
+              shadow={"sm"}
             >
               <Heading size={"xl"} fontWeight={"semibold"}>
                 Complete your Metadatify account
               </Heading>
 
-              <Text color={"gray.500"} fontWeight={"semibold"} fontSize={"sm"}>
+              <Text
+                color={"gray.500"}
+                fontWeight={"semibold"}
+                fontSize={"sm"}
+                textAlign={"center"}
+              >
                 Please provide some additional information about yourself before
                 continuing.
               </Text>
@@ -163,15 +174,15 @@ const Setup = () => {
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Your ORCiD:
                 </Text>
-                <Tag.Root colorPalette={"green"}>
+                <Tag.Root colorPalette={"primary"}>
                   <Tag.Label>{token.orcid}</Tag.Label>
                 </Tag.Root>
               </Flex>
 
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Flex direction={"column"} gap={"2"}>
-                    <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"column"} gap={"4"}>
+                    <Flex direction={"row"} gap={"4"}>
                       <Flex direction={"column"} w={"100%"}>
                         <Field.Root required>
                           <Field.Label>
@@ -182,6 +193,12 @@ const Setup = () => {
                             id={"userFirstNameInput"}
                             size={"sm"}
                             rounded={"md"}
+                            borderColor={"gray.300"}
+                            _focus={{
+                              borderColor: "primary",
+                              boxShadow:
+                                "0 0 0 1px var(--chakra-colors-primary)",
+                            }}
                             value={userFirstName}
                             onChange={(event) =>
                               setUserFirstName(event.target.value)
@@ -199,6 +216,12 @@ const Setup = () => {
                             id={"userLastNameInput"}
                             size={"sm"}
                             rounded={"md"}
+                            borderColor={"gray.300"}
+                            _focus={{
+                              borderColor: "primary",
+                              boxShadow:
+                                "0 0 0 1px var(--chakra-colors-primary)",
+                            }}
                             value={userLastName}
                             onChange={(event) =>
                               setUserLastName(event.target.value)
@@ -207,7 +230,7 @@ const Setup = () => {
                         </Field.Root>
                       </Flex>
                     </Flex>
-                    <Flex direction={"column"} gap={"2"}>
+                    <Flex direction={"column"} gap={"4"}>
                       <Flex direction={"column"}>
                         <Field.Root required>
                           <Field.Label>
@@ -219,6 +242,12 @@ const Setup = () => {
                             size={"sm"}
                             rounded={"md"}
                             type={"email"}
+                            borderColor={"gray.300"}
+                            _focus={{
+                              borderColor: "primary",
+                              boxShadow:
+                                "0 0 0 1px var(--chakra-colors-primary)",
+                            }}
                             value={userEmail}
                             onChange={(event) =>
                               setUserEmail(event.target.value)
@@ -236,6 +265,12 @@ const Setup = () => {
                             id={"userAffiliationInput"}
                             size={"sm"}
                             rounded={"md"}
+                            borderColor={"gray.300"}
+                            _focus={{
+                              borderColor: "primary",
+                              boxShadow:
+                                "0 0 0 1px var(--chakra-colors-primary)",
+                            }}
                             value={userAffiliation}
                             onChange={(event) =>
                               setUserAffiliation(event.target.value)
@@ -256,7 +291,7 @@ const Setup = () => {
                       loading={isLoading}
                       disabled={!userComplete}
                     >
-                      Done
+                      Complete Setup
                       <Icon name={"check"} />
                     </Button>
                   </Flex>

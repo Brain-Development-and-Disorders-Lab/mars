@@ -178,14 +178,15 @@ const Login = () => {
           <Flex
             direction={"column"}
             p={"8"}
-            gap={"4"}
+            gap={"6"}
             h={"md"}
             bg={"white"}
             align={"center"}
             justify={"center"}
             border={"1px solid"}
-            borderColor={"gray.300"}
-            rounded={"md"}
+            borderColor={"gray.200"}
+            rounded={"lg"}
+            shadow={"sm"}
           >
             <Heading size={"2xl"} fontWeight={"semibold"}>
               Sign in
@@ -224,7 +225,9 @@ const Login = () => {
                 colorPalette={"gray"}
                 gap={"4"}
                 disabled
+                opacity={0.6}
               >
+                <Icon name={"clock"} />
                 More sign in options coming soon.
               </Button>
             </Flex>
