@@ -11,11 +11,6 @@ import * as fs from "fs";
 import "source-map-support/register";
 import _ from "lodash";
 
-// Monitoring
-import { collectDefaultMetrics, register } from "prom-client";
-import { Metrics } from "./models/Metrics";
-import { createPrometheusExporterPlugin } from "@bmatei/apollo-prometheus-exporter";
-
 // Get the connection functions
 import { connect } from "./connectors/database";
 
@@ -54,9 +49,6 @@ import APIRouter from "./models/API";
 consola.level =
   process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
 
-// Prometheus
-collectDefaultMetrics();
-
 // Posthog
 import { PostHog } from "posthog-node";
 export const PostHogClient =
@@ -68,10 +60,6 @@ export const PostHogClient =
 
 const port = process.env.PORT || 8000;
 const app = express();
-const prometheusExporterPlugin = createPrometheusExporterPlugin({
-  app,
-  defaultMetrics: false,
-});
 const httpServer = http.createServer(app);
 
 // Setup CORS origins
@@ -100,9 +88,6 @@ const start = async () => {
     consola.info("Creating /public directory...");
     fs.mkdirSync(__dirname + "/public");
   }
-
-  // Setup server Prometheus
-  Metrics.setupPrometheus();
 
   // Setup the GraphQL server
   const server = new ApolloServer<Context>({
@@ -144,24 +129,11 @@ const start = async () => {
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
-    plugins: [
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-      prometheusExporterPlugin,
-    ],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   consola.start("Starting GraphQL server...");
   await server.start();
   consola.success("GraphQL server running!");
-
-  // Serve Prometheus metrics
-  app.get("/metrics", async (_req, res) => {
-    try {
-      res.set("Content-Type", register.contentType);
-      res.end(await register.metrics());
-    } catch (err) {
-      res.status(500).end(err);
-    }
-  });
 
   // Serve static resources
   app.use(
