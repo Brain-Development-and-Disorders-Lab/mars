@@ -87,7 +87,7 @@ import { IconType } from "react-icons";
 import _ from "lodash";
 
 // Define the icon set
-const SYSTEM_ICONS: Record<string, IconType> = {
+export const SYSTEM_ICONS: Record<string, IconType> = {
   // Default
   unknown: BsQuestionOctagonFill,
 
