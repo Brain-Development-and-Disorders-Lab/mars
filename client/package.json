@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "webpack serve --config webpack.dev.js",
+    "start:storybook": "storybook dev --port 6006 --no-open",
     "build": "webpack --config webpack.prod.js",
     "build:storybook": "storybook build",
     "clean": "rm -rf dist",
@@ -17,8 +18,7 @@
     "lint:fix": "prettier . --write",
     "test:components": "jest  --verbose",
     "test:ui": "cypress run",
-    "scan": "react-scan localhost:8080",
-    "storybook": "storybook dev --port 6006 --no-open"
+    "scan": "react-scan localhost:8080"
   },
   "dependencies": {
     "@apollo/client": "^3.10.1",
