@@ -61,7 +61,7 @@ export const WithData: Story = {
         _id: "1",
         name: "Project Name",
         type: "text",
-        data: "Mars Research Project",
+        data: "MARS Project",
       },
       {
         _id: "2",
@@ -108,7 +108,7 @@ export const ReadOnly: Story = {
         _id: "1",
         name: "Project Name",
         type: "text",
-        data: "Mars Research Project",
+        data: "MARS Project",
       },
       {
         _id: "2",
@@ -156,7 +156,7 @@ export const ResponsiveContainer: Story = {
         _id: "1",
         name: "Project Name",
         type: "text",
-        data: "Mars Research Project",
+        data: "MARS Project",
       },
       {
         _id: "2",
@@ -164,21 +164,76 @@ export const ResponsiveContainer: Story = {
         type: "number",
         data: 50000,
       },
+      {
+        _id: "3",
+        name: "Start Date",
+        type: "date",
+        data: "2024-01-15",
+      },
+      {
+        _id: "4",
+        name: "Repository URL",
+        type: "url",
+        data: "https://github.com/example/mars-project",
+      },
+      {
+        _id: "5",
+        name: "Description",
+        type: "text",
+        data: "A long description that demonstrates scrolling behavior",
+      },
+      {
+        _id: "6",
+        name: "Team Size",
+        type: "number",
+        data: 15,
+      },
+      {
+        _id: "7",
+        name: "Status",
+        type: "text",
+        data: "Active",
+      },
+      {
+        _id: "8",
+        name: "End Date",
+        type: "date",
+        data: "2024-12-31",
+      },
     ]);
 
     return (
       <Flex direction="column" gap={4} p={4}>
         <Text fontSize="sm" color="gray.600">
-          Container width: 320px (max-width)
+          Container width: 320px, height: 400px (table scrollable, navigation
+          fixed)
         </Text>
-        <Box w="320px" border="1px solid" borderColor="gray.300" p={2}>
+        <Box
+          w="320px"
+          h="400px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+        >
           <ValuesRemix {...args} values={values} setValues={setValues} />
         </Box>
 
         <Text fontSize="sm" color="gray.600">
-          Container width: 200px (should scroll)
+          Container width: 200px, height: 300px (should scroll both directions)
         </Text>
-        <Box w="200px" border="1px solid" borderColor="gray.300" p={2}>
+        <Box
+          w="200px"
+          h="300px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+        >
           <ValuesRemix {...args} values={values} setValues={setValues} />
         </Box>
       </Flex>

@@ -652,517 +652,530 @@ const ValuesRemix = (props: {
   };
 
   return (
-    <Box w="100%" overflowX="auto" css={{ WebkitOverflowScrolling: "touch" }}>
+    <Box
+      w="100%"
+      display="flex"
+      flexDirection="column"
+      css={{ WebkitOverflowScrolling: "touch" }}
+    >
       {/* Table */}
-      <Box
-        minW="800px"
-        w="100%"
-        border="1px solid"
-        borderColor="gray.200"
-        borderRadius="md"
-        overflow="hidden"
-      >
-        {/* Header Row */}
-        <Flex
-          gap={0}
-          bg="gray.50"
-          borderBottom="1px solid"
+      <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
+        <Box
+          minW="800px"
+          w="100%"
+          border="1px solid"
           borderColor="gray.200"
-          direction="row"
+          borderRadius="md"
+          overflow="hidden"
         >
-          {/* Drag Handle Column Header - only show in edit mode */}
-          {!props.viewOnly && (
+          {/* Header Row */}
+          <Flex
+            gap={0}
+            bg="gray.50"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            direction="row"
+          >
+            {/* Drag Handle Column Header - only show in edit mode */}
+            {!props.viewOnly && (
+              <Box
+                w="40px"
+                px={1}
+                py={1}
+                textAlign="center"
+                bg="gray.50"
+                borderRight="1px solid"
+                borderColor="gray.200"
+              />
+            )}
+
+            {/* Type Column Header */}
             <Box
-              w="40px"
+              w={`${columnWidths.type}px`}
               px={1}
               py={1}
-              textAlign="center"
-              bg="gray.50"
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
               borderRight="1px solid"
               borderColor="gray.200"
-            />
-          )}
-
-          {/* Type Column Header */}
-          <Box
-            w={`${columnWidths.type}px`}
-            px={1}
-            py={1}
-            fontSize="xs"
-            fontWeight="semibold"
-            color="gray.600"
-            borderRight="1px solid"
-            borderColor="gray.200"
-            position="relative"
-            textAlign="center"
-            lineHeight="1.2"
-          >
-            <Text>Type</Text>
-            {/* Resize Handle */}
-            <Box
-              position="absolute"
-              right="-1px"
-              top="0"
-              bottom="0"
-              width="3px"
-              cursor="col-resize"
-              bg="transparent"
-              _hover={{ bg: "blue.300" }}
-              onMouseDown={(e) => handleResizeStart("type", e)}
-              zIndex={10}
-            />
-          </Box>
-
-          {/* Name Column Header */}
-          <Box
-            w={`${columnWidths.name}px`}
-            px={1}
-            py={1}
-            fontSize="xs"
-            fontWeight="semibold"
-            color="gray.600"
-            borderRight="1px solid"
-            borderColor="gray.200"
-            position="relative"
-            textAlign="center"
-            lineHeight="1.2"
-          >
-            <Text>Name</Text>
-            {/* Resize Handle */}
-            <Box
-              position="absolute"
-              right="-1px"
-              top="0"
-              bottom="0"
-              width="3px"
-              cursor="col-resize"
-              bg="transparent"
-              _hover={{ bg: "blue.300" }}
-              onMouseDown={(e) => handleResizeStart("name", e)}
-              zIndex={10}
-            />
-          </Box>
-
-          {/* Value Column Header */}
-          <Flex
-            w={`${columnWidths.value}px`}
-            flex="1"
-            px={1}
-            py={1}
-            fontSize="xs"
-            fontWeight="semibold"
-            color="gray.600"
-            position="relative"
-            justify="center"
-            align="center"
-          >
-            <Text>Value</Text>
-            {/* Resize Handle */}
-            <Box
-              position="absolute"
-              right="-1px"
-              top="0"
-              bottom="0"
-              width="3px"
-              cursor="col-resize"
-              bg="transparent"
-              _hover={{ bg: "blue.300" }}
-              onMouseDown={(e) => handleResizeStart("value", e)}
-              zIndex={10}
-            />
-          </Flex>
-        </Flex>
-
-        {/* Data Rows */}
-        <Box maxH="300px" overflowY="auto" overflowX="hidden">
-          {paginatedValues.map((value, index) => (
-            <Flex
-              key={value._id}
-              gap={0}
-              borderBottom={
-                index < paginatedValues.length - 1 ? "1px solid" : "none"
-              }
-              borderColor="gray.200"
-              _hover={{ bg: "gray.25" }}
-              overflow="hidden"
-              bg={selectedRows.has(value._id) ? "blue.50" : "transparent"}
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
             >
-              {/* Drag Handle Column - only show in edit mode */}
-              {!props.viewOnly && (
+              <Text>Type</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("type", e)}
+                zIndex={10}
+              />
+            </Box>
+
+            {/* Name Column Header */}
+            <Box
+              w={`${columnWidths.name}px`}
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              borderRight="1px solid"
+              borderColor="gray.200"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+            >
+              <Text>Name</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("name", e)}
+                zIndex={10}
+              />
+            </Box>
+
+            {/* Value Column Header */}
+            <Flex
+              w={`${columnWidths.value}px`}
+              flex="1"
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              position="relative"
+              justify="center"
+              align="center"
+            >
+              <Text>Value</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("value", e)}
+                zIndex={10}
+              />
+            </Flex>
+          </Flex>
+
+          {/* Data Rows */}
+          <Box overflowY="auto" overflowX="hidden">
+            {paginatedValues.map((value, index) => (
+              <Flex
+                key={value._id}
+                gap={0}
+                borderBottom={
+                  index < paginatedValues.length - 1 ? "1px solid" : "none"
+                }
+                borderColor="gray.200"
+                _hover={{ bg: "gray.25" }}
+                overflow="hidden"
+                bg={selectedRows.has(value._id) ? "blue.50" : "transparent"}
+              >
+                {/* Drag Handle Column - only show in edit mode */}
+                {!props.viewOnly && (
+                  <Box
+                    w="40px"
+                    px={1}
+                    py={0.5}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    borderRight="1px solid"
+                    borderColor="gray.200"
+                    bg={
+                      selectedRows.has(value._id) ? "blue.100" : "transparent"
+                    }
+                    _hover={
+                      !props.viewOnly
+                        ? {
+                            bg: selectedRows.has(value._id)
+                              ? "blue.200"
+                              : "gray.100",
+                          }
+                        : {}
+                    }
+                    cursor={props.viewOnly ? "default" : "pointer"}
+                  >
+                    <Checkbox.Root
+                      checked={selectedRows.has(value._id)}
+                      onChange={() =>
+                        !props.viewOnly && toggleRowSelection(value._id)
+                      }
+                      size="xs"
+                      colorPalette="blue"
+                      disabled={props.viewOnly}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
+                  </Box>
+                )}
+                {/* Type Column */}
                 <Box
-                  w="40px"
-                  px={1}
-                  py={0.5}
+                  w={`${columnWidths.type}px`}
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
                   borderRight="1px solid"
                   borderColor="gray.200"
-                  bg={selectedRows.has(value._id) ? "blue.100" : "transparent"}
-                  _hover={
-                    !props.viewOnly
-                      ? {
-                          bg: selectedRows.has(value._id)
-                            ? "blue.200"
-                            : "gray.100",
-                        }
-                      : {}
-                  }
-                  cursor={props.viewOnly ? "default" : "pointer"}
                 >
-                  <Checkbox.Root
-                    checked={selectedRows.has(value._id)}
-                    onChange={() =>
-                      !props.viewOnly && toggleRowSelection(value._id)
-                    }
-                    size="xs"
-                    colorPalette="blue"
-                    disabled={props.viewOnly}
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                  </Checkbox.Root>
-                </Box>
-              )}
-              {/* Type Column */}
-              <Box
-                w={`${columnWidths.type}px`}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                borderRight="1px solid"
-                borderColor="gray.200"
-              >
-                {!props.viewOnly ? (
-                  <Select.Root
-                    size="xs"
-                    border="1px solid transparent"
-                    collection={createListCollection({
-                      items: [
-                        { value: "number", label: "Number" },
-                        { value: "text", label: "Text" },
-                        { value: "url", label: "URL" },
-                        { value: "date", label: "Date" },
-                        { value: "entity", label: "Entity" },
-                        { value: "select", label: "Select" },
-                      ],
-                    })}
-                    onValueChange={(details) =>
-                      handleTypeChange(
-                        value._id,
-                        details.items[0].value as IValueType,
-                      )
-                    }
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger
-                        minW="100px"
-                        h="20px"
-                        borderRadius="none"
-                        border="none"
-                      >
-                        <Flex align="center" gap={1}>
-                          {getTypeIcon(value.type)}
-                          <Text fontSize="xs" color="gray.700">
-                            {value.type === "url"
-                              ? "URL"
-                              : _.capitalize(value.type)}
-                          </Text>
-                        </Flex>
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Select.Positioner>
-                      <Select.Content zIndex={9999}>
-                        {[
+                  {!props.viewOnly ? (
+                    <Select.Root
+                      size="xs"
+                      border="1px solid transparent"
+                      collection={createListCollection({
+                        items: [
                           { value: "number", label: "Number" },
                           { value: "text", label: "Text" },
                           { value: "url", label: "URL" },
                           { value: "date", label: "Date" },
                           { value: "entity", label: "Entity" },
                           { value: "select", label: "Select" },
-                        ].map((option) => (
-                          <Select.Item item={option} key={option.value}>
-                            <Flex align="center" gap={2}>
-                              {getTypeIcon(option.value as IValueType)}
-                              {option.label}
-                            </Flex>
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Select.Root>
-                ) : (
-                  <Flex align="center" gap={1} w="60px">
-                    {getTypeIcon(value.type)}
-                    <Text fontSize="xs" color="gray.700">
-                      {value.type === "url" ? "URL" : _.capitalize(value.type)}
-                    </Text>
-                  </Flex>
-                )}
-              </Box>
-
-              {/* Name Column */}
-              <Box
-                w={`${columnWidths.name}px`}
-                p={"0"}
-                m={"0"}
-                borderRight="1px solid"
-                borderColor="gray.200"
-              >
-                <Input
-                  value={value.name}
-                  onChange={(e) => handleNameChange(value._id, e.target.value)}
-                  size="xs"
-                  px={1}
-                  py={0.5}
-                  h="100%"
-                  fontSize="xs"
-                  readOnly={props.viewOnly}
-                  placeholder="Enter name"
-                  border="1px solid transparent"
-                  borderRadius="none"
-                  bg="transparent"
-                  cursor={props.viewOnly ? "default" : "text"}
-                  onClick={
-                    props.viewOnly ? (e) => e.preventDefault() : undefined
-                  }
-                  _focus={{
-                    bg: "white",
-                    border: "1px solid",
-                    borderColor: "blue.300",
-                  }}
-                  _hover={{
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }}
-                />
-              </Box>
-
-              {/* Value Column */}
-              <Flex
-                w={`${columnWidths.value}px`}
-                flex="1"
-                p={"0"}
-                overflow="visible"
-                justify="space-between"
-                align="center"
-              >
-                {renderDataInput(value)}
-                {props.viewOnly && value.type !== "entity" && (
-                  <IconButton
-                    aria-label="Copy value"
-                    size="2xs"
-                    mx={"1"}
-                    variant="outline"
-                    colorPalette="gray"
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        value.data?.toString() || "",
-                      )
-                    }
-                  >
-                    <Icon name="copy" size="xs" />
-                  </IconButton>
-                )}
-              </Flex>
-            </Flex>
-          ))}
-        </Box>
-
-        {/* Add or Delete Selected Rows Button */}
-        {!props.viewOnly && (
-          <Flex
-            borderTop="1px solid"
-            borderColor="gray.200"
-            p={0}
-            justify="center"
-            align="center"
-            bg="gray.50"
-            _hover={{ bg: "gray.100" }}
-          >
-            {selectedRows.size > 0 ? (
-              <Button
-                size="xs"
-                variant="ghost"
-                colorPalette="red"
-                onClick={removeSelectedRows}
-                aria-label="Delete selected rows"
-                w="100%"
-              >
-                <Icon name="delete" />
-                <Text ml={1}>
-                  Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
-                  {selectedRows.size})
-                </Text>
-              </Button>
-            ) : (
-              <Button
-                size="xs"
-                variant="ghost"
-                colorPalette="green"
-                onClick={addRow}
-                aria-label="Add row"
-                w="100%"
-              >
-                <Icon name="add" />
-                <Text ml={1}>Add Row</Text>
-              </Button>
-            )}
-          </Flex>
-        )}
-
-        {/* Select Options Modal */}
-        <Dialog.Root
-          open={selectModalOpen}
-          size="sm"
-          placement="center"
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header p={"0"} roundedTop="md" bg="gray.100">
-                <Flex direction="row" align="center" gap="1" p={"2"}>
-                  <Icon name="v_select" />
-                  <Text fontSize="xs" fontWeight="semibold">
-                    Setup Options
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton
-                    size="2xs"
-                    onClick={cancelSelectOptions}
-                    _hover={{ bg: "gray.200" }}
-                  />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p="2" gap="2" pb="1">
-                <Flex direction="column" gap="2">
-                  <Flex direction="row" gap="2">
-                    <Input
-                      size="xs"
-                      rounded="md"
-                      placeholder="Enter option value"
-                      value={newOption}
-                      onChange={(e) => setNewOption(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          addOption();
-                        }
-                      }}
-                    />
-                    <Button
-                      colorPalette="green"
-                      size="xs"
-                      rounded="md"
-                      onClick={addOption}
-                      disabled={
-                        !newOption.trim() ||
-                        selectOptions.includes(newOption.trim())
+                        ],
+                      })}
+                      onValueChange={(details) =>
+                        handleTypeChange(
+                          value._id,
+                          details.items[0].value as IValueType,
+                        )
                       }
                     >
-                      Add
-                      <Icon name="add" />
-                    </Button>
-                  </Flex>
-                  <Box>
-                    <Stack
-                      gap="1"
-                      separator={<Separator />}
-                      pb="1"
-                      maxH="200px"
-                      overflowY={"auto"}
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger
+                          minW="100px"
+                          h="20px"
+                          borderRadius="none"
+                          border="none"
+                        >
+                          <Flex align="center" gap={1}>
+                            {getTypeIcon(value.type)}
+                            <Text fontSize="xs" color="gray.700">
+                              {value.type === "url"
+                                ? "URL"
+                                : _.capitalize(value.type)}
+                            </Text>
+                          </Flex>
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Select.Positioner>
+                        <Select.Content zIndex={9999}>
+                          {[
+                            { value: "number", label: "Number" },
+                            { value: "text", label: "Text" },
+                            { value: "url", label: "URL" },
+                            { value: "date", label: "Date" },
+                            { value: "entity", label: "Entity" },
+                            { value: "select", label: "Select" },
+                          ].map((option) => (
+                            <Select.Item item={option} key={option.value}>
+                              <Flex align="center" gap={2}>
+                                {getTypeIcon(option.value as IValueType)}
+                                {option.label}
+                              </Flex>
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Select.Root>
+                  ) : (
+                    <Flex align="center" gap={1} w="60px">
+                      {getTypeIcon(value.type)}
+                      <Text fontSize="xs" color="gray.700">
+                        {value.type === "url"
+                          ? "URL"
+                          : _.capitalize(value.type)}
+                      </Text>
+                    </Flex>
+                  )}
+                </Box>
+
+                {/* Name Column */}
+                <Box
+                  w={`${columnWidths.name}px`}
+                  p={"0"}
+                  m={"0"}
+                  borderRight="1px solid"
+                  borderColor="gray.200"
+                >
+                  <Input
+                    value={value.name}
+                    onChange={(e) =>
+                      handleNameChange(value._id, e.target.value)
+                    }
+                    size="xs"
+                    px={1}
+                    py={0.5}
+                    h="100%"
+                    fontSize="xs"
+                    readOnly={props.viewOnly}
+                    placeholder="Enter name"
+                    border="1px solid transparent"
+                    borderRadius="none"
+                    bg="transparent"
+                    cursor={props.viewOnly ? "default" : "text"}
+                    onClick={
+                      props.viewOnly ? (e) => e.preventDefault() : undefined
+                    }
+                    _focus={{
+                      bg: "white",
+                      border: "1px solid",
+                      borderColor: "blue.300",
+                    }}
+                    _hover={{
+                      border: "1px solid",
+                      borderColor: "blue.200",
+                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                    }}
+                  />
+                </Box>
+
+                {/* Value Column */}
+                <Flex
+                  w={`${columnWidths.value}px`}
+                  flex="1"
+                  p={"0"}
+                  overflow="visible"
+                  justify="space-between"
+                  align="center"
+                >
+                  {renderDataInput(value)}
+                  {props.viewOnly && value.type !== "entity" && (
+                    <IconButton
+                      aria-label="Copy value"
+                      size="2xs"
+                      mx={"1"}
+                      variant="outline"
+                      colorPalette="gray"
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          value.data?.toString() || "",
+                        )
+                      }
                     >
-                      {selectOptions.length > 0 ? (
-                        selectOptions.map((option, index) => (
+                      <Icon name="copy" size="xs" />
+                    </IconButton>
+                  )}
+                </Flex>
+              </Flex>
+            ))}
+          </Box>
+
+          {/* Add or Delete Selected Rows Button */}
+          {!props.viewOnly && (
+            <Flex
+              borderTop="1px solid"
+              borderColor="gray.200"
+              p={0}
+              justify="center"
+              align="center"
+              bg="gray.50"
+              _hover={{ bg: "gray.100" }}
+            >
+              {selectedRows.size > 0 ? (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="red"
+                  onClick={removeSelectedRows}
+                  aria-label="Delete selected rows"
+                  w="100%"
+                >
+                  <Icon name="delete" />
+                  <Text ml={1}>
+                    Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
+                    {selectedRows.size})
+                  </Text>
+                </Button>
+              ) : (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="green"
+                  onClick={addRow}
+                  aria-label="Add row"
+                  w="100%"
+                >
+                  <Icon name="add" />
+                  <Text ml={1}>Add Row</Text>
+                </Button>
+              )}
+            </Flex>
+          )}
+
+          {/* Select Options Modal */}
+          <Dialog.Root
+            open={selectModalOpen}
+            size="sm"
+            placement="center"
+            closeOnEscape
+            closeOnInteractOutside
+          >
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header p={"0"} roundedTop="md" bg="gray.100">
+                  <Flex direction="row" align="center" gap="1" p={"2"}>
+                    <Icon name="v_select" />
+                    <Text fontSize="xs" fontWeight="semibold">
+                      Setup Options
+                    </Text>
+                  </Flex>
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton
+                      size="2xs"
+                      onClick={cancelSelectOptions}
+                      _hover={{ bg: "gray.200" }}
+                    />
+                  </Dialog.CloseTrigger>
+                </Dialog.Header>
+                <Dialog.Body p="2" gap="2" pb="1">
+                  <Flex direction="column" gap="2">
+                    <Flex direction="row" gap="2">
+                      <Input
+                        size="xs"
+                        rounded="md"
+                        placeholder="Enter option value"
+                        value={newOption}
+                        onChange={(e) => setNewOption(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            addOption();
+                          }
+                        }}
+                      />
+                      <Button
+                        colorPalette="green"
+                        size="xs"
+                        rounded="md"
+                        onClick={addOption}
+                        disabled={
+                          !newOption.trim() ||
+                          selectOptions.includes(newOption.trim())
+                        }
+                      >
+                        Add
+                        <Icon name="add" />
+                      </Button>
+                    </Flex>
+                    <Box>
+                      <Stack
+                        gap="1"
+                        separator={<Separator />}
+                        pb="1"
+                        maxH="200px"
+                        overflowY={"auto"}
+                      >
+                        {selectOptions.length > 0 ? (
+                          selectOptions.map((option, index) => (
+                            <Flex
+                              key={option}
+                              direction="row"
+                              cursor={props.viewOnly ? "default" : "text"}
+                              onClick={
+                                props.viewOnly
+                                  ? (e) => e.preventDefault()
+                                  : undefined
+                              }
+                              justify="space-between"
+                              align="center"
+                            >
+                              <Flex gap="1">
+                                <Text fontWeight="semibold" fontSize="xs">
+                                  Value {index + 1}:
+                                </Text>
+                                <Text fontSize="xs">{option}</Text>
+                              </Flex>
+                              <IconButton
+                                aria-label={`remove_${index}`}
+                                size="2xs"
+                                colorPalette="red"
+                                onClick={() => removeOption(option)}
+                              >
+                                <Icon name="delete" />
+                              </IconButton>
+                            </Flex>
+                          ))
+                        ) : (
                           <Flex
-                            key={option}
-                            direction="row"
                             cursor={props.viewOnly ? "default" : "text"}
                             onClick={
                               props.viewOnly
                                 ? (e) => e.preventDefault()
                                 : undefined
                             }
-                            justify="space-between"
                             align="center"
+                            justify="center"
+                            minH="60px"
+                            rounded="md"
+                            border="1px"
+                            borderColor="gray.300"
                           >
-                            <Flex gap="1">
-                              <Text fontWeight="semibold" fontSize="xs">
-                                Value {index + 1}:
-                              </Text>
-                              <Text fontSize="xs">{option}</Text>
-                            </Flex>
-                            <IconButton
-                              aria-label={`remove_${index}`}
-                              size="2xs"
-                              colorPalette="red"
-                              onClick={() => removeOption(option)}
+                            <Text
+                              fontSize="xs"
+                              fontWeight="semibold"
+                              color="gray.400"
                             >
-                              <Icon name="delete" />
-                            </IconButton>
+                              No values added.
+                            </Text>
                           </Flex>
-                        ))
-                      ) : (
-                        <Flex
-                          cursor={props.viewOnly ? "default" : "text"}
-                          onClick={
-                            props.viewOnly
-                              ? (e) => e.preventDefault()
-                              : undefined
-                          }
-                          align="center"
-                          justify="center"
-                          minH="60px"
-                          rounded="md"
-                          border="1px"
-                          borderColor="gray.300"
-                        >
-                          <Text
-                            fontSize="xs"
-                            fontWeight="semibold"
-                            color="gray.400"
-                          >
-                            No values added.
-                          </Text>
-                        </Flex>
-                      )}
-                    </Stack>
-                  </Box>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
-                <Button
-                  size="xs"
-                  rounded="md"
-                  colorPalette="red"
-                  onClick={cancelSelectOptions}
-                >
-                  Cancel
-                  <Icon name="cross" />
-                </Button>
-                <Spacer />
-                <Button
-                  size="xs"
-                  rounded="md"
-                  colorPalette="green"
-                  onClick={confirmSelectOptions}
-                  disabled={selectOptions.length === 0}
-                >
-                  Confirm
-                  <Icon name="check" />
-                </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+                        )}
+                      </Stack>
+                    </Box>
+                  </Flex>
+                </Dialog.Body>
+                <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+                  <Button
+                    size="xs"
+                    rounded="md"
+                    colorPalette="red"
+                    onClick={cancelSelectOptions}
+                  >
+                    Cancel
+                    <Icon name="cross" />
+                  </Button>
+                  <Spacer />
+                  <Button
+                    size="xs"
+                    rounded="md"
+                    colorPalette="green"
+                    onClick={confirmSelectOptions}
+                    disabled={selectOptions.length === 0}
+                  >
+                    Confirm
+                    <Icon name="check" />
+                  </Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Dialog.Root>
+        </Box>
       </Box>
 
       {/* Pagination Toolbar */}
@@ -1173,6 +1186,7 @@ const ValuesRemix = (props: {
         justify={{ base: "space-between", sm: "space-between" }}
         w="100%"
         my={1}
+        flexShrink={0}
       >
         <Flex direction="row" gap={1} align="center" wrap="wrap">
           <IconButton
