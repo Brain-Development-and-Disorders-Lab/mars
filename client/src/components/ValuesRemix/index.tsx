@@ -304,38 +304,6 @@ const ValuesRemix = (props: {
     setSelectedRows(new Set());
   };
 
-  const moveRowUp = () => {
-    if (selectedRows.size !== 1) return;
-    const selectedId = Array.from(selectedRows)[0];
-    const selectedIndex = localValues.findIndex((v) => v._id === selectedId);
-    if (selectedIndex <= 0) return;
-
-    const updatedValues = [...localValues];
-    [updatedValues[selectedIndex - 1], updatedValues[selectedIndex]] = [
-      updatedValues[selectedIndex],
-      updatedValues[selectedIndex - 1],
-    ];
-
-    setLocalValues(updatedValues);
-    props.setValues(updatedValues);
-  };
-
-  const moveRowDown = () => {
-    if (selectedRows.size !== 1) return;
-    const selectedId = Array.from(selectedRows)[0];
-    const selectedIndex = localValues.findIndex((v) => v._id === selectedId);
-    if (selectedIndex >= localValues.length - 1) return;
-
-    const updatedValues = [...localValues];
-    [updatedValues[selectedIndex], updatedValues[selectedIndex + 1]] = [
-      updatedValues[selectedIndex + 1],
-      updatedValues[selectedIndex],
-    ];
-
-    setLocalValues(updatedValues);
-    props.setValues(updatedValues);
-  };
-
   const toggleRowSelection = (valueId: string) => {
     const newSelection = new Set(selectedRows);
     if (newSelection.has(valueId)) {
@@ -350,18 +318,18 @@ const ValuesRemix = (props: {
   const getTypeIcon = (type: IValueType) => {
     switch (type) {
       case "number":
-        return <Icon size="sm" name="v_number" color="green.300" />;
+        return <Icon size="xs" name="v_number" color="green.300" />;
       case "text":
-        return <Icon size="sm" name="v_text" color="blue.300" />;
+        return <Icon size="xs" name="v_text" color="blue.300" />;
       case "url":
-        return <Icon size="sm" name="v_url" color="yellow.300" />;
+        return <Icon size="xs" name="v_url" color="yellow.300" />;
       case "date":
-        return <Icon size="sm" name="v_date" color="orange.300" />;
+        return <Icon size="xs" name="v_date" color="orange.300" />;
       case "select":
-        return <Icon size="sm" name="v_select" color="cyan.300" />;
+        return <Icon size="xs" name="v_select" color="cyan.300" />;
       case "entity":
       default:
-        return <Icon size="sm" name="entity" color="purple.300" />;
+        return <Icon size="xs" name="entity" color="purple.300" />;
     }
   };
 
@@ -386,14 +354,14 @@ const ValuesRemix = (props: {
             onChange={(e) =>
               handleDataChange(value._id, parseFloat(e.target.value) || 0)
             }
-            size="sm"
-            px={1}
-            py={0.5}
-            fontSize="sm"
+            size="xs"
+            h="100%"
+            borderRadius="none"
+            fontSize="xs"
             type="number"
             readOnly={props.viewOnly}
             placeholder="Enter number"
-            border="none"
+            border="1px solid transparent"
             bg="transparent"
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
@@ -419,13 +387,13 @@ const ValuesRemix = (props: {
           <Input
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="sm"
-            px={1}
-            py={0.5}
-            fontSize="sm"
+            size="xs"
+            h="100%"
+            borderRadius="none"
+            fontSize="xs"
             readOnly={props.viewOnly}
             placeholder="Enter text"
-            border="none"
+            border="1px solid transparent"
             bg="transparent"
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
@@ -451,13 +419,13 @@ const ValuesRemix = (props: {
           <Input
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="sm"
-            px={1}
-            py={0.5}
-            fontSize="sm"
+            size="xs"
+            h="100%"
+            borderRadius="none"
+            fontSize="xs"
             readOnly={props.viewOnly}
             placeholder="Enter URL"
-            border="none"
+            border="1px solid transparent"
             bg="transparent"
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
@@ -483,13 +451,13 @@ const ValuesRemix = (props: {
           <Input
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="sm"
-            px={1}
-            py={0.5}
-            fontSize="sm"
+            size="xs"
+            h="100%"
+            borderRadius="none"
+            fontSize="xs"
             type="date"
             readOnly={props.viewOnly}
-            border="none"
+            border="1px solid transparent"
             bg="transparent"
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
@@ -516,7 +484,10 @@ const ValuesRemix = (props: {
           // Show dropdown with configured options
           return (
             <Select.Root
-              size="sm"
+              size="xs"
+              minW="100px"
+              h="100%"
+              border="1px solid transparent"
               value={value.data.selected ? [value.data.selected._id] : []}
               collection={createListCollection({
                 items: (
@@ -539,10 +510,24 @@ const ValuesRemix = (props: {
                   selected: selectedOption || "",
                 });
               }}
+              _focus={{
+                bg: "white",
+                border: "1px solid",
+                borderColor: "blue.300",
+              }}
+              _hover={
+                !props.viewOnly
+                  ? {
+                      border: "1px solid",
+                      borderColor: "blue.200",
+                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                    }
+                  : {}
+              }
             >
               <Select.HiddenSelect />
               <Select.Control>
-                <Select.Trigger minW="100px" h="20px">
+                <Select.Trigger border="none" borderRadius="none">
                   <Select.ValueText placeholder="Select Value">
                     {value.data.selected?.name || "Select Value"}
                   </Select.ValueText>
@@ -573,22 +558,32 @@ const ValuesRemix = (props: {
             </Select.Root>
           );
         } else {
-          // Show "Setup Values" button
+          // Show "Setup Options" button
           return (
-            <Flex w="100%" h="100%" align="center" justify="center">
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="blue"
-                onClick={() => openSelectModal(value._id)}
-                disabled={props.viewOnly}
-                px={2}
-                py={0.5}
-                fontSize="xs"
-                h="20px"
-              >
-                Setup Values
-              </Button>
+            <Flex
+              w="100%"
+              h="100%"
+              p={"0"}
+              align="center"
+              justify="center"
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={
+                !props.viewOnly
+                  ? {
+                      bg: "blue.50",
+                      cursor: "pointer",
+                    }
+                  : {}
+              }
+              onClick={() => openSelectModal(value._id)}
+            >
+              <Text fontSize="xs" fontWeight="semibold" color="blue.600">
+                Setup Options
+              </Text>
             </Flex>
           );
         }
@@ -596,13 +591,35 @@ const ValuesRemix = (props: {
       case "entity":
         if (!props.viewOnly) {
           return (
-            <SearchSelect
-              placeholder="Select Entity"
-              resultType="entity"
-              value={value.data || { _id: "", name: "" }}
-              onChange={(entity) => handleDataChange(value._id, entity)}
-              disabled={props.viewOnly}
-            />
+            <Flex
+              w="100%"
+              h="100%"
+              p={"0"}
+              align="center"
+              justify="center"
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={
+                !props.viewOnly
+                  ? {
+                      borderColor: "blue.200",
+                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                    }
+                  : {}
+              }
+            >
+              <SearchSelect
+                placeholder="Select Entity"
+                resultType="entity"
+                value={value.data || { _id: "", name: "" }}
+                onChange={(entity) => handleDataChange(value._id, entity)}
+                disabled={props.viewOnly}
+                isEmbedded
+              />
+            </Flex>
           );
         } else {
           return (
@@ -617,13 +634,13 @@ const ValuesRemix = (props: {
           <Input
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="sm"
+            size="xs"
             px={1}
             py={0.5}
-            fontSize="sm"
+            fontSize="xs"
             readOnly={props.viewOnly}
             placeholder="Enter value"
-            border="none"
+            border="1px solid transparent"
             bg="transparent"
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
@@ -647,7 +664,7 @@ const ValuesRemix = (props: {
   };
 
   return (
-    <Box w="100%">
+    <Box w="100%" overflowX="auto" css={{ WebkitOverflowScrolling: "touch" }}>
       {/* Table */}
       <Box
         minW="800px"
@@ -655,7 +672,7 @@ const ValuesRemix = (props: {
         border="1px solid"
         borderColor="gray.200"
         borderRadius="md"
-        overflow="visible"
+        overflow="hidden"
       >
         {/* Header Row */}
         <Flex
@@ -668,7 +685,7 @@ const ValuesRemix = (props: {
           {/* Drag Handle Column Header - only show in edit mode */}
           {!props.viewOnly && (
             <Box
-              w="30px"
+              w="40px"
               px={1}
               py={1}
               textAlign="center"
@@ -769,7 +786,7 @@ const ValuesRemix = (props: {
         </Flex>
 
         {/* Data Rows */}
-        <Box maxH="300px" overflowY="auto" overflowX="visible">
+        <Box maxH="300px" overflowY="auto" overflowX="hidden">
           {paginatedValues.map((value, index) => (
             <Flex
               key={value._id}
@@ -779,13 +796,13 @@ const ValuesRemix = (props: {
               }
               borderColor="gray.200"
               _hover={{ bg: "gray.25" }}
-              overflow="visible"
+              overflow="hidden"
               bg={selectedRows.has(value._id) ? "blue.50" : "transparent"}
             >
               {/* Drag Handle Column - only show in edit mode */}
               {!props.viewOnly && (
                 <Box
-                  w="30px"
+                  w="40px"
                   px={1}
                   py={0.5}
                   display="flex"
@@ -810,7 +827,7 @@ const ValuesRemix = (props: {
                     onChange={() =>
                       !props.viewOnly && toggleRowSelection(value._id)
                     }
-                    size="sm"
+                    size="xs"
                     colorPalette="blue"
                     disabled={props.viewOnly}
                   >
@@ -822,8 +839,6 @@ const ValuesRemix = (props: {
               {/* Type Column */}
               <Box
                 w={`${columnWidths.type}px`}
-                px={1}
-                py={0.5}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -833,6 +848,7 @@ const ValuesRemix = (props: {
                 {!props.viewOnly ? (
                   <Select.Root
                     size="xs"
+                    border="1px solid transparent"
                     collection={createListCollection({
                       items: [
                         { value: "number", label: "Number" },
@@ -852,7 +868,12 @@ const ValuesRemix = (props: {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger minW="100px" h="20px">
+                      <Select.Trigger
+                        minW="100px"
+                        h="20px"
+                        borderRadius="none"
+                        border="none"
+                      >
                         <Flex align="center" gap={1}>
                           {getTypeIcon(value.type)}
                           <Text fontSize="xs" color="gray.700">
@@ -900,21 +921,23 @@ const ValuesRemix = (props: {
               {/* Name Column */}
               <Box
                 w={`${columnWidths.name}px`}
-                px={1}
-                py={0.5}
+                p={"0"}
+                m={"0"}
                 borderRight="1px solid"
                 borderColor="gray.200"
               >
                 <Input
                   value={value.name}
                   onChange={(e) => handleNameChange(value._id, e.target.value)}
-                  size="sm"
+                  size="xs"
                   px={1}
                   py={0.5}
-                  fontSize="sm"
+                  h="100%"
+                  fontSize="xs"
                   readOnly={props.viewOnly}
                   placeholder="Enter name"
-                  border="none"
+                  border="1px solid transparent"
+                  borderRadius="none"
                   bg="transparent"
                   cursor={props.viewOnly ? "default" : "text"}
                   onClick={
@@ -941,8 +964,7 @@ const ValuesRemix = (props: {
               <Box
                 w={`${columnWidths.value}px`}
                 flex="1"
-                px={1}
-                py={0.5}
+                p={"0"}
                 overflow="visible"
               >
                 {renderDataInput(value)}
@@ -950,6 +972,48 @@ const ValuesRemix = (props: {
             </Flex>
           ))}
         </Box>
+
+        {/* Add or Delete Selected Rows Button */}
+        {!props.viewOnly && (
+          <Flex
+            borderTop="1px solid"
+            borderColor="gray.200"
+            p={0}
+            justify="center"
+            align="center"
+            bg="gray.50"
+            _hover={{ bg: "gray.100" }}
+          >
+            {selectedRows.size > 0 ? (
+              <Button
+                size="xs"
+                variant="ghost"
+                colorPalette="red"
+                onClick={removeSelectedRows}
+                aria-label="Delete selected rows"
+                w="100%"
+              >
+                <Icon name="delete" />
+                <Text ml={1}>
+                  Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
+                  {selectedRows.size})
+                </Text>
+              </Button>
+            ) : (
+              <Button
+                size="xs"
+                variant="ghost"
+                colorPalette="green"
+                onClick={addRow}
+                aria-label="Add row"
+                w="100%"
+              >
+                <Icon name="add" />
+                <Text ml={1}>Add Row</Text>
+              </Button>
+            )}
+          </Flex>
+        )}
 
         {/* Select Options Modal */}
         <Dialog.Root
@@ -962,26 +1026,26 @@ const ValuesRemix = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header px="2" py="4" roundedTop="md" bg="gray.100">
-                <Flex direction="row" align="center" gap="2">
+              <Dialog.Header p={"0"} roundedTop="md" bg="gray.100">
+                <Flex direction="row" align="center" gap="1" p={"2"}>
                   <Icon name="v_select" />
-                  <Text fontSize="sm" fontWeight="semibold">
-                    Setup Values
+                  <Text fontSize="xs" fontWeight="semibold">
+                    Setup Options
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size="sm"
+                    size="2xs"
                     onClick={cancelSelectOptions}
                     _hover={{ bg: "gray.200" }}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p="2" gap="2" pb="0">
+              <Dialog.Body p="2" gap="2" pb="1">
                 <Flex direction="column" gap="2">
                   <Flex direction="row" gap="2">
                     <Input
-                      size="sm"
+                      size="xs"
                       rounded="md"
                       placeholder="Enter option value"
                       value={newOption}
@@ -994,7 +1058,7 @@ const ValuesRemix = (props: {
                     />
                     <Button
                       colorPalette="green"
-                      size="sm"
+                      size="xs"
                       rounded="md"
                       onClick={addOption}
                       disabled={
@@ -1010,7 +1074,7 @@ const ValuesRemix = (props: {
                     <Stack
                       gap="1"
                       separator={<Separator />}
-                      pb="2"
+                      pb="1"
                       maxH="200px"
                       overflowY={"auto"}
                     >
@@ -1028,15 +1092,15 @@ const ValuesRemix = (props: {
                             justify="space-between"
                             align="center"
                           >
-                            <Flex gap="2">
-                              <Text fontWeight="semibold" fontSize="sm">
+                            <Flex gap="1">
+                              <Text fontWeight="semibold" fontSize="xs">
                                 Value {index + 1}:
                               </Text>
-                              <Text fontSize="sm">{option}</Text>
+                              <Text fontSize="xs">{option}</Text>
                             </Flex>
                             <IconButton
                               aria-label={`remove_${index}`}
-                              size="sm"
+                              size="2xs"
                               colorPalette="red"
                               onClick={() => removeOption(option)}
                             >
@@ -1060,7 +1124,7 @@ const ValuesRemix = (props: {
                           borderColor="gray.300"
                         >
                           <Text
-                            fontSize="sm"
+                            fontSize="xs"
                             fontWeight="semibold"
                             color="gray.400"
                           >
@@ -1072,9 +1136,9 @@ const ValuesRemix = (props: {
                   </Box>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p="2" bg="gray.100" roundedBottom="md">
+              <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
                 <Button
-                  size="sm"
+                  size="xs"
                   rounded="md"
                   colorPalette="red"
                   onClick={cancelSelectOptions}
@@ -1084,7 +1148,7 @@ const ValuesRemix = (props: {
                 </Button>
                 <Spacer />
                 <Button
-                  size="sm"
+                  size="xs"
                   rounded="md"
                   colorPalette="green"
                   onClick={confirmSelectOptions}
@@ -1099,181 +1163,128 @@ const ValuesRemix = (props: {
         </Dialog.Root>
       </Box>
 
-      {/* Toolbar */}
-      <Box
-        bg="white"
-        border="1px solid"
-        borderColor="gray.200"
-        borderRadius="md"
-        p={1}
-        boxShadow="sm"
-        mt={2}
+      {/* Pagination Toolbar */}
+      <Flex
+        gap={1}
+        align="center"
+        wrap="wrap"
+        justify={{ base: "space-between", sm: "space-between" }}
+        w="100%"
+        my={1}
       >
-        <Flex gap={1} align="center" justify="space-between">
-          {/* Left side - Actions */}
-          <Flex gap={1} align="center">
-            {!props.viewOnly && (
-              <>
-                <Button
-                  size="xs"
-                  rounded="md"
-                  colorPalette="green"
-                  onClick={addRow}
-                  aria-label="Add row"
-                  disabled={props.viewOnly}
-                  cursor={props.viewOnly ? "default" : "pointer"}
-                >
-                  Add
-                  <Icon name="add" />
-                </Button>
-                <IconButton
-                  size="xs"
-                  rounded="md"
-                  colorPalette="blue"
-                  onClick={moveRowUp}
-                  disabled={selectedRows.size !== 1}
-                  aria-label="Move row up"
-                >
-                  <Icon name="c_up" size="sm" />
-                </IconButton>
-                <IconButton
-                  size="xs"
-                  rounded="md"
-                  colorPalette="blue"
-                  onClick={moveRowDown}
-                  disabled={selectedRows.size !== 1}
-                  aria-label="Move row down"
-                >
-                  <Icon name="c_down" size="sm" />
-                </IconButton>
-                <Button
-                  size="xs"
-                  rounded="md"
-                  colorPalette="red"
-                  onClick={removeSelectedRows}
-                  disabled={selectedRows.size === 0}
-                  aria-label="Remove selected rows"
-                >
-                  Delete
-                  <Icon name="delete" />
-                </Button>
-              </>
-            )}
-          </Flex>
-
-          {/* Right side - Pagination */}
-          <Flex gap={2} align="center">
-            <Text fontSize="sm">Shown Per Page:</Text>
-            <Fieldset.Root w="fit-content">
-              <Fieldset.Content>
-                <Field.Root>
-                  <Select.Root
-                    size="sm"
-                    w="80px"
-                    collection={createListCollection({
-                      items: [
-                        { label: "5", value: "5" },
-                        { label: "10", value: "10" },
-                        { label: "20", value: "20" },
-                        { label: "50", value: "50" },
-                        { label: "100", value: "100" },
-                      ],
-                    })}
-                    value={[rowsPerPage.toString()]}
-                    onValueChange={(details) =>
-                      setRowsPerPage(parseInt(details.value[0]))
-                    }
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger rounded="md">
-                        <Select.ValueText placeholder="Page Size" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {[
-                            { label: "5", value: "5" },
-                            { label: "10", value: "10" },
-                            { label: "20", value: "20" },
-                            { label: "50", value: "50" },
-                            { label: "100", value: "100" },
-                          ].map((count) => (
-                            <Select.Item item={count} key={count.value}>
-                              {count.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
-
-            <Flex direction="row" gap={2} align="center">
-              <IconButton
-                variant="outline"
-                size="sm"
-                rounded="md"
-                aria-label="first page"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage <= 1}
-              >
-                <Icon name="c_double_left" />
-              </IconButton>
-              <IconButton
-                variant="outline"
-                size="sm"
-                rounded="md"
-                aria-label="previous page"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage <= 1}
-              >
-                <Icon name="c_left" />
-              </IconButton>
-              {totalPages > 0 && (
-                <Flex gap={1}>
-                  <Text fontSize="sm" fontWeight="semibold">
-                    {currentPage}
-                  </Text>
-                  <Text fontSize="sm"> of </Text>
-                  <Text fontSize="sm" fontWeight="semibold">
-                    {totalPages}
-                  </Text>
-                </Flex>
-              )}
-              <IconButton
-                variant="outline"
-                size="sm"
-                rounded="md"
-                aria-label="next page"
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages, currentPage + 1))
-                }
-                disabled={currentPage >= totalPages}
-              >
-                <Icon name="c_right" />
-              </IconButton>
-              <IconButton
-                variant="outline"
-                size="sm"
-                rounded="md"
-                aria-label="last page"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage >= totalPages}
-              >
-                <Icon name="c_double_right" />
-              </IconButton>
+        <Flex direction="row" gap={1} align="center" wrap="wrap">
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="first page"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage <= 1}
+          >
+            <Icon name="c_double_left" />
+          </IconButton>
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="previous page"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage <= 1}
+          >
+            <Icon name="c_left" />
+          </IconButton>
+          {totalPages > 0 && (
+            <Flex gap={1}>
+              <Text fontSize="xs" fontWeight="semibold">
+                {currentPage}
+              </Text>
+              <Text fontSize="xs"> of </Text>
+              <Text fontSize="xs" fontWeight="semibold">
+                {totalPages}
+              </Text>
             </Flex>
-          </Flex>
+          )}
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="next page"
+            onClick={() =>
+              setCurrentPage(Math.min(totalPages, currentPage + 1))
+            }
+            disabled={currentPage >= totalPages}
+          >
+            <Icon name="c_right" />
+          </IconButton>
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="last page"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage >= totalPages}
+          >
+            <Icon name="c_double_right" />
+          </IconButton>
         </Flex>
-      </Box>
+
+        <Flex direction="row" gap={1} align="center" wrap="wrap">
+          <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+            Show:
+          </Text>
+          <Fieldset.Root w="fit-content">
+            <Fieldset.Content>
+              <Field.Root>
+                <Select.Root
+                  size="xs"
+                  w="80px"
+                  collection={createListCollection({
+                    items: [
+                      { label: "5", value: "5" },
+                      { label: "10", value: "10" },
+                      { label: "20", value: "20" },
+                      { label: "50", value: "50" },
+                      { label: "100", value: "100" },
+                    ],
+                  })}
+                  value={[rowsPerPage.toString()]}
+                  onValueChange={(details) =>
+                    setRowsPerPage(parseInt(details.value[0]))
+                  }
+                >
+                  <Select.HiddenSelect />
+                  <Select.Control>
+                    <Select.Trigger rounded="md">
+                      <Select.ValueText placeholder="Page Size" />
+                    </Select.Trigger>
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal>
+                    <Select.Positioner>
+                      <Select.Content>
+                        {[
+                          { label: "5", value: "5" },
+                          { label: "10", value: "10" },
+                          { label: "20", value: "20" },
+                          { label: "50", value: "50" },
+                          { label: "100", value: "100" },
+                        ].map((count) => (
+                          <Select.Item item={count} key={count.value}>
+                            {count.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
+              </Field.Root>
+            </Fieldset.Content>
+          </Fieldset.Root>
+        </Flex>
+      </Flex>
     </Box>
   );
 };

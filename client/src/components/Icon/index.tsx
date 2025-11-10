@@ -205,8 +205,8 @@ const Icon = (props: {
         return (
           <ChakraIcon
             as={iconComponent}
-            w={"2"}
-            h={"2"}
+            w={"3"}
+            h={"3"}
             color={iconColor}
             style={props.style}
           />

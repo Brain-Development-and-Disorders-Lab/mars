@@ -261,8 +261,10 @@ const SearchSelect = (props: SearchSelectProps) => {
           value={props.value?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
-          size={"sm"}
-          rounded={"md"}
+          size={"xs"}
+          rounded={props.isEmbedded ? "none" : "sm"}
+          border={props.isEmbedded ? "none" : "1px solid"}
+          borderColor={props.isEmbedded ? "" : "gray.300"}
           disabled={props?.disabled || false}
           readOnly
         />
