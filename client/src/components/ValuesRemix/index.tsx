@@ -355,7 +355,7 @@ const ValuesRemix = (props: {
               handleDataChange(value._id, parseFloat(e.target.value) || 0)
             }
             size="xs"
-            h="100%"
+            h={props.viewOnly ? "34px" : "100%"}
             borderRadius="none"
             fontSize="xs"
             type="number"
@@ -370,15 +370,11 @@ const ValuesRemix = (props: {
               border: "1px solid",
               borderColor: "blue.300",
             }}
-            _hover={
-              !props.viewOnly
-                ? {
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }
-                : {}
-            }
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
         );
 
@@ -388,7 +384,7 @@ const ValuesRemix = (props: {
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
             size="xs"
-            h="100%"
+            h={props.viewOnly ? "34px" : "100%"}
             borderRadius="none"
             fontSize="xs"
             readOnly={props.viewOnly}
@@ -402,15 +398,11 @@ const ValuesRemix = (props: {
               border: "1px solid",
               borderColor: "blue.300",
             }}
-            _hover={
-              !props.viewOnly
-                ? {
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }
-                : {}
-            }
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
         );
 
@@ -420,7 +412,7 @@ const ValuesRemix = (props: {
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
             size="xs"
-            h="100%"
+            h={props.viewOnly ? "34px" : "100%"}
             borderRadius="none"
             fontSize="xs"
             readOnly={props.viewOnly}
@@ -434,15 +426,11 @@ const ValuesRemix = (props: {
               border: "1px solid",
               borderColor: "blue.300",
             }}
-            _hover={
-              !props.viewOnly
-                ? {
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }
-                : {}
-            }
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
         );
 
@@ -452,7 +440,7 @@ const ValuesRemix = (props: {
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
             size="xs"
-            h="100%"
+            h={props.viewOnly ? "34px" : "100%"}
             borderRadius="none"
             fontSize="xs"
             type="date"
@@ -466,15 +454,11 @@ const ValuesRemix = (props: {
               border: "1px solid",
               borderColor: "blue.300",
             }}
-            _hover={
-              !props.viewOnly
-                ? {
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }
-                : {}
-            }
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
         );
 
@@ -486,7 +470,7 @@ const ValuesRemix = (props: {
             <Select.Root
               size="xs"
               minW="100px"
-              h="100%"
+              h={props.viewOnly ? "34px" : "100%"}
               border="1px solid transparent"
               value={value.data.selected ? [value.data.selected._id] : []}
               collection={createListCollection({
@@ -515,15 +499,11 @@ const ValuesRemix = (props: {
                 border: "1px solid",
                 borderColor: "blue.300",
               }}
-              _hover={
-                !props.viewOnly
-                  ? {
-                      border: "1px solid",
-                      borderColor: "blue.200",
-                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                    }
-                  : {}
-              }
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
             >
               <Select.HiddenSelect />
               <Select.Control>
@@ -571,14 +551,12 @@ const ValuesRemix = (props: {
                 bg: "white",
                 borderColor: "blue.300",
               }}
-              _hover={
-                !props.viewOnly
-                  ? {
-                      bg: "blue.50",
-                      cursor: "pointer",
-                    }
-                  : {}
-              }
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+              cursor="pointer"
               onClick={() => openSelectModal(value._id)}
             >
               <Text fontSize="xs" fontWeight="semibold" color="blue.600">
@@ -593,7 +571,7 @@ const ValuesRemix = (props: {
           return (
             <Flex
               w="100%"
-              h="100%"
+              h={props.viewOnly ? "34px" : "100%"}
               p={"0"}
               align="center"
               justify="center"
@@ -602,14 +580,11 @@ const ValuesRemix = (props: {
                 bg: "white",
                 borderColor: "blue.300",
               }}
-              _hover={
-                !props.viewOnly
-                  ? {
-                      borderColor: "blue.200",
-                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                    }
-                  : {}
-              }
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
             >
               <SearchSelect
                 placeholder="Select Entity"
@@ -623,8 +598,24 @@ const ValuesRemix = (props: {
           );
         } else {
           return (
-            <Flex px={1}>
-              <Linky type="entities" id={value.data?._id || ""} size="sm" />
+            <Flex
+              w="100%"
+              h={props.viewOnly ? "34px" : "100%"}
+              justify="center"
+              pt={"0.5"}
+              px={"2"}
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+            >
+              <Linky type="entities" id={value.data?._id || ""} size="xs" />
             </Flex>
           );
         }
@@ -635,6 +626,7 @@ const ValuesRemix = (props: {
             value={value.data?.toString() || ""}
             onChange={(e) => handleDataChange(value._id, e.target.value)}
             size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
             px={1}
             py={0.5}
             fontSize="xs"
@@ -649,15 +641,11 @@ const ValuesRemix = (props: {
               border: "1px solid",
               borderColor: "blue.300",
             }}
-            _hover={
-              !props.viewOnly
-                ? {
-                    border: "1px solid",
-                    borderColor: "blue.200",
-                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                  }
-                : {}
-            }
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
         );
     }
@@ -909,7 +897,7 @@ const ValuesRemix = (props: {
                     </Select.Positioner>
                   </Select.Root>
                 ) : (
-                  <Flex align="center" gap={1}>
+                  <Flex align="center" gap={1} w="60px">
                     {getTypeIcon(value.type)}
                     <Text fontSize="xs" color="gray.700">
                       {value.type === "url" ? "URL" : _.capitalize(value.type)}
@@ -948,27 +936,41 @@ const ValuesRemix = (props: {
                     border: "1px solid",
                     borderColor: "blue.300",
                   }}
-                  _hover={
-                    !props.viewOnly
-                      ? {
-                          border: "1px solid",
-                          borderColor: "blue.200",
-                          boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                        }
-                      : {}
-                  }
+                  _hover={{
+                    border: "1px solid",
+                    borderColor: "blue.200",
+                    boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                  }}
                 />
               </Box>
 
               {/* Value Column */}
-              <Box
+              <Flex
                 w={`${columnWidths.value}px`}
                 flex="1"
                 p={"0"}
                 overflow="visible"
+                justify="space-between"
+                align="center"
               >
                 {renderDataInput(value)}
-              </Box>
+                {props.viewOnly && value.type !== "entity" && (
+                  <IconButton
+                    aria-label="Copy value"
+                    size="2xs"
+                    mx={"1"}
+                    variant="outline"
+                    colorPalette="gray"
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        value.data?.toString() || "",
+                      )
+                    }
+                  >
+                    <Icon name="copy" size="xs" />
+                  </IconButton>
+                )}
+              </Flex>
             </Flex>
           ))}
         </Box>
