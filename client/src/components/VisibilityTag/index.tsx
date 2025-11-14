@@ -34,20 +34,21 @@ const VisibilityTag = (props: VisibilityTagProps) => {
     <Flex
       align={"center"}
       gap={"2"}
-      p={"2"}
+      p={"1"}
       rounded={"md"}
       border={"1px solid"}
       borderColor={"gray.300"}
       bg={"white"}
       minW={"120px"}
+      h={"54px"}
     >
       <Icon
         name={props.isPublic ? "l_globus" : "lock"}
-        size={"sm"}
+        size={"xs"}
         color={"green.400"}
       />
       <Flex direction={"column"} gap={"0"}>
-        <Text fontSize={"sm"} fontWeight={"semibold"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
           {props.isPublic ? "Public" : "Private"}
         </Text>
         {isBreakpointActive("xl", "up") && (
@@ -67,10 +68,10 @@ const VisibilityTag = (props: VisibilityTagProps) => {
           <IconButton
             ml={"1"}
             aria-label={"set-visibility"}
-            size={"sm"}
+            size={"xs"}
             disabled
           >
-            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+            <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
           </IconButton>
         </Tooltip>
       ) : (
@@ -81,12 +82,12 @@ const VisibilityTag = (props: VisibilityTagProps) => {
           <IconButton
             ml={"1"}
             aria-label={"set-visibility"}
-            size={"sm"}
+            size={"xs"}
             colorPalette={"green"}
             disabled={props.disabled}
             onClick={handleVisibilityClick}
           >
-            <Icon name={props.isPublic ? "lock" : "l_globus"} />
+            <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
           </IconButton>
         </Tooltip>
       )}

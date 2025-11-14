@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Flex, Input, Text, Fieldset, Field } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
-import Values from "@components/Values";
+import ValuesRemix from "@components/ValuesRemix";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -191,7 +191,7 @@ const AttributeCard = (props: AttributeCardProps) => {
 
       {attributeCardData.restrictDataValues ? (
         // Restrict the data to options from a drop-down
-        <Values
+        <ValuesRemix
           viewOnly={finished}
           values={values}
           setValues={setValues}
@@ -199,7 +199,7 @@ const AttributeCard = (props: AttributeCardProps) => {
           requireData
         />
       ) : (
-        <Values
+        <ValuesRemix
           viewOnly={finished}
           values={values}
           setValues={setValues}

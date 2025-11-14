@@ -507,7 +507,11 @@ const ValuesRemix = (props: {
             >
               <Select.HiddenSelect />
               <Select.Control>
-                <Select.Trigger border="none" borderRadius="none">
+                <Select.Trigger
+                  border="none"
+                  borderRadius="none"
+                  disabled={props.viewOnly}
+                >
                   <Select.ValueText placeholder="Select Value">
                     {value.data.selected?.name || "Select Value"}
                   </Select.ValueText>
@@ -671,7 +675,7 @@ const ValuesRemix = (props: {
           {/* Header Row */}
           <Flex
             gap={0}
-            bg="gray.50"
+            bg="gray.100"
             borderBottom="1px solid"
             borderColor="gray.200"
             direction="row"
@@ -683,14 +687,14 @@ const ValuesRemix = (props: {
                 px={1}
                 py={1}
                 textAlign="center"
-                bg="gray.50"
+                bg="gray.100"
                 borderRight="1px solid"
                 borderColor="gray.200"
               />
             )}
 
             {/* Type Column Header */}
-            <Box
+            <Flex
               w={`${columnWidths.type}px`}
               px={1}
               py={1}
@@ -702,6 +706,8 @@ const ValuesRemix = (props: {
               position="relative"
               textAlign="center"
               lineHeight="1.2"
+              align="center"
+              justify="center"
             >
               <Text>Type</Text>
               {/* Resize Handle */}
@@ -717,10 +723,10 @@ const ValuesRemix = (props: {
                 onMouseDown={(e) => handleResizeStart("type", e)}
                 zIndex={10}
               />
-            </Box>
+            </Flex>
 
             {/* Name Column Header */}
-            <Box
+            <Flex
               w={`${columnWidths.name}px`}
               px={1}
               py={1}
@@ -732,6 +738,8 @@ const ValuesRemix = (props: {
               position="relative"
               textAlign="center"
               lineHeight="1.2"
+              align="center"
+              justify="center"
             >
               <Text>Name</Text>
               {/* Resize Handle */}
@@ -747,7 +755,7 @@ const ValuesRemix = (props: {
                 onMouseDown={(e) => handleResizeStart("name", e)}
                 zIndex={10}
               />
-            </Box>
+            </Flex>
 
             {/* Value Column Header */}
             <Flex
@@ -1185,7 +1193,7 @@ const ValuesRemix = (props: {
         wrap="wrap"
         justify={{ base: "space-between", sm: "space-between" }}
         w="100%"
-        my={1}
+        mt={1}
         flexShrink={0}
       >
         <Flex direction="row" gap={1} align="center" wrap="wrap">

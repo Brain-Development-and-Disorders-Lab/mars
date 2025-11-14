@@ -26,6 +26,7 @@ const AlertDialog = (props: AlertDialogProps) => {
       open={props.open}
       onOpenChange={(details) => props.setOpen(details.open)}
       placement={"center"}
+      size={"sm"}
       closeOnEscape
       closeOnInteractOutside
     >
@@ -33,14 +34,14 @@ const AlertDialog = (props: AlertDialogProps) => {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
-            px={"2"}
-            py={"4"}
+            px={"1"}
+            py={"2"}
             fontWeight={"semibold"}
-            fontSize={"md"}
+            fontSize={"sm"}
             roundedTop={"md"}
-            bg={"gray.100"}
+            bg={"orange.200"}
           >
-            <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />
               {header}
             </Flex>
@@ -48,24 +49,24 @@ const AlertDialog = (props: AlertDialogProps) => {
           <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
           <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
             <Button
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
               variant={"solid"}
               colorPalette={leftButtonColor}
               onClick={leftButtonAction}
             >
               {leftButtonLabel}
-              <Icon name={"cross"} />
+              <Icon name={"cross"} size={"xs"} />
             </Button>
             <Spacer />
             <Button
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
               colorPalette={rightButtonColor}
               onClick={rightButtonAction}
             >
               {rightButtonLabel}
-              <Icon name={"check"} />
+              <Icon name={"check"} size={"xs"} />
             </Button>
           </Dialog.Footer>
         </Dialog.Content>
