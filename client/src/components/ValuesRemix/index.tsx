@@ -89,11 +89,11 @@ const ValuesRemix = (props: {
     data: "",
   });
 
-  // Initialize with two rows if empty, otherwise use provided values
+  // Initialize with a new row if empty, otherwise use provided values
   const [localValues, setLocalValues] = useState<IValue<GenericValueType>[]>(
     () => {
       if (props.values.length === 0) {
-        return [createNewValue("row1"), createNewValue("row2")];
+        return [createNewValue("row1")];
       }
       return props.values;
     },
