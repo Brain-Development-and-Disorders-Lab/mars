@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Input, Menu, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import Values from "@components/Values";
+import ValuesRemix from "@components/ValuesRemix";
 import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
@@ -290,9 +290,9 @@ const Template = () => {
     >
       <Flex direction={"column"}>
         <Flex
-          gap={"2"}
-          p={"2"}
-          pb={{ base: "2", lg: "0" }}
+          gap={"1"}
+          p={"1"}
+          pb={{ base: "1", lg: "0" }}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -300,48 +300,50 @@ const Template = () => {
         >
           <Flex
             align={"center"}
-            gap={"2"}
-            p={"2"}
+            gap={"1"}
+            p={"1"}
             border={"2px solid"}
             rounded={"md"}
           >
-            <Icon name={"template"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
+            <Icon name={"template"} size={"sm"} />
+            <Heading fontWeight={"semibold"} size={"sm"}>
               {template.name}
             </Heading>
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu.Root>
               <Menu.Trigger asChild>
                 <Button
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"yellow"}
                   data-testid={"templateActionsButton"}
                 >
                   Actions
-                  <Icon name={"lightning"} />
+                  <Icon name={"lightning"} size={"xs"} />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
                 <Menu.Content>
                   <Menu.Item
+                    fontSize={"xs"}
                     value={"export"}
                     onClick={handleDownloadClick}
                     disabled={editing || templateArchived}
                   >
-                    <Icon name={"download"} />
+                    <Icon name={"download"} size={"xs"} />
                     Export
                   </Menu.Item>
                   <Menu.Item
+                    fontSize={"xs"}
                     value={"archive"}
                     onClick={() => setArchiveDialogOpen(true)}
                     disabled={templateArchived}
                   >
-                    <Icon name={"archive"} />
+                    <Icon name={"archive"} size={"xs"} />
                     Archive
                   </Menu.Item>
                 </Menu.Content>
@@ -352,37 +354,41 @@ const Template = () => {
               <Button
                 id={"restoreTemplateButton"}
                 onClick={handleRestoreFromArchiveClick}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"orange"}
               >
                 Restore
-                <Icon name={"rewind"} />
+                <Icon name={"rewind"} size={"xs"} />
               </Button>
             ) : (
-              <Flex gap={"2"}>
+              <Flex gap={"1"}>
                 {editing && (
                   <Button
                     onClick={handleCancelClick}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"red"}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
                 <Button
                   id={"editTemplateButton"}
                   colorPalette={editing ? "green" : "blue"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   loading={updateLoading}
                 >
                   {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
+                  {editing ? (
+                    <Icon name={"save"} size={"xs"} />
+                  ) : (
+                    <Icon name={"edit"} size={"xs"} />
+                  )}
                 </Button>
               </Flex>
             )}
@@ -395,7 +401,7 @@ const Template = () => {
               open={archiveDialogOpen}
               setOpen={setArchiveDialogOpen}
             >
-              <Text>
+              <Text fontSize={"xs"}>
                 Are you sure you want to archive this Template? It can be
                 restored any time from the Workspace archives.
               </Text>
@@ -403,27 +409,27 @@ const Template = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"2"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
           {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
             {/* Overview */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               h={"fit-content"}
-              gap={"2"}
+              gap={"1"}
               bg={"gray.100"}
               rounded={"md"}
               grow={"1"}
             >
-              <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
-                    Name
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+                    Template Name
                   </Text>
                   <Input
                     id={"attributeNameInput"}
-                    size={"sm"}
+                    size={"xs"}
                     value={templateName}
                     onChange={(event) => {
                       setTemplateName(event.target.value);
@@ -442,22 +448,22 @@ const Template = () => {
                 />
               </Flex>
 
-              <Flex gap={"2"} direction={"row"}>
+              <Flex gap={"1"} direction={"row"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Owner
                   </Text>
                   <ActorTag
                     orcid={template.owner}
                     fallback={"No Owner"}
-                    size={"md"}
+                    size={"sm"}
                   />
                 </Flex>
               </Flex>
@@ -466,7 +472,7 @@ const Template = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
@@ -474,14 +480,14 @@ const Template = () => {
               basis={"40%"}
               grow={"1"}
             >
-              <Text fontWeight={"bold"} fontSize={"sm"}>
-                Description
+              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+                Template Description
               </Text>
               <MDEditor
+                id={"attributeDescriptionInput"}
                 height={150}
                 minHeight={100}
                 maxHeight={400}
-                id={"attributeDescriptionInput"}
                 style={{ width: "100%" }}
                 value={templateDescription}
                 preview={editing ? "edit" : "preview"}
@@ -494,12 +500,17 @@ const Template = () => {
           </Flex>
 
           <Flex
-            p={"2"}
+            direction={"column"}
+            gap={"1"}
+            p={"1"}
             rounded={"md"}
             border={"1px solid"}
             borderColor={"gray.300"}
           >
-            <Values
+            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+              Template Values
+            </Text>
+            <ValuesRemix
               viewOnly={!editing}
               values={templateValues}
               setValues={setTemplateValues}

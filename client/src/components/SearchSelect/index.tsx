@@ -6,6 +6,7 @@ import {
   InputGroup,
   Text,
   Spinner,
+  Box,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -21,6 +22,14 @@ import _ from "lodash";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 const SearchSelect = (props: SearchSelectProps) => {
+  const inputRef = React.useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = React.useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
     query GetEntities($limit: Int, $archived: Boolean) {
@@ -185,11 +194,24 @@ const SearchSelect = (props: SearchSelectProps) => {
   }, 200);
 
   /**
-   * Handle clicking the `Input` componet dropdown
+   * Handle clicking the `Input` component dropdown
    */
   const onInputClick = () => {
     if (props?.disabled !== true) {
-      setShowResults(!showResults);
+      if (!showResults && inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 8, // 2pt = 8px spacing
+          left: rect.left + window.scrollX,
+          width: rect.width,
+        });
+        setShowResults(true);
+        // Start animation after a tiny delay to allow initial state to render
+        setTimeout(() => setIsAnimating(true), 10);
+      } else {
+        setIsAnimating(false);
+        setTimeout(() => setShowResults(false), 150); // Allow animation to complete
+      }
     }
   };
 
@@ -225,8 +247,9 @@ const SearchSelect = (props: SearchSelectProps) => {
   };
 
   return (
-    <Flex id={props.id || "searchSelect"} pos={"relative"} w={"100%"}>
+    <Box id={props.id || "searchSelect"} position="relative" w="100%">
       <InputGroup
+        ref={inputRef}
         data-testid={"search-select"}
         onClick={onInputClick}
         endElement={
@@ -238,114 +261,119 @@ const SearchSelect = (props: SearchSelectProps) => {
           value={props.value?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
-          size={"sm"}
-          rounded={"md"}
+          size={"xs"}
+          rounded={props.isEmbedded ? "none" : "sm"}
+          border={props.isEmbedded ? "none" : "1px solid"}
+          borderColor={props.isEmbedded ? "" : "gray.300"}
           disabled={props?.disabled || false}
           readOnly
         />
       </InputGroup>
       {showResults && (
-        <Flex
-          w={"100%"}
-          p={"2"}
-          mt={"10"}
-          gap={"2"}
-          minW={"200px"}
-          direction={"column"}
-          bg={"white"}
-          border={"1px"}
-          borderColor={"gray.300"}
-          borderRadius={"sm"}
-          shadow={"md"}
-          position={"absolute"}
-          zIndex={"2"}
-        >
-          <Input
-            size={"sm"}
-            rounded={"md"}
-            placeholder={"Search"}
-            onChange={handleInputChange}
-            autoFocus
+        <>
+          {/* Capture external clicks */}
+          <Box
+            position="fixed"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            zIndex="9998"
+            onClick={() => {
+              setIsAnimating(false);
+              setTimeout(() => setShowResults(false), 150);
+            }}
+            opacity={isAnimating ? 1 : 0}
+            transition="opacity 0.15s ease-in-out"
           />
-          <Flex
-            direction={"column"}
-            maxH={"200px"}
-            overflowY={"auto"}
-            gap={"2"}
-            p={"0"}
+          {/* Dropdown */}
+          <Box
+            position="fixed"
+            top={dropdownPosition.top}
+            left={dropdownPosition.left}
+            width={dropdownPosition.width}
+            bg="white"
+            border="1px"
+            borderColor="gray.300"
+            borderRadius="sm"
+            shadow="md"
+            zIndex="9999"
+            p="2"
+            opacity={isAnimating ? 1 : 0}
+            transform={isAnimating ? "translateY(0)" : "translateY(-8px)"}
+            transition="all 0.15s ease-in-out"
           >
-            {/* Has searched, search operation complete, multiple results */}
-            {hasSearched &&
-              searchLoading === false &&
-              results.length > 0 &&
-              results.map((result: IGenericItem) => (
-                <Flex key={`r_${result._id}`} p={"0"}>
+            <Input
+              size="sm"
+              rounded="md"
+              placeholder="Search"
+              onChange={handleInputChange}
+              autoFocus
+              mb="2"
+            />
+
+            <Box maxH="200px" overflowY="auto">
+              {/* Has searched, search operation complete, multiple results */}
+              {hasSearched &&
+                searchLoading === false &&
+                results.length > 0 &&
+                results.map((result: IGenericItem) => (
                   <Button
                     key={result._id}
-                    variant={"ghost"}
+                    variant="ghost"
                     onClick={() => handleSelectResult(result)}
-                    width={"full"}
+                    width="full"
                     disabled={searchLoading}
-                    size={"sm"}
+                    size="sm"
+                    justifyContent="flex-start"
+                    mb="1"
                   >
-                    <Flex w={"100%"} justify={"left"}>
-                      {result.name}
-                    </Flex>
+                    {result.name}
                   </Button>
-                </Flex>
-              ))}
+                ))}
 
-            {/* Has searched, search operation complete, no results */}
-            {hasSearched && searchLoading === false && results.length === 0 && (
-              <Flex
-                w={"100%"}
-                minH={"100px"}
-                align={"center"}
-                justify={"center"}
-              >
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                  No Results
-                </Text>
-              </Flex>
-            )}
+              {/* Has searched, search operation complete, no results */}
+              {hasSearched &&
+                searchLoading === false &&
+                results.length === 0 && (
+                  <Flex w="100%" minH="100px" align="center" justify="center">
+                    <Text fontSize="sm" fontWeight="semibold">
+                      No Results
+                    </Text>
+                  </Flex>
+                )}
 
-            {/* Has not yet searched, search operation complete */}
-            {!hasSearched &&
-              searchLoading === false &&
-              options &&
-              options.length > 0 &&
-              options.map((option: IGenericItem) => (
-                <Flex key={`o_${option._id}`}>
+              {/* Has not yet searched, search operation complete */}
+              {!hasSearched &&
+                searchLoading === false &&
+                options &&
+                options.length > 0 &&
+                options.map((option: IGenericItem) => (
                   <Button
                     key={option._id}
-                    variant={"ghost"}
+                    variant="ghost"
                     onClick={() => handleSelectResult(option)}
-                    width={"full"}
+                    width="full"
                     disabled={entitiesLoading || projectsLoading}
-                    size={"sm"}
+                    size="sm"
+                    justifyContent="flex-start"
+                    mb="1"
                   >
-                    <Flex w={"100%"} justify={"left"}>
-                      {_.truncate(option.name, { length: 24 })}
-                    </Flex>
+                    {_.truncate(option.name, { length: 24 })}
                   </Button>
-                </Flex>
-              ))}
+                ))}
 
-            {/* Search operation in-progress */}
-            {searchLoading === true && (
-              <Flex
-                w={"100%"}
-                minH={"100px"}
-                align={"center"}
-                justify={"center"}
-              >
-                <Spinner />
-              </Flex>
-            )}
-          </Flex>
-        </Flex>
+              {/* Search operation in-progress */}
+              {searchLoading === true && (
+                <Flex w="100%" minH="100px" align="center" justify="center">
+                  <Spinner />
+                </Flex>
+              )}
+            </Box>
+          </Box>
+        </>
       )}
-    </Flex>
+    </Box>
   );
 };
 

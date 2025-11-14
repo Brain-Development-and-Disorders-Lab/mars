@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
-import Values from "@components/Values";
+import ValuesRemix from "@components/ValuesRemix";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -192,7 +192,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     minH={values.length > 0 ? "fit-content" : "200px"}
                   >
                     {values && values.length > 0 ? (
-                      <Values
+                      <ValuesRemix
                         viewOnly={!isEditing}
                         values={values}
                         setValues={setValues}

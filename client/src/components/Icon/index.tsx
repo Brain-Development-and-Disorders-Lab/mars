@@ -87,7 +87,7 @@ import { IconType } from "react-icons";
 import _ from "lodash";
 
 // Define the icon set
-const SYSTEM_ICONS: Record<string, IconType> = {
+export const SYSTEM_ICONS: Record<string, IconType> = {
   // Default
   unknown: BsQuestionOctagonFill,
 
@@ -205,8 +205,8 @@ const Icon = (props: {
         return (
           <ChakraIcon
             as={iconComponent}
-            w={"2"}
-            h={"2"}
+            w={"3"}
+            h={"3"}
             color={iconColor}
             style={props.style}
           />

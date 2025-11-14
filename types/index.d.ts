@@ -550,6 +550,7 @@ export type SearchSelectProps = {
   placeholder?: string;
   onChange?: (value: any) => void;
   disabled?: boolean;
+  isEmbedded?: boolean;
 };
 
 // SearchBox props

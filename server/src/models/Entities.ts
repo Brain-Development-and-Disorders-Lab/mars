@@ -28,9 +28,6 @@ import dayjs from "dayjs";
 import Papa from "papaparse";
 import consola from "consola";
 
-// Statistics
-import { EntityCounterAll } from "./Metrics";
-
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
 // Constants for parsing strings
@@ -145,7 +142,7 @@ export class Entities {
 
     // Apply updated statistics
     if (successStatus) {
-      EntityCounterAll.inc();
+      // Entity counter removed - was Prometheus-specific
     }
 
     return {

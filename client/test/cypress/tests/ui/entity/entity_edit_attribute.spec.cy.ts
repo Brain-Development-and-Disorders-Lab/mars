@@ -24,7 +24,6 @@ describe("Entity, edit Attributes", () => {
     cy.get("[data-testid='create-attribute-description']").type(
       "Attribute Description",
     );
-    cy.get("[data-testid='add-value-button']").click();
     cy.get("input").eq(-2).type("Value Name");
     cy.get("input").eq(-1).type("Value Data");
     cy.get("[data-testid='save-add-attribute-button']").click();

@@ -21,25 +21,24 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
   }
 
   return (
-    <Flex direction={"column"} gap={"1"}>
-      <Flex
-        align={"center"}
-        gap={"2"}
-        p={"2"}
-        rounded={"md"}
-        border={"1px solid"}
-        borderColor={"gray.300"}
-        bg={"white"}
-      >
-        <Icon name={"v_date"} size={"sm"} color={"orange"} />
-        <Flex direction={"column"} gap={"0"}>
-          <Text fontSize={"sm"} fontWeight={"semibold"}>
-            {dateString}
-          </Text>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-            {_.isUndefined(props.description) ? "Timestamp" : props.description}
-          </Text>
-        </Flex>
+    <Flex
+      align={"center"}
+      gap={"2"}
+      p={"1"}
+      rounded={"md"}
+      border={"1px solid"}
+      borderColor={"gray.300"}
+      bg={"white"}
+      h={"54px"}
+    >
+      <Icon name={"v_date"} size={"xs"} color={"orange"} />
+      <Flex direction={"column"} gap={"0"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          {_.isUndefined(props.description) ? "Timestamp" : props.description}
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"semibold"}>
+          {dateString}
+        </Text>
       </Flex>
     </Flex>
   );

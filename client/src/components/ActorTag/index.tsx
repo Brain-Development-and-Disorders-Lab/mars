@@ -58,39 +58,38 @@ const ActorTag = (props: ActorTagProps) => {
   }, []);
 
   return (
-    <Flex>
-      <Flex
-        direction={"row"}
-        gap={"2"}
-        align={"center"}
-        justify={"space-around"}
-        p={props.size === "sm" ? "1" : "2"}
-        rounded={"md"}
-        border={"1px solid"}
-        borderColor={"gray.300"}
-        bg={"white"}
-        minW={"120px"}
+    <Flex
+      direction={"row"}
+      gap={"2"}
+      align={"center"}
+      justify={"space-around"}
+      p={props.size === "sm" ? "1" : "2"}
+      rounded={"md"}
+      border={"1px solid"}
+      borderColor={"gray.300"}
+      bg={"white"}
+      minW={"120px"}
+      h={"54px"}
+    >
+      <Avatar.Root
+        size={props.size === "sm" ? "xs" : "sm"}
+        key={actorLabel}
+        colorPalette={"blue"}
       >
-        <Avatar.Root
-          size={props.size === "sm" ? "xs" : "sm"}
-          key={actorLabel}
-          colorPalette={"blue"}
-        >
-          <Avatar.Fallback name={actorLabel} />
-        </Avatar.Root>
-        <Skeleton loading={loading} asChild>
-          <Flex direction={"column"} gap={"0.5"} align={"center"}>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
-              {actorLabel}
+        <Avatar.Fallback name={actorLabel} />
+      </Avatar.Root>
+      <Skeleton loading={loading} asChild>
+        <Flex direction={"column"} gap={"0.5"} align={"center"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+            {actorLabel}
+          </Text>
+          {isBreakpointActive("xl", "up") && (
+            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.400"}>
+              {props.orcid}
             </Text>
-            {isBreakpointActive("xl", "up") && (
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                {props.orcid}
-              </Text>
-            )}
-          </Flex>
-        </Skeleton>
-      </Flex>
+          )}
+        </Flex>
+      </Skeleton>
     </Flex>
   );
 };

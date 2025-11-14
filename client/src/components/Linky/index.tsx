@@ -64,7 +64,7 @@ const Linky = (props: LinkyProps) => {
   const getLinkyData = async () => {
     const data: IGenericItem = {
       _id: props.id,
-      name: props.fallback || "Invalid",
+      name: props.fallback || "Invalid Name",
     };
 
     if (props.type === "templates") {
@@ -130,7 +130,7 @@ const Linky = (props: LinkyProps) => {
         <Link
           onClick={onClickHandler}
           fontWeight={"semibold"}
-          color={showDeleted ? "gray.400" : "black"}
+          color={showDeleted ? "gray.600" : "black"}
           fontSize={props.size ? props.size : ""}
         >
           {linkLabel}

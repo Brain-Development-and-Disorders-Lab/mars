@@ -9,6 +9,14 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Define default font size for MDEditor */
+body .w-md-editor-text-pre > code,
+body .wmde-markdown,
+body .w-md-editor-text-input {
+  font-size: 12px !important;
+  line-height: 13px !important;
+}
+
 /* CSS for React Query Builder */
 .svg-font-color svg > path {
   fill: var(--ifm-font-color-base);

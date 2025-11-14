@@ -37,7 +37,7 @@ import Graph from "@components/Graph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
-import Values from "@components/Values";
+import ValuesRemix from "@components/ValuesRemix";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
@@ -2450,7 +2450,7 @@ const Entity = () => {
                       <Fieldset.Root invalid={isAttributeValueError}>
                         <Fieldset.Content>
                           <Field.Root required>
-                            <Values
+                            <ValuesRemix
                               viewOnly={false}
                               values={attributeValues}
                               setValues={setAttributeValues}
