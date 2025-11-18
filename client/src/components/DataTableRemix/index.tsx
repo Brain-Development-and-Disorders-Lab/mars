@@ -109,9 +109,9 @@ const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
     <Menu.Root>
       <Menu.Trigger asChild>
         <Button
-          variant="ghost"
+          variant="subtle"
           size="xs"
-          p={0.5}
+          p={0}
           minW="auto"
           h="auto"
           onClick={(e) => {
@@ -250,54 +250,57 @@ const DataTableRemix = (props: DataTableProps) => {
   // Create ReactTable instance
   const table = useReactTable({
     columns: [
-      // Checkbox select column - always included
-      {
-        id: "select",
-        enableHiding: false, // Prevent hiding the selection column
-        header: ({ table }: any) => (
-          <Flex align="center" justify="center" w="auto" h="100%">
-            <Checkbox.Root
-              {...{
-                disabled: props.viewOnly,
-                size: "xs",
-                colorPalette: "blue",
-                checked: table.getIsAllRowsSelected()
-                  ? true
-                  : table.getIsSomeRowsSelected()
-                    ? "indeterminate"
-                    : false,
-                invalid: false,
-                onChange: table.getToggleAllRowsSelectedHandler(),
-              }}
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-            </Checkbox.Root>
-          </Flex>
-        ),
-        cell: ({ row }: any) => (
-          <Flex align="center" justify="center" w="auto" h="100%">
-            <Checkbox.Root
-              {...{
-                id: `s_${Math.random().toString(16).slice(2)}`,
-                size: "xs",
-                colorPalette: "blue",
-                checked: row.getIsSelected()
-                  ? true
-                  : row.getIsSomeSelected()
-                    ? "indeterminate"
-                    : false,
-                disabled: !row.getCanSelect() || props.viewOnly,
-                invalid: false,
-                onChange: row.getToggleSelectedHandler(),
-              }}
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-            </Checkbox.Root>
-          </Flex>
-        ),
-      },
+      // Checkbox select column - only included if showSelection is true
+      ...(props.showSelection
+        ? [
+            {
+              id: "select",
+              header: ({ table }: any) => (
+                <Flex align="center" justify="center" w="auto" h="100%">
+                  <Checkbox.Root
+                    {...{
+                      disabled: props.viewOnly,
+                      size: "xs",
+                      colorPalette: "blue",
+                      checked: table.getIsAllRowsSelected()
+                        ? true
+                        : table.getIsSomeRowsSelected()
+                          ? "indeterminate"
+                          : false,
+                      invalid: false,
+                      onChange: table.getToggleAllRowsSelectedHandler(),
+                    }}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                  </Checkbox.Root>
+                </Flex>
+              ),
+              cell: ({ row }: any) => (
+                <Flex align="center" justify="center" w="auto" h="100%">
+                  <Checkbox.Root
+                    {...{
+                      id: `s_${Math.random().toString(16).slice(2)}`,
+                      size: "xs",
+                      colorPalette: "blue",
+                      checked: row.getIsSelected()
+                        ? true
+                        : row.getIsSomeSelected()
+                          ? "indeterminate"
+                          : false,
+                      disabled: !row.getCanSelect() || props.viewOnly,
+                      invalid: false,
+                      onChange: row.getToggleSelectedHandler(),
+                    }}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                  </Checkbox.Root>
+                </Flex>
+              ),
+            },
+          ]
+        : []),
       ...props.columns.map((col) => ({ ...col, filterFn: includesSome })),
     ],
     data: props.data,
@@ -346,6 +349,7 @@ const DataTableRemix = (props: DataTableProps) => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
     let hasChanges = false;
 
+    // Update data column visibility from props.visibleColumns (excludes select)
     Object.keys(props.visibleColumns).forEach((column) => {
       if (
         column !== "select" &&
@@ -355,15 +359,18 @@ const DataTableRemix = (props: DataTableProps) => {
         hasChanges = true;
       }
     });
-    // Ensure select column is always visible
-    if (updatedVisibility["select"] !== true) {
-      updatedVisibility["select"] = true;
+
+    // Update select column visibility from props.showSelection
+    const shouldShowSelect = props.showSelection === true;
+    if (updatedVisibility["select"] !== shouldShowSelect) {
+      updatedVisibility["select"] = shouldShowSelect;
       hasChanges = true;
     }
+
     if (hasChanges) {
       setColumnVisibility(updatedVisibility);
     }
-  }, [props.visibleColumns]);
+  }, [props.visibleColumns, props.showSelection]);
 
   // Column selector state
   const [columnNames, setColumnNames] = useState([] as string[]);
@@ -372,7 +379,7 @@ const DataTableRemix = (props: DataTableProps) => {
   );
 
   useEffect(() => {
-    // Get a list of all column names
+    // Get a list of all column names (excluding select - it's controlled by showSelection prop)
     const columns = table
       .getAllColumns()
       .filter((column) => {
@@ -385,13 +392,27 @@ const DataTableRemix = (props: DataTableProps) => {
     // Set the column visibilities
     const updatedVisibility = _.cloneDeep(columnVisibility);
 
+    // First, preserve all column visibilities from props.visibleColumns (including non-toggleable ones like "name")
+    Object.keys(props.visibleColumns).forEach((column) => {
+      if (column !== "select" && props.visibleColumns[column] !== undefined) {
+        updatedVisibility[column] = props.visibleColumns[column];
+      }
+    });
+
+    // Set visibility for toggleable columns (those in the column selector) - default to true if not set
     columns.map((column) => {
-      if (!_.isUndefined(columnVisibility[column])) {
+      if (updatedVisibility[column] === undefined) {
         updatedVisibility[column] = true;
       }
     });
-    // Ensure select column is always visible
-    updatedVisibility["select"] = true;
+
+    // Set select column visibility based on showSelection prop
+    if (props.showSelection === true) {
+      updatedVisibility["select"] = true;
+    } else {
+      updatedVisibility["select"] = false;
+    }
+
     setColumnVisibility(updatedVisibility);
 
     // Initialize column widths for all columns (excluding select which is always fixed)
@@ -504,15 +525,58 @@ const DataTableRemix = (props: DataTableProps) => {
     if (!isResizing || !dragRef.current) return;
 
     const deltaX = event.clientX - dragRef.current.startX;
-    const newWidth = Math.max(
-      minDataColumnWidth,
-      dragRef.current.startWidth + deltaX,
-    );
+    const proposedWidth = dragRef.current.startWidth + deltaX;
 
-    setColumnWidths((prev) => ({
-      ...prev,
-      [isResizing]: newWidth,
-    }));
+    // Ensure the resized column doesn't go below minimum
+    const newWidth = Math.max(minDataColumnWidth, proposedWidth);
+
+    // Get all visible data columns (excluding select and last column which is auto)
+    const visibleHeaders = table.getHeaderGroups()[0]?.headers || [];
+    const allDataColumns = visibleHeaders
+      .map((header, index) => ({
+        id: header.id,
+        isLast: index === visibleHeaders.length - 1,
+        isSelect: header.id === "select",
+      }))
+      .filter((col) => !col.isSelect && !col.isLast);
+
+    // Calculate current widths of other columns (excluding the one being resized)
+    const otherColumns = allDataColumns.filter((col) => col.id !== isResizing);
+
+    // Calculate the width change
+    const currentResizedWidth = columnWidths[isResizing] || 150;
+    const widthChange = newWidth - currentResizedWidth;
+
+    // Verify all other data columns are at or above minimum
+    const allOtherColumnsValid = otherColumns.every((col) => {
+      const currentWidth = columnWidths[col.id] || 150;
+      return currentWidth >= minDataColumnWidth;
+    });
+
+    // If making the column wider, check if any other column is at minimum
+    // If so, prevent the resize to avoid forcing them below minimum
+    let canResize = allOtherColumnsValid;
+    if (widthChange > 0 && allOtherColumnsValid) {
+      // Check if any other column is exactly at minimum (no room to shrink)
+      const anyColumnAtMinimum = otherColumns.some((col) => {
+        const currentWidth = columnWidths[col.id] || 150;
+        return currentWidth <= minDataColumnWidth;
+      });
+
+      // If any column is at minimum and we're making this one wider,
+      // prevent the resize to avoid potential issues
+      if (anyColumnAtMinimum) {
+        canResize = false;
+      }
+    }
+
+    // Only apply the resize if it's safe
+    if (canResize) {
+      setColumnWidths((prev) => ({
+        ...prev,
+        [isResizing]: newWidth,
+      }));
+    }
   };
 
   // Handle column resize end
@@ -546,28 +610,28 @@ const DataTableRemix = (props: DataTableProps) => {
   const updateColumnVisibility = (columns: string[]) => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
 
-    // Reset visibility on update
-    for (const column of Object.keys(updatedVisibility)) {
-      // Hide all columns except select
-      if (column !== "select") {
-        updatedVisibility[column] = false;
+    // Get the list of toggleable columns (those that appear in the dropdown)
+    const toggleableColumns = columnNames;
+
+    // Only reset visibility for toggleable columns
+    toggleableColumns.forEach((column) => {
+      updatedVisibility[column] = false;
+    });
+
+    // Set visibility to true for selected toggleable columns
+    columns.forEach((column) => {
+      if (toggleableColumns.includes(column)) {
+        updatedVisibility[column] = true;
       }
+    });
+
+    // Preserve select column visibility based on showSelection prop
+    if (props.showSelection === true) {
+      updatedVisibility["select"] = true;
+    } else {
+      updatedVisibility["select"] = false;
     }
 
-    // Ensure select column is always visible
-    updatedVisibility["select"] = true;
-
-    // Re-instate column visibility if defined
-    for (const column of columns) {
-      if (column !== "select") {
-        if (
-          !_.isUndefined(updatedVisibility[column]) ||
-          updatedVisibility[column] === false
-        ) {
-          updatedVisibility[column] = true;
-        }
-      }
-    }
     setColumnVisibility(updatedVisibility);
   };
 
@@ -668,8 +732,8 @@ const DataTableRemix = (props: DataTableProps) => {
                             {canSortColumn(header) && (
                               <Button
                                 size="xs"
-                                variant="ghost"
-                                p={0.5}
+                                variant="subtle"
+                                p={0}
                                 minW="auto"
                                 h="auto"
                                 onClick={(e) => {
@@ -774,14 +838,77 @@ const DataTableRemix = (props: DataTableProps) => {
         gap={1}
         align="center"
         wrap="wrap"
-        justify={{ base: "space-between", sm: "space-between" }}
+        justify={"space-between"}
         w="100%"
         mt={1}
         flexShrink={0}
       >
-        <Flex direction="row" gap={1} align="center" wrap="wrap">
+        {props.showPagination && (
+          <Flex direction="row" gap={1} align="center" wrap="wrap">
+            <IconButton
+              variant="outline"
+              size="xs"
+              rounded="md"
+              aria-label="first page"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <Icon name={"c_double_left"} />
+            </IconButton>
+            <IconButton
+              variant="outline"
+              size="xs"
+              rounded="md"
+              aria-label="previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <Icon name={"c_left"} />
+            </IconButton>
+            {table.getPageCount() > 0 && (
+              <Flex gap={1}>
+                <Text fontSize="xs" fontWeight="semibold">
+                  {table.getState().pagination.pageIndex + 1}
+                </Text>
+                <Text fontSize="xs"> of </Text>
+                <Text fontSize="xs" fontWeight="semibold">
+                  {table.getPageCount()}
+                </Text>
+              </Flex>
+            )}
+            <IconButton
+              variant="outline"
+              size="xs"
+              rounded="md"
+              aria-label="next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <Icon name={"c_right"} />
+            </IconButton>
+            <IconButton
+              variant="outline"
+              size="xs"
+              rounded="md"
+              aria-label="last page"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <Icon name={"c_double_right"} />
+            </IconButton>
+          </Flex>
+        )}
+
+        <Flex
+          direction="row"
+          gap={1}
+          align="center"
+          justify="start"
+          grow={1}
+          wrap="wrap"
+        >
           {/* Actions button */}
-          {!props.viewOnly && (
+          {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
                 <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
@@ -878,58 +1005,6 @@ const DataTableRemix = (props: DataTableProps) => {
 
         {props.showPagination && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="first page"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <Icon name={"c_double_left"} />
-            </IconButton>
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="previous page"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <Icon name={"c_left"} />
-            </IconButton>
-            {table.getPageCount() > 0 && (
-              <Flex gap={1}>
-                <Text fontSize="xs" fontWeight="semibold">
-                  {table.getState().pagination.pageIndex + 1}
-                </Text>
-                <Text fontSize="xs"> of </Text>
-                <Text fontSize="xs" fontWeight="semibold">
-                  {table.getPageCount()}
-                </Text>
-              </Flex>
-            )}
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="next page"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <Icon name={"c_right"} />
-            </IconButton>
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="last page"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <Icon name={"c_double_right"} />
-            </IconButton>
-
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
               Show:
             </Text>
