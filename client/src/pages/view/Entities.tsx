@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Flex,
   Heading,
   Text,
@@ -10,7 +11,6 @@ import {
   Button,
   Spacer,
   Tag,
-  Link,
   useDisclosure,
   Select,
   Portal,
@@ -20,7 +20,7 @@ import {
   Fieldset,
   Field,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+// import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
@@ -43,6 +43,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
+import DataTableRemix from "@components/DataTableRemix";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -117,6 +118,18 @@ const Entities = () => {
         name
         description
         created
+        attributes {
+          _id
+          name
+          values {
+            _id
+            name
+          }
+        }
+        attachments {
+          _id
+          name
+        }
       }
     }
   `;
@@ -168,27 +181,41 @@ const Entities = () => {
     columnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex>
+          <Flex align={"center"} justify={"space-between"} gap={"1"}>
             <Tooltip
               content={info.getValue()}
               disabled={info.getValue().length < 36}
               showArrow
             >
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 36 })}
               </Text>
             </Tooltip>
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="outline"
+              colorPalette="gray"
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
+            </Button>
           </Flex>
         );
       },
       header: "Name",
+      meta: {
+        minWidth: 200,
+      },
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
             </Tag.Root>
           );
         }
@@ -196,11 +223,11 @@ const Entities = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 36}
+              disabled={info.getValue().length < 32}
               showArrow
             >
-              <Text fontSize={"sm"}>
-                {_.truncate(info.getValue(), { length: 36 })}
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), { length: 32 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -212,11 +239,14 @@ const Entities = () => {
     columnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          <ActorTag
-            orcid={info.getValue()}
-            fallback={"Unknown User"}
-            size={"sm"}
-          />
+          // <ActorTag
+          //   orcid={info.getValue()}
+          //   fallback={"Unknown User"}
+          //   size={"sm"}
+          // />
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            {info.getValue()}
+          </Text>
         );
       },
       header: "Owner",
@@ -224,29 +254,30 @@ const Entities = () => {
     }),
     columnHelper.accessor("created", {
       cell: (info) => (
-        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
           {dayjs(info.getValue()).fromNow()}
         </Text>
       ),
       header: "Created",
       enableHiding: true,
     }),
-    columnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              fontWeight={"semibold"}
-              color={"black"}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-            </Link>
-            <Icon name={"a_right"} />
-          </Flex>
-        );
-      },
-      header: "",
+    columnHelper.accessor("attributes", {
+      cell: (info) => (
+        <Tag.Root colorPalette={"green"}>
+          <Tag.Label>{info.getValue().length}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attributes",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("attachments", {
+      cell: (info) => (
+        <Tag.Root colorPalette={"purple"}>
+          <Tag.Label>{info.getValue().length}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attachments",
+      enableHiding: true,
     }),
   ];
 
@@ -311,14 +342,17 @@ const Entities = () => {
         bg={"white"}
         wrap={"wrap"}
         gap={"4"}
+        minW="0"
+        maxW="100%"
       >
         <Flex
           w={"100%"}
+          minW="0"
           direction={"row"}
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
+          <Flex align={"center"} gap={"2"} w={"100%"} minW="0">
             <Icon name={"entity"} size={"md"} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
@@ -333,27 +367,29 @@ const Entities = () => {
             </Button>
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"}>
+        <Flex direction={"column"} gap={"4"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"sm"}>
             All Entities in the current Workspace are shown below. Sort the
             Entities using the column headers.
           </Text>
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
-            <DataTable
-              columns={columns}
-              data={entityData.filter((entity) =>
-                _.isEqual(entity.archived, false),
-              )}
-              visibleColumns={visibleColumns}
-              selectedRows={{}}
-              actions={actions}
-              showColumnSelect
-              showSelection
-              showPagination
-              columnFilters={columnFilters}
-              onColumnFiltersChange={setColumnFilters}
-            />
+            <Box w="100%" minW="0" maxW="100%">
+              <DataTableRemix
+                columns={columns}
+                data={entityData.filter((entity) =>
+                  _.isEqual(entity.archived, false),
+                )}
+                visibleColumns={visibleColumns}
+                selectedRows={{}}
+                actions={actions}
+                showColumnSelect
+                showSelection
+                showPagination
+                columnFilters={columnFilters}
+                onColumnFiltersChange={setColumnFilters}
+              />
+            </Box>
           ) : (
             <EmptyState.Root>
               <EmptyState.Content>

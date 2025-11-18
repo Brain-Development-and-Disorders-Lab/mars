@@ -1,13 +1,9 @@
-// React
 import React, { useEffect, useState } from "react";
-
-// Existing and custom components
 import {
   Box,
   Flex,
   IconButton,
   Select,
-  Table,
   Text,
   Checkbox,
   Menu,
@@ -29,11 +25,6 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
-
-// Custom hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
-
-// Existing and custom types
 import { DataTableProps } from "@types";
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,10 +33,8 @@ declare module "@tanstack/react-table" {
   }
 }
 
-// Utility functions and libraries
 import _ from "lodash";
 
-// Custom filter function for array inclusion
 const includesSome = (row: any, columnId: string, filterValue: unknown[]) => {
   if (
     !filterValue ||
@@ -57,7 +46,6 @@ const includesSome = (row: any, columnId: string, filterValue: unknown[]) => {
     ? filterValue.includes(row.getValue(columnId))
     : true;
 };
-// Auto remove when filter array empty
 (includesSome as any).autoRemove = (val: unknown) =>
   !val || (Array.isArray(val) && val.length === 0);
 
@@ -70,7 +58,6 @@ type ColumnFilterMenuProps = {
 const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
   const [query, setQuery] = useState("");
 
-  // Helper function to convert values to display strings
   const getDisplayValue = (val: any) => {
     if (val === null || val === undefined) return "Empty";
     if (Array.isArray(val)) return `${val.length} items`;
@@ -78,7 +65,6 @@ const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
     return String(val);
   };
 
-  // Helper function to get filter key (what we actually filter by)
   const getFilterKey = (val: any) => {
     if (val === null || val === undefined) return "empty";
     if (Array.isArray(val)) return val.length.toString();
@@ -128,7 +114,7 @@ const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
       <Portal>
         <Menu.Positioner>
           <Menu.Content>
-            <Flex direction="column" p="2" gap="2" minW="200px" maxW="300px">
+            <Flex direction="column" p="2" gap="2" minW="200px" maxW="200px">
               <Input
                 size="sm"
                 rounded="md"
@@ -192,10 +178,6 @@ const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
 };
 
 const DataTableRemix = (props: DataTableProps) => {
-  // Breakpoint state
-  const { isBreakpointActive } = useBreakpoint();
-
-  // Page length collection
   const [pageLength, setPageLength] = useState<string[]>(["10"]);
   const pageLengthsCollection = createListCollection({
     items: [
@@ -207,36 +189,22 @@ const DataTableRemix = (props: DataTableProps) => {
     ],
   });
 
-  // State for column widths with minimum constraints (excludes select column)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const minDataColumnWidth = 100;
-  const selectColumnWidth = 40; // Fixed width for select column (matches ValuesRemix)
+  const selectColumnWidth = 40;
+  const defaultColumnWidth = 200;
 
-  // State for drag resizing
-  const [isResizing, setIsResizing] = useState<string | null>(null);
-  const dragRef = React.useRef<{ startX: number; startWidth: number } | null>(
-    null,
-  );
-
-  // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
     props.visibleColumns,
   );
-
-  // Table row selection state
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
-
-  // Column filters state
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     props.columnFilters ?? [],
   );
 
-  // `useEffect` for when the rows are selected
   useEffect(() => {
     if (props.onSelectedRowsChange) {
       const rowSet = [];
       for (const rowIndex of Object.keys(selectedRows)) {
-        // Get the corresponding row based on the current selected index
         const row = props.data[parseInt(rowIndex)];
         if (row) {
           rowSet.push(row);
@@ -247,10 +215,8 @@ const DataTableRemix = (props: DataTableProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRows, props.data]);
 
-  // Create ReactTable instance
   const table = useReactTable({
     columns: [
-      // Checkbox select column - only included if showSelection is true
       ...(props.showSelection
         ? [
             {
@@ -344,12 +310,10 @@ const DataTableRemix = (props: DataTableProps) => {
     },
   });
 
-  // Effect to update the column visibility
   useEffect(() => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
     let hasChanges = false;
 
-    // Update data column visibility from props.visibleColumns (excludes select)
     Object.keys(props.visibleColumns).forEach((column) => {
       if (
         column !== "select" &&
@@ -360,7 +324,6 @@ const DataTableRemix = (props: DataTableProps) => {
       }
     });
 
-    // Update select column visibility from props.showSelection
     const shouldShowSelect = props.showSelection === true;
     if (updatedVisibility["select"] !== shouldShowSelect) {
       updatedVisibility["select"] = shouldShowSelect;
@@ -372,14 +335,12 @@ const DataTableRemix = (props: DataTableProps) => {
     }
   }, [props.visibleColumns, props.showSelection]);
 
-  // Column selector state
   const [columnNames, setColumnNames] = useState([] as string[]);
   const [columnNamesCollection, setColumnNamesCollection] = useState(
     createListCollection<string>({ items: [] }),
   );
 
   useEffect(() => {
-    // Get a list of all column names (excluding select - it's controlled by showSelection prop)
     const columns = table
       .getAllColumns()
       .filter((column) => {
@@ -389,24 +350,20 @@ const DataTableRemix = (props: DataTableProps) => {
     setColumnNames(columns);
     setColumnNamesCollection(createListCollection({ items: columns }));
 
-    // Set the column visibilities
     const updatedVisibility = _.cloneDeep(columnVisibility);
 
-    // First, preserve all column visibilities from props.visibleColumns (including non-toggleable ones like "name")
     Object.keys(props.visibleColumns).forEach((column) => {
       if (column !== "select" && props.visibleColumns[column] !== undefined) {
         updatedVisibility[column] = props.visibleColumns[column];
       }
     });
 
-    // Set visibility for toggleable columns (those in the column selector) - default to true if not set
     columns.map((column) => {
       if (updatedVisibility[column] === undefined) {
         updatedVisibility[column] = true;
       }
     });
 
-    // Set select column visibility based on showSelection prop
     if (props.showSelection === true) {
       updatedVisibility["select"] = true;
     } else {
@@ -415,20 +372,18 @@ const DataTableRemix = (props: DataTableProps) => {
 
     setColumnVisibility(updatedVisibility);
 
-    // Initialize column widths for all columns (excluding select which is always fixed)
     const initialWidths: Record<string, number> = {};
     table.getAllColumns().forEach((column) => {
       if (
         column.id !== "select" &&
         !_.includes(["_id", "name", "view"], column.id)
       ) {
-        initialWidths[column.id] = 150;
+        initialWidths[column.id] = defaultColumnWidth;
       }
     });
     setColumnWidths((prev) => ({ ...prev, ...initialWidths }));
   }, []);
 
-  // Effect to update the selected rows
   useEffect(() => {
     if (!_.isEqual(selectedRows, props.selectedRows)) {
       setSelectedRows(props.selectedRows);
@@ -436,14 +391,12 @@ const DataTableRemix = (props: DataTableProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedRows]);
 
-  // When column filters change, notify parent if needed
   useEffect(() => {
     if (props.onColumnFiltersChange) {
       props.onColumnFiltersChange(columnFilters);
     }
   }, [columnFilters, props.onColumnFiltersChange]);
 
-  // Effect to update the column filters
   useEffect(() => {
     if (!_.isEqual(columnFilters, props.columnFilters ?? [])) {
       setColumnFilters(props.columnFilters ?? []);
@@ -451,7 +404,6 @@ const DataTableRemix = (props: DataTableProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.columnFilters]);
 
-  // Exclude columns that are not sortable, i.e. checkboxes and buttons
   const canSortColumn = (header: any) => {
     return (
       !_.isEqual(header.id, "select") &&
@@ -463,125 +415,20 @@ const DataTableRemix = (props: DataTableProps) => {
     );
   };
 
-  // Handle column resize start
-  const handleResizeStart = (columnId: string, event: React.MouseEvent) => {
-    if (columnId === "select") return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    setIsResizing(columnId);
-    dragRef.current = {
-      startX: event.clientX,
-      startWidth: columnWidths[columnId] || 150,
-    };
-  };
-
-  // Handle column resize during drag
-  const handleResizeMove = (event: MouseEvent) => {
-    if (!isResizing || !dragRef.current) return;
-
-    const deltaX = event.clientX - dragRef.current.startX;
-    const proposedWidth = dragRef.current.startWidth + deltaX;
-
-    // Ensure the resized column doesn't go below minimum
-    const newWidth = Math.max(minDataColumnWidth, proposedWidth);
-
-    // Get all visible data columns (excluding select and last column which is auto)
-    const visibleHeaders = table.getHeaderGroups()[0]?.headers || [];
-    const allDataColumns = visibleHeaders
-      .map((header, index) => ({
-        id: header.id,
-        isLast: index === visibleHeaders.length - 1,
-        isSelect: header.id === "select",
-      }))
-      .filter((col) => !col.isSelect && !col.isLast);
-
-    // Calculate current widths of other columns (excluding the one being resized)
-    const otherColumns = allDataColumns.filter((col) => col.id !== isResizing);
-
-    // Calculate the width change
-    const currentResizedWidth = columnWidths[isResizing] || 150;
-    const widthChange = newWidth - currentResizedWidth;
-
-    // Verify all other data columns are at or above minimum
-    const allOtherColumnsValid = otherColumns.every((col) => {
-      const currentWidth = columnWidths[col.id] || 150;
-      return currentWidth >= minDataColumnWidth;
-    });
-
-    // If making the column wider, check if any other column is at minimum
-    // If so, prevent the resize to avoid forcing them below minimum
-    let canResize = allOtherColumnsValid;
-    if (widthChange > 0 && allOtherColumnsValid) {
-      // Check if any other column is exactly at minimum (no room to shrink)
-      const anyColumnAtMinimum = otherColumns.some((col) => {
-        const currentWidth = columnWidths[col.id] || 150;
-        return currentWidth <= minDataColumnWidth;
-      });
-
-      // If any column is at minimum and we're making this one wider,
-      // prevent the resize to avoid potential issues
-      if (anyColumnAtMinimum) {
-        canResize = false;
-      }
-    }
-
-    // Only apply the resize if it's safe
-    if (canResize) {
-      setColumnWidths((prev) => ({
-        ...prev,
-        [isResizing]: newWidth,
-      }));
-    }
-  };
-
-  // Handle column resize end
-  const handleResizeEnd = () => {
-    setIsResizing(null);
-    dragRef.current = null;
-  };
-
-  // Add event listeners for drag
-  React.useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", handleResizeMove);
-      document.addEventListener("mouseup", handleResizeEnd);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-
-      return () => {
-        document.removeEventListener("mousemove", handleResizeMove);
-        document.removeEventListener("mouseup", handleResizeEnd);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-    }
-    return undefined;
-  }, [isResizing]);
-
-  /**
-   * Update the column visibility depending on the column selected
-   * @param column Name of the column
-   */
   const updateColumnVisibility = (columns: string[]) => {
     const updatedVisibility = _.cloneDeep(columnVisibility);
-
-    // Get the list of toggleable columns (those that appear in the dropdown)
     const toggleableColumns = columnNames;
 
-    // Only reset visibility for toggleable columns
     toggleableColumns.forEach((column) => {
       updatedVisibility[column] = false;
     });
 
-    // Set visibility to true for selected toggleable columns
     columns.forEach((column) => {
       if (toggleableColumns.includes(column)) {
         updatedVisibility[column] = true;
       }
     });
 
-    // Preserve select column visibility based on showSelection prop
     if (props.showSelection === true) {
       updatedVisibility["select"] = true;
     } else {
@@ -594,202 +441,189 @@ const DataTableRemix = (props: DataTableProps) => {
   return (
     <Box
       w="100%"
+      maxW="100%"
       display="flex"
       flexDirection="column"
       css={{ WebkitOverflowScrolling: "touch" }}
     >
-      <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
+      <Box
+        w="100%"
+        maxW="100%"
+        flex="1"
+        minH="0"
+        minW="0"
+        overflowX="auto"
+        overflowY="auto"
+        position="relative"
+      >
         <Box
           minW="800px"
-          w="100%"
           border="1px solid"
           borderColor="gray.200"
           borderRadius="md"
           overflow="hidden"
+          display="inline-block"
         >
-          {/* Table */}
-          <Table.Root
-            variant={"line"}
-            size={"sm"}
-            interactive
-            style={{ tableLayout: "fixed" }}
+          <Flex
+            gap={0}
+            bg="gray.100"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            direction="row"
           >
-            {/* Column group for fixed widths */}
-            <colgroup>
-              {table.getHeaderGroups()[0]?.headers.map((header, index) => {
-                const isSelectColumn = header.id === "select";
-                const isLastColumn =
-                  index === table.getHeaderGroups()[0]?.headers.length - 1;
-                return (
-                  <col
-                    key={header.id}
-                    style={{
-                      width: isSelectColumn
-                        ? `${selectColumnWidth}px`
-                        : isLastColumn
-                          ? "auto"
-                          : `${columnWidths[header.id] || 150}px`,
-                    }}
-                  />
-                );
-              })}
-            </colgroup>
-            {/* Table head */}
-            <Table.Header bg={"gray.100"} p={"0"}>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <Table.Row key={headerGroup.id} bg={"gray.100"}>
-                  {headerGroup.headers.map((header, headerIndex) => {
-                    const isSelectColumn = header.id === "select";
-                    const isLastColumn =
-                      headerIndex === headerGroup.headers.length - 1;
+            {table.getHeaderGroups()[0]?.headers.map((header, headerIndex) => {
+              const isSelectColumn = header.id === "select";
+              const isLastColumn =
+                headerIndex === table.getHeaderGroups()[0]?.headers.length - 1;
+              const headerWidth = isSelectColumn
+                ? selectColumnWidth
+                : isLastColumn
+                  ? undefined
+                  : columnWidths[header.id] || defaultColumnWidth;
 
-                    return (
-                      <Table.ColumnHeader
-                        key={header.id}
-                        w={
-                          isSelectColumn
-                            ? `${selectColumnWidth}px`
-                            : isLastColumn
-                              ? undefined
-                              : `${columnWidths[header.id] || 150}px`
-                        }
-                        px={1}
-                        py={1}
-                        fontSize="xs"
-                        fontWeight="semibold"
-                        color="gray.600"
-                        bg={"gray.100"}
-                        borderRight="1px solid"
-                        borderColor="gray.200"
-                        position="relative"
-                        textAlign="center"
-                        lineHeight="1.2"
-                        overflow="hidden"
-                      >
-                        {header.id === "select" ? (
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )
-                        ) : (
-                          <Flex
-                            direction="row"
-                            align="center"
-                            gap={1}
-                            justify="center"
-                            w="auto"
-                          >
-                            <Text textAlign="center">
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                            </Text>
-                            {canSortColumn(header) && (
-                              <Button
-                                size="xs"
-                                variant="subtle"
-                                p={0}
-                                minW="auto"
-                                h="auto"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  header.column.getToggleSortingHandler()?.(e);
-                                }}
-                              >
-                                <Icon
-                                  name={
-                                    header.column.getIsSorted() === "desc"
-                                      ? "sort_up"
-                                      : header.column.getIsSorted() === "asc"
-                                        ? "sort_down"
-                                        : "sort"
-                                  }
-                                  color={
-                                    header.column.getIsSorted()
-                                      ? "blue.700"
-                                      : "gray.600"
-                                  }
-                                  size="xs"
-                                />
-                              </Button>
-                            )}
-                            {canSortColumn(header) && (
-                              <ColumnFilterMenu
-                                columnId={header.id}
-                                data={props.data}
-                                table={table}
-                              />
-                            )}
-                          </Flex>
+              return (
+                <Flex
+                  key={header.id}
+                  w={headerWidth ? `${headerWidth}px` : "auto"}
+                  flex={isLastColumn ? "1" : "0 0 auto"}
+                  px={1}
+                  py={1}
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  color="gray.600"
+                  bg="gray.100"
+                  borderRight={!isLastColumn ? "1px solid" : "none"}
+                  borderColor="gray.200"
+                  position="relative"
+                  textAlign="center"
+                  lineHeight="1.2"
+                  align="center"
+                  justify="center"
+                  overflow="hidden"
+                >
+                  {header.id === "select" ? (
+                    flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )
+                  ) : (
+                    <Flex
+                      direction="row"
+                      align="center"
+                      gap={1}
+                      justify="center"
+                      w="100%"
+                    >
+                      <Text textAlign="center">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
                         )}
-                        {/* Resize Handle */}
-                        {header.id !== "select" && (
-                          <Box
-                            position="absolute"
-                            right="-1px"
-                            top="0"
-                            bottom="0"
-                            width="3px"
-                            cursor="col-resize"
-                            bg="transparent"
-                            _hover={{ bg: "blue.300" }}
-                            onMouseDown={(e) => handleResizeStart(header.id, e)}
-                            zIndex={10}
+                      </Text>
+                      {canSortColumn(header) && (
+                        <Button
+                          size="xs"
+                          variant="subtle"
+                          p={0}
+                          minW="auto"
+                          h="auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            header.column.getToggleSortingHandler()?.(e);
+                          }}
+                        >
+                          <Icon
+                            name={
+                              header.column.getIsSorted() === "desc"
+                                ? "sort_up"
+                                : header.column.getIsSorted() === "asc"
+                                  ? "sort_down"
+                                  : "sort"
+                            }
+                            color={
+                              header.column.getIsSorted()
+                                ? "blue.700"
+                                : "gray.600"
+                            }
+                            size="xs"
                           />
-                        )}
-                      </Table.ColumnHeader>
-                    );
-                  })}
-                </Table.Row>
-              ))}
-            </Table.Header>
+                        </Button>
+                      )}
+                      {canSortColumn(header) && (
+                        <ColumnFilterMenu
+                          columnId={header.id}
+                          data={props.data}
+                          table={table}
+                        />
+                      )}
+                    </Flex>
+                  )}
+                </Flex>
+              );
+            })}
+          </Flex>
 
-            {/* Table body */}
-            <Table.Body>
-              {table.getRowModel().rows.map((row) => (
-                <Table.Row id={row.id} key={row.id} w={"auto"}>
+          <Box overflowY="auto" overflowX="hidden">
+            {table.getRowModel().rows.map((row, rowIndex) => {
+              const isSelected = row.getIsSelected();
+              return (
+                <Flex
+                  key={row.id}
+                  id={row.id}
+                  gap={0}
+                  borderBottom={
+                    rowIndex < table.getRowModel().rows.length - 1
+                      ? "1px solid"
+                      : "none"
+                  }
+                  borderColor="gray.200"
+                  _hover={{ bg: "gray.25" }}
+                  overflow="hidden"
+                  bg={isSelected ? "blue.50" : "transparent"}
+                >
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const meta: any = cell.column.columnDef.meta;
                     const isLastCell =
                       cellIndex === row.getVisibleCells().length - 1;
                     const isSelectColumn = cell.column.id === "select";
+                    const cellWidth = isSelectColumn
+                      ? selectColumnWidth
+                      : isLastCell
+                        ? undefined
+                        : columnWidths[cell.column.id] || defaultColumnWidth;
 
                     return (
-                      <Table.Cell
-                        id={cell.id}
+                      <Box
                         key={cell.id}
-                        fontVariantNumeric={meta?.isNumeric}
+                        id={cell.id}
+                        w={cellWidth ? `${cellWidth}px` : "auto"}
+                        flex={isLastCell ? "1" : "0 0 auto"}
                         px={1}
                         py={0.5}
-                        w={
-                          isSelectColumn
-                            ? `${selectColumnWidth}px`
-                            : isLastCell
-                              ? undefined
-                              : `${columnWidths[cell.column.id] || 150}px`
-                        }
+                        fontVariantNumeric={meta?.isNumeric}
                         borderRight={!isLastCell ? "1px solid" : "none"}
                         borderColor="gray.200"
                         textAlign={isSelectColumn ? "center" : "left"}
                         overflow="hidden"
+                        display="flex"
+                        alignItems="center"
+                        bg={isSelected ? "blue.50" : "transparent"}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
                         )}
-                      </Table.Cell>
+                      </Box>
                     );
                   })}
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
+                </Flex>
+              );
+            })}
+          </Box>
         </Box>
       </Box>
 
-      {/* Pagination Toolbar */}
       <Flex
         gap={1}
         align="center"
@@ -863,7 +697,6 @@ const DataTableRemix = (props: DataTableProps) => {
           grow={1}
           wrap="wrap"
         >
-          {/* Actions button */}
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>

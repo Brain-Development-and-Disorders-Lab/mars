@@ -28,9 +28,12 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
     <Flex
       direction={"column"}
       w={"100%"}
+      minW="0"
+      maxW="100%"
       minH={{ base: "92vh", lg: "100vh" }}
       maxH={{ base: "100%" }}
       overflowY={"auto"}
+      overflowX={"hidden"}
     >
       {/* Toast notification provider */}
       <Toaster />
@@ -85,8 +88,11 @@ const Page: FC = () => {
         <Flex
           direction={"column"}
           w={"100%"}
+          minW="0"
+          maxW="100%"
           ml={{ base: "0", lg: "240px" }}
           mt={{ base: "8vh", lg: "0" }}
+          overflowX="hidden"
         >
           {/* Main content components */}
           <Outlet />

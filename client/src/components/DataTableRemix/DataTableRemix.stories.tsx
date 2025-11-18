@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 // Chakra UI components
-import { Box } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 
 // Components
 import DataTableRemix from "./index";
@@ -10,7 +10,6 @@ import DataTableRemix from "./index";
 // Storybook
 import type { Meta, StoryObj } from "@storybook/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Text } from "@chakra-ui/react";
 
 // Sample data type
 type SampleData = {
@@ -164,10 +163,17 @@ const defaultColumns = [
   columnHelper.accessor("name", {
     header: "Name",
     cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 150,
+    },
   }),
   columnHelper.accessor("status", {
     header: "Status",
     cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 100,
+      maxWidth: 200,
+    },
   }),
   columnHelper.accessor("value", {
     header: "Value",
@@ -178,11 +184,52 @@ const defaultColumns = [
     ),
     meta: {
       isNumeric: true,
+      minWidth: 120,
     },
   }),
   columnHelper.accessor("description", {
     header: "Description",
     cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 200,
+    },
+  }),
+];
+
+// Columns with wide minWidths to test scrolling
+const wideColumns = [
+  columnHelper.accessor("name", {
+    header: "Name",
+    cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 300,
+    },
+  }),
+  columnHelper.accessor("status", {
+    header: "Status",
+    cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 250,
+    },
+  }),
+  columnHelper.accessor("value", {
+    header: "Value",
+    cell: (info) => (
+      <Text fontSize="xs" fontVariantNumeric="tabular-nums">
+        ${info.getValue().toLocaleString()}
+      </Text>
+    ),
+    meta: {
+      isNumeric: true,
+      minWidth: 200,
+    },
+  }),
+  columnHelper.accessor("description", {
+    header: "Description",
+    cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+    meta: {
+      minWidth: 400,
+    },
   }),
 ];
 
@@ -321,5 +368,292 @@ export const ReadOnly: Story = {
     showSelection: false,
     showColumnSelect: false,
     viewOnly: true,
+  },
+};
+
+// Responsive container test - validates scroll behavior in constrained containers
+export const ResponsiveContainer: Story = {
+  render: (args) => {
+    const [visibleColumns] = useState({
+      name: true,
+      status: true,
+      value: true,
+      description: true,
+    });
+
+    return (
+      <Flex direction="column" gap={4} p={4}>
+        <Text fontSize="sm" color="gray.600">
+          Container width: 600px, height: 400px (table should scroll
+          horizontally)
+        </Text>
+        <Box
+          w="600px"
+          h="400px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={defaultColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 400px, height: 300px (should scroll both directions)
+        </Text>
+        <Box
+          w="400px"
+          h="300px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={defaultColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 320px, height: 400px (small desktop/mobile - should
+          scroll)
+        </Text>
+        <Box
+          w="320px"
+          h="400px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={defaultColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+      </Flex>
+    );
+  },
+  args: {
+    showPagination: true,
+    showSelection: true,
+    showColumnSelect: true,
+    viewOnly: false,
+  },
+};
+
+// Wide columns test - validates minWidth constraints and horizontal scrolling
+export const WideColumns: Story = {
+  render: (args) => {
+    const [visibleColumns] = useState({
+      name: true,
+      status: true,
+      value: true,
+      description: true,
+    });
+
+    return (
+      <Flex direction="column" gap={4} p={4}>
+        <Text fontSize="sm" color="gray.600" fontWeight="semibold">
+          Wide Columns Test - Columns have large minWidth values (300px, 250px,
+          200px, 400px)
+        </Text>
+        <Text fontSize="xs" color="gray.500" mb={2}>
+          The table should scroll horizontally when container is smaller than
+          total column widths. Columns should maintain their minWidth
+          constraints.
+        </Text>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 800px (should show horizontal scrollbar)
+        </Text>
+        <Box
+          w="800px"
+          h="400px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={wideColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 500px (definitely needs horizontal scroll)
+        </Text>
+        <Box
+          w="500px"
+          h="400px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={wideColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+      </Flex>
+    );
+  },
+  args: {
+    showPagination: true,
+    showSelection: true,
+    showColumnSelect: true,
+    viewOnly: false,
+  },
+};
+
+// Extreme width constraints test
+export const ExtremeWidthConstraints: Story = {
+  render: (args) => {
+    const [visibleColumns] = useState({
+      name: true,
+      status: true,
+      value: true,
+      description: true,
+    });
+
+    const extremeColumns = [
+      columnHelper.accessor("name", {
+        header: "Name",
+        cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+        meta: {
+          minWidth: 500,
+          maxWidth: 800,
+        },
+      }),
+      columnHelper.accessor("status", {
+        header: "Status",
+        cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+        meta: {
+          minWidth: 300,
+          maxWidth: 500,
+        },
+      }),
+      columnHelper.accessor("value", {
+        header: "Value",
+        cell: (info) => (
+          <Text fontSize="xs" fontVariantNumeric="tabular-nums">
+            ${info.getValue().toLocaleString()}
+          </Text>
+        ),
+        meta: {
+          isNumeric: true,
+          minWidth: 200,
+          maxWidth: 400,
+        },
+      }),
+      columnHelper.accessor("description", {
+        header: "Description",
+        cell: (info) => <Text fontSize="xs">{info.getValue()}</Text>,
+        meta: {
+          minWidth: 600,
+        },
+      }),
+    ];
+
+    return (
+      <Flex direction="column" gap={4} p={4}>
+        <Text fontSize="sm" color="gray.600" fontWeight="semibold">
+          Extreme Width Constraints Test
+        </Text>
+        <Text fontSize="xs" color="gray.500" mb={2}>
+          Columns have very large minWidth values (500px, 300px, 200px, 600px)
+          and some have maxWidth. Total minimum width: ~1600px. Table should
+          scroll horizontally in smaller containers.
+        </Text>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 1200px (should scroll horizontally)
+        </Text>
+        <Box
+          w="1200px"
+          h="500px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={extremeColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+
+        <Text fontSize="sm" color="gray.600">
+          Container width: 800px (definitely needs horizontal scroll)
+        </Text>
+        <Box
+          w="800px"
+          h="500px"
+          border="1px solid"
+          borderColor="gray.300"
+          p={2}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minW="0"
+        >
+          <DataTableRemix
+            {...args}
+            columns={extremeColumns}
+            data={sampleData}
+            visibleColumns={visibleColumns}
+            selectedRows={{}}
+          />
+        </Box>
+      </Flex>
+    );
+  },
+  args: {
+    showPagination: true,
+    showSelection: true,
+    showColumnSelect: true,
+    viewOnly: false,
   },
 };
