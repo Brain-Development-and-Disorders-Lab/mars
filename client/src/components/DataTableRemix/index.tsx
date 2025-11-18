@@ -451,50 +451,6 @@ const DataTableRemix = (props: DataTableProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.columnFilters]);
 
-  // Add a counter for the number of presented paginated items
-  const [itemCountComponent, setItemCountComponent] = useState(<Flex></Flex>);
-  const updateItemCountComponent = () => {
-    const page = table.getState().pagination.pageIndex;
-    const pageSize = table.getState().pagination.pageSize;
-
-    if (props.data.length === 0) {
-      setItemCountComponent(<Flex></Flex>);
-    } else if (page === 0) {
-      setItemCountComponent(
-        <Flex direction="row" gap={1} align="center">
-          <Text fontSize="xs">Showing:</Text>
-          <Text fontSize="xs" fontWeight="semibold">
-            1 - {props.data.length > pageSize ? pageSize : props.data.length}
-          </Text>
-          <Text fontSize="xs">of {props.data.length}</Text>
-        </Flex>,
-      );
-    } else if (page < table.getPageCount() - 1) {
-      setItemCountComponent(
-        <Flex direction="row" gap={1} align="center">
-          <Text fontSize="xs">Showing:</Text>
-          <Text fontSize="xs" fontWeight="semibold">
-            {pageSize * page + 1} - {pageSize * (page + 1)}
-          </Text>
-          <Text fontSize="xs">of {props.data.length}</Text>
-        </Flex>,
-      );
-    } else {
-      setItemCountComponent(
-        <Flex direction="row" gap={1} align="center">
-          <Text fontSize="xs">Showing:</Text>
-          <Text fontSize="xs" fontWeight="semibold">
-            {pageSize * page + 1} - {props.data.length}
-          </Text>
-          <Text fontSize="xs">of {props.data.length}</Text>
-        </Flex>,
-      );
-    }
-  };
-  useEffect(() => {
-    updateItemCountComponent();
-  }, [table.getState().pagination.pageIndex, props.data.length]);
-
   // Exclude columns that are not sortable, i.e. checkboxes and buttons
   const canSortColumn = (header: any) => {
     return (
@@ -913,11 +869,11 @@ const DataTableRemix = (props: DataTableProps) => {
               <Menu.Trigger asChild>
                 <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
                   Actions
-                  <Icon name={"lightning"} />
+                  <Icon name={"lightning"} size="xs" />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
-                <Menu.Content>
+                <Menu.Content p={1}>
                   {props.actions &&
                     props.actions.length > 0 &&
                     props.actions?.map((action) => {
@@ -935,9 +891,9 @@ const DataTableRemix = (props: DataTableProps) => {
                           }
                           value={action.label}
                         >
-                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                            <Icon name={action.icon} />
-                            <Text fontSize={"sm"}>{action.label}</Text>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={action.icon} size="xs" />
+                            <Text fontSize={"xs"}>{action.label}</Text>
                           </Flex>
                         </Menu.Item>
                       );
@@ -949,8 +905,8 @@ const DataTableRemix = (props: DataTableProps) => {
                       disabled
                       value={"No actions available"}
                     >
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Text fontSize={"sm"}>No Actions available</Text>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"}>No Actions available</Text>
                       </Flex>
                     </Menu.Item>
                   )}
@@ -960,47 +916,54 @@ const DataTableRemix = (props: DataTableProps) => {
           )}
 
           {columnNames.length > 0 && props.showColumnSelect && (
-            <Select.Root
-              key={"select-columns"}
-              size={"xs"}
-              w={"200px"}
-              collection={columnNamesCollection}
-              value={Object.keys(columnVisibility).filter(
-                (column) => columnVisibility[column] === true,
-              )}
-              onValueChange={(details) => {
-                updateColumnVisibility(details.items);
-              }}
-              multiple
+            <Flex
+              direction="row"
+              gap={1}
+              align="center"
+              wrap="wrap"
+              justify="center"
+              grow={1}
             >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger rounded={"md"}>
-                  <Select.ValueText placeholder={"Visible Columns"} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {columnNamesCollection.items.map((name) => (
-                      <Select.Item item={name} key={name}>
-                        {_.capitalize(name)}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
+              <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+                Columns:
+              </Text>
+              <Select.Root
+                key={"select-columns"}
+                size={"xs"}
+                w={"200px"}
+                collection={columnNamesCollection}
+                value={Object.keys(columnVisibility).filter(
+                  (column) => columnVisibility[column] === true,
+                )}
+                onValueChange={(details) => {
+                  updateColumnVisibility(details.items);
+                }}
+                multiple
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger rounded={"md"}>
+                    <Select.ValueText placeholder={"Visible Columns"} />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {columnNamesCollection.items.map((name) => (
+                        <Select.Item item={name} key={name}>
+                          {_.capitalize(name)}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+            </Flex>
           )}
-
-          {/* Table item counter */}
-          {props.showItemCount &&
-            isBreakpointActive("xl", "up") &&
-            itemCountComponent}
         </Flex>
 
         {props.showPagination && (

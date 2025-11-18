@@ -223,7 +223,6 @@ const Templates = () => {
               showColumnSelect
               showPagination
               showSelection
-              showItemCount
             />
           ) : (
             <EmptyState.Root>

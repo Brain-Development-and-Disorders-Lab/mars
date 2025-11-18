@@ -355,7 +355,6 @@ const Project = () => {
                   viewOnly={false}
                   showSelection={true}
                   showPagination
-                  showItemCount
                 />
               ) : (
                 <EmptyState.Root>

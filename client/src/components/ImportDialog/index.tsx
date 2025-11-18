@@ -1671,7 +1671,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                     visibleColumns={{}}
                     selectedRows={{}}
                     showPagination
-                    showItemCount
                   />
                 </Flex>
               )}

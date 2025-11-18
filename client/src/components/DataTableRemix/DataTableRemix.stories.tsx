@@ -50,10 +50,6 @@ const meta: Meta<typeof DataTableRemix> = {
       control: "boolean",
       description: "Whether to show column visibility selector",
     },
-    showItemCount: {
-      control: "boolean",
-      description: "Whether to show item count text",
-    },
     onSelectedRowsChange: {
       action: "selectedRowsChanged",
       table: {
@@ -216,7 +212,6 @@ export const Default: Story = {
     showPagination: true,
     showSelection: false,
     showColumnSelect: false,
-    showItemCount: true,
     viewOnly: false,
   },
 };
@@ -256,7 +251,6 @@ export const WithSelection: Story = {
     showPagination: true,
     showSelection: true,
     showColumnSelect: true,
-    showItemCount: true,
     viewOnly: false,
   },
 };
@@ -296,7 +290,6 @@ export const ManyRows: Story = {
     showPagination: true,
     showSelection: false,
     showColumnSelect: true,
-    showItemCount: true,
     viewOnly: false,
   },
 };
@@ -327,7 +320,6 @@ export const ReadOnly: Story = {
     showPagination: true,
     showSelection: false,
     showColumnSelect: false,
-    showItemCount: true,
     viewOnly: true,
   },
 };

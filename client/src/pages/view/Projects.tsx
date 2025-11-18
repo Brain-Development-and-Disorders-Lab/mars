@@ -243,7 +243,6 @@ const Projects = () => {
               showColumnSelect
               showPagination
               showSelection
-              showItemCount
             />
           ) : (
             <EmptyState.Root>

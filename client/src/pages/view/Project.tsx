@@ -1291,7 +1291,6 @@ const Project = () => {
                     showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
-                    showItemCount
                   />
                 ) : (
                   <EmptyState.Root>

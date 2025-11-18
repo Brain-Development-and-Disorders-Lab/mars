@@ -760,7 +760,6 @@ const Values = (props: {
           viewOnly={props.viewOnly}
           actions={actions}
           showPagination
-          showItemCount
           showSelection
         />
       ) : (

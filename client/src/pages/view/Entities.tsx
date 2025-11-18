@@ -351,7 +351,6 @@ const Entities = () => {
               showColumnSelect
               showSelection
               showPagination
-              showItemCount
               columnFilters={columnFilters}
               onColumnFiltersChange={setColumnFilters}
             />
@@ -475,7 +474,6 @@ const Entities = () => {
                   visibleColumns={exportTableVisibleColumns}
                   selectedRows={{}}
                   showPagination
-                  showItemCount
                 />
               </Flex>
             </Dialog.Body>

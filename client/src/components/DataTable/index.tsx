@@ -686,11 +686,6 @@ const DataTable = (props: DataTableProps) => {
           )}
         </Flex>
 
-        {/* Table item counter */}
-        {props.showItemCount &&
-          isBreakpointActive("xl", "up") &&
-          itemCountComponent}
-
         {props.showPagination && (
           <Flex gap={"2"} align={"center"} ref={selectPageSizeRef}>
             <Text fontSize={"sm"}>Shown Per Page:</Text>
