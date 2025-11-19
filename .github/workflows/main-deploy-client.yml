@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+          ref: ${{ github.event.release.tag_name || github.ref }}
 
       - name: Create .env file for client
         working-directory: client
