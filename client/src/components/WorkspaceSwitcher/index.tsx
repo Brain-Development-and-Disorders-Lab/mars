@@ -238,12 +238,14 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         open={open}
         onEscapeKeyDown={() => setOpen(false)}
         onInteractOutside={() => setOpen(false)}
+        size={"sm"}
       >
         <Menu.Trigger asChild>
           <Button
             h={"100%"}
             w={"100%"}
             p={"0"}
+            size={"xs"}
             rounded={"md"}
             bg={"white"}
             variant={"surface"}
@@ -253,15 +255,15 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               direction={"row"}
               gap={"2"}
               align={"center"}
-              p={"2"}
+              p={"1"}
               w={"100%"}
             >
-              <Icon name={"workspace"} />
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {_.truncate(label, { length: 14 })}
+              <Icon name={"workspace"} size={"sm"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"}>
+                {_.truncate(label, { length: 18 })}
               </Text>
               <Spacer />
-              <Icon name={"c_expand"} />
+              <Icon name={"c_expand"} size={"sm"} />
             </Flex>
           </Button>
         </Menu.Trigger>
@@ -285,7 +287,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                         align={"center"}
                       >
                         <Tooltip content={accessible.name} showArrow>
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
                             {_.truncate(accessible.name, { length: 24 })}
                           </Text>
                         </Tooltip>
@@ -312,7 +314,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                     align={"center"}
                     justify={"space-between"}
                   >
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       No Workspaces
                     </Text>
                   </Flex>
@@ -330,14 +332,14 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 disabled={workspaces.length === 0}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"edit"} />
-                  <Text fontSize={"sm"}>Edit workspace</Text>
+                  <Icon name={"edit"} size={"xs"} />
+                  <Text fontSize={"xs"}>Edit workspace</Text>
                 </Flex>
               </Menu.Item>
               <Menu.Item value={"create"} onClick={() => handleCreateClick()}>
                 <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"add"} />
-                  <Text fontSize={"sm"}>Create workspace</Text>
+                  <Icon name={"add"} size={"xs"} />
+                  <Text fontSize={"xs"}>Create workspace</Text>
                 </Flex>
               </Menu.Item>
             </Menu.ItemGroup>
@@ -352,8 +354,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   gap={"2"}
                   align={"center"}
                 >
-                  <Icon name={"person"} />
-                  <Text fontSize={"sm"}>Account settings</Text>
+                  <Icon name={"person"} size={"xs"} />
+                  <Text fontSize={"xs"}>Account settings</Text>
                 </Flex>
               </Menu.Item>
               <Menu.Item value={"logout"} onClick={() => logout()}>
@@ -363,8 +365,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   gap={"2"}
                   align={"center"}
                 >
-                  <Icon name={"logout"} />
-                  <Text fontSize={"sm"}>Log out</Text>
+                  <Icon name={"logout"} size={"xs"} />
+                  <Text fontSize={"xs"}>Log out</Text>
                 </Flex>
               </Menu.Item>
             </Menu.ItemGroup>

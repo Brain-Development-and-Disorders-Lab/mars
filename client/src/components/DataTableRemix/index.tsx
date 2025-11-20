@@ -34,6 +34,7 @@ import {
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 import { DataTableProps } from "@types";
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import _ from "lodash";
 
 declare module "@tanstack/react-table" {
@@ -282,6 +283,7 @@ const customSortingFn = (
 };
 
 const DataTableRemix = (props: DataTableProps) => {
+  const { isBreakpointActive } = useBreakpoint();
   const [pageLength, setPageLength] = useState<string[]>(["20"]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
@@ -702,6 +704,10 @@ const DataTableRemix = (props: DataTableProps) => {
 
   const totalMinWidth = calculateTotalMinWidth();
 
+  // Hide column visibility and page size on small tablet (md) and below
+  // Show on lg and above
+  const showAdvancedControls = isBreakpointActive("lg", "up");
+
   const getColumnWidth = useCallback(
     (columnId: string, isLast: boolean): string | undefined => {
       if (columnId === "select") {
@@ -758,8 +764,8 @@ const DataTableRemix = (props: DataTableProps) => {
         className="data-table-scroll-container"
       >
         <Box
-          w="100%"
-          minW={props.fill !== false ? `${totalMinWidth}px` : undefined}
+          w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
+          minW={`${totalMinWidth}px`}
           border="1px solid"
           borderColor="gray.200"
           borderRadius="md"
@@ -774,7 +780,7 @@ const DataTableRemix = (props: DataTableProps) => {
               borderBottom="1px solid"
               borderColor="gray.200"
               direction="row"
-              w="100%"
+              w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
             >
               {headerGroups[0].headers
                 .filter((header) => header.column.getIsVisible())
@@ -876,7 +882,11 @@ const DataTableRemix = (props: DataTableProps) => {
             </Flex>
           )}
 
-          <Box overflowY="auto" overflowX="hidden" w="100%">
+          <Box
+            overflowY="auto"
+            overflowX="hidden"
+            w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
+          >
             {rows.map((row, rowIndex) => {
               const isSelected = row.getIsSelected();
               const visibleCells = row.getVisibleCells();
@@ -885,7 +895,7 @@ const DataTableRemix = (props: DataTableProps) => {
                   key={row.id}
                   id={row.id}
                   gap={0}
-                  w="100%"
+                  w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
                   borderBottom={
                     rowIndex < rows.length - 1 ? "1px solid" : "none"
                   }
@@ -943,76 +953,68 @@ const DataTableRemix = (props: DataTableProps) => {
       <Flex
         gap={1}
         align="center"
-        wrap="wrap"
         justify="space-between"
         w="100%"
         mt={1}
         flexShrink={0}
       >
-        {props.showPagination && (
-          <Flex direction="row" gap={1} align="center" wrap="wrap">
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="first page"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <Icon name="c_double_left" />
-            </IconButton>
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="previous page"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <Icon name="c_left" />
-            </IconButton>
-            {table.getPageCount() > 0 && (
-              <Flex gap={1}>
-                <Text fontSize="xs" fontWeight="semibold">
-                  {table.getState().pagination.pageIndex + 1}
-                </Text>
-                <Text fontSize="xs"> of </Text>
-                <Text fontSize="xs" fontWeight="semibold">
-                  {table.getPageCount()}
-                </Text>
-              </Flex>
-            )}
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="next page"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <Icon name="c_right" />
-            </IconButton>
-            <IconButton
-              variant="outline"
-              size="xs"
-              rounded="md"
-              aria-label="last page"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <Icon name="c_double_right" />
-            </IconButton>
-          </Flex>
-        )}
+        <Flex direction="row" gap={1} align="center" flexShrink={0}>
+          {props.showPagination && (
+            <Flex direction="row" gap={1} align="center">
+              <IconButton
+                variant="outline"
+                size="xs"
+                rounded="md"
+                aria-label="first page"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <Icon name="c_double_left" />
+              </IconButton>
+              <IconButton
+                variant="outline"
+                size="xs"
+                rounded="md"
+                aria-label="previous page"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <Icon name="c_left" />
+              </IconButton>
+              {table.getPageCount() > 0 && (
+                <Flex gap={1}>
+                  <Text fontSize="xs" fontWeight="semibold">
+                    {table.getState().pagination.pageIndex + 1}
+                  </Text>
+                  <Text fontSize="xs"> of </Text>
+                  <Text fontSize="xs" fontWeight="semibold">
+                    {table.getPageCount()}
+                  </Text>
+                </Flex>
+              )}
+              <IconButton
+                variant="outline"
+                size="xs"
+                rounded="md"
+                aria-label="next page"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <Icon name="c_right" />
+              </IconButton>
+              <IconButton
+                variant="outline"
+                size="xs"
+                rounded="md"
+                aria-label="last page"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+              >
+                <Icon name="c_double_right" />
+              </IconButton>
+            </Flex>
+          )}
 
-        <Flex
-          direction="row"
-          gap={1}
-          align="center"
-          justify="start"
-          grow={1}
-          wrap="wrap"
-        >
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
@@ -1063,8 +1065,11 @@ const DataTableRemix = (props: DataTableProps) => {
               </Menu.Positioner>
             </Menu.Root>
           )}
+        </Flex>
 
-          {allColumnIds.length > 0 && props.showColumnSelect && (
+        {allColumnIds.length > 0 &&
+          props.showColumnSelect &&
+          showAdvancedControls && (
             <Flex
               direction="row"
               gap={1}
@@ -1072,7 +1077,6 @@ const DataTableRemix = (props: DataTableProps) => {
               wrap="wrap"
               justify="center"
               grow={1}
-              display={{ base: "none", md: "flex" }}
             >
               <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
                 Show Columns:
@@ -1132,16 +1136,9 @@ const DataTableRemix = (props: DataTableProps) => {
               </Select.Root>
             </Flex>
           )}
-        </Flex>
 
-        {props.showPagination && (
-          <Flex
-            direction="row"
-            gap={1}
-            align="center"
-            wrap="wrap"
-            display={{ base: "none", md: "flex" }}
-          >
+        {props.showPagination && showAdvancedControls && (
+          <Flex direction="row" gap={1} align="center" wrap="wrap">
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
               Show Items:
             </Text>

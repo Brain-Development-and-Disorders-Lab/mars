@@ -72,8 +72,8 @@ const Page: FC = () => {
         {/* Navigation component */}
         <Flex
           justify={"center"}
-          w={{ base: "100%", lg: "240px" }}
-          minW={{ lg: "240px" }}
+          w={{ base: "100%", lg: "200px" }}
+          minW={{ lg: "200px" }}
           h={{ base: "8vh", lg: "100%" }}
           position={"fixed"}
           borderRight={"1px"}
@@ -90,7 +90,7 @@ const Page: FC = () => {
           w={"100%"}
           minW="0"
           maxW="100%"
-          ml={{ base: "0", lg: "240px" }}
+          ml={{ base: "0", lg: "200px" }}
           mt={{ base: "8vh", lg: "0" }}
           overflowX="hidden"
         >

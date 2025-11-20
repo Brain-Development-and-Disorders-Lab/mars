@@ -239,11 +239,11 @@ const Dashboard = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 20}
+            disabled={info.getValue().length < 18}
             showArrow
           >
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 20 })}
+              {_.truncate(info.getValue(), { length: 18 })}
             </Text>
           </Tooltip>
           <Button
@@ -643,7 +643,13 @@ const Dashboard = () => {
         </Flex>
 
         <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"}>
+          <Flex
+            direction={"column"}
+            gap={"2"}
+            grow={"1"}
+            minW={"0"}
+            maxW={"100%"}
+          >
             {/* Projects and Entities */}
             <Flex
               direction={"column"}
@@ -653,6 +659,8 @@ const Dashboard = () => {
               gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
+              minW={"0"}
+              maxW={"100%"}
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
@@ -668,7 +676,7 @@ const Dashboard = () => {
                   data={projectTableData}
                   visibleColumns={visibleColumns}
                   selectedRows={{}}
-                  fill={false}
+                  fill
                 />
               )}
 
@@ -706,6 +714,8 @@ const Dashboard = () => {
               gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
+              minW={"0"}
+              maxW={"100%"}
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
@@ -727,7 +737,7 @@ const Dashboard = () => {
                   selectedRows={{}}
                   columnFilters={entityColumnFilters}
                   onColumnFiltersChange={setEntityColumnFilters}
-                  fill={false}
+                  fill
                 />
               )}
 
