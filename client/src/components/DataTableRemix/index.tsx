@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Box,
   Flex,
@@ -23,9 +23,14 @@ import {
   getFilteredRowModel,
   RowData,
   ColumnFiltersState,
+  SortingState,
+  Table,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 import { DataTableProps } from "@types";
+import _ from "lodash";
+
+// Extend TanStack Table types
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
@@ -33,9 +38,21 @@ declare module "@tanstack/react-table" {
   }
 }
 
-import _ from "lodash";
+// Column metadata for enhanced column configuration
+export type ColumnMeta = {
+  minWidth?: number;
+  maxWidth?: number;
+  fixedWidth?: number;
+  isFunction?: boolean; // For columns that only contain interactive elements (checkboxes, buttons)
+  align?: "left" | "center" | "right";
+};
 
-const includesSome = (row: any, columnId: string, filterValue: unknown[]) => {
+// Custom filter function for array-based filtering
+const includesSome = (
+  row: { getValue: (columnId: string) => unknown },
+  columnId: string,
+  filterValue: unknown[],
+) => {
   if (
     !filterValue ||
     (Array.isArray(filterValue) && filterValue.length === 0)
@@ -46,41 +63,48 @@ const includesSome = (row: any, columnId: string, filterValue: unknown[]) => {
     ? filterValue.includes(row.getValue(columnId))
     : true;
 };
-(includesSome as any).autoRemove = (val: unknown) =>
+(
+  includesSome as unknown as { autoRemove: (val: unknown) => boolean }
+).autoRemove = (val: unknown) =>
   !val || (Array.isArray(val) && val.length === 0);
 
-type ColumnFilterMenuProps = {
+// Column filter menu component
+type ColumnFilterMenuProps<TData extends RowData> = {
   columnId: string;
-  data: any[];
-  table: any;
+  data: TData[];
+  table: Table<TData>;
 };
 
-const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
+const ColumnFilterMenu = <TData extends RowData>({
+  columnId,
+  data,
+  table,
+}: ColumnFilterMenuProps<TData>) => {
   const [query, setQuery] = useState("");
 
-  const getDisplayValue = (val: any) => {
+  const getDisplayValue = (val: unknown) => {
     if (val === null || val === undefined) return "Empty";
     if (Array.isArray(val)) return `${val.length} items`;
     if (typeof val === "object") return JSON.stringify(val);
     return String(val);
   };
 
-  const getFilterKey = (val: any) => {
+  const getFilterKey = (val: unknown) => {
     if (val === null || val === undefined) return "empty";
     if (Array.isArray(val)) return val.length.toString();
     if (typeof val === "object") return JSON.stringify(val);
     return String(val);
   };
 
-  const values = React.useMemo(
+  const values = useMemo(
     () =>
-      _.uniq(data.map((row) => row[columnId])).filter(
-        (val) => val !== null && val !== undefined,
-      ),
+      _.uniq(
+        data.map((row) => (row as Record<string, unknown>)[columnId]),
+      ).filter((val) => val !== null && val !== undefined),
     [data, columnId],
   );
 
-  const filtered = React.useMemo(
+  const filtered = useMemo(
     () =>
       values.filter((val) =>
         getDisplayValue(val).toLowerCase().includes(query.toLowerCase()),
@@ -177,32 +201,76 @@ const ColumnFilterMenu = ({ columnId, data, table }: ColumnFilterMenuProps) => {
   );
 };
 
-const DataTableRemix = (props: DataTableProps) => {
-  const [pageLength, setPageLength] = useState<string[]>(["10"]);
-  const pageLengthsCollection = createListCollection({
-    items: [
-      { label: "5", value: "5" },
-      { label: "10", value: "10" },
-      { label: "20", value: "20" },
-      { label: "50", value: "50" },
-      { label: "100", value: "100" },
-    ],
-  });
-
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const selectColumnWidth = 40;
-  const defaultColumnWidth = 200;
-
-  const [columnVisibility, setColumnVisibility] = useState(
-    props.visibleColumns,
+// Helper to check if a column can be sorted
+const canSortColumn = (columnId: string): boolean => {
+  return (
+    columnId !== "select" &&
+    columnId !== "type" &&
+    columnId !== "view" &&
+    columnId !== "_id" &&
+    !columnId.endsWith("_id") &&
+    columnId !== "id"
   );
+};
+
+// Main DataTableRemix component
+const DataTableRemix = (props: DataTableProps) => {
+  // Pagination state
+  const [pageLength, setPageLength] = useState<string[]>(["10"]);
+  const pageLengthsCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: "5", value: "5" },
+          { label: "10", value: "10" },
+          { label: "20", value: "20" },
+          { label: "50", value: "50" },
+          { label: "100", value: "100" },
+        ],
+      }),
+    [],
+  );
+
+  // Column width management
+  const SELECT_COLUMN_WIDTH = 40;
+  const DEFAULT_COLUMN_WIDTH = 200;
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+
+  // Table state
+  // Initialize column visibility, ensuring _id and name are always visible
+  const [columnVisibility, setColumnVisibility] = useState(() => {
+    const initialVisibility = { ...props.visibleColumns };
+    // Always ensure _id and name are visible (cannot be toggled)
+    initialVisibility["_id"] = true;
+    initialVisibility["name"] = true;
+    return initialVisibility;
+  });
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     props.columnFilters ?? [],
   );
+  const [sorting, setSorting] = useState<SortingState>([]);
 
+  // Helper function to get column ID reliably
+  const getColumnId = useCallback(
+    (column: { id?: string; accessorKey?: string }) => {
+      return (column.id as string) || (column.accessorKey as string) || "";
+    },
+    [],
+  );
+
+  // Column names for visibility selector (toggleable columns only)
+  const [columnNames, setColumnNames] = useState<string[]>([]);
+
+  // Track previous selectedRows to avoid unnecessary callbacks
+  const prevSelectedRowsRef = React.useRef(selectedRows);
+
+  // Notify parent of selected rows changes
   useEffect(() => {
-    if (props.onSelectedRowsChange) {
+    if (
+      props.onSelectedRowsChange &&
+      !_.isEqual(prevSelectedRowsRef.current, selectedRows)
+    ) {
       const rowSet = [];
       for (const rowIndex of Object.keys(selectedRows)) {
         const row = props.data[parseInt(rowIndex)];
@@ -211,65 +279,180 @@ const DataTableRemix = (props: DataTableProps) => {
         }
       }
       props.onSelectedRowsChange(rowSet);
+      prevSelectedRowsRef.current = selectedRows;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRows, props.data]);
+  }, [selectedRows, props.data, props.onSelectedRowsChange]);
 
+  // Track previous columnFilters to avoid unnecessary callbacks
+  const prevColumnFiltersRef = React.useRef(columnFilters);
+
+  // Notify parent of column filter changes
+  useEffect(() => {
+    if (
+      props.onColumnFiltersChange &&
+      !_.isEqual(prevColumnFiltersRef.current, columnFilters)
+    ) {
+      props.onColumnFiltersChange(columnFilters);
+      prevColumnFiltersRef.current = columnFilters;
+    }
+  }, [columnFilters, props.onColumnFiltersChange]);
+
+  // Track previous prop values to prevent loops
+  const prevSelectedRowsPropRef = React.useRef(props.selectedRows);
+  const prevColumnFiltersPropRef = React.useRef(props.columnFilters);
+
+  // Sync external state changes - only when props actually change
+  useEffect(() => {
+    if (!_.isEqual(prevSelectedRowsPropRef.current, props.selectedRows)) {
+      setSelectedRows(props.selectedRows);
+      prevSelectedRowsPropRef.current = props.selectedRows;
+    }
+  }, [props.selectedRows]);
+
+  useEffect(() => {
+    const newFilters = props.columnFilters ?? [];
+    if (!_.isEqual(prevColumnFiltersPropRef.current, newFilters)) {
+      setColumnFilters(newFilters);
+      prevColumnFiltersPropRef.current = newFilters;
+    }
+  }, [props.columnFilters]);
+
+  // Build columns with selection column if needed
+  const columns = useMemo(() => {
+    const baseColumns = props.columns.map((col) => ({
+      ...col,
+      filterFn: includesSome,
+    }));
+
+    if (props.showSelection) {
+      return [
+        {
+          id: "select",
+          header: ({ table: tableInstance }: { table: Table<RowData> }) => (
+            <Flex align="center" justify="center" w="100%" h="100%">
+              <Checkbox.Root
+                disabled={props.viewOnly}
+                size="xs"
+                colorPalette="blue"
+                checked={
+                  tableInstance.getIsAllRowsSelected()
+                    ? true
+                    : tableInstance.getIsSomeRowsSelected()
+                      ? "indeterminate"
+                      : false
+                }
+                onChange={tableInstance.getToggleAllRowsSelectedHandler()}
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+              </Checkbox.Root>
+            </Flex>
+          ),
+          cell: ({
+            row,
+          }: {
+            row: {
+              getIsSelected: () => boolean;
+              getIsSomeSelected: () => boolean;
+              getCanSelect: () => boolean;
+              getToggleSelectedHandler: () => (event: unknown) => void;
+            };
+          }) => (
+            <Flex align="center" justify="center" w="100%" h="100%">
+              <Checkbox.Root
+                size="xs"
+                colorPalette="blue"
+                checked={
+                  row.getIsSelected()
+                    ? true
+                    : row.getIsSomeSelected()
+                      ? "indeterminate"
+                      : false
+                }
+                disabled={!row.getCanSelect() || props.viewOnly}
+                onChange={row.getToggleSelectedHandler()}
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+              </Checkbox.Root>
+            </Flex>
+          ),
+          enableSorting: false,
+          enableColumnFilter: false,
+          meta: {
+            fixedWidth: SELECT_COLUMN_WIDTH,
+            isFunction: true,
+            align: "center",
+          } as ColumnMeta,
+        },
+        ...baseColumns,
+      ];
+    }
+    return baseColumns;
+  }, [props.columns, props.showSelection, props.viewOnly]);
+
+  // Get all column IDs (including _id and name for display)
+  const allColumnIds = useMemo(
+    () =>
+      columns
+        .map((col) => getColumnId(col))
+        .filter(
+          (id) =>
+            id && id.trim().length > 0 && id !== "select" && id !== "view",
+        ),
+    [columns, getColumnId],
+  );
+
+  // Column names collection for Select - includes all columns with disabled state
+  const columnNamesCollection = useMemo(() => {
+    const items = allColumnIds
+      .filter((name) => name && name.trim().length > 0)
+      .map((name) => ({
+        value: name,
+        label: _.capitalize(name) || name,
+        disabled: name === "_id" || name === "name", // Disable _id and name
+      }));
+    return createListCollection({ items });
+  }, [allColumnIds]);
+
+  // Compute merged visibility state (props merged with internal state)
+  // This ensures the Select dropdown and table reflect the current state
+  const mergedColumnVisibility = useMemo(() => {
+    const merged = { ...columnVisibility };
+
+    // Merge with props, but only for toggleable columns (not _id, name, or select)
+    // Props take precedence for toggleable columns
+    Object.keys(props.visibleColumns).forEach((column) => {
+      if (
+        column !== "_id" &&
+        column !== "name" &&
+        column !== "select" &&
+        columnNames.includes(column) &&
+        props.visibleColumns[column] !== undefined
+      ) {
+        merged[column] = props.visibleColumns[column];
+      }
+    });
+
+    // Always ensure _id and name are visible
+    merged["_id"] = true;
+    merged["name"] = true;
+
+    // Ensure select column visibility matches showSelection prop
+    merged["select"] = !!props.showSelection;
+
+    return merged;
+  }, [
+    columnVisibility,
+    props.visibleColumns,
+    columnNames,
+    props.showSelection,
+  ]);
+
+  // Initialize table
   const table = useReactTable({
-    columns: [
-      ...(props.showSelection
-        ? [
-            {
-              id: "select",
-              header: ({ table }: any) => (
-                <Flex align="center" justify="center" w="auto" h="100%">
-                  <Checkbox.Root
-                    {...{
-                      disabled: props.viewOnly,
-                      size: "xs",
-                      colorPalette: "blue",
-                      checked: table.getIsAllRowsSelected()
-                        ? true
-                        : table.getIsSomeRowsSelected()
-                          ? "indeterminate"
-                          : false,
-                      invalid: false,
-                      onChange: table.getToggleAllRowsSelectedHandler(),
-                    }}
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                  </Checkbox.Root>
-                </Flex>
-              ),
-              cell: ({ row }: any) => (
-                <Flex align="center" justify="center" w="auto" h="100%">
-                  <Checkbox.Root
-                    {...{
-                      id: `s_${Math.random().toString(16).slice(2)}`,
-                      size: "xs",
-                      colorPalette: "blue",
-                      checked: row.getIsSelected()
-                        ? true
-                        : row.getIsSomeSelected()
-                          ? "indeterminate"
-                          : false,
-                      disabled: !row.getCanSelect() || props.viewOnly,
-                      invalid: false,
-                      onChange: row.getToggleSelectedHandler(),
-                    }}
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                  </Checkbox.Root>
-                </Flex>
-              ),
-            },
-          ]
-        : []),
-      ...props.columns.map((col) => ({ ...col, filterFn: includesSome })),
-    ],
     data: props.data,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -281,20 +464,21 @@ const DataTableRemix = (props: DataTableProps) => {
       },
     },
     state: {
-      columnVisibility: columnVisibility,
+      columnVisibility: mergedColumnVisibility,
       rowSelection: selectedRows,
-      columnFilters: columnFilters,
+      columnFilters,
+      sorting,
     },
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     filterFns: {
       includesSome,
     },
     meta: {
-      updateData: (rowIndex: number, columnId: any, value: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        props.setData &&
+      updateData: (rowIndex: number, columnId: string, value: unknown) => {
+        if (props.setData) {
           props.setData((data) =>
             data.map((row, index) => {
               if (index === rowIndex) {
@@ -306,137 +490,285 @@ const DataTableRemix = (props: DataTableProps) => {
               return row;
             }),
           );
+        }
       },
     },
   });
 
-  useEffect(() => {
-    const updatedVisibility = _.cloneDeep(columnVisibility);
-    let hasChanges = false;
-
-    Object.keys(props.visibleColumns).forEach((column) => {
-      if (
-        column !== "select" &&
-        updatedVisibility[column] !== props.visibleColumns[column]
-      ) {
-        updatedVisibility[column] = props.visibleColumns[column];
-        hasChanges = true;
-      }
-    });
-
-    const shouldShowSelect = props.showSelection === true;
-    if (updatedVisibility["select"] !== shouldShowSelect) {
-      updatedVisibility["select"] = shouldShowSelect;
-      hasChanges = true;
-    }
-
-    if (hasChanges) {
-      setColumnVisibility(updatedVisibility);
-    }
-  }, [props.visibleColumns, props.showSelection]);
-
-  const [columnNames, setColumnNames] = useState([] as string[]);
-  const [columnNamesCollection, setColumnNamesCollection] = useState(
-    createListCollection<string>({ items: [] }),
+  // Track column IDs from props to detect changes
+  // Only include columns that can be toggled (exclude _id, name, and view)
+  const columnIdsFromProps = useMemo(
+    () =>
+      columns
+        .map((col) => getColumnId(col))
+        .filter(
+          (id) =>
+            id &&
+            id.trim().length > 0 &&
+            !_.includes(["_id", "name", "view"], id),
+        ),
+    [columns, getColumnId],
   );
 
+  // Initialize column widths and names - only when column structure changes
   useEffect(() => {
-    const columns = table
-      .getAllColumns()
-      .filter((column) => {
-        return !_.includes(["_id", "select", "name", "view"], column.id);
-      })
-      .map((column) => column.id);
-    setColumnNames(columns);
-    setColumnNamesCollection(createListCollection({ items: columns }));
+    const visibleColumnIds = columnIdsFromProps;
 
-    const updatedVisibility = _.cloneDeep(columnVisibility);
-
-    Object.keys(props.visibleColumns).forEach((column) => {
-      if (column !== "select" && props.visibleColumns[column] !== undefined) {
-        updatedVisibility[column] = props.visibleColumns[column];
-      }
-    });
-
-    columns.map((column) => {
-      if (updatedVisibility[column] === undefined) {
-        updatedVisibility[column] = true;
-      }
-    });
-
-    if (props.showSelection === true) {
-      updatedVisibility["select"] = true;
-    } else {
-      updatedVisibility["select"] = false;
+    // Only update if column names actually changed
+    const currentColumnNames = columnNames.join(",");
+    const newColumnNames = visibleColumnIds.join(",");
+    if (currentColumnNames !== newColumnNames) {
+      setColumnNames(visibleColumnIds);
     }
 
-    setColumnVisibility(updatedVisibility);
-
+    // Initialize column widths - only if not already set
     const initialWidths: Record<string, number> = {};
-    table.getAllColumns().forEach((column) => {
-      if (
-        column.id !== "select" &&
-        !_.includes(["_id", "name", "view"], column.id)
-      ) {
-        initialWidths[column.id] = defaultColumnWidth;
+    let hasNewWidths = false;
+    columns.forEach((column) => {
+      const id = getColumnId(column);
+      if (id && id !== "select" && !_.includes(["_id", "name", "view"], id)) {
+        if (!columnWidths[id]) {
+          const meta = column.meta as ColumnMeta | undefined;
+          initialWidths[id] =
+            meta?.fixedWidth || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+          hasNewWidths = true;
+        }
       }
     });
-    setColumnWidths((prev) => ({ ...prev, ...initialWidths }));
+    if (hasNewWidths) {
+      setColumnWidths((prev) => ({ ...prev, ...initialWidths }));
+    }
+  }, [columnIdsFromProps, columnNames, columnWidths, columns]);
+
+  // Track previous values for visibility sync
+  const prevColumnIdsRef = React.useRef<string[]>([]);
+  const prevVisibleColumnsRef = React.useRef(props.visibleColumns);
+  const prevShowSelectionRef = React.useRef(props.showSelection);
+
+  // Sync visibility state - consolidated effect to avoid loops
+  useEffect(() => {
+    const visibleColumnIds = columnIdsFromProps;
+    const columnIdsChanged =
+      visibleColumnIds.join(",") !== prevColumnIdsRef.current.join(",");
+    const visibleColumnsChanged = !_.isEqual(
+      prevVisibleColumnsRef.current,
+      props.visibleColumns,
+    );
+    const showSelectionChanged =
+      prevShowSelectionRef.current !== props.showSelection;
+
+    // Only run if something actually changed
+    if (!columnIdsChanged && !visibleColumnsChanged && !showSelectionChanged) {
+      return;
+    }
+
+    // Use functional update to get current state without including it in dependencies
+    setColumnVisibility((currentVisibility) => {
+      const updatedVisibility = { ...currentVisibility };
+      let hasChanges = false;
+
+      // Always ensure _id and name are visible (cannot be toggled)
+      const allColumnIds = columns
+        .map((col) => getColumnId(col))
+        .filter(Boolean);
+      allColumnIds.forEach((columnId) => {
+        if (columnId === "_id" || columnId === "name") {
+          if (updatedVisibility[columnId] !== true) {
+            updatedVisibility[columnId] = true;
+            hasChanges = true;
+          }
+        }
+      });
+
+      // Sync from props (only if props changed)
+      if (visibleColumnsChanged) {
+        Object.keys(props.visibleColumns).forEach((column) => {
+          // Only sync toggleable columns (not _id, name, or select)
+          if (
+            column !== "select" &&
+            column !== "_id" &&
+            column !== "name" &&
+            props.visibleColumns[column] !== undefined
+          ) {
+            if (updatedVisibility[column] !== props.visibleColumns[column]) {
+              updatedVisibility[column] = props.visibleColumns[column];
+              hasChanges = true;
+            }
+          }
+        });
+        prevVisibleColumnsRef.current = props.visibleColumns;
+      }
+
+      // Set defaults for new toggleable columns (only when column structure changes)
+      if (columnIdsChanged) {
+        visibleColumnIds.forEach((column) => {
+          if (updatedVisibility[column] === undefined) {
+            updatedVisibility[column] = true;
+            hasChanges = true;
+          }
+        });
+        prevColumnIdsRef.current = visibleColumnIds;
+      }
+
+      // Sync select column (only if prop changed)
+      if (showSelectionChanged) {
+        const shouldShowSelect = !!props.showSelection;
+        if (updatedVisibility["select"] !== shouldShowSelect) {
+          updatedVisibility["select"] = shouldShowSelect;
+          hasChanges = true;
+        }
+        prevShowSelectionRef.current = props.showSelection;
+      }
+
+      // Only return new object if there are changes, otherwise return current to prevent re-render
+      return hasChanges ? updatedVisibility : currentVisibility;
+    });
+  }, [columnIdsFromProps, props.visibleColumns, props.showSelection, columns]);
+
+  // Get visible columns for the Select value (includes always-visible _id and name)
+  const visibleColumnsForSelect = useMemo(() => {
+    const visibleToggleable = columnNames.filter(
+      (column) => mergedColumnVisibility[column] === true,
+    );
+    // Always include _id and name in the value to show them as selected (but disabled)
+    const alwaysVisible = allColumnIds.filter(
+      (id) => id === "_id" || id === "name",
+    );
+    return [...alwaysVisible, ...visibleToggleable];
+  }, [columnNames, mergedColumnVisibility, allColumnIds]);
+
+  // Update column visibility from selector
+  const updateColumnVisibility = useCallback(
+    (columns: string[]) => {
+      setColumnVisibility((currentVisibility) => {
+        const updatedVisibility = { ...currentVisibility };
+        const toggleableColumns = columnNames;
+
+        // Hide all toggleable columns first
+        toggleableColumns.forEach((column) => {
+          updatedVisibility[column] = false;
+        });
+
+        // Show selected columns
+        columns.forEach((column) => {
+          if (toggleableColumns.includes(column)) {
+            updatedVisibility[column] = true;
+          }
+        });
+
+        // Always keep _id and name visible
+        updatedVisibility["_id"] = true;
+        updatedVisibility["name"] = true;
+
+        // Sync select column
+        updatedVisibility["select"] = !!props.showSelection;
+
+        return updatedVisibility;
+      });
+    },
+    [columnNames, props.showSelection],
+  );
+
+  // Container ref for measuring width
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+
+  // Measure container width on mount and resize
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+
+    updateWidth();
+    const resizeObserver = new ResizeObserver(updateWidth);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
-  useEffect(() => {
-    if (!_.isEqual(selectedRows, props.selectedRows)) {
-      setSelectedRows(props.selectedRows);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selectedRows]);
+  const headerGroups = table.getHeaderGroups();
+  const rows = table.getRowModel().rows;
 
-  useEffect(() => {
-    if (props.onColumnFiltersChange) {
-      props.onColumnFiltersChange(columnFilters);
-    }
-  }, [columnFilters, props.onColumnFiltersChange]);
+  // Calculate total minimum width of all visible columns
+  const calculateTotalMinWidth = useCallback(() => {
+    const visibleHeaders =
+      headerGroups[0]?.headers.filter((header) =>
+        header.column.getIsVisible(),
+      ) || [];
 
-  useEffect(() => {
-    if (!_.isEqual(columnFilters, props.columnFilters ?? [])) {
-      setColumnFilters(props.columnFilters ?? []);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.columnFilters]);
-
-  const canSortColumn = (header: any) => {
-    return (
-      !_.isEqual(header.id, "select") &&
-      !_.isEqual(header.id, "type") &&
-      !_.isEqual(header.id, "view") &&
-      !_.isEqual(header.id, "_id") &&
-      !_.endsWith(header.id, "_id") &&
-      !_.isEqual(header.id, "id")
-    );
-  };
-
-  const updateColumnVisibility = (columns: string[]) => {
-    const updatedVisibility = _.cloneDeep(columnVisibility);
-    const toggleableColumns = columnNames;
-
-    toggleableColumns.forEach((column) => {
-      updatedVisibility[column] = false;
-    });
-
-    columns.forEach((column) => {
-      if (toggleableColumns.includes(column)) {
-        updatedVisibility[column] = true;
+    let totalMinWidth = 0;
+    visibleHeaders.forEach((header) => {
+      const id = header.id;
+      if (id === "select") {
+        totalMinWidth += SELECT_COLUMN_WIDTH;
+      } else {
+        const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+        if (meta?.fixedWidth) {
+          totalMinWidth += meta.fixedWidth;
+        } else {
+          totalMinWidth +=
+            columnWidths[id] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+        }
       }
     });
+    return totalMinWidth;
+  }, [headerGroups, columnWidths]);
 
-    if (props.showSelection === true) {
-      updatedVisibility["select"] = true;
-    } else {
-      updatedVisibility["select"] = false;
-    }
+  const totalMinWidth = calculateTotalMinWidth();
+  const needsScrolling =
+    containerWidth !== null && totalMinWidth > containerWidth;
 
-    setColumnVisibility(updatedVisibility);
-  };
+  // Get column width helper - now handles responsive sizing
+  const getColumnWidth = useCallback(
+    (columnId: string, isLast: boolean): string | undefined => {
+      if (columnId === "select") {
+        return `${SELECT_COLUMN_WIDTH}px`;
+      }
+      const meta = table.getColumn(columnId)?.columnDef.meta as
+        | ColumnMeta
+        | undefined;
+
+      // Fixed width columns always use their fixed width
+      if (meta?.fixedWidth) {
+        return `${meta.fixedWidth}px`;
+      }
+
+      const minWidth =
+        columnWidths[columnId] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+
+      // If we need scrolling, use min widths (no flex)
+      if (needsScrolling) {
+        return `${minWidth}px`;
+      }
+
+      // If we have extra space, distribute it
+      // Last non-fixed column gets remaining space
+      if (isLast) {
+        return undefined; // Flex to fill remaining space
+      }
+
+      // Other non-fixed columns use their min width but can grow
+      return `${minWidth}px`;
+    },
+    [columnWidths, table, needsScrolling],
+  );
+
+  // Get column alignment helper
+  const getColumnAlign = useCallback(
+    (columnId: string): "left" | "center" | "right" => {
+      const meta = table.getColumn(columnId)?.columnDef.meta as
+        | ColumnMeta
+        | undefined;
+      return meta?.align || "left";
+    },
+    [table],
+  );
 
   return (
     <Box
@@ -446,169 +778,208 @@ const DataTableRemix = (props: DataTableProps) => {
       flexDirection="column"
       css={{ WebkitOverflowScrolling: "touch" }}
     >
+      {/* Scrollable table container */}
       <Box
+        ref={containerRef}
         w="100%"
         maxW="100%"
         flex="1"
         minH="0"
         minW="0"
-        overflowX="auto"
+        overflowX={needsScrolling ? "auto" : "hidden"}
         overflowY="auto"
         position="relative"
+        className="data-table-scroll-container"
       >
         <Box
-          minW="800px"
+          w="100%"
+          minW={needsScrolling ? `${totalMinWidth}px` : "100%"}
           border="1px solid"
           borderColor="gray.200"
           borderRadius="md"
           overflow="hidden"
-          display="inline-block"
+          display="flex"
+          flexDirection="column"
         >
-          <Flex
-            gap={0}
-            bg="gray.100"
-            borderBottom="1px solid"
-            borderColor="gray.200"
-            direction="row"
-          >
-            {table.getHeaderGroups()[0]?.headers.map((header, headerIndex) => {
-              const isSelectColumn = header.id === "select";
-              const isLastColumn =
-                headerIndex === table.getHeaderGroups()[0]?.headers.length - 1;
-              const headerWidth = isSelectColumn
-                ? selectColumnWidth
-                : isLastColumn
-                  ? undefined
-                  : columnWidths[header.id] || defaultColumnWidth;
+          {/* Header Row */}
+          {headerGroups.length > 0 && (
+            <Flex
+              gap={0}
+              bg="gray.100"
+              borderBottom="1px solid"
+              borderColor="gray.200"
+              direction="row"
+              w="100%"
+            >
+              {headerGroups[0].headers
+                .filter((header) => header.column.getIsVisible())
+                .map((header, headerIndex, visibleHeaders) => {
+                  const isSelectColumn = header.id === "select";
+                  const isLastColumn =
+                    headerIndex === visibleHeaders.length - 1;
+                  const columnWidth = getColumnWidth(header.id, isLastColumn);
+                  const align = getColumnAlign(header.id);
 
-              return (
-                <Flex
-                  key={header.id}
-                  w={headerWidth ? `${headerWidth}px` : "auto"}
-                  flex={isLastColumn ? "1" : "0 0 auto"}
-                  px={1}
-                  py={1}
-                  fontSize="xs"
-                  fontWeight="semibold"
-                  color="gray.600"
-                  bg="gray.100"
-                  borderRight={!isLastColumn ? "1px solid" : "none"}
-                  borderColor="gray.200"
-                  position="relative"
-                  textAlign="center"
-                  lineHeight="1.2"
-                  align="center"
-                  justify="center"
-                  overflow="hidden"
-                >
-                  {header.id === "select" ? (
-                    flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )
-                  ) : (
+                  const meta = table.getColumn(header.id)?.columnDef.meta as
+                    | ColumnMeta
+                    | undefined;
+                  const isFixed = meta?.fixedWidth !== undefined;
+                  const flexValue =
+                    isLastColumn && !needsScrolling && !isFixed
+                      ? "1"
+                      : "0 0 auto";
+
+                  return (
                     <Flex
-                      direction="row"
+                      key={header.id}
+                      w={columnWidth}
+                      flex={flexValue}
+                      minW={columnWidth}
+                      px={1}
+                      py={1}
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="gray.600"
+                      bg="gray.100"
+                      borderRight={!isLastColumn ? "1px solid" : "none"}
+                      borderColor="gray.200"
+                      position="relative"
+                      textAlign={align}
+                      lineHeight="1.2"
                       align="center"
-                      gap={1}
-                      justify="center"
-                      w="100%"
+                      justify={"center"}
+                      overflow="hidden"
+                      flexShrink={0}
                     >
-                      <Text textAlign="center">
-                        {flexRender(
+                      {isSelectColumn ? (
+                        flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
-                        )}
-                      </Text>
-                      {canSortColumn(header) && (
-                        <Button
-                          size="xs"
-                          variant="subtle"
-                          p={0}
-                          minW="auto"
-                          h="auto"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            header.column.getToggleSortingHandler()?.(e);
-                          }}
+                        )
+                      ) : (
+                        <Flex
+                          direction="row"
+                          align="center"
+                          gap={1}
+                          justify={"space-between"}
+                          w="100%"
                         >
-                          <Icon
-                            name={
-                              header.column.getIsSorted() === "desc"
-                                ? "sort_up"
-                                : header.column.getIsSorted() === "asc"
-                                  ? "sort_down"
-                                  : "sort"
-                            }
-                            color={
-                              header.column.getIsSorted()
-                                ? "blue.700"
-                                : "gray.600"
-                            }
-                            size="xs"
-                          />
-                        </Button>
-                      )}
-                      {canSortColumn(header) && (
-                        <ColumnFilterMenu
-                          columnId={header.id}
-                          data={props.data}
-                          table={table}
-                        />
+                          <Text textAlign={align}>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                          </Text>
+                          <Flex
+                            direction="row"
+                            gap={1}
+                            align="center"
+                            justify="center"
+                          >
+                            {canSortColumn(header.id) && (
+                              <Button
+                                size="xs"
+                                variant="subtle"
+                                p={0}
+                                minW="auto"
+                                h="auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  header.column.getToggleSortingHandler()?.(e);
+                                }}
+                              >
+                                <Icon
+                                  name={
+                                    header.column.getIsSorted() === "desc"
+                                      ? "sort_up"
+                                      : header.column.getIsSorted() === "asc"
+                                        ? "sort_down"
+                                        : "sort"
+                                  }
+                                  color={
+                                    header.column.getIsSorted()
+                                      ? "blue.700"
+                                      : "gray.600"
+                                  }
+                                  size="xs"
+                                />
+                              </Button>
+                            )}
+                            {canSortColumn(header.id) && (
+                              <ColumnFilterMenu<RowData>
+                                columnId={header.id}
+                                data={props.data}
+                                table={table}
+                              />
+                            )}
+                          </Flex>
+                        </Flex>
                       )}
                     </Flex>
-                  )}
-                </Flex>
-              );
-            })}
-          </Flex>
+                  );
+                })}
+            </Flex>
+          )}
 
-          <Box overflowY="auto" overflowX="hidden">
-            {table.getRowModel().rows.map((row, rowIndex) => {
+          {/* Data Rows */}
+          <Box overflowY="auto" overflowX="hidden" w="100%">
+            {rows.map((row, rowIndex) => {
               const isSelected = row.getIsSelected();
+              const visibleCells = row.getVisibleCells();
               return (
                 <Flex
                   key={row.id}
                   id={row.id}
                   gap={0}
+                  w="100%"
                   borderBottom={
-                    rowIndex < table.getRowModel().rows.length - 1
-                      ? "1px solid"
-                      : "none"
+                    rowIndex < rows.length - 1 ? "1px solid" : "none"
                   }
                   borderColor="gray.200"
                   _hover={{ bg: "gray.25" }}
                   overflow="hidden"
                   bg={isSelected ? "blue.50" : "transparent"}
                 >
-                  {row.getVisibleCells().map((cell, cellIndex) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const meta: any = cell.column.columnDef.meta;
-                    const isLastCell =
-                      cellIndex === row.getVisibleCells().length - 1;
-                    const isSelectColumn = cell.column.id === "select";
-                    const cellWidth = isSelectColumn
-                      ? selectColumnWidth
-                      : isLastCell
-                        ? undefined
-                        : columnWidths[cell.column.id] || defaultColumnWidth;
+                  {visibleCells.map((cell, cellIndex) => {
+                    const isLastCell = cellIndex === visibleCells.length - 1;
+                    const columnWidth = getColumnWidth(
+                      cell.column.id,
+                      isLastCell,
+                    );
+                    const align = getColumnAlign(cell.column.id);
+                    const meta = cell.column.columnDef.meta as
+                      | ColumnMeta
+                      | undefined;
+                    const isFixed = meta?.fixedWidth !== undefined;
+                    const flexValue =
+                      isLastCell && !needsScrolling && !isFixed
+                        ? "1"
+                        : "0 0 auto";
 
                     return (
                       <Box
                         key={cell.id}
                         id={cell.id}
-                        w={cellWidth ? `${cellWidth}px` : "auto"}
-                        flex={isLastCell ? "1" : "0 0 auto"}
+                        w={columnWidth}
+                        flex={flexValue}
+                        minW={columnWidth}
                         px={1}
                         py={0.5}
-                        fontVariantNumeric={meta?.isNumeric}
                         borderRight={!isLastCell ? "1px solid" : "none"}
                         borderColor="gray.200"
-                        textAlign={isSelectColumn ? "center" : "left"}
+                        textAlign={align}
                         overflow="hidden"
                         display="flex"
                         alignItems="center"
+                        justifyContent={
+                          align === "center"
+                            ? "center"
+                            : align === "right"
+                              ? "flex-end"
+                              : "flex-start"
+                        }
                         bg={isSelected ? "blue.50" : "transparent"}
+                        flexShrink={0}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -624,15 +995,17 @@ const DataTableRemix = (props: DataTableProps) => {
         </Box>
       </Box>
 
+      {/* Pagination and Controls Toolbar */}
       <Flex
         gap={1}
         align="center"
         wrap="wrap"
-        justify={"space-between"}
+        justify="space-between"
         w="100%"
         mt={1}
         flexShrink={0}
       >
+        {/* Left side: Pagination controls */}
         {props.showPagination && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">
             <IconButton
@@ -643,7 +1016,7 @@ const DataTableRemix = (props: DataTableProps) => {
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
-              <Icon name={"c_double_left"} />
+              <Icon name="c_double_left" />
             </IconButton>
             <IconButton
               variant="outline"
@@ -653,7 +1026,7 @@ const DataTableRemix = (props: DataTableProps) => {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <Icon name={"c_left"} />
+              <Icon name="c_left" />
             </IconButton>
             {table.getPageCount() > 0 && (
               <Flex gap={1}>
@@ -674,7 +1047,7 @@ const DataTableRemix = (props: DataTableProps) => {
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              <Icon name={"c_right"} />
+              <Icon name="c_right" />
             </IconButton>
             <IconButton
               variant="outline"
@@ -684,11 +1057,12 @@ const DataTableRemix = (props: DataTableProps) => {
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
-              <Icon name={"c_double_right"} />
+              <Icon name="c_double_right" />
             </IconButton>
           </Flex>
         )}
 
+        {/* Center: Actions and Column Selector */}
         <Flex
           direction="row"
           gap={1}
@@ -700,46 +1074,42 @@ const DataTableRemix = (props: DataTableProps) => {
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
+                <Button colorPalette="yellow" size="xs" rounded="md">
                   Actions
-                  <Icon name={"lightning"} size="xs" />
+                  <Icon name="lightning" size="xs" />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
                 <Menu.Content p={1}>
-                  {props.actions &&
-                    props.actions.length > 0 &&
-                    props.actions?.map((action) => {
-                      return (
-                        <Menu.Item
-                          onClick={() => {
-                            action.action(table, selectedRows);
-                          }}
-                          key={action.label}
-                          disabled={
-                            (Object.keys(selectedRows).length === 0 ||
-                              _.isUndefined(props.actions) ||
-                              props.actions?.length === 0) &&
-                            action.alwaysEnabled !== true
-                          }
-                          value={action.label}
-                        >
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
-                            <Icon name={action.icon} size="xs" />
-                            <Text fontSize={"xs"}>{action.label}</Text>
-                          </Flex>
-                        </Menu.Item>
-                      );
-                    })}
-                  {(_.isUndefined(props.actions) ||
-                    props.actions.length === 0) && (
+                  {props.actions && props.actions.length > 0 ? (
+                    props.actions.map((action) => (
+                      <Menu.Item
+                        onClick={() => {
+                          action.action(table, selectedRows);
+                        }}
+                        key={action.label}
+                        disabled={
+                          (Object.keys(selectedRows).length === 0 ||
+                            _.isUndefined(props.actions) ||
+                            props.actions?.length === 0) &&
+                          !action.alwaysEnabled
+                        }
+                        value={action.label}
+                      >
+                        <Flex direction="row" gap="1" align="center">
+                          <Icon name={action.icon} size="xs" />
+                          <Text fontSize="xs">{action.label}</Text>
+                        </Flex>
+                      </Menu.Item>
+                    ))
+                  ) : (
                     <Menu.Item
-                      key={"no-actions"}
+                      key="no-actions"
                       disabled
-                      value={"No actions available"}
+                      value="No actions available"
                     >
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Text fontSize={"xs"}>No Actions available</Text>
+                      <Flex direction="row" gap="1" align="center">
+                        <Text fontSize="xs">No Actions available</Text>
                       </Flex>
                     </Menu.Item>
                   )}
@@ -748,7 +1118,7 @@ const DataTableRemix = (props: DataTableProps) => {
             </Menu.Root>
           )}
 
-          {columnNames.length > 0 && props.showColumnSelect && (
+          {allColumnIds.length > 0 && props.showColumnSelect && (
             <Flex
               direction="row"
               gap={1}
@@ -761,22 +1131,24 @@ const DataTableRemix = (props: DataTableProps) => {
                 Columns:
               </Text>
               <Select.Root
-                key={"select-columns"}
-                size={"xs"}
-                w={"200px"}
+                key="select-columns"
+                size="xs"
+                w="200px"
                 collection={columnNamesCollection}
-                value={Object.keys(columnVisibility).filter(
-                  (column) => columnVisibility[column] === true,
-                )}
+                value={visibleColumnsForSelect}
                 onValueChange={(details) => {
-                  updateColumnVisibility(details.items);
+                  // Filter out disabled columns (_id and name) from the selection
+                  const toggleableColumns = (details.value as string[]).filter(
+                    (col) => col !== "_id" && col !== "name",
+                  );
+                  updateColumnVisibility(toggleableColumns);
                 }}
                 multiple
               >
                 <Select.HiddenSelect />
                 <Select.Control>
-                  <Select.Trigger rounded={"md"}>
-                    <Select.ValueText placeholder={"Visible Columns"} />
+                  <Select.Trigger rounded="md">
+                    <Select.ValueText placeholder="Visible Columns" />
                   </Select.Trigger>
                   <Select.IndicatorGroup>
                     <Select.Indicator />
@@ -785,12 +1157,30 @@ const DataTableRemix = (props: DataTableProps) => {
                 <Portal>
                   <Select.Positioner>
                     <Select.Content>
-                      {columnNamesCollection.items.map((name) => (
-                        <Select.Item item={name} key={name}>
-                          {_.capitalize(name)}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
+                      {(columnNamesCollection.items || []).map((item) => {
+                        const isDisabled =
+                          item.disabled === true ||
+                          item.value === "_id" ||
+                          item.value === "name";
+                        return (
+                          <Select.Item
+                            item={item}
+                            key={item.value}
+                            pointerEvents={isDisabled ? "none" : "auto"}
+                            opacity={isDisabled ? 0.5 : 1}
+                            cursor={isDisabled ? "not-allowed" : "pointer"}
+                            onClick={(e) => {
+                              if (isDisabled) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }
+                            }}
+                          >
+                            {item.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        );
+                      })}
                     </Select.Content>
                   </Select.Positioner>
                 </Portal>
@@ -799,6 +1189,7 @@ const DataTableRemix = (props: DataTableProps) => {
           )}
         </Flex>
 
+        {/* Right side: Page size selector */}
         {props.showPagination && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
@@ -808,9 +1199,9 @@ const DataTableRemix = (props: DataTableProps) => {
               <Fieldset.Content>
                 <Field.Root>
                   <Select.Root
-                    key={"select-pagesize"}
-                    size={"xs"}
-                    w={"80px"}
+                    key="select-pagesize"
+                    size="xs"
+                    w="80px"
                     collection={pageLengthsCollection}
                     value={pageLength}
                     onValueChange={(details) => {
@@ -820,8 +1211,8 @@ const DataTableRemix = (props: DataTableProps) => {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger rounded={"md"}>
-                        <Select.ValueText placeholder={"Page Size"} />
+                      <Select.Trigger rounded="md">
+                        <Select.ValueText placeholder="Page Size" />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
                         <Select.Indicator />

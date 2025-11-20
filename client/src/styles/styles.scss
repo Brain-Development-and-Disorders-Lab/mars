@@ -199,3 +199,41 @@ body .w-md-editor-text-input {
     width: fit-content;
   }
 }
+
+/* Custom scrollbar styles for DataTableRemix */
+.data-table-scroll-container {
+  /* For Webkit browsers (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition: background 0.2s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  /* Minimize spacing - remove any default margins/padding on scrollbar */
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Reduce gap by making scrollbar track flush with content */
+  &::-webkit-scrollbar:horizontal {
+    margin-top: 0;
+  }
+}

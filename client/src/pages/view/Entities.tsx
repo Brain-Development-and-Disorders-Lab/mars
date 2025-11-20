@@ -25,6 +25,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -43,7 +44,6 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
-import DataTableRemix from "@components/DataTableRemix";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -181,14 +181,14 @@ const Entities = () => {
     columnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"}>
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 36}
+              disabled={info.getValue().length < 20}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 36 })}
+                {_.truncate(info.getValue(), { length: 20 })}
               </Text>
             </Tooltip>
             <Button
@@ -383,11 +383,11 @@ const Entities = () => {
                 visibleColumns={visibleColumns}
                 selectedRows={{}}
                 actions={actions}
-                showColumnSelect
-                showSelection
-                showPagination
                 columnFilters={columnFilters}
                 onColumnFiltersChange={setColumnFilters}
+                showColumnSelect
+                showPagination
+                showSelection
               />
             </Box>
           ) : (
