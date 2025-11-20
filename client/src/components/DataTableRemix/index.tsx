@@ -309,8 +309,22 @@ const DataTableRemix = (props: DataTableProps) => {
   const prevShowSelectionRef = useRef(props.showSelection);
 
   const getColumnId = useCallback(
-    (column: { id?: string; accessorKey?: string }) => {
-      return (column.id as string) || (column.accessorKey as string) || "";
+    (column: {
+      id?: string | ((...args: unknown[]) => string);
+      accessorKey?: string;
+    }) => {
+      // Handle id as string
+      if (typeof column.id === "string") {
+        return column.id;
+      }
+      // Handle id as function - convert to string or use fallback
+      if (typeof column.id === "function") {
+        // For function-based ids, we can't reliably extract a string id
+        // Use accessorKey as fallback, or generate a stable id
+        return (column.accessorKey as string) || "";
+      }
+      // Fallback to accessorKey or empty string
+      return (column.accessorKey as string) || "";
     },
     [],
   );
@@ -439,7 +453,10 @@ const DataTableRemix = (props: DataTableProps) => {
         .map((col) => getColumnId(col))
         .filter(
           (id) =>
-            id && id.trim().length > 0 && !NON_TOGGLEABLE_COLUMNS.includes(id),
+            id &&
+            typeof id === "string" &&
+            id.trim().length > 0 &&
+            !NON_TOGGLEABLE_COLUMNS.includes(id),
         ),
     [columns, getColumnId],
   );
@@ -451,6 +468,7 @@ const DataTableRemix = (props: DataTableProps) => {
         .filter(
           (id) =>
             id &&
+            typeof id === "string" &&
             id.trim().length > 0 &&
             !ALWAYS_VISIBLE_COLUMNS.includes(id) &&
             id !== "view",
@@ -460,7 +478,9 @@ const DataTableRemix = (props: DataTableProps) => {
 
   const columnNamesCollection = useMemo(() => {
     const items = allColumnIds
-      .filter((name) => name && name.trim().length > 0)
+      .filter(
+        (name) => name && typeof name === "string" && name.trim().length > 0,
+      )
       .map((name) => ({
         value: name,
         label: _.capitalize(name) || name,
@@ -708,6 +728,24 @@ const DataTableRemix = (props: DataTableProps) => {
   // Show on lg and above
   const showAdvancedControls = isBreakpointActive("lg", "up");
 
+  const getColumnMinWidth = useCallback(
+    (columnId: string): number => {
+      if (columnId === "select") {
+        return SELECT_COLUMN_WIDTH;
+      }
+      const meta = table.getColumn(columnId)?.columnDef.meta as
+        | ColumnMeta
+        | undefined;
+
+      if (meta?.fixedWidth) {
+        return meta.fixedWidth;
+      }
+
+      return columnWidths[columnId] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+    },
+    [columnWidths, table],
+  );
+
   const getColumnWidth = useCallback(
     (columnId: string, isLast: boolean): string | undefined => {
       if (columnId === "select") {
@@ -721,8 +759,7 @@ const DataTableRemix = (props: DataTableProps) => {
         return `${meta.fixedWidth}px`;
       }
 
-      const minWidth =
-        columnWidths[columnId] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+      const minWidth = getColumnMinWidth(columnId);
 
       if (isLast) {
         return undefined;
@@ -730,7 +767,7 @@ const DataTableRemix = (props: DataTableProps) => {
 
       return `${minWidth}px`;
     },
-    [columnWidths, table],
+    [getColumnMinWidth],
   );
 
   const getColumnAlign = useCallback(
@@ -789,13 +826,14 @@ const DataTableRemix = (props: DataTableProps) => {
                   const isLastColumn =
                     headerIndex === visibleHeaders.length - 1;
                   const columnWidth = getColumnWidth(header.id, isLastColumn);
+                  const columnMinWidth = getColumnMinWidth(header.id);
                   const align = getColumnAlign(header.id);
                   return (
                     <Flex
                       key={header.id}
                       w={columnWidth}
-                      flex="0 0 auto"
-                      minW={columnWidth}
+                      flex={isLastColumn ? "1 1 auto" : "0 0 auto"}
+                      minW={isLastColumn ? `${columnMinWidth}px` : columnWidth}
                       px={1}
                       py={1}
                       fontSize="xs"
@@ -910,14 +948,15 @@ const DataTableRemix = (props: DataTableProps) => {
                       cell.column.id,
                       isLastCell,
                     );
+                    const columnMinWidth = getColumnMinWidth(cell.column.id);
                     const align = getColumnAlign(cell.column.id);
                     return (
                       <Box
                         key={cell.id}
                         id={cell.id}
                         w={columnWidth}
-                        flex="0 0 auto"
-                        minW={columnWidth}
+                        flex={isLastCell ? "1 1 auto" : "0 0 auto"}
+                        minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
                         h={"34px"}
                         px={1}
                         py={0.5}
