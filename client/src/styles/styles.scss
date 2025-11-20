@@ -14,7 +14,11 @@ body .w-md-editor-text-pre > code,
 body .wmde-markdown,
 body .w-md-editor-text-input {
   font-size: 12px !important;
-  line-height: 13px !important;
+  line-height: 24px !important;
+}
+body .w-md-editor-preview,
+body .w-md-editor-text {
+  padding: 0px 2.5px !important;
 }
 
 /* CSS for React Query Builder */
