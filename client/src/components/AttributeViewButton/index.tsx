@@ -37,7 +37,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
     <Flex gap={"1"}>
       <IconButton
         size="2xs"
-        variant="outline"
+        variant="subtle"
         colorPalette="gray"
         aria-label={"View Attribute"}
         onClick={() => setOpen(true)}
@@ -47,7 +47,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       {isEditing && (
         <IconButton
           size="2xs"
-          variant="outline"
+          variant="subtle"
           colorPalette="red"
           aria-label={"Delete Attribute"}
           onClick={props.removeCallback}

@@ -642,7 +642,7 @@ const Entity = () => {
               <Button
                 size="2xs"
                 mx={"1"}
-                variant="outline"
+                variant="subtle"
                 colorPalette="red"
                 aria-label={"Remove Project"}
                 onClick={() => {
@@ -656,7 +656,7 @@ const Entity = () => {
               <Button
                 size="2xs"
                 mx={"1"}
-                variant="outline"
+                variant="subtle"
                 colorPalette="gray"
                 aria-label={"View Project"}
                 onClick={() => navigate(`/projects/${projectId}`)}
@@ -824,7 +824,7 @@ const Entity = () => {
                 <Dialog.Trigger asChild>
                   <IconButton
                     aria-label={"Preview attachment"}
-                    variant={"outline"}
+                    variant={"subtle"}
                     size={"2xs"}
                     key={`preview-file-${info.getValue()}`}
                     colorPalette={"gray"}
@@ -849,7 +849,7 @@ const Entity = () => {
                 <IconButton
                   aria-label={"Remove attachment"}
                   size={"2xs"}
-                  variant={"outline"}
+                  variant={"subtle"}
                   key={`remove-file-${info.getValue()}`}
                   colorPalette={"red"}
                   onClick={() => removeAttachment(info.getValue())}
@@ -860,7 +860,7 @@ const Entity = () => {
                 <IconButton
                   aria-label={"Download attachment"}
                   size={"2xs"}
-                  variant={"outline"}
+                  variant={"subtle"}
                   key={`download-file-${info.getValue()}`}
                   colorPalette={"blue"}
                   onClick={() => handleDownload()}
@@ -1414,7 +1414,7 @@ const Entity = () => {
             {/* Version history */}
             <Drawer.Root
               open={historyOpen}
-              size={"md"}
+              size={"sm"}
               onOpenChange={(event) => setHistoryOpen(event.open)}
               closeOnEscape
               closeOnInteractOutside
@@ -2800,6 +2800,37 @@ const Entity = () => {
               </Dialog.Header>
               <Dialog.Body p={"1"}>
                 <Flex direction={"column"} gap={"1"}>
+                  <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Description:
+                    </Text>
+                    <Text fontSize={"xs"}>{entityName} is</Text>
+                    <Tag.Root
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      colorPalette={"yellow"}
+                    >
+                      <Tag.Label>
+                        {selectedRelationshipType === "general" && "related"}
+                        {selectedRelationshipType === "child" && "a child"}
+                        {selectedRelationshipType === "parent" && "a parent"}
+                      </Tag.Label>
+                    </Tag.Root>
+                    <Text fontSize={"xs"}>
+                      {selectedRelationshipType === "general" ? "to" : "of"}
+                    </Text>
+                    <Tag.Root
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      colorPalette={"blue"}
+                    >
+                      <Tag.Label>
+                        {_.isUndefined(selectedRelationshipTarget.name)
+                          ? "Select Entity"
+                          : selectedRelationshipTarget.name}
+                      </Tag.Label>
+                    </Tag.Root>
+                  </Flex>
                   <Flex
                     direction={"row"}
                     gap={"1"}
@@ -2878,37 +2909,6 @@ const Entity = () => {
                         onChange={setSelectedRelationshipTarget}
                       />
                     </Flex>
-                  </Flex>
-                  <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Description:
-                    </Text>
-                    <Text fontSize={"xs"}>{entityName} is</Text>
-                    <Tag.Root
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      colorPalette={"yellow"}
-                    >
-                      <Tag.Label>
-                        {selectedRelationshipType === "general" && "related"}
-                        {selectedRelationshipType === "child" && "a child"}
-                        {selectedRelationshipType === "parent" && "a parent"}
-                      </Tag.Label>
-                    </Tag.Root>
-                    <Text fontSize={"xs"}>
-                      {selectedRelationshipType === "general" ? "to" : "of"}
-                    </Text>
-                    <Tag.Root
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      colorPalette={"blue"}
-                    >
-                      <Tag.Label>
-                        {_.isUndefined(selectedRelationshipTarget.name)
-                          ? "Select Entity"
-                          : selectedRelationshipTarget.name}
-                      </Tag.Label>
-                    </Tag.Root>
                   </Flex>
                 </Flex>
               </Dialog.Body>

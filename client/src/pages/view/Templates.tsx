@@ -125,7 +125,7 @@ const Templates = () => {
             <Button
               size="2xs"
               mx={"1"}
-              variant="outline"
+              variant="subtle"
               colorPalette="gray"
               aria-label={"View Template"}
               onClick={() => navigate(`/templates/${info.row.original._id}`)}

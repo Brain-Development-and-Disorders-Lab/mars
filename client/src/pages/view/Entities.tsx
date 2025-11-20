@@ -192,7 +192,7 @@ const Entities = () => {
             <Button
               size="2xs"
               mx={"1"}
-              variant="outline"
+              variant="subtle"
               colorPalette="gray"
               aria-label={"View Entity"}
               onClick={() => navigate(`/entities/${info.row.original._id}`)}

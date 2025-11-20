@@ -127,7 +127,7 @@ const Projects = () => {
           <Button
             size="2xs"
             mx={"1"}
-            variant="outline"
+            variant="subtle"
             colorPalette="gray"
             aria-label={"View Project"}
             onClick={() => navigate(`/projects/${info.row.original._id}`)}
