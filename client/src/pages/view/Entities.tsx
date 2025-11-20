@@ -259,8 +259,8 @@ const Entities = () => {
     }),
     columnHelper.accessor("attributes", {
       cell: (info) => (
-        <Tag.Root colorPalette={"green"}>
-          <Tag.Label>{info.getValue().length}</Tag.Label>
+        <Tag.Root colorPalette={"green"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
         </Tag.Root>
       ),
       header: "Attributes",
@@ -268,8 +268,8 @@ const Entities = () => {
     }),
     columnHelper.accessor("attachments", {
       cell: (info) => (
-        <Tag.Root colorPalette={"purple"}>
-          <Tag.Label>{info.getValue().length}</Tag.Label>
+        <Tag.Root colorPalette={"purple"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
         </Tag.Root>
       ),
       header: "Attachments",

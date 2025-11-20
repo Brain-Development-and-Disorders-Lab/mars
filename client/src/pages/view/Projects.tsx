@@ -5,14 +5,13 @@ import {
   EmptyState,
   Flex,
   Heading,
-  Link,
   Spacer,
   Tag,
   Text,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
@@ -115,14 +114,28 @@ const Projects = () => {
   const columns = [
     columnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip
-          content={info.getValue()}
-          disabled={info.getValue().length < 36}
-        >
-          <Text lineClamp={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 36 })}
-          </Text>
-        </Tooltip>
+        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+          <Tooltip
+            content={info.getValue()}
+            disabled={info.getValue().length < 20}
+            showArrow
+          >
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
+          </Tooltip>
+          <Button
+            size="2xs"
+            mx={"1"}
+            variant="outline"
+            colorPalette="gray"
+            aria-label={"View Entity"}
+            onClick={() => navigate(`/entities/${info.row.original._id}`)}
+          >
+            View
+            <Icon name={"a_right"} />
+          </Button>
+        </Flex>
       ),
       header: "Name",
     }),
@@ -131,19 +144,22 @@ const Projects = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
             </Tag.Root>
           );
         }
         return (
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 36}
-          >
-            <Text lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 36 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 32}
+              showArrow
+            >
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), { length: 32 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Description",
@@ -156,42 +172,32 @@ const Projects = () => {
             orcid={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
+            inline
           />
         );
       },
       header: "Owner",
     }),
     columnHelper.accessor("created", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
+      cell: (info) => {
+        return (
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
       header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("entities", {
       cell: (info) => {
         return (
-          <Tag.Root colorPalette={"green"}>
-            <Tag.Label>{info.getValue().length}</Tag.Label>
+          <Tag.Root colorPalette={"green"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
           </Tag.Root>
         );
       },
       header: "Entities",
-    }),
-    columnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              fontWeight={"semibold"}
-              color={"black"}
-              onClick={() => navigate(`/projects/${info.getValue()}`)}
-            >
-              View
-            </Link>
-            <Icon name={"a_right"} />
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
 
@@ -199,11 +205,11 @@ const Projects = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
-        p={"4"}
+        p={"2"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"4"}
+        gap={"2"}
         justify={"center"}
       >
         <Flex
@@ -221,21 +227,21 @@ const Projects = () => {
             <Button
               colorPalette={"green"}
               onClick={() => navigate("/create/project")}
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
             >
-              Create
-              <Icon name={"add"} />
+              Create Project
+              <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <Text fontSize={"sm"}>
+        <Flex direction={"column"} gap={"2"} w={"100%"}>
+          <Text fontSize={"xs"} ml={"0.5"}>
             All Projects in the current Workspace are shown below. Sort the
             Projects using the column headers.
           </Text>
           {projects.length > 0 ? (
-            <DataTable
+            <DataTableRemix
               columns={columns}
               data={data.projects}
               visibleColumns={visibleColumns}
