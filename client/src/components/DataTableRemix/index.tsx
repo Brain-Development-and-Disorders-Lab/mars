@@ -226,6 +226,61 @@ const canSortColumn = (columnId: string): boolean => {
   );
 };
 
+/**
+ * Custom sorting function that handles edge cases:
+ * - null/undefined values (sorted to the end)
+ * - Mixed types (converts to strings for consistent comparison)
+ * - Case-insensitive string comparison
+ * - Empty strings
+ * - Arrays and objects (converted to string representation)
+ */
+const customSortingFn = (
+  rowA: { getValue: (columnId: string) => unknown },
+  rowB: { getValue: (columnId: string) => unknown },
+  columnId: string,
+): number => {
+  const a = rowA.getValue(columnId);
+  const b = rowB.getValue(columnId);
+
+  // Handle null/undefined - sort to the end
+  if (a === null || a === undefined) {
+    if (b === null || b === undefined) return 0;
+    return 1; // a is null/undefined, b is not, so a comes after
+  }
+  if (b === null || b === undefined) {
+    return -1; // b is null/undefined, a is not, so b comes after
+  }
+
+  // Convert both values to strings for consistent comparison
+  let strA: string;
+  let strB: string;
+
+  if (Array.isArray(a)) {
+    strA = a.length > 0 ? String(a[0]) : "";
+  } else if (typeof a === "object") {
+    strA = JSON.stringify(a);
+  } else {
+    strA = String(a);
+  }
+
+  if (Array.isArray(b)) {
+    strB = b.length > 0 ? String(b[0]) : "";
+  } else if (typeof b === "object") {
+    strB = JSON.stringify(b);
+  } else {
+    strB = String(b);
+  }
+
+  // Case-insensitive comparison
+  const normalizedA = strA.toLowerCase().trim();
+  const normalizedB = strB.toLowerCase().trim();
+
+  // Compare normalized strings
+  if (normalizedA < normalizedB) return -1;
+  if (normalizedA > normalizedB) return 1;
+  return 0;
+};
+
 const DataTableRemix = (props: DataTableProps) => {
   const [pageLength, setPageLength] = useState<string[]>(["20"]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -307,6 +362,7 @@ const DataTableRemix = (props: DataTableProps) => {
     const baseColumns = props.columns.map((col) => ({
       ...col,
       filterFn: includesSome,
+      sortingFn: customSortingFn,
     }));
 
     if (!props.showSelection) {
@@ -460,6 +516,9 @@ const DataTableRemix = (props: DataTableProps) => {
     onSortingChange: setSorting,
     filterFns: {
       includesSome,
+    },
+    sortingFns: {
+      customSort: customSortingFn,
     },
     meta: {
       updateData: (rowIndex: number, columnId: string, value: unknown) => {
