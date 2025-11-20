@@ -17,14 +17,12 @@ import {
   createListCollection,
   EmptyState,
   CloseButton,
-  Fieldset,
   Field,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import DataTable from "@components/DataTable";
 import DataTableRemix from "@components/DataTableRemix";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
@@ -86,8 +84,8 @@ const Entities = () => {
         return (
           <Flex>
             <Tooltip content={info.getValue()} showArrow>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 30 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 32 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -97,9 +95,9 @@ const Entities = () => {
     }),
     exportTableColumnHelper.accessor("_id", {
       cell: () => (
-        <Flex direction={"row"} gap={"2"} align={"center"} p={"1"}>
-          <Icon name={"download"} color={"blue.600"} />
-          <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.600"}>
+        <Flex direction={"row"} gap={"1"} align={"center"} p={"1"}>
+          <Icon name={"download"} color={"blue.600"} size={"xs"} />
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"blue.600"}>
             {"Export"}
           </Text>
         </Flex>
@@ -335,11 +333,11 @@ const Entities = () => {
     >
       <Flex
         direction={"row"}
-        p={"4"}
+        p={"2"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"4"}
+        gap={"2"}
         minW="0"
         maxW="100%"
       >
@@ -357,16 +355,16 @@ const Entities = () => {
             <Button
               colorPalette={"green"}
               onClick={() => navigate("/create/entity")}
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
             >
-              Create
-              <Icon name={"add"} />
+              Create Entity
+              <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"} minW="0" maxW="100%">
-          <Text fontSize={"sm"}>
+        <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
+          <Text fontSize={"xs"} ml={"0.5"}>
             All Entities in the current Workspace are shown below. Sort the
             Entities using the column headers.
           </Text>
@@ -415,8 +413,7 @@ const Entities = () => {
           <Dialog.Content>
             {/* Heading and close button */}
             <Dialog.Header
-              px={"2"}
-              py={"4"}
+              p={"2"}
               fontWeight={"semibold"}
               roundedTop={"md"}
               bg={"gray.100"}
@@ -424,94 +421,91 @@ const Entities = () => {
               Export Entities
               <Dialog.CloseTrigger asChild>
                 <CloseButton
-                  size={"sm"}
+                  size={"2xs"}
                   onClick={onExportClose}
                   _hover={{ bg: "gray.200" }}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
-            <Dialog.Body px={"2"} gap={"2"}>
+            <Dialog.Body p={"1"}>
               {/* Select export format */}
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Flex
-                    w={"100%"}
-                    direction={"row"}
-                    py={"2"}
-                    gap={"2"}
-                    justify={"space-between"}
-                    align={"center"}
-                  >
-                    <Flex gap={"1"} align={"center"} w={"100%"}>
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
-                        Format:
-                      </Text>
-                      <Field.Root invalid={!exportFormatSelected} required>
-                        <Select.Root
-                          key={"select-export-format"}
-                          size={"sm"}
-                          w={"xs"}
-                          rounded={"md"}
-                          collection={createListCollection({
-                            items: ["JSON", "CSV"],
-                          })}
-                          onValueChange={(details) => {
-                            setExportFormat(
-                              details.items[0].toLowerCase() as "json" | "csv",
-                            );
-                            setExportFormatSelected(true);
-                          }}
-                        >
-                          <Select.HiddenSelect />
-                          <Select.Control>
-                            <Select.Trigger>
-                              <Select.ValueText
-                                placeholder={"Select export format"}
-                              />
-                            </Select.Trigger>
-                            <Select.IndicatorGroup>
-                              <Select.Indicator />
-                            </Select.IndicatorGroup>
-                          </Select.Control>
-                          <Portal container={exportEntitiesRef}>
-                            <Select.Positioner>
-                              <Select.Content zIndex={9999}>
-                                {createListCollection({
-                                  items: ["JSON", "CSV"],
-                                }).items.map((valueType) => (
-                                  <Select.Item item={valueType} key={valueType}>
-                                    {valueType}
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Portal>
-                        </Select.Root>
-                      </Field.Root>
-                    </Flex>
+              <Flex gap={"1"} direction={"column"}>
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  gap={"1"}
+                  align={"center"}
+                  ml={"0.5"}
+                >
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    File Format:
+                  </Text>
+                  <Flex>
+                    <Field.Root invalid={!exportFormatSelected} required>
+                      <Select.Root
+                        key={"select-export-format"}
+                        size={"xs"}
+                        w={"xs"}
+                        rounded={"md"}
+                        collection={createListCollection({
+                          items: ["JSON", "CSV"],
+                        })}
+                        onValueChange={(details) => {
+                          setExportFormat(
+                            details.items[0].toLowerCase() as "json" | "csv",
+                          );
+                          setExportFormatSelected(true);
+                        }}
+                      >
+                        <Select.HiddenSelect />
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText
+                              placeholder={"Select export format"}
+                            />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Portal container={exportEntitiesRef}>
+                          <Select.Positioner>
+                            <Select.Content zIndex={9999}>
+                              {createListCollection({
+                                items: ["JSON", "CSV"],
+                              }).items.map((valueType) => (
+                                <Select.Item item={valueType} key={valueType}>
+                                  {valueType}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Portal>
+                      </Select.Root>
+                    </Field.Root>
                   </Flex>
-                </Fieldset.Content>
-              </Fieldset.Root>
+                </Flex>
 
-              <Flex
-                w={"100%"}
-                direction={"column"}
-                gap={"2"}
-                border={"1px"}
-                borderColor={"gray.300"}
-                rounded={"md"}
-              >
-                <DataTable
-                  columns={exportTableColumns}
-                  data={toExport}
-                  visibleColumns={exportTableVisibleColumns}
-                  selectedRows={{}}
-                  showPagination
-                />
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  gap={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
+                  <DataTableRemix
+                    columns={exportTableColumns}
+                    data={toExport}
+                    visibleColumns={exportTableVisibleColumns}
+                    selectedRows={{}}
+                    showPagination
+                  />
+                </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 {/* "Export" button */}
                 <Flex
@@ -523,13 +517,13 @@ const Entities = () => {
                 >
                   <Button
                     colorPalette={"blue"}
-                    size={"sm"}
+                    size={"xs"}
                     onClick={() => onExportClick()}
                     loading={exportLoading}
                     rounded={"md"}
                     disabled={!exportFormatSelected}
                   >
-                    Export
+                    Download
                     <Icon name={"download"} />
                   </Button>
                 </Flex>

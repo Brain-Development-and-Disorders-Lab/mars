@@ -1068,26 +1068,30 @@ const DataTableRemix = (props: DataTableProps) => {
               <Menu.Positioner>
                 <Menu.Content p={1}>
                   {props.actions && props.actions.length > 0 ? (
-                    props.actions.map((action) => (
-                      <Menu.Item
-                        onClick={() => {
-                          action.action(table, selectedRows);
-                        }}
-                        key={action.label}
-                        disabled={
-                          (Object.keys(selectedRows).length === 0 ||
-                            _.isUndefined(props.actions) ||
-                            props.actions?.length === 0) &&
-                          !action.alwaysEnabled
-                        }
-                        value={action.label}
-                      >
-                        <Flex direction="row" gap="1" align="center">
-                          <Icon name={action.icon} size="xs" />
-                          <Text fontSize="xs">{action.label}</Text>
-                        </Flex>
-                      </Menu.Item>
-                    ))
+                    props.actions.map((action) => {
+                      const isDisabled =
+                        (Object.keys(selectedRows).length === 0 ||
+                          _.isUndefined(props.actions) ||
+                          props.actions?.length === 0) &&
+                        !action.alwaysEnabled;
+                      return (
+                        <Menu.Item
+                          onClick={() => {
+                            if (!isDisabled) {
+                              action.action(table, selectedRows);
+                            }
+                          }}
+                          key={action.label}
+                          disabled={isDisabled}
+                          value={action.label}
+                        >
+                          <Flex direction="row" gap="1" align="center">
+                            <Icon name={action.icon} size="xs" />
+                            <Text fontSize="xs">{action.label}</Text>
+                          </Flex>
+                        </Menu.Item>
+                      );
+                    })
                   ) : (
                     <Menu.Item
                       key="no-actions"
@@ -1112,9 +1116,10 @@ const DataTableRemix = (props: DataTableProps) => {
               wrap="wrap"
               justify="center"
               grow={1}
+              display={{ base: "none", md: "flex" }}
             >
               <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
-                Columns:
+                Show Columns:
               </Text>
               <Select.Root
                 key="select-columns"
@@ -1174,9 +1179,15 @@ const DataTableRemix = (props: DataTableProps) => {
         </Flex>
 
         {props.showPagination && (
-          <Flex direction="row" gap={1} align="center" wrap="wrap">
+          <Flex
+            direction="row"
+            gap={1}
+            align="center"
+            wrap="wrap"
+            display={{ base: "none", md: "flex" }}
+          >
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
-              Show:
+              Show Items:
             </Text>
             <Fieldset.Root w="fit-content">
               <Fieldset.Content>
