@@ -40,9 +40,7 @@ const UploadDialog = (props: {
       uploadAttachment(target: $target, file: $file) {
         success
         message
-        data {
-          _id
-        }
+        data
       }
     }
   `;
@@ -86,7 +84,7 @@ const UploadDialog = (props: {
         // Add the upload to the existing list of uploads
         props.setUploads([
           ...props.uploads,
-          response.data.uploadAttachment.data._id,
+          response.data.uploadAttachment.data,
         ]);
 
         // Reset file upload state

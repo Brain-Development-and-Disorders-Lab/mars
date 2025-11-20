@@ -157,9 +157,9 @@ const start = async () => {
   app.use(
     "/",
     cors<cors.CorsRequest>({ origin: origins }),
-    express.json({ limit: "50mb" }),
+    express.json({ limit: "100mb" }),
     graphqlUploadExpress({
-      maxFileSize: 10000000,
+      maxFileSize: 104857600, // 100MB
       maxFiles: 10,
     }) as RequestHandler,
     expressMiddleware(server, {
