@@ -684,23 +684,30 @@ const ValuesRemix = (props: {
             {!props.viewOnly && (
               <Box
                 w="40px"
+                flex="0 0 auto"
+                minW="40px"
                 px={1}
                 py={1}
                 textAlign="center"
                 bg="gray.100"
                 borderRight="1px solid"
                 borderColor="gray.200"
+                overflow="hidden"
+                flexShrink={0}
               />
             )}
 
             {/* Type Column Header */}
             <Flex
               w={`${columnWidths.type}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.type}px`}
               px={1}
               py={1}
               fontSize="xs"
               fontWeight="semibold"
               color="gray.600"
+              bg="gray.100"
               borderRight="1px solid"
               borderColor="gray.200"
               position="relative"
@@ -708,8 +715,10 @@ const ValuesRemix = (props: {
               lineHeight="1.2"
               align="center"
               justify="center"
+              overflow="hidden"
+              flexShrink={0}
             >
-              <Text>Type</Text>
+              <Text textAlign="center">Type</Text>
               {/* Resize Handle */}
               <Box
                 position="absolute"
@@ -728,11 +737,14 @@ const ValuesRemix = (props: {
             {/* Name Column Header */}
             <Flex
               w={`${columnWidths.name}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.name}px`}
               px={1}
               py={1}
               fontSize="xs"
               fontWeight="semibold"
               color="gray.600"
+              bg="gray.100"
               borderRight="1px solid"
               borderColor="gray.200"
               position="relative"
@@ -740,8 +752,10 @@ const ValuesRemix = (props: {
               lineHeight="1.2"
               align="center"
               justify="center"
+              overflow="hidden"
+              flexShrink={0}
             >
-              <Text>Name</Text>
+              <Text textAlign="center">Name</Text>
               {/* Resize Handle */}
               <Box
                 position="absolute"
@@ -760,17 +774,23 @@ const ValuesRemix = (props: {
             {/* Value Column Header */}
             <Flex
               w={`${columnWidths.value}px`}
-              flex="1"
+              flex="0 0 auto"
+              minW={`${columnWidths.value}px`}
               px={1}
               py={1}
               fontSize="xs"
               fontWeight="semibold"
               color="gray.600"
+              bg="gray.100"
               position="relative"
-              justify="center"
+              textAlign="center"
+              lineHeight="1.2"
               align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
             >
-              <Text>Value</Text>
+              <Text textAlign="center">Value</Text>
               {/* Resize Handle */}
               <Box
                 position="absolute"
@@ -874,11 +894,10 @@ const ValuesRemix = (props: {
                       <Select.Control>
                         <Select.Trigger
                           minW="100px"
-                          h="20px"
                           borderRadius="none"
                           border="none"
                         >
-                          <Flex align="center" gap={1}>
+                          <Flex align="center" gap={1} h="16px">
                             {getTypeIcon(value.type)}
                             <Text fontSize="xs" color="gray.700">
                               {value.type === "url"
@@ -939,7 +958,7 @@ const ValuesRemix = (props: {
                     }
                     size="xs"
                     px={1}
-                    py={0.5}
+                    py={0}
                     h="100%"
                     fontSize="xs"
                     readOnly={props.viewOnly}
@@ -1003,8 +1022,7 @@ const ValuesRemix = (props: {
               p={0}
               justify="center"
               align="center"
-              bg="gray.50"
-              _hover={{ bg: "gray.100" }}
+              bg="gray.100"
             >
               {selectedRows.size > 0 ? (
                 <Button
@@ -1014,9 +1032,11 @@ const ValuesRemix = (props: {
                   onClick={removeSelectedRows}
                   aria-label="Delete selected rows"
                   w="100%"
+                  h={"fit-content"}
+                  p={"0.5"}
                 >
-                  <Icon name="delete" />
-                  <Text ml={1}>
+                  <Icon name="delete" size="xs" />
+                  <Text ml={1} fontSize="xs" fontWeight="semibold">
                     Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
                     {selectedRows.size})
                   </Text>
@@ -1029,9 +1049,13 @@ const ValuesRemix = (props: {
                   onClick={addRow}
                   aria-label="Add row"
                   w="100%"
+                  h={"fit-content"}
+                  p={"0.5"}
                 >
-                  <Icon name="add" />
-                  <Text ml={1}>Add Row</Text>
+                  <Icon name="add" size="xs" />
+                  <Text ml={1} fontSize="xs" fontWeight="semibold">
+                    Add Row
+                  </Text>
                 </Button>
               )}
             </Flex>

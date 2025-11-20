@@ -918,6 +918,7 @@ const DataTableRemix = (props: DataTableProps) => {
                         w={columnWidth}
                         flex="0 0 auto"
                         minW={columnWidth}
+                        h={"34px"}
                         px={1}
                         py={0.5}
                         borderRight={!isLastCell ? "1px solid" : "none"}
