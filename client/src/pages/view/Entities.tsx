@@ -20,7 +20,7 @@ import {
   Fieldset,
   Field,
 } from "@chakra-ui/react";
-// import ActorTag from "@components/ActorTag";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
@@ -239,14 +239,12 @@ const Entities = () => {
     columnHelper.accessor("owner", {
       cell: (info) => {
         return (
-          // <ActorTag
-          //   orcid={info.getValue()}
-          //   fallback={"Unknown User"}
-          //   size={"sm"}
-          // />
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
-            {info.getValue()}
-          </Text>
+          <ActorTag
+            orcid={info.getValue()}
+            fallback={"Unknown User"}
+            size={"sm"}
+            inline
+          />
         );
       },
       header: "Owner",

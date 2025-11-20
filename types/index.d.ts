@@ -133,6 +133,7 @@ export type ActorTagProps = {
   orcid: string;
   fallback: string;
   size: "sm" | "md";
+  inline?: boolean;
 };
 
 // "VisibilityTagProps" component props

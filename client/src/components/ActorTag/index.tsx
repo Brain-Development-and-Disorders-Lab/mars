@@ -57,7 +57,16 @@ const ActorTag = (props: ActorTagProps) => {
     }
   }, []);
 
-  return (
+  return props.inline ? (
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={"blue"}>
+        <Avatar.Fallback name={actorLabel} />
+      </Avatar.Root>
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+        {actorLabel}
+      </Text>
+    </Flex>
+  ) : (
     <Flex
       direction={"row"}
       gap={"2"}
