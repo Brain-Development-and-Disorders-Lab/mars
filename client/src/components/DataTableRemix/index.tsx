@@ -238,8 +238,13 @@ const DataTableRemix = (props: DataTableProps) => {
 
   // Table state
   // Initialize column visibility, ensuring _id and name are always visible
+  // Start with props values, which will be properly initialized by the sync effect
   const [columnVisibility, setColumnVisibility] = useState(() => {
-    const initialVisibility = { ...props.visibleColumns };
+    const initialVisibility: Record<string, boolean> = {};
+    // Copy all props values
+    Object.keys(props.visibleColumns).forEach((key) => {
+      initialVisibility[key] = props.visibleColumns[key];
+    });
     // Always ensure _id and name are visible (cannot be toggled)
     initialVisibility["_id"] = true;
     initialVisibility["name"] = true;
@@ -417,21 +422,23 @@ const DataTableRemix = (props: DataTableProps) => {
 
   // Compute merged visibility state (props merged with internal state)
   // This ensures the Select dropdown and table reflect the current state
+  // Internal state takes precedence for columns that have been set, props are used as fallback
   const mergedColumnVisibility = useMemo(() => {
     const merged = { ...columnVisibility };
 
-    // Merge with props, but only for toggleable columns (not _id, name, or select)
-    // Props take precedence for toggleable columns
-    Object.keys(props.visibleColumns).forEach((column) => {
-      if (
-        column !== "_id" &&
-        column !== "name" &&
-        column !== "select" &&
-        columnNames.includes(column) &&
-        props.visibleColumns[column] !== undefined
-      ) {
-        merged[column] = props.visibleColumns[column];
+    // For toggleable columns, use internal state if set, otherwise fall back to props
+    // This allows user interactions to override props
+    columnNames.forEach((column) => {
+      if (columnVisibility[column] === undefined) {
+        // If not in internal state, use props value
+        if (props.visibleColumns[column] !== undefined) {
+          merged[column] = props.visibleColumns[column];
+        } else {
+          // Default to true if not specified
+          merged[column] = true;
+        }
       }
+      // Otherwise, keep the internal state value (already in merged from spread above)
     });
 
     // Always ensure _id and name are visible
@@ -588,6 +595,7 @@ const DataTableRemix = (props: DataTableProps) => {
             column !== "select" &&
             column !== "_id" &&
             column !== "name" &&
+            columnNames.includes(column) &&
             props.visibleColumns[column] !== undefined
           ) {
             if (updatedVisibility[column] !== props.visibleColumns[column]) {
@@ -600,10 +608,15 @@ const DataTableRemix = (props: DataTableProps) => {
       }
 
       // Set defaults for new toggleable columns (only when column structure changes)
+      // Also initialize columns from props if they exist in props but not in internal state
       if (columnIdsChanged) {
         visibleColumnIds.forEach((column) => {
           if (updatedVisibility[column] === undefined) {
-            updatedVisibility[column] = true;
+            // Use props value if available, otherwise default to true
+            updatedVisibility[column] =
+              props.visibleColumns[column] !== undefined
+                ? props.visibleColumns[column]
+                : true;
             hasChanges = true;
           }
         });
