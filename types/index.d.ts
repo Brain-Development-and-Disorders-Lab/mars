@@ -395,6 +395,9 @@ export type DataTableProps = {
   showPagination?: boolean;
   showSelection?: boolean;
   actions?: DataTableAction[];
+
+  // Layout behavior
+  fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
 };
 
 export type DataTableAction = {

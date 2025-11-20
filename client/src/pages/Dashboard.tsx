@@ -9,7 +9,6 @@ import {
   Tag,
   Avatar,
   Stat,
-  Spacer,
   Link,
   Collapsible,
   Badge,
@@ -18,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
-import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
@@ -237,11 +236,28 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip content={info.getValue()}>
-          <Text lineClamp={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 24 })}
-          </Text>
-        </Tooltip>
+        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+          <Tooltip
+            content={info.getValue()}
+            disabled={info.getValue().length < 20}
+            showArrow
+          >
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
+          </Tooltip>
+          <Button
+            size="2xs"
+            mx={"1"}
+            variant="outline"
+            colorPalette="gray"
+            aria-label={"View Entity"}
+            onClick={() => navigate(`/entities/${info.row.original._id}`)}
+          >
+            View
+            <Icon name={"a_right"} />
+          </Button>
+        </Flex>
       ),
       header: "Name",
     }),
@@ -250,46 +266,31 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>No Description</Tag.Label>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
             </Tag.Root>
           );
         }
         return (
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 30}
-          >
-            <Text lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 30 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 32}
+              showArrow
+            >
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), { length: 32 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Description",
       enableHiding: true,
     }),
-    entityTableColumnHelper.accessor("attributes", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue().length, 0)) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>None</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Tag.Root colorPalette={"green"}>
-            <Tag.Label>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
-      },
-      header: "Attributes",
-      enableHiding: true,
-    }),
     entityTableColumnHelper.accessor("timestamp", {
       cell: (info) => {
         return (
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -297,22 +298,23 @@ const Dashboard = () => {
       header: "Created",
       enableHiding: true,
     }),
-    entityTableColumnHelper.accessor("_id", {
+    entityTableColumnHelper.accessor("attributes", {
       cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return (
+            <Tag.Root colorPalette={"orange"} size={"sm"}>
+              <Tag.Label fontSize={"xs"}>None</Tag.Label>
+            </Tag.Root>
+          );
+        }
         return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              color={"black"}
-              fontWeight={"semibold"}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Link>
-          </Flex>
+          <Tag.Root colorPalette={"green"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
+          </Tag.Root>
         );
       },
-      header: "",
+      header: "Attributes",
+      enableHiding: true,
     }),
   ];
 
@@ -323,17 +325,29 @@ const Dashboard = () => {
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
       cell: (info) => {
-        if (_.isEqual(info.getValue().length, 0)) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>None</Tag.Label>
-            </Tag.Root>
-          );
-        }
         return (
-          <Text lineClamp={1} fontWeight={"semibold"}>
-            {info.getValue()}
-          </Text>
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 20}
+              showArrow
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 20 })}
+              </Text>
+            </Tooltip>
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="outline"
+              colorPalette="gray"
+              aria-label={"View Project"}
+              onClick={() => navigate(`/projects/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
+            </Button>
+          </Flex>
         );
       },
       header: "Name",
@@ -343,22 +357,36 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>No Description</Tag.Label>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
             </Tag.Root>
           );
         }
         return (
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 30}
-          >
-            <Text lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 30 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 32}
+              showArrow
+            >
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), { length: 32 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    projectTableColumnHelper.accessor("timestamp", {
+      cell: (info) => {
+        return (
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
+      header: "Created",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("entities", {
@@ -378,23 +406,6 @@ const Dashboard = () => {
       },
       header: "Entities",
       enableHiding: true,
-    }),
-    projectTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              color={"black"}
-              fontWeight={"semibold"}
-              onClick={() => navigate(`/projects/${info.getValue()}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Link>
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
 
@@ -479,7 +490,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
+      <Flex direction={"column"} w={"100%"} p={"2"} gap={"1"}>
         {token.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
@@ -490,11 +501,16 @@ const Dashboard = () => {
             tooltipComponent={WalkthroughTooltip}
           />
         )}
-        <Flex direction={"column"} basis={"70%"} gap={"2"}>
-          <Flex direction={"row"} gap={"2"} align={"center"}>
+        <Flex direction={"column"} basis={"70%"} gap={"0"}>
+          <Flex
+            direction={"row"}
+            gap={"1"}
+            align={"center"}
+            justify={"space-between"}
+          >
             <Flex direction={"column"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon name={"dashboard"} size={"md"} />
+                <Icon name={"dashboard"} size={"sm"} />
                 <Heading size={"xl"}>Dashboard</Heading>
               </Flex>
               <Flex direction={"column"} gap={"1"}>
@@ -520,7 +536,6 @@ const Dashboard = () => {
                 {/* Display toggle for stats */}
               </Flex>
             </Flex>
-            <Spacer />
             <Flex>
               <ActorTag
                 orcid={token.orcid}
@@ -531,17 +546,19 @@ const Dashboard = () => {
           </Flex>
 
           <Collapsible.Root onOpenChange={(event) => setOpenStats(event.open)}>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
               <Collapsible.Trigger>
                 <Link
                   fontSize={"xs"}
                   fontWeight={"semibold"}
                   color={"gray.700"}
                 >
-                  {openStats ? "Hide" : "Show"} stats{" "}
+                  {openStats ? "Hide" : "Show"} Workspace Metrics{" "}
                 </Link>
               </Collapsible.Trigger>
-              <Icon name={openStats ? "c_up" : "c_down"} size={"xs"} />
+              <Flex pt={"1"}>
+                <Icon name={openStats ? "c_up" : "c_down"} size={"xs"} />
+              </Flex>
             </Flex>
 
             <Collapsible.Content>
@@ -555,8 +572,12 @@ const Dashboard = () => {
                 borderColor={"gray.300"}
               >
                 <Stat.Root>
-                  <Stat.Label>Total Workspace Entities</Stat.Label>
-                  <Stat.ValueText>{entityMetrics.all}</Stat.ValueText>
+                  <Stat.Label fontSize={"xs"}>
+                    Total Workspace Entities
+                  </Stat.Label>
+                  <Stat.ValueText fontSize={"md"}>
+                    {entityMetrics.all}
+                  </Stat.ValueText>
                   <Badge
                     px={"0"}
                     variant={"plain"}
@@ -568,8 +589,12 @@ const Dashboard = () => {
                 </Stat.Root>
 
                 <Stat.Root>
-                  <Stat.Label>Total Workspace Projects</Stat.Label>
-                  <Stat.ValueText>{projectMetrics.all}</Stat.ValueText>
+                  <Stat.Label fontSize={"xs"}>
+                    Total Workspace Projects
+                  </Stat.Label>
+                  <Stat.ValueText fontSize={"md"}>
+                    {projectMetrics.all}
+                  </Stat.ValueText>
                   <Badge
                     px={"0"}
                     variant={"plain"}
@@ -583,8 +608,12 @@ const Dashboard = () => {
                 </Stat.Root>
 
                 <Stat.Root>
-                  <Stat.Label>Total Workspace Templates</Stat.Label>
-                  <Stat.ValueText>{templateMetrics.all}</Stat.ValueText>
+                  <Stat.Label fontSize={"xs"}>
+                    Total Workspace Templates
+                  </Stat.Label>
+                  <Stat.ValueText fontSize={"md"}>
+                    {templateMetrics.all}
+                  </Stat.ValueText>
                   <Badge
                     px={"0"}
                     variant={"plain"}
@@ -598,10 +627,15 @@ const Dashboard = () => {
                 </Stat.Root>
 
                 <Stat.Root>
-                  <Stat.Label>Total Workspace Collaborators</Stat.Label>
-                  <Stat.ValueText>
+                  <Stat.Label fontSize={"xs"}>
+                    Total Workspace Collaborators
+                  </Stat.Label>
+                  <Stat.ValueText fontSize={"md"}>
                     {workspaceMetrics.collaborators}
                   </Stat.ValueText>
+                  <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
+                    No change
+                  </Badge>
                 </Stat.Root>
               </Flex>
             </Collapsible.Content>
@@ -616,24 +650,25 @@ const Dashboard = () => {
               p={"2"}
               background={"white"}
               rounded={"md"}
-              gap={"2"}
+              gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Projects heading */}
-              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-                <Icon name={"project"} size={"md"} />
-                <Heading size={"lg"}>Recent Projects</Heading>
+              <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
+                <Icon name={"project"} size={"sm"} />
+                <Heading size={"md"}>Recent Projects</Heading>
               </Flex>
 
               {/* Projects table */}
               {/* Condition: Loaded and content present */}
               {!loading && projectData.length > 0 && (
-                <DataTable
+                <DataTableRemix
                   columns={projectTableColumns}
                   data={projectTableData}
                   visibleColumns={visibleColumns}
                   selectedRows={{}}
+                  fill={false}
                 />
               )}
 
@@ -652,13 +687,13 @@ const Dashboard = () => {
               <Flex justify={"right"}>
                 <Button
                   key={`view-projects-all`}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/projects`)}
                 >
                   All Projects
-                  <Icon name={"c_right"} />
+                  <Icon name={"c_right"} size={"xs"} />
                 </Button>
               </Flex>
             </Flex>
@@ -668,20 +703,20 @@ const Dashboard = () => {
               p={"2"}
               background={"white"}
               rounded={"md"}
-              gap={"2"}
+              gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
             >
               {/* Entities heading */}
-              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-                <Icon name={"entity"} size={"md"} />
-                <Heading size={"lg"}>Recent Entities</Heading>
+              <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
+                <Icon name={"entity"} size={"sm"} />
+                <Heading size={"md"}>Recent Entities</Heading>
               </Flex>
 
               {/* Entities table */}
               {/* Condition: Loaded and content present */}
               {!loading && entityData.length > 0 && (
-                <DataTable
+                <DataTableRemix
                   columns={entityTableColumns}
                   data={entityTableData.filter(
                     (entity) =>
@@ -692,6 +727,7 @@ const Dashboard = () => {
                   selectedRows={{}}
                   columnFilters={entityColumnFilters}
                   onColumnFiltersChange={setEntityColumnFilters}
+                  fill={false}
                 />
               )}
 
@@ -710,7 +746,7 @@ const Dashboard = () => {
               <Flex justify={"right"}>
                 <Button
                   key={`view-entity-all`}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/entities`)}
@@ -727,7 +763,7 @@ const Dashboard = () => {
             direction={"column"}
             maxW={{ lg: "md" }}
             p={"2"}
-            gap={"2"}
+            gap={"1"}
             grow={"1"}
             rounded={"md"}
             border={"1px solid"}
@@ -739,18 +775,18 @@ const Dashboard = () => {
               id={"recentActivityHeader"}
               align={"center"}
               gap={"2"}
-              my={"2"}
+              ml={"0.5"}
             >
-              <Icon name={"activity"} size={"md"} />
-              <Heading size={"lg"} color={"gray.700"}>
+              <Icon name={"activity"} size={"sm"} />
+              <Heading size={"md"} color={"gray.700"}>
                 Recent Activity
               </Heading>
             </Flex>
 
             {/* Activity list */}
             {activityData.length > 0 ? (
-              <Flex py={"2"} w={"100%"} h={"auto"} overflowY={"auto"}>
-                <Stack gap={"3"} w={"95%"}>
+              <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
+                <Stack gap={"2"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
                       <Flex
@@ -760,19 +796,20 @@ const Dashboard = () => {
                         key={`activity-${activity._id}`}
                         align={"center"}
                       >
-                        <Tooltip content={activity.actor} showArrow>
-                          <Avatar.Root
-                            size={"sm"}
-                            key={activity.actor}
-                            colorPalette={"blue"}
+                        <Avatar.Root
+                          size={"xs"}
+                          key={activity.actor}
+                          colorPalette={"blue"}
+                        >
+                          <Avatar.Fallback name={activity.actor} />
+                        </Avatar.Root>
+                        <Flex direction={"column"} w={"100%"} gap={"0.5"}>
+                          <Flex
+                            direction={"row"}
+                            gap={"1"}
+                            justify={"space-between"}
                           >
-                            <Avatar.Fallback name={activity.actor} />
-                          </Avatar.Root>
-                        </Tooltip>
-                        <Flex direction={"column"} w={"100%"}>
-                          <Flex direction={"row"} gap={"1"}>
-                            <Text fontSize={"sm"}>{activity.details}</Text>
-                            <Spacer />
+                            <Text fontSize={"xs"}>{activity.details}:</Text>
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
@@ -787,7 +824,7 @@ const Dashboard = () => {
                               type={activity.target.type}
                               fallback={activity.target.name}
                               justify={"left"}
-                              size={"sm"}
+                              size={"xs"}
                               truncate={20}
                             />
                           </Flex>

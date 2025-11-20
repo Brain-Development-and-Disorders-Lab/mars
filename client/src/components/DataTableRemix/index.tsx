@@ -297,8 +297,6 @@ const DataTableRemix = (props: DataTableProps) => {
   );
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
-  const [containerWidth, setContainerWidth] = useState<number | null>(null);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRowsRef = useRef(selectedRows);
   const prevColumnFiltersRef = useRef(columnFilters);
@@ -675,24 +673,6 @@ const DataTableRemix = (props: DataTableProps) => {
     [columnNames, props.showSelection],
   );
 
-  useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
-      }
-    };
-
-    updateWidth();
-    const resizeObserver = new ResizeObserver(updateWidth);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
 
@@ -721,8 +701,6 @@ const DataTableRemix = (props: DataTableProps) => {
   }, [headerGroups, columnWidths]);
 
   const totalMinWidth = calculateTotalMinWidth();
-  const needsScrolling =
-    containerWidth !== null && totalMinWidth > containerWidth;
 
   const getColumnWidth = useCallback(
     (columnId: string, isLast: boolean): string | undefined => {
@@ -740,17 +718,13 @@ const DataTableRemix = (props: DataTableProps) => {
       const minWidth =
         columnWidths[columnId] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
 
-      if (needsScrolling) {
-        return `${minWidth}px`;
-      }
-
       if (isLast) {
         return undefined;
       }
 
       return `${minWidth}px`;
     },
-    [columnWidths, table, needsScrolling],
+    [columnWidths, table],
   );
 
   const getColumnAlign = useCallback(
@@ -778,14 +752,14 @@ const DataTableRemix = (props: DataTableProps) => {
         flex="1"
         minH="0"
         minW="0"
-        overflowX={needsScrolling ? "auto" : "hidden"}
+        overflowX="auto"
         overflowY="auto"
         position="relative"
         className="data-table-scroll-container"
       >
         <Box
           w="100%"
-          minW={needsScrolling ? `${totalMinWidth}px` : "100%"}
+          minW={props.fill !== false ? `${totalMinWidth}px` : undefined}
           border="1px solid"
           borderColor="gray.200"
           borderRadius="md"
@@ -810,20 +784,11 @@ const DataTableRemix = (props: DataTableProps) => {
                     headerIndex === visibleHeaders.length - 1;
                   const columnWidth = getColumnWidth(header.id, isLastColumn);
                   const align = getColumnAlign(header.id);
-                  const meta = table.getColumn(header.id)?.columnDef.meta as
-                    | ColumnMeta
-                    | undefined;
-                  const isFixed = meta?.fixedWidth !== undefined;
-                  const flexValue =
-                    isLastColumn && !needsScrolling && !isFixed
-                      ? "1"
-                      : "0 0 auto";
-
                   return (
                     <Flex
                       key={header.id}
                       w={columnWidth}
-                      flex={flexValue}
+                      flex="0 0 auto"
                       minW={columnWidth}
                       px={1}
                       py={1}
@@ -936,21 +901,12 @@ const DataTableRemix = (props: DataTableProps) => {
                       isLastCell,
                     );
                     const align = getColumnAlign(cell.column.id);
-                    const meta = cell.column.columnDef.meta as
-                      | ColumnMeta
-                      | undefined;
-                    const isFixed = meta?.fixedWidth !== undefined;
-                    const flexValue =
-                      isLastCell && !needsScrolling && !isFixed
-                        ? "1"
-                        : "0 0 auto";
-
                     return (
                       <Box
                         key={cell.id}
                         id={cell.id}
                         w={columnWidth}
-                        flex={flexValue}
+                        flex="0 0 auto"
                         minW={columnWidth}
                         px={1}
                         py={0.5}
