@@ -349,7 +349,7 @@ const Entities = () => {
           align={"center"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"} minW="0">
-            <Icon name={"entity"} size={"md"} />
+            <Icon name={"entity"} size={"sm"} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button

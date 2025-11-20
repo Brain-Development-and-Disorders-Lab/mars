@@ -129,8 +129,8 @@ const Projects = () => {
             mx={"1"}
             variant="outline"
             colorPalette="gray"
-            aria-label={"View Entity"}
-            onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            aria-label={"View Project"}
+            onClick={() => navigate(`/projects/${info.row.original._id}`)}
           >
             View
             <Icon name={"a_right"} />
@@ -219,7 +219,7 @@ const Projects = () => {
           align={"center"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"md"} />
+            <Icon name={"project"} size={"sm"} />
             <Heading fontWeight={"bold"} size={"md"}>
               Projects
             </Heading>
