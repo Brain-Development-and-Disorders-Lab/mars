@@ -810,16 +810,16 @@ const Values = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"blue.300"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
                 <Icon name={"add"} />
                 Add Options
               </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton
-                  size={"sm"}
+                  size={"2xs"}
+                  top={"6px"}
                   onClick={() => setSelectOpen(false)}
-                  _hover={{ bg: "gray.200" }}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>

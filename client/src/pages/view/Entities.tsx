@@ -416,15 +416,11 @@ const Entities = () => {
               p={"2"}
               fontWeight={"semibold"}
               roundedTop={"md"}
-              bg={"gray.100"}
+              bg={"blue.300"}
             >
               Export Entities
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  onClick={onExportClose}
-                  _hover={{ bg: "gray.200" }}
-                />
+                <CloseButton size={"2xs"} top={"6px"} onClick={onExportClose} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p={"1"}>

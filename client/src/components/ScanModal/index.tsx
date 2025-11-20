@@ -297,25 +297,22 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
-            px={"2"}
-            py={"4"}
+            p={"2"}
             fontWeight={"semibold"}
             roundedTop={"md"}
-            bg={"gray.100"}
+            bg={"green.300"}
           >
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Icon name={"scan"} />
-              Scan Label
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"scan"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Scan Label
+              </Text>
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton
-                size={"sm"}
-                onClick={handleOnClose}
-                _hover={{ bg: "gray.200" }}
-              />
+              <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
+          <Dialog.Body p={"1"} gap={"1"} w={"100%"} alignContent={"center"}>
             {/* Camera view */}
             <Flex justify={"center"} align={"center"}>
               <Flex
@@ -352,29 +349,30 @@ const ScanModal = (props: ScanModalProps) => {
             {/* Manual entry field */}
             <Flex
               align={"center"}
-              mt={"2"}
+              mt={"1"}
               w={"100%"}
               justify={"center"}
-              gap={"2"}
+              gap={"1"}
             >
               {!showInput && (
                 <Flex>
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"blue"}
                     onClick={handleManualInputSelect}
                   >
                     Enter Identifier
+                    <Icon name={"search"} size={"xs"} />
                   </Button>
                 </Flex>
               )}
 
               {showInput && (
-                <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+                <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
                   <Flex grow={1}>
                     <Input
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       value={manualInputValue}
                       onChange={(event) =>
@@ -385,25 +383,25 @@ const ScanModal = (props: ScanModalProps) => {
                   </Flex>
 
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"blue"}
                     loading={loading}
                     onClick={runManualSearch}
                   >
                     Find
-                    <Icon name={"search"} />
+                    <Icon name={"search"} size={"xs"} />
                   </Button>
 
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     loading={loading}
                     colorPalette={"red"}
                     onClick={() => setShowInput(false)}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                 </Flex>
               )}

@@ -1072,7 +1072,7 @@ const ValuesRemix = (props: {
             <Dialog.Backdrop />
             <Dialog.Positioner>
               <Dialog.Content>
-                <Dialog.Header p={"0"} roundedTop="md" bg="gray.100">
+                <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
                   <Flex direction="row" align="center" gap="1" p={"2"}>
                     <Icon name="v_select" />
                     <Text fontSize="xs" fontWeight="semibold">
@@ -1082,14 +1082,14 @@ const ValuesRemix = (props: {
                   <Dialog.CloseTrigger asChild>
                     <CloseButton
                       size="2xs"
+                      top={"6px"}
                       onClick={cancelSelectOptions}
-                      _hover={{ bg: "gray.200" }}
                     />
                   </Dialog.CloseTrigger>
                 </Dialog.Header>
-                <Dialog.Body p="2" gap="2" pb="1">
-                  <Flex direction="column" gap="2">
-                    <Flex direction="row" gap="2">
+                <Dialog.Body p="1" gap="1" pb="1">
+                  <Flex direction="column" gap="1">
+                    <Flex direction="row" gap="1">
                       <Input
                         size="xs"
                         rounded="md"
@@ -1139,7 +1139,11 @@ const ValuesRemix = (props: {
                               align="center"
                             >
                               <Flex gap="1">
-                                <Text fontWeight="semibold" fontSize="xs">
+                                <Text
+                                  fontWeight="semibold"
+                                  fontSize="xs"
+                                  ml={"0.5"}
+                                >
                                   Value {index + 1}:
                                 </Text>
                                 <Text fontSize="xs">{option}</Text>

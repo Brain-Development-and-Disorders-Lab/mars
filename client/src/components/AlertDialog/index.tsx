@@ -39,7 +39,7 @@ const AlertDialog = (props: AlertDialogProps) => {
             fontWeight={"semibold"}
             fontSize={"sm"}
             roundedTop={"md"}
-            bg={"orange.200"}
+            bg={"orange.300"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />

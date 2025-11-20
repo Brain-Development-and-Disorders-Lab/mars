@@ -9,7 +9,17 @@ describe("Template Page", () => {
     cy.get("#orcidLoginButton").click();
 
     cy.contains("button", "Templates").click();
-    cy.contains("td", "Test Template").siblings().contains("a", "View").click();
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains("Test Template")
+        .parents()
+        .filter((_, el) => {
+          // Find the row element (id is just a number, not containing underscore)
+          return el.id && /^\d+$/.test(el.id);
+        })
+        .first()
+        .find('button[aria-label="View Template"]')
+        .click();
+    });
   });
 
   it("renders the Template details correctly", () => {

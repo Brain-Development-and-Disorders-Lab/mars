@@ -836,7 +836,9 @@ const Entity = () => {
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
                   <Dialog.Content maxW={"100vw"} w={"fit-content"}>
-                    <Dialog.Header>Attachment Preview</Dialog.Header>
+                    <Dialog.Header bg={"blue.300"}>
+                      Attachment Preview
+                    </Dialog.Header>
                     <Dialog.Body>
                       <Flex justify={"center"} align={"center"} pb={"2"}>
                         <PreviewModal attachment={previewAttachment} />
@@ -1438,6 +1440,7 @@ const Entity = () => {
                     <Drawer.CloseTrigger asChild>
                       <CloseButton
                         size={"xs"}
+                        top={"6px"}
                         onClick={() => setHistoryOpen(false)}
                       />
                     </Drawer.CloseTrigger>
@@ -2322,7 +2325,7 @@ const Entity = () => {
                 fontWeight={"semibold"}
                 fontSize={"sm"}
                 roundedTop={"md"}
-                bg={"gray.100"}
+                bg={"blue.300"}
               >
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} />
@@ -2333,6 +2336,7 @@ const Entity = () => {
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
+                    top={"6px"}
                     onClick={() => setAddAttributesOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -2579,7 +2583,7 @@ const Entity = () => {
                   py={"2"}
                   fontWeight={"semibold"}
                   fontSize={"md"}
-                  bg={"gray.100"}
+                  bg={"blue.300"}
                   roundedTop={"md"}
                 >
                   <Flex
@@ -2596,6 +2600,7 @@ const Entity = () => {
                   <Dialog.CloseTrigger asChild>
                     <CloseButton
                       size={"2xs"}
+                      top={"6px"}
                       onClick={() => setAddProjectsOpen(false)}
                     />
                   </Dialog.CloseTrigger>
@@ -2780,7 +2785,7 @@ const Entity = () => {
               <Dialog.Header
                 p={"1"}
                 py={"2"}
-                bg={"gray.100"}
+                bg={"blue.300"}
                 roundedTop={"md"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
@@ -2794,6 +2799,7 @@ const Entity = () => {
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
+                    top={"6px"}
                     onClick={() => setAddRelationshipsOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -2975,11 +2981,13 @@ const Entity = () => {
                 mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                bg={"blue.300"}
               >
                 Export Entity
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setExportOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -3334,11 +3342,13 @@ const Entity = () => {
                 mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                bg={"blue.300"}
               >
                 Visualize: {entityName}
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setAddRelationshipsOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -3370,11 +3380,13 @@ const Entity = () => {
                 mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                bg={"blue.300"}
               >
                 Share Entity
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setShareOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -3503,11 +3515,13 @@ const Entity = () => {
                 mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                bg={"blue.300"}
               >
                 Clone Entity
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setCloneOpen(false)}
                   />
                 </Dialog.CloseTrigger>
@@ -3587,7 +3601,7 @@ const Entity = () => {
               <Dialog.Header
                 p={"2"}
                 flexShrink={0}
-                bg={"gray.100"}
+                bg={"blue.300"}
                 borderBottom={"2px"}
                 roundedTop={"md"}
               >
@@ -3612,9 +3626,9 @@ const Entity = () => {
                 </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setSaveMessageOpen(false)}
-                    _hover={{ bg: "gray.200" }}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>

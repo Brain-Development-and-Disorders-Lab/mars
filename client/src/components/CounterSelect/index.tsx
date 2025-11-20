@@ -398,11 +398,15 @@ const CounterSelect = (props: CounterProps) => {
               fontWeight={"semibold"}
               fontSize={"md"}
               roundedTop={"md"}
-              bg={"gray.100"}
+              bg={"blue.300"}
             >
               Create Counter
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"sm"} onClick={() => setOpen(false)} />
+                <CloseButton
+                  size={"2xs"}
+                  top={"6px"}
+                  onClick={() => setOpen(false)}
+                />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 

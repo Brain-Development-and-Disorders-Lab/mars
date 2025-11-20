@@ -11,7 +11,10 @@ describe("Entity, edit details", () => {
 
   it("should be able to rename the Entity", () => {
     cy.contains("button", "Entities").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Entity"]')
+      .first()
+      .click();
     cy.get("#editEntityButton").click();
 
     // Update the Entity name
@@ -27,7 +30,10 @@ describe("Entity, edit details", () => {
 
   it("should be able to update the Entity description", () => {
     cy.contains("button", "Entities").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Entity"]')
+      .first()
+      .click();
     cy.get("#editEntityButton").click();
 
     // Update the Entity name

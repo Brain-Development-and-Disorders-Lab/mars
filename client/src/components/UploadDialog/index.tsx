@@ -180,9 +180,8 @@ const UploadDialog = (props: {
               <Dialog.Header
                 p={"2"}
                 fontWeight={"semibold"}
-                fontSize={"md"}
                 roundedTop={"md"}
-                bg={"gray.100"}
+                bg={"blue.300"}
               >
                 <Flex
                   direction={"row"}
@@ -192,46 +191,50 @@ const UploadDialog = (props: {
                 >
                   <Flex
                     align={"center"}
-                    gap={"2"}
-                    p={"2"}
+                    gap={"1"}
                     border={"2px"}
                     rounded={"md"}
                   >
-                    <Icon name={"upload"} />
-                    Upload Attachment
+                    <Icon name={"upload"} size={"xs"} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Upload Attachment
+                    </Text>
                   </Flex>
                   <Dialog.CloseTrigger asChild>
                     <CloseButton
-                      size={"sm"}
+                      size={"2xs"}
+                      top={"6px"}
                       onClick={() => props.setOpen(false)}
-                      _hover={{ bg: "gray.300" }}
                     />
                   </Dialog.CloseTrigger>
                 </Flex>
               </Dialog.Header>
-              <Dialog.Body p={"2"} gap={"2"}>
-                <Flex gap={"2"} direction={"column"}>
+              <Dialog.Body p={"1"} gap={"1"}>
+                <Flex gap={"1"} direction={"column"}>
                   <Flex gap={"1"} direction={"row"} align={"center"}>
-                    <Text fontSize={"sm"}>Supported file formats:</Text>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Supported file formats:
+                    </Text>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label>PDF</Tag.Label>
+                      <Tag.Label fontSize={"xs"}>PDF</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label>JPEG</Tag.Label>
+                      <Tag.Label fontSize={"xs"}>JPEG</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label>PNG</Tag.Label>
+                      <Tag.Label fontSize={"xs"}>PNG</Tag.Label>
                     </Tag.Root>
                     <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label>DNA</Tag.Label>
+                      <Tag.Label fontSize={"xs"}>DNA</Tag.Label>
                     </Tag.Root>
                   </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>
                     <Fieldset.Root>
-                      <Fieldset.Content>
+                      <Fieldset.Content h={"100%"} w={"100%"}>
                         <Flex
                           direction={"column"}
                           minH={"50vh"}
+                          h={"100%"}
                           w={"100%"}
                           align={"center"}
                           justify={"center"}
@@ -328,10 +331,10 @@ const UploadDialog = (props: {
                   </Flex>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"red"}
                     variant={"solid"}
@@ -341,10 +344,10 @@ const UploadDialog = (props: {
                     }}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
                     variant={"solid"}
@@ -353,7 +356,7 @@ const UploadDialog = (props: {
                     loading={loading}
                   >
                     Upload
-                    <Icon name={"upload"} />
+                    <Icon name={"upload"} size={"xs"} />
                   </Button>
                 </Flex>
               </Dialog.Footer>

@@ -1017,41 +1017,42 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header
-                px={"2"}
-                py={"4"}
+                p={"2"}
                 fontWeight={"semibold"}
                 roundedTop={"md"}
-                bg={"gray.100"}
+                bg={"blue.300"}
               >
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"entity"} size={"sm"} />
-                  Entities
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"entity"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Entities
+                  </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setInformationOpen(false)}
-                    _hover={{ bg: "gray.200" }}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Heading size={"sm"}>1. Start</Heading>
-                  <Text>
+              <Dialog.Body p={"1"} px={"2"} gap={"1"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Heading size={"xs"}>1. Start</Heading>
+                  <Text fontSize={"xs"}>
                     Specify some basic details about this Entity. Relations
                     between Entities and membership to Projects can be specified
                     on the following page. Finally, the metadata associated with
                     this Entity should be specified using Attributes and
                     corresponding Values.
                   </Text>
-                  <Heading size={"sm"}>2. Relationships</Heading>
-                  <Text>
+                  <Heading size={"xs"}>2. Relationships</Heading>
+                  <Text fontSize={"xs"}>
                     Relations between Entities and membership to Projects can be
                     specified using Relationships.
                   </Text>
-                  <Heading size={"sm"}>3. Attributes</Heading>
-                  <Text>
+                  <Heading size={"xs"}>3. Attributes</Heading>
+                  <Text fontSize={"xs"}>
                     The metadata associated with this Entity should be specified
                     using Attributes and corresponding Values.
                   </Text>

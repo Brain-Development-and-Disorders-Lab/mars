@@ -11,10 +11,17 @@ describe("Entity, edit Attributes", () => {
 
   it("should be able to add and edit Attributes", () => {
     cy.contains("button", "Entities").click();
-    cy.contains("td", "Test Child Entity")
-      .siblings()
-      .contains("a", "View")
-      .click();
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains("Test Child Entity")
+        .parents()
+        .filter((_, el) => {
+          // Find the row element (id is just a number, not containing underscore)
+          return el.id && /^\d+$/.test(el.id);
+        })
+        .first()
+        .find('button[aria-label="View Entity"]')
+        .click();
+    });
     cy.contains("No Attributes").should("exist");
     cy.get("#editEntityButton").click();
 
@@ -40,7 +47,7 @@ describe("Entity, edit Attributes", () => {
     cy.get("#editEntityButton").click();
 
     // Delete the Attribute
-    cy.get('button[aria-label="Delete attribute"]').click();
+    cy.get('button[aria-label="Delete Attribute"]').click();
     cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 

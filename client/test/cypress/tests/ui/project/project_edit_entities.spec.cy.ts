@@ -11,7 +11,10 @@ describe("Project, edit Entities", () => {
 
   it("should be able to add an Entity", () => {
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Add an Entity
@@ -23,14 +26,17 @@ describe("Project, edit Entities", () => {
     cy.contains("button", "Done").click();
 
     // Validate the Entity was added
-    cy.get("table").eq(0).contains("Test Entity");
+    cy.get(".data-table-scroll-container").contains("Test Entity");
     cy.reload();
-    cy.get("table").eq(0).contains("Test Entity");
+    cy.get(".data-table-scroll-container").contains("Test Entity");
   });
 
   it("should be able to remove an Entity", () => {
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Add an Entity
@@ -44,19 +50,32 @@ describe("Project, edit Entities", () => {
 
     // Remove the Entity
     cy.get("#editProjectButton").click();
-    cy.get("tr > td > div > button").click();
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains("Test Entity")
+        .parents()
+        .filter((_, el) => {
+          // Find the row element (id is just a number, not containing underscore)
+          return el.id && /^\d+$/.test(el.id);
+        })
+        .first()
+        .find('button[aria-label="Remove entity"]')
+        .click();
+    });
     cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
     // Validate the Entity was removed
-    cy.contains("table").should("not.exist");
+    cy.get(".data-table-scroll-container").should("not.exist");
     cy.reload();
-    cy.contains("table").should("not.exist");
+    cy.get(".data-table-scroll-container").should("not.exist");
   });
 
   it("should be updated after removing the Project via the Entity", () => {
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Add an Entity
@@ -69,18 +88,41 @@ describe("Project, edit Entities", () => {
     cy.reload();
 
     // Remove the the Entity
-    cy.get("tr > td > div > div > a").eq(0).click();
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains("Test Entity")
+        .parents()
+        .filter((_, el) => {
+          // Find the row element (id is just a number, not containing underscore)
+          return el.id && /^\d+$/.test(el.id);
+        })
+        .first()
+        .find('button[aria-label="View Entity"]')
+        .click();
+    });
     cy.get("#editEntityButton").click();
-    cy.get("tr > td > div > button").eq(0).click();
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains("Test Project")
+        .parents()
+        .filter((_, el) => {
+          // Find the row element (id is just a number, not containing underscore)
+          return el.id && /^\d+$/.test(el.id);
+        })
+        .first()
+        .find('button[aria-label="Remove Project"]')
+        .click();
+    });
     cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
     // Navigate to the Project
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Validate the Entity was removed
-    cy.contains("table").should("not.exist");
+    cy.get(".data-table-scroll-container").should("not.exist");
   });
 });

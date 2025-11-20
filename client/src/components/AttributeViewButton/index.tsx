@@ -70,11 +70,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
             maxH={"90vh"}
             display={"flex"}
             flexDirection={"column"}
+            p={"0"}
           >
             <Dialog.Header
-              p={"2"}
+              p={"1"}
               flexShrink={0}
-              bg={"gray.100"}
+              bg={"blue.300"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
@@ -86,64 +87,58 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               >
                 <Flex
                   align={"center"}
-                  gap={"2"}
-                  p={"2"}
+                  gap={"1"}
+                  p={"1"}
                   border={"2px"}
                   rounded={"md"}
                 >
-                  <Icon name={"template"} />
-                  <Text fontSize={"md"} fontWeight={"semibold"}>
+                  <Icon name={"template"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
                     {props.attribute.name}
                   </Text>
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton
-                  size={"sm"}
+                  size={"2xs"}
+                  top={"6px"}
                   onClick={() => setOpen(false)}
-                  _hover={{ bg: "gray.200" }}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
             <Dialog.Body p={"0"} flex={"1"} overflow={"auto"}>
-              <Flex direction={"column"} p={"2"} gap={"2"}>
-                <Flex
-                  gap={"2"}
-                  p={"0"}
-                  rounded={"md"}
-                  direction={"row"}
-                  wrap={"wrap"}
-                >
+              <Flex direction={"column"} p={"1"} gap={"1"}>
+                <Flex gap={"1"} rounded={"md"} direction={"row"} wrap={"wrap"}>
                   <Flex
                     direction={"column"}
                     h={"fit-content"}
-                    gap={"2"}
+                    gap={"1"}
                     w={{ base: "100%", md: "50%" }}
-                    p={"2"}
+                    p={"1"}
                     border={"1px solid"}
                     borderColor={"gray.300"}
                     rounded={"md"}
                   >
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Name
                     </Text>
                     <Input
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       value={name}
                       onChange={(event) => setName(event.target.value)}
                       readOnly={!isEditing}
                     />
                     <Flex direction={"column"} gap={"1"}>
-                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                      <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                         Owner
                       </Text>
                       <Flex>
                         <ActorTag
                           orcid={props.attribute.owner}
                           fallback={"Unknown User"}
-                          size={"md"}
+                          size={"sm"}
                         />
                       </Flex>
                     </Flex>
@@ -151,14 +146,14 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
                   <Flex
                     direction={"column"}
-                    gap={"2"}
+                    gap={"1"}
                     grow={"1"}
-                    p={"2"}
+                    p={"1"}
                     border={"1px solid"}
                     borderColor={"gray.300"}
                     rounded={"md"}
                   >
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Description
                     </Text>
                     <MDEditor
@@ -178,15 +173,14 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
                 <Flex
                   direction={"column"}
-                  gap={"2"}
-                  p={"2"}
+                  gap={"1"}
                   grow={"1"}
                   h={"fit-content"}
                   bg={"white"}
                 >
                   <Flex
                     direction={"column"}
-                    gap={"2"}
+                    gap={"1"}
                     align={"center"}
                     justify={"center"}
                     minH={values.length > 0 ? "fit-content" : "200px"}
@@ -213,7 +207,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
             {isEditing && (
               <Dialog.Footer
-                p={"2"}
+                p={"1"}
                 flexShrink={0}
                 bg={"gray.100"}
                 roundedBottom={"md"}
@@ -228,7 +222,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 >
                   <Button
                     colorPalette={"red"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     variant={"solid"}
                     onClick={() => {
@@ -245,12 +239,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     }}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
 
                   <Button
                     colorPalette={"green"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     onClick={() => {
                       // Close the modal
@@ -272,7 +266,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     }}
                   >
                     Done
-                    <Icon name={"check"} />
+                    <Icon name={"check"} size={"xs"} />
                   </Button>
                 </Flex>
               </Dialog.Footer>

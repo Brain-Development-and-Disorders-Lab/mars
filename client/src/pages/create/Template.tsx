@@ -288,6 +288,7 @@ const Template = () => {
               mt={"2"}
               fontWeight={"semibold"}
               fontSize={"md"}
+              bg={"green.300"}
             >
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"project"} size={"sm"} />

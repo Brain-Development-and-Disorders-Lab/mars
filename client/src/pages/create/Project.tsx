@@ -447,16 +447,16 @@ const Project = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
+            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"blue.300"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
                 <Icon name={"add"} />
                 Add Entity
               </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton
-                  size={"sm"}
+                  size={"2xs"}
+                  top={"6px"}
                   onClick={() => setEntitiesOpen(false)}
-                  _hover={{ bg: "gray.200" }}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
@@ -535,6 +535,7 @@ const Project = () => {
               mt={"2"}
               fontWeight={"semibold"}
               fontSize={"md"}
+              bg={"green.300"}
             >
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"project"} size={"sm"} />
