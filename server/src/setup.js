@@ -19,3 +19,24 @@ db.createCollection("projects");
 db.createCollection("users");
 db.createCollection("workspaces");
 db.createCollection("counters");
+
+// Step 3: Setup "storage" database for GridFS attachments
+// Switch to the storage database
+db = db.getSiblingDB("storage");
+
+// Create a user for the storage database
+db.createUser({
+  user: "client",
+  pwd: "metadataclient",
+  roles: [
+    {
+      role: "readWrite",
+      db: "storage",
+    },
+  ],
+});
+
+// Create a placeholder collection to ensure the database exists
+// GridFS buckets are created automatically when first used
+db.createCollection("attachments.files");
+db.createCollection("attachments.chunks");
