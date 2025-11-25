@@ -44,38 +44,38 @@ const AttributeCard = (props: AttributeCardProps) => {
   return (
     <Flex
       direction={"column"}
-      gap={"2"}
+      gap={"1"}
       border={"1px solid"}
       borderColor={"gray.300"}
       rounded={"md"}
-      p={"2"}
+      p={"1"}
     >
       <Flex
         w={"100%"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
-        gap={"2"}
+        gap={"1"}
       >
-        <Flex direction={"row"} gap={"2"} align={"center"}>
+        <Flex direction={"row"} gap={"1"} align={"center"}>
           <Flex
             align={"center"}
-            gap={"2"}
-            p={"2"}
+            gap={"1"}
+            p={"1"}
             border={"2px solid"}
             rounded={"md"}
             w={"fit-content"}
           >
-            <Icon name={"template"} size={"sm"} />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
+            <Icon name={"template"} size={"xs"} />
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
               Attribute{name !== "" ? `: ${name}` : ""}
             </Text>
           </Flex>
         </Flex>
 
-        <Flex gap={"2"}>
+        <Flex gap={"1"}>
           <Button
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"red"}
             onClick={() => {
@@ -85,10 +85,10 @@ const AttributeCard = (props: AttributeCardProps) => {
             }}
           >
             Remove
-            <Icon name={"delete"} />
+            <Icon name={"delete"} size={"xs"} />
           </Button>
           <Button
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"green"}
             onClick={() => {
@@ -100,38 +100,43 @@ const AttributeCard = (props: AttributeCardProps) => {
             disabled={finished || !validAttributes}
           >
             Save
-            <Icon name={"check"} />
+            <Icon name={"save"} size={"xs"} />
           </Button>
         </Flex>
       </Flex>
-      <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+      <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
         {/* Attribute name */}
         <Flex
           direction={"column"}
-          p={"2"}
+          p={"1"}
           h={"fit-content"}
           w={{ base: "100%", md: "50%" }}
-          gap={"2"}
+          gap={"1"}
           rounded={"md"}
           border={"1px solid"}
           borderColor={"gray.300"}
         >
-          <Flex direction={"row"} gap={"2"}>
+          <Flex direction={"row"} gap={"1"}>
             <Flex grow={"1"}>
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required>
-                    <Field.Label>
+                    <Field.Label
+                      fontWeight={"semibold"}
+                      fontSize={"xs"}
+                      ml={"0.5"}
+                    >
                       Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       bg={"white"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       placeholder={"Name"}
                       value={name}
                       onChange={(event) => setName(event.target.value)}
+                      disabled={finished}
                     />
                   </Field.Root>
                 </Fieldset.Content>
@@ -140,16 +145,16 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Flex>
 
           {/* "Owner" field */}
-          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             <Flex direction={"column"} gap={"1"}>
-              <Text fontWeight={"semibold"} fontSize={"sm"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                 Owner
               </Text>
               <Flex>
                 <ActorTag
                   orcid={attributeCardData.owner}
                   fallback={"Unknown User"}
-                  size={"md"}
+                  size={"sm"}
                 />
               </Flex>
             </Flex>
@@ -159,9 +164,9 @@ const AttributeCard = (props: AttributeCardProps) => {
         {/* Attribute description */}
         <Flex
           direction={"row"}
-          p={"2"}
+          p={"1"}
           h={"fit-content"}
-          gap={"2"}
+          gap={"1"}
           border={"1px solid"}
           borderColor={"gray.300"}
           rounded={"md"}
@@ -169,15 +174,17 @@ const AttributeCard = (props: AttributeCardProps) => {
         >
           <Fieldset.Root>
             <Fieldset.Content>
-              <Field.Root>
-                <Field.Label>Description</Field.Label>
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} ml={"0.5"}>
+                  Description
+                </Field.Label>
                 <MDEditor
                   height={150}
                   minHeight={100}
                   maxHeight={400}
                   style={{ width: "100%" }}
                   value={description}
-                  preview={"edit"}
+                  preview={finished ? "preview" : "edit"}
                   extraCommands={[]}
                   onChange={(value) => {
                     setDescription(value || "");
