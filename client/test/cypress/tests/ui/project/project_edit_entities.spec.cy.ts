@@ -55,7 +55,7 @@ describe("Project, edit Entities", () => {
         .parents()
         .filter((_, el) => {
           // Find the row element (id is just a number, not containing underscore)
-          return el.id && /^\d+$/.test(el.id);
+          return !!(el.id && /^\d+$/.test(el.id));
         })
         .first()
         .find('button[aria-label="Remove entity"]')
@@ -93,7 +93,7 @@ describe("Project, edit Entities", () => {
         .parents()
         .filter((_, el) => {
           // Find the row element (id is just a number, not containing underscore)
-          return el.id && /^\d+$/.test(el.id);
+          return !!(el.id && /^\d+$/.test(el.id));
         })
         .first()
         .find('button[aria-label="View Entity"]')
@@ -105,7 +105,7 @@ describe("Project, edit Entities", () => {
         .parents()
         .filter((_, el) => {
           // Find the row element (id is just a number, not containing underscore)
-          return el.id && /^\d+$/.test(el.id);
+          return !!(el.id && /^\d+$/.test(el.id));
         })
         .first()
         .find('button[aria-label="Remove Project"]')

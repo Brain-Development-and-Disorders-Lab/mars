@@ -14,7 +14,7 @@ describe("Template Page", () => {
         .parents()
         .filter((_, el) => {
           // Find the row element (id is just a number, not containing underscore)
-          return el.id && /^\d+$/.test(el.id);
+          return !!(el.id && /^\d+$/.test(el.id));
         })
         .first()
         .find('button[aria-label="View Template"]')

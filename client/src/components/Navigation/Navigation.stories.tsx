@@ -47,10 +47,10 @@ const meta: Meta<typeof Navigation> = {
         { client: mockPostHog },
         React.createElement(
           AuthenticationProvider,
-          {},
+          null,
           React.createElement(
             WorkspaceProvider,
-            {},
+            null,
             React.createElement(
               Flex,
               { direction: "row", w: "100%", h: "100vh", p: 0, m: 0 },
