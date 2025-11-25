@@ -34,6 +34,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
       maxH={{ base: "100%" }}
       overflowY={"auto"}
       overflowX={"hidden"}
+      p={"1.5"}
     >
       {/* Toast notification provider */}
       <Toaster />

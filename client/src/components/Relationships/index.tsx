@@ -81,20 +81,27 @@ const Relationships = (props: RelationshipsProps) => {
               disabled={info.getValue().name.length < 20}
               showArrow
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue().name, { length: 20 })}
-              </Text>
-              <Button
-                size="2xs"
-                mx={"1"}
-                variant="subtle"
-                colorPalette="gray"
-                aria-label={"View Source Entity"}
-                onClick={() => navigate(`/entities/${info.getValue()._id}`)}
+              <Flex
+                align={"center"}
+                gap={"1"}
+                w={"100%"}
+                justify={"space-between"}
               >
-                View
-                <Icon name={"a_right"} size={"xs"} />
-              </Button>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue().name, { length: 20 })}
+                </Text>
+                <Button
+                  size="2xs"
+                  mx={"1"}
+                  variant="subtle"
+                  colorPalette="gray"
+                  aria-label={"View Source Entity"}
+                  onClick={() => navigate(`/entities/${info.getValue()._id}`)}
+                >
+                  View
+                  <Icon name={"a_right"} size={"xs"} />
+                </Button>
+              </Flex>
             </Tooltip>
           </Flex>
         );
