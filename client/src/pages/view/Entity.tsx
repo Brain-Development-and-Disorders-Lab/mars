@@ -2168,7 +2168,7 @@ const Entity = () => {
           </Flex>
 
           {/* "Relationships" and "Attachments" fields */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
             {/* Relationships */}
             <Flex
               direction={"column"}

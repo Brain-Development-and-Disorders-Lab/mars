@@ -5,7 +5,6 @@ import {
   Field,
   Fieldset,
   Flex,
-  IconButton,
   Input,
   Separator,
   Spacer,
@@ -34,8 +33,8 @@ const Collaborators = (props: CollaboratorsProps) => {
   return (
     <Flex
       direction={"column"}
-      gap={"2"}
-      p={"2"}
+      gap={"1"}
+      p={"1"}
       h={"fit-content"}
       rounded={"md"}
       border={"1px solid"}
@@ -43,8 +42,8 @@ const Collaborators = (props: CollaboratorsProps) => {
       grow={"1"}
     >
       {/* Collaborators display */}
-      <Flex direction={"column"} gap={"2"}>
-        <Text fontSize={"sm"} fontWeight={"bold"}>
+      <Flex direction={"column"} gap={"1"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"}>
           Collaborators
         </Text>
         <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -53,7 +52,7 @@ const Collaborators = (props: CollaboratorsProps) => {
               <Field.Root invalid={newCollaborator !== "" && !validOrcid}>
                 <Input
                   placeholder={"ORCiD"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   value={newCollaborator}
                   onChange={(e) => setNewCollaborator(e.target.value)}
@@ -65,7 +64,7 @@ const Collaborators = (props: CollaboratorsProps) => {
           <Spacer />
           <Button
             colorPalette={"green"}
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             disabled={!props.editing || !validOrcid}
             onClick={() => {
@@ -83,12 +82,12 @@ const Collaborators = (props: CollaboratorsProps) => {
             }}
           >
             Add
-            <Icon name={"add"} />
+            <Icon name={"add"} size={"xs"} />
           </Button>
         </Flex>
         <Flex
           w={"100%"}
-          py={"2"}
+          py={"1"}
           px={"0"}
           justify={"center"}
           align={"center"}
@@ -107,7 +106,7 @@ const Collaborators = (props: CollaboratorsProps) => {
             </EmptyState.Root>
           ) : (
             <Stack
-              gap={"2"}
+              gap={"1"}
               separator={<Separator variant={"solid"} />}
               w={"100%"}
             >
@@ -125,14 +124,15 @@ const Collaborators = (props: CollaboratorsProps) => {
                       size={"sm"}
                     />
                     <Tag.Root colorPalette={"green"}>
-                      <Tag.Label>{collaborator}</Tag.Label>
+                      <Tag.Label fontSize={"xs"}>Collaborator</Tag.Label>
                     </Tag.Root>
                   </Flex>
                   {props.editing && (
-                    <IconButton
-                      size={"sm"}
+                    <Button
+                      size={"2xs"}
                       colorPalette={"red"}
                       rounded={"md"}
+                      variant={"subtle"}
                       aria-label="Remove collaborator"
                       onClick={() =>
                         props.setProjectCollaborators((collaborators) =>
@@ -140,8 +140,9 @@ const Collaborators = (props: CollaboratorsProps) => {
                         )
                       }
                     >
-                      <Icon name="delete" />
-                    </IconButton>
+                      Remove
+                      <Icon name="delete" size={"xs"} />
+                    </Button>
                   )}
                 </Flex>
               ))}

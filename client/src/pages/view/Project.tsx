@@ -1179,9 +1179,9 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"1"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
           {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"1"} p={"1"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Overview */}
             <Flex
               direction={"column"}
@@ -1270,7 +1270,7 @@ const Project = () => {
           </Flex>
 
           {/* "Entities" and "Collaborators" */}
-          <Flex direction={"row"} gap={"1"} p={"1"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Entities */}
             <Flex
               direction={"column"}
