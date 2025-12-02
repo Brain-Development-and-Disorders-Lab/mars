@@ -282,7 +282,7 @@ const customSortingFn = (
   return 0;
 };
 
-const DataTableRemix = (props: DataTableProps) => {
+const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
   const [pageLength, setPageLength] = useState<string[]>(["20"]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -1228,4 +1228,4 @@ const DataTableRemix = (props: DataTableProps) => {
   );
 };
 
-export default DataTableRemix;
+export default DataTable;

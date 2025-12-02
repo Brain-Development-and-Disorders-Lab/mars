@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import ValuesRemix from "@components/ValuesRemix";
+import Values from "@components/Values";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
@@ -267,7 +267,7 @@ const Template = () => {
         </Flex>
 
         <Flex w={"100%"} p={"1"} gap={"1"} direction={"column"}>
-          <ValuesRemix
+          <Values
             viewOnly={false}
             values={values}
             setValues={setValues}

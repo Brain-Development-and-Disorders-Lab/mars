@@ -35,10 +35,10 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 /**
- * ValuesRemix component - A spreadsheet-like interface for editing key-value data
+ * Values component - A spreadsheet-like interface for editing key-value data
  * Features a compact, spreadsheet-like layout with type selection, name, and value columns
  */
-const ValuesRemix = (props: {
+const Values = (props: {
   viewOnly?: boolean;
   values: IValue<GenericValueType>[];
   setValues: (value: React.SetStateAction<IValue<GenericValueType>[]>) => void;
@@ -1341,4 +1341,4 @@ const ValuesRemix = (props: {
   );
 };
 
-export default ValuesRemix;
+export default Values;

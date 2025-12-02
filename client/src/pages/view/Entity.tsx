@@ -31,12 +31,12 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
-import ValuesRemix from "@components/ValuesRemix";
+import Values from "@components/Values";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
@@ -2083,7 +2083,7 @@ const Entity = () => {
                     </EmptyState.Content>
                   </EmptyState.Root>
                 ) : (
-                  <DataTableRemix
+                  <DataTable
                     data={entityProjects}
                     columns={projectsTableColumns}
                     visibleColumns={{}}
@@ -2153,7 +2153,7 @@ const Entity = () => {
                     </EmptyState.Content>
                   </EmptyState.Root>
                 ) : (
-                  <DataTableRemix
+                  <DataTable
                     data={entityAttributes}
                     columns={attributeTableColumns}
                     visibleColumns={visibleAttributeTableColumns}
@@ -2290,7 +2290,7 @@ const Entity = () => {
                       </EmptyState.Content>
                     </EmptyState.Root>
                   ) : (
-                    <DataTableRemix
+                    <DataTable
                       data={entityAttachments}
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
@@ -2496,7 +2496,7 @@ const Entity = () => {
                       <Fieldset.Root invalid={isAttributeValueError}>
                         <Fieldset.Content>
                           <Field.Root required>
-                            <ValuesRemix
+                            <Values
                               viewOnly={false}
                               values={attributeValues}
                               setValues={setAttributeValues}

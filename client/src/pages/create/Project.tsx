@@ -19,7 +19,7 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import ActorTag from "@components/ActorTag";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import { UnsavedChangesModal } from "@components/WarningModal";
@@ -366,7 +366,7 @@ const Project = () => {
               minH={entities.length > 0 ? "fit-content" : "200px"}
             >
               {entities && entities.length > 0 ? (
-                <DataTableRemix
+                <DataTable
                   data={entities}
                   columns={entitiesColumns}
                   visibleColumns={{}}

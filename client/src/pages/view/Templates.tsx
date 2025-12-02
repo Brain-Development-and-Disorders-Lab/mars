@@ -12,7 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -238,7 +238,7 @@ const Templates = () => {
             Templates using the column headers.
           </Text>
           {templates.length > 0 ? (
-            <DataTableRemix
+            <DataTable
               columns={columns}
               data={templates}
               visibleColumns={visibleColumns}

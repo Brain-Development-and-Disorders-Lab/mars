@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
@@ -673,7 +673,7 @@ const Dashboard = () => {
               {/* Projects table */}
               {/* Condition: Loaded and content present */}
               {!loading && projectData.length > 0 && (
-                <DataTableRemix
+                <DataTable
                   columns={projectTableColumns}
                   data={projectTableData}
                   visibleColumns={visibleColumns}
@@ -730,7 +730,7 @@ const Dashboard = () => {
               {/* Entities table */}
               {/* Condition: Loaded and content present */}
               {!loading && entityData.length > 0 && (
-                <DataTableRemix
+                <DataTable
                   columns={entityTableColumns}
                   data={entityTableData.filter(
                     (entity) =>

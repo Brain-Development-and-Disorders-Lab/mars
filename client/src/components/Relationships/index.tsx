@@ -1,6 +1,6 @@
 import React from "react";
 import { Flex, Text, Tag, Button } from "@chakra-ui/react";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -182,7 +182,7 @@ const Relationships = (props: RelationshipsProps) => {
 
   return (
     <Flex w={"100%"}>
-      <DataTableRemix
+      <DataTable
         data={props.relationships}
         setData={props.setRelationships}
         columns={relationshipTableColumns}

@@ -22,7 +22,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import Attribute from "@components/AttributeCard";
 import CounterSelect from "@components/CounterSelect";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -1768,7 +1768,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  <DataTableRemix
+                  <DataTable
                     columns={reviewTableColumns}
                     data={reviewEntities}
                     visibleColumns={{}}
@@ -1888,7 +1888,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  <DataTableRemix
+                  <DataTable
                     columns={templateReviewTableColumns}
                     data={reviewTemplates}
                     visibleColumns={{}}

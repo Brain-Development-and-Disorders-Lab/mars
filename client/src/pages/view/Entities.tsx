@@ -23,7 +23,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -371,7 +371,7 @@ const Entities = () => {
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">
-              <DataTableRemix
+              <DataTable
                 columns={columns}
                 data={entityData.filter((entity) =>
                   _.isEqual(entity.archived, false),
@@ -491,7 +491,7 @@ const Entities = () => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  <DataTableRemix
+                  <DataTable
                     columns={exportTableColumns}
                     data={toExport}
                     visibleColumns={exportTableVisibleColumns}

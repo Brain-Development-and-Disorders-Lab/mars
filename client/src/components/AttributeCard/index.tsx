@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
-import ValuesRemix from "@components/ValuesRemix";
+import Values from "@components/Values";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -225,7 +225,7 @@ const AttributeCard = (props: AttributeCardProps) => {
 
             {attributeCardData.restrictDataValues ? (
               // Restrict the data to options from a drop-down
-              <ValuesRemix
+              <Values
                 viewOnly={finished}
                 values={values}
                 setValues={setValues}
@@ -233,7 +233,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 requireData
               />
             ) : (
-              <ValuesRemix
+              <Values
                 viewOnly={finished}
                 values={values}
                 setValues={setValues}

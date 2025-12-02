@@ -15,7 +15,7 @@ import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
 import Icon from "@components/Icon";
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -972,7 +972,7 @@ const Workspace = () => {
               minH={shownEntities.length > 0 ? "fit-content" : "200px"}
             >
               {shownEntities.length > 0 ? (
-                <DataTableRemix
+                <DataTable
                   data={shownEntities}
                   columns={entitiesTableColumns}
                   visibleColumns={{}}
@@ -1034,7 +1034,7 @@ const Workspace = () => {
               minH={shownProjects.length > 0 ? "fit-content" : "200px"}
             >
               {shownProjects.length > 0 ? (
-                <DataTableRemix
+                <DataTable
                   data={shownProjects}
                   columns={projectsTableColumns}
                   visibleColumns={{}}
@@ -1094,7 +1094,7 @@ const Workspace = () => {
               minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
             >
               {shownTemplates.length > 0 ? (
-                <DataTableRemix
+                <DataTable
                   data={shownTemplates}
                   columns={templatesTableColumns}
                   visibleColumns={{}}
@@ -1145,7 +1145,7 @@ const Workspace = () => {
               minH={counters.length > 0 ? "fit-content" : "200px"}
             >
               {counters.length > 0 ? (
-                <DataTableRemix
+                <DataTable
                   data={counters}
                   columns={countersTableColumns}
                   visibleColumns={{}}

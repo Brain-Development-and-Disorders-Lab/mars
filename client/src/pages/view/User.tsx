@@ -17,7 +17,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 
 // Custom types
@@ -727,7 +727,7 @@ const User = () => {
                 minH={userWorkspaces.length > 0 ? "fit-content" : "200px"}
               >
                 {userWorkspaces.length > 0 ? (
-                  <DataTableRemix
+                  <DataTable
                     data={userWorkspaces}
                     columns={workspacesTableColumns}
                     visibleColumns={{}}
@@ -788,7 +788,7 @@ const User = () => {
                   </Button>
                 </Flex>
                 {userKeys.length > 0 ? (
-                  <DataTableRemix
+                  <DataTable
                     columns={apiKeysTableColumns}
                     data={userKeys}
                     visibleColumns={{}}

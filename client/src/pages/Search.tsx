@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -881,7 +881,7 @@ const Search = () => {
                     {results.length} result
                     {results.length > 1 ? "s" : ""}
                   </Heading>
-                  <DataTableRemix
+                  <DataTable
                     columns={searchResultColumns}
                     visibleColumns={visibleColumns}
                     selectedRows={{}}

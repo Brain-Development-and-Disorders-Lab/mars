@@ -32,7 +32,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
@@ -1313,7 +1313,7 @@ const Project = () => {
                 minH={projectEntities.length > 0 ? "fit-content" : "200px"}
               >
                 {projectEntities && projectEntities.length > 0 ? (
-                  <DataTableRemix
+                  <DataTable
                     data={projectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
