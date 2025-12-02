@@ -969,7 +969,7 @@ const Entity = () => {
                                     (template: ISelectOption) => (
                                       <Select.Item
                                         item={template}
-                                        key={template._id}
+                                        key={template.value}
                                         fontSize={"xs"}
                                       >
                                         {template.label}

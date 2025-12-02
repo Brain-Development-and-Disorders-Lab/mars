@@ -58,7 +58,7 @@ describe("Project, edit Entities", () => {
           return !!(el.id && /^\d+$/.test(el.id));
         })
         .first()
-        .find('button[aria-label="Remove entity"]')
+        .find('button[aria-label="Remove Entity"]')
         .click();
     });
     cy.contains("button", "Save").click();
@@ -87,30 +87,35 @@ describe("Project, edit Entities", () => {
     cy.contains("button", "Done").click();
     cy.reload();
 
-    // Remove the the Entity
-    cy.get(".data-table-scroll-container").within(() => {
-      cy.contains("Test Entity")
-        .parents()
-        .filter((_, el) => {
-          // Find the row element (id is just a number, not containing underscore)
-          return !!(el.id && /^\d+$/.test(el.id));
-        })
-        .first()
-        .find('button[aria-label="View Entity"]')
-        .click();
-    });
+    // Remove the Entity
+    cy.get(".data-table-scroll-container")
+      .first()
+      .within(() => {
+        cy.contains("Test Entity")
+          .parents()
+          .filter((_, el) => {
+            // Find the row element (id is just a number, not containing underscore)
+            return !!(el.id && /^\d+$/.test(el.id));
+          })
+          .first()
+          .find('button[aria-label="View Entity"]')
+          .last()
+          .click();
+      });
     cy.get("#editEntityButton").click();
-    cy.get(".data-table-scroll-container").within(() => {
-      cy.contains("Test Project")
-        .parents()
-        .filter((_, el) => {
-          // Find the row element (id is just a number, not containing underscore)
-          return !!(el.id && /^\d+$/.test(el.id));
-        })
-        .first()
-        .find('button[aria-label="Remove Project"]')
-        .click();
-    });
+    cy.get(".data-table-scroll-container")
+      .first()
+      .within(() => {
+        cy.contains("My First Project")
+          .parents()
+          .filter((_, el) => {
+            // Find the row element (id is just a number, not containing underscore)
+            return !!(el.id && /^\d+$/.test(el.id));
+          })
+          .first()
+          .find('button[aria-label="Remove Project"]')
+          .click();
+      });
     cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
