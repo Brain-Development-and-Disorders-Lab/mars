@@ -82,16 +82,23 @@ describe("Create Entities", () => {
     // Click on "Continue" to go to the Attributes step
     cy.get("button").contains("Continue").click();
 
+    // Wait for templates to be loaded and select to be enabled
+    cy.get("[data-testid='select-template-trigger']").should("not.be.disabled");
+
     // Add an Attribute
     cy.get("[data-testid='select-template-trigger']").click();
-    cy.get(".chakra-select__content").contains("Test Template").click();
 
-    // Check if the Attribute is displayed
-    cy.get("[data-testid='create-entity-attributes']").should("exist");
+    // Wait for dropdown to be visible and select the template
+    cy.contains('[role="option"]', "Test Template")
+      .should("be.visible")
+      .click();
+
+    // Check if the Attribute is displayed (wait for it to be visible)
+    cy.get("[data-testid='create-entity-attributes']").should("be.visible");
 
     // Save the Attribute and finish creating the Entity
-    cy.get("button").contains("Save").click();
-    cy.get("button").contains("Finish").click();
+    cy.get("button").contains("Save").should("be.visible").click();
+    cy.get("button").contains("Finish").should("be.visible").click();
 
     // Check redirection
     cy.url().should("include", "/entities"); // Check if redirected to Entities page

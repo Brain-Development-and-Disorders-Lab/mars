@@ -78,6 +78,7 @@ const ActorTag = (props: ActorTagProps) => {
       borderColor={"gray.300"}
       bg={"white"}
       minW={"120px"}
+      maxW={props.size === "sm" ? "180px" : "200px"}
       h={"54px"}
     >
       <Avatar.Root

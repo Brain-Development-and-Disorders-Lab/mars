@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -14,7 +14,6 @@ import {
   Flex,
   Heading,
   Input,
-  ListCollection,
   Portal,
   Select,
   Spacer,
@@ -40,13 +39,14 @@ import {
   AttributeModel,
   AttributeCardProps,
   IGenericItem,
+  ISelectOption,
   ResponseData,
   IRelationship,
   RelationshipType,
 } from "@types";
 
 // Utility functions and libraries
-import { isValidAttributes } from "src/util";
+import { isValidAttributes, createSelectOptions } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -98,10 +98,16 @@ const Entity = () => {
   // Projects
   const [projects, setProjects] = useState([] as IGenericItem[]);
 
-  // Templates collection
-  const [templatesCollection, setTemplatesCollection] = useState(
-    {} as ListCollection<AttributeModel>,
-  );
+  // Templates
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
+
+  // Templates collection for Select component
+  const templatesCollection = useMemo(() => {
+    const items = createSelectOptions<AttributeModel>(templates, "_id", "name");
+    return createListCollection<ISelectOption>({
+      items: items || [],
+    });
+  }, [templates]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -128,6 +134,11 @@ const Entity = () => {
 
   const [selectedAttributes, setSelectedAttributes] = useState(
     [] as AttributeModel[],
+  );
+
+  // Selected template value for the Select component
+  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>(
+    [],
   );
 
   // Various validation error states
@@ -216,9 +227,7 @@ const Entity = () => {
       setProjects(data.projects);
     }
     if (data?.templates) {
-      setTemplatesCollection(
-        createListCollection<AttributeModel>({ items: data.templates }),
-      );
+      setTemplates(data.templates);
     }
   }, [data]);
 
@@ -903,12 +912,16 @@ const Entity = () => {
                           collection={templatesCollection}
                           disabled={templatesCollection.items.length === 0}
                           rounded={"md"}
+                          value={selectedTemplateValue}
                           onValueChange={(details) => {
-                            const selectedTemplate = details.items[0];
-                            if (!_.isEqual(selectedTemplate._id, "")) {
-                              for (const template of templatesCollection.items) {
+                            const selectedTemplateId = details.value[0];
+                            if (
+                              selectedTemplateId &&
+                              !_.isEqual(selectedTemplateId, "")
+                            ) {
+                              for (const template of templates) {
                                 if (
-                                  _.isEqual(selectedTemplate._id, template._id)
+                                  _.isEqual(selectedTemplateId, template._id)
                                 ) {
                                   setSelectedAttributes([
                                     ...selectedAttributes,
@@ -922,6 +935,8 @@ const Entity = () => {
                                       values: template.values,
                                     },
                                   ]);
+                                  // Reset the select after adding the template
+                                  setSelectedTemplateValue([]);
                                   break;
                                 }
                               }
@@ -951,13 +966,13 @@ const Entity = () => {
                                 {templatesCollection.items &&
                                   templatesCollection.items.length > 0 &&
                                   templatesCollection.items.map(
-                                    (template: AttributeModel) => (
+                                    (template: ISelectOption) => (
                                       <Select.Item
                                         item={template}
                                         key={template._id}
                                         fontSize={"xs"}
                                       >
-                                        {template.name}
+                                        {template.label}
                                         <Select.ItemIndicator />
                                       </Select.Item>
                                     ),
