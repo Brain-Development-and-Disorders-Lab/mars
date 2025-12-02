@@ -1195,7 +1195,7 @@ const Project = () => {
               <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Name
+                    Project Name
                   </Text>
                   <Input
                     id={"projectNameInput"}
@@ -1221,14 +1221,14 @@ const Project = () => {
               <Flex gap={"1"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Visibility
+                    Project Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Owner
+                    Project Owner
                   </Text>
                   <ActorTag
                     orcid={project.owner}
@@ -1251,7 +1251,7 @@ const Project = () => {
               grow={"1"}
             >
               <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                Description
+                Project Description
               </Text>
               <MDEditor
                 height={150}
@@ -1288,9 +1288,12 @@ const Project = () => {
                 align={"center"}
               >
                 {/* Entities in the Project */}
-                <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                  Entities
-                </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                  <Icon name={"entity"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Project Entities
+                  </Text>
+                </Flex>
                 <Button
                   colorPalette={"green"}
                   id={"addEntityButton"}

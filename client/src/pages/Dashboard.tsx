@@ -653,7 +653,7 @@ const Dashboard = () => {
             {/* Projects and Entities */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               background={"white"}
               rounded={"md"}
               gap={"1"}
@@ -664,8 +664,10 @@ const Dashboard = () => {
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"project"} size={"sm"} />
-                <Heading size={"md"}>Recent Projects</Heading>
+                <Icon name={"project"} size={"xs"} />
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Recent Projects
+                </Text>
               </Flex>
 
               {/* Projects table */}
@@ -708,7 +710,7 @@ const Dashboard = () => {
 
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               background={"white"}
               rounded={"md"}
               gap={"1"}
@@ -719,8 +721,10 @@ const Dashboard = () => {
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"entity"} size={"sm"} />
-                <Heading size={"md"}>Recent Entities</Heading>
+                <Icon name={"entity"} size={"xs"} />
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Recent Entities
+                </Text>
               </Flex>
 
               {/* Entities table */}
@@ -772,7 +776,7 @@ const Dashboard = () => {
           <Flex
             direction={"column"}
             maxW={{ lg: "md" }}
-            p={"2"}
+            p={"1"}
             gap={"1"}
             grow={"1"}
             rounded={"md"}
@@ -784,13 +788,13 @@ const Dashboard = () => {
             <Flex
               id={"recentActivityHeader"}
               align={"center"}
-              gap={"2"}
+              gap={"1"}
               ml={"0.5"}
             >
-              <Icon name={"activity"} size={"sm"} />
-              <Heading size={"md"} color={"gray.700"}>
+              <Icon name={"activity"} size={"xs"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
                 Recent Activity
-              </Heading>
+              </Text>
             </Flex>
 
             {/* Activity list */}

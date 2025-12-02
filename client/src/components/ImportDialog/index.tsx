@@ -1414,6 +1414,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                                 }}
                               >
                                 Use {nameUseCounter ? "Column" : "Counter"}
+                                <Icon
+                                  name={nameUseCounter ? "text" : "counter"}
+                                  size={"xs"}
+                                />
                               </Button>
                             </Flex>
                             {!nameUseCounter && (

@@ -1946,7 +1946,7 @@ const Entity = () => {
               <Flex gap={"1"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Name
+                    Entity Name
                   </Text>
                   <Input
                     id={"entityNameInput"}
@@ -1972,7 +1972,7 @@ const Entity = () => {
               <Flex gap={"1"} direction={"row"} w={"100%"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Visibility
+                    Entity Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
@@ -1980,7 +1980,7 @@ const Entity = () => {
                 {/* Owner */}
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Owner
+                    Entity Owner
                   </Text>
                   <ActorTag
                     orcid={entityData.owner}
@@ -2005,7 +2005,7 @@ const Entity = () => {
             >
               <Flex direction={"column"} gap={"1"} w={"100%"}>
                 <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                  Description
+                  Entity Description
                 </Text>
                 <Flex>
                   <MDEditor
@@ -2118,7 +2118,7 @@ const Entity = () => {
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                    Attributes
+                    Entity Attributes
                   </Text>
                 </Flex>
                 <Button
@@ -2190,7 +2190,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                      Relationships
+                      Entity Relationships
                     </Text>
                   </Flex>
                   <Button
@@ -2256,7 +2256,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"attachment"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                      Attachments
+                      Entity Attachments
                     </Text>
                   </Flex>
                   <Button

@@ -451,14 +451,14 @@ const Template = () => {
               <Flex gap={"1"} direction={"row"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Visibility
+                    Template Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Owner
+                    Template Owner
                   </Text>
                   <ActorTag
                     orcid={template.owner}

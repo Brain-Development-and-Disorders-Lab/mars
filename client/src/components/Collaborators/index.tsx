@@ -43,9 +43,12 @@ const Collaborators = (props: CollaboratorsProps) => {
     >
       {/* Collaborators display */}
       <Flex direction={"column"} gap={"1"}>
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
-          Collaborators
-        </Text>
+        <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+          <Icon name={"person"} size={"xs"} />
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            Collaborators
+          </Text>
+        </Flex>
         <Flex direction={"row"} gap={"2"} align={"center"}>
           <Fieldset.Root>
             <Fieldset.Content>

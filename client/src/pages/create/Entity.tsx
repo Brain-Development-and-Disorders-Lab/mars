@@ -566,6 +566,10 @@ const Entity = () => {
                             colorPalette={"blue"}
                           >
                             Use {useCounter ? "Text" : "Counter"}
+                            <Icon
+                              name={useCounter ? "text" : "counter"}
+                              size={"xs"}
+                            />
                           </Button>
                         </Flex>
                       </Flex>

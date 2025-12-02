@@ -7,8 +7,6 @@ import {
   Text,
   Heading,
   Code,
-  Fieldset,
-  Field,
   EmptyState,
 } from "@chakra-ui/react";
 
@@ -16,8 +14,8 @@ import {
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
 import Icon from "@components/Icon";
-import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
+import DataTableRemix from "@components/DataTableRemix";
 import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -492,53 +490,58 @@ const Workspace = () => {
     entitiesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex>
+          <Flex
+            w={"100%"}
+            justify={"space-between"}
+            p={"0.5"}
+            gap={"2"}
+            align={"center"}
+          >
             <Tooltip
               content={info.getValue()}
               disabled={info.getValue().length < 24}
               showArrow
             >
-              <Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
                 })}
               </Text>
             </Tooltip>
+            <Flex p={"0.5"} gap={"1"} align={"center"}>
+              <Button
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"Archive"}
+                colorPalette={"orange"}
+                variant={"subtle"}
+                onClick={() =>
+                  archiveEntity(info.row.original._id, !showArchivedEntities)
+                }
+              >
+                {showArchivedEntities ? "Restore" : "Archive"}
+                {
+                  <Icon
+                    name={showArchivedEntities ? "rewind" : "archive"}
+                    size={"xs"}
+                  />
+                }
+              </Button>
+              <Button
+                variant={"subtle"}
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"View Entity"}
+                onClick={() => navigate(`/entities/${info.row.original._id}`)}
+              >
+                View
+                <Icon name={"a_right"} size={"xs"} />
+              </Button>
+            </Flex>
           </Flex>
         );
       },
       header: "Name",
-    }),
-    entitiesTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <Button
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"Archive Entity"}
-              colorPalette={"orange"}
-              onClick={() =>
-                archiveEntity(info.row.original._id, !showArchivedEntities)
-              }
-            >
-              {showArchivedEntities ? "Restore" : "Archive"}
-              {<Icon name={showArchivedEntities ? "rewind" : "archive"} />}
-            </Button>
-            <Button
-              variant={"subtle"}
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"View Entity"}
-              onClick={() => navigate(`/entities/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
   const entitiesTableActions: DataTableAction[] = [
@@ -560,53 +563,58 @@ const Workspace = () => {
     projectsTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex>
+          <Flex
+            w={"100%"}
+            justify={"space-between"}
+            p={"0.5"}
+            gap={"2"}
+            align={"center"}
+          >
             <Tooltip
               content={info.getValue()}
               disabled={info.getValue().length < 24}
               showArrow
             >
-              <Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
                 })}
               </Text>
             </Tooltip>
+            <Flex p={"0.5"} gap={"1"}>
+              <Button
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"Archive Project"}
+                colorPalette={"orange"}
+                variant={"subtle"}
+                onClick={() =>
+                  archiveProject(info.row.original._id, !showArchivedProjects)
+                }
+              >
+                {showArchivedProjects ? "Restore" : "Archive"}
+                {
+                  <Icon
+                    name={showArchivedProjects ? "rewind" : "archive"}
+                    size={"xs"}
+                  />
+                }
+              </Button>
+              <Button
+                variant={"subtle"}
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"View Project"}
+                onClick={() => navigate(`/projects/${info.row.original._id}`)}
+              >
+                View
+                <Icon name={"a_right"} size={"xs"} />
+              </Button>
+            </Flex>
           </Flex>
         );
       },
       header: "Name",
-    }),
-    projectsTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <Button
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"Archive Project"}
-              colorPalette={"orange"}
-              onClick={() =>
-                archiveProject(info.row.original._id, !showArchivedProjects)
-              }
-            >
-              {showArchivedProjects ? "Restore" : "Archive"}
-              {<Icon name={showArchivedProjects ? "rewind" : "archive"} />}
-            </Button>
-            <Button
-              variant={"subtle"}
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"View Project"}
-              onClick={() => navigate(`/projects/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
   const projectsTableActions: DataTableAction[] = [
@@ -628,53 +636,58 @@ const Workspace = () => {
     templatesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex>
+          <Flex
+            w={"100%"}
+            justify={"space-between"}
+            p={"0.5"}
+            gap={"2"}
+            align={"center"}
+          >
             <Tooltip
               content={info.getValue()}
               disabled={info.getValue().length < 24}
               showArrow
             >
-              <Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
                 })}
               </Text>
             </Tooltip>
+            <Flex p={"0.5"} gap={"1"}>
+              <Button
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"Archive Template"}
+                colorPalette={"orange"}
+                variant={"subtle"}
+                onClick={() =>
+                  archiveTemplate(info.row.original._id, !showArchivedTemplates)
+                }
+              >
+                {showArchivedTemplates ? "Restore" : "Archive"}
+                {
+                  <Icon
+                    name={showArchivedTemplates ? "rewind" : "archive"}
+                    size={"xs"}
+                  />
+                }
+              </Button>
+              <Button
+                variant={"subtle"}
+                size={"2xs"}
+                rounded={"md"}
+                aria-label={"View Template"}
+                onClick={() => navigate(`/templates/${info.row.original._id}`)}
+              >
+                View
+                <Icon name={"a_right"} size={"xs"} />
+              </Button>
+            </Flex>
           </Flex>
         );
       },
       header: "Name",
-    }),
-    templatesTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
-            <Button
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"Archive Template"}
-              colorPalette={"orange"}
-              onClick={() =>
-                archiveTemplate(info.row.original._id, !showArchivedTemplates)
-              }
-            >
-              {showArchivedTemplates ? "Restore" : "Archive"}
-              {<Icon name={showArchivedTemplates ? "rewind" : "archive"} />}
-            </Button>
-            <Button
-              variant={"subtle"}
-              size={"sm"}
-              rounded={"md"}
-              aria-label={"View Template"}
-              onClick={() => navigate(`/templates/${info.row.original._id}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Button>
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
   const templatesTableActions: DataTableAction[] = [
@@ -696,13 +709,13 @@ const Workspace = () => {
     countersTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex py={"2"}>
+          <Flex p={"0.5"}>
             <Tooltip
               content={info.getValue()}
               disabled={info.getValue().length < 24}
               showArrow
             >
-              <Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
                 })}
@@ -740,7 +753,9 @@ const Workspace = () => {
               }
               showArrow
             >
-              <Text fontWeight={"semibold"}>{info.getValue()}</Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {info.getValue()}
+              </Text>
             </Tooltip>
           </Flex>
         );
@@ -757,7 +772,9 @@ const Workspace = () => {
               }
               showArrow
             >
-              <Text fontWeight={"semibold"}>{info.getValue()}</Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {info.getValue()}
+              </Text>
             </Tooltip>
           </Flex>
         );
@@ -774,9 +791,9 @@ const Workspace = () => {
       isLoaded={!workspaceDataLoading && !workspaceLoading}
     >
       <Flex
-        gap={"2"}
-        p={"2"}
-        pb={{ base: "2", lg: "0" }}
+        gap={"1"}
+        p={"1"}
+        pb={{ base: "1", lg: "0" }}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
@@ -784,29 +801,29 @@ const Workspace = () => {
       >
         <Flex
           align={"center"}
-          gap={"2"}
-          p={"2"}
+          gap={"1"}
+          p={"1"}
           border={"2px solid"}
           rounded={"md"}
         >
-          <Icon name={"workspace"} size={"md"} />
-          <Heading fontWeight={"semibold"} size={"md"}>
+          <Icon name={"workspace"} size={"sm"} />
+          <Heading fontWeight={"semibold"} size={"sm"}>
             {name}
           </Heading>
         </Flex>
-        <Flex direction={"row"} align={"center"} gap={"2"}>
+        <Flex direction={"row"} align={"center"} gap={"1"}>
           <Button
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"red"}
             onClick={() => navigate("/")}
           >
             Cancel
-            <Icon name={"cross"} />
+            <Icon name={"cross"} size={"xs"} />
           </Button>
           <Button
             id={"modalWorkspaceCreateButton"}
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"green"}
             disabled={name === ""}
@@ -819,67 +836,60 @@ const Workspace = () => {
             onClick={() => handleUpdateClick()}
           >
             Save
-            <Icon name={"save"} />
+            <Icon name={"save"} size={"xs"} />
           </Button>
         </Flex>
       </Flex>
 
-      <Flex direction={"column"} gap={"2"} p={"2"}>
-        <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+      <Flex direction={"column"} gap={"1"} p={"1"}>
+        <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
           {/* Workspace name */}
           <Flex
             direction={"column"}
-            p={"2"}
+            p={"1"}
             h={"fit-content"}
             w={{ base: "100%", md: "50%" }}
-            gap={"2"}
+            gap={"1"}
             bg={"gray.100"}
             rounded={"md"}
           >
-            <Flex direction={"row"} gap={"2"}>
-              <Flex grow={"1"}>
-                <Fieldset.Root>
-                  <Fieldset.Content>
-                    <Field.Root required>
-                      <Field.Label>
-                        Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"modalWorkspaceName"}
-                        bg={"white"}
-                        size={"sm"}
-                        rounded={"md"}
-                        placeholder={"Name"}
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                      />
-                    </Field.Root>
-                  </Fieldset.Content>
-                </Fieldset.Root>
+            <Flex direction={"row"} gap={"1"}>
+              <Flex direction={"column"} gap={"1"} grow={"1"}>
+                <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+                  Name
+                </Text>
+                <Input
+                  id={"modalWorkspaceName"}
+                  bg={"white"}
+                  size={"xs"}
+                  rounded={"md"}
+                  placeholder={"Name"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
               </Flex>
 
               <TimestampTag timestamp={created} description={"Created"} />
             </Flex>
 
             {/* "Visibility" and "Owner" fields */}
-            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"semibold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                   Visibility
                 </Text>
                 <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"semibold"} fontSize={"sm"}>
+                <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                   Owner
                 </Text>
                 <Flex>
                   <ActorTag
                     orcid={owner}
                     fallback={"Unknown User"}
-                    size={"md"}
+                    size={"sm"}
                   />
                 </Flex>
               </Flex>
@@ -889,37 +899,35 @@ const Workspace = () => {
           {/* Workspace description */}
           <Flex
             direction={"row"}
-            p={"2"}
+            p={"1"}
             h={"fit-content"}
-            gap={"2"}
+            gap={"1"}
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
           >
-            <Fieldset.Root>
-              <Fieldset.Content>
-                <Field.Root>
-                  <Field.Label>Description</Field.Label>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    style={{ width: "100%" }}
-                    value={description}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setDescription(value || "");
-                    }}
-                  />
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
+            <Flex direction={"column"} gap={"1"} w={"100%"}>
+              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+                Description
+              </Text>
+              <MDEditor
+                height={150}
+                minHeight={100}
+                maxHeight={400}
+                style={{ width: "100%" }}
+                value={description}
+                preview={"edit"}
+                extraCommands={[]}
+                onChange={(value) => {
+                  setDescription(value || "");
+                }}
+              />
+            </Flex>
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
           {/* Workspace collaborators */}
           <Flex w={{ base: "100%", md: "50%" }}>
             <Collaborators
@@ -932,26 +940,29 @@ const Workspace = () => {
           {/* Workspace Entities */}
           <Flex
             direction={"column"}
-            p={"2"}
+            p={"1"}
             h={"fit-content"}
-            gap={"2"}
+            gap={"1"}
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchivedEntities ? "Archived " : ""}Entities
-              </Text>
+              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                <Icon name={"entity"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {showArchivedEntities ? "Archived " : ""}Workspace Entities
+                </Text>
+              </Flex>
               <Button
                 colorPalette={"blue"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 onClick={() => setShowArchivedEntities(!showArchivedEntities)}
               >
                 {showArchivedEntities ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} />
+                <Icon name={"archive"} size={"xs"} />
               </Button>
             </Flex>
             <Flex
@@ -961,7 +972,7 @@ const Workspace = () => {
               minH={shownEntities.length > 0 ? "fit-content" : "200px"}
             >
               {shownEntities.length > 0 ? (
-                <DataTable
+                <DataTableRemix
                   data={shownEntities}
                   columns={entitiesTableColumns}
                   visibleColumns={{}}
@@ -977,7 +988,8 @@ const Workspace = () => {
                       <Icon name={"entity"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedEntities ? "archived " : ""}Entities
+                      No {showArchivedEntities ? "archived " : ""}Workspace
+                      Entities
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -986,12 +998,12 @@ const Workspace = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"row"} p={"0"} gap={"1"} wrap={"wrap"}>
           {/* Workspace Projects */}
           <Flex
             direction={"column"}
-            p={"2"}
-            gap={"2"}
+            p={"1"}
+            gap={"1"}
             h={"fit-content"}
             border={"1px solid"}
             borderColor={"gray.300"}
@@ -999,17 +1011,20 @@ const Workspace = () => {
             basis={"50%"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchivedProjects ? "Archived " : ""}Projects
-              </Text>
+              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                <Icon name={"project"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {showArchivedProjects ? "Archived " : ""}Workspace Projects
+                </Text>
+              </Flex>
               <Button
                 colorPalette={"blue"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 onClick={() => setShowArchivedProjects(!showArchivedProjects)}
               >
                 {showArchivedProjects ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} />
+                <Icon name={"archive"} size={"xs"} />
               </Button>
             </Flex>
             <Flex
@@ -1019,7 +1034,7 @@ const Workspace = () => {
               minH={shownProjects.length > 0 ? "fit-content" : "200px"}
             >
               {shownProjects.length > 0 ? (
-                <DataTable
+                <DataTableRemix
                   data={shownProjects}
                   columns={projectsTableColumns}
                   visibleColumns={{}}
@@ -1035,7 +1050,8 @@ const Workspace = () => {
                       <Icon name={"project"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedProjects ? "archived " : ""}Projects
+                      No {showArchivedProjects ? "archived " : ""}Workspace
+                      Projects
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -1046,26 +1062,29 @@ const Workspace = () => {
           {/* Workspace Templates */}
           <Flex
             direction={"column"}
-            p={"2"}
+            p={"1"}
             h={"fit-content"}
-            gap={"2"}
+            gap={"1"}
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                {showArchivedTemplates ? "Archived " : ""}Templates
-              </Text>
+              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                <Icon name={"template"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {showArchivedTemplates ? "Archived " : ""}Workspace Templates
+                </Text>
+              </Flex>
               <Button
                 colorPalette={"blue"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
               >
                 {showArchivedTemplates ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} />
+                <Icon name={"archive"} size={"xs"} />
               </Button>
             </Flex>
             <Flex
@@ -1075,7 +1094,7 @@ const Workspace = () => {
               minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
             >
               {shownTemplates.length > 0 ? (
-                <DataTable
+                <DataTableRemix
                   data={shownTemplates}
                   columns={templatesTableColumns}
                   visibleColumns={{}}
@@ -1091,7 +1110,8 @@ const Workspace = () => {
                       <Icon name={"template"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedTemplates ? "archived " : ""}Templates
+                      No {showArchivedTemplates ? "archived " : ""}Workspace
+                      Templates
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -1104,49 +1124,48 @@ const Workspace = () => {
           {/* Workspace Counters */}
           <Flex
             direction={"column"}
-            p={"2"}
-            gap={"2"}
+            p={"1"}
+            gap={"1"}
             h={"fit-content"}
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
             basis={"50%"}
           >
-            <Fieldset.Root>
-              <Fieldset.Content>
-                <Field.Root>
-                  <Field.Label>Counters</Field.Label>
-                  <Flex
-                    w={"100%"}
-                    justify={"center"}
-                    align={counters.length > 0 ? "" : "center"}
-                    minH={counters.length > 0 ? "fit-content" : "200px"}
-                  >
-                    {counters.length > 0 ? (
-                      <DataTable
-                        data={counters}
-                        columns={countersTableColumns}
-                        visibleColumns={{}}
-                        actions={[]}
-                        selectedRows={{}}
-                        showPagination
-                      />
-                    ) : (
-                      <EmptyState.Root>
-                        <EmptyState.Content>
-                          <EmptyState.Indicator>
-                            <Icon name={"counter"} size={"lg"} />
-                          </EmptyState.Indicator>
-                          <EmptyState.Description>
-                            No Counters
-                          </EmptyState.Description>
-                        </EmptyState.Content>
-                      </EmptyState.Root>
-                    )}
-                  </Flex>
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
+            <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+              <Icon name={"counter"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Workspace Counters
+              </Text>
+            </Flex>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={counters.length > 0 ? "" : "center"}
+              minH={counters.length > 0 ? "fit-content" : "200px"}
+            >
+              {counters.length > 0 ? (
+                <DataTableRemix
+                  data={counters}
+                  columns={countersTableColumns}
+                  visibleColumns={{}}
+                  actions={[]}
+                  selectedRows={{}}
+                  showPagination
+                />
+              ) : (
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"counter"} size={"lg"} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>
+                      No Workspace Counters
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
+              )}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
