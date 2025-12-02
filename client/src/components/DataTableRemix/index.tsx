@@ -1075,12 +1075,12 @@ const DataTableRemix = (props: DataTableProps) => {
                       return (
                         <Menu.Item
                           onClick={() => {
-                            if (!isDisabled) {
+                            if (!isDisabled && !action.disabled) {
                               action.action(table, selectedRows);
                             }
                           }}
                           key={action.label}
-                          disabled={isDisabled}
+                          disabled={isDisabled || action.disabled}
                           value={action.label}
                         >
                           <Flex direction="row" gap="1" align="center">
