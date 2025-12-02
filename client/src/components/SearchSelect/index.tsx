@@ -298,13 +298,13 @@ const SearchSelect = (props: SearchSelectProps) => {
             borderRadius="sm"
             shadow="md"
             zIndex="9999"
-            p="2"
+            p="1"
             opacity={isAnimating ? 1 : 0}
             transform={isAnimating ? "translateY(0)" : "translateY(-8px)"}
             transition="all 0.15s ease-in-out"
           >
             <Input
-              size="sm"
+              size="xs"
               rounded="md"
               placeholder="Search"
               onChange={handleInputChange}
@@ -324,7 +324,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     onClick={() => handleSelectResult(result)}
                     width="full"
                     disabled={searchLoading}
-                    size="sm"
+                    size="xs"
                     justifyContent="flex-start"
                     mb="1"
                   >
@@ -355,7 +355,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     onClick={() => handleSelectResult(option)}
                     width="full"
                     disabled={entitiesLoading || projectsLoading}
-                    size="sm"
+                    size="xs"
                     justifyContent="flex-start"
                     mb="1"
                   >
