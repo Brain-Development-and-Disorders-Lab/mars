@@ -11,7 +11,6 @@ import {
   Fieldset,
   Flex,
   Heading,
-  IconButton,
   Input,
   Spacer,
   Text,
@@ -20,7 +19,7 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import ActorTag from "@components/ActorTag";
-import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import { UnsavedChangesModal } from "@components/WarningModal";
@@ -122,28 +121,24 @@ const Project = () => {
   const entitiesColumns = [
     {
       id: (info: Cell<string, string>) => info.row.original,
-      cell: (info: Cell<string, string>) => (
-        <Linky id={info.row.original} type={"entities"} size={"sm"} />
-      ),
-      header: "Name",
-    },
-    {
-      id: "view",
       cell: (info: Cell<string, string>) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
-            <IconButton
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Linky id={info.row.original} type={"entities"} size={"xs"} />
+            <Button
+              size="2xs"
+              variant="subtle"
+              colorPalette="red"
               aria-label={"Remove entity"}
-              colorPalette={"red"}
               onClick={() => removeEntity(info.row.original)}
-              size={"sm"}
             >
-              <Icon name={"delete"} />
-            </IconButton>
+              Remove
+              <Icon name={"delete"} size={"xs"} />
+            </Button>
           </Flex>
         );
       },
-      header: "",
+      header: "Name",
     },
   ];
 
@@ -174,22 +169,22 @@ const Project = () => {
         {/* Page header */}
         <Flex
           direction={"row"}
-          p={"2"}
+          p={"1"}
           align={"center"}
           justify={"space-between"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"md"} />
-            <Heading size={"md"}>Create Project</Heading>
+            <Icon name={"project"} size={"xs"} />
+            <Heading size={"sm"}>Create Project</Heading>
             <Spacer />
             <Button
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
               variant={"outline"}
               onClick={() => setInformationOpen(true)}
             >
               Info
-              <Icon name={"info"} />
+              <Icon name={"info"} size={"xs"} />
             </Button>
           </Flex>
         </Flex>
@@ -198,28 +193,34 @@ const Project = () => {
           <Flex
             direction={"column"}
             w={{ base: "100%", md: "50%" }}
-            p={"2"}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
+            p={"1"}
+            pt={{ base: "0", lg: "1" }}
+            gap={"1"}
             grow={"1"}
             rounded={"md"}
           >
             <Flex
               direction={"column"}
-              p={"2"}
-              gap={"2"}
+              p={"1"}
+              gap={"1"}
               rounded={"md"}
               border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root invalid={isNameError}>
-                <Fieldset.Content>
+                <Fieldset.Content gap={"1"}>
                   <Field.Root required>
-                    <Field.Label>Name</Field.Label>
+                    <Field.Label
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      ml={"0.5"}
+                    >
+                      Name
+                    </Field.Label>
                     <Input
                       data-testid={"create-project-name"}
                       name={"name"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       placeholder={"Name"}
                       borderColor={"gray.300"}
@@ -228,27 +229,39 @@ const Project = () => {
                       onChange={(event) => setName(event.target.value)}
                     />
                     {isNameError && (
-                      <Field.ErrorText>
+                      <Field.ErrorText fontSize={"xs"}>
                         A name to identify the Project must be specified.
                       </Field.ErrorText>
                     )}
                   </Field.Root>
 
                   <Field.Root>
-                    <Field.Label>Owner</Field.Label>
+                    <Field.Label
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      ml={"0.5"}
+                    >
+                      Owner
+                    </Field.Label>
                     <Flex>
                       <ActorTag
                         orcid={owner}
                         fallback={"Unknown User"}
-                        size={"md"}
+                        size={"sm"}
                       />
                     </Flex>
                   </Field.Root>
 
                   <Field.Root>
-                    <Field.Label>Created</Field.Label>
+                    <Field.Label
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      ml={"0.5"}
+                    >
+                      Created
+                    </Field.Label>
                     <Input
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       type={"datetime-local"}
                       value={created}
@@ -258,7 +271,7 @@ const Project = () => {
                         )
                       }
                     />
-                    <Field.HelperText>
+                    <Field.HelperText fontSize={"xs"}>
                       Specify a timestamp for the Project.
                     </Field.HelperText>
                   </Field.Root>
@@ -269,18 +282,18 @@ const Project = () => {
 
           <Flex
             direction={"column"}
-            p={"2"}
-            pl={{ base: "2", lg: "0" }}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
+            p={"1"}
+            pl={{ base: "1", lg: "0" }}
+            pt={{ base: "0", lg: "1" }}
+            gap={"1"}
             grow={"1"}
             basis={"50%"}
             rounded={"md"}
           >
             <Flex
               direction={"column"}
-              p={"2"}
-              gap={"2"}
+              p={"1"}
+              gap={"1"}
               rounded={"md"}
               border={"1px solid"}
               borderColor={"gray.300"}
@@ -289,7 +302,13 @@ const Project = () => {
               <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
                   <Field.Root required>
-                    <Field.Label>Description</Field.Label>
+                    <Field.Label
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      ml={"0.5"}
+                    >
+                      Description
+                    </Field.Label>
                     <MDEditor
                       height={150}
                       minHeight={100}
@@ -303,7 +322,7 @@ const Project = () => {
                       }}
                     />
                     {isDescriptionError && (
-                      <Field.ErrorText>
+                      <Field.ErrorText fontSize={"xs"}>
                         A description must be provided.
                       </Field.ErrorText>
                     )}
@@ -314,25 +333,25 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} px={"2"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"column"} px={"1"} gap={"1"} wrap={"wrap"}>
           <Flex justify={"space-between"} align={"center"}>
-            <Text fontWeight={"bold"} fontSize={"sm"}>
+            <Text fontWeight={"semibold"} fontSize={"xs"}>
               Entities
             </Text>
             <Button
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
               colorPalette={"green"}
               onClick={() => setEntitiesOpen(true)}
             >
               Add Entity
-              <Icon name={"add"} />
+              <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
           <Flex
             direction={"column"}
-            p={"2"}
-            gap={"2"}
+            p={"1"}
+            gap={"1"}
             w={"100%"}
             rounded={"md"}
             border={"1px solid"}
@@ -347,7 +366,7 @@ const Project = () => {
               minH={entities.length > 0 ? "fit-content" : "200px"}
             >
               {entities && entities.length > 0 ? (
-                <DataTable
+                <DataTableRemix
                   data={entities}
                   columns={entitiesColumns}
                   visibleColumns={{}}
@@ -378,25 +397,25 @@ const Project = () => {
       <Flex
         direction={"row"}
         wrap={"wrap"}
-        gap={"6"}
+        gap={"1"}
         justify={"space-between"}
         w={"100%"}
-        p={"2"}
+        p={"1"}
       >
         <Button
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           colorPalette={"red"}
           variant={"solid"}
           onClick={() => navigate("/projects")}
         >
           Cancel
-          <Icon name={"cross"} />
+          <Icon name={"cross"} size={"xs"} />
         </Button>
 
         <Button
           id={"finishCreateProjectButton"}
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           colorPalette={"green"}
           onClick={async () => {
@@ -430,7 +449,7 @@ const Project = () => {
           disabled={isDetailsError && !isSubmitting}
         >
           Finish
-          <Icon name={"check"} />
+          <Icon name={"check"} size={"xs"} />
         </Button>
       </Flex>
 
@@ -447,10 +466,12 @@ const Project = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"blue.300"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon name={"add"} />
-                Add Entity
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={"blue.300"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"add"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Add Entity
+                </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton
@@ -460,9 +481,9 @@ const Project = () => {
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
-            <Dialog.Body p={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"}>
+            <Dialog.Body p={"1"} px={"2"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontSize={"xs"}>
                   Select an Entity to add to the Project.
                 </Text>
 
@@ -475,16 +496,16 @@ const Project = () => {
               </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
               <Button
                 colorPalette={"red"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 variant={"solid"}
                 onClick={() => setEntitiesOpen(false)}
               >
                 Cancel
-                <Icon name={"cross"} />
+                <Icon name={"cross"} size={"xs"} />
               </Button>
 
               <Spacer />
@@ -492,7 +513,7 @@ const Project = () => {
               <Button
                 id={"addEntityDoneButton"}
                 colorPalette={"green"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 onClick={() => {
                   // Add the Origin to the Entity
@@ -500,7 +521,7 @@ const Project = () => {
                 }}
               >
                 Done
-                <Icon name={"check"} />
+                <Icon name={"check"} size={"xs"} />
               </Button>
             </Dialog.Footer>
           </Dialog.Content>
@@ -520,46 +541,42 @@ const Project = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.CloseTrigger asChild>
-              <IconButton
-                bg={"white"}
-                _hover={{ bg: "gray.200" }}
-                variant={"subtle"}
-                color={"black"}
+              <CloseButton
+                size={"2xs"}
+                top={"6px"}
                 onClick={() => setInformationOpen(false)}
-              >
-                <Icon name={"close"} />
-              </IconButton>
+              />
             </Dialog.CloseTrigger>
             <Dialog.Header
               p={"2"}
-              mt={"2"}
               fontWeight={"semibold"}
-              fontSize={"md"}
-              bg={"green.300"}
+              fontSize={"xs"}
+              bg={"blue.300"}
+              roundedTop={"md"}
             >
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"project"} size={"sm"} />
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"project"} size={"xs"} />
                 Projects
               </Flex>
             </Dialog.Header>
-            <Dialog.Body p={"2"}>
+            <Dialog.Body p={"1"} px={"2"}>
               <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"}>
+                <Text fontSize={"xs"}>
                   Projects can be used to organize and share Entities.
                 </Text>
-                <Text fontSize={"sm"}>
+                <Text fontSize={"xs"}>
                   Any type of Entity can be included in a Project. Entities can
                   be added and removed from a Project after it has been created.
                 </Text>
 
-                <Heading size={"sm"}>Name</Heading>
-                <Text fontSize={"sm"}>
+                <Heading size={"xs"}>Name</Heading>
+                <Text fontSize={"xs"}>
                   Specify the name of a Project. This should be unique and will
                   act as a searchable identifier.
                 </Text>
 
-                <Heading size={"sm"}>Date Created or Started</Heading>
-                <Text fontSize={"sm"}>
+                <Heading size={"xs"}>Date Created or Started</Heading>
+                <Text fontSize={"xs"}>
                   A timestamp assigned to the Project. For example, if this is a
                   set of Entities used in a specific experiment, this date could
                   represent when work on the experiment commenced. Otherwise,
@@ -567,8 +584,8 @@ const Project = () => {
                   created in Metadatify.
                 </Text>
 
-                <Heading size={"sm"}>Description</Heading>
-                <Text fontSize={"sm"}>
+                <Heading size={"xs"}>Description</Heading>
+                <Text fontSize={"xs"}>
                   A brief description of the Project contents.
                 </Text>
               </Flex>

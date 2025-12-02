@@ -61,7 +61,6 @@ export const WithRestrictedValues: Story = {
       { p: 4, w: "1000px" },
       React.createElement(AttributeCard, {
         ...defaultArgs,
-        restrictDataValues: true,
         permittedDataValues: ["Option 1", "Option 2", "Option 3"],
         ...args,
       }),
@@ -77,9 +76,6 @@ export const Empty: Story = {
       { p: 4, w: "1000px" },
       React.createElement(AttributeCard, {
         ...defaultArgs,
-        name: "",
-        description: "",
-        values: [],
         ...args,
       }),
     );

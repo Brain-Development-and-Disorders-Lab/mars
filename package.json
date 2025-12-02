@@ -1,6 +1,6 @@
 {
   "name": "mars",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "https://github.com/Brain-Development-and-Disorders-Lab/mars.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
