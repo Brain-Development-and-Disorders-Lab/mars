@@ -205,11 +205,11 @@ const Templates = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
-        p={"2"}
+        p={"1"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"2"}
+        gap={"1"}
       >
         <Flex
           w={"100%"}
@@ -217,7 +217,7 @@ const Templates = () => {
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
+          <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"template"} size={"sm"} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />

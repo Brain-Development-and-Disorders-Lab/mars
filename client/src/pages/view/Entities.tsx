@@ -333,11 +333,11 @@ const Entities = () => {
     >
       <Flex
         direction={"row"}
-        p={"2"}
+        p={"1"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"2"}
+        gap={"1"}
         minW="0"
         maxW="100%"
       >
@@ -348,7 +348,7 @@ const Entities = () => {
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"} minW="0">
+          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"entity"} size={"sm"} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />

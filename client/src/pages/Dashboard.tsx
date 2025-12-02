@@ -490,7 +490,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"column"} w={"100%"} p={"2"} gap={"1"}>
+      <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
         {token.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
@@ -509,7 +509,7 @@ const Dashboard = () => {
             justify={"space-between"}
           >
             <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"dashboard"} size={"sm"} />
                 <Heading size={"xl"}>Dashboard</Heading>
               </Flex>

@@ -221,13 +221,13 @@ const Setup = () => {
                     <Flex direction={"row"} gap={"4"}>
                       <Flex direction={"column"} w={"100%"}>
                         <Field.Root required>
-                          <Field.Label>
+                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
                             First Name
                             <Field.RequiredIndicator />
                           </Field.Label>
                           <Input
                             id={"userFirstNameInput"}
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             borderColor={"gray.300"}
                             _focus={{
@@ -244,13 +244,13 @@ const Setup = () => {
                       </Flex>
                       <Flex direction={"column"} w={"100%"}>
                         <Field.Root required>
-                          <Field.Label>
+                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
                             Last Name
                             <Field.RequiredIndicator />
                           </Field.Label>
                           <Input
                             id={"userLastNameInput"}
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             borderColor={"gray.300"}
                             _focus={{
@@ -269,13 +269,13 @@ const Setup = () => {
                     <Flex direction={"column"} gap={"4"}>
                       <Flex direction={"column"}>
                         <Field.Root invalid={emailError !== ""} required>
-                          <Field.Label>
+                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
                             Email
                             <Field.RequiredIndicator />
                           </Field.Label>
                           <Input
                             id={"userEmailInput"}
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             type={"email"}
                             borderColor={emailError ? "red.300" : "gray.300"}
@@ -301,13 +301,13 @@ const Setup = () => {
                       </Flex>
                       <Flex direction={"column"}>
                         <Field.Root required>
-                          <Field.Label>
+                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
                             Affiliation
                             <Field.RequiredIndicator />
                           </Field.Label>
                           <Select.Root
                             collection={affiliationCollection}
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             value={userAffiliation ? [userAffiliation] : []}
                             onValueChange={(details) =>
@@ -350,7 +350,7 @@ const Setup = () => {
                     <Button
                       id={"userDoneButton"}
                       colorPalette={"orange"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       onClick={() => {
                         logout();
@@ -358,19 +358,19 @@ const Setup = () => {
                       }}
                     >
                       Logout
-                      <Icon name={"logout"} />
+                      <Icon name={"logout"} size={"xs"} />
                     </Button>
                     <Button
                       id={"userDoneButton"}
                       colorPalette={"green"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       onClick={() => onDoneClick()}
                       loading={isLoading}
                       disabled={!userComplete}
                     >
                       Complete Setup
-                      <Icon name={"check"} />
+                      <Icon name={"check"} size={"xs"} />
                     </Button>
                   </Flex>
                 </Fieldset.Content>
