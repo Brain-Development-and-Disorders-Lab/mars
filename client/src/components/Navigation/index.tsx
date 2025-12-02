@@ -47,26 +47,26 @@ const Navigation = () => {
       <Flex
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
-        gap={"4"}
+        gap={"2"}
+        w={"100%"}
       >
         {/* Heading */}
         <Flex
           direction={"row"}
           gap={"2"}
           p={"1"}
-          mt={"2"}
           align={"center"}
           justify={"center"}
         >
-          <Image src="/Favicon.png" boxSize={"24px"} />
+          <Image src="/Favicon.png" boxSize={"20px"} />
           <Text fontWeight={"semibold"} fontSize={"lg"} color={"brand"}>
             Metadatify
           </Text>
         </Flex>
 
         {/* Workspace menu items */}
-        <Flex direction={"column"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"} w={"100%"}>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <Flex direction={"column"} gap={"1"} w={"100%"}>
             <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             <SearchBox resultType={"entity"} />
           </Flex>
@@ -79,7 +79,7 @@ const Navigation = () => {
             <Button
               id={"navDashboardButtonDesktop"}
               key={"dashboard"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -89,14 +89,14 @@ const Navigation = () => {
               onClick={() => navigate("/")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"dashboard"} />
+              <Icon name={"dashboard"} size={"xs"} />
               Dashboard
             </Button>
 
             <Button
               id={"navSearchButtonDesktop"}
               key={"search"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -110,14 +110,14 @@ const Navigation = () => {
               onClick={() => navigate("/search")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"search"} />
+              <Icon name={"search"} size={"xs"} />
               Search
             </Button>
 
             <Button
               id={"navCreateButtonDesktop"}
               key={"create"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -131,7 +131,7 @@ const Navigation = () => {
               onClick={() => navigate("/create")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"add"} />
+              <Icon name={"add"} size={"xs"} />
               Create
             </Button>
 
@@ -141,7 +141,7 @@ const Navigation = () => {
 
             <Button
               id={"navEntitiesButtonDesktop"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -156,7 +156,7 @@ const Navigation = () => {
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"entity"} />
+              <Icon name={"entity"} size={"xs"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -164,7 +164,7 @@ const Navigation = () => {
 
             <Button
               id={"navProjectsButtonDesktop"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -179,7 +179,7 @@ const Navigation = () => {
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"project"} />
+              <Icon name={"project"} size={"xs"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -187,7 +187,7 @@ const Navigation = () => {
 
             <Button
               id={"navTemplatesButtonDesktop"}
-              size={"sm"}
+              size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
@@ -202,7 +202,7 @@ const Navigation = () => {
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"template"} />
+              <Icon name={"template"} size={"xs"} />
               Templates
             </Button>
           </Flex>
@@ -217,7 +217,7 @@ const Navigation = () => {
                   id={"navImportButtonDesktop"}
                   w={"100%"}
                   key={"import"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"blue"}
                   onClick={() => {
@@ -228,7 +228,7 @@ const Navigation = () => {
                   }}
                   disabled={workspace === "" || _.isUndefined(workspace)}
                 >
-                  <Icon name={"upload"} />
+                  <Icon name={"upload"} size={"xs"} />
                   Import
                 </Button>
               </Flex>
@@ -238,7 +238,7 @@ const Navigation = () => {
                   id={"navScanButtonDesktop"}
                   w={"100%"}
                   key={"scan"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
                   onClick={() => {
@@ -249,7 +249,7 @@ const Navigation = () => {
                   }}
                   disabled={workspace === "" || _.isUndefined(workspace)}
                 >
-                  <Icon name={"scan"} />
+                  <Icon name={"scan"} size={"xs"} />
                   Scan
                 </Button>
               </Flex>
@@ -276,7 +276,7 @@ const Navigation = () => {
         w={"100%"}
         bg={"gray.100"}
         justify={"space-between"}
-        gap={"2"}
+        gap={"1"}
       >
         {/* Navigation items */}
         <Menu.Root>
@@ -284,55 +284,60 @@ const Navigation = () => {
             <IconButton
               aria-label={"Open Menu"}
               display={{ base: "flex", lg: "none" }}
-              size={"md"}
+              size={"xs"}
               bg={"white"}
               color={"gray.500"}
             >
-              <Icon name={"list"} />
+              <Icon name={"list"} size={"xs"} />
             </IconButton>
           </Menu.Trigger>
           <Menu.Positioner>
-            <Menu.Content>
+            <Menu.Content p={"1"}>
               <Menu.ItemGroup title={"Menu"}>
                 <Menu.ItemGroupLabel>Menu</Menu.ItemGroupLabel>
                 <Menu.Item
                   id={"navDashboardButtonMobile"}
                   value={"dashboard"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/")}
                 >
-                  <Icon name={"dashboard"} />
+                  <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
                 </Menu.Item>
                 <Menu.Item
                   id={"navSearchButtonMobile"}
                   value={"search"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/search")}
                 >
-                  <Icon name={"search"} />
+                  <Icon name={"search"} size={"xs"} />
                   Search
                 </Menu.Item>
                 <Menu.Item
                   id={"navProjectButtonMobile"}
                   value={"projects"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/projects")}
                 >
-                  <Icon name={"project"} />
+                  <Icon name={"project"} size={"xs"} />
                   Projects
                 </Menu.Item>
                 <Menu.Item
                   id={"navEntitiesButtonMobile"}
                   value={"entities"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/entities")}
                 >
-                  <Icon name={"entity"} />
+                  <Icon name={"entity"} size={"xs"} />
                   Entities
                 </Menu.Item>
                 <Menu.Item
                   id={"navTemplatesButtonMobile"}
                   value={"templates"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/templates")}
                 >
-                  <Icon name={"template"} />
+                  <Icon name={"template"} size={"xs"} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>
@@ -342,14 +347,16 @@ const Navigation = () => {
                 <Menu.Item
                   id={"navCreateButtonMobile"}
                   value={"create"}
+                  fontSize={"xs"}
                   onClick={() => navigate("/create")}
                 >
-                  <Icon name={"add"} />
+                  <Icon name={"add"} size={"xs"} />
                   Create
                 </Menu.Item>
                 <Menu.Item
                   id={"navScanButtonMobile"}
                   value={"scan"}
+                  fontSize={"xs"}
                   onClick={() => {
                     // Capture event
                     posthog.capture("scan_modal_open");
@@ -358,7 +365,7 @@ const Navigation = () => {
                   }}
                   disabled={workspace === "" || _.isUndefined(workspace)}
                 >
-                  <Icon name={"scan"} />
+                  <Icon name={"scan"} size={"xs"} />
                   Scan
                 </Menu.Item>
               </Menu.ItemGroup>

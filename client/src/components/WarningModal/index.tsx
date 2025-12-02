@@ -8,28 +8,34 @@ import { UnsavedChangesModalProps } from "@types";
 
 const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
   return (
-    <Dialog.Root open={props.blocker.state === "blocked"} placement={"center"}>
+    <Dialog.Root
+      open={props.blocker.state === "blocked"}
+      placement={"center"}
+      size={"xs"}
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"gray.100"}>
-            <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+          <Dialog.Header px={"1"} py={"2"} roundedTop={"md"} bg={"orange.300"}>
+            <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"warning"} />
-              <Text fontWeight={"semibold"}>Unsaved Changes</Text>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Unsaved Changes
+              </Text>
             </Flex>
           </Dialog.Header>
 
-          <Dialog.Body p={"2"}>
-            <Text fontSize={"sm"}>
+          <Dialog.Body p={"1"}>
+            <Text fontSize={"xs"}>
               Are you sure you want to leave this page? You will lose any
               unsaved changes.
             </Text>
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+          <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
             <Flex w={"100%"} justify={"space-between"}>
               <Button
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"red"}
                 ref={props.cancelBlockerRef}
@@ -39,18 +45,18 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
                 }}
               >
                 Cancel
-                <Icon name={"cross"} />
+                <Icon name={"cross"} size={"xs"} />
               </Button>
 
               <Button
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"green"}
                 onClick={() => props.blocker.proceed?.()}
                 ml={3}
               >
                 Continue
-                <Icon name={"check"} />
+                <Icon name={"check"} size={"xs"} />
               </Button>
             </Flex>
           </Dialog.Footer>

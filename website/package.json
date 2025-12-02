@@ -1,6 +1,6 @@
 {
   "name": "metadatify-website",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Product website for Metadatify",
   "main": "index.js",
   "author": "Henry Burgess <henry.burgess@wustl.edu>",

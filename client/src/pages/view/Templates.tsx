@@ -7,16 +7,16 @@ import {
   EmptyState,
   Flex,
   Heading,
-  Link,
   Spacer,
   Tag,
   Text,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
-import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -110,7 +110,32 @@ const Templates = () => {
   const columnHelper = createColumnHelper<AttributeModel>();
   const columns = [
     columnHelper.accessor("name", {
-      cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
+      cell: (info) => {
+        return (
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 20}
+              showArrow
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 20 })}
+              </Text>
+            </Tooltip>
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="subtle"
+              colorPalette="gray"
+              aria-label={"View Template"}
+              onClick={() => navigate(`/templates/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} />
+            </Button>
+          </Flex>
+        );
+      },
       header: "Name",
     }),
     columnHelper.accessor("description", {
@@ -118,14 +143,22 @@ const Templates = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
             </Tag.Root>
           );
         }
         return (
-          <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 36 })}
-          </Text>
+          <Flex>
+            <Tooltip
+              content={info.getValue()}
+              disabled={info.getValue().length < 32}
+              showArrow
+            >
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), { length: 32 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Description",
@@ -138,6 +171,7 @@ const Templates = () => {
             orcid={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
+            inline
           />
         );
       },
@@ -145,36 +179,25 @@ const Templates = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("timestamp", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
+      cell: (info) => {
+        return (
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
       header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("values", {
       cell: (info) => {
         return (
-          <Tag.Root colorPalette={"green"}>
-            <Tag.Label>{info.getValue().length}</Tag.Label>
+          <Tag.Root colorPalette={"green"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
           </Tag.Root>
         );
       },
       header: "Values",
-    }),
-    columnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              fontWeight={"semibold"}
-              color={"black"}
-              onClick={() => navigate(`/templates/${info.getValue()}`)}
-            >
-              View
-            </Link>
-            <Icon name={"a_right"} />
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
 
@@ -182,11 +205,11 @@ const Templates = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
-        p={"4"}
+        p={"2"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"4"}
+        gap={"2"}
       >
         <Flex
           w={"100%"}
@@ -195,27 +218,27 @@ const Templates = () => {
           align={"center"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"template"} size={"md"} />
+            <Icon name={"template"} size={"sm"} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button
               colorPalette={"green"}
               onClick={() => navigate("/create/template")}
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
             >
-              Create
-              <Icon name={"add"} />
+              Create Template
+              <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <Text fontSize={"sm"}>
+        <Flex direction={"column"} gap={"2"} w={"100%"}>
+          <Text fontSize={"xs"} ml={"0.5"}>
             All Templates in the current Workspace are shown below. Sort the
             Templates using the column headers.
           </Text>
           {templates.length > 0 ? (
-            <DataTable
+            <DataTableRemix
               columns={columns}
               data={templates}
               visibleColumns={visibleColumns}
@@ -223,7 +246,6 @@ const Templates = () => {
               showColumnSelect
               showPagination
               showSelection
-              showItemCount
             />
           ) : (
             <EmptyState.Root>

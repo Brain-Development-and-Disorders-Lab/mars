@@ -11,7 +11,10 @@ describe("Project, edit details", () => {
 
   it("should be able to rename the Project", () => {
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Update the Project name
@@ -27,7 +30,10 @@ describe("Project, edit details", () => {
 
   it("should be able to update the Project description", () => {
     cy.contains("button", "Projects").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.get(".data-table-scroll-container")
+      .find('button[aria-label="View Project"]')
+      .first()
+      .click();
     cy.get("#editProjectButton").click();
 
     // Update the Entity name

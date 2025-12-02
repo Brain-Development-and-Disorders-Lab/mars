@@ -542,7 +542,7 @@ export const typedefs = `#graphql
     archiveTemplates(toArchive: [String], state: Boolean): ResponseMessage
 
     # Data mutations
-    uploadAttachment(target: String, file: Upload!): ResponseMessage
+    uploadAttachment(target: String, file: Upload!): ResponseDataString
 
     # Data import CSV mutations
     prepareEntityCSV(file: [Upload]!): [String]

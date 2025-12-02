@@ -1,6 +1,6 @@
 import React from "react";
-import { Flex, Text, Tag, IconButton, Link } from "@chakra-ui/react";
-import DataTable from "@components/DataTable";
+import { Flex, Text, Tag, Button } from "@chakra-ui/react";
+import DataTableRemix from "@components/DataTableRemix";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -75,13 +75,35 @@ const Relationships = (props: RelationshipsProps) => {
     relationshipTableColumnHelper.accessor("source", {
       cell: (info) => {
         return (
-          <Tooltip content={info.getValue().name} showArrow>
-            <Text>
-              {_.truncate(info.getValue().name, {
-                length: 24,
-              })}
-            </Text>
-          </Tooltip>
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip
+              content={info.getValue().name}
+              disabled={info.getValue().name.length < 20}
+              showArrow
+            >
+              <Flex
+                align={"center"}
+                gap={"1"}
+                w={"100%"}
+                justify={"space-between"}
+              >
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue().name, { length: 20 })}
+                </Text>
+                <Button
+                  size="2xs"
+                  mx={"1"}
+                  variant="subtle"
+                  colorPalette="gray"
+                  aria-label={"View Source Entity"}
+                  onClick={() => navigate(`/entities/${info.getValue()._id}`)}
+                >
+                  View
+                  <Icon name={"a_right"} size={"xs"} />
+                </Button>
+              </Flex>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Source",
@@ -90,62 +112,58 @@ const Relationships = (props: RelationshipsProps) => {
       cell: (info) => {
         return (
           <Flex p={"1"}>
-            <Tag.Root>
-              <Tag.Label>{info.getValue()}</Tag.Label>
+            <Tag.Root size={"sm"}>
+              <Tag.Label fontSize={"xs"}>{info.getValue()}</Tag.Label>
             </Tag.Root>
           </Flex>
         );
       },
       header: "Type",
+      meta: {
+        minWidth: 100,
+        maxWidth: 100,
+      },
     }),
     relationshipTableColumnHelper.accessor("target", {
       cell: (info) => {
         return (
-          <Tooltip content={info.getValue().name} showArrow>
-            <Text>
-              {_.truncate(info.getValue().name, {
-                length: 24,
-              })}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Target",
-    }),
-    relationshipTableColumnHelper.accessor("target._id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex w={"100%"} justify={"space-between"} gap={"1"}>
+            <Flex align={"center"} gap={"1"} w={"100%"}>
+              <Tooltip content={info.getValue().name} showArrow>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue().name, { length: 20 })}
+                </Text>
+              </Tooltip>
+            </Flex>
             {props.viewOnly ? (
-              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-                <Link
-                  color={"black"}
-                  fontWeight={"semibold"}
-                  onClick={() =>
-                    navigate(`/entities/${info.row.original.target._id}`)
-                  }
-                >
-                  View
-                </Link>
-                <Icon name={"a_right"} />
-              </Flex>
+              <Button
+                size="2xs"
+                variant="subtle"
+                colorPalette="gray"
+                aria-label={"View Target Entity"}
+                onClick={() => navigate(`/entities/${info.getValue()._id}`)}
+              >
+                View
+                <Icon name={"a_right"} size={"xs"} />
+              </Button>
             ) : (
-              <IconButton
+              <Button
+                size="2xs"
+                variant="subtle"
+                colorPalette="red"
                 aria-label={"Remove relationship"}
-                colorPalette={"red"}
                 onClick={() => {
                   removeRelationship(info.row.original);
                 }}
-                size={"sm"}
-                rounded={"md"}
               >
-                <Icon name={"delete"} />
-              </IconButton>
+                Remove
+                <Icon name={"delete"} size={"xs"} />
+              </Button>
             )}
           </Flex>
         );
       },
-      header: "",
+      header: "Target",
     }),
   ];
   const relationshipTableActions: DataTableAction[] = [
@@ -164,7 +182,7 @@ const Relationships = (props: RelationshipsProps) => {
 
   return (
     <Flex w={"100%"}>
-      <DataTable
+      <DataTableRemix
         data={props.relationships}
         setData={props.setRelationships}
         columns={relationshipTableColumns}

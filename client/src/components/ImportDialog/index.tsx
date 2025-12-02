@@ -964,7 +964,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             py={"4"}
             fontWeight={"semibold"}
             roundedTop={"md"}
-            bg={"gray.100"}
+            bg={"blue.300"}
           >
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Icon name={"upload"} />
@@ -972,7 +972,8 @@ const ImportDialog = (props: ImportDialogProps) => {
             </Flex>
             <Dialog.CloseTrigger asChild>
               <CloseButton
-                size={"sm"}
+                size={"2xs"}
+                top={"6px"}
                 onClick={handleOnClose}
                 _hover={{ bg: "gray.200" }}
               />
@@ -1671,7 +1672,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                     visibleColumns={{}}
                     selectedRows={{}}
                     showPagination
-                    showItemCount
                   />
                 </Flex>
               )}

@@ -21,7 +21,7 @@ const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
   // Component state
-  const [linkLabel, setLinkLabel] = useState("Invalid");
+  const [linkLabel, setLinkLabel] = useState("Loading...");
   const [tooltipLabel, setTooltipLabel] = useState("Default");
   const [showDeleted, setShowDeleted] = useState(false);
 
@@ -123,10 +123,14 @@ const Linky = (props: LinkyProps) => {
 
   return (
     <Tooltip showArrow content={tooltipLabel}>
-      <SkeletonText
-        noOfLines={1}
-        loading={loadingTemplate || loadingEntity || loadingProject}
-      >
+      {loadingTemplate || loadingEntity || loadingProject ? (
+        <SkeletonText
+          noOfLines={1}
+          loading={loadingTemplate || loadingEntity || loadingProject}
+        >
+          {linkLabel}
+        </SkeletonText>
+      ) : (
         <Link
           onClick={onClickHandler}
           fontWeight={"semibold"}
@@ -135,7 +139,7 @@ const Linky = (props: LinkyProps) => {
         >
           {linkLabel}
         </Link>
-      </SkeletonText>
+      )}
     </Tooltip>
   );
 };

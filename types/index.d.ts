@@ -133,6 +133,7 @@ export type ActorTagProps = {
   orcid: string;
   fallback: string;
   size: "sm" | "md";
+  inline?: boolean;
 };
 
 // "VisibilityTagProps" component props
@@ -392,9 +393,11 @@ export type DataTableProps = {
   // Interface visibility
   showColumnSelect?: boolean;
   showPagination?: boolean;
-  showItemCount?: boolean; // Show text at the bottom of the table orienting the user
   showSelection?: boolean;
   actions?: DataTableAction[];
+
+  // Layout behavior
+  fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
 };
 
 export type DataTableAction = {

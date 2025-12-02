@@ -2,7 +2,16 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Input, Text, Fieldset, Field } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Input,
+  Text,
+  Fieldset,
+  Field,
+  Collapsible,
+  IconButton,
+} from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import ValuesRemix from "@components/ValuesRemix";
@@ -19,6 +28,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   const [description, setDescription] = useState(props.description);
   const [values, setValues] = useState(props.values);
   const [finished, setFinished] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const isNameError = name === "";
   const isDescriptionError = description === "";
@@ -42,171 +52,198 @@ const AttributeCard = (props: AttributeCardProps) => {
   };
 
   return (
-    <Flex
-      direction={"column"}
-      gap={"2"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
-      rounded={"md"}
-      p={"2"}
+    <Collapsible.Root
+      open={isOpen}
+      onOpenChange={(event) => setIsOpen(event.open)}
     >
       <Flex
-        w={"100%"}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        gap={"2"}
+        direction={"column"}
+        gap={"1"}
+        border={"1px solid"}
+        borderColor={"gray.300"}
+        rounded={"md"}
+        p={"1"}
       >
-        <Flex direction={"row"} gap={"2"} align={"center"}>
-          <Flex
-            align={"center"}
-            gap={"2"}
-            p={"2"}
-            border={"2px solid"}
-            rounded={"md"}
-            w={"fit-content"}
-          >
-            <Icon name={"template"} size={"sm"} />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attribute{name !== "" ? `: ${name}` : ""}
-            </Text>
-          </Flex>
-        </Flex>
-
-        <Flex gap={"2"}>
-          <Button
-            size={"sm"}
-            rounded={"md"}
-            colorPalette={"red"}
-            onClick={() => {
-              if (props.onRemove) {
-                props.onRemove(props._id);
-              }
-            }}
-          >
-            Remove
-            <Icon name={"delete"} />
-          </Button>
-          <Button
-            size={"sm"}
-            rounded={"md"}
-            colorPalette={"green"}
-            onClick={() => {
-              setFinished(true);
-              if (props.onUpdate) {
-                props.onUpdate(attributeCardData);
-              }
-            }}
-            disabled={finished || !validAttributes}
-          >
-            Save
-            <Icon name={"check"} />
-          </Button>
-        </Flex>
-      </Flex>
-      <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-        {/* Attribute name */}
         <Flex
-          direction={"column"}
-          p={"2"}
-          h={"fit-content"}
-          w={{ base: "100%", md: "50%" }}
-          gap={"2"}
-          rounded={"md"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
+          w={"100%"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          gap={"1"}
         >
-          <Flex direction={"row"} gap={"2"}>
-            <Flex grow={"1"}>
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Field.Root required>
-                    <Field.Label>
-                      Name
-                      <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Input
-                      bg={"white"}
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Name"}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Collapsible.Trigger asChild>
+              <IconButton
+                size={"2xs"}
+                variant={"outline"}
+                rounded={"md"}
+                colorPalette={"gray"}
+                aria-label={isOpen ? "Collapse attribute" : "Expand attribute"}
+              >
+                <Icon name={isOpen ? "c_down" : "c_right"} size={"xs"} />
+              </IconButton>
+            </Collapsible.Trigger>
+            <Flex
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              rounded={"md"}
+              w={"fit-content"}
+            >
+              <Icon name={"template"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Attribute{name !== "" ? `: ${name}` : ""}
+              </Text>
             </Flex>
           </Flex>
 
-          {/* "Owner" field */}
-          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            <Flex direction={"column"} gap={"1"}>
-              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                Owner
-              </Text>
-              <Flex>
-                <ActorTag
-                  orcid={attributeCardData.owner}
-                  fallback={"Unknown User"}
-                  size={"md"}
-                />
+          <Flex gap={"1"}>
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"red"}
+              onClick={() => {
+                if (props.onRemove) {
+                  props.onRemove(props._id);
+                }
+              }}
+            >
+              Remove
+              <Icon name={"delete"} size={"xs"} />
+            </Button>
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => {
+                setFinished(true);
+                if (props.onUpdate) {
+                  props.onUpdate(attributeCardData);
+                }
+              }}
+              disabled={finished || !validAttributes}
+            >
+              Save
+              <Icon name={"save"} size={"xs"} />
+            </Button>
+          </Flex>
+        </Flex>
+        <Collapsible.Content>
+          <Flex direction={"column"} gap={"1"}>
+            <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+              {/* Attribute name */}
+              <Flex
+                direction={"column"}
+                p={"1"}
+                h={"fit-content"}
+                w={{ base: "100%", md: "50%" }}
+                gap={"1"}
+                rounded={"md"}
+                border={"1px solid"}
+                borderColor={"gray.300"}
+              >
+                <Flex direction={"row"} gap={"1"}>
+                  <Flex grow={"1"}>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Field.Root required>
+                          <Field.Label
+                            fontWeight={"semibold"}
+                            fontSize={"xs"}
+                            ml={"0.5"}
+                          >
+                            Name
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Input
+                            bg={"white"}
+                            size={"xs"}
+                            rounded={"md"}
+                            placeholder={"Name"}
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                            disabled={finished}
+                          />
+                        </Field.Root>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
+                  </Flex>
+                </Flex>
+
+                {/* "Owner" field */}
+                <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                      Owner
+                    </Text>
+                    <Flex>
+                      <ActorTag
+                        orcid={attributeCardData.owner}
+                        fallback={"Unknown User"}
+                        size={"sm"}
+                      />
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* Attribute description */}
+              <Flex
+                direction={"row"}
+                p={"1"}
+                h={"fit-content"}
+                gap={"1"}
+                border={"1px solid"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+                grow={"1"}
+              >
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root gap={"1"}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"}>
+                        Description
+                      </Field.Label>
+                      <MDEditor
+                        height={150}
+                        minHeight={100}
+                        maxHeight={400}
+                        style={{ width: "100%" }}
+                        value={description}
+                        preview={finished ? "preview" : "edit"}
+                        extraCommands={[]}
+                        onChange={(value) => {
+                          setDescription(value || "");
+                        }}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
               </Flex>
             </Flex>
+
+            {attributeCardData.restrictDataValues ? (
+              // Restrict the data to options from a drop-down
+              <ValuesRemix
+                viewOnly={finished}
+                values={values}
+                setValues={setValues}
+                permittedValues={props.permittedDataValues}
+                requireData
+              />
+            ) : (
+              <ValuesRemix
+                viewOnly={finished}
+                values={values}
+                setValues={setValues}
+                requireData
+              />
+            )}
           </Flex>
-        </Flex>
-
-        {/* Attribute description */}
-        <Flex
-          direction={"row"}
-          p={"2"}
-          h={"fit-content"}
-          gap={"2"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
-          rounded={"md"}
-          grow={"1"}
-        >
-          <Fieldset.Root>
-            <Fieldset.Content>
-              <Field.Root>
-                <Field.Label>Description</Field.Label>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
-                />
-              </Field.Root>
-            </Fieldset.Content>
-          </Fieldset.Root>
-        </Flex>
+        </Collapsible.Content>
       </Flex>
-
-      {attributeCardData.restrictDataValues ? (
-        // Restrict the data to options from a drop-down
-        <ValuesRemix
-          viewOnly={finished}
-          values={values}
-          setValues={setValues}
-          permittedValues={props.permittedDataValues}
-          requireData
-        />
-      ) : (
-        <ValuesRemix
-          viewOnly={finished}
-          values={values}
-          setValues={setValues}
-          requireData
-        />
-      )}
-    </Flex>
+    </Collapsible.Root>
   );
 };
 

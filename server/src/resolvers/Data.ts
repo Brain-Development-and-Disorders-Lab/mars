@@ -44,7 +44,7 @@ export const DataResolvers = {
       _parent: IResolverParent,
       args: { target: string; file: IFile },
       context: Context,
-    ): Promise<IResponseMessage> => {
+    ): Promise<ResponseData<string>> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
       return await Data.uploadAttachment(args.target, args.file);

@@ -14,9 +14,7 @@ import {
   Fieldset,
   Flex,
   Heading,
-  IconButton,
   Input,
-  Link,
   Menu,
   Portal,
   RadioGroup,
@@ -34,7 +32,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
-import DataTable from "@components/DataTable";
+import DataTableRemix from "@components/DataTableRemix";
 import SearchSelect from "@components/SearchSelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
@@ -611,43 +609,50 @@ const Project = () => {
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
-      id: (info: Cell<string, string>) => info.row.original,
-      cell: (info: Cell<string, string>) => (
-        <Linky id={info.row.original} type={"entities"} size={"sm"} />
-      ),
-      header: "Name",
-    },
-    {
-      id: "view",
+      id: "entityId",
+      accessorFn: (row: string) => row,
       cell: (info: Cell<string, string>) => {
+        const entityId = info.getValue();
         return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip
+              content={entityId}
+              disabled={entityId.length < 20}
+              showArrow
+            >
+              <Linky id={entityId} type={"entities"} size={"xs"} />
+            </Tooltip>
             {editing ? (
-              <IconButton
-                aria-label={"Remove entity"}
-                colorPalette={"red"}
-                size={"sm"}
-                rounded={"md"}
-                onClick={() => handleRemoveEntity(info.row.original)}
+              <Button
+                size="2xs"
+                mx={"1"}
+                variant="subtle"
+                colorPalette="red"
+                aria-label={"Remove Entity"}
+                onClick={() => {
+                  handleRemoveEntity(entityId);
+                }}
               >
-                <Icon name={"delete"} />
-              </IconButton>
+                Remove
+                <Icon name={"delete"} size={"xs"} />
+              </Button>
             ) : (
-              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-                <Link
-                  fontWeight={"semibold"}
-                  color={"black"}
-                  onClick={() => navigate(`/entities/${info.row.original}`)}
-                >
-                  View
-                </Link>
-                <Icon name={"a_right"} />
-              </Flex>
+              <Button
+                size="2xs"
+                mx={"1"}
+                variant="subtle"
+                colorPalette="gray"
+                aria-label={"View Entity"}
+                onClick={() => navigate(`/entities/${entityId}`)}
+              >
+                View
+                <Icon name={"a_right"} size={"xs"} />
+              </Button>
             )}
           </Flex>
         );
       },
-      header: "",
+      header: "Name",
     },
   ];
   const entitiesTableActions: DataTableAction[] = [
@@ -671,9 +676,9 @@ const Project = () => {
     >
       <Flex direction={"column"}>
         <Flex
-          gap={"2"}
-          p={"2"}
-          pb={{ base: "2", lg: "0" }}
+          gap={"1"}
+          p={"1"}
+          pb={{ base: "1", lg: "0" }}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -682,25 +687,25 @@ const Project = () => {
           <Flex
             id={"projectNameTag"}
             align={"center"}
-            gap={"2"}
-            p={"2"}
+            gap={"1"}
+            p={"1"}
             border={"2px solid"}
             rounded={"md"}
           >
-            <Icon name={"project"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
+            <Icon name={"project"} size={"sm"} />
+            <Heading fontWeight={"semibold"} size={"sm"}>
               {project.name}
             </Heading>
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu.Root>
+            <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"sm"} rounded={"md"}>
+                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
                   Actions
-                  <Icon name={"lightning"} />
+                  <Icon name={"lightning"} size={"xs"} />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
@@ -708,10 +713,10 @@ const Project = () => {
                   <Menu.Item
                     value={"export-project"}
                     onClick={handleExportClick}
-                    fontSize={"sm"}
+                    fontSize={"xs"}
                     disabled={exportLoading || projectArchived}
                   >
-                    <Icon name={"download"} />
+                    <Icon name={"download"} size={"xs"} />
                     Export Project
                   </Menu.Item>
                   <Tooltip
@@ -722,24 +727,24 @@ const Project = () => {
                     <Menu.Item
                       value={"export-entities"}
                       onClick={handleExportEntitiesClick}
-                      fontSize={"sm"}
+                      fontSize={"xs"}
                       disabled={
                         projectEntities?.length === 0 ||
                         exportEntitiesLoading ||
                         projectArchived
                       }
                     >
-                      <Icon name={"download"} />
+                      <Icon name={"download"} size={"xs"} />
                       Export Entities
                     </Menu.Item>
                   </Tooltip>
                   <Menu.Item
                     value={"archive"}
                     onClick={() => setArchiveDialogOpen(true)}
-                    fontSize={"sm"}
+                    fontSize={"xs"}
                     disabled={projectArchived}
                   >
-                    <Icon name={"archive"} />
+                    <Icon name={"archive"} size={"xs"} />
                     Archive
                   </Menu.Item>
                 </Menu.Content>
@@ -749,37 +754,41 @@ const Project = () => {
             {projectArchived ? (
               <Button
                 onClick={handleRestoreClick}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"orange"}
               >
                 Restore
-                <Icon name={"rewind"} />
+                <Icon name={"rewind"} size={"xs"} />
               </Button>
             ) : (
               <Flex gap={"2"}>
                 {editing && (
                   <Button
                     onClick={handleCancelClick}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"red"}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
                 <Button
                   id={"editProjectButton"}
                   colorPalette={editing ? "green" : "blue"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   loading={isUpdating}
                 >
                   {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} /> : <Icon name={"edit"} />}
+                  {editing ? (
+                    <Icon name={"save"} size={"xs"} />
+                  ) : (
+                    <Icon name={"edit"} size={"xs"} />
+                  )}
                 </Button>
               </Flex>
             )}
@@ -797,47 +806,51 @@ const Project = () => {
                   onClick={() => setHistoryOpen(true)}
                   variant={"subtle"}
                   colorPalette={"gray"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                 >
                   History
-                  <Icon name={"clock"} />
+                  <Icon name={"clock"} size={"xs"} />
                 </Button>
               </Drawer.Trigger>
               <Drawer.Backdrop />
               <Drawer.Positioner>
-                <Drawer.Content>
+                <Drawer.Content p={"1"}>
                   <Drawer.CloseTrigger asChild>
                     <CloseButton
-                      size={"sm"}
+                      top={"6px"}
+                      size={"2xs"}
                       onClick={() => setHistoryOpen(false)}
                     />
                   </Drawer.CloseTrigger>
-                  <Drawer.Header pb={"2"}>
+                  <Drawer.Header pb={"1"} p={"1"}>
                     <Flex direction={"column"} w={"100%"} gap={"2"}>
-                      <Text fontSize={"sm"} fontWeight={"bold"}>
-                        History
-                      </Text>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Icon name={"clock"} size={"sm"} />
+                        <Text fontSize={"sm"} fontWeight={"bold"}>
+                          History
+                        </Text>
+                      </Flex>
                       <Flex
-                        direction={"row"}
+                        direction={"column"}
                         gap={"1"}
                         justify={"space-between"}
                       >
                         <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Last modified:
                           </Text>
-                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
                             {projectHistory.length > 0
                               ? dayjs(projectHistory[0].timestamp).fromNow()
                               : "never"}
                           </Text>
                         </Flex>
                         <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            Previous Versions:
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Versions:
                           </Text>
-                          <Text fontSize={"sm"} fontWeight={"normal"}>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
                             {projectHistory.length}
                           </Text>
                         </Flex>
@@ -845,8 +858,8 @@ const Project = () => {
                     </Flex>
                   </Drawer.Header>
 
-                  <Drawer.Body>
-                    <Stack gap={"2"}>
+                  <Drawer.Body p={"1"}>
+                    <Stack gap={"1"}>
                       {projectHistory && projectHistory.length > 0 ? (
                         projectHistory.map((projectVersion) => {
                           return (
@@ -863,11 +876,11 @@ const Project = () => {
                                   direction={"column"}
                                   w={"100%"}
                                   gap={"1"}
-                                  p={"2"}
+                                  p={"1"}
                                 >
                                   <Text
                                     fontWeight={"semibold"}
-                                    fontSize={"sm"}
+                                    fontSize={"xs"}
                                     color={"gray.700"}
                                   >
                                     {projectVersion.name}
@@ -875,7 +888,7 @@ const Project = () => {
                                 </Flex>
                               </Card.Header>
 
-                              <Card.Body px={"2"} py={"0"}>
+                              <Card.Body px={"1"} py={"0"}>
                                 <Flex direction={"column"} gap={"2"}>
                                   {/* Description */}
                                   {_.isEqual(projectVersion.description, "") ? (
@@ -883,14 +896,27 @@ const Project = () => {
                                       size={"sm"}
                                       colorPalette={"orange"}
                                     >
-                                      <Tag.Label>No Description</Tag.Label>
+                                      <Tag.Label fontSize={"xs"}>
+                                        No Description
+                                      </Tag.Label>
                                     </Tag.Root>
                                   ) : (
-                                    <Text fontSize={"sm"}>
-                                      {_.truncate(projectVersion.description, {
-                                        length: 56,
-                                      })}
-                                    </Text>
+                                    <Tooltip
+                                      content={projectVersion.description}
+                                      disabled={
+                                        projectVersion.description.length < 32
+                                      }
+                                      showArrow
+                                    >
+                                      <Text fontSize={"xs"}>
+                                        {_.truncate(
+                                          projectVersion.description,
+                                          {
+                                            length: 32,
+                                          },
+                                        )}
+                                      </Text>
+                                    </Tooltip>
                                   )}
 
                                   <Flex direction={"row"} gap={"2"}>
@@ -898,14 +924,14 @@ const Project = () => {
                                     <Flex
                                       direction={"column"}
                                       gap={"1"}
-                                      p={"2"}
+                                      p={"1"}
                                       rounded={"md"}
                                       border={"1px solid"}
                                       borderColor={"gray.300"}
                                       grow={"1"}
                                     >
                                       <Text
-                                        fontSize={"sm"}
+                                        fontSize={"xs"}
                                         fontWeight={"semibold"}
                                       >
                                         Entities
@@ -924,7 +950,7 @@ const Project = () => {
                                               <Linky
                                                 type={"projects"}
                                                 id={projectVersion.entities[0]}
-                                                size={"sm"}
+                                                size={"xs"}
                                               />
                                             </Tag.Label>
                                           </Tag.Root>
@@ -932,7 +958,7 @@ const Project = () => {
                                             1 && (
                                             <Text
                                               fontWeight={"semibold"}
-                                              fontSize={"sm"}
+                                              fontSize={"xs"}
                                             >
                                               and{" "}
                                               {projectVersion.entities.length -
@@ -942,7 +968,7 @@ const Project = () => {
                                           )}
                                         </Flex>
                                       ) : (
-                                        <Text fontSize={"sm"}>No Entities</Text>
+                                        <Text fontSize={"xs"}>No Entities</Text>
                                       )}
                                     </Flex>
 
@@ -950,14 +976,14 @@ const Project = () => {
                                     <Flex
                                       direction={"column"}
                                       gap={"1"}
-                                      p={"2"}
+                                      p={"1"}
                                       rounded={"md"}
                                       border={"1px solid"}
                                       borderColor={"gray.300"}
                                       grow={"1"}
                                     >
                                       <Text
-                                        fontSize={"sm"}
+                                        fontSize={"xs"}
                                         fontWeight={"semibold"}
                                       >
                                         Collaborators
@@ -973,7 +999,7 @@ const Project = () => {
                                             key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
                                             size={"sm"}
                                           >
-                                            <Tag.Label>
+                                            <Tag.Label fontSize={"xs"}>
                                               {projectVersion.collaborators[0]}
                                             </Tag.Label>
                                           </Tag.Root>
@@ -981,7 +1007,7 @@ const Project = () => {
                                             1 && (
                                             <Text
                                               fontWeight={"semibold"}
-                                              fontSize={"sm"}
+                                              fontSize={"xs"}
                                             >
                                               and{" "}
                                               {projectVersion.collaborators
@@ -991,7 +1017,7 @@ const Project = () => {
                                           )}
                                         </Flex>
                                       ) : (
-                                        <Text fontSize={"sm"}>
+                                        <Text fontSize={"xs"}>
                                           No Collaborators
                                         </Text>
                                       )}
@@ -1000,7 +1026,7 @@ const Project = () => {
                                 </Flex>
                               </Card.Body>
 
-                              <Card.Footer p={"2"}>
+                              <Card.Footer p={"1"}>
                                 {/* Version information */}
                                 <Flex direction={"column"} gap={"2"} w={"100%"}>
                                   <Flex
@@ -1014,10 +1040,10 @@ const Project = () => {
                                       direction={"column"}
                                       w={"100%"}
                                       gap={"1"}
-                                      p={"2"}
+                                      p={"1"}
                                     >
                                       <Text
-                                        fontSize={"sm"}
+                                        fontSize={"xs"}
                                         fontWeight={"semibold"}
                                       >
                                         Version
@@ -1031,7 +1057,7 @@ const Project = () => {
                                           size={"sm"}
                                           colorPalette={"green"}
                                         >
-                                          <Tag.Label>
+                                          <Tag.Label fontSize={"xs"}>
                                             {projectVersion.version}
                                           </Tag.Label>
                                         </Tag.Root>
@@ -1046,7 +1072,7 @@ const Project = () => {
                                         ).fromNow()}
                                       </Text>
                                       <Text
-                                        fontSize={"sm"}
+                                        fontSize={"xs"}
                                         fontWeight={"semibold"}
                                       >
                                         Message
@@ -1058,7 +1084,9 @@ const Project = () => {
                                             size={"sm"}
                                             colorPalette={"orange"}
                                           >
-                                            <Tag.Label>No Message</Tag.Label>
+                                            <Tag.Label fontSize={"xs"}>
+                                              No Message
+                                            </Tag.Label>
                                           </Tag.Root>
                                         </Flex>
                                       ) : (
@@ -1069,7 +1097,7 @@ const Project = () => {
                                           }
                                           showArrow
                                         >
-                                          <Text fontSize={"sm"}>
+                                          <Text fontSize={"xs"}>
                                             {_.truncate(
                                               projectVersion.message,
                                               {
@@ -1085,10 +1113,10 @@ const Project = () => {
                                       direction={"column"}
                                       w={"100%"}
                                       gap={"1"}
-                                      p={"2"}
+                                      p={"1"}
                                     >
                                       <Text
-                                        fontSize={"sm"}
+                                        fontSize={"xs"}
                                         fontWeight={"semibold"}
                                       >
                                         Author
@@ -1097,7 +1125,7 @@ const Project = () => {
                                         <ActorTag
                                           orcid={projectVersion.author}
                                           fallback={"Unknown User"}
-                                          size={"md"}
+                                          size={"sm"}
                                         />
                                       </Flex>
                                     </Flex>
@@ -1106,7 +1134,7 @@ const Project = () => {
                                   <Flex w={"100%"} justify={"right"}>
                                     <Button
                                       colorPalette={"orange"}
-                                      size={"sm"}
+                                      size={"xs"}
                                       rounded={"md"}
                                       onClick={() => {
                                         handleRestoreFromHistoryClick(
@@ -1116,7 +1144,7 @@ const Project = () => {
                                       disabled={projectArchived}
                                     >
                                       Restore
-                                      <Icon name={"rewind"} />
+                                      <Icon name={"rewind"} size={"xs"} />
                                     </Button>
                                   </Flex>
                                 </Flex>
@@ -1125,7 +1153,7 @@ const Project = () => {
                           );
                         })
                       ) : (
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
                           No previous versions.
                         </Text>
                       )}
@@ -1143,7 +1171,7 @@ const Project = () => {
               open={archiveDialogOpen}
               setOpen={setArchiveDialogOpen}
             >
-              <Text>
+              <Text fontSize={"xs"}>
                 Are you sure you want to archive this Project? No Entities will
                 be deleted. This Project will be moved to the Workspace archive.
               </Text>
@@ -1151,27 +1179,27 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"2"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
           {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Overview */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               h={"fit-content"}
-              gap={"2"}
+              gap={"1"}
               bg={"gray.100"}
               rounded={"md"}
               grow={"1"}
             >
-              <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Name
                   </Text>
                   <Input
                     id={"projectNameInput"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     value={projectName}
                     onChange={(event) => {
@@ -1190,22 +1218,22 @@ const Project = () => {
                 />
               </Flex>
 
-              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+              <Flex gap={"1"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Owner
                   </Text>
                   <ActorTag
                     orcid={project.owner}
                     fallback={"Unknown User"}
-                    size={"md"}
+                    size={"sm"}
                   />
                 </Flex>
               </Flex>
@@ -1214,7 +1242,7 @@ const Project = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               gap={"1"}
               border={"1px solid"}
               borderColor={"gray.300"}
@@ -1222,7 +1250,7 @@ const Project = () => {
               basis={"40%"}
               grow={"1"}
             >
-              <Text fontWeight={"bold"} fontSize={"sm"}>
+              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                 Description
               </Text>
               <MDEditor
@@ -1242,13 +1270,13 @@ const Project = () => {
           </Flex>
 
           {/* "Entities" and "Collaborators" */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Entities */}
             <Flex
               direction={"column"}
               h={"fit-content"}
-              p={"2"}
-              gap={"2"}
+              p={"1"}
+              gap={"1"}
               rounded={"md"}
               border={"1px solid"}
               borderColor={"gray.300"}
@@ -1260,19 +1288,19 @@ const Project = () => {
                 align={"center"}
               >
                 {/* Entities in the Project */}
-                <Text fontSize={"sm"} fontWeight={"bold"}>
+                <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
                   Entities
                 </Text>
                 <Button
                   colorPalette={"green"}
                   id={"addEntityButton"}
                   onClick={() => setEntitiesOpen(true)}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   disabled={!editing}
                 >
                   Add
-                  <Icon name={"add"} />
+                  <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
               <Flex
@@ -1282,7 +1310,7 @@ const Project = () => {
                 minH={projectEntities.length > 0 ? "fit-content" : "200px"}
               >
                 {projectEntities && projectEntities.length > 0 ? (
-                  <DataTable
+                  <DataTableRemix
                     data={projectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
@@ -1291,7 +1319,6 @@ const Project = () => {
                     showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
-                    showItemCount
                   />
                 ) : (
                   <EmptyState.Root>
@@ -1330,21 +1357,31 @@ const Project = () => {
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
               <Dialog.Header
-                p={"2"}
-                mt={"2"}
+                px={"1"}
+                py={"2"}
                 fontWeight={"semibold"}
-                fontSize={"md"}
+                fontSize={"xs"}
+                bg={"blue.300"}
+                roundedTop={"md"}
               >
-                Add Entity
+                <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                  <Icon name={"add"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Add Entity
+                  </Text>
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setEntitiesOpen(false)}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"} gap={"2"}>
-                <Text>Select an Entity to add to the Project.</Text>
+              <Dialog.Body p={"1"} gap={"1"}>
+                <Text fontSize={"xs"}>
+                  Select an Entity to add to the Project.
+                </Text>
                 <SearchSelect
                   id={"entitySearchSelect"}
                   resultType={"entity"}
@@ -1353,16 +1390,16 @@ const Project = () => {
                 />
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
+              <Dialog.Footer p={"1"}>
                 <Button
                   colorPalette={"red"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   variant={"solid"}
                   onClick={() => setEntitiesOpen(false)}
                 >
                   Cancel
-                  <Icon name={"cross"} />
+                  <Icon name={"cross"} size={"xs"} />
                 </Button>
 
                 <Spacer />
@@ -1370,7 +1407,7 @@ const Project = () => {
                 <Button
                   id={"addEntityDoneButton"}
                   colorPalette={"green"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   onClick={() => {
                     if (id) {
@@ -1380,7 +1417,7 @@ const Project = () => {
                   }}
                 >
                   Done
-                  <Icon name={"check"} />
+                  <Icon name={"check"} size={"xs"} />
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>
@@ -1402,129 +1439,142 @@ const Project = () => {
               {/* Heading and close button */}
               <Dialog.Header
                 p={"2"}
-                mt={"2"}
                 fontWeight={"semibold"}
-                fontSize={"md"}
+                fontSize={"xs"}
+                bg={"blue.300"}
+                roundedTop={"md"}
               >
-                Export Project
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"download"} size={"sm"} />
+                  Export Project
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size={"sm"}
+                    size={"2xs"}
+                    top={"6px"}
                     onClick={() => setExportOpen(false)}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body px={"2"} gap={"2"}>
-                {/* Export information */}
-                {_.isEqual(exportFormat, "json") && (
-                  <Information
-                    text={"JSON files can be re-imported into Metadatify."}
-                  />
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Information
-                    text={
-                      " To export Entities alongside Project details, use JSON format."
-                    }
-                  />
-                )}
-
+              <Dialog.Body p={"1"} gap={"1"}>
                 {/* Select export format */}
                 <Flex
                   w={"100%"}
-                  direction={"row"}
-                  py={"2"}
-                  gap={"2"}
-                  justify={"space-between"}
-                  align={"center"}
+                  direction={"column"}
+                  py={"1"}
+                  gap={"1"}
                   ref={selectExportFormatRef}
                 >
-                  <Flex gap={"2"} align={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Format:
-                    </Text>
-                    <Fieldset.Root w={"fit-content"}>
-                      <Fieldset.Content>
-                        <Field.Root>
-                          <Select.Root
-                            key={"select-export-format"}
-                            w={"120px"}
-                            size={"sm"}
-                            collection={createListCollection({
-                              items: ["JSON", "CSV"],
-                            })}
-                            defaultValue={["JSON"]}
-                            onValueChange={(details) =>
-                              setExportFormat(details.items[0].toLowerCase())
-                            }
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger>
-                                <Select.ValueText
-                                  placeholder={"Select Export Format"}
-                                />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Portal container={selectExportFormatRef}>
-                              <Select.Positioner>
-                                <Select.Content>
-                                  {createListCollection({
-                                    items: ["JSON", "CSV"],
-                                  }).items.map((valueType) => (
-                                    <Select.Item
-                                      item={valueType}
-                                      key={valueType}
-                                    >
-                                      {valueType}
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  ))}
-                                </Select.Content>
-                              </Select.Positioner>
-                            </Portal>
-                          </Select.Root>
-                        </Field.Root>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
+                  <Flex
+                    direction={"row"}
+                    gap={"1"}
+                    align={"center"}
+                    justify={"space-between"}
+                    ml={"0.5"}
+                  >
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Format:
+                      </Text>
+                      <Fieldset.Root w={"fit-content"}>
+                        <Fieldset.Content>
+                          <Field.Root>
+                            <Select.Root
+                              key={"select-export-format"}
+                              w={"120px"}
+                              size={"xs"}
+                              rounded={"md"}
+                              collection={createListCollection({
+                                items: ["JSON", "CSV"],
+                              })}
+                              defaultValue={["JSON"]}
+                              onValueChange={(details) =>
+                                setExportFormat(details.items[0].toLowerCase())
+                              }
+                            >
+                              <Select.HiddenSelect />
+                              <Select.Control>
+                                <Select.Trigger>
+                                  <Select.ValueText
+                                    placeholder={"Select Export Format"}
+                                  />
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                  <Select.Indicator />
+                                </Select.IndicatorGroup>
+                              </Select.Control>
+                              <Portal container={selectExportFormatRef}>
+                                <Select.Positioner>
+                                  <Select.Content>
+                                    {createListCollection({
+                                      items: ["JSON", "CSV"],
+                                    }).items.map((valueType) => (
+                                      <Select.Item
+                                        item={valueType}
+                                        key={valueType}
+                                      >
+                                        {valueType}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))}
+                                  </Select.Content>
+                                </Select.Positioner>
+                              </Portal>
+                            </Select.Root>
+                          </Field.Root>
+                        </Fieldset.Content>
+                      </Fieldset.Root>
+                    </Flex>
+                    {/* Export information */}
+                    {_.isEqual(exportFormat, "json") && (
+                      <Information
+                        text={"JSON files can be re-imported into Metadatify."}
+                      />
+                    )}
+                    {_.isEqual(exportFormat, "csv") && (
+                      <Information
+                        text={
+                          "To export Entities alongside Project details, use JSON format."
+                        }
+                      />
+                    )}
                   </Flex>
-                  <Text fontSize={"sm"}>
-                    Select the Project fields to be exported.
+                  <Text fontSize={"xs"}>
+                    Select the Project fields to be exported:
                   </Text>
                 </Flex>
 
                 {/* Selection content */}
                 <Flex
                   direction={"row"}
-                  p={"2"}
-                  gap={"4"}
+                  p={"1"}
+                  gap={"1"}
                   rounded={"md"}
                   border={"1px solid"}
                   borderColor={"gray.300"}
                 >
                   <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Fieldset.Legend>Details</Fieldset.Legend>
+                    <Fieldset.Content gap={"1"}>
+                      <Fieldset.Legend fontSize={"xs"}>Details</Fieldset.Legend>
                       {!loading ? (
-                        <Stack gap={2} direction={"column"}>
+                        <Stack gap={"1"} direction={"column"}>
                           <Checkbox.Root
                             disabled
                             defaultChecked
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
-                            fontSize={"sm"}
+                            fontSize={"xs"}
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label>Name: {projectName}</Checkbox.Label>
+                            <Checkbox.Label fontSize={"xs"}>
+                              Name: {projectName}
+                            </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
-                            fontSize={"sm"}
+                            fontSize={"xs"}
                             checked={_.includes(exportFields, "created")}
                             onCheckedChange={(details) =>
                               handleExportCheck(
@@ -1535,13 +1585,13 @@ const Project = () => {
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label>
+                            <Checkbox.Label fontSize={"xs"}>
                               Created:{" "}
                               {dayjs(project.created).format("DD MMM YYYY")}
                             </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             checked={_.includes(exportFields, "owner")}
                             onCheckedChange={(details) =>
@@ -1553,12 +1603,12 @@ const Project = () => {
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label>
+                            <Checkbox.Label fontSize={"xs"}>
                               Owner: {project.owner}
                             </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             checked={_.includes(exportFields, "description")}
                             onCheckedChange={(details) =>
@@ -1571,8 +1621,8 @@ const Project = () => {
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label>
-                              <Text lineClamp={1} fontSize={"sm"}>
+                            <Checkbox.Label fontSize={"xs"}>
+                              <Text lineClamp={1} fontSize={"xs"}>
                                 Description:{" "}
                                 {_.isEqual(projectDescription, "")
                                   ? "No description"
@@ -1584,13 +1634,15 @@ const Project = () => {
                           </Checkbox.Root>
                         </Stack>
                       ) : (
-                        <Text fontSize={"sm"}>Loading details...</Text>
+                        <Text fontSize={"xs"}>Loading details...</Text>
                       )}
                     </Fieldset.Content>
                   </Fieldset.Root>
                   <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Fieldset.Legend>Entities</Fieldset.Legend>
+                    <Fieldset.Content gap={"1"}>
+                      <Fieldset.Legend fontSize={"xs"}>
+                        Entities
+                      </Fieldset.Legend>
                       {!loading ? (
                         <Tooltip
                           content={
@@ -1600,7 +1652,7 @@ const Project = () => {
                           showArrow
                         >
                           <Checkbox.Root
-                            size={"sm"}
+                            size={"xs"}
                             rounded={"md"}
                             checked={_.includes(exportFields, "entities")}
                             onCheckedChange={(details) =>
@@ -1616,15 +1668,15 @@ const Project = () => {
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label>
-                              <Text lineClamp={1} fontSize={"sm"}>
+                            <Checkbox.Label fontSize={"xs"}>
+                              <Text lineClamp={1} fontSize={"xs"}>
                                 Export Entities
                               </Text>
                             </Checkbox.Label>
                           </Checkbox.Root>
                         </Tooltip>
                       ) : (
-                        <Text fontSize={"sm"}>Loading details...</Text>
+                        <Text fontSize={"xs"}>Loading details...</Text>
                       )}
                       {_.includes(exportFields, "entities") && (
                         <RadioGroup.Root
@@ -1637,14 +1689,14 @@ const Project = () => {
                             <RadioGroup.Item value={"name"}>
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"sm"}>
+                              <RadioGroup.Label fontSize={"xs"}>
                                 Names
                               </RadioGroup.Label>
                             </RadioGroup.Item>
                             <RadioGroup.Item value={"_id"}>
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"sm"}>
+                              <RadioGroup.Label fontSize={"xs"}>
                                 Identifiers
                               </RadioGroup.Label>
                             </RadioGroup.Item>
@@ -1656,25 +1708,25 @@ const Project = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
-                <Flex direction={"column"} w={"30%"} gap={"2"}>
+              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+                <Flex direction={"column"} w={"30%"} gap={"1"}>
                   {/* "Download" button */}
                   <Flex
                     direction={"row"}
                     w={"100%"}
-                    gap={"2"}
+                    gap={"1"}
                     justify={"right"}
                     align={"center"}
                   >
                     <Button
                       colorPalette={"blue"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       onClick={() => handleDownloadClick(exportFormat)}
                       loading={exportLoading}
                     >
                       Download
-                      <Icon name={"download"} />
+                      <Icon name={"download"} size={"xs"} />
                     </Button>
                   </Flex>
                 </Flex>
@@ -1696,9 +1748,10 @@ const Project = () => {
             <Dialog.Content>
               <Dialog.Header
                 p={"2"}
-                mt={"2"}
                 fontWeight={"semibold"}
                 fontSize={"md"}
+                bg={"blue.300"}
+                roundedTop={"md"}
               >
                 <Icon name={"save"} />
                 Saving Changes

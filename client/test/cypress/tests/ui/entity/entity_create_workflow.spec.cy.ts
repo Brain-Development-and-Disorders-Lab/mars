@@ -65,7 +65,7 @@ describe("Create Entities", () => {
     cy.get("button").contains("Add").click();
 
     // Check if the relationship is displayed in a table
-    cy.get(".chakra-table__root").should("exist");
+    cy.get(".data-table-scroll-container").should("exist");
     cy.get("#0_target").should("exist");
     cy.get("#0_target").contains("Test Entity");
   });

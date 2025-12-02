@@ -314,7 +314,7 @@ const Template = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
             {/* Actions Menu */}
-            <Menu.Root>
+            <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
                 <Button
                   size={"xs"}

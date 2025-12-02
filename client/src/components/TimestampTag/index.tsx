@@ -36,7 +36,7 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
           {_.isUndefined(props.description) ? "Timestamp" : props.description}
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} mr={"0.5"}>
           {dateString}
         </Text>
       </Flex>

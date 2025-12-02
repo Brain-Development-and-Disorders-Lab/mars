@@ -81,7 +81,7 @@ export class Data {
   static uploadAttachment = async (
     target: string,
     file: IFile,
-  ): Promise<IResponseMessage> => {
+  ): Promise<ResponseData<string>> => {
     const { createReadStream, filename, mimetype } = await file;
 
     const bucket = getAttachments();
@@ -90,26 +90,47 @@ export class Data {
       metadata: { type: mimetype },
     });
 
-    stream
-      .pipe(uploadStream)
-      .on("error", (error: Error) => {
-        return {
-          success: false,
-          message: `Unable to upload file: ${error.message}`,
-        };
-      })
-      .on("finish", async () => {
-        // Once the upload is finished, register attachment with Entity
-        await Entities.addAttachment(target, {
-          _id: uploadStream.id.toString(),
-          name: filename,
-        });
-      });
+    return new Promise((resolve, reject) => {
+      stream
+        .pipe(uploadStream)
+        .on("error", (error: Error) => {
+          reject({
+            success: false,
+            message: `Unable to upload file: ${error.message}`,
+            data: "",
+          });
+        })
+        .on("finish", async () => {
+          try {
+            // Once the upload is finished, register attachment with Entity
+            const attachmentId = uploadStream.id.toString();
+            const addResult = await Entities.addAttachment(target, {
+              _id: attachmentId,
+              name: filename,
+            });
 
-    return {
-      success: true,
-      message: `Uploaded file "${filename}"`,
-    };
+            if (!addResult.success) {
+              resolve({
+                success: false,
+                message: addResult.message,
+                data: "",
+              });
+            } else {
+              resolve({
+                success: true,
+                message: `Uploaded file "${filename}"`,
+                data: attachmentId,
+              });
+            }
+          } catch (error: any) {
+            reject({
+              success: false,
+              message: `Error registering attachment: ${error.message}`,
+              data: "",
+            });
+          }
+        });
+    });
   };
 
   /**

@@ -38,7 +38,10 @@ describe("CSV Import Test", () => {
 
       // Validate that the Project contains an Entity named "Mini Box 1 (CSV)"
       cy.get("#navProjectsButtonDesktop").click();
-      cy.get("#0__id > div > a").first().click(); // Button to view the first Project
+      cy.get(".data-table-scroll-container")
+        .find('button[aria-label="View Project"]')
+        .first()
+        .click();
       cy.contains("Mini Box 1 (CSV)");
     });
   });

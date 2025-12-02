@@ -309,14 +309,15 @@ const CounterSelect = (props: CounterProps) => {
 
   return (
     <Flex direction={"column"} gap={"1"} w={"100%"}>
-      <Flex w={"100%"} gap={"2"}>
+      <Flex w={"100%"} gap={"1"}>
         <Select.Root
           key={"select-counter"}
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           minW={"200px"}
           collection={counterCollection}
           onValueChange={handleSelectCounter}
+          disabled={counterCollection.items.length === 0}
         >
           <Select.HiddenSelect />
           <Select.Control>
@@ -345,34 +346,34 @@ const CounterSelect = (props: CounterProps) => {
         {props.showCreate && (
           <Flex>
             <Button
-              size={"sm"}
+              size={"xs"}
               rounded={"md"}
               colorPalette={"green"}
               onClick={() => setOpen(true)}
             >
               Create
-              <Icon name={"add"} />
+              <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
         )}
       </Flex>
 
       {/* Counter information */}
-      <Flex w={"100%"} gap={"2"}>
+      <Flex w={"100%"} gap={"1"}>
         {!_.isUndefined(selected._id) ? (
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
               Next Value:
             </Text>
             <Text
-              fontSize={"sm"}
+              fontSize={"xs"}
               color={currentValueLoading ? "gray.400" : "black"}
             >
               {currentValueLoading ? "Loading" : currentValue}
             </Text>
           </Flex>
         ) : (
-          <Text fontSize={"xs"} color={"gray.600"}>
+          <Text fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
             Select Counter to preview the next value
           </Text>
         )}
@@ -393,22 +394,31 @@ const CounterSelect = (props: CounterProps) => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header
-              px={"2"}
-              py={"4"}
+              px={"1"}
+              py={"2"}
               fontWeight={"semibold"}
-              fontSize={"md"}
+              fontSize={"sm"}
               roundedTop={"md"}
-              bg={"gray.100"}
+              bg={"blue.300"}
             >
               Create Counter
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"sm"} onClick={() => setOpen(false)} />
+                <CloseButton
+                  size={"2xs"}
+                  top={"6px"}
+                  onClick={() => setOpen(false)}
+                />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
-            <Dialog.Body px={"2"} gap={"2"}>
+            <Dialog.Body px={"1"} gap={"1"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text fontSize={"sm"} color={"gray.600"} lineHeight={"1.5"}>
+                <Text
+                  fontSize={"xs"}
+                  color={"gray.600"}
+                  lineHeight={"1.5"}
+                  ml={"0.5"}
+                >
                   Counters are used to standardize name formats using letters
                   and a number.
                   <br />
@@ -420,13 +430,13 @@ const CounterSelect = (props: CounterProps) => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label>
+                        <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Name
                           <Field.RequiredIndicator />
                         </Field.Label>
                         <Input
                           value={counterName}
-                          size={"sm"}
+                          size={"xs"}
                           rounded={"md"}
                           onChange={onNameInputChange}
                         />
@@ -439,22 +449,22 @@ const CounterSelect = (props: CounterProps) => {
                   <Fieldset.Root invalid={!isValidFormat}>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label>
+                        <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Format
                           <Field.RequiredIndicator />
                         </Field.Label>
                         <Input
                           value={counterFormat}
-                          size={"sm"}
+                          size={"xs"}
                           rounded={"md"}
                           onChange={onFormatInputChange}
                         />
                         {!isValidFormat && (
-                          <Field.ErrorText>
+                          <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
                             {formatErrorMessage}
                           </Field.ErrorText>
                         )}
-                        <Field.HelperText>
+                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
                           Example: "Counter_{"{}"}" generates "Counter_1",
                           "Counter_2", etc.
                         </Field.HelperText>
@@ -467,17 +477,20 @@ const CounterSelect = (props: CounterProps) => {
                   <Fieldset.Root invalid={!isValidInitial}>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label>
+                        <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Initial Value
                           <Field.RequiredIndicator />
                         </Field.Label>
                         <Input
                           type={"number"}
                           value={counterInitial}
-                          size={"sm"}
+                          size={"xs"}
                           rounded={"md"}
                           onChange={onInitialInputChange}
                         />
+                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
+                          The initial value of the counter.
+                        </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -485,51 +498,54 @@ const CounterSelect = (props: CounterProps) => {
                   <Fieldset.Root invalid={!isValidIncrement}>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label>
+                        <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Increment
                           <Field.RequiredIndicator />
                         </Field.Label>
                         <Input
                           type={"number"}
                           value={counterIncrement}
-                          size={"sm"}
+                          size={"xs"}
                           rounded={"md"}
                           onChange={onIncrementInputChange}
                         />
+                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
+                          The step size of the counter.
+                        </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
 
                 <Flex
-                  p={"2"}
-                  gap={"2"}
+                  p={"1"}
+                  gap={"1"}
                   direction={"column"}
                   rounded={"md"}
                   bg={"gray.100"}
                 >
                   <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Initial Counter Value:
                     </Text>
-                    <Text fontSize={"sm"}>{currentCounterPreview}</Text>
+                    <Text fontSize={"xs"}>{currentCounterPreview}</Text>
                   </Flex>
 
                   <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Next Counter Value:
                     </Text>
-                    <Text fontSize={"sm"}>{nextCounterPreview}</Text>
+                    <Text fontSize={"xs"}>{nextCounterPreview}</Text>
                   </Flex>
                 </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
                   variant={"solid"}
                   colorPalette={"red"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   onClick={() => {
                     setOpen(false);
@@ -540,11 +556,11 @@ const CounterSelect = (props: CounterProps) => {
                   }}
                 >
                   Cancel
-                  <Icon name={"cross"} />
+                  <Icon name={"cross"} size={"xs"} />
                 </Button>
 
                 <Button
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
                   disabled={
@@ -557,7 +573,7 @@ const CounterSelect = (props: CounterProps) => {
                   onClick={onDoneClick}
                 >
                   Done
-                  <Icon name="check" />
+                  <Icon name="check" size={"xs"} />
                 </Button>
               </Flex>
             </Dialog.Footer>
