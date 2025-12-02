@@ -12,6 +12,7 @@ import {
   Separator,
   Box,
   AbsoluteCenter,
+  Spacer,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -188,22 +189,27 @@ const Login = () => {
             rounded={"lg"}
             shadow={"sm"}
           >
-            <Heading size={"2xl"} fontWeight={"semibold"}>
-              Sign in
-            </Heading>
+            <Flex direction={"column"} gap={"2"} align={"center"}>
+              <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
+              <Heading size={"2xl"} fontWeight={"semibold"}>
+                Sign in
+              </Heading>
 
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
-              Use one of the sign in options below to get started.
-            </Text>
+              <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
+                Use one of the sign in options below to get started.
+              </Text>
+            </Flex>
 
             <Flex direction={"column"} gap={"2"} pt={"8"}>
               <Button
                 id={"orcidLoginButton"}
                 variant={"subtle"}
-                gap={"4"}
                 onClick={onLoginClick}
                 loading={isLoading}
                 loadingText={"Logging in..."}
+                size={"sm"}
+                rounded={"md"}
+                colorPalette={"green"}
               >
                 <Image
                   src={
@@ -216,20 +222,37 @@ const Login = () => {
               <Box position={"relative"} p={"4"}>
                 <Separator />
                 <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
-                  or
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    or
+                  </Text>
                 </AbsoluteCenter>
               </Box>
 
               <Button
                 variant={"subtle"}
                 colorPalette={"gray"}
-                gap={"4"}
                 disabled
-                opacity={0.6}
+                size={"sm"}
+                opacity={0.8}
+                rounded={"md"}
               >
-                <Icon name={"clock"} />
+                <Icon name={"clock"} size={"xs"} />
                 More sign in options coming soon.
               </Button>
+            </Flex>
+
+            <Spacer />
+
+            {/* Version number */}
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              justify={"center"}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                v{process.env.VERSION}
+              </Text>
             </Flex>
           </Flex>
         </Flex>
