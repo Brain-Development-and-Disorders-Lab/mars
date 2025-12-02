@@ -281,6 +281,12 @@ export type EntityImportReview = {
   state: "create" | "update";
 };
 
+// Import review summary for Templates being imported
+export type TemplateImportReview = {
+  name: string;
+  state: "create" | "update";
+};
+
 // Column mappings for Entity imports
 export type IRow = Record<string, any>;
 export type IColumnMapping = Record<string, any>;

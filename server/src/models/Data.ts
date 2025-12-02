@@ -9,6 +9,7 @@ import {
   IResponseMessage,
   ResponseData,
   EntityImportReview,
+  TemplateImportReview,
   IColumnMapping,
   IRow,
   GenericValueType,
@@ -428,6 +429,60 @@ export class Data {
       return {
         success: true,
         message: "Collated list of Entities from JSON file to review",
+        data: review,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Invalid JSON file",
+      data: [],
+    };
+  };
+
+  /**
+   * Review a Template JSON file and collate a list of operations that will be made to the imported Template
+   * @param {IFile[]} file JSON file for import
+   * @return {Promise<ResponseData<TemplateImportReview[]>>}
+   */
+  static reviewTemplateJSON = async (
+    file: IFile[],
+  ): Promise<ResponseData<TemplateImportReview[]>> => {
+    const { createReadStream, mimetype } = await file[0];
+    const stream = createReadStream();
+
+    // Validate correct MIME type before continuing
+    if (_.isEqual(mimetype, "application/json")) {
+      const output = await Data.bufferHelper(stream);
+      const parsed = JSON.parse(output.toString());
+
+      // Check that JSON file contains required fields
+      if (
+        _.isUndefined(parsed["name"]) ||
+        _.isUndefined(parsed["description"]) ||
+        _.isUndefined(parsed["archived"]) ||
+        _.isUndefined(parsed["values"])
+      ) {
+        return {
+          success: false,
+          message: "Template JSON file is missing required fields",
+          data: [],
+        };
+      }
+
+      const review: TemplateImportReview[] = [];
+      // Check if Template exists and update or create as required
+      const exists =
+        !_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id));
+
+      review.push({
+        name: parsed.name,
+        state: exists ? "update" : "create",
+      });
+
+      return {
+        success: true,
+        message: "Collated list of Templates from JSON file to review",
         data: review,
       };
     }

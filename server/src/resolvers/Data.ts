@@ -4,6 +4,7 @@ import {
   Context,
   CSVImportOptions,
   EntityImportReview,
+  TemplateImportReview,
   IColumnMapping,
   IFile,
   IResolverParent,
@@ -117,6 +118,17 @@ export const DataResolvers = {
         args.attributes,
         context,
       );
+    },
+
+    // Review a Template JSON file, return collection of Template names and their updates
+    reviewTemplateJSON: async (
+      _parent: IResolverParent,
+      args: { file: IFile[] },
+      context: Context,
+    ): Promise<ResponseData<TemplateImportReview[]>> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+      return await Data.reviewTemplateJSON(args.file);
     },
 
     // Import Template JSON file

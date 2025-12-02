@@ -16,38 +16,38 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
   } = props;
 
   return (
-    <Flex w={"sm"} bg={"white"} rounded={"md"} p={"2"} direction={"column"}>
+    <Flex w={"sm"} bg={"white"} rounded={"md"} p={"1"} direction={"column"}>
       <Flex w={"100%"} justify={"space-between"} align={"center"}>
         {/* Tooltip header, with a close button */}
         {step.title && (
           <Text
             className={"tooltip__title"}
             fontWeight={"semibold"}
-            fontSize={"md"}
+            fontSize={"sm"}
           >
             {step.title}
           </Text>
         )}
 
         <IconButton
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           variant={"ghost"}
           className={"tooltip__close"}
           {...closeProps}
         >
-          <Icon name={"close"} />
+          <Icon name={"close"} size={"xs"} />
         </IconButton>
       </Flex>
 
       <Flex
         className={"tooltip__body"}
         direction={"column"}
-        gap={"2"}
+        gap={"1"}
         {...tooltipProps}
       >
         {/* Tooltip content */}
-        <Flex className={"tooltip__content"} w={"100%"}>
+        <Flex className={"tooltip__content"} w={"100%"} fontSize={"xs"}>
           {step.content}
         </Flex>
 
@@ -61,7 +61,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
         >
           {/* Skip button */}
           <Button
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"orange"}
             className={"tooltip__button"}
@@ -71,30 +71,30 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
           </Button>
 
           {/* Navigation button */}
-          <Flex className={"tooltip__spacer"} gap={"2"}>
+          <Flex className={"tooltip__spacer"} gap={"1"}>
             {index > 0 && (
               <Button
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"blue"}
                 className={"tooltip__button"}
                 {...backProps}
               >
-                <Icon name={"c_left"} />
+                <Icon name={"c_left"} size={"xs"} />
                 {backProps.title}
               </Button>
             )}
 
             {continuous && (
               <Button
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"blue"}
                 className={"tooltip__button tooltip__button--primary"}
                 {...primaryProps}
               >
                 {primaryProps.title}
-                <Icon name={"c_right"} />
+                <Icon name={"c_right"} size={"xs"} />
               </Button>
             )}
           </Flex>

@@ -242,6 +242,12 @@ export const typedefs = `#graphql
     state: String
   }
 
+  # "TemplateReview" type storing the review state of a Template to be imported
+  type TemplateReview {
+    name: String
+    state: String
+  }
+
   # "ActivityTarget" type
   type ActivityTarget {
     _id: String!
@@ -378,6 +384,13 @@ export const typedefs = `#graphql
     success: Boolean
     message: String
     data: [EntityReview]
+  }
+
+  # "ResponseData"-type containing data with type "TemplateReview"
+  type ResponseDataTemplateReview {
+    success: Boolean
+    message: String
+    data: [TemplateReview]
   }
 
   # "ResponseData"-type containing data with type "APIKey"
@@ -552,6 +565,7 @@ export const typedefs = `#graphql
     # Data import JSON mutations
     reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
     importEntityJSON(file: [Upload]!, project: String, attributes: [AttributeInput]): ResponseMessage
+    reviewTemplateJSON(file: [Upload]!): ResponseDataTemplateReview
     importTemplateJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
