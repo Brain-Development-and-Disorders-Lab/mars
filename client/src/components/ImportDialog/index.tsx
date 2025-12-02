@@ -1199,6 +1199,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   rounded={"md"}
                   bg={"gray.100"}
                   p={"1"}
+                  mb={"1"}
                 >
                   <Flex direction={"row"} gap={"1"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1427,9 +1428,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                   )}
 
                   {fileType === JSON_MIME_TYPE && (
-                    <Flex direction={"row"} gap={"1"}>
-                      <Fieldset.Root>
-                        <Fieldset.Content>
+                    <Fieldset.Root>
+                      <Fieldset.Content>
+                        <Flex direction={"row"} gap={"1"}>
                           <Field.Root>
                             <Field.Label fontSize={"xs"}>
                               Name Prefix
@@ -1461,9 +1462,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                               Field containing Entity names
                             </Field.HelperText>
                           </Field.Root>
-                        </Fieldset.Content>
-                      </Fieldset.Root>
-                    </Flex>
+                        </Flex>
+                      </Fieldset.Content>
+                    </Fieldset.Root>
                   )}
 
                   <Flex direction={"row"} gap={"1"}>
