@@ -15,7 +15,6 @@ import {
   Stack,
   Drawer,
   Card,
-  Spacer,
   IconButton,
   Menu,
   Dialog,
@@ -2322,14 +2321,12 @@ const Entity = () => {
               <Dialog.Header
                 px={"1"}
                 py={"2"}
-                fontWeight={"semibold"}
-                fontSize={"sm"}
                 roundedTop={"md"}
                 bg={"blue.300"}
               >
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} />
-                  <Text fontSize={"sm"} fontWeight={"bold"} ml={"0.5"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                     Add Attribute
                   </Text>
                 </Flex>
@@ -2581,8 +2578,6 @@ const Entity = () => {
                 <Dialog.Header
                   px={"1"}
                   py={"2"}
-                  fontWeight={"semibold"}
-                  fontSize={"md"}
                   bg={"blue.300"}
                   roundedTop={"md"}
                 >
@@ -2593,7 +2588,7 @@ const Entity = () => {
                     ml={"0.5"}
                   >
                     <Icon name={"project"} size={"xs"} />
-                    <Text fontSize={"sm"} fontWeight={"bold"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Link Entity to Project
                     </Text>
                   </Flex>
@@ -2782,17 +2777,10 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content ref={selectRelationshipTypeRef}>
               {/* Heading and close button */}
-              <Dialog.Header
-                p={"1"}
-                py={"2"}
-                bg={"blue.300"}
-                roundedTop={"md"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-              >
+              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                   <Icon name={"graph"} size={"xs"} />
-                  <Text fontSize={"sm"} fontWeight={"bold"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Add Relationship
                   </Text>
                 </Flex>
@@ -2976,14 +2964,13 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
               {/* Heading and close button */}
-              <Dialog.Header
-                p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-                bg={"blue.300"}
-              >
-                Export Entity
+              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"download"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Export Entity
+                  </Text>
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
@@ -2992,7 +2979,7 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body px={"2"} gap={"2"}>
+              <Dialog.Body p={"1"} gap={"1"}>
                 {/* Export information */}
                 {_.isEqual(exportFormat, "json") && (
                   <Information
@@ -3011,14 +2998,14 @@ const Entity = () => {
                 <Flex
                   w={"100%"}
                   direction={"row"}
-                  py={"2"}
-                  gap={"2"}
+                  p={"1"}
+                  gap={"1"}
                   justify={"space-between"}
                   align={"center"}
                   ref={selectExportFormatRef}
                 >
-                  <Flex gap={"2"} align={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  <Flex gap={"1"} align={"center"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Format:
                     </Text>
                     <Fieldset.Root w={"fit-content"}>
@@ -3027,7 +3014,7 @@ const Entity = () => {
                           <Select.Root
                             key={"select-export-format"}
                             w={"120px"}
-                            size={"sm"}
+                            size={"xs"}
                             collection={createListCollection({
                               items: ["JSON", "CSV"],
                             })}
@@ -3069,7 +3056,11 @@ const Entity = () => {
                       </Fieldset.Content>
                     </Fieldset.Root>
                   </Flex>
-                  <Text fontSize={"sm"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
                     Select the Entity fields to be exported.
                   </Text>
                 </Flex>
@@ -3077,23 +3068,28 @@ const Entity = () => {
                 {/* Selection content */}
                 <Flex
                   direction={"column"}
-                  p={"2"}
-                  gap={"2"}
+                  p={"1"}
+                  gap={"1"}
                   rounded={"md"}
                   border={"1px solid"}
                   borderColor={"gray.300"}
                 >
-                  <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"row"} gap={"1"}>
                     <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Fieldset.Legend>Details</Fieldset.Legend>
+                      <Fieldset.Content gap={"1"}>
+                        <Fieldset.Legend
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                        >
+                          Entity Details
+                        </Fieldset.Legend>
                         {!loading ? (
-                          <Stack gap={2} direction={"column"}>
+                          <Stack gap={1} direction={"column"}>
                             <Checkbox.Root
                               disabled
                               defaultChecked
-                              fontSize={"sm"}
-                              size={"sm"}
+                              fontSize={"xs"}
+                              size={"xs"}
                             >
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
@@ -3109,8 +3105,8 @@ const Entity = () => {
                                   details.checked as boolean,
                                 )
                               }
-                              fontSize={"sm"}
-                              size={"sm"}
+                              fontSize={"xs"}
+                              size={"xs"}
                             >
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
@@ -3124,8 +3120,8 @@ const Entity = () => {
                             <Checkbox.Root
                               checked={true}
                               disabled
-                              fontSize={"sm"}
-                              size={"sm"}
+                              fontSize={"xs"}
+                              size={"xs"}
                             >
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
@@ -3142,12 +3138,12 @@ const Entity = () => {
                                 )
                               }
                               disabled={_.isEqual(entityDescription, "")}
-                              size={"sm"}
+                              size={"xs"}
                             >
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
                               <Checkbox.Label>
-                                <Text lineClamp={1} fontSize={"sm"}>
+                                <Text lineClamp={1} fontSize={"xs"}>
                                   Description:{" "}
                                   {_.isEqual(entityDescription, "")
                                     ? "No description"
@@ -3164,15 +3160,20 @@ const Entity = () => {
                       </Fieldset.Content>
                     </Fieldset.Root>
                     <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Fieldset.Legend>Projects</Fieldset.Legend>
+                      <Fieldset.Content gap={"1"}>
+                        <Fieldset.Legend
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                        >
+                          Linked Projects
+                        </Fieldset.Legend>
                         {!loading && entityProjects.length > 0 ? (
-                          <Stack gap={2} direction={"column"}>
+                          <Stack gap={1} direction={"column"}>
                             {entityProjects.map((project) => {
                               allExportFields.push(`project_${project}`);
                               return (
                                 <Checkbox.Root
-                                  size={"sm"}
+                                  size={"xs"}
                                   key={project}
                                   checked={_.includes(
                                     exportFields,
@@ -3191,7 +3192,7 @@ const Entity = () => {
                                     <Linky
                                       id={project}
                                       type={"projects"}
-                                      size={"sm"}
+                                      size={"xs"}
                                     />
                                   </Checkbox.Label>
                                 </Checkbox.Root>
@@ -3199,7 +3200,7 @@ const Entity = () => {
                             })}
                           </Stack>
                         ) : (
-                          <Text fontSize={"sm"}>No Projects</Text>
+                          <Text fontSize={"xs"}>No Projects</Text>
                         )}
                       </Fieldset.Content>
                     </Fieldset.Root>
@@ -3207,20 +3208,25 @@ const Entity = () => {
 
                   <Separator />
 
-                  <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"row"} gap={"1"}>
                     <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Fieldset.Legend>Origins</Fieldset.Legend>
+                      <Fieldset.Content gap={"1"}>
+                        <Fieldset.Legend
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                        >
+                          Entity Relationships
+                        </Fieldset.Legend>
                         {!loading && entityRelationships?.length > 0 ? (
-                          <Stack gap={2} direction={"column"}>
+                          <Stack gap={1} direction={"column"}>
                             {entityRelationships.map((relationship) => {
                               allExportFields.push(
                                 `relationship_${relationship.target._id}_${relationship.type}`,
                               );
                               return (
                                 <Checkbox.Root
-                                  size={"sm"}
-                                  fontSize={"sm"}
+                                  size={"xs"}
+                                  fontSize={"xs"}
                                   key={relationship.target._id}
                                   checked={_.includes(
                                     exportFields,
@@ -3239,7 +3245,7 @@ const Entity = () => {
                                     <Linky
                                       id={relationship.target._id}
                                       type={"entities"}
-                                      size={"sm"}
+                                      size={"xs"}
                                     />
                                   </Checkbox.Label>
                                 </Checkbox.Root>
@@ -3247,7 +3253,7 @@ const Entity = () => {
                             })}
                           </Stack>
                         ) : (
-                          <Text fontSize={"sm"}>No Origins</Text>
+                          <Text fontSize={"xs"}>No Relationships</Text>
                         )}
                       </Fieldset.Content>
                     </Fieldset.Root>
@@ -3255,20 +3261,25 @@ const Entity = () => {
 
                   <Separator />
 
-                  <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"row"} gap={"1"}>
                     <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Fieldset.Legend>Attributes</Fieldset.Legend>
+                      <Fieldset.Content gap={"1"}>
+                        <Fieldset.Legend
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                        >
+                          Entity Attributes
+                        </Fieldset.Legend>
                         {!loading && entityAttributes.length > 0 ? (
-                          <Stack gap={2} direction={"column"}>
+                          <Stack gap={1} direction={"column"}>
                             {entityAttributes.map((attribute) => {
                               allExportFields.push(
                                 `attribute_${attribute._id}`,
                               );
                               return (
                                 <Checkbox.Root
-                                  size={"sm"}
-                                  fontSize={"sm"}
+                                  size={"xs"}
+                                  fontSize={"xs"}
                                   key={attribute._id}
                                   checked={_.includes(
                                     exportFields,
@@ -3291,7 +3302,7 @@ const Entity = () => {
                             })}
                           </Stack>
                         ) : (
-                          <Text fontSize={"sm"}>No Attributes</Text>
+                          <Text fontSize={"xs"}>No Attributes</Text>
                         )}
                       </Fieldset.Content>
                     </Fieldset.Root>
@@ -3299,26 +3310,26 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
-                <Flex direction={"column"} w={"30%"} gap={"2"}>
+              <Dialog.Footer p={"1"}>
+                <Flex direction={"column"} w={"30%"} gap={"1"}>
                   {/* "Download" button */}
                   <Flex
                     direction={"row"}
                     w={"100%"}
-                    gap={"2"}
+                    gap={"1"}
                     justify={"right"}
                     align={"center"}
                   >
                     <Button
                       variant={"solid"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       colorPalette={"blue"}
                       onClick={() => handleDownloadClick(exportFormat)}
                       loading={exportLoading}
                     >
                       Download
-                      <Icon name={"download"} />
+                      <Icon name={"download"} size={"xs"} />
                     </Button>
                   </Flex>
                 </Flex>
@@ -3337,14 +3348,13 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header
-                p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-                bg={"blue.300"}
-              >
-                Visualize: {entityName}
+              <Dialog.Header px={"1"} py={"2"} bg={"blue.300"}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"graph"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Visualize: {entityName}
+                  </Text>
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
@@ -3353,7 +3363,7 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"}>
+              <Dialog.Body p={"0"}>
                 <Graph
                   id={entityData._id}
                   entityNavigateHook={handleEntityNodeClick}
@@ -3375,14 +3385,13 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header
-                p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-                bg={"blue.300"}
-              >
-                Share Entity
+              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"share"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Share Entity
+                  </Text>
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
@@ -3391,27 +3400,27 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Dialog.Body p={"1"} px={"2"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Flex w={"25%"}>
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Sharable URL:
                       </Text>
                     </Flex>
                     <Flex w={"60%"}>
                       <Input
-                        size={"sm"}
+                        size={"xs"}
                         value={`https://app.metadatify.com/entities/${id}`}
                         rounded={"md"}
                         onFocus={(event) => event.target.select()}
                         readOnly
                       />
                     </Flex>
-                    <Button
-                      variant={"subtle"}
-                      size={"sm"}
+                    <IconButton
+                      size={"xs"}
                       rounded={"md"}
+                      variant={"outline"}
                       onClick={async () => {
                         await navigator.clipboard.writeText(
                           `https://app.metadatify.com/entities/${id}`,
@@ -3424,30 +3433,29 @@ const Entity = () => {
                         });
                       }}
                     >
-                      Copy
-                      <Icon name={"copy"} />
-                    </Button>
+                      <Icon name={"copy"} size={"xs"} />
+                    </IconButton>
                   </Flex>
 
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Flex w={"25%"}>
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Unique ID:
                       </Text>
                     </Flex>
                     <Flex w={"60%"}>
                       <Input
-                        size={"sm"}
+                        size={"xs"}
                         value={id}
                         rounded={"md"}
                         onFocus={(event) => event.target.select()}
                         readOnly
                       />
                     </Flex>
-                    <Button
-                      variant={"subtle"}
-                      size={"sm"}
+                    <IconButton
+                      size={"xs"}
                       rounded={"md"}
+                      variant={"outline"}
                       onClick={async () => {
                         await navigator.clipboard.writeText(`${id}`);
                         toaster.create({
@@ -3458,19 +3466,18 @@ const Entity = () => {
                         });
                       }}
                     >
-                      Copy
-                      <Icon name={"copy"} />
-                    </Button>
+                      <Icon name={"copy"} size={"xs"} />
+                    </IconButton>
                   </Flex>
 
-                  <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"row"} gap={"1"}>
                     <Flex w={"25%"}>
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
                         QR Code:
                       </Text>
                     </Flex>
                     <Flex
-                      p={"2"}
+                      p={"1"}
                       border={"1px solid"}
                       borderColor={"gray.300"}
                       rounded={"md"}
@@ -3481,18 +3488,25 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
-                <Spacer />
-                <Button
-                  variant={"solid"}
-                  size={"sm"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => setShareOpen(false)}
+              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"1"}
+                  justify={"right"}
+                  align={"center"}
                 >
-                  Done
-                  <Icon name={"check"} />
-                </Button>
+                  <Button
+                    variant={"solid"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => setShareOpen(false)}
+                  >
+                    Done
+                    <Icon name={"check"} size={"xs"} />
+                  </Button>
+                </Flex>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
