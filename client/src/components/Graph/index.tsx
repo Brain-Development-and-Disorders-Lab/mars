@@ -443,18 +443,18 @@ const Graph = (props: {
 
   return (
     <Flex
-      h={"full"}
+      h={"100%"}
       align={"center"}
       justify={"center"}
       direction={"column"}
       w={"100%"}
       p={"0"}
-      gap={"2"}
+      gap={"1"}
     >
       <Flex
-        p={"2"}
+        p={"1"}
         w={"97vw"}
-        h={"85vh"}
+        h={"95vh"}
         rounded={"md"}
         border={"1px"}
         borderColor={"gray.300"}

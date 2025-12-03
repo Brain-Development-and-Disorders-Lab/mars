@@ -209,13 +209,14 @@ const Project = () => {
             >
               <Fieldset.Root invalid={isNameError}>
                 <Fieldset.Content gap={"1"}>
-                  <Field.Root required>
+                  <Field.Root required gap={"0"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
-                      Name
+                      Project Name
+                      <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       data-testid={"create-project-name"}
@@ -235,13 +236,13 @@ const Project = () => {
                     )}
                   </Field.Root>
 
-                  <Field.Root>
+                  <Field.Root gap={"0"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
-                      Owner
+                      Project Owner
                     </Field.Label>
                     <Flex>
                       <ActorTag
@@ -252,13 +253,13 @@ const Project = () => {
                     </Flex>
                   </Field.Root>
 
-                  <Field.Root>
+                  <Field.Root gap={"0"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
-                      Created
+                      Project Created
                     </Field.Label>
                     <Input
                       size={"xs"}
@@ -301,13 +302,13 @@ const Project = () => {
               {/* Project description */}
               <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
-                  <Field.Root required>
+                  <Field.Root required gap={"0"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
-                      Description
+                      Project Description
                     </Field.Label>
                     <MDEditor
                       height={150}
@@ -336,7 +337,7 @@ const Project = () => {
         <Flex direction={"column"} px={"1"} gap={"1"} wrap={"wrap"}>
           <Flex justify={"space-between"} align={"center"}>
             <Text fontWeight={"semibold"} fontSize={"xs"}>
-              Entities
+              Project Entities
             </Text>
             <Button
               size={"xs"}
@@ -559,35 +560,44 @@ const Project = () => {
                 Projects
               </Flex>
             </Dialog.Header>
-            <Dialog.Body p={"1"} px={"2"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"xs"}>
-                  Projects can be used to organize and share Entities.
-                </Text>
-                <Text fontSize={"xs"}>
-                  Any type of Entity can be included in a Project. Entities can
-                  be added and removed from a Project after it has been created.
-                </Text>
+            <Dialog.Body p={"1"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Flex
+                  direction={"column"}
+                  gap={"1"}
+                  bg={"gray.100"}
+                  p={"1"}
+                  rounded={"md"}
+                >
+                  <Heading size={"xs"}>Overview</Heading>
+                  <Text fontSize={"xs"}>
+                    Projects can be used to organize and share Entities. Any
+                    type of Entity can be included in a Project. Entities can be
+                    added and removed from a Project after it has been created.
+                  </Text>
+                </Flex>
 
-                <Heading size={"xs"}>Name</Heading>
-                <Text fontSize={"xs"}>
-                  Specify the name of a Project. This should be unique and will
-                  act as a searchable identifier.
-                </Text>
+                <Flex direction={"column"} gap={"1"} ml={"0.5"}>
+                  <Heading size={"xs"}>Project Name</Heading>
+                  <Text fontSize={"xs"}>
+                    Specify the name of a Project. This should be unique and
+                    will act as a searchable identifier.
+                  </Text>
 
-                <Heading size={"xs"}>Date Created or Started</Heading>
-                <Text fontSize={"xs"}>
-                  A timestamp assigned to the Project. For example, if this is a
-                  set of Entities used in a specific experiment, this date could
-                  represent when work on the experiment commenced. Otherwise,
-                  this timestamp may simply represent when this Project was
-                  created in Metadatify.
-                </Text>
+                  <Heading size={"xs"}>Project Created</Heading>
+                  <Text fontSize={"xs"}>
+                    A timestamp assigned to the Project. For example, if this is
+                    a set of Entities used in a specific experiment, this date
+                    could represent when work on the experiment commenced.
+                    Otherwise, this timestamp may simply represent when this
+                    Project was created in Metadatify.
+                  </Text>
 
-                <Heading size={"xs"}>Description</Heading>
-                <Text fontSize={"xs"}>
-                  A brief description of the Project contents.
-                </Text>
+                  <Heading size={"xs"}>Project Description</Heading>
+                  <Text fontSize={"xs"}>
+                    A brief description of the Project contents.
+                  </Text>
+                </Flex>
               </Flex>
             </Dialog.Body>
           </Dialog.Content>

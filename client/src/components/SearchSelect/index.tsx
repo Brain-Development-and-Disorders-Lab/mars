@@ -262,7 +262,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"xs"}
-          rounded={props.isEmbedded ? "none" : "sm"}
+          rounded={props.isEmbedded ? "none" : "md"}
           border={props.isEmbedded ? "none" : "1px solid"}
           borderColor={props.isEmbedded ? "" : "gray.300"}
           disabled={props?.disabled || false}
@@ -289,7 +289,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           {/* Dropdown */}
           <Box
             position="fixed"
-            top={dropdownPosition.top}
+            top={dropdownPosition.top - 5}
             left={dropdownPosition.left}
             width={dropdownPosition.width}
             bg="white"
