@@ -179,66 +179,76 @@ const CreateWorkspace = () => {
 
   return (
     <Content>
-      <Flex direction={"column"}>
+      <Flex
+        direction={"column"}
+        p={"1"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"1"}
+        minW="0"
+        maxW="100%"
+      >
         {/* Page header */}
         <Flex
+          w={"100%"}
+          minW="0"
           direction={"row"}
-          p={"2"}
-          align={"center"}
           justify={"space-between"}
+          align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"workspace"} size={"md"} />
+          <Flex align={"center"} gap={"1"} w={"100%"} pt={"1"} minW="0">
+            <Icon name={"workspace"} size={"sm"} />
             <Heading size={"md"}>Create Workspace</Heading>
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
+        <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"}>
           {workspace === "" ? (
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
               Before you can get started using Metadatify, you must be invited
               as Collaborator on an existing Workspace or create a new Workspace
               below.
             </Text>
           ) : (
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
               Workspaces can be used to organize Entities and Projects, as well
               as inviting collaborators to work together on experiments.
             </Text>
           )}
-          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
             Use the Workspace switcher in the navigation bar to view all
             Workspaces and switch the active Workspace.
           </Text>
         </Flex>
 
-        <Flex direction={"row"} p={"2"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"row"} p={"1"} gap={"1"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"0"}
-            gap={"2"}
+            gap={"1"}
             w={{ base: "100%", md: "50%" }}
           >
             {/* Workspace name */}
             <Flex
               direction={"column"}
               h={"fit-content"}
-              p={"2"}
-              gap={"2"}
+              p={"1"}
+              gap={"1"}
               rounded={"md"}
               border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root required>
-                    <Field.Label>
-                      Name
+                  <Field.Root required gap={"1"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      Workspace Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       id={"modalWorkspaceName"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       placeholder={"Name"}
                       value={name}
@@ -253,16 +263,18 @@ const CreateWorkspace = () => {
             <Flex
               direction={"column"}
               h={"fit-content"}
-              p={"2"}
-              gap={"2"}
+              p={"1"}
+              gap={"1"}
               rounded={"md"}
               border={"1px solid"}
               borderColor={"gray.300"}
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root>
-                    <Field.Label>Description</Field.Label>
+                  <Field.Root gap={"1"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      Workspace Description
+                    </Field.Label>
                     <MDEditor
                       height={150}
                       minHeight={100}
@@ -295,37 +307,37 @@ const CreateWorkspace = () => {
       <Spacer />
 
       <Flex
-        p={"2"}
-        gap={"2"}
+        p={"1"}
+        gap={"1"}
         align={"center"}
         w={"100%"}
         justify={"space-between"}
       >
         {workspace === "" && (
           <Button
-            size={"sm"}
+            size={"xs"}
             colorPalette={"orange"}
             rounded={"md"}
             onClick={() => logout()}
           >
             Log out
-            <Icon name={"logout"} />
+            <Icon name={"logout"} size={"xs"} />
           </Button>
         )}
         {workspace !== "" && (
           <Button
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
             colorPalette={"red"}
             onClick={() => handleCancelClick()}
           >
             Cancel
-            <Icon name={"cross"} />
+            <Icon name={"cross"} size={"xs"} />
           </Button>
         )}
         <Button
           id={"modalWorkspaceCreateButton"}
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           colorPalette={"green"}
           onClick={() => handleCreateWorkspaceClick()}
@@ -333,7 +345,7 @@ const CreateWorkspace = () => {
           disabled={name === ""}
         >
           Create
-          <Icon name={"check"} />
+          <Icon name={"check"} size={"xs"} />
         </Button>
       </Flex>
 

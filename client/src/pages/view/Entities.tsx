@@ -23,7 +23,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -333,11 +333,11 @@ const Entities = () => {
     >
       <Flex
         direction={"row"}
-        p={"2"}
+        p={"1"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"2"}
+        gap={"1"}
         minW="0"
         maxW="100%"
       >
@@ -348,7 +348,7 @@ const Entities = () => {
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"} minW="0">
+          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"entity"} size={"sm"} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
@@ -371,7 +371,7 @@ const Entities = () => {
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">
-              <DataTableRemix
+              <DataTable
                 columns={columns}
                 data={entityData.filter((entity) =>
                   _.isEqual(entity.archived, false),
@@ -491,7 +491,7 @@ const Entities = () => {
                   borderColor={"gray.300"}
                   rounded={"md"}
                 >
-                  <DataTableRemix
+                  <DataTable
                     columns={exportTableColumns}
                     data={toExport}
                     visibleColumns={exportTableVisibleColumns}

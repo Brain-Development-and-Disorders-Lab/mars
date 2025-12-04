@@ -1,18 +1,18 @@
 // React
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// Existing and custom components
+// Chakra UI components
 import {
+  Box,
   Button,
+  Checkbox,
   CloseButton,
   Dialog,
-  EmptyState,
-  Field,
   Fieldset,
+  Field,
   Flex,
   IconButton,
   Input,
-  Link,
   Portal,
   Select,
   Separator,
@@ -21,658 +21,198 @@ import {
   Text,
   createListCollection,
 } from "@chakra-ui/react";
-import { createColumnHelper, Row } from "@tanstack/react-table";
-import DataTable from "@components/DataTable";
+
+// Custom components
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
-import Tooltip from "@components/Tooltip";
-import { toaster } from "@components/Toast";
 
-// Existing and custom types
-import {
-  DataTableAction,
-  GenericValueType,
-  IGenericItem,
-  IValue,
-  IValueType,
-} from "@types";
+// Types
+import { IValue, IValueType, GenericValueType } from "@types";
 
-// Utility functions and libraries
+// Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
 
 /**
- * Values component use to display a collection of Values and enable
- * creating and deleting Values. Displays collection as cards.
- * @param props collection of props to construct component
- * @returns
+ * Values component - A spreadsheet-like interface for editing key-value data
+ * Features a compact, spreadsheet-like layout with type selection, name, and value columns
  */
 const Values = (props: {
-  viewOnly: boolean;
+  viewOnly?: boolean;
   values: IValue<GenericValueType>[];
   setValues: (value: React.SetStateAction<IValue<GenericValueType>[]>) => void;
-  requireData?: true | false;
+  requireData?: boolean;
   permittedValues?: string[];
 }) => {
-  const [selectOpen, setSelectOpen] = useState(false);
-  const [option, setOption] = useState("");
-  const [options, setOptions] = useState<string[]>([]);
-  const [editingValueId, setEditingValueId] = useState<string | null>(null);
+  // Counter for unique IDs
+  const idCounter = React.useRef(0);
 
-  // Value type dropdown ref
-  const selectValueTypeRef = useRef(null);
+  // State for select options modal
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
+  const [editingSelectId, setEditingSelectId] = useState<string | null>(null);
+  const [selectOptions, setSelectOptions] = useState<string[]>([]);
+  const [newOption, setNewOption] = useState("");
 
-  const columnHelper = createColumnHelper<IValue<GenericValueType>>();
-  const columns = useMemo(
-    () => [
-      // Value `type` column
-      columnHelper.accessor("type", {
-        cell: ({ getValue, row: { index }, column: { id }, table }) => {
-          const initialValue = getValue();
-          const [valueType, setValueType] = useState<IValueType>(initialValue);
+  // State for column widths with minimum constraints
+  const [columnWidths, setColumnWidths] = useState({
+    type: 120,
+    name: 220,
+    value: 260,
+  });
 
-          useEffect(() => {
-            setValueType(initialValue);
-          }, [initialValue]);
+  // Minimum column widths
+  const minColumnWidths = {
+    type: 120,
+    name: 220,
+    value: 260,
+  };
 
-          const onTypeChange = (value: string) => {
-            const typedValue = value as IValueType;
-            setValueType(typedValue);
-
-            // Update the type in the table
-            table.options.meta?.updateData(index, id, typedValue);
-
-            // Reset the data field based on the new type
-            let data: GenericValueType;
-            switch (typedValue) {
-              case "number":
-                data = 0;
-                break;
-              case "text":
-                data = "";
-                break;
-              case "url":
-                data = "";
-                break;
-              case "date":
-                data = dayjs(Date.now()).toISOString();
-                break;
-              case "entity":
-                data = "";
-                break;
-              case "select":
-                data = {
-                  selected: "",
-                  options: [] as IGenericItem[],
-                };
-                break;
-              default:
-                data = "";
-            }
-
-            // Update the data field
-            table.options.meta?.updateData(index, "data", data);
-          };
-
-          // Setup icon for value type
-          let typeIcon: React.ReactElement;
-          switch (valueType) {
-            case "number": {
-              typeIcon = (
-                <Icon size={"sm"} name={"v_number"} color={"green.300"} />
-              );
-              break;
-            }
-            case "text": {
-              typeIcon = (
-                <Icon size={"sm"} name={"v_text"} color={"blue.300"} />
-              );
-              break;
-            }
-            case "url": {
-              typeIcon = (
-                <Icon size={"sm"} name={"v_url"} color={"yellow.300"} />
-              );
-              break;
-            }
-            case "date": {
-              typeIcon = (
-                <Icon size={"sm"} name={"v_date"} color={"orange.300"} />
-              );
-              break;
-            }
-            case "select": {
-              typeIcon = (
-                <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
-              );
-              break;
-            }
-            case "entity":
-            default: {
-              typeIcon = (
-                <Icon size={"sm"} name={"entity"} color={"purple.300"} />
-              );
-              break;
-            }
-          }
-
-          // Apply casing for display
-          let displayType: string;
-          if (valueType === "url") {
-            displayType = _.upperCase(valueType);
-          } else {
-            displayType = _.capitalize(valueType);
-          }
-
-          // Show dropdown in edit mode, otherwise show read-only display
-          if (!props.viewOnly) {
-            const typeOptions = [
-              { value: "number", label: "Number" },
-              { value: "text", label: "Text" },
-              { value: "url", label: "URL" },
-              { value: "date", label: "Date" },
-              { value: "entity", label: "Entity" },
-              { value: "select", label: "Select" },
-            ];
-
-            return (
-              <Flex
-                align={"center"}
-                justify={"left"}
-                gap={"3"}
-                w={"100%"}
-                minW={"140px"}
-              >
-                <Flex flexShrink={0}>{typeIcon}</Flex>
-                <Select.Root
-                  size={"sm"}
-                  collection={createListCollection<{
-                    value: string;
-                    label: string;
-                  }>({
-                    items: typeOptions,
-                  })}
-                  onValueChange={(details) =>
-                    onTypeChange(details.items[0].value)
-                  }
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger minW={"100px"}>
-                      <Select.ValueText placeholder={displayType} />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal container={selectValueTypeRef}>
-                    <Select.Positioner>
-                      <Select.Content zIndex={9999}>
-                        {typeOptions.map((option) => (
-                          <Select.Item item={option} key={option.value}>
-                            {option.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              </Flex>
-            );
-          } else {
-            return (
-              <Flex
-                align={"center"}
-                justify={"left"}
-                gap={"3"}
-                w={"100%"}
-                minW={"140px"}
-              >
-                <Flex flexShrink={0}>{typeIcon}</Flex>
-                <Text fontWeight={"semibold"} color={"gray.500"}>
-                  {displayType}
-                </Text>
-              </Flex>
-            );
-          }
-        },
-        header: "Type",
-        size: 160,
-        minSize: 160,
-        maxSize: 160,
-      }),
-
-      // Value `name` column
-      columnHelper.accessor("name", {
-        cell: ({
-          getValue,
-          row: { index, original },
-          column: { id },
-          table,
-        }) => {
-          const initialValue = getValue();
-          const [value, setValue] = useState(initialValue);
-          useEffect(() => {
-            setValue(initialValue);
-          }, [initialValue]);
-
-          const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-            setValue(event.target.value);
-          };
-
-          const onBlur = () => {
-            table.options.meta?.updateData(index, id, value);
-          };
-
-          return (
-            <Fieldset.Root>
-              <Fieldset.Content>
-                <Field.Root invalid={_.isEqual(value, "")}>
-                  <Input
-                    id={`i_${original._id}_name`}
-                    value={value}
-                    readOnly={props.viewOnly}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    size={"sm"}
-                    rounded={"md"}
-                  />
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
-          );
-        },
-        header: "Name",
-        size: 200,
-        minSize: 200,
-        maxSize: 200,
-      }),
-
-      // Value `data` column
-      columnHelper.accessor("data", {
-        cell: ({
-          getValue,
-          row: { index, original },
-          column: { id },
-          table,
-        }) => {
-          const initialValue = getValue();
-          const [value, setValue] = useState(initialValue);
-          useEffect(() => {
-            setValue(initialValue);
-          }, [initialValue]);
-
-          /**
-           * Handle a Select change event
-           * @param event change event data
-           */
-          const onSelectChange = (value: GenericValueType) => {
-            setValue({
-              selected: value,
-              options: initialValue.options,
-            });
-          };
-
-          /**
-           * Handle a `SearchSelect` component change event
-           * @param entity change event Entity
-           */
-          const onSearchSelectChange = (entity: IGenericItem) => {
-            setValue(entity);
-
-            // Need to update the table data in order to update overall state
-            table.options.meta?.updateData(index, id, entity);
-          };
-
-          const onBlur = () => {
-            table.options.meta?.updateData(index, id, value);
-          };
-
-          let dataInput: React.ReactElement;
-          if (_.isUndefined(props.permittedValues)) {
-            switch (original.type) {
-              case "number": {
-                dataInput = (
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root
-                        invalid={
-                          _.isEqual(value, "") &&
-                          _.isEqual(props.requireData, true)
-                        }
-                      >
-                        <Input
-                          id={`i_${original._id}_data`}
-                          type={"number"}
-                          value={value}
-                          size={"sm"}
-                          rounded={"md"}
-                          readOnly={props.viewOnly}
-                          onChange={(event) =>
-                            setValue(parseFloat(event.target.value))
-                          }
-                          onBlur={onBlur}
-                        />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                );
-                break;
-              }
-              case "text": {
-                dataInput = (
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root
-                        invalid={
-                          _.isEqual(value, "") &&
-                          _.isEqual(props.requireData, true)
-                        }
-                      >
-                        <Input
-                          id={`i_${original._id}_data`}
-                          value={value}
-                          size={"sm"}
-                          rounded={"md"}
-                          readOnly={props.viewOnly}
-                          onChange={(event) => setValue(event.target.value)}
-                          onBlur={onBlur}
-                        />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                );
-                break;
-              }
-              case "url": {
-                if (_.isEqual(props.viewOnly, false)) {
-                  dataInput = (
-                    <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Field.Root
-                          invalid={
-                            _.isEqual(value, "") &&
-                            _.isEqual(props.requireData, true)
-                          }
-                        >
-                          <Input
-                            id={`i_${original._id}_data`}
-                            value={value}
-                            size={"sm"}
-                            rounded={"md"}
-                            readOnly={props.viewOnly}
-                            onChange={(event) => setValue(event.target.value)}
-                            onBlur={onBlur}
-                          />
-                        </Field.Root>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  );
-                } else {
-                  // Setup Link display depending on destination URL
-                  let linkTextColor = "black";
-                  let linkBgColor = "gray.100";
-                  let linkLogo = null;
-                  let shortenedUrl = value.toString();
-                  let tooltipText = value.toString();
-                  let validLink = false;
-
-                  try {
-                    const domain = new URL(value);
-                    const hostname = domain.hostname.replace("www", "");
-                    shortenedUrl = shortenedUrl.replace("https://", "");
-                    shortenedUrl = shortenedUrl.replace("http://", "");
-                    shortenedUrl = shortenedUrl.substring(0, 18);
-                    shortenedUrl = shortenedUrl.concat("...");
-                    if (
-                      _.isEqual(hostname, "wustl.box.com") ||
-                      _.isEqual(hostname, "wustl.app.box.com")
-                    ) {
-                      // Link to Box
-                      linkTextColor = "white";
-                      linkBgColor = "blue.400";
-                      linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
-                    } else if (
-                      _.isEqual(hostname, "mynotebook.labarchives.com")
-                    ) {
-                      // Link to LabArchives
-                      linkTextColor = "white";
-                      linkBgColor = "purple.400";
-                      linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
-                    } else if (_.isEqual(hostname, "app.globus.org")) {
-                      // Link to Globus
-                      linkTextColor = "white";
-                      linkBgColor = "blue.600";
-                      linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
-                    } else if (_.isEqual(hostname, "github.com")) {
-                      // Link to GitHub
-                      linkTextColor = "white";
-                      linkBgColor = "black";
-                      linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
-                    }
-                    validLink = true;
-                  } catch {
-                    linkTextColor = "orange.700";
-                    linkBgColor = "orange.300";
-                    linkLogo = <Icon name={"warning"} />;
-                    shortenedUrl = _.truncate(shortenedUrl, { length: 10 });
-                    tooltipText = "Possible invalid URL: " + value.toString();
-                  }
-
-                  dataInput = (
-                    <Tooltip content={tooltipText} showArrow>
-                      <Flex
-                        direction={"row"}
-                        align={"center"}
-                        p={"2"}
-                        pl={"4"}
-                        pr={"4"}
-                        w={"fit-content"}
-                        rounded={"full"}
-                        gap={"2"}
-                        bg={linkBgColor}
-                        color={linkTextColor}
-                        justify={"space-between"}
-                      >
-                        {linkLogo}
-                        {validLink ? (
-                          <Link
-                            href={value}
-                            lineClamp={1}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Text>{shortenedUrl}</Text>
-                          </Link>
-                        ) : (
-                          <Text>{shortenedUrl}</Text>
-                        )}
-                        <Icon name={"link"} />
-                      </Flex>
-                    </Tooltip>
-                  );
-                }
-                break;
-              }
-              case "date": {
-                dataInput = (
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root
-                        invalid={
-                          _.isEqual(value, "") &&
-                          _.isEqual(props.requireData, true)
-                        }
-                      >
-                        <Input
-                          id={`i_${original._id}_data`}
-                          type={"date"}
-                          value={value}
-                          size={"sm"}
-                          rounded={"md"}
-                          readOnly={props.viewOnly}
-                          onChange={(event) => setValue(event.target.value)}
-                          onBlur={onBlur}
-                        />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                );
-                break;
-              }
-              case "entity": {
-                if (_.isEqual(props.viewOnly, false)) {
-                  dataInput = (
-                    <SearchSelect
-                      placeholder={"Select"}
-                      resultType={"entity"}
-                      value={value}
-                      onChange={onSearchSelectChange}
-                      disabled={props.viewOnly}
-                    />
-                  );
-                } else {
-                  dataInput = (
-                    <Flex px={"2"}>
-                      <Linky type={"entities"} id={value._id} size={"sm"} />
-                    </Flex>
-                  );
-                }
-                break;
-              }
-              case "select": {
-                if (value.options && value.options.length > 0) {
-                  // Show dropdown when options exist
-                  dataInput = (
-                    <Select.Root
-                      key={"select-option"}
-                      size={"sm"}
-                      invalid={
-                        _.isEqual(value, "") &&
-                        _.isEqual(props.requireData, true)
-                      }
-                      collection={createListCollection<IGenericItem>({
-                        items: value.options || [],
-                      })}
-                      onValueChange={(details) =>
-                        onSelectChange(details.items[0])
-                      }
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger>
-                          <Select.ValueText placeholder={"Select Option"} />
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal>
-                        <Select.Positioner>
-                          <Select.Content zIndex={9999}>
-                            {(value.options || []).map(
-                              (option: IGenericItem) => (
-                                <Select.Item item={option} key={option._id}>
-                                  {option.name}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ),
-                            )}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
-                  );
-                } else {
-                  // Show "Add Options" button when no options exist
-                  dataInput = (
-                    <Button
-                      size={"sm"}
-                      variant={"solid"}
-                      colorPalette={"green"}
-                      rounded={"md"}
-                      onClick={() => {
-                        setEditingValueId(original._id);
-                        setSelectOpen(true);
-                      }}
-                    >
-                      Add Options
-                      <Icon name={"add"} />
-                    </Button>
-                  );
-                }
-                break;
-              }
-            }
-          } else {
-            dataInput = (
-              <Select.Root
-                key={"select-column"}
-                size={"sm"}
-                invalid={
-                  _.isEqual(value, "") && _.isEqual(props.requireData, true)
-                }
-                collection={createListCollection<string>({
-                  items: props.permittedValues,
-                })}
-                onValueChange={(details) => setValue(details.items[0])}
-                disabled={props.viewOnly}
-              >
-                <Select.HiddenSelect />
-                <Select.Control>
-                  <Select.Trigger>
-                    <Select.ValueText placeholder={"Select Column"} />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content zIndex={9999}>
-                      {createListCollection<string>({
-                        items: props.permittedValues,
-                      }).items.map((value: string) => (
-                        <Select.Item item={value} key={value}>
-                          {value}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
-            );
-          }
-
-          return (
-            <Flex align={"center"} justify={"left"} gap={"2"}>
-              {dataInput}
-            </Flex>
-          );
-        },
-        header: "Value Data",
-        size: 300,
-        minSize: 300,
-        maxSize: 300,
-      }),
-    ],
-    [props.viewOnly],
+  // State for drag resizing
+  const [isResizing, setIsResizing] = useState<string | null>(null);
+  const dragRef = React.useRef<{ startX: number; startWidth: number } | null>(
+    null,
   );
 
-  const addOptions = () => {
-    if (editingValueId) {
-      // Update the existing Select value with the defined options
-      const updatedValues = props.values.map((value) => {
-        if (value._id === editingValueId) {
+  // State for row selection and manipulation
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+
+  // State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Default data for new rows
+  const createNewValue = (suffix?: string): IValue<GenericValueType> => ({
+    _id: `v_text_${Date.now()}_${++idCounter.current}_${suffix || Math.random().toString(36).substr(2, 9)}`,
+    name: "",
+    type: "text",
+    data: "",
+  });
+
+  // Initialize with a new row if empty, otherwise use provided values
+  const [localValues, setLocalValues] = useState<IValue<GenericValueType>[]>(
+    () => {
+      if (props.values.length === 0) {
+        return [createNewValue("row1")];
+      }
+      return props.values;
+    },
+  );
+
+  // Update local values when props.values changes
+  useEffect(() => {
+    if (props.values.length > 0) {
+      setLocalValues(props.values);
+    }
+  }, [props.values]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(localValues.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedValues = localValues.slice(startIndex, endIndex);
+
+  // Reset to first page when rows per page changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rowsPerPage]);
+
+  // Handle type change
+  const handleTypeChange = (valueId: string, newType: IValueType) => {
+    const updatedValues = localValues.map((value) => {
+      if (value._id === valueId) {
+        let newData: GenericValueType;
+        switch (newType) {
+          case "number":
+            newData = 0;
+            break;
+          case "text":
+            newData = "";
+            break;
+          case "url":
+            newData = "";
+            break;
+          case "date":
+            newData = dayjs(Date.now()).toISOString();
+            break;
+          case "entity":
+            newData = { _id: "", name: "" };
+            break;
+          case "select":
+            newData = {
+              selected: "",
+              options: [],
+            };
+            break;
+          default:
+            newData = "";
+        }
+        return { ...value, type: newType, data: newData };
+      }
+      return value;
+    });
+    setLocalValues(updatedValues);
+    props.setValues(updatedValues);
+  };
+
+  // Handle name change
+  const handleNameChange = (valueId: string, newName: string) => {
+    const updatedValues = localValues.map((value) => {
+      if (value._id === valueId) {
+        return { ...value, name: newName };
+      }
+      return value;
+    });
+    setLocalValues(updatedValues);
+    props.setValues(updatedValues);
+  };
+
+  // Handle data change
+  const handleDataChange = (valueId: string, newData: GenericValueType) => {
+    const updatedValues = localValues.map((value) => {
+      if (value._id === valueId) {
+        return { ...value, data: newData };
+      }
+      return value;
+    });
+    setLocalValues(updatedValues);
+    props.setValues(updatedValues);
+  };
+
+  // Handle opening select options modal
+  const openSelectModal = (valueId: string) => {
+    setEditingSelectId(valueId);
+    setSelectOptions([]);
+    setNewOption("");
+    setSelectModalOpen(true);
+  };
+
+  // Handle adding a new option
+  const addOption = () => {
+    if (newOption.trim() && !selectOptions.includes(newOption.trim())) {
+      setSelectOptions([...selectOptions, newOption.trim()]);
+      setNewOption("");
+    }
+  };
+
+  // Handle removing an option
+  const removeOption = (optionToRemove: string) => {
+    setSelectOptions(
+      selectOptions.filter((option) => option !== optionToRemove),
+    );
+  };
+
+  // Handle confirming select options
+  const confirmSelectOptions = () => {
+    if (editingSelectId && selectOptions.length > 0) {
+      const updatedValues = localValues.map((value) => {
+        if (value._id === editingSelectId) {
           return {
             ...value,
             data: {
               selected: "",
-              options: options.map((opt) => ({
-                _id: `option_${Math.round(performance.now())}_${opt}`,
+              options: selectOptions.map((opt) => ({
+                _id: `option_${Date.now()}_${opt}`,
                 name: opt,
               })),
             },
@@ -680,284 +220,1124 @@ const Values = (props: {
         }
         return value;
       });
-
+      setLocalValues(updatedValues);
       props.setValues(updatedValues);
     }
-
-    // Reset the options and editing state
-    setOptions([]);
-    setEditingValueId(null);
-
-    // Close the modal
-    setSelectOpen(false);
+    setSelectModalOpen(false);
+    setEditingSelectId(null);
+    setSelectOptions([]);
+    setNewOption("");
   };
 
-  const actions: DataTableAction[] = [
-    {
-      label: "Delete Values",
-      icon: "delete",
-      action: (table, rows: Row<IValue<GenericValueType>>) => {
-        // Delete rows that have been selected
-        const idToRemove: IValue<GenericValueType>[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          idToRemove.push(table.getRow(rowIndex).original);
+  // Handle canceling select options
+  const cancelSelectOptions = () => {
+    setSelectModalOpen(false);
+    setEditingSelectId(null);
+    setSelectOptions([]);
+    setNewOption("");
+  };
+
+  // Handle column resize start
+  const handleResizeStart = (column: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    setIsResizing(column);
+    dragRef.current = {
+      startX: event.clientX,
+      startWidth: columnWidths[column as keyof typeof columnWidths],
+    };
+  };
+
+  // Handle column resize during drag
+  const handleResizeMove = (event: MouseEvent) => {
+    if (!isResizing || !dragRef.current) return;
+
+    const deltaX = event.clientX - dragRef.current.startX;
+    const minWidth =
+      minColumnWidths[isResizing as keyof typeof minColumnWidths];
+    const newWidth = Math.max(minWidth, dragRef.current.startWidth + deltaX);
+
+    setColumnWidths((prev) => ({
+      ...prev,
+      [isResizing]: newWidth,
+    }));
+  };
+
+  // Handle column resize end
+  const handleResizeEnd = () => {
+    setIsResizing(null);
+    dragRef.current = null;
+  };
+
+  // Add event listeners for drag
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener("mousemove", handleResizeMove);
+      document.addEventListener("mouseup", handleResizeEnd);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      return () => {
+        document.removeEventListener("mousemove", handleResizeMove);
+        document.removeEventListener("mouseup", handleResizeEnd);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+    }
+    return undefined;
+  }, [isResizing]);
+
+  // Row manipulation functions
+  const addRow = () => {
+    const newValue = createNewValue();
+    const updatedValues = [...localValues, newValue];
+    setLocalValues(updatedValues);
+    props.setValues(updatedValues);
+  };
+
+  const removeSelectedRows = () => {
+    if (selectedRows.size === 0) return;
+    const updatedValues = localValues.filter(
+      (value) => !selectedRows.has(value._id),
+    );
+    setLocalValues(updatedValues);
+    props.setValues(updatedValues);
+    setSelectedRows(new Set());
+  };
+
+  const toggleRowSelection = (valueId: string) => {
+    const newSelection = new Set(selectedRows);
+    if (newSelection.has(valueId)) {
+      newSelection.delete(valueId);
+    } else {
+      newSelection.add(valueId);
+    }
+    setSelectedRows(newSelection);
+  };
+
+  // Get icon for value type
+  const getTypeIcon = (type: IValueType) => {
+    switch (type) {
+      case "number":
+        return <Icon size="xs" name="v_number" color="green.300" />;
+      case "text":
+        return <Icon size="xs" name="v_text" color="blue.300" />;
+      case "url":
+        return <Icon size="xs" name="v_url" color="yellow.300" />;
+      case "date":
+        return <Icon size="xs" name="v_date" color="orange.300" />;
+      case "select":
+        return <Icon size="xs" name="v_select" color="cyan.300" />;
+      case "entity":
+      default:
+        return <Icon size="xs" name="entity" color="purple.300" />;
+    }
+  };
+
+  // Helper function to check if select has configured options
+  const hasSelectOptions = (data: unknown): boolean => {
+    return !!(
+      data &&
+      typeof data === "object" &&
+      "options" in data &&
+      Array.isArray((data as { options: unknown[] }).options) &&
+      (data as { options: unknown[] }).options.length > 0
+    );
+  };
+
+  // Render data input based on type
+  const renderDataInput = (value: IValue<GenericValueType>) => {
+    switch (value.type) {
+      case "number":
+        return (
+          <Input
+            value={value.data?.toString() || ""}
+            onChange={(e) =>
+              handleDataChange(value._id, parseFloat(e.target.value) || 0)
+            }
+            size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
+            borderRadius="none"
+            fontSize="xs"
+            type="number"
+            readOnly={props.viewOnly}
+            placeholder="Enter number"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+
+      case "text":
+        return (
+          <Input
+            value={value.data?.toString() || ""}
+            onChange={(e) => handleDataChange(value._id, e.target.value)}
+            size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
+            borderRadius="none"
+            fontSize="xs"
+            readOnly={props.viewOnly}
+            placeholder="Enter text"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+
+      case "url":
+        return (
+          <Input
+            value={value.data?.toString() || ""}
+            onChange={(e) => handleDataChange(value._id, e.target.value)}
+            size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
+            borderRadius="none"
+            fontSize="xs"
+            readOnly={props.viewOnly}
+            placeholder="Enter URL"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+
+      case "date":
+        return (
+          <Input
+            value={value.data?.toString() || ""}
+            onChange={(e) => handleDataChange(value._id, e.target.value)}
+            size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
+            borderRadius="none"
+            fontSize="xs"
+            type="date"
+            readOnly={props.viewOnly}
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+
+      case "select":
+        // Check if select has options configured
+        if (hasSelectOptions(value.data)) {
+          // Show dropdown with configured options
+          return (
+            <Select.Root
+              size="xs"
+              minW="100px"
+              h={props.viewOnly ? "34px" : "100%"}
+              border="1px solid transparent"
+              value={value.data.selected ? [value.data.selected._id] : []}
+              collection={createListCollection({
+                items: (
+                  value.data as {
+                    options: Array<{ _id: string; name: string }>;
+                  }
+                ).options.map((opt) => ({
+                  value: opt._id,
+                  label: opt.name,
+                })),
+              })}
+              onValueChange={(details) => {
+                const selectedOption = (
+                  value.data as {
+                    options: Array<{ _id: string; name: string }>;
+                  }
+                ).options.find((opt) => opt._id === details.value[0]);
+                handleDataChange(value._id, {
+                  ...value.data,
+                  selected: selectedOption || "",
+                });
+              }}
+              _focus={{
+                bg: "white",
+                border: "1px solid",
+                borderColor: "blue.300",
+              }}
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger
+                  border="none"
+                  borderRadius="none"
+                  disabled={props.viewOnly}
+                >
+                  <Select.ValueText placeholder="Select Value">
+                    {value.data.selected?.name || "Select Value"}
+                  </Select.ValueText>
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content zIndex={9999}>
+                    {(
+                      value.data as {
+                        options: Array<{ _id: string; name: string }>;
+                      }
+                    ).options.map((option) => (
+                      <Select.Item
+                        item={{ value: option._id, label: option.name }}
+                        key={option._id}
+                      >
+                        {option.name}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
+          );
+        } else {
+          // Show "Setup Options" button
+          return (
+            <Flex
+              w="100%"
+              h="100%"
+              p={"0"}
+              align="center"
+              justify="center"
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+              cursor="pointer"
+              onClick={() => openSelectModal(value._id)}
+            >
+              <Text fontSize="xs" fontWeight="semibold" color="blue.600">
+                Setup Options
+              </Text>
+            </Flex>
+          );
         }
 
-        const updatedValues = props.values.filter((value) => {
-          return !idToRemove.includes(value);
-        });
+      case "entity":
+        if (!props.viewOnly) {
+          return (
+            <Flex
+              w="100%"
+              h={props.viewOnly ? "34px" : "100%"}
+              p={"0"}
+              align="center"
+              justify="center"
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+            >
+              <SearchSelect
+                placeholder="Select Entity"
+                resultType="entity"
+                value={value.data || { _id: "", name: "" }}
+                onChange={(entity) => handleDataChange(value._id, entity)}
+                disabled={props.viewOnly}
+                isEmbedded
+              />
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex
+              w="100%"
+              h={props.viewOnly ? "34px" : "100%"}
+              justify="center"
+              pt={"0.5"}
+              px={"2"}
+              border="1px solid transparent"
+              _focus={{
+                bg: "white",
+                borderColor: "blue.300",
+              }}
+              _hover={{
+                border: "1px solid",
+                borderColor: "blue.200",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+            >
+              <Linky type="entities" id={value.data?._id || ""} size="xs" />
+            </Flex>
+          );
+        }
 
-        props.setValues(updatedValues);
-        table.resetRowSelection();
-      },
-    },
-  ];
+      default:
+        return (
+          <Input
+            value={value.data?.toString() || ""}
+            onChange={(e) => handleDataChange(value._id, e.target.value)}
+            size="xs"
+            h={props.viewOnly ? "34px" : "100%"}
+            px={1}
+            py={0.5}
+            fontSize="xs"
+            readOnly={props.viewOnly}
+            placeholder="Enter value"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+    }
+  };
 
   return (
-    <Flex direction={"column"} gap={"2"} w={"100%"}>
-      <Flex
-        direction={"row"}
-        gap={"2"}
-        flexWrap={"wrap"}
-        justify={"space-between"}
-        align={"center"}
-      >
-        <Text fontSize={"sm"} fontWeight={"bold"}>
-          Values
-        </Text>
-        {!props.viewOnly && (
-          <Button
-            data-testid={"add-value-button"}
-            variant={"solid"}
-            colorPalette={"green"}
-            size={"sm"}
-            rounded={"md"}
-            onClick={() => {
-              props.setValues([
-                ...props.values,
-                {
-                  _id: `v_text_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "text",
-                  data: "",
-                },
-              ]);
-            }}
-          >
-            Add Value
-            <Icon name={"add"} />
-          </Button>
-        )}
-      </Flex>
-
-      {props.values.length > 0 ? (
-        <DataTable
-          columns={columns}
-          visibleColumns={{}}
-          selectedRows={{}}
-          data={props.values}
-          setData={props.setValues}
-          viewOnly={props.viewOnly}
-          actions={actions}
-          showPagination
-          showSelection
-        />
-      ) : (
-        <Flex
-          w={"100%"}
-          align={"center"}
-          justify={"center"}
-          minH={"200px"}
-          rounded={"md"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
+    <Box
+      w="100%"
+      display="flex"
+      flexDirection="column"
+      css={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {/* Table */}
+      <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
+        <Box
+          minW="800px"
+          w="100%"
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="md"
+          overflow="hidden"
         >
-          <EmptyState.Root>
-            <EmptyState.Content>
-              <Flex direction={"row"} gap={"2"}>
-                <EmptyState.Indicator>
-                  <Icon name={"v_text"} size={"sm"} />
-                </EmptyState.Indicator>
-                <EmptyState.Indicator>
-                  <Icon name={"v_number"} size={"sm"} />
-                </EmptyState.Indicator>
-                <EmptyState.Indicator>
-                  <Icon name={"v_url"} size={"sm"} />
-                </EmptyState.Indicator>
-                <EmptyState.Indicator>
-                  <Icon name={"v_date"} size={"sm"} />
-                </EmptyState.Indicator>
-                <EmptyState.Indicator>
-                  <Icon name={"v_select"} size={"sm"} />
-                </EmptyState.Indicator>
-                <EmptyState.Indicator>
-                  <Icon name={"entity"} size={"sm"} />
-                </EmptyState.Indicator>
-              </Flex>
-              <EmptyState.Description>No Values</EmptyState.Description>
-            </EmptyState.Content>
-          </EmptyState.Root>
-        </Flex>
-      )}
+          {/* Header Row */}
+          <Flex
+            gap={0}
+            bg="gray.100"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            direction="row"
+          >
+            {/* Drag Handle Column Header - only show in edit mode */}
+            {!props.viewOnly && (
+              <Box
+                w="40px"
+                flex="0 0 auto"
+                minW="40px"
+                px={1}
+                py={1}
+                textAlign="center"
+                bg="gray.100"
+                borderRight="1px solid"
+                borderColor="gray.200"
+                overflow="hidden"
+                flexShrink={0}
+              />
+            )}
 
-      <Dialog.Root
-        open={selectOpen}
-        size={"sm"}
-        placement={"center"}
-        closeOnEscape
-        closeOnInteractOutside
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header px={"2"} py={"4"} roundedTop={"md"} bg={"blue.300"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon name={"add"} />
-                Add Options
-              </Flex>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  top={"6px"}
-                  onClick={() => setSelectOpen(false)}
-                />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-            <Dialog.Body p={"2"} gap={"2"} pb={"0"}>
-              <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"sm"}>
-                  Name the option, then click "Add" to add it to the collection
-                  of options associated with this Select value. Click "Continue"
-                  to save the options.
-                </Text>
-                <Text fontSize={"sm"}>
-                  For a Select value, set the options to be displayed.
-                  Duplicates are not permitted.
-                </Text>
-                <Flex direction={"row"} gap={"4"}>
-                  <Input
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Option Value"}
-                    value={option}
-                    onChange={(event) => setOption(event.target.value)}
-                  />
-                  <Button
-                    colorPalette={"green"}
-                    size={"sm"}
-                    onClick={() => {
-                      if (!_.includes(options, option)) {
-                        setOptions([...options, option.toString()]);
-                        setOption("");
-                      } else {
-                        toaster.create({
-                          title: "Warning",
-                          description: "Can't add duplicate options.",
-                          type: "warning",
-                          duration: 2000,
-                          closable: true,
-                        });
-                      }
-                    }}
-                    disabled={_.isEqual(option, "")}
+            {/* Type Column Header */}
+            <Flex
+              w={`${columnWidths.type}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.type}px`}
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              bg="gray.100"
+              borderRight="1px solid"
+              borderColor="gray.200"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+              align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
+            >
+              <Text textAlign="center">Type</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("type", e)}
+                zIndex={10}
+              />
+            </Flex>
+
+            {/* Name Column Header */}
+            <Flex
+              w={`${columnWidths.name}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.name}px`}
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              bg="gray.100"
+              borderRight="1px solid"
+              borderColor="gray.200"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+              align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
+            >
+              <Text textAlign="center">Name</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("name", e)}
+                zIndex={10}
+              />
+            </Flex>
+
+            {/* Value Column Header */}
+            <Flex
+              w={`${columnWidths.value}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.value}px`}
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              bg="gray.100"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+              align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
+            >
+              <Text textAlign="center">Value</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("value", e)}
+                zIndex={10}
+              />
+            </Flex>
+          </Flex>
+
+          {/* Data Rows */}
+          <Box overflowY="auto" overflowX="hidden">
+            {paginatedValues.map((value, index) => (
+              <Flex
+                key={value._id}
+                gap={0}
+                borderBottom={
+                  index < paginatedValues.length - 1 ? "1px solid" : "none"
+                }
+                borderColor="gray.200"
+                _hover={{ bg: "gray.25" }}
+                overflow="hidden"
+                bg={selectedRows.has(value._id) ? "blue.50" : "transparent"}
+              >
+                {/* Drag Handle Column - only show in edit mode */}
+                {!props.viewOnly && (
+                  <Box
+                    w="40px"
+                    px={1}
+                    py={0.5}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    borderRight="1px solid"
+                    borderColor="gray.200"
+                    bg={
+                      selectedRows.has(value._id) ? "blue.100" : "transparent"
+                    }
+                    _hover={
+                      !props.viewOnly
+                        ? {
+                            bg: selectedRows.has(value._id)
+                              ? "blue.200"
+                              : "gray.100",
+                          }
+                        : {}
+                    }
+                    cursor={props.viewOnly ? "default" : "pointer"}
                   >
-                    Add
-                    <Icon name={"add"} />
-                  </Button>
-                </Flex>
-
-                <Flex direction={"column"} gap={"2"}>
-                  <Stack gap={"1"} separator={<Separator />}>
-                    {options.length > 0 ? (
-                      options.map((option, index) => {
-                        return (
-                          <Flex
-                            direction={"row"}
-                            w={"100%"}
-                            justify={"space-between"}
-                            align={"center"}
-                            key={option}
-                          >
-                            <Flex gap={"2"}>
-                              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                Option {index + 1}:
-                              </Text>
-                              <Text fontSize={"sm"}>{option}</Text>
-                            </Flex>
-                            <IconButton
-                              aria-label={`remove_${index}`}
-                              size={"sm"}
-                              colorPalette={"red"}
-                              onClick={() => {
-                                setOptions([
-                                  ...options.filter(
-                                    (currentOption) =>
-                                      !_.isEqual(currentOption, option),
-                                  ),
-                                ]);
-                              }}
-                            >
-                              <Icon name={"delete"} />
-                            </IconButton>
-                          </Flex>
-                        );
-                      })
-                    ) : (
-                      <Flex
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        minH={"100px"}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                      >
-                        <Text
-                          fontSize={"sm"}
-                          fontWeight={"semibold"}
-                          color={"gray.400"}
+                    <Checkbox.Root
+                      checked={selectedRows.has(value._id)}
+                      onChange={() =>
+                        !props.viewOnly && toggleRowSelection(value._id)
+                      }
+                      size="xs"
+                      colorPalette="blue"
+                      disabled={props.viewOnly}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
+                  </Box>
+                )}
+                {/* Type Column */}
+                <Box
+                  w={`${columnWidths.type}px`}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  borderRight="1px solid"
+                  borderColor="gray.200"
+                >
+                  {!props.viewOnly ? (
+                    <Select.Root
+                      size="xs"
+                      border="1px solid transparent"
+                      collection={createListCollection({
+                        items: [
+                          { value: "number", label: "Number" },
+                          { value: "text", label: "Text" },
+                          { value: "url", label: "URL" },
+                          { value: "date", label: "Date" },
+                          { value: "entity", label: "Entity" },
+                          { value: "select", label: "Select" },
+                        ],
+                      })}
+                      onValueChange={(details) =>
+                        handleTypeChange(
+                          value._id,
+                          details.items[0].value as IValueType,
+                        )
+                      }
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger
+                          minW="100px"
+                          borderRadius="none"
+                          border="none"
                         >
-                          No Options
-                        </Text>
-                      </Flex>
-                    )}
-                  </Stack>
+                          <Flex align="center" gap={1} h="16px">
+                            {getTypeIcon(value.type)}
+                            <Text fontSize="xs" color="gray.700">
+                              {value.type === "url"
+                                ? "URL"
+                                : _.capitalize(value.type)}
+                            </Text>
+                          </Flex>
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Select.Positioner>
+                        <Select.Content zIndex={9999}>
+                          {[
+                            { value: "number", label: "Number" },
+                            { value: "text", label: "Text" },
+                            { value: "url", label: "URL" },
+                            { value: "date", label: "Date" },
+                            { value: "entity", label: "Entity" },
+                            { value: "select", label: "Select" },
+                          ].map((option) => (
+                            <Select.Item item={option} key={option.value}>
+                              <Flex align="center" gap={2}>
+                                {getTypeIcon(option.value as IValueType)}
+                                {option.label}
+                              </Flex>
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Select.Root>
+                  ) : (
+                    <Flex align="center" gap={1} w="60px">
+                      {getTypeIcon(value.type)}
+                      <Text fontSize="xs" color="gray.700">
+                        {value.type === "url"
+                          ? "URL"
+                          : _.capitalize(value.type)}
+                      </Text>
+                    </Flex>
+                  )}
+                </Box>
+
+                {/* Name Column */}
+                <Box
+                  w={`${columnWidths.name}px`}
+                  p={"0"}
+                  m={"0"}
+                  borderRight="1px solid"
+                  borderColor="gray.200"
+                >
+                  <Input
+                    value={value.name}
+                    onChange={(e) =>
+                      handleNameChange(value._id, e.target.value)
+                    }
+                    size="xs"
+                    px={1}
+                    py={0}
+                    h="100%"
+                    fontSize="xs"
+                    readOnly={props.viewOnly}
+                    placeholder="Enter name"
+                    border="1px solid transparent"
+                    borderRadius="none"
+                    bg="transparent"
+                    cursor={props.viewOnly ? "default" : "text"}
+                    onClick={
+                      props.viewOnly ? (e) => e.preventDefault() : undefined
+                    }
+                    _focus={{
+                      bg: "white",
+                      border: "1px solid",
+                      borderColor: "blue.300",
+                    }}
+                    _hover={{
+                      border: "1px solid",
+                      borderColor: "blue.200",
+                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                    }}
+                  />
+                </Box>
+
+                {/* Value Column */}
+                <Flex
+                  w={`${columnWidths.value}px`}
+                  flex="1"
+                  p={"0"}
+                  overflow="visible"
+                  justify="space-between"
+                  align="center"
+                >
+                  {renderDataInput(value)}
+                  {props.viewOnly && value.type !== "entity" && (
+                    <IconButton
+                      aria-label="Copy value"
+                      size="2xs"
+                      mx={"1"}
+                      variant="outline"
+                      colorPalette="gray"
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          value.data?.toString() || "",
+                        )
+                      }
+                    >
+                      <Icon name="copy" size="xs" />
+                    </IconButton>
+                  )}
                 </Flex>
               </Flex>
-            </Dialog.Body>
-            <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
-              <Button
-                size={"sm"}
-                rounded={"md"}
-                colorPalette={"red"}
-                onClick={() => {
-                  // Reset the list of options and editing state
-                  setOptions([]);
-                  setEditingValueId(null);
+            ))}
+          </Box>
 
-                  // Close the modal
-                  setSelectOpen(false);
-                }}
-              >
-                Cancel
-                <Icon name={"cross"} />
-              </Button>
-              <Spacer />
-              <Button
-                size={"sm"}
-                rounded={"md"}
-                colorPalette={"green"}
-                onClick={addOptions}
-                disabled={_.isEqual(options.length, 0)}
-              >
-                Continue
-                <Icon name={"c_right"} />
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
-    </Flex>
+          {/* Add or Delete Selected Rows Button */}
+          {!props.viewOnly && (
+            <Flex
+              borderTop="1px solid"
+              borderColor="gray.200"
+              p={0}
+              justify="center"
+              align="center"
+              bg="gray.100"
+            >
+              {selectedRows.size > 0 ? (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="red"
+                  onClick={removeSelectedRows}
+                  aria-label="Delete selected rows"
+                  w="100%"
+                  h={"fit-content"}
+                  p={"0.5"}
+                >
+                  <Icon name="delete" size="xs" />
+                  <Text ml={1} fontSize="xs" fontWeight="semibold">
+                    Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
+                    {selectedRows.size})
+                  </Text>
+                </Button>
+              ) : (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="green"
+                  onClick={addRow}
+                  aria-label="Add row"
+                  w="100%"
+                  h={"fit-content"}
+                  p={"0.5"}
+                >
+                  <Icon name="add" size="xs" />
+                  <Text ml={1} fontSize="xs" fontWeight="semibold">
+                    Add Row
+                  </Text>
+                </Button>
+              )}
+            </Flex>
+          )}
+
+          {/* Select Options Modal */}
+          <Dialog.Root
+            open={selectModalOpen}
+            size="sm"
+            placement="center"
+            closeOnEscape
+            closeOnInteractOutside
+          >
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+                  <Flex direction="row" align="center" gap="1" p={"2"}>
+                    <Icon name="v_select" />
+                    <Text fontSize="xs" fontWeight="semibold">
+                      Setup Options
+                    </Text>
+                  </Flex>
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton
+                      size="2xs"
+                      top={"6px"}
+                      onClick={cancelSelectOptions}
+                    />
+                  </Dialog.CloseTrigger>
+                </Dialog.Header>
+                <Dialog.Body p="1" gap="1" pb="1">
+                  <Flex direction="column" gap="1">
+                    <Flex direction="row" gap="1">
+                      <Input
+                        size="xs"
+                        rounded="md"
+                        placeholder="Enter option value"
+                        value={newOption}
+                        onChange={(e) => setNewOption(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            addOption();
+                          }
+                        }}
+                      />
+                      <Button
+                        colorPalette="green"
+                        size="xs"
+                        rounded="md"
+                        onClick={addOption}
+                        disabled={
+                          !newOption.trim() ||
+                          selectOptions.includes(newOption.trim())
+                        }
+                      >
+                        Add
+                        <Icon name="add" />
+                      </Button>
+                    </Flex>
+                    <Box>
+                      <Stack
+                        gap="1"
+                        separator={<Separator />}
+                        pb="1"
+                        maxH="200px"
+                        overflowY={"auto"}
+                      >
+                        {selectOptions.length > 0 ? (
+                          selectOptions.map((option, index) => (
+                            <Flex
+                              key={option}
+                              direction="row"
+                              cursor={props.viewOnly ? "default" : "text"}
+                              onClick={
+                                props.viewOnly
+                                  ? (e) => e.preventDefault()
+                                  : undefined
+                              }
+                              justify="space-between"
+                              align="center"
+                            >
+                              <Flex gap="1">
+                                <Text
+                                  fontWeight="semibold"
+                                  fontSize="xs"
+                                  ml={"0.5"}
+                                >
+                                  Value {index + 1}:
+                                </Text>
+                                <Text fontSize="xs">{option}</Text>
+                              </Flex>
+                              <IconButton
+                                aria-label={`remove_${index}`}
+                                size="2xs"
+                                colorPalette="red"
+                                onClick={() => removeOption(option)}
+                              >
+                                <Icon name="delete" />
+                              </IconButton>
+                            </Flex>
+                          ))
+                        ) : (
+                          <Flex
+                            cursor={props.viewOnly ? "default" : "text"}
+                            onClick={
+                              props.viewOnly
+                                ? (e) => e.preventDefault()
+                                : undefined
+                            }
+                            align="center"
+                            justify="center"
+                            minH="60px"
+                            rounded="md"
+                            border="1px"
+                            borderColor="gray.300"
+                          >
+                            <Text
+                              fontSize="xs"
+                              fontWeight="semibold"
+                              color="gray.400"
+                            >
+                              No values added.
+                            </Text>
+                          </Flex>
+                        )}
+                      </Stack>
+                    </Box>
+                  </Flex>
+                </Dialog.Body>
+                <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+                  <Button
+                    size="xs"
+                    rounded="md"
+                    colorPalette="red"
+                    onClick={cancelSelectOptions}
+                  >
+                    Cancel
+                    <Icon name="cross" />
+                  </Button>
+                  <Spacer />
+                  <Button
+                    size="xs"
+                    rounded="md"
+                    colorPalette="green"
+                    onClick={confirmSelectOptions}
+                    disabled={selectOptions.length === 0}
+                  >
+                    Confirm
+                    <Icon name="check" />
+                  </Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Dialog.Root>
+        </Box>
+      </Box>
+
+      {/* Pagination Toolbar */}
+      <Flex
+        gap={1}
+        align="center"
+        wrap="wrap"
+        justify={{ base: "space-between", sm: "space-between" }}
+        w="100%"
+        mt={1}
+        flexShrink={0}
+      >
+        <Flex direction="row" gap={1} align="center" wrap="wrap">
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="first page"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage <= 1}
+          >
+            <Icon name="c_double_left" />
+          </IconButton>
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="previous page"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage <= 1}
+          >
+            <Icon name="c_left" />
+          </IconButton>
+          {totalPages > 0 && (
+            <Flex gap={1}>
+              <Text fontSize="xs" fontWeight="semibold">
+                {currentPage}
+              </Text>
+              <Text fontSize="xs"> of </Text>
+              <Text fontSize="xs" fontWeight="semibold">
+                {totalPages}
+              </Text>
+            </Flex>
+          )}
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="next page"
+            onClick={() =>
+              setCurrentPage(Math.min(totalPages, currentPage + 1))
+            }
+            disabled={currentPage >= totalPages}
+          >
+            <Icon name="c_right" />
+          </IconButton>
+          <IconButton
+            variant="outline"
+            size="xs"
+            rounded="md"
+            aria-label="last page"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage >= totalPages}
+          >
+            <Icon name="c_double_right" />
+          </IconButton>
+        </Flex>
+
+        <Flex direction="row" gap={1} align="center" wrap="wrap">
+          <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+            Show:
+          </Text>
+          <Fieldset.Root w="fit-content">
+            <Fieldset.Content>
+              <Field.Root>
+                <Select.Root
+                  size="xs"
+                  w="80px"
+                  collection={createListCollection({
+                    items: [
+                      { label: "5", value: "5" },
+                      { label: "10", value: "10" },
+                      { label: "20", value: "20" },
+                      { label: "50", value: "50" },
+                      { label: "100", value: "100" },
+                    ],
+                  })}
+                  value={[rowsPerPage.toString()]}
+                  onValueChange={(details) =>
+                    setRowsPerPage(parseInt(details.value[0]))
+                  }
+                >
+                  <Select.HiddenSelect />
+                  <Select.Control>
+                    <Select.Trigger rounded="md">
+                      <Select.ValueText placeholder="Page Size" />
+                    </Select.Trigger>
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal>
+                    <Select.Positioner>
+                      <Select.Content>
+                        {[
+                          { label: "5", value: "5" },
+                          { label: "10", value: "10" },
+                          { label: "20", value: "20" },
+                          { label: "50", value: "50" },
+                          { label: "100", value: "100" },
+                        ].map((count) => (
+                          <Select.Item item={count} key={count.value}>
+                            {count.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
+              </Field.Root>
+            </Fieldset.Content>
+          </Fieldset.Root>
+        </Flex>
+      </Flex>
+    </Box>
   );
 };
 

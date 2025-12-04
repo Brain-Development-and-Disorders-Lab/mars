@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Input, Menu, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import ValuesRemix from "@components/ValuesRemix";
+import Values from "@components/Values";
 import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
@@ -451,14 +451,14 @@ const Template = () => {
               <Flex gap={"1"} direction={"row"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Visibility
+                    Template Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Owner
+                    Template Owner
                   </Text>
                   <ActorTag
                     orcid={template.owner}
@@ -510,7 +510,7 @@ const Template = () => {
             <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
               Template Values
             </Text>
-            <ValuesRemix
+            <Values
               viewOnly={!editing}
               values={templateValues}
               setValues={setTemplateValues}

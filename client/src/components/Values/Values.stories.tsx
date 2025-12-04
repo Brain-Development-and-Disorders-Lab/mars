@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Box, Flex, Text } from "@chakra-ui/react";
 
 // Components
-import ValuesRemix from "./index";
+import Values from "./index";
 
 // Types
 import { IValue, GenericValueType } from "@types";
@@ -13,9 +13,9 @@ import { IValue, GenericValueType } from "@types";
 // Storybook
 import type { Meta, StoryObj } from "@storybook/react";
 
-const meta: Meta<typeof ValuesRemix> = {
-  title: "Components/ValuesRemix",
-  component: ValuesRemix,
+const meta: Meta<typeof Values> = {
+  title: "Components/Values",
+  component: Values,
   parameters: {
     layout: "centered",
     docs: {
@@ -38,7 +38,7 @@ const meta: Meta<typeof ValuesRemix> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ValuesRemix>;
+type Story = StoryObj<typeof Values>;
 
 // Default story with empty values
 export const Default: Story = {
@@ -47,7 +47,7 @@ export const Default: Story = {
 
     return (
       <Box p={4}>
-        <ValuesRemix {...args} values={values} setValues={setValues} />
+        <Values {...args} values={values} setValues={setValues} />
       </Box>
     );
   },
@@ -91,7 +91,7 @@ export const WithData: Story = {
 
     return (
       <Box p={4}>
-        <ValuesRemix {...args} values={values} setValues={setValues} />
+        <Values {...args} values={values} setValues={setValues} />
       </Box>
     );
   },
@@ -120,7 +120,7 @@ export const ReadOnly: Story = {
 
     return (
       <Box p={4}>
-        <ValuesRemix {...args} values={values} setValues={setValues} />
+        <Values {...args} values={values} setValues={setValues} />
       </Box>
     );
   },
@@ -142,7 +142,7 @@ export const ManyRows: Story = {
 
     return (
       <Box p={4}>
-        <ValuesRemix {...args} values={values} setValues={setValues} />
+        <Values {...args} values={values} setValues={setValues} />
       </Box>
     );
   },
@@ -218,7 +218,7 @@ export const ResponsiveContainer: Story = {
           flexDirection="column"
           overflow="hidden"
         >
-          <ValuesRemix {...args} values={values} setValues={setValues} />
+          <Values {...args} values={values} setValues={setValues} />
         </Box>
 
         <Text fontSize="sm" color="gray.600">
@@ -234,7 +234,7 @@ export const ResponsiveContainer: Story = {
           flexDirection="column"
           overflow="hidden"
         >
-          <ValuesRemix {...args} values={values} setValues={setValues} />
+          <Values {...args} values={values} setValues={setValues} />
         </Box>
       </Flex>
     );

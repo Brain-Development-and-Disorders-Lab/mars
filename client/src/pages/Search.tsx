@@ -8,7 +8,6 @@ import {
   Flex,
   Heading,
   Input,
-  Link,
   Menu,
   Portal,
   Spacer,
@@ -20,7 +19,6 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -174,12 +172,28 @@ const Search = () => {
   const searchResultColumns = [
     searchResultColumnHelper.accessor("name", {
       cell: (info) => (
-        <Linky
-          id={info.row.original._id}
-          type={"entities"}
-          size={"sm"}
-          fallback={info.row.original.name}
-        />
+        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+          <Tooltip
+            content={info.getValue()}
+            disabled={info.getValue().length < 20}
+            showArrow
+          >
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
+          </Tooltip>
+          <Button
+            size="2xs"
+            mx={"1"}
+            variant="subtle"
+            colorPalette="gray"
+            aria-label={"View Entity"}
+            onClick={() => navigate(`/entities/${info.row.original._id}`)}
+          >
+            View
+            <Icon name={"a_right"} size={"xs"} />
+          </Button>
+        </Flex>
       ),
       header: "Name",
     }),
@@ -188,7 +202,7 @@ const Search = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>No Description</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -197,7 +211,7 @@ const Search = () => {
             content={info.getValue()}
             disabled={info.getValue().length < 30}
           >
-            <Text lineClamp={1}>
+            <Text fontSize={"xs"} lineClamp={1}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
           </Tooltip>
@@ -213,6 +227,7 @@ const Search = () => {
             orcid={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
+            inline
           />
         );
       },
@@ -222,7 +237,7 @@ const Search = () => {
       cell: (info) => {
         return (
           <Tag.Root colorPalette={"green"}>
-            <Tag.Label>
+            <Tag.Label fontSize={"xs"}>
               {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
             </Tag.Label>
           </Tag.Root>
@@ -233,14 +248,14 @@ const Search = () => {
     searchResultColumnHelper.accessor("archived", {
       cell: (info) => {
         return (
-          <Flex direction={"row"} gap={"2"} align={"center"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
             <Icon
               name={info.getValue() ? "archive" : "check"}
               color={info.getValue() ? "orange" : "green"}
             />
             <Text
               fontWeight={"semibold"}
-              fontSize={"sm"}
+              fontSize={"xs"}
               color={info.getValue() ? "orange" : "green"}
             >
               {info.getValue() ? "Archived" : "Active"}
@@ -249,23 +264,6 @@ const Search = () => {
         );
       },
       header: "Status",
-    }),
-    searchResultColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link
-              color={"black"}
-              fontWeight={"semibold"}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-              <Icon name={"a_right"} />
-            </Link>
-          </Flex>
-        );
-      },
-      header: "",
     }),
   ];
   const searchResultActions: DataTableAction[] = [
@@ -639,17 +637,19 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"column"} p={"2"} gap={"4"}>
+      <Flex direction={"column"} p={"1"} gap={"1"}>
         {/* Page header */}
         <Flex
           direction={"row"}
-          p={"2"}
+          p={"1"}
           align={"center"}
           justify={"space-between"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"search"} size={"md"} />
-            <Heading size={"md"}>Search</Heading>
+          <Flex align={"center"} gap={"1"} w={"100%"}>
+            <Icon name={"search"} size={"sm"} />
+            <Text fontSize={"md"} fontWeight={"semibold"}>
+              Search
+            </Text>
           </Flex>
         </Flex>
 
@@ -661,51 +661,61 @@ const Search = () => {
           variant={"subtle"}
           onValueChange={onTabChange}
         >
-          <Tabs.List p={"2"} gap={"2"} pb={"0"}>
-            <Flex gap={"2"} align={"center"}>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
+          <Tabs.List p={"1"} gap={"1"} pb={"0"}>
+            <Flex gap={"1"} align={"center"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Search Using:
               </Text>
-              <Tabs.Trigger value={"text"} disabled={isSearching}>
-                <Icon name={"text"} size={"sm"} />
+              <Tabs.Trigger
+                value={"text"}
+                disabled={isSearching}
+                fontSize={"xs"}
+                gap={"1"}
+              >
+                <Icon name={"text"} size={"xs"} />
                 Text
               </Tabs.Trigger>
-              <Tabs.Trigger value={"advanced"} disabled={isSearching}>
-                <Icon name={"search_query"} />
+              <Tabs.Trigger
+                value={"advanced"}
+                disabled={isSearching}
+                fontSize={"xs"}
+                gap={"1"}
+              >
+                <Icon name={"search_query"} size={"xs"} />
                 Query Builder
               </Tabs.Trigger>
             </Flex>
           </Tabs.List>
 
           {/* Text search */}
-          <Tabs.Content value={"text"} p={"2"}>
-            <Flex direction={"column"} gap={"2"}>
+          <Tabs.Content value={"text"} p={"1"}>
+            <Flex direction={"column"} gap={"1"}>
               {/* Search options */}
-              <Flex justify={"space-between"} align={"center"}>
-                <Menu.Root>
+              <Flex align={"center"} gap={"1"}>
+                <Menu.Root size={"sm"}>
                   <Menu.Trigger asChild>
                     <Button
                       variant={"outline"}
                       colorPalette={"gray"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                     >
-                      <Icon name={"settings"} />
-                      Options
+                      <Icon name={"settings"} size={"xs"} />
+                      Search Options
                     </Button>
                   </Menu.Trigger>
                   <Portal>
                     <Menu.Positioner>
                       <Menu.Content>
                         <Menu.ItemGroup>
-                          <Menu.ItemGroupLabel>Options</Menu.ItemGroupLabel>
                           <Menu.CheckboxItem
+                            fontSize={"xs"}
                             key={"archived"}
                             value={"archived"}
                             checked={showArchived}
                             onCheckedChange={(event) => setShowArchived(event)}
                           >
-                            Show Archived
+                            Show Archived Entities
                             <Menu.ItemIndicator />
                           </Menu.CheckboxItem>
                         </Menu.ItemGroup>
@@ -714,17 +724,17 @@ const Search = () => {
                   </Portal>
                 </Menu.Root>
 
-                <Menu.Root>
+                <Menu.Root size={"sm"}>
                   <Menu.Trigger asChild>
                     <Button
                       variant={"outline"}
                       colorPalette={"gray"}
-                      size={"sm"}
+                      size={"xs"}
                       rounded={"md"}
                       disabled
                     >
-                      <Icon name={"filter"} />
-                      Filters
+                      <Icon name={"filter"} size={"xs"} />
+                      Search Filters
                     </Button>
                   </Menu.Trigger>
                   <Portal>
@@ -739,7 +749,7 @@ const Search = () => {
               <Flex
                 w={"100%"}
                 direction={"row"}
-                gap={"2"}
+                gap={"1"}
                 align={"center"}
                 border={"1px"}
                 borderColor={"gray.300"}
@@ -747,7 +757,7 @@ const Search = () => {
               >
                 <Flex w={"100%"}>
                   <Input
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     value={query}
                     placeholder={"Search..."}
@@ -764,7 +774,7 @@ const Search = () => {
                 <Spacer />
 
                 <Button
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"gray"}
                   variant={"outline"}
@@ -781,23 +791,23 @@ const Search = () => {
 
                 <Button
                   aria-label={"Search"}
-                  size={"sm"}
+                  size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
                   disabled={query === ""}
                   onClick={() => runSearch()}
                 >
                   Search
-                  <Icon name={"search"} />
+                  <Icon name={"search"} size={"xs"} />
                 </Button>
               </Flex>
             </Flex>
           </Tabs.Content>
 
           {/* Query builder */}
-          <Tabs.Content value={"advanced"} p={"2"}>
-            <Flex direction={"column"} gap={"2"}>
-              <Flex direction={"column"} gap={"2"}>
+          <Tabs.Content value={"advanced"} p={"1"}>
+            <Flex direction={"column"} gap={"1"}>
+              <Flex direction={"column"} gap={"1"}>
                 <QueryBuilderChakra>
                   <QueryBuilderDnD
                     dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}
@@ -814,9 +824,9 @@ const Search = () => {
                     />
                   </QueryBuilderDnD>
                 </QueryBuilderChakra>
-                <Flex justify={"right"} gap={"2"}>
+                <Flex justify={"right"} gap={"1"}>
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"gray"}
                     variant={"outline"}
@@ -832,13 +842,13 @@ const Search = () => {
                   <Button
                     aria-label={"Run Query"}
                     colorPalette={"green"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     onClick={() => onSearchBuiltQuery()}
                     disabled={!isValid}
                   >
                     Search
-                    <Icon name={"search"} />
+                    <Icon name={"search"} size={"xs"} />
                   </Button>
                 </Flex>
               </Flex>
@@ -847,7 +857,7 @@ const Search = () => {
         </Tabs.Root>
 
         {/* Search Results */}
-        <Flex gap={"2"} p={"2"} w={"100%"}>
+        <Flex gap={"1"} p={"1"} w={"100%"}>
           {isSearching && (
             <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
               <Spinner size={"lg"} color={"gray.600"} />
@@ -859,7 +869,7 @@ const Search = () => {
               id={"resultsContainer"}
               direction={"column"}
               w={"100%"}
-              gap={"2"}
+              gap={"1"}
             >
               {results.length > 0 ? (
                 <>

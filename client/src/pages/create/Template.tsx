@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import ValuesRemix from "@components/ValuesRemix";
+import Values from "@components/Values";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
@@ -181,13 +181,14 @@ const Template = () => {
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root required>
+                  <Field.Root required gap={"1"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
                       Template Name
+                      <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       size={"xs"}
@@ -231,13 +232,14 @@ const Template = () => {
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root required>
+                  <Field.Root required gap={"1"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
                     >
                       Template Description
+                      <Field.RequiredIndicator />
                     </Field.Label>
                     <MDEditor
                       height={150}
@@ -267,7 +269,7 @@ const Template = () => {
         </Flex>
 
         <Flex w={"100%"} p={"1"} gap={"1"} direction={"column"}>
-          <ValuesRemix
+          <Values
             viewOnly={false}
             values={values}
             setValues={setValues}
@@ -308,12 +310,16 @@ const Template = () => {
                 Template Attributes
               </Flex>
             </Dialog.Header>
-            <Dialog.Body p={"1"} px={"2"}>
+            <Dialog.Body p={"1"}>
               <Flex gap={"1"} direction={"column"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Overview
-                  </Text>
+                <Flex
+                  direction={"column"}
+                  gap={"1"}
+                  bg={"gray.100"}
+                  p={"1"}
+                  rounded={"md"}
+                >
+                  <Heading size={"xs"}>Overview</Heading>
                   <Text fontSize={"xs"}>
                     Create a new template Attribute to be used to specify
                     metadata associated with Entities. Using Values, predefined
@@ -324,7 +330,7 @@ const Template = () => {
                   </Text>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1"}>
+                <Flex direction={"column"} gap={"1"} ml={"0.5"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Values
                   </Text>

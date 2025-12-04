@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
@@ -490,7 +490,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"column"} w={"100%"} p={"2"} gap={"1"}>
+      <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
         {token.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
@@ -509,7 +509,7 @@ const Dashboard = () => {
             justify={"space-between"}
           >
             <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"dashboard"} size={"sm"} />
                 <Heading size={"xl"}>Dashboard</Heading>
               </Flex>
@@ -653,7 +653,7 @@ const Dashboard = () => {
             {/* Projects and Entities */}
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               background={"white"}
               rounded={"md"}
               gap={"1"}
@@ -664,14 +664,16 @@ const Dashboard = () => {
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"project"} size={"sm"} />
-                <Heading size={"md"}>Recent Projects</Heading>
+                <Icon name={"project"} size={"xs"} />
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Recent Projects
+                </Text>
               </Flex>
 
               {/* Projects table */}
               {/* Condition: Loaded and content present */}
               {!loading && projectData.length > 0 && (
-                <DataTableRemix
+                <DataTable
                   columns={projectTableColumns}
                   data={projectTableData}
                   visibleColumns={visibleColumns}
@@ -708,7 +710,7 @@ const Dashboard = () => {
 
             <Flex
               direction={"column"}
-              p={"2"}
+              p={"1"}
               background={"white"}
               rounded={"md"}
               gap={"1"}
@@ -719,14 +721,16 @@ const Dashboard = () => {
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"entity"} size={"sm"} />
-                <Heading size={"md"}>Recent Entities</Heading>
+                <Icon name={"entity"} size={"xs"} />
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Recent Entities
+                </Text>
               </Flex>
 
               {/* Entities table */}
               {/* Condition: Loaded and content present */}
               {!loading && entityData.length > 0 && (
-                <DataTableRemix
+                <DataTable
                   columns={entityTableColumns}
                   data={entityTableData.filter(
                     (entity) =>
@@ -772,7 +776,7 @@ const Dashboard = () => {
           <Flex
             direction={"column"}
             maxW={{ lg: "md" }}
-            p={"2"}
+            p={"1"}
             gap={"1"}
             grow={"1"}
             rounded={"md"}
@@ -784,13 +788,13 @@ const Dashboard = () => {
             <Flex
               id={"recentActivityHeader"}
               align={"center"}
-              gap={"2"}
+              gap={"1"}
               ml={"0.5"}
             >
-              <Icon name={"activity"} size={"sm"} />
-              <Heading size={"md"} color={"gray.700"}>
+              <Icon name={"activity"} size={"xs"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
                 Recent Activity
-              </Heading>
+              </Text>
             </Flex>
 
             {/* Activity list */}

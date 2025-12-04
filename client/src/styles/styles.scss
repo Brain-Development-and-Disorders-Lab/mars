@@ -42,13 +42,13 @@ body .w-md-editor-text {
     height: var(--input-height);
     background: var(--chakra-colors-white);
     border-radius: var(--chakra-radii-md);
-    --input-font-size: var(--chakra-fontSizes-sm);
+    --input-font-size: var(--chakra-fontSizes-xs);
     --input-border-radius: var(--chakra-radii-md);
     --input-height: var(--chakra-sizes-8);
   }
   button {
     display: inline-flex;
-    font-size: var(--chakra-fontSizes-sm);
+    font-size: var(--chakra-fontSizes-xs);
     height: var(--chakra-sizes-8);
     align-items: center;
     justify-content: center;
@@ -97,11 +97,11 @@ body .w-md-editor-text {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: var(--chakra-spacing-2);
+  gap: var(--chakra-spacing-1);
   flex-wrap: wrap;
 
   .ruleGroup-notToggle {
-    gap: var(--chakra-spacing-2);
+    gap: var(--chakra-spacing-1);
   }
 
   .ruleGroup-combinators {
@@ -111,8 +111,10 @@ body .w-md-editor-text {
 
   .ruleGroup-addRule,
   .ruleGroup-addGroup {
-    font-size: var(--chakra-font-sizes-sm);
-    padding: var(--chakra-spacing-2);
+    font-size: var(--chakra-font-sizes-xs);
+    padding: var(--chakra-spacing-1);
+    padding-left: var(--chakra-spacing-2);
+    padding-right: var(--chakra-spacing-2);
     background: var(--chakra-colors-blue-500);
     color: var(--chakra-colors-white);
     svg {
@@ -125,12 +127,13 @@ body .w-md-editor-text {
   }
 
   .ruleGroup-remove {
-    padding: var(--chakra-spacing-2);
+    padding: var(--chakra-spacing-1);
     background: var(--chakra-colors-red-500);
+    min-width: 33px;
     svg {
       color: var(--chakra-colors-white);
-      width: var(--chakra-sizes-3);
-      height: var(--chakra-sizes-3);
+      width: var(--chakra-sizes-4);
+      height: var(--chakra-sizes-4);
     }
   }
   .ruleGroup-remove:hover {
@@ -138,7 +141,7 @@ body .w-md-editor-text {
   }
 
   .ruleGroup-cloneGroup {
-    padding: var(--chakra-spacing-2);
+    padding: var(--chakra-spacing-1);
     background: var(--chakra-colors-yellow-400);
   }
   .ruleGroup-cloneGroup:hover {
@@ -154,13 +157,26 @@ body .w-md-editor-text {
   display: flex;
   flex-direction: column;
 
+  .rule-fields {
+    select {
+      font-size: small;
+    }
+  }
+
+  .rule-operators {
+    select {
+      font-size: small;
+    }
+  }
+
   .rule-remove {
-    padding: var(--chakra-spacing-2);
+    padding: var(--chakra-spacing-1);
     background: var(--chakra-colors-red-500);
+    min-width: 33px;
     svg {
       color: var(--chakra-colors-white);
-      width: var(--chakra-sizes-3);
-      height: var(--chakra-sizes-3);
+      width: var(--chakra-sizes-4);
+      height: var(--chakra-sizes-4);
     }
   }
   .rule-remove:hover {
@@ -168,7 +184,7 @@ body .w-md-editor-text {
   }
 
   .rule-cloneRule {
-    padding: var(--chakra-spacing-2);
+    padding: var(--chakra-spacing-1);
     background: var(--chakra-colors-yellow-400);
   }
   .rule-cloneRule:hover {
@@ -177,16 +193,16 @@ body .w-md-editor-text {
 
   .rule {
     display: flex;
-    gap: var(--chakra-spacing-2);
+    gap: var(--chakra-spacing-1);
     flex-wrap: wrap;
 
     .rule-remove {
-      padding: var(--chakra-spacing-2);
+      padding: var(--chakra-spacing-1);
       background: var(--chakra-colors-red-500);
       svg {
         color: var(--chakra-colors-white);
-        width: var(--chakra-sizes-3);
-        height: var(--chakra-sizes-3);
+        width: var(--chakra-sizes-4);
+        height: var(--chakra-sizes-4);
       }
     }
     .rule-remove:hover {
@@ -197,6 +213,18 @@ body .w-md-editor-text {
     .rule-operators {
       border-radius: var(--chakra-radii-md);
     }
+
+    .search-select-input {
+      font-size: small;
+    }
+
+    .search-select-results {
+      font-size: small;
+      button {
+        font-size: small;
+        justify-content: flex-start;
+      }
+    }
   }
 
   .chakra-select__wrapper {
@@ -204,7 +232,7 @@ body .w-md-editor-text {
   }
 }
 
-/* Custom scrollbar styles for DataTableRemix */
+/* Custom scrollbar styles for DataTable */
 .data-table-scroll-container {
   /* For Webkit browsers (Chrome, Safari, Edge) */
   &::-webkit-scrollbar {

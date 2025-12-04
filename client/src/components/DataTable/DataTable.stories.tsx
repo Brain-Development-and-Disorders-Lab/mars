@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box } from "@chakra-ui/react";
-import DataTableRemix from "./index";
+import DataTable from "./index";
 import type { Meta, StoryObj } from "@storybook/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -12,16 +12,16 @@ type SampleData = {
   description: string;
 };
 
-const meta: Meta<typeof DataTableRemix> = {
-  title: "Components/DataTableRemix",
-  component: DataTableRemix,
+const meta: Meta<typeof DataTable> = {
+  title: "Components/DataTable",
+  component: DataTable,
   parameters: {
     layout: "centered",
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof DataTableRemix>;
+type Story = StoryObj<typeof DataTable>;
 
 const sampleData: SampleData[] = Array.from({ length: 12 }, (_, i) => ({
   id: `${i + 1}`,
@@ -68,7 +68,7 @@ export const Default: Story = {
     const [visibleColumns] = useState(defaultVisibleColumns);
     return (
       <Box p={4} w="100%" maxW="1200px">
-        <DataTableRemix
+        <DataTable
           {...args}
           columns={defaultColumns}
           data={sampleData}
@@ -91,7 +91,7 @@ export const WithSelection: Story = {
     const [visibleColumns] = useState(defaultVisibleColumns);
     return (
       <Box p={4} w="100%" maxW="1200px">
-        <DataTableRemix
+        <DataTable
           {...args}
           columns={defaultColumns}
           data={sampleData}
@@ -130,7 +130,7 @@ export const ManyRows: Story = {
     }));
     return (
       <Box p={4} w="100%" maxW="1200px">
-        <DataTableRemix
+        <DataTable
           {...args}
           columns={defaultColumns}
           data={manyRows}
@@ -153,7 +153,7 @@ export const ReadOnly: Story = {
     const [visibleColumns] = useState(defaultVisibleColumns);
     return (
       <Box p={4} w="100%" maxW="1200px">
-        <DataTableRemix
+        <DataTable
           {...args}
           columns={defaultColumns}
           data={sampleData}
@@ -200,7 +200,7 @@ export const ResponsiveSizing: Story = {
               overflow="hidden"
               minW="0"
             >
-              <DataTableRemix
+              <DataTable
                 {...args}
                 columns={defaultColumns}
                 data={sampleData}

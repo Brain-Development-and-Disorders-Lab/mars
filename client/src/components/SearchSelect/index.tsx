@@ -262,7 +262,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"xs"}
-          rounded={props.isEmbedded ? "none" : "sm"}
+          rounded={props.isEmbedded ? "none" : "md"}
           border={props.isEmbedded ? "none" : "1px solid"}
           borderColor={props.isEmbedded ? "" : "gray.300"}
           disabled={props?.disabled || false}
@@ -289,7 +289,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           {/* Dropdown */}
           <Box
             position="fixed"
-            top={dropdownPosition.top}
+            top={dropdownPosition.top - 5}
             left={dropdownPosition.left}
             width={dropdownPosition.width}
             bg="white"
@@ -298,21 +298,26 @@ const SearchSelect = (props: SearchSelectProps) => {
             borderRadius="sm"
             shadow="md"
             zIndex="9999"
-            p="2"
+            p="1"
             opacity={isAnimating ? 1 : 0}
             transform={isAnimating ? "translateY(0)" : "translateY(-8px)"}
             transition="all 0.15s ease-in-out"
           >
             <Input
-              size="sm"
-              rounded="md"
-              placeholder="Search"
+              className={"search-select-input"}
+              size={"xs"}
+              rounded={"md"}
+              placeholder={"Search"}
               onChange={handleInputChange}
               autoFocus
-              mb="2"
+              mb={"2"}
             />
 
-            <Box maxH="200px" overflowY="auto">
+            <Box
+              maxH="200px"
+              overflowY="auto"
+              className={"search-select-results"}
+            >
               {/* Has searched, search operation complete, multiple results */}
               {hasSearched &&
                 searchLoading === false &&
@@ -324,7 +329,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     onClick={() => handleSelectResult(result)}
                     width="full"
                     disabled={searchLoading}
-                    size="sm"
+                    size="xs"
                     justifyContent="flex-start"
                     mb="1"
                   >
@@ -355,7 +360,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                     onClick={() => handleSelectResult(option)}
                     width="full"
                     disabled={entitiesLoading || projectsLoading}
-                    size="sm"
+                    size="xs"
                     justifyContent="flex-start"
                     mb="1"
                   >

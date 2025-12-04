@@ -114,7 +114,7 @@ const SearchQueryValue = ({
           onChange={handleInputChange}
           minW={"300px"}
           rounded={"md"}
-          size={"sm"}
+          size={"xs"}
           backgroundColor={"white"}
           data-testid={"value-editor"}
         />
@@ -168,21 +168,21 @@ const SearchQueryValue = ({
               <Select.Control
                 minW={"90px"}
                 maxW={"120px"}
-                fontSize={"sm"}
+                fontSize={"xs"}
                 h={"28px"}
                 style={{ justifyContent: "flex-start" }}
               >
                 <Select.Trigger
                   minW={"90px"}
                   maxW={"120px"}
-                  fontSize={"sm"}
+                  fontSize={"xs"}
                   h={"28px"}
                   style={{ justifyContent: "flex-start" }}
                   data-testid={"rule-value-type-trigger"}
                 >
                   <Select.ValueText
                     placeholder={"Type"}
-                    fontSize={"sm"}
+                    fontSize={"xs"}
                     style={{ textAlign: "left" }}
                   />
                 </Select.Trigger>
@@ -192,12 +192,12 @@ const SearchQueryValue = ({
               </Select.Control>
               <Portal>
                 <Select.Positioner>
-                  <Select.Content fontSize={"sm"}>
+                  <Select.Content fontSize={"xs"}>
                     {["Text", "URL", "Number", "Date"].map((valueType) => (
                       <Select.Item
                         item={valueType}
                         key={valueType}
-                        fontSize={"sm"}
+                        fontSize={"xs"}
                         h={"28px"}
                         style={{ textAlign: "left" }}
                       >
@@ -223,21 +223,21 @@ const SearchQueryValue = ({
               <Select.Control
                 minW={"120px"}
                 maxW={"150px"}
-                fontSize={"sm"}
+                fontSize={"xs"}
                 h={"28px"}
                 style={{ justifyContent: "flex-start" }}
               >
                 <Select.Trigger
                   minW={"120px"}
                   maxW={"150px"}
-                  fontSize={"sm"}
+                  fontSize={"xs"}
                   h={"28px"}
                   style={{ justifyContent: "flex-start" }}
                   data-testid={"rule-value-operators-trigger"}
                 >
                   <Select.ValueText
                     placeholder={"Condition"}
-                    fontSize={"sm"}
+                    fontSize={"xs"}
                     style={{ textAlign: "left" }}
                   />
                 </Select.Trigger>
@@ -247,12 +247,12 @@ const SearchQueryValue = ({
               </Select.Control>
               <Portal>
                 <Select.Positioner>
-                  <Select.Content fontSize={"sm"}>
+                  <Select.Content fontSize={"xs"}>
                     {operatorsCollection.items.map((operator) => (
                       <Select.Item
                         item={operator}
                         key={operator}
-                        fontSize={"sm"}
+                        fontSize={"xs"}
                         h={"28px"}
                         style={{ textAlign: "left" }}
                       >
@@ -278,7 +278,7 @@ const SearchQueryValue = ({
               minW={"80px"}
               rounded={"md"}
               size={"xs"}
-              fontSize={"sm"}
+              fontSize={"xs"}
               height={"28px"}
               data-testid={"value-editor"}
               style={{ textAlign: "left" }}

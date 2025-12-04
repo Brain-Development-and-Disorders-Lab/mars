@@ -12,7 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
-import DataTableRemix from "@components/DataTableRemix";
+import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -115,11 +115,11 @@ const Templates = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 18}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 18 })}
               </Text>
             </Tooltip>
             <Button
@@ -205,11 +205,11 @@ const Templates = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
-        p={"2"}
+        p={"1"}
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"2"}
+        gap={"1"}
       >
         <Flex
           w={"100%"}
@@ -217,7 +217,7 @@ const Templates = () => {
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
+          <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"template"} size={"sm"} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
@@ -238,7 +238,7 @@ const Templates = () => {
             Templates using the column headers.
           </Text>
           {templates.length > 0 ? (
-            <DataTableRemix
+            <DataTable
               columns={columns}
               data={templates}
               visibleColumns={visibleColumns}

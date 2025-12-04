@@ -512,20 +512,14 @@ const Entity = () => {
                 rounded={"md"}
               >
                 <Fieldset.Root invalid={isNameError || !isNameUnique} gap={"1"}>
-                  <Fieldset.Legend
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    ml={"0.5"}
-                  >
-                    Entity Details
-                  </Fieldset.Legend>
-                  <Flex mt={"1"}>
-                    <Information text="Specify the basic details of the new Entity." />
-                  </Flex>
                   <Fieldset.Content mt={"1"}>
-                    <Field.Root required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"}>
-                        Name
+                    <Field.Root required gap={"1"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                      >
+                        Entity Name
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Flex gap={"1"} justify={"space-between"}>
@@ -566,6 +560,10 @@ const Entity = () => {
                             colorPalette={"blue"}
                           >
                             Use {useCounter ? "Text" : "Counter"}
+                            <Icon
+                              name={useCounter ? "text" : "counter"}
+                              size={"xs"}
+                            />
                           </Button>
                         </Flex>
                       </Flex>
@@ -581,9 +579,13 @@ const Entity = () => {
                       )}
                     </Field.Root>
 
-                    <Field.Root invalid={isDateError} required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"}>
-                        Created
+                    <Field.Root invalid={isDateError} required gap={"1"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                      >
+                        Entity Created
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Input
@@ -624,19 +626,16 @@ const Entity = () => {
                 borderColor={"gray.300"}
               >
                 {/* Description */}
-                <Fieldset.Root>
-                  <Fieldset.Legend
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    ml={"0.5"}
-                  >
-                    Entity Description
-                  </Fieldset.Legend>
-                  <Flex mt={"1"}>
-                    <Information text="Specify a description for the new Entity." />
-                  </Flex>
-                  <Fieldset.Content mt={"2"}>
-                    <Field.Root>
+                <Fieldset.Root gap={"0"}>
+                  <Fieldset.Content gap={"0"}>
+                    <Field.Root gap={"1"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                      >
+                        Entity Description
+                      </Field.Label>
                       <MDEditor
                         height={150}
                         minHeight={100}
@@ -677,10 +676,18 @@ const Entity = () => {
                 border={"1px solid"}
                 borderColor={"gray.300"}
               >
-                <Heading size={"sm"} fontWeight={"semibold"} ml={"0.5"}>
+                <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                   Entity Relationships
                 </Heading>
-                <Information text="Create Relationships between this Entity and other Entities." />
+                <Text
+                  fontSize={"xs"}
+                  ml={"0.5"}
+                  fontWeight={"semibold"}
+                  color={"gray.500"}
+                >
+                  Specify the relationships between this Entity and other
+                  Entities.
+                </Text>
                 <Flex
                   direction={"row"}
                   gap={"1"}
@@ -824,19 +831,24 @@ const Entity = () => {
                       }
                     }}
                   >
-                    <Fieldset.Legend
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
+                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      Linked Projects
+                    </Text>
+                    <Text
+                      fontSize={"xs"}
                       ml={"0.5"}
+                      fontWeight={"semibold"}
+                      color={"gray.500"}
                     >
-                      Entity Projects
-                    </Fieldset.Legend>
-                    <Information text="Specify the Projects that this new Entity should be included with. The Entity will then be contained within the specified Projects." />
+                      Specify the Projects that this new Entity should be
+                      included with. The Entity will then be contained within
+                      the specified Projects.
+                    </Text>
                     <Fieldset.Content gap={"1"}>
-                      <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Available Projects
-                      </Heading>
-                      <Stack gap={"1"} direction={"column"}>
+                      </Text>
+                      <Stack gap={"1"} direction={"column"} ml={"0.5"}>
                         {projects &&
                           projects.length > 0 &&
                           projects.map((project) => {
@@ -1090,26 +1102,42 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"1"} px={"2"} gap={"1"}>
+              <Dialog.Body p={"1"} gap={"1"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Heading size={"xs"}>1. Start</Heading>
-                  <Text fontSize={"xs"}>
-                    Specify some basic details about this Entity. Relations
-                    between Entities and membership to Projects can be specified
-                    on the following page. Finally, the metadata associated with
-                    this Entity should be specified using Attributes and
-                    corresponding Values.
-                  </Text>
-                  <Heading size={"xs"}>2. Relationships</Heading>
-                  <Text fontSize={"xs"}>
-                    Relations between Entities and membership to Projects can be
-                    specified using Relationships.
-                  </Text>
-                  <Heading size={"xs"}>3. Attributes</Heading>
-                  <Text fontSize={"xs"}>
-                    The metadata associated with this Entity should be specified
-                    using Attributes and corresponding Values.
-                  </Text>
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    bg={"gray.100"}
+                    p={"1"}
+                    rounded={"md"}
+                  >
+                    <Heading size={"xs"}>Overview</Heading>
+                    <Text fontSize={"xs"}>
+                      Entities are the core objects in Metadatify. They can be
+                      used to represent any type of object, such as a dataset, a
+                      sample, a protocol, or a software tool.
+                    </Text>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"} ml={"0.5"}>
+                    <Heading size={"xs"}>Page 1: Start</Heading>
+                    <Text fontSize={"xs"}>
+                      Specify some basic details about this Entity. Relations
+                      between Entities and membership to Projects can be
+                      specified on the following page. Finally, the metadata
+                      associated with this Entity should be specified using
+                      Attributes and corresponding Values.
+                    </Text>
+                    <Heading size={"xs"}>Page 2: Relationships</Heading>
+                    <Text fontSize={"xs"}>
+                      Relations between Entities and membership to Projects can
+                      be specified using Relationships.
+                    </Text>
+                    <Heading size={"xs"}>Page 3: Attributes</Heading>
+                    <Text fontSize={"xs"}>
+                      The metadata associated with this Entity should be
+                      specified using Attributes and corresponding Values.
+                    </Text>
+                  </Flex>
                 </Flex>
               </Dialog.Body>
             </Dialog.Content>

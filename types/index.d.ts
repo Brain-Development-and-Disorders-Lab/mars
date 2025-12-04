@@ -281,6 +281,12 @@ export type EntityImportReview = {
   state: "create" | "update";
 };
 
+// Import review summary for Templates being imported
+export type TemplateImportReview = {
+  name: string;
+  state: "create" | "update";
+};
+
 // Column mappings for Entity imports
 export type IRow = Record<string, any>;
 export type IColumnMapping = Record<string, any>;
@@ -404,6 +410,7 @@ export type DataTableAction = {
   label: string; // Action label
   icon: IconNames; // Icon
   action: (table: any, rows: any) => void; // Action function acting on the provided the table and rows
+  disabled?: boolean; // Disable the action
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
