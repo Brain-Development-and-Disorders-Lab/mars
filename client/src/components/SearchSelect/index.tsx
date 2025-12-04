@@ -304,15 +304,20 @@ const SearchSelect = (props: SearchSelectProps) => {
             transition="all 0.15s ease-in-out"
           >
             <Input
-              size="xs"
-              rounded="md"
-              placeholder="Search"
+              className={"search-select-input"}
+              size={"xs"}
+              rounded={"md"}
+              placeholder={"Search"}
               onChange={handleInputChange}
               autoFocus
-              mb="2"
+              mb={"2"}
             />
 
-            <Box maxH="200px" overflowY="auto">
+            <Box
+              maxH="200px"
+              overflowY="auto"
+              className={"search-select-results"}
+            >
               {/* Has searched, search operation complete, multiple results */}
               {hasSearched &&
                 searchLoading === false &&

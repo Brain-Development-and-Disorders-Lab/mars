@@ -241,7 +241,7 @@ const CreateWorkspace = () => {
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root required>
+                  <Field.Root required gap={"1"}>
                     <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                       Workspace Name
                       <Field.RequiredIndicator />
@@ -271,7 +271,7 @@ const CreateWorkspace = () => {
             >
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root>
+                  <Field.Root gap={"1"}>
                     <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                       Workspace Description
                     </Field.Label>
