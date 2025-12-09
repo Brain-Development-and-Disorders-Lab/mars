@@ -735,17 +735,19 @@ const Dashboard = () => {
               </Badge>
             </Stat.Root>
 
-            <Stat.Root>
-              <Stat.Label fontSize={"xs"}>
-                Total Workspace Collaborators
-              </Stat.Label>
-              <Stat.ValueText fontSize={"md"}>
-                {workspaceMetrics.collaborators}
-              </Stat.ValueText>
-              <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
-                No change
-              </Badge>
-            </Stat.Root>
+            {breakpoint !== "base" && breakpoint !== "sm" && (
+              <Stat.Root>
+                <Stat.Label fontSize={"xs"}>
+                  Total Workspace Collaborators
+                </Stat.Label>
+                <Stat.ValueText fontSize={"md"}>
+                  {workspaceMetrics.collaborators}
+                </Stat.ValueText>
+                <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
+                  No change
+                </Badge>
+              </Stat.Root>
+            )}
           </Flex>
         </Flex>
 
