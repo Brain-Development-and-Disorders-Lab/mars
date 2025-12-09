@@ -684,17 +684,7 @@ const Dashboard = () => {
           </Flex>
 
           {/* Quick Search */}
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-            bg={"white"}
-          >
-            <SearchBox />
-          </Flex>
+          <SearchBox />
 
           <Flex
             p={"2"}

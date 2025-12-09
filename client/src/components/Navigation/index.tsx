@@ -14,7 +14,6 @@ import {
 import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
 import ScanModal from "@components/ScanModal";
-import SearchBox from "@components/SearchBox";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -68,7 +67,6 @@ const Navigation = () => {
         <Flex direction={"column"} gap={"4"} w={"100%"}>
           <Flex direction={"column"} gap={"1"} w={"100%"}>
             <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
-            <SearchBox resultType={"entity"} />
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
