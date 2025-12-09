@@ -2,13 +2,24 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Box, Flex, Heading, Text, Tag, EmptyState } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Tag,
+  EmptyState,
+  Button,
+} from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 // Existing and custom types
 import { ActivityModel } from "@types";
@@ -23,6 +34,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 const Activity = () => {
+  const navigate = useNavigate();
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   const { breakpoint } = useBreakpoint();
@@ -111,11 +123,13 @@ const Activity = () => {
                 ? "red"
                 : "orange";
         return (
-          <Tag.Root colorPalette={colorPalette} size={"sm"}>
-            <Tag.Label fontSize={"xs"} textTransform={"capitalize"}>
-              {displayType}
-            </Tag.Label>
-          </Tag.Root>
+          <Flex align={"center"} justify={"center"} w={"100%"}>
+            <Tag.Root colorPalette={colorPalette} size={"sm"}>
+              <Tag.Label fontSize={"xs"} textTransform={"capitalize"}>
+                {displayType}
+              </Tag.Label>
+            </Tag.Root>
+          </Flex>
         );
       },
       header: "Operation",
@@ -127,7 +141,7 @@ const Activity = () => {
       cell: (info) => {
         const target = info.getValue();
         return (
-          <Flex align={"center"} gap={"1"}>
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Linky
               id={target._id}
               type={target.type}
@@ -135,6 +149,18 @@ const Activity = () => {
               justify={"left"}
               size={"xs"}
             />
+            <Button
+              size="2xs"
+              variant="subtle"
+              colorPalette="gray"
+              aria-label={"View Target"}
+              onClick={() =>
+                navigate(`/${target.type.toLowerCase()}/${target._id}`)
+              }
+            >
+              View
+              <Icon name={"a_right"} size={"xs"} />
+            </Button>
           </Flex>
         );
       },
@@ -167,12 +193,12 @@ const Activity = () => {
     }),
     columnHelper.accessor("timestamp", {
       cell: (info) => (
-        <Flex direction={"column"} gap={"0.5"}>
+        <Flex direction={"row"} gap={"1"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
-          <Text fontSize={"xs"} color={"gray.500"}>
             {dayjs(info.getValue()).format("MMM D, YYYY h:mm A")}
+          </Text>
+          <Text fontSize={"xs"} color={"gray.600"}>
+            ({dayjs(info.getValue()).fromNow()})
           </Text>
         </Flex>
       ),
