@@ -1,9 +1,6 @@
 // Custom types
 import { ActivityModel, IActivity, ResponseData } from "@types";
 
-// Models
-import { Users } from "./Users";
-
 // Utility functions and libraries
 import { getIdentifier } from "../util";
 import { getDatabase } from "../connectors/database";
@@ -54,14 +51,6 @@ export class Activity {
       ...activity,
     };
 
-    // If the `actor` has been provided, assume ORCiD and retrieve actual name
-    if (activityModel.actor) {
-      const user = await Users.getOne(activityModel.actor);
-      if (user) {
-        activityModel.actor = `${user.firstName} ${user.lastName}`;
-        consola.debug("Activity User:", activityModel.actor);
-      }
-    }
     consola.debug("Activity:", activityModel.type, activityModel.target._id);
 
     const response = await getDatabase()

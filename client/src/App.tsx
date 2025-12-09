@@ -36,6 +36,7 @@ import Entity from "@pages/view/Entity";
 import Entities from "@pages/view/Entities";
 import User from "@pages/view/User";
 import Workspace from "@pages/view/Workspace";
+import Activity from "@pages/view/Activity";
 
 // Page type - Create
 import Create from "@pages/create/Create";
@@ -128,6 +129,7 @@ const App = (): ReactElement => {
           {/* Other routes */}
           <Route path={"/profile"} element={<User />} />
           <Route path={"/search"} element={<Search />} />
+          <Route path={"/activity"} element={<Activity />} />
           <Route path={"/invalid"} element={<Invalid />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
         </Route>

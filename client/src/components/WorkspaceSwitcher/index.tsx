@@ -336,6 +336,19 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   <Text fontSize={"xs"}>Edit workspace</Text>
                 </Flex>
               </Menu.Item>
+              <Menu.Item
+                value={"activity"}
+                onClick={() => {
+                  navigate("/activity");
+                  setOpen(false);
+                }}
+                disabled={workspaces.length === 0}
+              >
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"activity"} size={"xs"} />
+                  <Text fontSize={"xs"}>Workspace Activity</Text>
+                </Flex>
+              </Menu.Item>
               <Menu.Item value={"create"} onClick={() => handleCreateClick()}>
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"add"} size={"xs"} />

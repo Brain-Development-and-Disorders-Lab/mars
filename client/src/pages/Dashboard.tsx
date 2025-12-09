@@ -111,6 +111,7 @@ const GET_DASHBOARD = gql`
 
 // Activity Feed component
 const ActivityFeed = ({ activities }: { activities: ActivityModel[] }) => {
+  const navigate = useNavigate();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
@@ -163,50 +164,72 @@ const ActivityFeed = ({ activities }: { activities: ActivityModel[] }) => {
 
       {/* Activity list */}
       {activities.length > 0 ? (
-        <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
-          <Stack gap={"2"} w={"95%"}>
-            {activities.map((activity) => {
-              return (
-                <Flex
-                  direction={"row"}
-                  width={"100%"}
-                  gap={"2"}
-                  key={`activity-${activity._id}`}
-                  align={"center"}
-                >
-                  <Avatar.Root
-                    size={"xs"}
-                    key={activity.actor}
-                    colorPalette={"blue"}
+        <Flex direction={"column"} gap={"1"}>
+          <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
+            <Stack gap={"2"} w={"95%"}>
+              {activities.map((activity) => {
+                return (
+                  <Flex
+                    direction={"row"}
+                    width={"100%"}
+                    gap={"2"}
+                    key={`activity-${activity._id}`}
+                    align={"center"}
                   >
-                    <Avatar.Fallback name={activity.actor} />
-                  </Avatar.Root>
-                  <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                    <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                      <Text fontSize={"xs"}>{activity.details}:</Text>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={"gray.500"}
-                      >
-                        {dayjs(activity.timestamp).fromNow()}
-                      </Text>
-                    </Flex>
-                    <Flex>
-                      <Linky
-                        id={activity.target._id}
-                        type={activity.target.type}
-                        fallback={activity.target.name}
-                        justify={"left"}
-                        size={"xs"}
-                        truncate={20}
+                    {activity.actor ? (
+                      <ActorTag
+                        orcid={activity.actor}
+                        fallback={"Unknown User"}
+                        size={"sm"}
+                        avatarOnly
                       />
+                    ) : (
+                      <Avatar.Root size={"xs"} colorPalette={"blue"}>
+                        <Avatar.Fallback name={"Unknown"} />
+                      </Avatar.Root>
+                    )}
+                    <Flex direction={"column"} w={"100%"} gap={"0.5"}>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        justify={"space-between"}
+                      >
+                        <Text fontSize={"xs"}>{activity.details}:</Text>
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          color={"gray.500"}
+                        >
+                          {dayjs(activity.timestamp).fromNow()}
+                        </Text>
+                      </Flex>
+                      <Flex>
+                        <Linky
+                          id={activity.target._id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                          justify={"left"}
+                          size={"xs"}
+                          truncate={20}
+                        />
+                      </Flex>
                     </Flex>
                   </Flex>
-                </Flex>
-              );
-            })}
-          </Stack>
+                );
+              })}
+            </Stack>
+          </Flex>
+          <Flex justify={"right"} pr={"0.5"} pb={"0.5"}>
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"blue"}
+              onClick={() => navigate("/activity")}
+            >
+              View All
+              <Icon name={"c_right"} size={"xs"} />
+            </Button>
+          </Flex>
         </Flex>
       ) : (
         <EmptyState.Root>

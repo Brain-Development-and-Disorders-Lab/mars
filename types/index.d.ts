@@ -134,6 +134,7 @@ export type ActorTagProps = {
   fallback: string;
   size: "sm" | "md";
   inline?: boolean;
+  avatarOnly?: boolean;
 };
 
 // "VisibilityTagProps" component props
