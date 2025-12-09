@@ -25,6 +25,8 @@ import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import Joyride, { ACTIONS, CallBackProps, EVENTS } from "react-joyride";
+import SearchBox from "@components/SearchBox";
+import ActivityChart from "@components/ActivityChart";
 
 // Existing and custom types
 import {
@@ -162,63 +164,88 @@ const ActivityFeed = ({ activities }: { activities: ActivityModel[] }) => {
         </Flex>
       </Flex>
 
+      <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+          Last Update:
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+          {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
+        </Text>
+      </Flex>
+
+      {/* Activity Chart */}
+      <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+          Activity:
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+          {dayjs().subtract(6, "day").format("MMM D, YYYY")} -{" "}
+          {dayjs().format("MMM D, YYYY")}
+        </Text>
+      </Flex>
+      <ActivityChart />
+
+      <Text
+        fontSize={"xs"}
+        fontWeight={"semibold"}
+        color={"gray.700"}
+        ml={"0.5"}
+      >
+        Activity Feed
+      </Text>
+
       {/* Activity list */}
       {activities.length > 0 ? (
         <Flex direction={"column"} gap={"1"}>
-          <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
-            <Stack gap={"2"} w={"95%"}>
-              {activities.map((activity) => {
-                return (
-                  <Flex
-                    direction={"row"}
-                    width={"100%"}
-                    gap={"2"}
-                    key={`activity-${activity._id}`}
-                    align={"center"}
-                  >
-                    {activity.actor ? (
-                      <ActorTag
-                        orcid={activity.actor}
-                        fallback={"Unknown User"}
-                        size={"sm"}
-                        avatarOnly
-                      />
-                    ) : (
-                      <Avatar.Root size={"xs"} colorPalette={"blue"}>
-                        <Avatar.Fallback name={"Unknown"} />
-                      </Avatar.Root>
-                    )}
-                    <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                      <Flex
-                        direction={"row"}
-                        gap={"1"}
-                        justify={"space-between"}
+          <Stack gap={"1.5"} w={"95%"}>
+            {activities.map((activity) => {
+              return (
+                <Flex
+                  direction={"row"}
+                  width={"100%"}
+                  gap={"2"}
+                  key={`activity-${activity._id}`}
+                  align={"center"}
+                >
+                  {activity.actor ? (
+                    <ActorTag
+                      orcid={activity.actor}
+                      fallback={"Unknown User"}
+                      size={"sm"}
+                      avatarOnly
+                    />
+                  ) : (
+                    <Avatar.Root size={"xs"} colorPalette={"blue"}>
+                      <Avatar.Fallback name={"Unknown"} />
+                    </Avatar.Root>
+                  )}
+                  <Flex direction={"column"} w={"100%"} gap={"0.5"}>
+                    <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                      <Text fontSize={"xs"}>{activity.details}:</Text>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={"gray.500"}
                       >
-                        <Text fontSize={"xs"}>{activity.details}:</Text>
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          color={"gray.500"}
-                        >
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
-                      </Flex>
-                      <Flex>
-                        <Linky
-                          id={activity.target._id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                          justify={"left"}
-                          size={"xs"}
-                          truncate={20}
-                        />
-                      </Flex>
+                        {dayjs(activity.timestamp).fromNow()}
+                      </Text>
+                    </Flex>
+                    <Flex>
+                      <Linky
+                        id={activity.target._id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                        justify={"left"}
+                        size={"xs"}
+                        truncate={20}
+                      />
                     </Flex>
                   </Flex>
-                );
-              })}
-            </Stack>
-          </Flex>
+                </Flex>
+              );
+            })}
+          </Stack>
+
           <Flex justify={"right"} pr={"0.5"} pb={"0.5"}>
             <Button
               size={"xs"}
@@ -274,9 +301,6 @@ const Dashboard = () => {
   const [workspaceMetrics, setWorkspaceMetrics] = useState(
     {} as WorkspaceMetrics,
   );
-  const [lastUpdate] = useState(
-    dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
-  );
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -306,7 +330,7 @@ const Dashboard = () => {
       projectLimit: 8,
       entityLimit: 8,
       entitiesArchived: false,
-      activityLimit: 12,
+      activityLimit: 5,
     },
     fetchPolicy: "network-only",
     pollInterval: 5000, // Poll every 5 seconds to refresh activity feed
@@ -648,28 +672,6 @@ const Dashboard = () => {
                 <Icon name={"dashboard"} size={"sm"} />
                 <Heading size={"xl"}>Dashboard</Heading>
               </Flex>
-              <Flex direction={"column"} gap={"1"}>
-                {/* Display last update when on desktop */}
-                {breakpoint !== "base" && (
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.700"}
-                    >
-                      Last Update:
-                    </Text>
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.400"}
-                    >
-                      {lastUpdate}
-                    </Text>
-                  </Flex>
-                )}
-                {/* Display toggle for stats */}
-              </Flex>
             </Flex>
 
             <Flex>
@@ -679,6 +681,19 @@ const Dashboard = () => {
                 size={"md"}
               />
             </Flex>
+          </Flex>
+
+          {/* Quick Search */}
+          <Flex
+            direction={"column"}
+            gap={"1"}
+            p={"1"}
+            rounded={"md"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+            bg={"white"}
+          >
+            <SearchBox />
           </Flex>
 
           <Flex

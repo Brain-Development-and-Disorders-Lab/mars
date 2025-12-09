@@ -566,7 +566,7 @@ export type SearchSelectProps = {
 
 // SearchBox props
 export type SearchBoxProps = {
-  resultType: "entity" | "project";
+  resultType?: "entity" | "project" | "template";
 };
 
 // Generic ResponseMessage type
