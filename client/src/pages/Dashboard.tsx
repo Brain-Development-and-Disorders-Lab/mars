@@ -9,11 +9,10 @@ import {
   Tag,
   Avatar,
   Stat,
-  Link,
-  Collapsible,
   Badge,
   Stack,
   EmptyState,
+  Box,
 } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -110,6 +109,119 @@ const GET_DASHBOARD = gql`
   }
 `;
 
+// Activity Feed component
+const ActivityFeed = ({ activities }: { activities: ActivityModel[] }) => {
+  const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimestampUpdate(Date.now());
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <Flex
+      direction={"column"}
+      maxW={{ lg: "md" }}
+      p={"1"}
+      gap={"1"}
+      grow={"1"}
+      rounded={"md"}
+      border={"1px solid"}
+      borderColor={"gray.300"}
+      h={"fit-content"}
+      data-timestamp-update={timestampUpdate}
+    >
+      {/* Activity heading */}
+      <Flex
+        id={"recentActivityHeader"}
+        align={"center"}
+        gap={"1"}
+        ml={"0.5"}
+        justify={"space-between"}
+      >
+        <Flex align={"center"} gap={"1"}>
+          <Icon name={"activity"} size={"xs"} />
+          <Text fontSize={"sm"} fontWeight={"semibold"}>
+            Workspace Activity
+          </Text>
+        </Flex>
+        <Flex align={"center"} gap={"1"} mr={"0.5"}>
+          <Box
+            w={"8px"}
+            h={"8px"}
+            borderRadius={"full"}
+            bg={"green.500"}
+            className="live-indicator"
+          />
+          <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+            Live
+          </Text>
+        </Flex>
+      </Flex>
+
+      {/* Activity list */}
+      {activities.length > 0 ? (
+        <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
+          <Stack gap={"2"} w={"95%"}>
+            {activities.map((activity) => {
+              return (
+                <Flex
+                  direction={"row"}
+                  width={"100%"}
+                  gap={"2"}
+                  key={`activity-${activity._id}`}
+                  align={"center"}
+                >
+                  <Avatar.Root
+                    size={"xs"}
+                    key={activity.actor}
+                    colorPalette={"blue"}
+                  >
+                    <Avatar.Fallback name={activity.actor} />
+                  </Avatar.Root>
+                  <Flex direction={"column"} w={"100%"} gap={"0.5"}>
+                    <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                      <Text fontSize={"xs"}>{activity.details}:</Text>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={"gray.500"}
+                      >
+                        {dayjs(activity.timestamp).fromNow()}
+                      </Text>
+                    </Flex>
+                    <Flex>
+                      <Linky
+                        id={activity.target._id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                        justify={"left"}
+                        size={"xs"}
+                        truncate={20}
+                      />
+                    </Flex>
+                  </Flex>
+                </Flex>
+              );
+            })}
+          </Stack>
+        </Flex>
+      ) : (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <Icon name={"activity"} size={"lg"} />
+            </EmptyState.Indicator>
+            <EmptyState.Description>No recent Activity.</EmptyState.Description>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      )}
+    </Flex>
+  );
+};
+
 const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
@@ -142,7 +254,6 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
-  const [openStats, setOpenStats] = useState(false);
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -175,6 +286,7 @@ const Dashboard = () => {
       activityLimit: 12,
     },
     fetchPolicy: "network-only",
+    pollInterval: 5000, // Poll every 5 seconds to refresh activity feed
   });
 
   // Assign data
@@ -501,7 +613,7 @@ const Dashboard = () => {
             tooltipComponent={WalkthroughTooltip}
           />
         )}
-        <Flex direction={"column"} basis={"70%"} gap={"0"}>
+        <Flex direction={"column"} basis={"70%"} gap={"1"}>
           <Flex
             direction={"row"}
             gap={"1"}
@@ -536,6 +648,7 @@ const Dashboard = () => {
                 {/* Display toggle for stats */}
               </Flex>
             </Flex>
+
             <Flex>
               <ActorTag
                 orcid={token.orcid}
@@ -545,107 +658,78 @@ const Dashboard = () => {
             </Flex>
           </Flex>
 
-          <Collapsible.Root onOpenChange={(event) => setOpenStats(event.open)}>
-            <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-              <Collapsible.Trigger>
-                <Link
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.700"}
-                >
-                  {openStats ? "Hide" : "Show"} Workspace Metrics{" "}
-                </Link>
-              </Collapsible.Trigger>
-              <Flex pt={"1"}>
-                <Icon name={openStats ? "c_up" : "c_down"} size={"xs"} />
-              </Flex>
-            </Flex>
-
-            <Collapsible.Content>
-              <Flex
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                basis={"30%"}
-                align={"center"}
-                border={"1px solid"}
-                borderColor={"gray.300"}
+          <Flex
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            basis={"30%"}
+            align={"center"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+          >
+            <Stat.Root>
+              <Stat.Label fontSize={"xs"}>Total Workspace Entities</Stat.Label>
+              <Stat.ValueText fontSize={"md"}>
+                {entityMetrics.all}
+              </Stat.ValueText>
+              <Badge
+                px={"0"}
+                variant={"plain"}
+                colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
               >
-                <Stat.Root>
-                  <Stat.Label fontSize={"xs"}>
-                    Total Workspace Entities
-                  </Stat.Label>
-                  <Stat.ValueText fontSize={"md"}>
-                    {entityMetrics.all}
-                  </Stat.ValueText>
-                  <Badge
-                    px={"0"}
-                    variant={"plain"}
-                    colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
-                  >
-                    {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                    {entityMetrics.addedDay} in last 24 hours
-                  </Badge>
-                </Stat.Root>
+                {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                {entityMetrics.addedDay} in last 24 hours
+              </Badge>
+            </Stat.Root>
 
-                <Stat.Root>
-                  <Stat.Label fontSize={"xs"}>
-                    Total Workspace Projects
-                  </Stat.Label>
-                  <Stat.ValueText fontSize={"md"}>
-                    {projectMetrics.all}
-                  </Stat.ValueText>
-                  <Badge
-                    px={"0"}
-                    variant={"plain"}
-                    colorPalette={
-                      projectMetrics.addedDay > 0 ? "green" : "gray"
-                    }
-                  >
-                    {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                    {projectMetrics.addedDay} in last 24 hours
-                  </Badge>
-                </Stat.Root>
+            <Stat.Root>
+              <Stat.Label fontSize={"xs"}>Total Workspace Projects</Stat.Label>
+              <Stat.ValueText fontSize={"md"}>
+                {projectMetrics.all}
+              </Stat.ValueText>
+              <Badge
+                px={"0"}
+                variant={"plain"}
+                colorPalette={projectMetrics.addedDay > 0 ? "green" : "gray"}
+              >
+                {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                {projectMetrics.addedDay} in last 24 hours
+              </Badge>
+            </Stat.Root>
 
-                <Stat.Root>
-                  <Stat.Label fontSize={"xs"}>
-                    Total Workspace Templates
-                  </Stat.Label>
-                  <Stat.ValueText fontSize={"md"}>
-                    {templateMetrics.all}
-                  </Stat.ValueText>
-                  <Badge
-                    px={"0"}
-                    variant={"plain"}
-                    colorPalette={
-                      templateMetrics.addedDay > 0 ? "green" : "gray"
-                    }
-                  >
-                    {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                    {templateMetrics.addedDay} in last 24 hours
-                  </Badge>
-                </Stat.Root>
+            <Stat.Root>
+              <Stat.Label fontSize={"xs"}>Total Workspace Templates</Stat.Label>
+              <Stat.ValueText fontSize={"md"}>
+                {templateMetrics.all}
+              </Stat.ValueText>
+              <Badge
+                px={"0"}
+                variant={"plain"}
+                colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}
+              >
+                {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
+                {templateMetrics.addedDay} in last 24 hours
+              </Badge>
+            </Stat.Root>
 
-                <Stat.Root>
-                  <Stat.Label fontSize={"xs"}>
-                    Total Workspace Collaborators
-                  </Stat.Label>
-                  <Stat.ValueText fontSize={"md"}>
-                    {workspaceMetrics.collaborators}
-                  </Stat.ValueText>
-                  <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
-                    No change
-                  </Badge>
-                </Stat.Root>
-              </Flex>
-            </Collapsible.Content>
-          </Collapsible.Root>
+            <Stat.Root>
+              <Stat.Label fontSize={"xs"}>
+                Total Workspace Collaborators
+              </Stat.Label>
+              <Stat.ValueText fontSize={"md"}>
+                {workspaceMetrics.collaborators}
+              </Stat.ValueText>
+              <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
+                No change
+              </Badge>
+            </Stat.Root>
+          </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
+        <Flex direction={"row"} wrap={"wrap"} gap={"1"} p={"0"}>
           <Flex
             direction={"column"}
-            gap={"2"}
+            gap={"1"}
             grow={"1"}
             minW={"0"}
             maxW={"100%"}
@@ -773,94 +857,7 @@ const Dashboard = () => {
           </Flex>
 
           {/* Activity */}
-          <Flex
-            direction={"column"}
-            maxW={{ lg: "md" }}
-            p={"1"}
-            gap={"1"}
-            grow={"1"}
-            rounded={"md"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-            h={"fit-content"}
-          >
-            {/* Activity heading */}
-            <Flex
-              id={"recentActivityHeader"}
-              align={"center"}
-              gap={"1"}
-              ml={"0.5"}
-            >
-              <Icon name={"activity"} size={"xs"} />
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Recent Activity
-              </Text>
-            </Flex>
-
-            {/* Activity list */}
-            {activityData.length > 0 ? (
-              <Flex py={"1"} w={"100%"} h={"auto"} overflowY={"auto"}>
-                <Stack gap={"2"} w={"95%"}>
-                  {activityData.map((activity) => {
-                    return (
-                      <Flex
-                        direction={"row"}
-                        width={"100%"}
-                        gap={"2"}
-                        key={`activity-${activity._id}`}
-                        align={"center"}
-                      >
-                        <Avatar.Root
-                          size={"xs"}
-                          key={activity.actor}
-                          colorPalette={"blue"}
-                        >
-                          <Avatar.Fallback name={activity.actor} />
-                        </Avatar.Root>
-                        <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                          <Flex
-                            direction={"row"}
-                            gap={"1"}
-                            justify={"space-between"}
-                          >
-                            <Text fontSize={"xs"}>{activity.details}:</Text>
-                            <Text
-                              fontSize={"xs"}
-                              fontWeight={"semibold"}
-                              color={"gray.500"}
-                            >
-                              {dayjs(activity.timestamp).fromNow()}
-                            </Text>
-                          </Flex>
-                          <Flex>
-                            <Linky
-                              id={activity.target._id}
-                              type={activity.target.type}
-                              fallback={activity.target.name}
-                              justify={"left"}
-                              size={"xs"}
-                              truncate={20}
-                            />
-                          </Flex>
-                        </Flex>
-                      </Flex>
-                    );
-                  })}
-                </Stack>
-              </Flex>
-            ) : (
-              <EmptyState.Root>
-                <EmptyState.Content>
-                  <EmptyState.Indicator>
-                    <Icon name={"activity"} size={"lg"} />
-                  </EmptyState.Indicator>
-                  <EmptyState.Description>
-                    No recent Activity.
-                  </EmptyState.Description>
-                </EmptyState.Content>
-              </EmptyState.Root>
-            )}
-          </Flex>
+          <ActivityFeed activities={activityData} />
         </Flex>
       </Flex>
     </Content>
