@@ -10,6 +10,9 @@ import {
   Tag,
   EmptyState,
   Button,
+  Checkbox,
+  Input,
+  Field,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -32,6 +35,10 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { gql, useQuery } from "@apollo/client";
 import _ from "lodash";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Activity = () => {
   const navigate = useNavigate();
@@ -49,6 +56,27 @@ const Activity = () => {
 
   // Column filters state for activity table
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // Filter state (temporary values before applying)
+  const [filterState, setFilterState] = useState({
+    startDate: "",
+    endDate: "",
+    activityTypes: [] as string[],
+    targetTypes: [] as string[],
+  });
+
+  // Applied filters state
+  const [appliedFilters, setAppliedFilters] = useState({
+    startDate: "",
+    endDate: "",
+    activityTypes: [] as string[],
+    targetTypes: [] as string[],
+  });
+
+  // Filtered activity data
+  const [filteredActivityData, setFilteredActivityData] = useState(
+    [] as ActivityModel[],
+  );
 
   // Update timestamp every 5 seconds to trigger relative time updates
   useEffect(() => {
@@ -91,8 +119,45 @@ const Activity = () => {
     if (data?.activity) {
       // Unpack all the Activity data
       setActivityData(data.activity);
+      // Initialize filtered data with all activity
+      setFilteredActivityData(data.activity);
     }
   }, [data]);
+
+  // Apply filters to activity data
+  useEffect(() => {
+    let filtered = [...activityData];
+
+    // Filter by date range
+    if (appliedFilters.startDate) {
+      const startDate = dayjs(appliedFilters.startDate).startOf("day");
+      filtered = filtered.filter((activity) =>
+        dayjs(activity.timestamp).isSameOrAfter(startDate),
+      );
+    }
+    if (appliedFilters.endDate) {
+      const endDate = dayjs(appliedFilters.endDate).endOf("day");
+      filtered = filtered.filter((activity) =>
+        dayjs(activity.timestamp).isSameOrBefore(endDate),
+      );
+    }
+
+    // Filter by activity types
+    if (appliedFilters.activityTypes.length > 0) {
+      filtered = filtered.filter((activity) =>
+        appliedFilters.activityTypes.includes(activity.type),
+      );
+    }
+
+    // Filter by target types
+    if (appliedFilters.targetTypes.length > 0) {
+      filtered = filtered.filter((activity) =>
+        appliedFilters.targetTypes.includes(activity.target.type),
+      );
+    }
+
+    setFilteredActivityData(filtered);
+  }, [activityData, appliedFilters]);
 
   const { workspace } = useWorkspace();
 
@@ -124,15 +189,15 @@ const Activity = () => {
             ? "created"
             : type === "update"
               ? "update"
-              : type === "delete"
-                ? "delete"
+              : type === "archived"
+                ? "archived"
                 : type;
         const colorPalette =
           type === "create"
             ? "green"
             : type === "update"
               ? "blue"
-              : type === "delete"
+              : type === "archived"
                 ? "red"
                 : "orange";
         return (
@@ -241,35 +306,228 @@ const Activity = () => {
           direction={"row"}
           justify={"space-between"}
           align={"center"}
-          data-timestamp-update={timestampUpdate}
         >
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"activity"} size={"sm"} />
             <Heading size={"md"}>Workspace Activity</Heading>
           </Flex>
-          <Flex align={"center"} gap={"1"}>
-            <Box
-              w={"8px"}
-              h={"8px"}
-              borderRadius={"full"}
-              bg={"green.500"}
-              className="live-indicator"
-            />
-            <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
-              Live
-            </Text>
-          </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
+        <Flex direction={"column"} gap={"1"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
             All activity in the current Workspace is shown below, sorted by most
-            recent. Sort the activity using the column headers.
+            recent. Sort the activity using the column headers or use the
+            filters below.
           </Text>
-          {activityData.length > 0 ? (
+
+          {/* Filter Section */}
+          <Flex
+            direction={"column"}
+            gap={"1"}
+            p={"1"}
+            rounded={"md"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+          >
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Icon name={"filter"} size={"sm"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Activity Filters
+              </Text>
+            </Flex>
+
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              {/* Date Range Filter */}
+              <Flex direction={"column"} gap={"1"} minW={"200px"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Date Range
+                </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Field.Root gap={"0"}>
+                    <Field.Label fontSize={"xs"}>Start</Field.Label>
+                    <Input
+                      type={"date"}
+                      size={"xs"}
+                      bg={"white"}
+                      value={filterState.startDate}
+                      onChange={(e) =>
+                        setFilterState({
+                          ...filterState,
+                          startDate: e.target.value,
+                        })
+                      }
+                    />
+                  </Field.Root>
+                  <Field.Root gap={"0"}>
+                    <Field.Label fontSize={"xs"}>End</Field.Label>
+                    <Input
+                      type={"date"}
+                      size={"xs"}
+                      bg={"white"}
+                      value={filterState.endDate}
+                      onChange={(e) =>
+                        setFilterState({
+                          ...filterState,
+                          endDate: e.target.value,
+                        })
+                      }
+                    />
+                  </Field.Root>
+                </Flex>
+              </Flex>
+
+              {/* Operation Type Filter */}
+              <Flex direction={"column"} gap={"1"} minW={"200px"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Operation Type
+                </Text>
+                <Flex direction={"column"} gap={"1"}>
+                  {["create", "update", "archived"].map((type) => (
+                    <Checkbox.Root
+                      key={type}
+                      size={"xs"}
+                      colorPalette={"blue"}
+                      checked={filterState.activityTypes.includes(type)}
+                      onCheckedChange={(details) => {
+                        const isChecked = details.checked as boolean;
+                        if (isChecked) {
+                          setFilterState({
+                            ...filterState,
+                            activityTypes: [...filterState.activityTypes, type],
+                          });
+                        } else {
+                          setFilterState({
+                            ...filterState,
+                            activityTypes: filterState.activityTypes.filter(
+                              (t) => t !== type,
+                            ),
+                          });
+                        }
+                      }}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label
+                        fontSize={"xs"}
+                        textTransform={"capitalize"}
+                      >
+                        {type === "create" ? "Created" : type}
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  ))}
+                </Flex>
+              </Flex>
+
+              {/* Target Type Filter */}
+              <Flex direction={"column"} gap={"1"} minW={"200px"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Target Type
+                </Text>
+                <Flex direction={"column"} gap={"1"}>
+                  {["entities", "projects", "templates"].map((type) => (
+                    <Checkbox.Root
+                      key={type}
+                      size={"xs"}
+                      colorPalette={"blue"}
+                      checked={filterState.targetTypes.includes(type)}
+                      onCheckedChange={(details) => {
+                        const isChecked = details.checked as boolean;
+                        if (isChecked) {
+                          setFilterState({
+                            ...filterState,
+                            targetTypes: [...filterState.targetTypes, type],
+                          });
+                        } else {
+                          setFilterState({
+                            ...filterState,
+                            targetTypes: filterState.targetTypes.filter(
+                              (t) => t !== type,
+                            ),
+                          });
+                        }
+                      }}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label
+                        fontSize={"xs"}
+                        textTransform={"capitalize"}
+                      >
+                        {type === "entities"
+                          ? "Entity"
+                          : type === "projects"
+                            ? "Project"
+                            : "Template"}
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  ))}
+                </Flex>
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {/* Buttons and Live Indicator Row */}
+          <Flex
+            direction={"row"}
+            gap={"1"}
+            align={"center"}
+            justify={"space-between"}
+            data-timestamp-update={timestampUpdate}
+          >
+            {/* Live Indicator - Far Left */}
+            <Flex align={"center"} gap={"1"} ml={"0.5"}>
+              <Box
+                w={"8px"}
+                h={"8px"}
+                borderRadius={"full"}
+                bg={"green.500"}
+                className="live-indicator"
+              />
+              <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                Live
+              </Text>
+            </Flex>
+
+            {/* Apply and Clear Buttons - Right */}
+            <Flex direction={"row"} gap={"2"}>
+              <Button
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"blue"}
+                onClick={() => {
+                  setAppliedFilters({ ...filterState });
+                }}
+              >
+                Apply
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"outline"}
+                rounded={"md"}
+                bg={"white"}
+                _hover={{
+                  bg: "gray.100",
+                }}
+                onClick={() => {
+                  const clearedState = {
+                    startDate: "",
+                    endDate: "",
+                    activityTypes: [],
+                    targetTypes: [],
+                  };
+                  setFilterState(clearedState);
+                  setAppliedFilters(clearedState);
+                }}
+              >
+                Clear
+              </Button>
+            </Flex>
+          </Flex>
+
+          {filteredActivityData.length > 0 || activityData.length === 0 ? (
             <Box w="100%" minW="0" maxW="100%">
               <DataTable
                 columns={columns}
-                data={activityData}
+                data={filteredActivityData}
                 visibleColumns={visibleColumns}
                 selectedRows={{}}
                 columnFilters={columnFilters}
@@ -284,7 +542,14 @@ const Activity = () => {
                 <EmptyState.Indicator>
                   <Icon name={"activity"} size={"lg"} />
                 </EmptyState.Indicator>
-                <EmptyState.Description>No Activity</EmptyState.Description>
+                <EmptyState.Description>
+                  {appliedFilters.startDate ||
+                  appliedFilters.endDate ||
+                  appliedFilters.activityTypes.length > 0 ||
+                  appliedFilters.targetTypes.length > 0
+                    ? "No activity matches the selected filters"
+                    : "No Activity"}
+                </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
           )}
