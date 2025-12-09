@@ -80,7 +80,8 @@ const Activity = () => {
   );
 
   // Collapsible state for filters
-  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Update timestamp every 5 seconds to trigger relative time updates
   useEffect(() => {
@@ -131,6 +132,7 @@ const Activity = () => {
   // Apply filters to activity data
   useEffect(() => {
     let filtered = [...activityData];
+    let activeFilterCount = 0;
 
     // Filter by date range
     if (appliedFilters.startDate) {
@@ -138,12 +140,14 @@ const Activity = () => {
       filtered = filtered.filter((activity) =>
         dayjs(activity.timestamp).isSameOrAfter(startDate),
       );
+      activeFilterCount++;
     }
     if (appliedFilters.endDate) {
       const endDate = dayjs(appliedFilters.endDate).endOf("day");
       filtered = filtered.filter((activity) =>
         dayjs(activity.timestamp).isSameOrBefore(endDate),
       );
+      activeFilterCount++;
     }
 
     // Filter by activity types
@@ -151,6 +155,7 @@ const Activity = () => {
       filtered = filtered.filter((activity) =>
         appliedFilters.activityTypes.includes(activity.type),
       );
+      activeFilterCount += appliedFilters.activityTypes.length;
     }
 
     // Filter by target types
@@ -158,8 +163,10 @@ const Activity = () => {
       filtered = filtered.filter((activity) =>
         appliedFilters.targetTypes.includes(activity.target.type),
       );
+      activeFilterCount += appliedFilters.targetTypes.length;
     }
 
+    setActiveFilterCount(activeFilterCount);
     setFilteredActivityData(filtered);
   }, [activityData, appliedFilters]);
 
@@ -531,7 +538,11 @@ const Activity = () => {
             </Flex>
 
             {/* Apply and Clear Buttons - Right */}
-            <Flex direction={"row"} gap={"2"}>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"}>
+                {activeFilterCount} Active Filter
+                {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
+              </Text>
               <Button
                 size={"xs"}
                 rounded={"md"}
@@ -546,10 +557,6 @@ const Activity = () => {
                 size={"xs"}
                 variant={"outline"}
                 rounded={"md"}
-                bg={"white"}
-                _hover={{
-                  bg: "gray.100",
-                }}
                 onClick={() => {
                   const clearedState = {
                     startDate: "",
@@ -560,6 +567,7 @@ const Activity = () => {
                   setFilterState(clearedState);
                   setAppliedFilters(clearedState);
                 }}
+                disabled={activeFilterCount === 0}
               >
                 Clear
               </Button>
@@ -575,6 +583,7 @@ const Activity = () => {
                 selectedRows={{}}
                 columnFilters={columnFilters}
                 onColumnFiltersChange={setColumnFilters}
+                showSelection
                 showColumnSelect
                 showPagination
               />
