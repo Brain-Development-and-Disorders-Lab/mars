@@ -34,8 +34,7 @@ const AlertDialog = (props: AlertDialogProps) => {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header
-            px={"1"}
-            py={"2"}
+            p={"2"}
             fontWeight={"semibold"}
             fontSize={"sm"}
             roundedTop={"md"}

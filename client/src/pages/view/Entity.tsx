@@ -2350,12 +2350,7 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content ref={addAttributesContainerRef}>
-              <Dialog.Header
-                px={"1"}
-                py={"2"}
-                roundedTop={"md"}
-                bg={"blue.300"}
-              >
+              <Dialog.Header p={"2"} roundedTop={"md"} bg={"blue.300"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -2607,12 +2602,7 @@ const Entity = () => {
                 ref={selectProjectsContainerRef}
               >
                 {/* Heading and close button */}
-                <Dialog.Header
-                  px={"1"}
-                  py={"2"}
-                  bg={"blue.300"}
-                  roundedTop={"md"}
-                >
+                <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
                   <Flex
                     direction={"row"}
                     gap={"0.5"}
@@ -2809,7 +2799,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content ref={selectRelationshipTypeRef}>
               {/* Heading and close button */}
-              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                   <Icon name={"graph"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2996,7 +2986,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
               {/* Heading and close button */}
-              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"download"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -3380,7 +3370,7 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header px={"1"} py={"2"} bg={"blue.300"}>
+              <Dialog.Header p={"2"} bg={"blue.300"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"graph"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -3417,7 +3407,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"1"} py={"2"} bg={"blue.300"} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"share"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -3554,16 +3544,15 @@ const Entity = () => {
         >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
+            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header
-                p={"2"}
-                mt={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-                bg={"blue.300"}
-              >
-                Clone Entity
+              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"copy"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Clone Entity
+                  </Text>
+                </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
                     size={"2xs"}
@@ -3572,9 +3561,9 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"sm"} color={"gray.600"}>
+              <Dialog.Body p={"1"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"xs"} color={"gray.600"}>
                     By default, the cloned Entity will be created with the same
                     name, but with "(cloned)" appended to the end. You can
                     modify the name below.
@@ -3583,9 +3572,11 @@ const Entity = () => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label>Cloned Entity Name:</Field.Label>
+                        <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                          Cloned Entity Name:
+                        </Field.Label>
                         <Input
-                          size={"sm"}
+                          size={"xs"}
                           rounded={"md"}
                           value={clonedEntityName}
                           onChange={(event) =>
@@ -3598,26 +3589,26 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"}>
+              <Dialog.Footer p={"1"}>
                 <Flex
                   direction={"row"}
                   w={"100%"}
-                  gap={"2"}
+                  gap={"1"}
                   justify={"space-between"}
                 >
                   <Button
                     variant={"solid"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"red"}
                     onClick={() => setCloneOpen(false)}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                   <Button
                     variant={"solid"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={handleCloneClick}
@@ -3625,7 +3616,7 @@ const Entity = () => {
                     disabled={clonedEntityName === ""}
                   >
                     Clone
-                    <Icon name={"copy"} />
+                    <Icon name={"copy"} size={"xs"} />
                   </Button>
                 </Flex>
               </Dialog.Footer>
@@ -3643,32 +3634,14 @@ const Entity = () => {
         >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header
-                p={"2"}
-                flexShrink={0}
-                bg={"blue.300"}
-                borderBottom={"2px"}
-                roundedTop={"md"}
-              >
-                <Flex
-                  direction={"row"}
-                  justify={"space-between"}
-                  align={"center"}
-                  wrap={"wrap"}
-                >
-                  <Flex
-                    align={"center"}
-                    gap={"2"}
-                    p={"2"}
-                    border={"2px"}
-                    rounded={"md"}
-                  >
-                    <Icon name={"save"} />
-                    <Text fontSize={"md"} fontWeight={"semibold"}>
-                      Saving Changes
-                    </Text>
-                  </Flex>
+            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
+              {/* Heading and close button */}
+              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"save"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Saving Changes
+                  </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
@@ -3678,8 +3651,8 @@ const Entity = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
+              <Dialog.Body p={"1"}>
+                <Flex direction={"column"} gap={"1"}>
                   <MDEditor
                     height={150}
                     minHeight={100}
@@ -3691,7 +3664,7 @@ const Entity = () => {
                     extraCommands={[]}
                     textareaProps={{
                       placeholder:
-                        "Enter a description of the changes made to the Entity.",
+                        "(Optional) Enter a description of the changes made to the Entity.",
                     }}
                     onChange={(value) => {
                       setSaveMessage(value || "");
@@ -3699,32 +3672,32 @@ const Entity = () => {
                   />
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"2"}>
+              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
                 <Flex
                   direction={"row"}
                   w={"100%"}
-                  gap={"2"}
+                  gap={"1"}
                   justify={"space-between"}
                 >
                   <Button
                     variant={"solid"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"red"}
                     onClick={() => setSaveMessageOpen(false)}
                   >
                     Cancel
-                    <Icon name={"cross"} />
+                    <Icon name={"cross"} size={"xs"} />
                   </Button>
                   <Button
                     variant={"solid"}
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={handleSaveMessageDoneClick}
                   >
                     Done
-                    <Icon name={"check"} />
+                    <Icon name={"check"} size={"xs"} />
                   </Button>
                 </Flex>
               </Dialog.Footer>

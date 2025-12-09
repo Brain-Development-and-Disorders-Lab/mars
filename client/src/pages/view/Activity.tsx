@@ -36,6 +36,9 @@ import dayjs from "dayjs";
 const Activity = () => {
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
+  // Timestamp update state to trigger re-renders for relative time display
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
@@ -46,6 +49,15 @@ const Activity = () => {
 
   // Column filters state for activity table
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // Update timestamp every 5 seconds to trigger relative time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimestampUpdate(Date.now());
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Query to retrieve Activity
   const GET_ACTIVITY = gql`
@@ -71,6 +83,7 @@ const Activity = () => {
       limit: 10000, // High limit to get all activity
     },
     fetchPolicy: "network-only",
+    pollInterval: 5000, // Poll every 5 seconds to refresh activity
   });
 
   // Manage data once retrieved
@@ -228,10 +241,23 @@ const Activity = () => {
           direction={"row"}
           justify={"space-between"}
           align={"center"}
+          data-timestamp-update={timestampUpdate}
         >
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"activity"} size={"sm"} />
             <Heading size={"md"}>Workspace Activity</Heading>
+          </Flex>
+          <Flex align={"center"} gap={"1"}>
+            <Box
+              w={"8px"}
+              h={"8px"}
+              borderRadius={"full"}
+              bg={"green.500"}
+              className="live-indicator"
+            />
+            <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+              Live
+            </Text>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">

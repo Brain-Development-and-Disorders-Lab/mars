@@ -1360,8 +1360,7 @@ const Project = () => {
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
               <Dialog.Header
-                px={"1"}
-                py={"2"}
+                p={"2"}
                 fontWeight={"semibold"}
                 fontSize={"xs"}
                 bg={"blue.300"}
