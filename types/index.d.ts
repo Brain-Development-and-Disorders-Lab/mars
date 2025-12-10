@@ -418,6 +418,7 @@ export type DataTableAction = {
 // `PreviewModal` props
 export type PreviewModalProps = {
   attachment: IGenericItem;
+  trigger?: React.ReactNode;
 };
 
 // `PreviewModal` support type
