@@ -40,6 +40,7 @@ import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
+import SaveModal from "@components/SaveModal";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -1738,78 +1739,17 @@ const Project = () => {
         </Dialog.Root>
 
         {/* Save message modal */}
-        <Dialog.Root
+        <SaveModal
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
-          placement={"center"}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header
-                p={"2"}
-                fontWeight={"semibold"}
-                fontSize={"md"}
-                bg={"blue.300"}
-                roundedTop={"md"}
-              >
-                <Icon name={"save"} />
-                Saving Changes
-              </Dialog.Header>
-              <Dialog.Body p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"sm"} color={"gray.600"}>
-                    Specify a description of the changes made to the Project.
-                  </Text>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    id={"saveMessageInput"}
-                    style={{ width: "100%" }}
-                    value={saveMessage}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setSaveMessage(value || "");
-                    }}
-                  />
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"2"}>
-                <Flex
-                  direction={"row"}
-                  w={"100%"}
-                  gap={"2"}
-                  justify={"space-between"}
-                >
-                  <Button
-                    variant={"solid"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setSaveMessageOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} />
-                  </Button>
-                  <Button
-                    variant={"solid"}
-                    size={"sm"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={handleSaveMessageDoneClick}
-                  >
-                    Done
-                    <Icon name={"check"} />
-                  </Button>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+          onDone={handleSaveMessageDoneClick}
+          value={saveMessage}
+          onChange={setSaveMessage}
+          description={
+            "Specify a description of the changes made to the Project."
+          }
+          modifiedType={"Project"}
+        />
 
         {/* Blocker warning message */}
         <UnsavedChangesModal

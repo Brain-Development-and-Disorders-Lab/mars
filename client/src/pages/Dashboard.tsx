@@ -69,6 +69,7 @@ const GET_DASHBOARD = gql`
       _id
       name
       description
+      created
       entities
     }
     projectMetrics {
@@ -290,7 +291,7 @@ const Dashboard = () => {
     }[],
   );
   const [projectData, setProjectData] = useState(
-    [] as { _id: string; name: string; description: string }[],
+    [] as { _id: string; name: string; description: string; created: string }[],
   );
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
@@ -537,7 +538,7 @@ const Dashboard = () => {
       header: "Description",
       enableHiding: true,
     }),
-    projectTableColumnHelper.accessor("timestamp", {
+    projectTableColumnHelper.accessor("created", {
       cell: (info) => {
         return (
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>

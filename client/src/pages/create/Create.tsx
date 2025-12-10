@@ -45,11 +45,22 @@ const Create = () => {
           <Icon name={"add"} size={"sm"} />
           <Heading size={"lg"}>Create</Heading>
         </Flex>
-        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+        <Text
+          fontSize={"sm"}
+          fontWeight={"semibold"}
+          color={"gray.600"}
+          textAlign={"center"}
+        >
           Create a new Entity, Template, or Project to continue building your
           metadata catalog.
         </Text>
-        <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+        <Flex
+          direction={"row"}
+          gap={"1"}
+          wrap={"wrap"}
+          align={"center"}
+          justify={"center"}
+        >
           {/* Entity card */}
           <Card.Root
             maxW={"340px"}

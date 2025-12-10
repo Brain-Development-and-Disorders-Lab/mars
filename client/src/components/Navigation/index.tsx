@@ -92,6 +92,27 @@ const Navigation = () => {
             </Button>
 
             <Button
+              id={"navActivityButtonDesktop"}
+              key={"activity"}
+              size={"xs"}
+              w={"100%"}
+              rounded={"md"}
+              justifyContent={"left"}
+              bg={
+                _.includes(location.pathname, "/activity")
+                  ? "#ffffff"
+                  : "gray.100"
+              }
+              _hover={{ bg: "gray.200" }}
+              color={"black"}
+              onClick={() => navigate("/activity")}
+              disabled={workspace === "" || _.isUndefined(workspace)}
+            >
+              <Icon name={"activity"} size={"xs"} />
+              Activity
+            </Button>
+
+            <Button
               id={"navSearchButtonDesktop"}
               key={"search"}
               size={"xs"}
@@ -291,8 +312,8 @@ const Navigation = () => {
           </Menu.Trigger>
           <Menu.Positioner>
             <Menu.Content p={"1"}>
-              <Menu.ItemGroup title={"Menu"}>
-                <Menu.ItemGroupLabel>Menu</Menu.ItemGroupLabel>
+              <Menu.ItemGroup title={"Workspace"}>
+                <Menu.ItemGroupLabel>Workspace</Menu.ItemGroupLabel>
                 <Menu.Item
                   id={"navDashboardButtonMobile"}
                   value={"dashboard"}
@@ -303,6 +324,15 @@ const Navigation = () => {
                   Dashboard
                 </Menu.Item>
                 <Menu.Item
+                  id={"navActivityButtonMobile"}
+                  value={"activity"}
+                  fontSize={"xs"}
+                  onClick={() => navigate("/activity")}
+                >
+                  <Icon name={"activity"} size={"xs"} />
+                  Activity
+                </Menu.Item>
+                <Menu.Item
                   id={"navSearchButtonMobile"}
                   value={"search"}
                   fontSize={"xs"}
@@ -311,6 +341,10 @@ const Navigation = () => {
                   <Icon name={"search"} size={"xs"} />
                   Search
                 </Menu.Item>
+              </Menu.ItemGroup>
+
+              <Menu.ItemGroup title={"View"}>
+                <Menu.ItemGroupLabel>View</Menu.ItemGroupLabel>
                 <Menu.Item
                   id={"navProjectButtonMobile"}
                   value={"projects"}

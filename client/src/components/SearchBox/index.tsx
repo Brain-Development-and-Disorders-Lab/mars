@@ -58,7 +58,7 @@ const SearchBox = (props: SearchBoxProps) => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as IGenericItem[]);
 
-  // Measure input width when dropdown opens
+  // Measure input + search button width when dropdown opens
   useEffect(() => {
     if (!open) return;
 
@@ -66,7 +66,14 @@ const SearchBox = (props: SearchBoxProps) => {
       const input = document.querySelector(
         "[data-search-input]",
       ) as HTMLInputElement;
-      if (input) setInputWidth(input.offsetWidth);
+      const searchButton = document.querySelector(
+        "[data-search-button]",
+      ) as HTMLElement;
+      if (input && searchButton) {
+        // Get the gap between elements (1 unit = 4px in Chakra)
+        const gap = 4;
+        setInputWidth(input.offsetWidth + searchButton.offsetWidth + gap);
+      }
     };
 
     updateWidth();
@@ -237,7 +244,13 @@ const SearchBox = (props: SearchBoxProps) => {
               background={"white"}
               w={"100%"}
               borderColor={"gray.300"}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setOpen(false);
+                setHasSearched(false);
+                setIsError(false);
+                setResults([]);
+              }}
               onKeyUp={(event) => {
                 // Listen for "Enter" key when entering a query
                 if (event.key === "Enter" && query !== "") {
@@ -247,6 +260,7 @@ const SearchBox = (props: SearchBoxProps) => {
             />
 
             <Button
+              data-search-button
               size={"xs"}
               rounded={"md"}
               colorPalette={"green"}
@@ -385,7 +399,6 @@ const SearchBox = (props: SearchBoxProps) => {
                 gap={"1"}
               >
                 <Flex width={"100%"} direction={"row"} gap={"1"}>
-                  <Text fontSize={"xs"}>Showing </Text>
                   {isSearching ? (
                     <Spinner size={"sm"} />
                   ) : (
@@ -395,7 +408,11 @@ const SearchBox = (props: SearchBoxProps) => {
                         : results.length}{" "}
                     </Text>
                   )}
-                  <Text fontSize={"xs"}>results, view more using </Text>
+                  <Text fontSize={"xs"}>
+                    result
+                    {results.length > 1 || results.length === 0 ? "s" : ""},
+                    view more using{" "}
+                  </Text>
                   <Link
                     className={"light"}
                     color={"black"}

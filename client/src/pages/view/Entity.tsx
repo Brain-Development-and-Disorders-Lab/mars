@@ -47,6 +47,7 @@ import Tooltip from "@components/Tooltip";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
+import SaveModal from "@components/SaveModal";
 import { Cell, createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -3625,85 +3626,18 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Save message modal */}
-        <Dialog.Root
+        <SaveModal
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
-          placement={"center"}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
-              {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"save"} size={"xs"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Saving Changes
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton
-                    size={"2xs"}
-                    top={"6px"}
-                    onClick={() => setSaveMessageOpen(false)}
-                  />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    id={"saveMessageInput"}
-                    style={{ width: "100%" }}
-                    value={saveMessage}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    textareaProps={{
-                      placeholder:
-                        "(Optional) Enter a description of the changes made to the Entity.",
-                    }}
-                    onChange={(value) => {
-                      setSaveMessage(value || "");
-                    }}
-                  />
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
-                <Flex
-                  direction={"row"}
-                  w={"100%"}
-                  gap={"1"}
-                  justify={"space-between"}
-                >
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setSaveMessageOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} size={"xs"} />
-                  </Button>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={handleSaveMessageDoneClick}
-                  >
-                    Done
-                    <Icon name={"check"} size={"xs"} />
-                  </Button>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+          onDone={handleSaveMessageDoneClick}
+          value={saveMessage}
+          onChange={setSaveMessage}
+          placeholder={
+            "(Optional) Enter a description of the changes made to the Entity."
+          }
+          showCloseButton={true}
+          modifiedType={"Entity"}
+        />
 
         {/* Blocker warning message */}
         <UnsavedChangesModal

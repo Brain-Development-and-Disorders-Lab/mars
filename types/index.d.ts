@@ -569,6 +569,19 @@ export type SearchBoxProps = {
   resultType?: "entity" | "project" | "template";
 };
 
+// SaveModal props
+export type SaveModalProps = {
+  open: boolean;
+  onOpenChange: (details: { open: boolean }) => void;
+  onDone: () => void;
+  value: string;
+  onChange: (value: string) => void;
+  description?: string;
+  placeholder?: string;
+  showCloseButton?: boolean;
+  modifiedType?: "Entity" | "Project" | "Template";
+};
+
 // Generic ResponseMessage type
 export type IResponseMessage = {
   success: boolean;
