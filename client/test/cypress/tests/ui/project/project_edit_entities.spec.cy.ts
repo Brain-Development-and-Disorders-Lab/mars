@@ -104,7 +104,7 @@ describe("Project, edit Entities", () => {
       });
     cy.get("#editEntityButton").click();
     cy.get(".data-table-scroll-container")
-      .first()
+      .eq(1) // Second DataTable is Linked Projects
       .within(() => {
         cy.contains("My First Project")
           .parents()

@@ -268,7 +268,7 @@ const SearchBox = (props: SearchBoxProps) => {
               <Collapsible.Trigger asChild>
                 <Button size={"xs"} rounded={"md"} variant={"outline"}>
                   <Icon name={"filter"} size={"xs"} />
-                  {filtersOpen ? "Hide" : "Show"} Filters
+                  Search Filters
                   <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
                 </Button>
               </Collapsible.Trigger>
@@ -424,7 +424,7 @@ const SearchBox = (props: SearchBoxProps) => {
           onOpenChange={(event) => setFiltersOpen(event.open)}
         >
           <Collapsible.Content>
-            <Flex direction={"row"} gap={"2"} wrap={"wrap"} mt={"1"} ml={"0.5"}>
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"} ml={"0.5"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                 Include:
               </Text>

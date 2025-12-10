@@ -800,6 +800,7 @@ const User = () => {
                     fontWeight={"semibold"}
                     fontSize={"xs"}
                     color={"gray.400"}
+                    ml={"0.5"}
                   >
                     No API keys
                   </Text>
