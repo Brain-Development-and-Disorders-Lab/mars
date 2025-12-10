@@ -1690,7 +1690,7 @@ const Entity = () => {
                                                 <Linky
                                                   type={"projects"}
                                                   id={entityVersion.projects[0]}
-                                                  size={"sm"}
+                                                  size={"xs"}
                                                 />
                                               </Tag.Label>
                                             </Tag.Root>

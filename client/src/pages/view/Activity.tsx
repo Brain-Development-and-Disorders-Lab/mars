@@ -20,6 +20,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
+import ActivityGraph from "@components/ActivityGraph";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Routing and navigation
@@ -329,6 +330,41 @@ const Activity = () => {
             recent. Sort the activity using the column headers or use the
             filters below.
           </Text>
+
+          {/* Activity Charts Section */}
+          <Flex
+            direction={{ base: "column", md: "row" }}
+            gap={"1"}
+            w={"100%"}
+            minW="0"
+            maxW="100%"
+          >
+            <Flex direction={"column"} flex={"1"} minW="0">
+              <ActivityGraph
+                activities={activityData}
+                title="Overall Activity"
+                height="200px"
+              />
+            </Flex>
+            <Flex direction={"column"} flex={"1"} minW="0">
+              <ActivityGraph
+                activities={activityData.filter(
+                  (activity) => activity.target.type === "entities",
+                )}
+                title="Entity Activity"
+                height="200px"
+              />
+            </Flex>
+            <Flex direction={"column"} flex={"1"} minW="0">
+              <ActivityGraph
+                activities={activityData.filter(
+                  (activity) => activity.target.type === "projects",
+                )}
+                title="Project Activity"
+                height="200px"
+              />
+            </Flex>
+          </Flex>
 
           {/* Filter Section */}
           <Collapsible.Root
