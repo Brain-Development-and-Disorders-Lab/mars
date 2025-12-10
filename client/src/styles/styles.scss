@@ -269,3 +269,18 @@ body .w-md-editor-text {
     margin-top: 0;
   }
 }
+
+/* Live indicator animation for activity feed */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.live-indicator {
+  animation: pulse 2s ease-in-out infinite;
+}

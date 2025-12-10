@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -636,18 +637,20 @@ const Entity = () => {
                       >
                         Entity Description
                       </Field.Label>
-                      <MDEditor
-                        height={150}
-                        minHeight={100}
-                        maxHeight={400}
-                        style={{ width: "100%" }}
-                        value={description}
-                        preview={"edit"}
-                        extraCommands={[]}
-                        onChange={(value) => {
-                          setDescription(value || "");
-                        }}
-                      />
+                      <Box data-testid={"create-entity-description"}>
+                        <MDEditor
+                          height={150}
+                          minHeight={100}
+                          maxHeight={400}
+                          style={{ width: "100%" }}
+                          value={description}
+                          preview={"edit"}
+                          extraCommands={[]}
+                          onChange={(value) => {
+                            setDescription(value || "");
+                          }}
+                        />
+                      </Box>
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>

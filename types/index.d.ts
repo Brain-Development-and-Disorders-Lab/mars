@@ -134,6 +134,7 @@ export type ActorTagProps = {
   fallback: string;
   size: "sm" | "md";
   inline?: boolean;
+  avatarOnly?: boolean;
 };
 
 // "VisibilityTagProps" component props
@@ -565,7 +566,20 @@ export type SearchSelectProps = {
 
 // SearchBox props
 export type SearchBoxProps = {
-  resultType: "entity" | "project";
+  resultType?: "entity" | "project" | "template";
+};
+
+// SaveModal props
+export type SaveModalProps = {
+  open: boolean;
+  onOpenChange: (details: { open: boolean }) => void;
+  onDone: () => void;
+  value: string;
+  onChange: (value: string) => void;
+  description?: string;
+  placeholder?: string;
+  showCloseButton?: boolean;
+  modifiedType?: "Entity" | "Project" | "Template";
 };
 
 // Generic ResponseMessage type

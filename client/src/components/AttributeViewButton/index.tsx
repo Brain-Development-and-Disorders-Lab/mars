@@ -10,7 +10,6 @@ import {
   Text,
   CloseButton,
   EmptyState,
-  IconButton,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
@@ -35,25 +34,29 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
   return (
     <Flex gap={"1"}>
-      <IconButton
+      <Button
         size="2xs"
         variant="subtle"
+        rounded="md"
         colorPalette="gray"
         aria-label={"View Attribute"}
         onClick={() => setOpen(true)}
       >
+        {isEditing ? "Edit" : "Expand"}
         <Icon name={isEditing ? "edit" : "expand"} size={"xs"} />
-      </IconButton>
+      </Button>
       {isEditing && (
-        <IconButton
+        <Button
           size="2xs"
+          rounded="md"
           variant="subtle"
           colorPalette="red"
           aria-label={"Delete Attribute"}
           onClick={props.removeCallback}
         >
+          Delete
           <Icon name={"delete"} size={"xs"} />
-        </IconButton>
+        </Button>
       )}
       <Dialog.Root
         open={open}

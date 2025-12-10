@@ -21,9 +21,19 @@ describe("Create Project", () => {
 
   it("should navigate through the steps", () => {
     // Fill in the initial details
-    cy.get("[data-testid='create-project-name']").type("Test Project");
+    cy.get("[data-testid='create-project-name']")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type("Test Project");
     cy.get('input[type="datetime-local"]').type("2023-10-01T12:00:00");
-    cy.get("textarea").type("This is a test Project.");
+    cy.get("[data-testid='create-project-description']")
+      .find("textarea")
+      .should("be.visible")
+      .type("This is a test Project.");
+
+    // Wait for the Finish button to be enabled
+    cy.get("button").contains("Finish").should("not.be.disabled");
 
     // Submit the form
     cy.get("button").contains("Finish").click(); // Click to finish creating the Project

@@ -152,19 +152,23 @@ const ColumnFilterMenu = <TData extends RowData>({
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content>
-            <Flex direction="column" p="2" gap="2" minW="200px" maxW="200px">
+          <Menu.Content p={"1"}>
+            <Flex direction="column" p="1" gap="1" minW="200px" maxW="200px">
+              <Text fontSize="xs" fontWeight="semibold">
+                Column Filters
+              </Text>
               <Input
-                size="sm"
+                size="xs"
                 rounded="md"
                 placeholder="Search values..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <Flex direction="row" gap="2">
+              <Flex direction="row" gap="2" justify="space-between">
                 <Button
                   size="xs"
                   variant="outline"
+                  rounded="md"
                   onClick={(e) => {
                     e.stopPropagation();
                     table.getColumn(columnId)?.setFilterValue(values);
@@ -175,6 +179,7 @@ const ColumnFilterMenu = <TData extends RowData>({
                 <Button
                   size="xs"
                   variant="outline"
+                  rounded="md"
                   onClick={(e) => {
                     e.stopPropagation();
                     table.getColumn(columnId)?.setFilterValue([]);
@@ -188,6 +193,7 @@ const ColumnFilterMenu = <TData extends RowData>({
                   <Menu.CheckboxItem
                     key={`${columnId}_${getFilterKey(value)}_${index}`}
                     value={getFilterKey(value)}
+                    fontSize="xs"
                     checked={currentFilter.includes(value)}
                     closeOnSelect={false}
                     onCheckedChange={(checked) => {
@@ -203,7 +209,7 @@ const ColumnFilterMenu = <TData extends RowData>({
                   </Menu.CheckboxItem>
                 ))}
                 {filtered.length === 0 && (
-                  <Text fontSize="sm" color="gray.500" p="2" textAlign="center">
+                  <Text fontSize="xs" color="gray.500" p="2" textAlign="center">
                     No values found
                   </Text>
                 )}

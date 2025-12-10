@@ -43,6 +43,11 @@ describe("Security, check endpoint access", () => {
     cy.location("pathname").should("eq", "/login");
   });
 
+  it("should not be able to access /activity", () => {
+    cy.visit("http://localhost:8080/activity");
+    cy.location("pathname").should("eq", "/login");
+  });
+
   it("should not be able to access /create", () => {
     cy.visit("http://localhost:8080/create");
     cy.location("pathname").should("eq", "/login");

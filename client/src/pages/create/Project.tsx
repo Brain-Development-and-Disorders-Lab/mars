@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
   CloseButton,
   Dialog,
@@ -310,18 +311,20 @@ const Project = () => {
                     >
                       Project Description
                     </Field.Label>
-                    <MDEditor
-                      height={150}
-                      minHeight={100}
-                      maxHeight={400}
-                      style={{ width: "100%" }}
-                      value={description}
-                      preview={"edit"}
-                      extraCommands={[]}
-                      onChange={(value) => {
-                        setDescription(value || "");
-                      }}
-                    />
+                    <Box data-testid={"create-project-description"}>
+                      <MDEditor
+                        height={150}
+                        minHeight={100}
+                        maxHeight={400}
+                        style={{ width: "100%" }}
+                        value={description}
+                        preview={"edit"}
+                        extraCommands={[]}
+                        onChange={(value) => {
+                          setDescription(value || "");
+                        }}
+                      />
+                    </Box>
                     {isDescriptionError && (
                       <Field.ErrorText fontSize={"xs"}>
                         A description must be provided.

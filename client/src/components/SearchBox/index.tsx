@@ -1,19 +1,20 @@
 // React
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 // Existing and custom components
 import {
   Flex,
   Input,
   Text,
-  Popover,
   Link,
   Spinner,
   Stack,
   Skeleton,
-  IconButton,
   Separator,
   Button,
+  Checkbox,
+  Collapsible,
+  Box,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -25,20 +26,29 @@ import { IGenericItem, SearchBoxProps } from "@types";
 import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery } from "@apollo/client";
 
-// Workspace context
-import { useWorkspace } from "@hooks/useWorkspace";
-
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
 const SearchBox = (props: SearchBoxProps) => {
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [inputWidth, setInputWidth] = useState<number | undefined>(undefined);
+
+  // Default resultType to "entity" if not provided (so it's never undefined)
+  const resultType = props.resultType || "entity";
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-
-  // Workspace context
-  const { workspace } = useWorkspace();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<{
+    entities: boolean;
+    projects: boolean;
+    templates: boolean;
+  }>({
+    entities: resultType === "entity",
+    projects: resultType === "project",
+    templates: resultType === "template",
+  });
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -47,6 +57,58 @@ const SearchBox = (props: SearchBoxProps) => {
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as IGenericItem[]);
+
+  // Measure input + search button width when dropdown opens
+  useEffect(() => {
+    if (!open) return;
+
+    const updateWidth = () => {
+      const input = document.querySelector(
+        "[data-search-input]",
+      ) as HTMLInputElement;
+      const searchButton = document.querySelector(
+        "[data-search-button]",
+      ) as HTMLElement;
+      if (input && searchButton) {
+        // Get the gap between elements (1 unit = 4px in Chakra)
+        const gap = 4;
+        setInputWidth(input.offsetWidth + searchButton.offsetWidth + gap);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, [open]);
+
+  // Handle click outside to close results
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    // Handle escape key
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
@@ -76,16 +138,44 @@ const SearchBox = (props: SearchBoxProps) => {
   `;
   const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
 
+  // Determine resultType based on selected filters
+  const getResultType = (): string | undefined => {
+    const selectedCount =
+      (selectedTypes.entities ? 1 : 0) +
+      (selectedTypes.projects ? 1 : 0) +
+      (selectedTypes.templates ? 1 : 0);
+
+    // If all or none selected, search all types
+    if (selectedCount === 0 || selectedCount === 3) {
+      return undefined;
+    }
+
+    // If only one type selected, use that
+    if (selectedCount === 1) {
+      if (selectedTypes.entities) return "entity";
+      if (selectedTypes.projects) return "project";
+      if (selectedTypes.templates) return "template";
+      // Fallback (shouldn't happen, but satisfies TypeScript)
+      return undefined;
+    }
+
+    // Multiple types selected - search all (undefined means all)
+    return undefined;
+  };
+
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
     setIsSearching(loading);
     setHasSearched(true);
     setResults([]);
 
+    // Use filter selection if no explicit resultType prop was provided
+    const searchResultType = props.resultType || getResultType();
+
     const results = await searchText({
       variables: {
         query: query,
-        resultType: props.resultType,
+        resultType: searchResultType,
         isBuilder: false,
         showArchived: false,
       },
@@ -125,160 +215,291 @@ const SearchBox = (props: SearchBoxProps) => {
   };
 
   // Basic handler to navigate to a result
-  const handleResultClick = (id: string) => {
+  const handleResultClick = (id: string, type?: string) => {
     setQuery("");
     setOpen(false);
-    navigate(`/entities/${id}`);
+    // Determine route based on result type
+    if (type === "Project") {
+      navigate(`/projects/${id}`);
+    } else if (type === "Entity") {
+      navigate(`/entities/${id}`);
+    } else {
+      // Default to entity for backwards compatibility
+      navigate(`/entities/${id}`);
+    }
   };
 
   return (
-    <Popover.Root
-      open={open}
-      onInteractOutside={() => setOpen(false)}
-      onEscapeKeyDown={() => setOpen(false)}
-    >
-      <Flex gap={"2"} align={"center"} w={"100%"}>
-        <Popover.Trigger w={"100%"}>
-          <Input
-            value={query}
-            size={"xs"}
-            rounded={"md"}
-            placeholder={"Quick Search"}
-            background={"white"}
-            disabled={workspace === ""}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyUp={(event) => {
-              // Listen for "Enter" key when entering a query
-              if (event.key === "Enter" && query !== "") {
-                handleClick();
-              }
-            }}
-          />
-        </Popover.Trigger>
-        <IconButton
-          size={"xs"}
-          rounded={"md"}
-          colorPalette={"green"}
-          disabled={query === ""}
-          onClick={() => {
-            if (query !== "") {
-              handleClick();
-            }
-          }}
-        >
-          <Icon name={"search"} size={"xs"} />
-        </IconButton>
-      </Flex>
+    <Box ref={containerRef} w={"100%"}>
+      <Flex direction={"column"} gap={filtersOpen ? "1" : "0"} w={"100%"}>
+        {/* Input row with dropdown - wrapped in relative container */}
+        <Box position={"relative"} w={"100%"}>
+          <Flex gap={"1"} align={"center"} w={"100%"}>
+            <Input
+              data-search-input
+              value={query}
+              size={"xs"}
+              rounded={"md"}
+              placeholder={"Quick Search"}
+              background={"white"}
+              w={"100%"}
+              borderColor={"gray.300"}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setOpen(false);
+                setHasSearched(false);
+                setIsError(false);
+                setResults([]);
+              }}
+              onKeyUp={(event) => {
+                // Listen for "Enter" key when entering a query
+                if (event.key === "Enter" && query !== "") {
+                  handleClick();
+                }
+              }}
+            />
 
-      <Popover.Positioner>
-        <Popover.Content rounded={"md"}>
-          <Popover.Header p={"1"} bg={"gray.100"} roundedTop={"md"}>
-            <Flex direction={"row"} gap={"1"} w={"100%"} align={"center"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Search Results:{" "}
-              </Text>
-              <Text fontSize={"xs"}>"{query}"</Text>
-            </Flex>
-          </Popover.Header>
+            <Button
+              data-search-button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              disabled={query === ""}
+              onClick={() => {
+                if (query !== "") {
+                  handleClick();
+                }
+              }}
+            >
+              Search
+              <Icon name={"search"} size={"xs"} />
+            </Button>
 
-          <Popover.Body p={"1"}>
-            <Flex gap={"1"} py={"1"}>
-              {isSearching ? (
-                <Stack w={"100%"}>
-                  <Skeleton height={"30px"} />
-                  <Skeleton height={"30px"} />
-                  <Skeleton height={"30px"} />
-                </Stack>
-              ) : (
-                hasSearched &&
-                !isError && (
-                  <Stack gap={"1"} separator={<Separator />} w={"100%"}>
-                    {results.length > 0 ? (
-                      results.slice(0, MAX_RESULTS).map((result) => {
-                        return (
-                          <Flex
-                            key={result._id}
-                            direction={"row"}
-                            gap={"1"}
-                            w={"100%"}
-                            justify={"space-between"}
-                            align={"center"}
-                            p={"0"}
-                          >
-                            <Text
-                              color={"black"}
-                              fontWeight={"semibold"}
-                              fontSize={"xs"}
-                            >
-                              {result.name}
-                            </Text>
-                            <Button
-                              size="2xs"
-                              mx={"1"}
-                              variant="outline"
-                              colorPalette="gray"
-                              aria-label={"View Entity"}
-                              onClick={() => handleResultClick(result._id)}
-                            >
-                              View
-                              <Icon
-                                name={"a_right"}
-                                color={"black"}
-                                size={"xs"}
-                              />
-                            </Button>
-                          </Flex>
-                        );
-                      })
-                    ) : (
-                      <Flex m={"2"}>
-                        <Text fontWeight={"semibold"} fontSize={"xs"}>
-                          No results found.
-                        </Text>
-                      </Flex>
-                    )}
-                  </Stack>
-                )
-              )}
-            </Flex>
-          </Popover.Body>
+            <Collapsible.Root
+              open={filtersOpen}
+              onOpenChange={(event) => setFiltersOpen(event.open)}
+            >
+              <Collapsible.Trigger asChild>
+                <Button size={"xs"} rounded={"md"} variant={"outline"}>
+                  <Icon name={"filter"} size={"xs"} />
+                  Search Filters
+                  <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
+                </Button>
+              </Collapsible.Trigger>
+            </Collapsible.Root>
+          </Flex>
 
-          <Popover.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
-            <Flex direction={"column"} gap={"1"}>
-              <Flex width={"100%"} direction={"row"} gap={"1"}>
-                <Text fontSize={"xs"}>Showing </Text>
-                {isSearching ? (
-                  <Spinner size={"sm"} />
-                ) : (
-                  <Text fontWeight={"bold"} fontSize={"xs"}>
-                    {results.length > MAX_RESULTS
-                      ? MAX_RESULTS
-                      : results.length}{" "}
-                  </Text>
-                )}
-                <Text fontSize={"xs"}>results, view more using </Text>
-                <Link
-                  className={"light"}
-                  color={"black"}
-                  variant={"underline"}
-                  fontWeight={"semibold"}
-                  gap={"1"}
-                  fontSize={"xs"}
-                  onClick={() => {
-                    // Close the popover and navigate to the `/search` route
-                    onCloseWrapper();
-                    navigate("/search");
-                  }}
-                >
-                  Search
-                  <Icon name={"a_right"} color={"black"} size={"xs"} />
-                </Link>
+          {/* Results dropdown - width matches input */}
+          {open && (
+            <Box
+              position={"absolute"}
+              top={"100%"}
+              left={"0"}
+              mt={"1"}
+              zIndex={1000}
+              rounded={"md"}
+              border={"1px solid"}
+              borderColor={"gray.300"}
+              bg={"white"}
+              shadow={"lg"}
+              w={inputWidth ? `${inputWidth}px` : "100%"}
+            >
+              <Flex
+                p={"1"}
+                bg={"gray.100"}
+                roundedTop={"md"}
+                direction={"row"}
+                gap={"1"}
+                w={"100%"}
+                align={"center"}
+              >
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Search Results:{" "}
+                </Text>
+                <Text fontSize={"xs"}>"{query}"</Text>
               </Flex>
+
+              <Flex p={"1"} gap={"1"} py={"1"}>
+                {isSearching ? (
+                  <Stack w={"100%"}>
+                    <Skeleton height={"30px"} />
+                    <Skeleton height={"30px"} />
+                    <Skeleton height={"30px"} />
+                  </Stack>
+                ) : (
+                  hasSearched &&
+                  !isError && (
+                    <Stack gap={"1"} separator={<Separator />} w={"100%"}>
+                      {results.length > 0 ? (
+                        results
+                          .slice(0, MAX_RESULTS)
+                          .map((result: IGenericItem) => {
+                            const resultType =
+                              (result as IGenericItem & { __typename?: string })
+                                .__typename || "Entity";
+                            return (
+                              <Flex
+                                key={result._id}
+                                direction={"row"}
+                                gap={"1"}
+                                w={"100%"}
+                                justify={"space-between"}
+                                align={"center"}
+                                p={"0"}
+                              >
+                                <Flex direction={"column"} gap={"0.5"}>
+                                  <Text
+                                    color={"black"}
+                                    fontWeight={"semibold"}
+                                    fontSize={"xs"}
+                                  >
+                                    {result.name}
+                                  </Text>
+                                  <Text fontSize={"2xs"} color={"gray.500"}>
+                                    {resultType}
+                                  </Text>
+                                </Flex>
+                                <Button
+                                  size="2xs"
+                                  mx={"1"}
+                                  variant="subtle"
+                                  colorPalette="gray"
+                                  aria-label={`View ${resultType}`}
+                                  onClick={() =>
+                                    handleResultClick(result._id, resultType)
+                                  }
+                                >
+                                  View
+                                  <Icon
+                                    name={"a_right"}
+                                    color={"black"}
+                                    size={"xs"}
+                                  />
+                                </Button>
+                              </Flex>
+                            );
+                          })
+                      ) : (
+                        <Flex m={"2"}>
+                          <Text fontWeight={"semibold"} fontSize={"xs"}>
+                            No results found.
+                          </Text>
+                        </Flex>
+                      )}
+                    </Stack>
+                  )
+                )}
+              </Flex>
+
+              <Flex
+                p={"1"}
+                bg={"gray.100"}
+                roundedBottom={"md"}
+                direction={"column"}
+                gap={"1"}
+              >
+                <Flex width={"100%"} direction={"row"} gap={"1"}>
+                  {isSearching ? (
+                    <Spinner size={"sm"} />
+                  ) : (
+                    <Text fontWeight={"bold"} fontSize={"xs"}>
+                      {results.length > MAX_RESULTS
+                        ? MAX_RESULTS
+                        : results.length}{" "}
+                    </Text>
+                  )}
+                  <Text fontSize={"xs"}>
+                    result
+                    {results.length > 1 || results.length === 0 ? "s" : ""},
+                    view more using{" "}
+                  </Text>
+                  <Link
+                    className={"light"}
+                    color={"black"}
+                    variant={"underline"}
+                    fontWeight={"semibold"}
+                    gap={"1"}
+                    fontSize={"xs"}
+                    onClick={() => {
+                      // Close the dropdown and navigate to the `/search` route
+                      onCloseWrapper();
+                      navigate("/search");
+                    }}
+                  >
+                    Search
+                    <Icon name={"a_right"} color={"black"} size={"xs"} />
+                  </Link>
+                </Flex>
+              </Flex>
+            </Box>
+          )}
+        </Box>
+
+        {/* Collapsible Filters Content */}
+        <Collapsible.Root
+          open={filtersOpen}
+          onOpenChange={(event) => setFiltersOpen(event.open)}
+        >
+          <Collapsible.Content>
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Include:
+              </Text>
+              <Checkbox.Root
+                size={"xs"}
+                colorPalette={"blue"}
+                checked={selectedTypes.entities}
+                onCheckedChange={(details) => {
+                  setSelectedTypes({
+                    ...selectedTypes,
+                    entities: details.checked as boolean,
+                  });
+                }}
+                disabled
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label fontSize={"xs"}>Entities</Checkbox.Label>
+              </Checkbox.Root>
+
+              <Checkbox.Root
+                size={"xs"}
+                colorPalette={"blue"}
+                checked={selectedTypes.projects}
+                onCheckedChange={(details) => {
+                  setSelectedTypes({
+                    ...selectedTypes,
+                    projects: details.checked as boolean,
+                  });
+                }}
+                disabled
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label fontSize={"xs"}>Projects</Checkbox.Label>
+              </Checkbox.Root>
+
+              <Checkbox.Root
+                size={"xs"}
+                colorPalette={"blue"}
+                checked={selectedTypes.templates}
+                onCheckedChange={(details) => {
+                  setSelectedTypes({
+                    ...selectedTypes,
+                    templates: details.checked as boolean,
+                  });
+                }}
+                disabled
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label fontSize={"xs"}>Templates</Checkbox.Label>
+              </Checkbox.Root>
             </Flex>
-          </Popover.Footer>
-        </Popover.Content>
-      </Popover.Positioner>
-    </Popover.Root>
+          </Collapsible.Content>
+        </Collapsible.Root>
+      </Flex>
+    </Box>
   );
 };
 

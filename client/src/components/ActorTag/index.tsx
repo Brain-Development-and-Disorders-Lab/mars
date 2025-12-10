@@ -57,6 +57,19 @@ const ActorTag = (props: ActorTagProps) => {
     }
   }, []);
 
+  // If avatarOnly is true, show only the avatar
+  if (props.avatarOnly) {
+    return (
+      <Avatar.Root
+        size={props.inline ? "2xs" : props.size === "sm" ? "xs" : "sm"}
+        key={actorLabel}
+        colorPalette={"blue"}
+      >
+        <Avatar.Fallback name={actorLabel} />
+      </Avatar.Root>
+    );
+  }
+
   return props.inline ? (
     <Flex direction={"row"} gap={"2"} align={"center"}>
       <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={"blue"}>
