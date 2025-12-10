@@ -21,9 +21,19 @@ describe("Create Entities", () => {
 
   it("should navigate through the steps", () => {
     // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']").type("Test Entity");
+    cy.get("[data-testid='create-entity-name']")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
-    cy.get("textarea").type("This is a test entity.");
+    cy.get("[data-testid='create-entity-description']")
+      .find("textarea")
+      .should("be.visible")
+      .type("This is a test entity.");
+
+    // Wait for the Continue button to be enabled
+    cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
@@ -52,9 +62,19 @@ describe("Create Entities", () => {
 
   it("should allow adding Relationships", () => {
     // Fill in the initial details
-    cy.get('input[name="name"]').type("Test Entity");
+    cy.get("[data-testid='create-entity-name']")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
-    cy.get("textarea").type("This is a test entity.");
+    cy.get("[data-testid='create-entity-description']")
+      .find("textarea")
+      .should("be.visible")
+      .type("This is a test entity.");
+
+    // Wait for the Continue button to be enabled
+    cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
@@ -72,9 +92,19 @@ describe("Create Entities", () => {
 
   it("should allow adding Template Attributes", () => {
     // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']").type("Test Entity");
+    cy.get("[data-testid='create-entity-name']")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
-    cy.get("textarea").type("This is a test entity.");
+    cy.get("[data-testid='create-entity-description']")
+      .find("textarea")
+      .should("be.visible")
+      .type("This is a test entity.");
+
+    // Wait for the Continue button to be enabled
+    cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the relationships step
     cy.get("button").contains("Continue").click();
@@ -106,9 +136,19 @@ describe("Create Entities", () => {
 
   it("should complete Entity creation", () => {
     // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']").type("Test Entity");
+    cy.get("[data-testid='create-entity-name']")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
-    cy.get("textarea").type("This is a test entity.");
+    cy.get("[data-testid='create-entity-description']")
+      .find("textarea")
+      .should("be.visible")
+      .type("This is a test entity.");
+
+    // Wait for the Continue button to be enabled
+    cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
