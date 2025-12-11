@@ -1,10 +1,9 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
   Button,
-  Card,
   Checkbox,
   CloseButton,
   Dialog,
@@ -25,6 +24,8 @@ import {
   Text,
   createListCollection,
   useDisclosure,
+  Timeline,
+  Collapsible,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
@@ -87,6 +88,18 @@ const Project = () => {
 
   // History drawer
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(
+    new Set(),
+  );
+  const [historySortOrder, setHistorySortOrder] = useState<
+    "newest-first" | "oldest-first"
+  >("newest-first");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [dateFilterApplied, setDateFilterApplied] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState<ProjectHistory | null>(
+    null,
+  );
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -100,9 +113,90 @@ const Project = () => {
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
+
+  // Sorted and filtered history based on sort order and date range
+  const sortedProjectHistory = useMemo(() => {
+    let filtered = [...projectHistory];
+
+    // Apply date filter if active
+    if (dateFilterApplied) {
+      filtered = filtered.filter((item) => {
+        const itemDate = new Date(item.timestamp);
+        const itemDateOnly = new Date(
+          itemDate.getFullYear(),
+          itemDate.getMonth(),
+          itemDate.getDate(),
+        );
+
+        if (startDate) {
+          const start = new Date(startDate);
+          if (itemDateOnly < start) return false;
+        }
+
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999); // Include the entire end date
+          if (itemDateOnly > end) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // Sort based on sort order
+    if (historySortOrder === "newest-first") {
+      return filtered.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
+    } else {
+      return filtered.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+    }
+  }, [projectHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
+
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
   );
+
+  // Computed values that use preview data when in preview mode
+  const displayProjectName = useMemo(() => {
+    return previewVersion ? previewVersion.name : projectName;
+  }, [previewVersion, projectName]);
+
+  const displayProjectDescription = useMemo(() => {
+    return previewVersion
+      ? previewVersion.description || ""
+      : projectDescription;
+  }, [previewVersion, projectDescription]);
+
+  const displayProjectEntities = useMemo(() => {
+    return previewVersion ? previewVersion.entities : projectEntities;
+  }, [previewVersion, projectEntities]);
+
+  const displayProjectCollaborators = useMemo(() => {
+    return previewVersion ? previewVersion.collaborators : projectCollaborators;
+  }, [previewVersion, projectCollaborators]);
+
+  const displayProjectArchived = useMemo(() => {
+    return previewVersion ? previewVersion.archived : projectArchived;
+  }, [previewVersion, projectArchived]);
+
+  const displayProjectData = useMemo(() => {
+    if (previewVersion) {
+      return {
+        ...project,
+        name: previewVersion.name,
+        description: previewVersion.description || "",
+        entities: previewVersion.entities,
+        collaborators: previewVersion.collaborators,
+        archived: previewVersion.archived,
+      };
+    }
+    return project;
+  }, [previewVersion, project]);
 
   // Save message modal
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -134,6 +228,7 @@ const Project = () => {
         _id
         name
         archived
+        created
         description
         owner
         entities
@@ -214,14 +309,18 @@ const Project = () => {
   useEffect(() => {
     if (data?.project) {
       setProject(data.project);
-      setProjectName(data.project.name);
-      setProjectArchived(data.project.archived);
-      setProjectDescription(data.project.description);
-      setProjectEntities(data.project.entities);
+
+      if (!editing) {
+        setProjectName(data.project.name);
+        setProjectArchived(data.project.archived);
+        setProjectDescription(data.project.description);
+        setProjectEntities(data.project.entities);
+        setProjectCollaborators(data.project.collaborators || []);
+      }
+
       setProjectHistory(data.project.history || []);
-      setProjectCollaborators(data.project.collaborators || []);
     }
-  }, [data]);
+  }, [data, editing]);
 
   const { workspace } = useWorkspace();
 
@@ -259,6 +358,7 @@ const Project = () => {
    * Handle the edit button being clicked
    */
   const handleEditClick = () => {
+    if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
       // Open the save message modal
       setSaveMessageOpen(true);
@@ -676,6 +776,63 @@ const Project = () => {
       isLoaded={!loading && !archiveLoading && !updateLoading}
     >
       <Flex direction={"column"}>
+        {/* Preview Banner */}
+        {previewVersion && (
+          <Flex
+            direction={"row"}
+            align={"center"}
+            justify={"space-between"}
+            gap={"2"}
+            p={"2"}
+            bg={"blue.100"}
+            mx={"-1.5"}
+            mt={"-1.5"}
+            px={"1.5"}
+            pt={"1.5"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"clock"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Preview:
+              </Text>
+              <Tag.Root colorPalette={"green"}>
+                <Tag.Label fontSize={"xs"}>
+                  {previewVersion.version.slice(0, 6)}
+                </Tag.Label>
+              </Tag.Root>
+              <Text fontSize={"xs"} color={"gray.600"}>
+                {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
+              </Text>
+            </Flex>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"orange"}
+                rounded={"md"}
+                onClick={async () => {
+                  await handleRestoreFromHistoryClick(previewVersion);
+                  setPreviewVersion(null);
+                }}
+                disabled={displayProjectArchived}
+              >
+                Restore
+                <Icon name={"rewind"} size={"xs"} />
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"red"}
+                rounded={"md"}
+                onClick={() => setPreviewVersion(null)}
+              >
+                Exit Preview
+                <Icon name={"logout"} size={"xs"} />
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+
         <Flex
           gap={"1"}
           p={"1"}
@@ -695,8 +852,9 @@ const Project = () => {
           >
             <Icon name={"project"} size={"sm"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
-              {project.name}
+              {displayProjectData.name}
             </Heading>
+            {displayProjectArchived && <Icon name={"archive"} size={"sm"} />}
           </Flex>
 
           {/* Buttons */}
@@ -715,14 +873,19 @@ const Project = () => {
                     value={"export-project"}
                     onClick={handleExportClick}
                     fontSize={"xs"}
-                    disabled={exportLoading || projectArchived}
+                    disabled={
+                      exportLoading || projectArchived || !!previewVersion
+                    }
                   >
                     <Icon name={"download"} size={"xs"} />
                     Export Project
                   </Menu.Item>
                   <Tooltip
                     content={"This Project does not contain any Entities."}
-                    disabled={projectEntities?.length > 0 || projectArchived}
+                    disabled={
+                      displayProjectEntities?.length > 0 ||
+                      displayProjectArchived
+                    }
                     showArrow
                   >
                     <Menu.Item
@@ -730,9 +893,10 @@ const Project = () => {
                       onClick={handleExportEntitiesClick}
                       fontSize={"xs"}
                       disabled={
-                        projectEntities?.length === 0 ||
+                        displayProjectEntities?.length === 0 ||
                         exportEntitiesLoading ||
-                        projectArchived
+                        displayProjectArchived ||
+                        !!previewVersion
                       }
                     >
                       <Icon name={"download"} size={"xs"} />
@@ -743,7 +907,7 @@ const Project = () => {
                     value={"archive"}
                     onClick={() => setArchiveDialogOpen(true)}
                     fontSize={"xs"}
-                    disabled={projectArchived}
+                    disabled={projectArchived || !!previewVersion}
                   >
                     <Icon name={"archive"} size={"xs"} />
                     Archive
@@ -752,7 +916,7 @@ const Project = () => {
               </Menu.Positioner>
             </Menu.Root>
 
-            {projectArchived ? (
+            {displayProjectArchived ? (
               <Button
                 onClick={handleRestoreClick}
                 size={"xs"}
@@ -783,6 +947,7 @@ const Project = () => {
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   loading={isUpdating}
+                  disabled={!!previewVersion}
                 >
                   {editing ? "Save" : "Edit"}
                   {editing ? (
@@ -798,7 +963,7 @@ const Project = () => {
             <Drawer.Root
               open={historyOpen}
               onOpenChange={(details) => setHistoryOpen(details.open)}
-              size={"md"}
+              size={"lg"}
               closeOnEscape
               closeOnInteractOutside
             >
@@ -815,8 +980,8 @@ const Project = () => {
                 </Button>
               </Drawer.Trigger>
               <Drawer.Backdrop />
-              <Drawer.Positioner>
-                <Drawer.Content p={"1"}>
+              <Drawer.Positioner padding={"4"}>
+                <Drawer.Content rounded={"md"}>
                   <Drawer.CloseTrigger asChild>
                     <CloseButton
                       top={"6px"}
@@ -824,341 +989,540 @@ const Project = () => {
                       onClick={() => setHistoryOpen(false)}
                     />
                   </Drawer.CloseTrigger>
-                  <Drawer.Header pb={"1"} p={"1"}>
-                    <Flex direction={"column"} w={"100%"} gap={"2"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Icon name={"clock"} size={"sm"} />
-                        <Text fontSize={"sm"} fontWeight={"bold"}>
-                          History
-                        </Text>
-                      </Flex>
-                      <Flex
-                        direction={"column"}
-                        gap={"1"}
-                        justify={"space-between"}
-                      >
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {projectHistory.length > 0
-                              ? dayjs(projectHistory[0].timestamp).fromNow()
-                              : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {projectHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
+                  <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"clock"} size={"xs"} />
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Project History
+                      </Text>
                     </Flex>
                   </Drawer.Header>
 
-                  <Drawer.Body p={"1"}>
-                    <Stack gap={"1"}>
-                      {projectHistory && projectHistory.length > 0 ? (
-                        projectHistory.map((projectVersion) => {
-                          return (
-                            <Card.Root
-                              w={"100%"}
-                              key={`v_${projectVersion.timestamp}`}
-                              variant={"outline"}
+                  <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                    <Flex
+                      direction={"column"}
+                      gap={"1"}
+                      align={"start"}
+                      rounded={"md"}
+                      bg={"gray.100"}
+                      p={"1"}
+                    >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Date filter:
+                      </Text>
+
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        wrap={"wrap"}
+                        ml={"0.5"}
+                      >
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Field.Root gap={"0"}>
+                            <Field.Label fontSize={"xs"}>
+                              Start date
+                            </Field.Label>
+                            <Input
+                              type={"date"}
+                              size={"xs"}
                               rounded={"md"}
-                              border={"1px solid"}
-                              borderColor={"gray.300"}
+                              w={"140px"}
+                              bg={"white"}
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                            />
+                          </Field.Root>
+                          <Field.Root gap={"0"}>
+                            <Field.Label fontSize={"xs"}>End date</Field.Label>
+                            <Input
+                              type={"date"}
+                              size={"xs"}
+                              rounded={"md"}
+                              w={"140px"}
+                              bg={"white"}
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                            />
+                          </Field.Root>
+                        </Flex>
+                        <Button
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={"solid"}
+                          colorPalette={"blue"}
+                          alignSelf={"end"}
+                          onClick={() => {
+                            if (startDate || endDate) {
+                              setDateFilterApplied(true);
+                            }
+                          }}
+                        >
+                          Apply
+                        </Button>
+                        <Button
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={"outline"}
+                          alignSelf={"end"}
+                          bg={"white"}
+                          _hover={{ bg: "gray.50" }}
+                          onClick={() => {
+                            setStartDate("");
+                            setEndDate("");
+                            setDateFilterApplied(false);
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      </Flex>
+
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        ml={"0.5"}
+                      >
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Sort by:
+                        </Text>
+                        <Select.Root
+                          value={[historySortOrder]}
+                          w={"240px"}
+                          rounded={"md"}
+                          size={"xs"}
+                          bg={"white"}
+                          collection={createListCollection({
+                            items: [
+                              {
+                                value: "newest-first",
+                                label: "Newest → Oldest",
+                              },
+                              {
+                                value: "oldest-first",
+                                label: "Oldest → Newest",
+                              },
+                            ],
+                          })}
+                          onValueChange={(details) =>
+                            setHistorySortOrder(
+                              details.value[0] as
+                                | "newest-first"
+                                | "oldest-first",
+                            )
+                          }
+                        >
+                          <Select.HiddenSelect />
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {createListCollection({
+                                items: [
+                                  {
+                                    value: "newest-first",
+                                    label: "Newest → Oldest",
+                                  },
+                                  {
+                                    value: "oldest-first",
+                                    label: "Oldest → Newest",
+                                  },
+                                ],
+                              }).items.map((item) => (
+                                <Select.Item item={item} key={item.value}>
+                                  {item.label}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Select.Root>
+                      </Flex>
+                    </Flex>
+
+                    <Flex
+                      direction={"row"}
+                      gap={"1"}
+                      align={"center"}
+                      justify={"space-between"}
+                      mx={"0.5"}
+                    >
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Last modified:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length > 0
+                            ? dayjs(projectHistory[0].timestamp).fromNow()
+                            : "never"}
+                        </Text>
+                      </Flex>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Versions:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length}
+                        </Text>
+                      </Flex>
+                    </Flex>
+
+                    {sortedProjectHistory && sortedProjectHistory.length > 0 ? (
+                      <Timeline.Root size="sm" variant="subtle" mt={"1"}>
+                        {sortedProjectHistory.map((projectVersion) => {
+                          const isExpanded = expandedVersions.has(
+                            projectVersion.version,
+                          );
+                          return (
+                            <Timeline.Item
+                              key={`v_${projectVersion.timestamp}`}
                             >
-                              <Card.Header p={"0"}>
-                                <Flex
-                                  direction={"column"}
-                                  w={"100%"}
-                                  gap={"1"}
-                                  p={"1"}
-                                >
-                                  <Text
-                                    fontWeight={"semibold"}
-                                    fontSize={"xs"}
-                                    color={"gray.700"}
-                                  >
-                                    {projectVersion.name}
-                                  </Text>
-                                </Flex>
-                              </Card.Header>
-
-                              <Card.Body px={"1"} py={"0"}>
-                                <Flex direction={"column"} gap={"2"}>
-                                  {/* Description */}
-                                  {_.isEqual(projectVersion.description, "") ? (
-                                    <Tag.Root
-                                      size={"sm"}
-                                      colorPalette={"orange"}
-                                    >
-                                      <Tag.Label fontSize={"xs"}>
-                                        No Description
-                                      </Tag.Label>
-                                    </Tag.Root>
-                                  ) : (
-                                    <Tooltip
-                                      content={projectVersion.description}
-                                      disabled={
-                                        projectVersion.description.length < 32
-                                      }
-                                      showArrow
-                                    >
-                                      <Text fontSize={"xs"}>
-                                        {_.truncate(
-                                          projectVersion.description,
-                                          {
-                                            length: 32,
-                                          },
-                                        )}
-                                      </Text>
-                                    </Tooltip>
-                                  )}
-
-                                  <Flex direction={"row"} gap={"2"}>
-                                    {/* Entities */}
-                                    <Flex
-                                      direction={"column"}
-                                      gap={"1"}
-                                      p={"1"}
-                                      rounded={"md"}
-                                      border={"1px solid"}
-                                      borderColor={"gray.300"}
-                                      grow={"1"}
-                                    >
-                                      <Text
-                                        fontSize={"xs"}
-                                        fontWeight={"semibold"}
-                                      >
-                                        Entities
-                                      </Text>
-                                      {projectVersion.entities.length > 0 ? (
-                                        <Flex
-                                          direction={"row"}
-                                          gap={"2"}
-                                          align={"center"}
-                                        >
-                                          <Tag.Root
-                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
-                                            size={"sm"}
-                                          >
-                                            <Tag.Label>
-                                              <Linky
-                                                type={"projects"}
-                                                id={projectVersion.entities[0]}
-                                                size={"xs"}
-                                              />
-                                            </Tag.Label>
-                                          </Tag.Root>
-                                          {projectVersion.entities.length >
-                                            1 && (
-                                            <Text
-                                              fontWeight={"semibold"}
-                                              fontSize={"xs"}
-                                            >
-                                              and{" "}
-                                              {projectVersion.entities.length -
-                                                1}{" "}
-                                              others
-                                            </Text>
-                                          )}
-                                        </Flex>
-                                      ) : (
-                                        <Text fontSize={"xs"}>No Entities</Text>
-                                      )}
-                                    </Flex>
-
-                                    {/* Collaborators */}
-                                    <Flex
-                                      direction={"column"}
-                                      gap={"1"}
-                                      p={"1"}
-                                      rounded={"md"}
-                                      border={"1px solid"}
-                                      borderColor={"gray.300"}
-                                      grow={"1"}
-                                    >
-                                      <Text
-                                        fontSize={"xs"}
-                                        fontWeight={"semibold"}
-                                      >
-                                        Collaborators
-                                      </Text>
-                                      {projectVersion.collaborators.length >
-                                      0 ? (
-                                        <Flex
-                                          direction={"row"}
-                                          gap={"2"}
-                                          align={"center"}
-                                        >
-                                          <Tag.Root
-                                            key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
-                                            size={"sm"}
-                                          >
-                                            <Tag.Label fontSize={"xs"}>
-                                              {projectVersion.collaborators[0]}
-                                            </Tag.Label>
-                                          </Tag.Root>
-                                          {projectVersion.collaborators.length >
-                                            1 && (
-                                            <Text
-                                              fontWeight={"semibold"}
-                                              fontSize={"xs"}
-                                            >
-                                              and{" "}
-                                              {projectVersion.collaborators
-                                                .length - 1}{" "}
-                                              others
-                                            </Text>
-                                          )}
-                                        </Flex>
-                                      ) : (
-                                        <Text fontSize={"xs"}>
-                                          No Collaborators
-                                        </Text>
-                                      )}
-                                    </Flex>
-                                  </Flex>
-                                </Flex>
-                              </Card.Body>
-
-                              <Card.Footer p={"1"}>
-                                {/* Version information */}
-                                <Flex direction={"column"} gap={"2"} w={"100%"}>
+                              <Timeline.Connector>
+                                <Timeline.Separator />
+                                <Timeline.Indicator />
+                              </Timeline.Connector>
+                              <Timeline.Content>
+                                <Flex direction={"column"} gap={"1"} w={"100%"}>
                                   <Flex
                                     direction={"row"}
                                     gap={"2"}
-                                    bg={"gray.100"}
-                                    justify={"center"}
-                                    rounded={"md"}
+                                    align={"center"}
+                                    justify={"space-between"}
                                   >
                                     <Flex
                                       direction={"column"}
-                                      w={"100%"}
-                                      gap={"1"}
-                                      p={"1"}
+                                      gap={"0.5"}
+                                      grow={"1"}
                                     >
-                                      <Text
-                                        fontSize={"xs"}
-                                        fontWeight={"semibold"}
-                                      >
-                                        Version
-                                      </Text>
                                       <Flex
                                         direction={"row"}
-                                        gap={"2"}
+                                        gap={"1"}
                                         align={"center"}
                                       >
+                                        <Text
+                                          fontSize={"xs"}
+                                          fontWeight={"semibold"}
+                                        >
+                                          {projectVersion.name}
+                                        </Text>
                                         <Tag.Root
                                           size={"sm"}
                                           colorPalette={"green"}
                                         >
                                           <Tag.Label fontSize={"xs"}>
-                                            {projectVersion.version}
+                                            {projectVersion.version.slice(0, 6)}
                                           </Tag.Label>
                                         </Tag.Root>
+                                        <Text
+                                          fontSize={"xs"}
+                                          color={"gray.500"}
+                                        >
+                                          {dayjs(
+                                            projectVersion.timestamp,
+                                          ).fromNow()}
+                                        </Text>
                                       </Flex>
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"xs"}
-                                        color={"gray.400"}
+                                      <Flex
+                                        direction={"row"}
+                                        gap={"1"}
+                                        align={"center"}
                                       >
-                                        {dayjs(
-                                          projectVersion.timestamp,
-                                        ).fromNow()}
-                                      </Text>
-                                      <Text
-                                        fontSize={"xs"}
-                                        fontWeight={"semibold"}
-                                      >
-                                        Message
-                                      </Text>
-                                      {_.isEqual(projectVersion.message, "") ||
-                                      _.isNull(projectVersion.message) ? (
-                                        <Flex>
+                                        {projectVersion.message &&
+                                        !_.isEqual(
+                                          projectVersion.message,
+                                          "",
+                                        ) ? (
+                                          <Tooltip
+                                            content={projectVersion.message}
+                                            disabled={
+                                              projectVersion.message.length <=
+                                              40
+                                            }
+                                            showArrow
+                                          >
+                                            <Text
+                                              fontSize={"xs"}
+                                              color={"gray.600"}
+                                            >
+                                              {_.truncate(
+                                                projectVersion.message,
+                                                { length: 40 },
+                                              )}
+                                            </Text>
+                                          </Tooltip>
+                                        ) : (
                                           <Tag.Root
                                             size={"sm"}
                                             colorPalette={"orange"}
                                           >
                                             <Tag.Label fontSize={"xs"}>
-                                              No Message
+                                              No description
                                             </Tag.Label>
                                           </Tag.Root>
-                                        </Flex>
-                                      ) : (
-                                        <Tooltip
-                                          content={projectVersion.message}
-                                          disabled={
-                                            projectVersion.message.length < 32
-                                          }
-                                          showArrow
-                                        >
-                                          <Text fontSize={"xs"}>
-                                            {_.truncate(
-                                              projectVersion.message,
-                                              {
-                                                length: 32,
-                                              },
-                                            )}
-                                          </Text>
-                                        </Tooltip>
-                                      )}
-                                    </Flex>
-
-                                    <Flex
-                                      direction={"column"}
-                                      w={"100%"}
-                                      gap={"1"}
-                                      p={"1"}
-                                    >
-                                      <Text
-                                        fontSize={"xs"}
-                                        fontWeight={"semibold"}
-                                      >
-                                        Author
-                                      </Text>
-                                      <Flex>
-                                        <ActorTag
-                                          orcid={projectVersion.author}
-                                          fallback={"Unknown User"}
-                                          size={"sm"}
-                                        />
+                                        )}
                                       </Flex>
                                     </Flex>
+                                    <Flex direction={"row"} gap={"1"}>
+                                      <Collapsible.Root
+                                        open={isExpanded}
+                                        onOpenChange={(event) => {
+                                          const newExpanded = new Set(
+                                            expandedVersions,
+                                          );
+                                          if (event.open) {
+                                            newExpanded.add(
+                                              projectVersion.version,
+                                            );
+                                          } else {
+                                            newExpanded.delete(
+                                              projectVersion.version,
+                                            );
+                                          }
+                                          setExpandedVersions(newExpanded);
+                                        }}
+                                      >
+                                        <Collapsible.Trigger asChild>
+                                          <Button
+                                            size={"xs"}
+                                            variant={"subtle"}
+                                            colorPalette={"gray"}
+                                            rounded={"md"}
+                                            aria-label={
+                                              isExpanded
+                                                ? "Collapse details"
+                                                : "Expand details"
+                                            }
+                                          >
+                                            Details
+                                            <Icon
+                                              name={
+                                                isExpanded ? "c_up" : "c_down"
+                                              }
+                                              size={"xs"}
+                                            />
+                                          </Button>
+                                        </Collapsible.Trigger>
+                                      </Collapsible.Root>
+                                      <Button
+                                        variant={"solid"}
+                                        size={"xs"}
+                                        rounded={"md"}
+                                        colorPalette={"blue"}
+                                        onClick={() => {
+                                          setPreviewVersion(projectVersion);
+                                          setHistoryOpen(false);
+                                        }}
+                                        disabled={displayProjectArchived}
+                                      >
+                                        Preview
+                                        <Icon name={"expand"} size={"xs"} />
+                                      </Button>
+                                      <Button
+                                        colorPalette={"orange"}
+                                        size={"xs"}
+                                        rounded={"md"}
+                                        onClick={() => {
+                                          handleRestoreFromHistoryClick(
+                                            projectVersion,
+                                          );
+                                        }}
+                                        disabled={
+                                          displayProjectArchived ||
+                                          !!previewVersion
+                                        }
+                                      >
+                                        Restore
+                                        <Icon name={"rewind"} size={"xs"} />
+                                      </Button>
+                                    </Flex>
                                   </Flex>
 
-                                  <Flex w={"100%"} justify={"right"}>
-                                    <Button
-                                      colorPalette={"orange"}
-                                      size={"xs"}
-                                      rounded={"md"}
-                                      onClick={() => {
-                                        handleRestoreFromHistoryClick(
-                                          projectVersion,
+                                  <Collapsible.Root
+                                    open={isExpanded}
+                                    onOpenChange={(event) => {
+                                      const newExpanded = new Set(
+                                        expandedVersions,
+                                      );
+                                      if (event.open) {
+                                        newExpanded.add(projectVersion.version);
+                                      } else {
+                                        newExpanded.delete(
+                                          projectVersion.version,
                                         );
-                                      }}
-                                      disabled={projectArchived}
-                                    >
-                                      Restore
-                                      <Icon name={"rewind"} size={"xs"} />
-                                    </Button>
-                                  </Flex>
+                                      }
+                                      setExpandedVersions(newExpanded);
+                                    }}
+                                  >
+                                    <Collapsible.Content>
+                                      <Flex
+                                        direction={"column"}
+                                        gap={"2"}
+                                        mt={"1"}
+                                        p={"2"}
+                                        bg={"gray.50"}
+                                        rounded={"md"}
+                                      >
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"2"}
+                                          align={"center"}
+                                        >
+                                          <Text
+                                            fontSize={"xs"}
+                                            fontWeight={"semibold"}
+                                          >
+                                            Author:
+                                          </Text>
+                                          <ActorTag
+                                            orcid={projectVersion.author}
+                                            fallback={"Unknown User"}
+                                            size={"sm"}
+                                          />
+                                        </Flex>
+
+                                        <Flex direction={"column"} gap={"0.5"}>
+                                          <Text
+                                            fontSize={"xs"}
+                                            fontWeight={"semibold"}
+                                          >
+                                            Description:
+                                          </Text>
+                                          {_.isEqual(
+                                            projectVersion.description,
+                                            "",
+                                          ) ? (
+                                            <Tag.Root
+                                              size={"sm"}
+                                              colorPalette={"orange"}
+                                            >
+                                              <Tag.Label fontSize={"xs"}>
+                                                No Description
+                                              </Tag.Label>
+                                            </Tag.Root>
+                                          ) : (
+                                            <Text fontSize={"xs"}>
+                                              {projectVersion.description}
+                                            </Text>
+                                          )}
+                                        </Flex>
+
+                                        <Flex direction={"row"} gap={"1"}>
+                                          <Flex
+                                            direction={"column"}
+                                            gap={"1"}
+                                            p={"2"}
+                                            rounded={"md"}
+                                            border={"1px solid"}
+                                            borderColor={"gray.300"}
+                                            bg={"white"}
+                                            grow={"1"}
+                                          >
+                                            <Text
+                                              fontSize={"xs"}
+                                              fontWeight={"semibold"}
+                                            >
+                                              Entities
+                                            </Text>
+                                            {projectVersion.entities.length >
+                                            0 ? (
+                                              <Flex
+                                                direction={"row"}
+                                                gap={"2"}
+                                                align={"center"}
+                                                wrap={"wrap"}
+                                              >
+                                                {projectVersion.entities.map(
+                                                  (entityId) => (
+                                                    <Tag.Root
+                                                      key={`v_e_${projectVersion.timestamp}_${entityId}`}
+                                                      size={"sm"}
+                                                    >
+                                                      <Tag.Label
+                                                        fontSize={"xs"}
+                                                      >
+                                                        <Linky
+                                                          type={"entities"}
+                                                          id={entityId}
+                                                          size={"xs"}
+                                                        />
+                                                      </Tag.Label>
+                                                    </Tag.Root>
+                                                  ),
+                                                )}
+                                              </Flex>
+                                            ) : (
+                                              <Text fontSize={"xs"}>
+                                                No Entities
+                                              </Text>
+                                            )}
+                                          </Flex>
+
+                                          <Flex
+                                            direction={"column"}
+                                            gap={"1"}
+                                            p={"2"}
+                                            rounded={"md"}
+                                            border={"1px solid"}
+                                            borderColor={"gray.300"}
+                                            bg={"white"}
+                                            grow={"1"}
+                                          >
+                                            <Text
+                                              fontSize={"xs"}
+                                              fontWeight={"semibold"}
+                                            >
+                                              Collaborators
+                                            </Text>
+                                            {projectVersion.collaborators
+                                              .length > 0 ? (
+                                              <Flex
+                                                direction={"row"}
+                                                gap={"2"}
+                                                align={"center"}
+                                                wrap={"wrap"}
+                                              >
+                                                {projectVersion.collaborators.map(
+                                                  (collaborator) => (
+                                                    <Tag.Root
+                                                      key={`v_c_${projectVersion.timestamp}_${collaborator}`}
+                                                      size={"sm"}
+                                                    >
+                                                      <Tag.Label
+                                                        fontSize={"xs"}
+                                                      >
+                                                        {collaborator}
+                                                      </Tag.Label>
+                                                    </Tag.Root>
+                                                  ),
+                                                )}
+                                              </Flex>
+                                            ) : (
+                                              <Text fontSize={"xs"}>
+                                                No Collaborators
+                                              </Text>
+                                            )}
+                                          </Flex>
+                                        </Flex>
+                                      </Flex>
+                                    </Collapsible.Content>
+                                  </Collapsible.Root>
                                 </Flex>
-                              </Card.Footer>
-                            </Card.Root>
+                              </Timeline.Content>
+                            </Timeline.Item>
                           );
-                        })
-                      ) : (
-                        <Text fontSize={"xs"} fontWeight={"semibold"}>
-                          No previous versions.
-                        </Text>
-                      )}
-                    </Stack>
+                        })}
+                      </Timeline.Root>
+                    ) : (
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        No previous versions.
+                      </Text>
+                    )}
                   </Drawer.Body>
                 </Drawer.Content>
               </Drawer.Positioner>
@@ -1202,11 +1566,11 @@ const Project = () => {
                     id={"projectNameInput"}
                     size={"xs"}
                     rounded={"md"}
-                    value={projectName}
+                    value={previewVersion ? displayProjectName : projectName}
                     onChange={(event) => {
                       setProjectName(event.target.value);
                     }}
-                    readOnly={!editing}
+                    readOnly={!editing || !!previewVersion}
                     bg={"white"}
                     border={"1px solid"}
                     borderColor={"gray.300"}
@@ -1260,8 +1624,12 @@ const Project = () => {
                 maxHeight={400}
                 id={"projectDescriptionInput"}
                 style={{ width: "100%" }}
-                value={projectDescription}
-                preview={editing ? "edit" : "preview"}
+                value={
+                  previewVersion
+                    ? displayProjectDescription
+                    : projectDescription
+                }
+                preview={editing && !previewVersion ? "edit" : "preview"}
                 extraCommands={[]}
                 onChange={(value) => {
                   setProjectDescription(value || "");
@@ -1301,7 +1669,7 @@ const Project = () => {
                   onClick={() => setEntitiesOpen(true)}
                   size={"xs"}
                   rounded={"md"}
-                  disabled={!editing}
+                  disabled={!editing || !!previewVersion}
                 >
                   Add
                   <Icon name={"add"} size={"xs"} />
@@ -1311,15 +1679,17 @@ const Project = () => {
                 w={"100%"}
                 justify={"center"}
                 align={"center"}
-                minH={projectEntities.length > 0 ? "fit-content" : "200px"}
+                minH={
+                  displayProjectEntities.length > 0 ? "fit-content" : "200px"
+                }
               >
-                {projectEntities && projectEntities.length > 0 ? (
+                {displayProjectEntities && displayProjectEntities.length > 0 ? (
                   <DataTable
-                    data={projectEntities}
+                    data={displayProjectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     selectedRows={{}}
-                    viewOnly={!editing}
+                    viewOnly={!editing || !!previewVersion}
                     showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
@@ -1341,8 +1711,8 @@ const Project = () => {
 
             {/* Collaborators */}
             <Collaborators
-              editing={editing}
-              projectCollaborators={projectCollaborators}
+              editing={editing && !previewVersion}
+              projectCollaborators={displayProjectCollaborators}
               setProjectCollaborators={setProjectCollaborators}
             />
           </Flex>

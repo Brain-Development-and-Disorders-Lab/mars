@@ -204,7 +204,7 @@ const ColumnFilterMenu = <TData extends RowData>({
                       table.getColumn(columnId)?.setFilterValue(next);
                     }}
                   >
-                    {getDisplayValue(value)}
+                    {_.truncate(getDisplayValue(value), { length: 24 })}
                     <Menu.ItemIndicator />
                   </Menu.CheckboxItem>
                 ))}

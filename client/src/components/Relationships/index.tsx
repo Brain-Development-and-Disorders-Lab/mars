@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Flex, Text, Tag, Button } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -11,11 +11,77 @@ import { DataTableAction, IRelationship, RelationshipsProps } from "@types";
 // Navigation
 import { useNavigate } from "react-router-dom";
 
+// GraphQL
+import { gql, useLazyQuery } from "@apollo/client";
+
 // Utility functions and libraries
 import _ from "lodash";
 
 const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();
+
+  // GraphQL query to fetch entity name by ID
+  const GET_ENTITY_NAME = gql`
+    query GetEntityName($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getEntityName] = useLazyQuery(GET_ENTITY_NAME);
+
+  // Extract all unique entity IDs from relationships
+  const uniqueEntityIds = useMemo(() => {
+    const ids = new Set<string>();
+    props.relationships.forEach((rel) => {
+      ids.add(rel.source._id);
+      ids.add(rel.target._id);
+    });
+    return Array.from(ids);
+  }, [props.relationships]);
+
+  // State to store fetched entity names
+  const [entityNames, setEntityNames] = useState<Record<string, string>>({});
+
+  // Fetch entity names for all unique IDs
+  useEffect(() => {
+    const fetchEntityNames = async () => {
+      const nameMap: Record<string, string> = {};
+
+      // Fetch names for all unique entity IDs
+      await Promise.all(
+        uniqueEntityIds.map(async (entityId) => {
+          try {
+            const { data } = await getEntityName({
+              variables: { _id: entityId },
+            });
+            if (data?.entity) {
+              nameMap[entityId] = data.entity.name;
+            }
+          } catch {
+            // If fetch fails, fall back to the name from relationship data
+            const relationship = props.relationships.find(
+              (rel) =>
+                rel.source._id === entityId || rel.target._id === entityId,
+            );
+            if (relationship) {
+              nameMap[entityId] =
+                relationship.source._id === entityId
+                  ? relationship.source.name
+                  : relationship.target.name;
+            }
+          }
+        }),
+      );
+
+      setEntityNames(nameMap);
+    };
+
+    if (uniqueEntityIds.length > 0) {
+      fetchEntityNames();
+    }
+  }, [uniqueEntityIds, getEntityName, props.relationships]);
 
   /**
    * Compare two `IRelationship` structures and determine if they are describing
@@ -74,11 +140,14 @@ const Relationships = (props: RelationshipsProps) => {
   const relationshipTableColumns = [
     relationshipTableColumnHelper.accessor("source", {
       cell: (info) => {
+        const sourceEntity = info.getValue();
+        // Use fetched name if available, otherwise fall back to relationship data name
+        const displayName = entityNames[sourceEntity._id] || sourceEntity.name;
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
-              content={info.getValue().name}
-              disabled={info.getValue().name.length < 20}
+              content={displayName}
+              disabled={displayName.length < 32}
               showArrow
             >
               <Flex
@@ -88,19 +157,8 @@ const Relationships = (props: RelationshipsProps) => {
                 justify={"space-between"}
               >
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue().name, { length: 20 })}
+                  {_.truncate(displayName, { length: 32 })}
                 </Text>
-                <Button
-                  size="2xs"
-                  mx={"1"}
-                  variant="subtle"
-                  colorPalette="gray"
-                  aria-label={"View Source Entity"}
-                  onClick={() => navigate(`/entities/${info.getValue()._id}`)}
-                >
-                  View
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
               </Flex>
             </Tooltip>
           </Flex>
@@ -126,12 +184,19 @@ const Relationships = (props: RelationshipsProps) => {
     }),
     relationshipTableColumnHelper.accessor("target", {
       cell: (info) => {
+        const targetEntity = info.getValue();
+        // Use fetched name if available, otherwise fall back to relationship data name
+        const displayName = entityNames[targetEntity._id] || targetEntity.name;
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"}>
             <Flex align={"center"} gap={"1"} w={"100%"}>
-              <Tooltip content={info.getValue().name} showArrow>
+              <Tooltip
+                content={displayName}
+                disabled={displayName.length < 32}
+                showArrow
+              >
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue().name, { length: 20 })}
+                  {_.truncate(displayName, { length: 32 })}
                 </Text>
               </Tooltip>
             </Flex>
