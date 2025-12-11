@@ -153,6 +153,10 @@ const Entity = () => {
     null,
   );
 
+  // Toggles
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editing, setEditing] = useState(false);
+
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
 
@@ -358,12 +362,16 @@ const Entity = () => {
     if (data?.entity) {
       // Unpack all the Entity data
       setEntityData(data.entity);
-      setEntityName(data.entity.name);
-      setEntityArchived(data.entity.archived);
-      setEntityDescription(data.entity.description || "");
-      setEntityProjects(data.entity.projects || []);
-      setEntityRelationships(data.entity.relationships || []);
-      setEntityAttributes(data.entity.attributes || []);
+
+      if (!editing) {
+        setEntityName(data.entity.name);
+        setEntityArchived(data.entity.archived);
+        setEntityDescription(data.entity.description || "");
+        setEntityProjects(data.entity.projects || []);
+        setEntityRelationships(data.entity.relationships || []);
+        setEntityAttributes(data.entity.attributes || []);
+      }
+
       setEntityAttachments(data.entity.attachments);
       setEntityHistory(data.entity.history || []);
 
@@ -386,7 +394,7 @@ const Entity = () => {
     if (data?.templates) {
       setTemplates(data.templates);
     }
-  }, [data]);
+  }, [data, editing]);
 
   // Display any GraphQL errors
   useEffect(() => {
@@ -485,10 +493,6 @@ const Entity = () => {
         attributeValues.some((value) => value.name === ""),
     );
   }, [attributeValues]);
-
-  // Toggles
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [editing, setEditing] = useState(false);
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
