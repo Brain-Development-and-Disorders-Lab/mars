@@ -106,35 +106,45 @@ const Entities = () => {
     }),
   ];
 
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities {
-      entities {
-        _id
-        archived
-        owner
-        name
-        description
-        created
-        attributes {
+    query GetEntities($page: Int, $pageSize: Int) {
+      entities(page: $page, pageSize: $pageSize) {
+        entities {
           _id
+          archived
+          owner
           name
-          values {
+          description
+          created
+          attributes {
+            _id
+            name
+            values {
+              _id
+              name
+            }
+          }
+          attachments {
             _id
             name
           }
         }
-        attachments {
-          _id
-          name
-        }
+        total
       }
     }
   `;
   const { loading, error, data, refetch } = useQuery<{
-    entities: EntityModel[];
+    entities: { entities: EntityModel[]; total: number };
   }>(GET_ENTITIES, {
-    variables: {},
+    variables: {
+      page,
+      pageSize,
+    },
   });
 
   // Query to generate exported data
@@ -148,9 +158,9 @@ const Entities = () => {
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.entities) {
-      // Unpack all the Entity data
-      setEntityData(data.entities);
+    if (data?.entities?.entities) {
+      // Set the paginated Entity data
+      setEntityData(data.entities.entities);
     }
   }, [data]);
 
@@ -162,6 +172,13 @@ const Entities = () => {
       refetch();
     }
   }, [workspace]);
+
+  // Refetch when pagination changes
+  useEffect(() => {
+    if (refetch) {
+      refetch();
+    }
+  }, [page, pageSize, refetch]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -384,6 +401,21 @@ const Entities = () => {
                 showColumnSelect
                 showPagination
                 showSelection
+                pageCount={
+                  data?.entities?.total
+                    ? Math.ceil(data.entities.total / pageSize)
+                    : 0
+                }
+                onPaginationChange={(newPageIndex, newPageSize) => {
+                  // If page size changed, reset to first page
+                  if (newPageSize !== pageSize) {
+                    setPage(0);
+                    setPageSize(newPageSize);
+                  } else {
+                    setPage(newPageIndex);
+                    setPageSize(newPageSize);
+                  }
+                }}
               />
             </Box>
           ) : (

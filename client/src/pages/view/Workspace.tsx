@@ -79,9 +79,12 @@ const Workspace = () => {
         archived
       }
       entities(archived: $entitiesArchived) {
-        _id
-        name
-        archived
+        entities {
+          _id
+          name
+          archived
+        }
+        total
       }
       templates {
         _id
@@ -101,7 +104,10 @@ const Workspace = () => {
     getWorkspaceData,
     { loading: workspaceDataLoading, error: workspaceDataError },
   ] = useLazyQuery<{
-    entities: (IGenericItem & { archived: boolean })[];
+    entities: {
+      entities: (IGenericItem & { archived: boolean })[];
+      total: number;
+    };
     projects: (IGenericItem & { archived: boolean })[];
     templates: (IGenericItem & { archived: boolean })[];
     counters: CounterModel[];
@@ -233,10 +239,10 @@ const Workspace = () => {
 
       // Get all Workspace data
       const workspaceData = await getWorkspaceData();
-      if (workspaceData.data?.entities) {
-        setEntities(workspaceData.data.entities);
+      if (workspaceData.data?.entities?.entities) {
+        setEntities(workspaceData.data.entities.entities);
         setShownEntities([
-          ...workspaceData.data.entities.filter(
+          ...workspaceData.data.entities.entities.filter(
             (entity) => entity.archived === showArchivedEntities,
           ),
         ]);

@@ -34,14 +34,17 @@ const SearchSelect = (props: SearchSelectProps) => {
   const GET_ENTITIES = gql`
     query GetEntities($limit: Int, $archived: Boolean) {
       entities(limit: $limit, archived: $archived) {
-        _id
-        name
+        entities {
+          _id
+          name
+        }
+        total
       }
     }
   `;
   const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
     useLazyQuery<{
-      entities: IGenericItem[];
+      entities: { entities: IGenericItem[]; total: number };
     }>(GET_ENTITIES, {
       variables: {
         limit: 20,
@@ -76,8 +79,8 @@ const SearchSelect = (props: SearchSelectProps) => {
         },
       });
 
-      if (result.data?.entities) {
-        setOptions(result.data.entities);
+      if (result.data?.entities?.entities) {
+        setOptions(result.data.entities.entities);
       }
     } else {
       // Get Projects
