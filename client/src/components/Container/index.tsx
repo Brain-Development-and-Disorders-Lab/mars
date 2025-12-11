@@ -92,6 +92,7 @@ const Page: FC = () => {
           w={"100%"}
           minW="0"
           maxW="100%"
+          minH={{ base: "92vh", lg: "100vh" }}
           ml={{ base: "0", lg: "200px" }}
           mt={{ base: "8vh", lg: "0" }}
           overflowX="hidden"

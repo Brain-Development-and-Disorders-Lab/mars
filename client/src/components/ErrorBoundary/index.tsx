@@ -1,6 +1,10 @@
 // React
 import React, { Component, ErrorInfo, ReactNode } from "react";
+
+// Existing and custom components
 import Error from "@components/Error";
+
+// Utilities
 import consola from "consola";
 
 interface Props {
