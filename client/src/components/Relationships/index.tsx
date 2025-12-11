@@ -147,7 +147,7 @@ const Relationships = (props: RelationshipsProps) => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={displayName}
-              disabled={displayName.length < 20}
+              disabled={displayName.length < 32}
               showArrow
             >
               <Flex
@@ -157,19 +157,8 @@ const Relationships = (props: RelationshipsProps) => {
                 justify={"space-between"}
               >
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(displayName, { length: 20 })}
+                  {_.truncate(displayName, { length: 32 })}
                 </Text>
-                <Button
-                  size="2xs"
-                  mx={"1"}
-                  variant="subtle"
-                  colorPalette="gray"
-                  aria-label={"View Source Entity"}
-                  onClick={() => navigate(`/entities/${info.getValue()._id}`)}
-                >
-                  View
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
               </Flex>
             </Tooltip>
           </Flex>
@@ -201,9 +190,13 @@ const Relationships = (props: RelationshipsProps) => {
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"}>
             <Flex align={"center"} gap={"1"} w={"100%"}>
-              <Tooltip content={displayName} showArrow>
+              <Tooltip
+                content={displayName}
+                disabled={displayName.length < 32}
+                showArrow
+              >
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(displayName, { length: 20 })}
+                  {_.truncate(displayName, { length: 32 })}
                 </Text>
               </Tooltip>
             </Flex>
