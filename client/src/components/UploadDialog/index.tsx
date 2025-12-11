@@ -27,6 +27,7 @@ const UploadDialog = (props: {
   target: string;
   uploads: string[];
   setUploads: React.Dispatch<React.SetStateAction<string[]>>;
+  onUploadSuccess?: () => void;
 }) => {
   const [file, setFile] = useState<File>({} as File);
   const [displayName, setDisplayName] = useState<string>("");
@@ -94,6 +95,11 @@ const UploadDialog = (props: {
         // Update state
         setIsError(false);
         setIsLoaded(true);
+
+        // Call success callback to refetch data
+        if (props.onUploadSuccess) {
+          props.onUploadSuccess();
+        }
 
         toaster.create({
           title: "Uploaded",

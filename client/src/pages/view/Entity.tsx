@@ -2924,6 +2924,11 @@ const Entity = () => {
           uploads={toUploadAttachments}
           setUploads={setToUploadAttachments}
           target={entityData._id}
+          onUploadSuccess={() => {
+            if (refetch) {
+              refetch();
+            }
+          }}
         />
 
         {/* Export modal */}

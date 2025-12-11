@@ -9,6 +9,7 @@ import {
   Text,
   Dialog,
   CloseButton,
+  Button,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
@@ -78,26 +79,28 @@ const ImageControls = () => {
     >
       <IconButton
         size={"xs"}
-        colorPalette={"blue"}
+        variant={"subtle"}
         aria-label={"Zoom out"}
         onClick={() => zoomOut()}
       >
         <Icon name={"zoom_out"} size={"xs"} />
       </IconButton>
+      <Button
+        size={"xs"}
+        variant={"subtle"}
+        aria-label={"Reset"}
+        onClick={() => resetTransform()}
+      >
+        Reset
+        <Icon name={"reload"} size={"xs"} />
+      </Button>
       <IconButton
         size={"xs"}
-        colorPalette={"blue"}
+        variant={"subtle"}
         aria-label={"Zoom in"}
         onClick={() => zoomIn()}
       >
         <Icon name={"zoom_in"} size={"xs"} />
-      </IconButton>
-      <IconButton
-        size={"xs"}
-        aria-label={"Reset"}
-        onClick={() => resetTransform()}
-      >
-        <Icon name={"reload"} size={"xs"} />
       </IconButton>
     </Flex>
   );
@@ -164,7 +167,7 @@ const DocumentPreview = (props: {
             position={"relative"}
             minH={0}
             rounded={"md"}
-            border={"1px solid"}
+            border={"2px solid"}
             borderColor={"gray.300"}
             boxSizing={"border-box"}
           >
@@ -188,39 +191,62 @@ const DocumentPreview = (props: {
               </Document>
             </TransformComponent>
           </Flex>
-          <ImageControls />
+          <Flex
+            direction={"row"}
+            gap={"2"}
+            align={"center"}
+            justify={"center"}
+            w={"100%"}
+            flexShrink={0}
+          >
+            <ImageControls />
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              justify={"center"}
+              flexShrink={0}
+            >
+              <IconButton
+                aria-label={"Previous page"}
+                size={"xs"}
+                colorPalette={"blue"}
+                rounded={"md"}
+                onClick={props.onPreviousPage}
+                disabled={props.previewIndex === 1}
+              >
+                <Icon name={"c_left"} size={"xs"} />
+              </IconButton>
+              <Flex
+                direction={"row"}
+                gap={"1"}
+                align={"center"}
+                justify={"center"}
+                flexShrink={0}
+              >
+                <Text fontSize={"xs"}>Page</Text>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {props.previewIndex}
+                </Text>
+                <Text fontSize={"xs"}>of</Text>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {props.previewPages}
+                </Text>
+              </Flex>
+              <IconButton
+                aria-label={"Next page"}
+                size={"xs"}
+                colorPalette={"blue"}
+                rounded={"md"}
+                onClick={props.onNextPage}
+                disabled={props.previewIndex === props.previewPages}
+              >
+                <Icon name={"c_right"} size={"xs"} />
+              </IconButton>
+            </Flex>
+          </Flex>
         </Flex>
       </TransformWrapper>
-
-      <Flex
-        direction={"row"}
-        gap={"1"}
-        align={"center"}
-        justify={"center"}
-        flexShrink={0}
-      >
-        <IconButton
-          aria-label={"Previous page"}
-          size={"xs"}
-          colorPalette={"blue"}
-          onClick={props.onPreviousPage}
-          disabled={props.previewIndex === 1}
-        >
-          <Icon name={"c_left"} size={"xs"} />
-        </IconButton>
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
-          Page {props.previewIndex} of {props.previewPages}
-        </Text>
-        <IconButton
-          aria-label={"Next page"}
-          size={"xs"}
-          colorPalette={"blue"}
-          onClick={props.onNextPage}
-          disabled={props.previewIndex === props.previewPages}
-        >
-          <Icon name={"c_right"} size={"xs"} />
-        </IconButton>
-      </Flex>
     </Flex>
   );
 };
@@ -252,7 +278,7 @@ const ImagePreview = (props: { previewSource: string }) => {
           position={"relative"}
           minH={0}
           rounded={"md"}
-          border={"1px solid"}
+          border={"2px solid"}
           borderColor={"gray.300"}
           boxSizing={"border-box"}
         >
@@ -308,7 +334,7 @@ const SequencePreview = (props: {
         <Flex
           flex={"1"}
           rounded={"md"}
-          border={"1px solid"}
+          border={"2px solid"}
           borderColor={"gray.300"}
           overflow={"hidden"}
           position={"relative"}
@@ -508,7 +534,13 @@ const PreviewContent = (props: {
 
     return (
       <Flex direction={"column"} w={"100%"} h={"100%"} flex={"1"} gap={"1"}>
-        <Flex direction={"row"} gap={"1"} align={"center"} flexShrink={0}>
+        <Flex
+          direction={"row"}
+          gap={"1"}
+          align={"center"}
+          flexShrink={0}
+          mx={"0.5"}
+        >
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             Name:
           </Text>
@@ -559,7 +591,7 @@ const PreviewContent = (props: {
           <Flex
             minH={"400px"}
             rounded={"md"}
-            border={"1px"}
+            border={"2px"}
             borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
