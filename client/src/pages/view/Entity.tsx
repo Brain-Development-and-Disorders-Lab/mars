@@ -149,6 +149,9 @@ const Entity = () => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [dateFilterApplied, setDateFilterApplied] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState<EntityHistory | null>(
+    null,
+  );
 
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
@@ -550,6 +553,53 @@ const Entity = () => {
     [] as string[],
   );
 
+  // Computed values that use preview data when in preview mode
+  const displayEntityName = useMemo(() => {
+    return previewVersion ? previewVersion.name : entityName;
+  }, [previewVersion, entityName]);
+
+  const displayEntityDescription = useMemo(() => {
+    return previewVersion
+      ? previewVersion.description || ""
+      : entityDescription;
+  }, [previewVersion, entityDescription]);
+
+  const displayEntityProjects = useMemo(() => {
+    return previewVersion ? previewVersion.projects : entityProjects;
+  }, [previewVersion, entityProjects]);
+
+  const displayEntityRelationships = useMemo(() => {
+    return previewVersion ? previewVersion.relationships : entityRelationships;
+  }, [previewVersion, entityRelationships]);
+
+  const displayEntityAttributes = useMemo(() => {
+    return previewVersion ? previewVersion.attributes : entityAttributes;
+  }, [previewVersion, entityAttributes]);
+
+  const displayEntityAttachments = useMemo(() => {
+    return previewVersion ? previewVersion.attachments : entityAttachments;
+  }, [previewVersion, entityAttachments]);
+
+  const displayEntityArchived = useMemo(() => {
+    return previewVersion ? previewVersion.archived : entityArchived;
+  }, [previewVersion, entityArchived]);
+
+  const displayEntityData = useMemo(() => {
+    if (previewVersion) {
+      return {
+        ...entityData,
+        name: previewVersion.name,
+        description: previewVersion.description || "",
+        projects: previewVersion.projects,
+        relationships: previewVersion.relationships,
+        attributes: previewVersion.attributes,
+        attachments: previewVersion.attachments,
+        archived: previewVersion.archived,
+      };
+    }
+    return entityData;
+  }, [previewVersion, entityData]);
+
   // Archive dialog
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
@@ -565,6 +615,7 @@ const Entity = () => {
 
   // Toggle editing status
   const handleEditClick = () => {
+    if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
       // Open the save message modal
       setSaveMessageOpen(true);
@@ -1292,6 +1343,40 @@ const Entity = () => {
       isLoaded={!loading && !updateLoading && !archiveLoading}
     >
       <Flex direction={"column"}>
+        {/* Preview Banner */}
+        {previewVersion && (
+          <Flex
+            direction={"row"}
+            align={"center"}
+            justify={"space-between"}
+            gap={"2"}
+            p={"2"}
+            bg={"blue.100"}
+            borderBottom={"1px solid"}
+            borderColor={"blue.300"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"clock"} size={"sm"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Preview: Version {previewVersion.version.slice(0, 6)}
+              </Text>
+              <Text fontSize={"xs"} color={"gray.600"}>
+                {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
+              </Text>
+            </Flex>
+            <Button
+              size={"xs"}
+              variant={"solid"}
+              colorPalette={"blue"}
+              rounded={"md"}
+              onClick={() => setPreviewVersion(null)}
+            >
+              Exit Preview
+              <Icon name={"cross"} size={"xs"} />
+            </Button>
+          </Flex>
+        )}
+
         <Flex
           gap={"1"}
           p={"1"}
@@ -1310,12 +1395,12 @@ const Entity = () => {
             rounded={"md"}
           >
             <Icon name={"entity"} size={"sm"} />
-            <Tooltip content={entityData.name}>
+            <Tooltip content={displayEntityData.name}>
               <Heading fontWeight={"semibold"} size={"sm"}>
-                {_.truncate(entityData.name, { length: 30 })}
+                {_.truncate(displayEntityData.name, { length: 30 })}
               </Heading>
             </Tooltip>
-            {entityArchived && <Icon name={"archive"} size={"sm"} />}
+            {displayEntityArchived && <Icon name={"archive"} size={"sm"} />}
           </Flex>
 
           {/* Buttons */}
@@ -1352,7 +1437,7 @@ const Entity = () => {
                       value={"visualize"}
                       onClick={() => setGraphOpen(true)}
                       fontSize={"xs"}
-                      disabled={editing || entityArchived}
+                      disabled={editing || entityArchived || !!previewVersion}
                     >
                       <Icon name={"graph"} size={"xs"} />
                       Visualize
@@ -1361,7 +1446,7 @@ const Entity = () => {
                       value={"clone"}
                       onClick={() => setCloneOpen(true)}
                       fontSize={"xs"}
-                      disabled={entityArchived}
+                      disabled={entityArchived || !!previewVersion}
                     >
                       <Icon name={"copy"} size={"xs"} />
                       Clone
@@ -1370,7 +1455,7 @@ const Entity = () => {
                       value={"export"}
                       onClick={handleExportClick}
                       fontSize={"xs"}
-                      disabled={editing || entityArchived}
+                      disabled={editing || entityArchived || !!previewVersion}
                     >
                       <Icon name={"download"} size={"xs"} />
                       Export
@@ -1424,6 +1509,7 @@ const Entity = () => {
                 colorPalette={editing ? "green" : "blue"}
                 onClick={handleEditClick}
                 loading={isUpdating}
+                disabled={!!previewVersion}
               >
                 {editing ? "Save" : "Edit"}
                 <Icon name={editing ? "save" : "edit"} size={"xs"} />
@@ -1798,13 +1884,29 @@ const Entity = () => {
                                           variant={"solid"}
                                           size={"xs"}
                                           rounded={"md"}
+                                          colorPalette={"blue"}
+                                          onClick={() => {
+                                            setPreviewVersion(entityVersion);
+                                            setHistoryOpen(false);
+                                          }}
+                                          disabled={entityArchived}
+                                        >
+                                          Preview
+                                          <Icon name={"expand"} size={"xs"} />
+                                        </Button>
+                                        <Button
+                                          variant={"solid"}
+                                          size={"xs"}
+                                          rounded={"md"}
                                           colorPalette={"orange"}
                                           onClick={() =>
                                             handleRestoreFromHistoryClick(
                                               entityVersion,
                                             )
                                           }
-                                          disabled={entityArchived}
+                                          disabled={
+                                            entityArchived || !!previewVersion
+                                          }
                                         >
                                           Restore
                                           <Icon name={"rewind"} size={"xs"} />
@@ -2165,11 +2267,11 @@ const Entity = () => {
                   <Input
                     id={"entityNameInput"}
                     size={"xs"}
-                    value={entityName}
+                    value={previewVersion ? displayEntityName : entityName}
                     onChange={(event) => {
                       setEntityName(event.target.value || "");
                     }}
-                    readOnly={!editing}
+                    readOnly={!editing || !!previewVersion}
                     rounded={"md"}
                     border={"1px solid"}
                     borderColor={"gray.300"}
@@ -2229,8 +2331,12 @@ const Entity = () => {
                     maxHeight={400}
                     id={"entityDescriptionInput"}
                     style={{ width: "100%" }}
-                    value={entityDescription}
-                    preview={editing ? "edit" : "preview"}
+                    value={
+                      previewVersion
+                        ? displayEntityDescription
+                        : entityDescription
+                    }
+                    preview={editing && !previewVersion ? "edit" : "preview"}
                     extraCommands={[]}
                     onChange={(value) => {
                       setEntityDescription(value || "");
@@ -2291,9 +2397,11 @@ const Entity = () => {
                 w={"100%"}
                 justify={"center"}
                 align={"center"}
-                minH={entityAttributes.length > 0 ? "fit-content" : "120px"}
+                minH={
+                  displayEntityAttributes.length > 0 ? "fit-content" : "120px"
+                }
               >
-                {entityAttributes.length === 0 ? (
+                {displayEntityAttributes.length === 0 ? (
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
@@ -2306,11 +2414,11 @@ const Entity = () => {
                   </EmptyState.Root>
                 ) : (
                   <DataTable
-                    data={entityAttributes}
+                    data={displayEntityAttributes}
                     columns={attributeTableColumns}
                     visibleColumns={visibleAttributeTableColumns}
                     selectedRows={{}}
-                    viewOnly={!editing}
+                    viewOnly={!editing || !!previewVersion}
                     showPagination
                     showSelection
                   />
@@ -2349,7 +2457,7 @@ const Entity = () => {
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => setAddRelationshipsOpen(true)}
-                    disabled={!editing}
+                    disabled={!editing || !!previewVersion}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
@@ -2358,16 +2466,18 @@ const Entity = () => {
                 <Flex
                   w={"100%"}
                   justify={"center"}
-                  align={entityRelationships.length > 0 ? "" : "center"}
+                  align={displayEntityRelationships.length > 0 ? "" : "center"}
                   minH={
-                    entityRelationships.length > 0 ? "fit-content" : "120px"
+                    displayEntityRelationships.length > 0
+                      ? "fit-content"
+                      : "120px"
                   }
                 >
-                  {entityRelationships.length > 0 ? (
+                  {displayEntityRelationships.length > 0 ? (
                     <Relationships
-                      relationships={entityRelationships}
+                      relationships={displayEntityRelationships}
                       setRelationships={setEntityRelationships}
-                      viewOnly={!editing}
+                      viewOnly={!editing || !!previewVersion}
                     />
                   ) : (
                     <EmptyState.Root>
@@ -2435,9 +2545,11 @@ const Entity = () => {
                 w={"100%"}
                 justify={"center"}
                 align={"center"}
-                minH={entityProjects.length > 0 ? "fit-content" : "120px"}
+                minH={
+                  displayEntityProjects.length > 0 ? "fit-content" : "120px"
+                }
               >
-                {entityProjects.length === 0 ? (
+                {displayEntityProjects.length === 0 ? (
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
@@ -2450,11 +2562,11 @@ const Entity = () => {
                   </EmptyState.Root>
                 ) : (
                   <DataTable
-                    data={entityProjects}
+                    data={displayEntityProjects}
                     columns={projectsTableColumns}
                     visibleColumns={{}}
                     selectedRows={{}}
-                    viewOnly={!editing}
+                    viewOnly={!editing || !!previewVersion}
                     actions={projectsTableActions}
                     showPagination
                     showSelection
@@ -2494,7 +2606,7 @@ const Entity = () => {
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => setUploadOpen(true)}
-                    disabled={!editing}
+                    disabled={!editing || !!previewVersion}
                   >
                     Upload
                     <Icon name={"upload"} size={"xs"} />
@@ -2505,9 +2617,13 @@ const Entity = () => {
                   w={"100%"}
                   justify={"center"}
                   align={"center"}
-                  minH={entityAttachments.length > 0 ? "fit-content" : "120px"}
+                  minH={
+                    displayEntityAttachments.length > 0
+                      ? "fit-content"
+                      : "120px"
+                  }
                 >
-                  {entityAttachments.length === 0 ? (
+                  {displayEntityAttachments.length === 0 ? (
                     <EmptyState.Root>
                       <EmptyState.Content>
                         <EmptyState.Indicator>
@@ -2520,11 +2636,11 @@ const Entity = () => {
                     </EmptyState.Root>
                   ) : (
                     <DataTable
-                      data={entityAttachments}
+                      data={displayEntityAttachments}
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
                       selectedRows={{}}
-                      viewOnly={!editing}
+                      viewOnly={!editing || !!previewVersion}
                       actions={attachmentTableActions}
                       showPagination
                       showSelection
@@ -3018,7 +3134,7 @@ const Entity = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Description:
                     </Text>
-                    <Text fontSize={"xs"}>{entityName} is</Text>
+                    <Text fontSize={"xs"}>{displayEntityName} is</Text>
                     <Tag.Root
                       fontSize={"xs"}
                       fontWeight={"semibold"}
@@ -3061,7 +3177,7 @@ const Entity = () => {
                       <Input
                         size={"xs"}
                         rounded={"md"}
-                        value={entityName}
+                        value={displayEntityName}
                         readOnly
                         disabled
                       />
