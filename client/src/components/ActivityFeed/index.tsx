@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -29,9 +29,10 @@ dayjs.extend(relativeTime);
 
 interface ActivityFeedProps {
   activities: ActivityModel[];
+  feedLimit?: number; // Number of activities to show in the feed (default: 5)
 }
 
-const ActivityFeed = ({ activities }: ActivityFeedProps) => {
+const ActivityFeed = ({ activities, feedLimit = 5 }: ActivityFeedProps) => {
   const navigate = useNavigate();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
@@ -41,6 +42,11 @@ const ActivityFeed = ({ activities }: ActivityFeedProps) => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Use all activities for the chart, but limit the feed display
+  const feedActivities = useMemo(() => {
+    return activities.slice(0, feedLimit);
+  }, [activities, feedLimit]);
 
   return (
     <Flex
@@ -114,10 +120,10 @@ const ActivityFeed = ({ activities }: ActivityFeedProps) => {
       </Text>
 
       {/* Activity list */}
-      {activities.length > 0 ? (
+      {feedActivities.length > 0 ? (
         <Flex direction={"column"} gap={"1"}>
           <Stack gap={"1.5"} w={"95%"}>
-            {activities.map((activity) => {
+            {feedActivities.map((activity: ActivityModel) => {
               return (
                 <Flex
                   direction={"row"}

@@ -2232,7 +2232,11 @@ const Entity = () => {
                           })}
                         </Timeline.Root>
                       ) : (
-                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          ml={"0.5"}
+                        >
                           No History.
                         </Text>
                       )}

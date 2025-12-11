@@ -166,10 +166,10 @@ const Dashboard = () => {
       projectLimit: 8,
       entityLimit: 8,
       entitiesArchived: false,
-      activityLimit: 5,
+      activityLimit: 200,
     },
     fetchPolicy: "network-only",
-    pollInterval: 5000, // Poll every 5 seconds to refresh activity feed
+    pollInterval: 5000,
   });
 
   // Assign data
