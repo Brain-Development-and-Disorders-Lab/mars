@@ -23,7 +23,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 
 // DNA preview imports
 import { SeqViz } from "seqviz";
-import seqparse, { Annotation } from "seqparse";
+import seqparse from "seqparse";
 
 // Zoom and pan import for image previews
 import {
@@ -39,7 +39,6 @@ import { STATIC_URL } from "src/variables";
 
 // Utility functions
 import _ from "lodash";
-import consola from "consola";
 
 // Setup PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -307,57 +306,211 @@ const ImagePreview = (props: { previewSource: string }) => {
 };
 
 // Sequence preview component
-const SequencePreview = (props: {
+interface SequencePreviewProps {
   name: string;
-  sequence: string;
-  annotations: Annotation[];
-}) => {
-  const transformRef = React.useRef<ReactZoomPanPinchRef | null>(null);
+  fileUrl: string;
+}
+
+interface ParsedSequence {
+  seq: string;
+  annotations: Array<{
+    name: string;
+    start: number;
+    end: number;
+    direction?: number;
+    color?: string;
+  }>;
+}
+
+const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sequenceData, setSequenceData] = useState<ParsedSequence | null>(null);
 
   useEffect(() => {
-    // Reset transform when sequence is ready
-    if (transformRef.current && props.sequence) {
-      transformRef.current.resetTransform(0);
-    }
-  }, [props.sequence]);
+    let isCancelled = false;
+
+    const loadSequence = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch the file
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        // Check file extension to determine if it's a SnapGene .dna file
+        const fileExtension = name.split(".").pop()?.toLowerCase();
+        const isSnapGene = fileExtension === "dna";
+
+        let text: string;
+
+        if (isSnapGene) {
+          // For SnapGene .dna files, try to read as text first
+          // SnapGene files may have binary headers but contain text data
+          try {
+            text = await response.text();
+          } catch {
+            // If text() fails, try arrayBuffer approach
+            const arrayBuffer = await response.arrayBuffer();
+            text = new TextDecoder("utf-8", { fatal: false }).decode(
+              arrayBuffer,
+            );
+          }
+        } else {
+          // For text-based files, read as text
+          text = await response.text();
+        }
+
+        // Try to parse with seqparse (works for FASTA, GenBank, and some SnapGene files)
+        let parsed: {
+          seq?: string;
+          annotations?: ParsedSequence["annotations"];
+        } | null = null;
+        try {
+          parsed = await seqparse(text);
+        } catch {
+          // seqparse failed, will treat as raw sequence below
+        }
+
+        if (parsed && typeof parsed === "object" && parsed.seq) {
+          // Successfully parsed with seqparse
+          const normalizedSeq = parsed.seq
+            .toUpperCase()
+            .replace(/\s+/g, "")
+            .replace(/[^ATGCUN]/gi, "");
+
+          if (normalizedSeq.length === 0) {
+            throw new Error("No valid sequence characters found after parsing");
+          }
+
+          if (!isCancelled) {
+            setSequenceData({
+              seq: normalizedSeq,
+              annotations: parsed.annotations || [],
+            });
+          }
+        } else {
+          // Parsing failed or returned invalid data, treat as raw sequence
+          // Remove common file format headers and extract sequence
+          const normalizedSeq = text
+            .toUpperCase()
+            .replace(/\s+/g, "")
+            .replace(/[^ATGCUN]/gi, "");
+
+          if (normalizedSeq.length === 0) {
+            throw new Error(
+              isSnapGene
+                ? "Unable to parse SnapGene file. The file may be corrupted or in an unsupported format."
+                : "No valid sequence characters found",
+            );
+          }
+
+          if (!isCancelled) {
+            setSequenceData({
+              seq: normalizedSeq,
+              annotations: [],
+            });
+          }
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load sequence",
+          );
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadSequence();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [fileUrl, name]);
+
+  if (loading) {
+    return (
+      <Flex
+        direction={"column"}
+        h={"100%"}
+        flex={"1"}
+        minH={0}
+        justify={"center"}
+        align={"center"}
+      >
+        <Spinner color={"gray.600"} />
+        <Text fontSize={"xs"} color={"gray.600"} mt={"2"}>
+          Loading sequence...
+        </Text>
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Flex
+        direction={"column"}
+        h={"100%"}
+        flex={"1"}
+        minH={0}
+        justify={"center"}
+        align={"center"}
+        gap={"2"}
+      >
+        <Text color={"red.500"} fontWeight={"semibold"} fontSize={"sm"}>
+          Error loading sequence
+        </Text>
+        <Text fontSize={"xs"} color={"gray.500"}>
+          {error}
+        </Text>
+      </Flex>
+    );
+  }
+
+  if (!sequenceData) {
+    return (
+      <Flex
+        direction={"column"}
+        h={"100%"}
+        flex={"1"}
+        minH={0}
+        justify={"center"}
+        align={"center"}
+      >
+        <Text fontSize={"xs"} color={"gray.500"}>
+          No sequence data available
+        </Text>
+      </Flex>
+    );
+  }
 
   return (
-    <Flex direction={"column"} h={"100%"} flex={"1"} minH={0}>
-      <TransformWrapper
-        ref={transformRef}
-        initialScale={1}
-        minScale={0.5}
-        maxScale={3}
-        limitToBounds={false}
-        centerOnInit
-      >
-        <Flex
-          flex={"1"}
-          rounded={"md"}
-          border={"2px solid"}
-          borderColor={"gray.300"}
-          overflow={"hidden"}
-          position={"relative"}
-          minH={0}
-          boxSizing={"border-box"}
-        >
-          <TransformComponent>
-            <Flex
-              minH={"500px"}
-              minW={"500px"}
-              justify={"center"}
-              align={"center"}
-            >
-              <SeqViz
-                name={props.name}
-                seq={props.sequence}
-                annotations={props.annotations}
-              />
-            </Flex>
-          </TransformComponent>
-        </Flex>
-        <ImageControls />
-      </TransformWrapper>
+    <Flex
+      direction={"column"}
+      h={"100%"}
+      flex={"1"}
+      minH={0}
+      rounded={"md"}
+      border={"2px solid"}
+      borderColor={"gray.300"}
+      overflow={"hidden"}
+      position={"relative"}
+      boxSizing={"border-box"}
+    >
+      {sequenceData && (
+        <SeqViz
+          name={name}
+          seq={sequenceData.seq}
+          annotations={sequenceData.annotations}
+        />
+      )}
     </Flex>
   );
 };
@@ -380,11 +533,6 @@ const PreviewContent = (props: {
     image: getWindowDimensions().width > MIN_WIDTH_IMAGE,
     sequence: getWindowDimensions().width > MIN_WIDTH_SEQUENCE,
   });
-
-  // Sequence state
-  const [preparingSequence, setPreparingSequence] = useState(false);
-  const [sequence, setSequence] = useState("");
-  const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
   const GET_FILE_URL = gql`
     query GetFileURL($_id: String) {
@@ -421,33 +569,12 @@ const PreviewContent = (props: {
     }
   };
 
-  const prepareSequence = async () => {
-    setPreparingSequence(true);
-    const response = await fetch(previewSource);
-
-    if (!response.ok) {
-      consola.error("Failed to prepare sequence:", response.statusText);
-      setPreparingSequence(false);
-      return;
-    }
-
-    const text = await response.text(); // Read the response as text
-    const { seq, annotations } = await seqparse(text); // Pass the text to seqparse
-    setSequence(seq);
-    setAnnotations(annotations);
-    setPreviewSource(seq);
-    setPreparingSequence(false);
-  };
-
   // Reset state when attachment changes
   useEffect(() => {
     setPreviewType(null);
     setPreviewSource("");
     setPreviewIndex(1);
     setPreviewPages(0);
-    setSequence("");
-    setAnnotations([]);
-    setPreparingSequence(false);
   }, [props.attachment._id]);
 
   useEffect(() => {
@@ -468,13 +595,6 @@ const PreviewContent = (props: {
       }
     }
   }, [data, props.attachment.name]);
-
-  // Prepare the sequence for preview
-  useEffect(() => {
-    if (previewType === "sequence" && previewSource) {
-      prepareSequence();
-    }
-  }, [previewType, previewSource]);
 
   useEffect(() => {
     // Update the preview support based on the current window dimensions
@@ -513,8 +633,8 @@ const PreviewContent = (props: {
       );
     }
 
-    // Show loading if query is loading, sequence is preparing, or we don't have preview data yet
-    if (loading || preparingSequence || !previewType || !previewSource) {
+    // Show loading if query is loading or we don't have preview data yet
+    if (loading || !previewType || !previewSource) {
       return (
         <Flex
           direction={"column"}
@@ -579,8 +699,7 @@ const PreviewContent = (props: {
           (previewSupport.sequence ? (
             <SequencePreview
               name={props.attachment.name}
-              sequence={sequence}
-              annotations={annotations}
+              fileUrl={previewSource}
             />
           ) : (
             <UnsupportedPreview />
