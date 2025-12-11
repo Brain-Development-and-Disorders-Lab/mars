@@ -26,7 +26,6 @@ import {
   useDisclosure,
   Timeline,
   Collapsible,
-  IconButton,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
@@ -95,6 +94,9 @@ const Project = () => {
   const [historySortOrder, setHistorySortOrder] = useState<
     "newest-first" | "oldest-first"
   >("newest-first");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [dateFilterApplied, setDateFilterApplied] = useState(false);
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -109,21 +111,48 @@ const Project = () => {
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
 
-  // Sorted history based on sort order
+  // Sorted and filtered history based on sort order and date range
   const sortedProjectHistory = useMemo(() => {
-    const sorted = [...projectHistory];
+    let filtered = [...projectHistory];
+
+    // Apply date filter if active
+    if (dateFilterApplied) {
+      filtered = filtered.filter((item) => {
+        const itemDate = new Date(item.timestamp);
+        const itemDateOnly = new Date(
+          itemDate.getFullYear(),
+          itemDate.getMonth(),
+          itemDate.getDate(),
+        );
+
+        if (startDate) {
+          const start = new Date(startDate);
+          if (itemDateOnly < start) return false;
+        }
+
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999); // Include the entire end date
+          if (itemDateOnly > end) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // Sort based on sort order
     if (historySortOrder === "newest-first") {
-      return sorted.sort(
+      return filtered.sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
     } else {
-      return sorted.sort(
+      return filtered.sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
       );
     }
-  }, [projectHistory, historySortOrder]);
+  }, [projectHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
 
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
@@ -824,7 +853,7 @@ const Project = () => {
             <Drawer.Root
               open={historyOpen}
               onOpenChange={(details) => setHistoryOpen(details.open)}
-              size={"md"}
+              size={"lg"}
               closeOnEscape
               closeOnInteractOutside
             >
@@ -841,8 +870,8 @@ const Project = () => {
                 </Button>
               </Drawer.Trigger>
               <Drawer.Backdrop />
-              <Drawer.Positioner>
-                <Drawer.Content p={"1"}>
+              <Drawer.Positioner padding={"4"}>
+                <Drawer.Content rounded={"md"}>
                   <Drawer.CloseTrigger asChild>
                     <CloseButton
                       top={"6px"}
@@ -850,105 +879,192 @@ const Project = () => {
                       onClick={() => setHistoryOpen(false)}
                     />
                   </Drawer.CloseTrigger>
-                  <Drawer.Header pb={"1"} p={"1"}>
-                    <Flex direction={"column"} w={"100%"} gap={"2"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Icon name={"clock"} size={"sm"} />
-                        <Text fontSize={"sm"} fontWeight={"bold"}>
-                          History
-                        </Text>
-                      </Flex>
-                      <Flex
-                        direction={"column"}
-                        gap={"1"}
-                        justify={"space-between"}
-                      >
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {projectHistory.length > 0
-                              ? dayjs(projectHistory[0].timestamp).fromNow()
-                              : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {projectHistory.length}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} align={"center"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Sort by:
-                          </Text>
-                          <Select.Root
-                            value={[historySortOrder]}
-                            w={"240px"}
-                            rounded={"md"}
-                            size={"xs"}
-                            collection={createListCollection({
-                              items: [
-                                {
-                                  value: "newest-first",
-                                  label: "Newest → Oldest",
-                                },
-                                {
-                                  value: "oldest-first",
-                                  label: "Oldest → Newest",
-                                },
-                              ],
-                            })}
-                            onValueChange={(details) =>
-                              setHistorySortOrder(
-                                details.value[0] as
-                                  | "newest-first"
-                                  | "oldest-first",
-                              )
-                            }
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger>
-                                <Select.ValueText />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {createListCollection({
-                                  items: [
-                                    {
-                                      value: "newest-first",
-                                      label: "Newest → Oldest",
-                                    },
-                                    {
-                                      value: "oldest-first",
-                                      label: "Oldest → Newest",
-                                    },
-                                  ],
-                                }).items.map((item) => (
-                                  <Select.Item item={item} key={item.value}>
-                                    {item.label}
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Select.Root>
-                        </Flex>
-                      </Flex>
+                  <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"clock"} size={"xs"} />
+                      <Text fontSize={"sm"} fontWeight={"semibold"}>
+                        Project History
+                      </Text>
                     </Flex>
                   </Drawer.Header>
 
-                  <Drawer.Body p={"1"}>
+                  <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                    <Flex
+                      direction={"column"}
+                      gap={"1"}
+                      align={"start"}
+                      rounded={"md"}
+                      bg={"gray.100"}
+                      p={"1"}
+                    >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Date filter:
+                      </Text>
+
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        wrap={"wrap"}
+                        ml={"0.5"}
+                      >
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Field.Root gap={"0"}>
+                            <Field.Label fontSize={"xs"}>
+                              Start date
+                            </Field.Label>
+                            <Input
+                              type={"date"}
+                              size={"xs"}
+                              rounded={"md"}
+                              w={"140px"}
+                              bg={"white"}
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                            />
+                          </Field.Root>
+                          <Field.Root gap={"0"}>
+                            <Field.Label fontSize={"xs"}>End date</Field.Label>
+                            <Input
+                              type={"date"}
+                              size={"xs"}
+                              rounded={"md"}
+                              w={"140px"}
+                              bg={"white"}
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                            />
+                          </Field.Root>
+                        </Flex>
+                        <Button
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={"solid"}
+                          colorPalette={"blue"}
+                          alignSelf={"end"}
+                          onClick={() => {
+                            if (startDate || endDate) {
+                              setDateFilterApplied(true);
+                            }
+                          }}
+                        >
+                          Apply
+                        </Button>
+                        <Button
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={"outline"}
+                          alignSelf={"end"}
+                          bg={"white"}
+                          _hover={{ bg: "gray.50" }}
+                          onClick={() => {
+                            setStartDate("");
+                            setEndDate("");
+                            setDateFilterApplied(false);
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      </Flex>
+
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        ml={"0.5"}
+                      >
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Sort by:
+                        </Text>
+                        <Select.Root
+                          value={[historySortOrder]}
+                          w={"240px"}
+                          rounded={"md"}
+                          size={"xs"}
+                          bg={"white"}
+                          collection={createListCollection({
+                            items: [
+                              {
+                                value: "newest-first",
+                                label: "Newest → Oldest",
+                              },
+                              {
+                                value: "oldest-first",
+                                label: "Oldest → Newest",
+                              },
+                            ],
+                          })}
+                          onValueChange={(details) =>
+                            setHistorySortOrder(
+                              details.value[0] as
+                                | "newest-first"
+                                | "oldest-first",
+                            )
+                          }
+                        >
+                          <Select.HiddenSelect />
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {createListCollection({
+                                items: [
+                                  {
+                                    value: "newest-first",
+                                    label: "Newest → Oldest",
+                                  },
+                                  {
+                                    value: "oldest-first",
+                                    label: "Oldest → Newest",
+                                  },
+                                ],
+                              }).items.map((item) => (
+                                <Select.Item item={item} key={item.value}>
+                                  {item.label}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Select.Root>
+                      </Flex>
+                    </Flex>
+
+                    <Flex
+                      direction={"row"}
+                      gap={"1"}
+                      align={"center"}
+                      justify={"space-between"}
+                      mx={"0.5"}
+                    >
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Last modified:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length > 0
+                            ? dayjs(projectHistory[0].timestamp).fromNow()
+                            : "never"}
+                        </Text>
+                      </Flex>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Versions:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length}
+                        </Text>
+                      </Flex>
+                    </Flex>
+
                     {sortedProjectHistory && sortedProjectHistory.length > 0 ? (
-                      <Timeline.Root size="sm" variant="subtle">
+                      <Timeline.Root size="sm" variant="subtle" mt={"1"}>
                         {sortedProjectHistory.map((projectVersion) => {
                           const isExpanded = expandedVersions.has(
                             projectVersion.version,
@@ -1062,23 +1178,25 @@ const Project = () => {
                                         }}
                                       >
                                         <Collapsible.Trigger asChild>
-                                          <IconButton
+                                          <Button
                                             size={"xs"}
                                             variant={"subtle"}
                                             colorPalette={"gray"}
+                                            rounded={"md"}
                                             aria-label={
                                               isExpanded
                                                 ? "Collapse details"
                                                 : "Expand details"
                                             }
                                           >
+                                            Details
                                             <Icon
                                               name={
                                                 isExpanded ? "c_up" : "c_down"
                                               }
                                               size={"xs"}
                                             />
-                                          </IconButton>
+                                          </Button>
                                         </Collapsible.Trigger>
                                       </Collapsible.Root>
                                       <Button

@@ -146,6 +146,9 @@ const Entity = () => {
   const [historySortOrder, setHistorySortOrder] = useState<
     "newest-first" | "oldest-first"
   >("newest-first");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [dateFilterApplied, setDateFilterApplied] = useState(false);
 
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
@@ -497,21 +500,48 @@ const Entity = () => {
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
 
-  // Sorted history based on sort order
+  // Sorted and filtered history based on sort order and date range
   const sortedEntityHistory = useMemo(() => {
-    const sorted = [...entityHistory];
+    let filtered = [...entityHistory];
+
+    // Apply date filter if active
+    if (dateFilterApplied) {
+      filtered = filtered.filter((item) => {
+        const itemDate = new Date(item.timestamp);
+        const itemDateOnly = new Date(
+          itemDate.getFullYear(),
+          itemDate.getMonth(),
+          itemDate.getDate(),
+        );
+
+        if (startDate) {
+          const start = new Date(startDate);
+          if (itemDateOnly < start) return false;
+        }
+
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999); // Include the entire end date
+          if (itemDateOnly > end) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // Sort based on sort order
     if (historySortOrder === "newest-first") {
-      return sorted.sort(
+      return filtered.sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
     } else {
-      return sorted.sort(
+      return filtered.sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
       );
     }
-  }, [entityHistory, historySortOrder]);
+  }, [entityHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
 
   const [entityAttachments, setEntityAttachments] = useState(
     [] as IGenericItem[],
@@ -1403,7 +1433,7 @@ const Entity = () => {
             {/* Version history */}
             <Drawer.Root
               open={historyOpen}
-              size={"sm"}
+              size={"lg"}
               onOpenChange={(event) => setHistoryOpen(event.open)}
               closeOnEscape
               closeOnInteractOutside
@@ -1422,42 +1452,115 @@ const Entity = () => {
               </Drawer.Trigger>
               <Portal>
                 <Drawer.Backdrop />
-                <Drawer.Positioner>
-                  <Drawer.Content p={"1"}>
+                <Drawer.Positioner padding={"4"}>
+                  <Drawer.Content rounded={"md"}>
                     <Drawer.CloseTrigger asChild>
                       <CloseButton
-                        size={"xs"}
+                        size={"2xs"}
                         top={"6px"}
                         onClick={() => setHistoryOpen(false)}
                       />
                     </Drawer.CloseTrigger>
-                    <Drawer.Header pb={"2"} p={"1"}>
-                      <Flex direction={"column"} w={"100%"} gap={"1"}>
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"clock"} size={"sm"} />
-                          <Text fontSize={"sm"} fontWeight={"semibold"}>
-                            History
-                          </Text>
+                    <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Icon name={"clock"} size={"xs"} />
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          Entity History
+                        </Text>
+                      </Flex>
+                    </Drawer.Header>
+
+                    <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                      <Flex
+                        direction={"column"}
+                        gap={"1"}
+                        align={"start"}
+                        rounded={"md"}
+                        bg={"gray.100"}
+                        p={"1"}
+                      >
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          ml={"0.5"}
+                        >
+                          Date filter:
+                        </Text>
+
+                        <Flex
+                          direction={"row"}
+                          gap={"1"}
+                          align={"center"}
+                          wrap={"wrap"}
+                          ml={"0.5"}
+                        >
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Field.Root gap={"0"}>
+                              <Field.Label fontSize={"xs"}>
+                                Start date
+                              </Field.Label>
+                              <Input
+                                type={"date"}
+                                size={"xs"}
+                                rounded={"md"}
+                                w={"140px"}
+                                bg={"white"}
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                              />
+                            </Field.Root>
+                            <Field.Root gap={"0"}>
+                              <Field.Label fontSize={"xs"}>
+                                End date
+                              </Field.Label>
+                              <Input
+                                type={"date"}
+                                size={"xs"}
+                                rounded={"md"}
+                                w={"140px"}
+                                bg={"white"}
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                              />
+                            </Field.Root>
+                          </Flex>
+                          <Button
+                            size={"xs"}
+                            rounded={"md"}
+                            variant={"solid"}
+                            colorPalette={"blue"}
+                            alignSelf={"end"}
+                            onClick={() => {
+                              if (startDate || endDate) {
+                                setDateFilterApplied(true);
+                              }
+                            }}
+                          >
+                            Apply
+                          </Button>
+                          <Button
+                            size={"xs"}
+                            rounded={"md"}
+                            variant={"outline"}
+                            alignSelf={"end"}
+                            bg={"white"}
+                            _hover={{ bg: "gray.50" }}
+                            onClick={() => {
+                              setStartDate("");
+                              setEndDate("");
+                              setDateFilterApplied(false);
+                            }}
+                          >
+                            Clear
+                          </Button>
                         </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length > 0
-                              ? dayjs(entityHistory[0].timestamp).fromNow()
-                              : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
+
+                        <Flex
+                          direction={"row"}
+                          gap={"1"}
+                          align={"center"}
+                          ml={"0.5"}
+                        >
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Sort by:
                           </Text>
@@ -1466,6 +1569,7 @@ const Entity = () => {
                             w={"240px"}
                             rounded={"md"}
                             size={"xs"}
+                            bg={"white"}
                             collection={createListCollection({
                               items: [
                                 {
@@ -1519,11 +1623,36 @@ const Entity = () => {
                           </Select.Root>
                         </Flex>
                       </Flex>
-                    </Drawer.Header>
 
-                    <Drawer.Body pt={"0"} p={"1"}>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        justify={"space-between"}
+                        mx={"0.5"}
+                      >
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {entityHistory.length > 0
+                              ? dayjs(entityHistory[0].timestamp).fromNow()
+                              : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Versions:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {entityHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+
                       {sortedEntityHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle">
+                        <Timeline.Root size="sm" variant="subtle" mt={"1"}>
                           {sortedEntityHistory.map((entityVersion) => {
                             const isExpanded = expandedVersions.has(
                               entityVersion.version,
@@ -1644,23 +1773,25 @@ const Entity = () => {
                                           }}
                                         >
                                           <Collapsible.Trigger asChild>
-                                            <IconButton
+                                            <Button
                                               size={"xs"}
                                               variant={"subtle"}
                                               colorPalette={"gray"}
+                                              rounded={"md"}
                                               aria-label={
                                                 isExpanded
                                                   ? "Collapse details"
                                                   : "Expand details"
                                               }
                                             >
+                                              Details
                                               <Icon
                                                 name={
                                                   isExpanded ? "c_up" : "c_down"
                                                 }
                                                 size={"xs"}
                                               />
-                                            </IconButton>
+                                            </Button>
                                           </Collapsible.Trigger>
                                         </Collapsible.Root>
                                         <Button
