@@ -70,6 +70,67 @@ export class Entities {
       .toArray();
   };
 
+  /**
+   * Get multiple Entities from identifiers with pagination
+   * @param entities Collection of Entity identifiers
+   * @param skip Number of entities to skip
+   * @param limit Maximum number of entities to return
+   * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
+   * @param reverse Reverse the sort order
+   * @return {Promise<EntityModel[]>}
+   */
+  static getManyPaginated = async (
+    entities: string[],
+    skip: number = 0,
+    limit: number = 0,
+    archived?: boolean,
+    reverse: boolean = false,
+  ): Promise<EntityModel[]> => {
+    const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
+
+    // Add archived filter if specified
+    if (archived !== undefined) {
+      queryFilter.archived = archived === true;
+    }
+
+    let query = getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .find(queryFilter)
+      .sort({ timestamp: reverse ? -1 : 1 });
+
+    if (skip > 0) {
+      query = query.skip(skip);
+    }
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    return await query.toArray();
+  };
+
+  /**
+   * Count Entities matching identifiers
+   * @param entities Collection of Entity identifiers
+   * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
+   * @return {Promise<number>}
+   */
+  static countMany = async (
+    entities: string[],
+    archived?: boolean,
+  ): Promise<number> => {
+    const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
+
+    // Add archived filter if specified
+    if (archived !== undefined) {
+      queryFilter.archived = archived === true;
+    }
+
+    return await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .countDocuments(queryFilter);
+  };
+
   static exists = async (_id: string): Promise<boolean> => {
     const entity = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)

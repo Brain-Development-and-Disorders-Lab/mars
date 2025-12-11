@@ -291,6 +291,10 @@ const customSortingFn = (
 const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
   const [pageLength, setPageLength] = useState<string[]>(["20"]);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  // Determine if we're using server-side pagination
+  const isServerSidePagination = props.pageCount !== undefined;
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initial: Record<string, boolean> = { ...props.visibleColumns };
@@ -522,12 +526,17 @@ const DataTable = (props: DataTableProps) => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: isServerSidePagination
+      ? undefined
+      : getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: isServerSidePagination,
+    pageCount: props.pageCount,
     autoResetPageIndex: false,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageIndex: 0,
+        pageSize: parseInt(pageLength[0]) || 20,
       },
     },
     state: {
@@ -535,11 +544,35 @@ const DataTable = (props: DataTableProps) => {
       rowSelection: selectedRows,
       columnFilters,
       sorting,
+      pagination: {
+        pageIndex,
+        pageSize: parseInt(pageLength[0]) || 20,
+      },
     },
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    onPaginationChange: (updater) => {
+      const currentState = table.getState().pagination;
+      const newState =
+        typeof updater === "function" ? updater(currentState) : updater;
+
+      const pageSizeChanged = newState.pageSize !== currentState.pageSize;
+
+      // If page size changed, reset to page 0
+      const finalPageIndex = pageSizeChanged ? 0 : newState.pageIndex;
+
+      setPageIndex(finalPageIndex);
+      if (pageSizeChanged) {
+        setPageLength([newState.pageSize.toString()]);
+      }
+
+      // For server-side pagination, notify parent
+      if (isServerSidePagination && props.onPaginationChange) {
+        props.onPaginationChange(finalPageIndex, newState.pageSize);
+      }
+    },
     filterFns: {
       includesSome,
     },
@@ -564,6 +597,14 @@ const DataTable = (props: DataTableProps) => {
       },
     },
   });
+
+  // Sync pagination changes to parent (for server-side pagination)
+  useEffect(() => {
+    if (isServerSidePagination && props.onPaginationChange) {
+      const currentPageSize = parseInt(pageLength[0]) || 20;
+      props.onPaginationChange(pageIndex, currentPageSize);
+    }
+  }, [pageIndex, pageLength, isServerSidePagination, props.onPaginationChange]);
 
   useEffect(() => {
     const currentColumnNames = columnNames.join(",");
