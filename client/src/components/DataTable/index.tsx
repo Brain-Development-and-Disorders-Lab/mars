@@ -290,11 +290,26 @@ const customSortingFn = (
 
 const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
-  const [pageLength, setPageLength] = useState<string[]>(["20"]);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageLength, setPageLength] = useState<string[]>([
+    props.pageSize?.toString() || "20",
+  ]);
+  const [pageIndex, setPageIndex] = useState(props.pageIndex ?? 0);
 
   // Determine if we're using server-side pagination
   const isServerSidePagination = props.pageCount !== undefined;
+
+  // Sync internal state with parent props when they change
+  useEffect(() => {
+    if (isServerSidePagination && props.pageIndex !== undefined) {
+      setPageIndex(props.pageIndex);
+    }
+  }, [props.pageIndex, isServerSidePagination]);
+
+  useEffect(() => {
+    if (isServerSidePagination && props.pageSize !== undefined) {
+      setPageLength([props.pageSize.toString()]);
+    }
+  }, [props.pageSize, isServerSidePagination]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initial: Record<string, boolean> = { ...props.visibleColumns };
@@ -599,7 +614,13 @@ const DataTable = (props: DataTableProps) => {
   });
 
   // Sync pagination changes to parent (for server-side pagination)
+  // Only call onPaginationChange when user actually changes pagination, not on initial render
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (isServerSidePagination && props.onPaginationChange) {
       const currentPageSize = parseInt(pageLength[0]) || 20;
       props.onPaginationChange(pageIndex, currentPageSize);

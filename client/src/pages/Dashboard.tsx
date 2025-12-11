@@ -166,8 +166,8 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projectLimit: 8,
-      entityLimit: 8,
+      projectLimit: 10,
+      entityLimit: 10,
       entitiesArchived: false,
       activityLimit: 200,
     },

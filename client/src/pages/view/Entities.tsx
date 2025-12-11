@@ -406,6 +406,8 @@ const Entities = () => {
                     ? Math.ceil(data.entities.total / pageSize)
                     : 0
                 }
+                pageIndex={page}
+                pageSize={pageSize}
                 onPaginationChange={(newPageIndex, newPageSize) => {
                   // If page size changed, reset to first page
                   if (newPageSize !== pageSize) {

@@ -246,8 +246,11 @@ const Project = () => {
         }
       }
       entities {
-        _id
-        name
+        entities {
+          _id
+          name
+        }
+        total
       }
     }
   `;
