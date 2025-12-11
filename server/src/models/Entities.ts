@@ -135,7 +135,7 @@ export class Entities {
 
     // Determine sort field and direction
     let sortField = "timestamp";
-    let sortDirection = reverse ? -1 : 1;
+    let sortDirection: 1 | -1 = reverse ? -1 : 1;
 
     if (sort) {
       // Map client field names to database field names
@@ -152,9 +152,11 @@ export class Entities {
 
     // Only sort by database field if it's not an array field (array fields sorted after fetch)
     if (sort && sort.field !== "attributes" && sort.field !== "attachments") {
-      query = query.sort({ [sortField]: sortDirection });
+      const sortObj: Record<string, 1 | -1> = { [sortField]: sortDirection };
+      query = query.sort(sortObj);
     } else if (!sort) {
-      query = query.sort({ [sortField]: sortDirection });
+      const sortObj: Record<string, 1 | -1> = { [sortField]: sortDirection };
+      query = query.sort(sortObj);
     }
 
     // For array fields (attributes, attachments), we need to sort by length
