@@ -270,7 +270,7 @@ const Workspace = () => {
         setCounters(workspaceData.data.counters);
       }
 
-      if (workspaceError || workspaceDataError) {
+      if (workspaceError || workspaceDataError || workspaceData.error) {
         toaster.create({
           title: "Error",
           description: "Unable to refresh Workspace information",

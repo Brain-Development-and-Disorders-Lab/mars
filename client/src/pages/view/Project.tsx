@@ -1522,9 +1522,16 @@ const Project = () => {
                         })}
                       </Timeline.Root>
                     ) : (
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        No previous versions.
-                      </Text>
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"clock"} size={"lg"} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>
+                            No History
+                          </EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
                     )}
                   </Drawer.Body>
                 </Drawer.Content>

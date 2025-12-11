@@ -31,6 +31,16 @@ export const EntitiesResolvers = {
         reverse: boolean | undefined;
         page: number | undefined;
         pageSize: number | undefined;
+        filter:
+          | {
+              startDate?: string;
+              endDate?: string;
+              owners?: string[];
+              hasAttachments?: boolean;
+              attributeCountRanges?: string[];
+            }
+          | undefined;
+        sort: { field: string; direction: string } | undefined;
       },
       context: Context,
     ) => {
@@ -81,8 +91,10 @@ export const EntitiesResolvers = {
           pageSize,
           archivedFilter,
           args.reverse || false,
+          args.filter,
+          args.sort,
         ),
-        Entities.countMany(workspace.entities, archivedFilter),
+        Entities.countMany(workspace.entities, archivedFilter, args.filter),
       ]);
 
       return {

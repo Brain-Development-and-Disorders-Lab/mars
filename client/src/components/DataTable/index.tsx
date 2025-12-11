@@ -336,6 +336,18 @@ const DataTable = (props: DataTableProps) => {
     props.pageSize?.toString() || "20",
   ]);
   const [pageIndex, setPageIndex] = useState(props.pageIndex ?? 0);
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    // Initialize sorting state from props if provided (for server-side sorting)
+    if (props.sortState) {
+      return [
+        {
+          id: props.sortState.field,
+          desc: props.sortState.direction === "desc",
+        },
+      ];
+    }
+    return [];
+  });
 
   // Determine if we're using server-side pagination
   const isServerSidePagination = props.pageCount !== undefined;
@@ -352,6 +364,20 @@ const DataTable = (props: DataTableProps) => {
       setPageLength([props.pageSize.toString()]);
     }
   }, [props.pageSize, isServerSidePagination]);
+
+  // Sync sorting state with parent props (for server-side sorting)
+  useEffect(() => {
+    if (props.sortState) {
+      setSorting([
+        {
+          id: props.sortState.field,
+          desc: props.sortState.direction === "desc",
+        },
+      ]);
+    } else if (props.sortState === null) {
+      setSorting([]);
+    }
+  }, [props.sortState]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initial: Record<string, boolean> = { ...props.visibleColumns };
@@ -364,7 +390,6 @@ const DataTable = (props: DataTableProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     props.columnFilters ?? [],
   );
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRowsRef = useRef(selectedRows);
@@ -582,12 +607,16 @@ const DataTable = (props: DataTableProps) => {
     data: props.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel:
+      isServerSidePagination && props.onSortChange
+        ? undefined
+        : getSortedRowModel(),
     getPaginationRowModel: isServerSidePagination
       ? undefined
       : getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     manualPagination: isServerSidePagination,
+    manualSorting: isServerSidePagination && props.onSortChange ? true : false,
     pageCount: props.pageCount,
     autoResetPageIndex: false,
     initialState: {
@@ -609,7 +638,21 @@ const DataTable = (props: DataTableProps) => {
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const newSorting =
+        typeof updater === "function" ? updater(sorting) : updater;
+      setSorting(newSorting);
+
+      // Notify parent of sort changes for server-side sorting
+      if (props.onSortChange && newSorting.length > 0) {
+        const sort = newSorting[0];
+        const field = sort.id;
+        const direction = sort.desc ? "desc" : "asc";
+        props.onSortChange(field, direction);
+      } else if (props.onSortChange) {
+        props.onSortChange("", null);
+      }
+    },
     onPaginationChange: (updater) => {
       const currentState = table.getState().pagination;
       const newState =

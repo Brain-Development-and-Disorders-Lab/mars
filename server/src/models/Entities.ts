@@ -71,12 +71,14 @@ export class Entities {
   };
 
   /**
-   * Get multiple Entities from identifiers with pagination
+   * Get multiple Entities from identifiers with pagination, filtering, and sorting
    * @param entities Collection of Entity identifiers
    * @param skip Number of entities to skip
    * @param limit Maximum number of entities to return
    * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
-   * @param reverse Reverse the sort order
+   * @param reverse Reverse the sort order (deprecated, use sort instead)
+   * @param filter Additional filters
+   * @param sort Sort configuration
    * @return {Promise<EntityModel[]>}
    */
   static getManyPaginated = async (
@@ -85,6 +87,14 @@ export class Entities {
     limit: number = 0,
     archived?: boolean,
     reverse: boolean = false,
+    filter?: {
+      startDate?: string;
+      endDate?: string;
+      owners?: string[];
+      hasAttachments?: boolean;
+      attributeCountRanges?: string[];
+    },
+    sort?: { field: string; direction: string },
   ): Promise<EntityModel[]> => {
     const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
 
@@ -93,31 +103,145 @@ export class Entities {
       queryFilter.archived = archived === true;
     }
 
+    // Add date range filters
+    if (filter?.startDate || filter?.endDate) {
+      const dateFilter: Record<string, unknown> = {};
+      if (filter.startDate) {
+        dateFilter.$gte = new Date(filter.startDate);
+      }
+      if (filter.endDate) {
+        const endDate = new Date(filter.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        dateFilter.$lte = endDate;
+      }
+      if (Object.keys(dateFilter).length > 0) {
+        queryFilter.created = dateFilter;
+      }
+    }
+
+    // Add owner filter
+    if (filter?.owners && filter.owners.length > 0) {
+      queryFilter.owner = { $in: filter.owners };
+    }
+
+    // Add has attachments filter
+    if (filter?.hasAttachments === true) {
+      queryFilter["attachments.0"] = { $exists: true };
+    }
+
     let query = getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .find(queryFilter)
-      .sort({ timestamp: reverse ? -1 : 1 });
+      .find(queryFilter);
 
-    if (skip > 0) {
-      query = query.skip(skip);
+    // Determine sort field and direction
+    let sortField = "timestamp";
+    let sortDirection = reverse ? -1 : 1;
+
+    if (sort) {
+      // Map client field names to database field names
+      const fieldMap: Record<string, string> = {
+        name: "name",
+        description: "description",
+        owner: "owner",
+        created: "created",
+        timestamp: "timestamp",
+      };
+      sortField = fieldMap[sort.field] || sort.field || "timestamp";
+      sortDirection = sort.direction === "desc" ? -1 : 1;
     }
 
-    if (limit > 0) {
-      query = query.limit(limit);
+    // Only sort by database field if it's not an array field (array fields sorted after fetch)
+    if (sort && sort.field !== "attributes" && sort.field !== "attachments") {
+      query = query.sort({ [sortField]: sortDirection });
+    } else if (!sort) {
+      query = query.sort({ [sortField]: sortDirection });
     }
 
-    return await query.toArray();
+    // For array fields (attributes, attachments), we need to sort by length
+    // This is handled after fetching by sorting the results
+
+    // If attribute count filtering is active, we need to fetch more results
+    // to ensure we can fill a full page after filtering
+    const needsAttributeFilter =
+      filter?.attributeCountRanges && filter.attributeCountRanges.length > 0;
+
+    if (needsAttributeFilter) {
+      // When filtering by attribute count, fetch a large batch, filter, then paginate
+      // Fetch enough to likely fill multiple pages after filtering
+      const fetchLimit = limit > 0 ? limit * 50 : 10000; // Fetch 50x page size or up to 10k
+      query = query.limit(fetchLimit);
+    } else {
+      // Normal pagination
+      if (skip > 0) {
+        query = query.skip(skip);
+      }
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+    }
+
+    let results = await query.toArray();
+
+    // Apply attribute count range filter (client-side as it requires counting)
+    if (needsAttributeFilter) {
+      results = results.filter((entity) => {
+        const attributeCount = entity.attributes.length;
+        return filter.attributeCountRanges!.some((range) => {
+          if (range === "0") return attributeCount === 0;
+          if (range === "1-5")
+            return attributeCount >= 1 && attributeCount <= 5;
+          if (range === "6-10")
+            return attributeCount >= 6 && attributeCount <= 10;
+          if (range === "11+") return attributeCount >= 11;
+          return false;
+        });
+      });
+
+      // After filtering, apply pagination
+      if (skip > 0) {
+        results = results.slice(skip);
+      }
+      if (limit > 0) {
+        results = results.slice(0, limit);
+      }
+    }
+
+    // Handle sorting for array fields (attributes, attachments) by length
+    if (sort && (sort.field === "attributes" || sort.field === "attachments")) {
+      results.sort((a, b) => {
+        const aLength =
+          sort.field === "attributes"
+            ? a.attributes.length
+            : a.attachments.length;
+        const bLength =
+          sort.field === "attributes"
+            ? b.attributes.length
+            : b.attachments.length;
+        const direction = sort.direction === "desc" ? -1 : 1;
+        return (aLength - bLength) * direction;
+      });
+    }
+
+    return results;
   };
 
   /**
-   * Count Entities matching identifiers
+   * Count Entities matching identifiers and filters
    * @param entities Collection of Entity identifiers
    * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
+   * @param filter Additional filters
    * @return {Promise<number>}
    */
   static countMany = async (
     entities: string[],
     archived?: boolean,
+    filter?: {
+      startDate?: string;
+      endDate?: string;
+      owners?: string[];
+      hasAttachments?: boolean;
+      attributeCountRanges?: string[];
+    },
   ): Promise<number> => {
     const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
 
@@ -126,9 +250,60 @@ export class Entities {
       queryFilter.archived = archived === true;
     }
 
-    return await getDatabase()
+    // Add date range filters
+    if (filter?.startDate || filter?.endDate) {
+      const dateFilter: Record<string, unknown> = {};
+      if (filter.startDate) {
+        dateFilter.$gte = new Date(filter.startDate);
+      }
+      if (filter.endDate) {
+        const endDate = new Date(filter.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        dateFilter.$lte = endDate;
+      }
+      if (Object.keys(dateFilter).length > 0) {
+        queryFilter.created = dateFilter;
+      }
+    }
+
+    // Add owner filter
+    if (filter?.owners && filter.owners.length > 0) {
+      queryFilter.owner = { $in: filter.owners };
+    }
+
+    // Add has attachments filter
+    if (filter?.hasAttachments === true) {
+      queryFilter["attachments.0"] = { $exists: true };
+    }
+
+    let count = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .countDocuments(queryFilter);
+
+    // Apply attribute count range filter (client-side as it requires counting)
+    if (
+      filter?.attributeCountRanges &&
+      filter.attributeCountRanges.length > 0
+    ) {
+      const allEntities = await getDatabase()
+        .collection<EntityModel>(ENTITIES_COLLECTION)
+        .find(queryFilter)
+        .toArray();
+      count = allEntities.filter((entity) => {
+        const attributeCount = entity.attributes.length;
+        return filter.attributeCountRanges!.some((range) => {
+          if (range === "0") return attributeCount === 0;
+          if (range === "1-5")
+            return attributeCount >= 1 && attributeCount <= 5;
+          if (range === "6-10")
+            return attributeCount >= 6 && attributeCount <= 10;
+          if (range === "11+") return attributeCount >= 11;
+          return false;
+        });
+      }).length;
+    }
+
+    return count;
   };
 
   static exists = async (_id: string): Promise<boolean> => {

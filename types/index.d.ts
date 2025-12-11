@@ -411,6 +411,8 @@ export type DataTableProps = {
   pageIndex?: number; // Current page index (0-based) - for syncing with parent state
   pageSize?: number; // Current page size - for syncing with parent state
   onPaginationChange?: (pageIndex: number, pageSize: number) => void; // Callback when pagination changes
+  onSortChange?: (field: string, direction: "asc" | "desc" | null) => void; // Callback when sorting changes (for server-side sorting)
+  sortState?: { field: string; direction: "asc" | "desc" } | null; // Current sort state (for syncing with server-side sorting)
 };
 
 export type DataTableAction = {

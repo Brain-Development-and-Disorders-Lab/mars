@@ -2232,13 +2232,16 @@ const Entity = () => {
                           })}
                         </Timeline.Root>
                       ) : (
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          ml={"0.5"}
-                        >
-                          No History.
-                        </Text>
+                        <EmptyState.Root>
+                          <EmptyState.Content>
+                            <EmptyState.Indicator>
+                              <Icon name={"clock"} size={"lg"} />
+                            </EmptyState.Indicator>
+                            <EmptyState.Description>
+                              No History
+                            </EmptyState.Description>
+                          </EmptyState.Content>
+                        </EmptyState.Root>
                       )}
                     </Drawer.Body>
                   </Drawer.Content>
