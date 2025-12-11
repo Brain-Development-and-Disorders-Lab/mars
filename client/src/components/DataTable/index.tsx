@@ -76,9 +76,24 @@ const includesSome = (
   ) {
     return true;
   }
-  return Array.isArray(filterValue)
-    ? filterValue.includes(row.getValue(columnId))
-    : true;
+  if (!Array.isArray(filterValue)) {
+    return true;
+  }
+
+  const rowValue = row.getValue(columnId);
+
+  // For arrays, compare by length (since we group by length in the filter)
+  if (Array.isArray(rowValue)) {
+    return filterValue.some((filterVal) => {
+      if (Array.isArray(filterVal)) {
+        return filterVal.length === rowValue.length;
+      }
+      return false;
+    });
+  }
+
+  // For non-arrays, use direct comparison
+  return filterValue.includes(rowValue);
 };
 
 (
@@ -106,20 +121,47 @@ const ColumnFilterMenu = <TData extends RowData>({
     return String(val);
   };
 
-  const getFilterKey = (val: unknown) => {
+  const getFilterKey = (val: unknown): string => {
     if (val === null || val === undefined) return "empty";
-    if (Array.isArray(val)) return val.length.toString();
-    if (typeof val === "object") return JSON.stringify(val);
-    return String(val);
+    if (Array.isArray(val)) {
+      // For arrays, use the length as the key (arrays with same length are considered equal for filtering)
+      return `array:${val.length}`;
+    }
+    if (typeof val === "object") {
+      // For objects, use JSON.stringify for deep comparison
+      return JSON.stringify(val);
+    }
+    // Normalize strings (trim whitespace) but preserve case
+    // Convert to string and trim to handle whitespace-only differences
+    const str = String(val).trim();
+    return str || "empty";
   };
 
-  const values = useMemo(
-    () =>
-      _.uniq(
-        data.map((row) => (row as Record<string, unknown>)[columnId]),
-      ).filter((val) => val !== null && val !== undefined),
-    [data, columnId],
-  );
+  const values = useMemo(() => {
+    const rawValues = data.map(
+      (row) => (row as Record<string, unknown>)[columnId],
+    );
+
+    // Use a Map to ensure uniqueness based on normalized keys
+    // For arrays, we want to group by length, so use the display value as the key
+    const uniqueMap = new Map<string, unknown>();
+    for (const val of rawValues) {
+      if (val !== null && val !== undefined) {
+        // For arrays, use display value as key to group by length
+        // For other types, use the normalized key
+        const key = Array.isArray(val)
+          ? getDisplayValue(val)
+          : getFilterKey(val);
+
+        // Only add if we haven't seen this normalized key before
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, val);
+        }
+      }
+    }
+
+    return Array.from(uniqueMap.values());
+  }, [data, columnId]);
 
   const filtered = useMemo(
     () =>

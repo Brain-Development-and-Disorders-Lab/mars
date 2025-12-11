@@ -115,11 +115,11 @@ const Templates = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 18}
+              disabled={info.getValue().length < 32}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 18 })}
+                {_.truncate(info.getValue(), { length: 32 })}
               </Text>
             </Tooltip>
             <Button
@@ -137,6 +137,9 @@ const Templates = () => {
         );
       },
       header: "Name",
+      meta: {
+        minWidth: 300,
+      },
     }),
     columnHelper.accessor("description", {
       cell: (info) => {

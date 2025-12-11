@@ -117,11 +117,11 @@ const Projects = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 20}
+            disabled={info.getValue().length < 32}
             showArrow
           >
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 20 })}
+              {_.truncate(info.getValue(), { length: 32 })}
             </Text>
           </Tooltip>
           <Button
@@ -138,6 +138,9 @@ const Projects = () => {
         </Flex>
       ),
       header: "Name",
+      meta: {
+        minWidth: 300,
+      },
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
