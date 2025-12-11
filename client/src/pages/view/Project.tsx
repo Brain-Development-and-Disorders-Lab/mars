@@ -97,6 +97,9 @@ const Project = () => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [dateFilterApplied, setDateFilterApplied] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState<ProjectHistory | null>(
+    null,
+  );
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -157,6 +160,43 @@ const Project = () => {
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
   );
+
+  // Computed values that use preview data when in preview mode
+  const displayProjectName = useMemo(() => {
+    return previewVersion ? previewVersion.name : projectName;
+  }, [previewVersion, projectName]);
+
+  const displayProjectDescription = useMemo(() => {
+    return previewVersion
+      ? previewVersion.description || ""
+      : projectDescription;
+  }, [previewVersion, projectDescription]);
+
+  const displayProjectEntities = useMemo(() => {
+    return previewVersion ? previewVersion.entities : projectEntities;
+  }, [previewVersion, projectEntities]);
+
+  const displayProjectCollaborators = useMemo(() => {
+    return previewVersion ? previewVersion.collaborators : projectCollaborators;
+  }, [previewVersion, projectCollaborators]);
+
+  const displayProjectArchived = useMemo(() => {
+    return previewVersion ? previewVersion.archived : projectArchived;
+  }, [previewVersion, projectArchived]);
+
+  const displayProjectData = useMemo(() => {
+    if (previewVersion) {
+      return {
+        ...project,
+        name: previewVersion.name,
+        description: previewVersion.description || "",
+        entities: previewVersion.entities,
+        collaborators: previewVersion.collaborators,
+        archived: previewVersion.archived,
+      };
+    }
+    return project;
+  }, [previewVersion, project]);
 
   // Save message modal
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -269,14 +309,18 @@ const Project = () => {
   useEffect(() => {
     if (data?.project) {
       setProject(data.project);
-      setProjectName(data.project.name);
-      setProjectArchived(data.project.archived);
-      setProjectDescription(data.project.description);
-      setProjectEntities(data.project.entities);
+
+      if (!editing) {
+        setProjectName(data.project.name);
+        setProjectArchived(data.project.archived);
+        setProjectDescription(data.project.description);
+        setProjectEntities(data.project.entities);
+        setProjectCollaborators(data.project.collaborators || []);
+      }
+
       setProjectHistory(data.project.history || []);
-      setProjectCollaborators(data.project.collaborators || []);
     }
-  }, [data]);
+  }, [data, editing]);
 
   const { workspace } = useWorkspace();
 
@@ -314,6 +358,7 @@ const Project = () => {
    * Handle the edit button being clicked
    */
   const handleEditClick = () => {
+    if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
       // Open the save message modal
       setSaveMessageOpen(true);
@@ -731,6 +776,63 @@ const Project = () => {
       isLoaded={!loading && !archiveLoading && !updateLoading}
     >
       <Flex direction={"column"}>
+        {/* Preview Banner */}
+        {previewVersion && (
+          <Flex
+            direction={"row"}
+            align={"center"}
+            justify={"space-between"}
+            gap={"2"}
+            p={"2"}
+            bg={"blue.100"}
+            mx={"-1.5"}
+            mt={"-1.5"}
+            px={"1.5"}
+            pt={"1.5"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"clock"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Preview:
+              </Text>
+              <Tag.Root colorPalette={"green"}>
+                <Tag.Label fontSize={"xs"}>
+                  {previewVersion.version.slice(0, 6)}
+                </Tag.Label>
+              </Tag.Root>
+              <Text fontSize={"xs"} color={"gray.600"}>
+                {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
+              </Text>
+            </Flex>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"orange"}
+                rounded={"md"}
+                onClick={async () => {
+                  await handleRestoreFromHistoryClick(previewVersion);
+                  setPreviewVersion(null);
+                }}
+                disabled={displayProjectArchived}
+              >
+                Restore
+                <Icon name={"rewind"} size={"xs"} />
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"red"}
+                rounded={"md"}
+                onClick={() => setPreviewVersion(null)}
+              >
+                Exit Preview
+                <Icon name={"logout"} size={"xs"} />
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+
         <Flex
           gap={"1"}
           p={"1"}
@@ -750,8 +852,9 @@ const Project = () => {
           >
             <Icon name={"project"} size={"sm"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
-              {project.name}
+              {displayProjectData.name}
             </Heading>
+            {displayProjectArchived && <Icon name={"archive"} size={"sm"} />}
           </Flex>
 
           {/* Buttons */}
@@ -770,14 +873,19 @@ const Project = () => {
                     value={"export-project"}
                     onClick={handleExportClick}
                     fontSize={"xs"}
-                    disabled={exportLoading || projectArchived}
+                    disabled={
+                      exportLoading || projectArchived || !!previewVersion
+                    }
                   >
                     <Icon name={"download"} size={"xs"} />
                     Export Project
                   </Menu.Item>
                   <Tooltip
                     content={"This Project does not contain any Entities."}
-                    disabled={projectEntities?.length > 0 || projectArchived}
+                    disabled={
+                      displayProjectEntities?.length > 0 ||
+                      displayProjectArchived
+                    }
                     showArrow
                   >
                     <Menu.Item
@@ -785,9 +893,10 @@ const Project = () => {
                       onClick={handleExportEntitiesClick}
                       fontSize={"xs"}
                       disabled={
-                        projectEntities?.length === 0 ||
+                        displayProjectEntities?.length === 0 ||
                         exportEntitiesLoading ||
-                        projectArchived
+                        displayProjectArchived ||
+                        !!previewVersion
                       }
                     >
                       <Icon name={"download"} size={"xs"} />
@@ -798,7 +907,7 @@ const Project = () => {
                     value={"archive"}
                     onClick={() => setArchiveDialogOpen(true)}
                     fontSize={"xs"}
-                    disabled={projectArchived}
+                    disabled={projectArchived || !!previewVersion}
                   >
                     <Icon name={"archive"} size={"xs"} />
                     Archive
@@ -807,7 +916,7 @@ const Project = () => {
               </Menu.Positioner>
             </Menu.Root>
 
-            {projectArchived ? (
+            {displayProjectArchived ? (
               <Button
                 onClick={handleRestoreClick}
                 size={"xs"}
@@ -838,6 +947,7 @@ const Project = () => {
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   loading={isUpdating}
+                  disabled={!!previewVersion}
                 >
                   {editing ? "Save" : "Edit"}
                   {editing ? (
@@ -1200,6 +1310,20 @@ const Project = () => {
                                         </Collapsible.Trigger>
                                       </Collapsible.Root>
                                       <Button
+                                        variant={"solid"}
+                                        size={"xs"}
+                                        rounded={"md"}
+                                        colorPalette={"blue"}
+                                        onClick={() => {
+                                          setPreviewVersion(projectVersion);
+                                          setHistoryOpen(false);
+                                        }}
+                                        disabled={displayProjectArchived}
+                                      >
+                                        Preview
+                                        <Icon name={"expand"} size={"xs"} />
+                                      </Button>
+                                      <Button
                                         colorPalette={"orange"}
                                         size={"xs"}
                                         rounded={"md"}
@@ -1208,7 +1332,10 @@ const Project = () => {
                                             projectVersion,
                                           );
                                         }}
-                                        disabled={projectArchived}
+                                        disabled={
+                                          displayProjectArchived ||
+                                          !!previewVersion
+                                        }
                                       >
                                         Restore
                                         <Icon name={"rewind"} size={"xs"} />
@@ -1439,11 +1566,11 @@ const Project = () => {
                     id={"projectNameInput"}
                     size={"xs"}
                     rounded={"md"}
-                    value={projectName}
+                    value={previewVersion ? displayProjectName : projectName}
                     onChange={(event) => {
                       setProjectName(event.target.value);
                     }}
-                    readOnly={!editing}
+                    readOnly={!editing || !!previewVersion}
                     bg={"white"}
                     border={"1px solid"}
                     borderColor={"gray.300"}
@@ -1497,8 +1624,12 @@ const Project = () => {
                 maxHeight={400}
                 id={"projectDescriptionInput"}
                 style={{ width: "100%" }}
-                value={projectDescription}
-                preview={editing ? "edit" : "preview"}
+                value={
+                  previewVersion
+                    ? displayProjectDescription
+                    : projectDescription
+                }
+                preview={editing && !previewVersion ? "edit" : "preview"}
                 extraCommands={[]}
                 onChange={(value) => {
                   setProjectDescription(value || "");
@@ -1538,7 +1669,7 @@ const Project = () => {
                   onClick={() => setEntitiesOpen(true)}
                   size={"xs"}
                   rounded={"md"}
-                  disabled={!editing}
+                  disabled={!editing || !!previewVersion}
                 >
                   Add
                   <Icon name={"add"} size={"xs"} />
@@ -1548,15 +1679,17 @@ const Project = () => {
                 w={"100%"}
                 justify={"center"}
                 align={"center"}
-                minH={projectEntities.length > 0 ? "fit-content" : "200px"}
+                minH={
+                  displayProjectEntities.length > 0 ? "fit-content" : "200px"
+                }
               >
-                {projectEntities && projectEntities.length > 0 ? (
+                {displayProjectEntities && displayProjectEntities.length > 0 ? (
                   <DataTable
-                    data={projectEntities}
+                    data={displayProjectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     selectedRows={{}}
-                    viewOnly={!editing}
+                    viewOnly={!editing || !!previewVersion}
                     showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
@@ -1578,8 +1711,8 @@ const Project = () => {
 
             {/* Collaborators */}
             <Collaborators
-              editing={editing}
-              projectCollaborators={projectCollaborators}
+              editing={editing && !previewVersion}
+              projectCollaborators={displayProjectCollaborators}
               setProjectCollaborators={setProjectCollaborators}
             />
           </Flex>
