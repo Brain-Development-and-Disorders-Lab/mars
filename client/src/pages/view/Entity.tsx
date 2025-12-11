@@ -14,7 +14,6 @@ import {
   Checkbox,
   Stack,
   Drawer,
-  Card,
   IconButton,
   Menu,
   Dialog,
@@ -27,6 +26,8 @@ import {
   Spinner,
   HStack,
   EmptyState,
+  Timeline,
+  Collapsible,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -139,6 +140,9 @@ const Entity = () => {
 
   // History drawer
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
@@ -176,6 +180,7 @@ const Entity = () => {
         _id
         name
         owner
+        created
         archived
         description
         projects
@@ -1450,20 +1455,21 @@ const Entity = () => {
                     </Drawer.Header>
 
                     <Drawer.Body pt={"0"} p={"1"}>
-                      <Stack gap={"2"}>
-                        {entityHistory.length > 0 ? (
-                          entityHistory.map((entityVersion) => {
+                      {entityHistory.length > 0 ? (
+                        <Timeline.Root size="sm" variant="subtle">
+                          {entityHistory.map((entityVersion) => {
+                            const isExpanded = expandedVersions.has(
+                              entityVersion.version,
+                            );
                             return (
-                              <Card.Root
-                                w={"100%"}
+                              <Timeline.Item
                                 key={`v_${entityVersion.timestamp}`}
-                                variant={"outline"}
-                                rounded={"md"}
-                                border={"1px solid"}
-                                borderColor={"gray.300"}
                               >
-                                <Card.Body p={"1"} pb={"0"} gap={"1"}>
-                                  {/* Version information */}
+                                <Timeline.Connector>
+                                  <Timeline.Separator />
+                                  <Timeline.Indicator />
+                                </Timeline.Connector>
+                                <Timeline.Content>
                                   <Flex
                                     direction={"column"}
                                     gap={"1"}
@@ -1471,24 +1477,15 @@ const Entity = () => {
                                   >
                                     <Flex
                                       direction={"row"}
-                                      gap={"1"}
-                                      bg={"gray.100"}
-                                      rounded={"md"}
-                                      w={"100%"}
+                                      gap={"2"}
+                                      align={"center"}
                                       justify={"space-between"}
                                     >
                                       <Flex
                                         direction={"column"}
-                                        gap={"1"}
-                                        p={"1"}
+                                        gap={"0.5"}
+                                        grow={"1"}
                                       >
-                                        <Text
-                                          fontSize={"xs"}
-                                          fontWeight={"semibold"}
-                                          ml={"0.5"}
-                                        >
-                                          Version
-                                        </Text>
                                         <Flex
                                           direction={"row"}
                                           gap={"1"}
@@ -1499,370 +1496,419 @@ const Entity = () => {
                                             colorPalette={"green"}
                                           >
                                             <Tag.Label fontSize={"xs"}>
-                                              {entityVersion.version}
+                                              {entityVersion.version.slice(
+                                                0,
+                                                6,
+                                              )}
                                             </Tag.Label>
                                           </Tag.Root>
+                                          <Text
+                                            fontSize={"xs"}
+                                            fontWeight={"semibold"}
+                                          >
+                                            {entityVersion.name}
+                                          </Text>
+                                          <Text
+                                            fontSize={"xs"}
+                                            color={"gray.500"}
+                                          >
+                                            {dayjs(
+                                              entityVersion.timestamp,
+                                            ).fromNow()}
+                                          </Text>
                                         </Flex>
-                                        <Text
-                                          fontSize={"xs"}
-                                          fontWeight={"semibold"}
-                                          ml={"0.5"}
-                                          color={"gray.500"}
+                                        <Flex
+                                          direction={"row"}
+                                          gap={"1"}
+                                          align={"center"}
                                         >
-                                          {dayjs(
-                                            entityVersion.timestamp,
-                                          ).fromNow()}
-                                        </Text>
-                                        <Text
-                                          fontSize={"xs"}
-                                          fontWeight={"semibold"}
-                                          ml={"0.5"}
-                                        >
-                                          Message
-                                        </Text>
-                                        {_.isEqual(entityVersion.message, "") ||
-                                        _.isNull(entityVersion.message) ? (
-                                          <Flex>
+                                          {entityVersion.message &&
+                                          !_.isEqual(
+                                            entityVersion.message,
+                                            "",
+                                          ) ? (
+                                            <Tooltip
+                                              content={entityVersion.message}
+                                              disabled={
+                                                entityVersion.message.length <=
+                                                40
+                                              }
+                                              showArrow
+                                            >
+                                              <Text
+                                                fontSize={"xs"}
+                                                color={"gray.600"}
+                                              >
+                                                {_.truncate(
+                                                  entityVersion.message,
+                                                  { length: 40 },
+                                                )}
+                                              </Text>
+                                            </Tooltip>
+                                          ) : (
                                             <Tag.Root
                                               size={"sm"}
                                               colorPalette={"orange"}
                                             >
                                               <Tag.Label fontSize={"xs"}>
-                                                No Message
+                                                No message
                                               </Tag.Label>
                                             </Tag.Root>
-                                          </Flex>
-                                        ) : (
-                                          <Tooltip
-                                            content={entityVersion.message}
-                                            disabled={
-                                              entityVersion.message.length < 32
-                                            }
-                                            showArrow
-                                          >
-                                            <Text fontSize={"xs"}>
-                                              {_.truncate(
-                                                entityVersion.message,
-                                                {
-                                                  length: 32,
-                                                },
-                                              )}
-                                            </Text>
-                                          </Tooltip>
-                                        )}
-                                      </Flex>
-
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"1"}
-                                        p={"2"}
-                                      >
-                                        <Text
-                                          fontSize={"xs"}
-                                          ml={"0.5"}
-                                          fontWeight={"semibold"}
-                                        >
-                                          Author
-                                        </Text>
-                                        <Flex>
-                                          <ActorTag
-                                            orcid={entityVersion.author}
-                                            fallback={"Unknown User"}
-                                            size={"sm"}
-                                          />
-                                        </Flex>
-                                      </Flex>
-                                    </Flex>
-                                  </Flex>
-
-                                  <Flex direction={"column"} gap={"1"}>
-                                    {/* Name */}
-                                    <Text
-                                      fontWeight={"semibold"}
-                                      fontSize={"xs"}
-                                      ml={"0.5"}
-                                    >
-                                      {entityVersion.name}
-                                    </Text>
-
-                                    {/* Description */}
-                                    <Flex w={"100%"} ml={"0.5"}>
-                                      {_.isEqual(
-                                        entityVersion.description,
-                                        "",
-                                      ) ? (
-                                        <Tag.Root
-                                          size={"sm"}
-                                          colorPalette={"orange"}
-                                        >
-                                          <Tag.Label fontSize={"xs"}>
-                                            No Description
-                                          </Tag.Label>
-                                        </Tag.Root>
-                                      ) : (
-                                        <Text fontSize={"xs"}>
-                                          {_.truncate(
-                                            entityVersion.description,
-                                            {
-                                              length: 56,
-                                            },
                                           )}
-                                        </Text>
-                                      )}
-                                    </Flex>
-
-                                    <Flex direction={"row"} gap={"1"}>
-                                      {/* Projects */}
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"1"}
-                                        p={"2"}
-                                        rounded={"md"}
-                                        border={"1px solid"}
-                                        borderColor={"gray.300"}
-                                        grow={"1"}
-                                      >
-                                        <Text
-                                          fontSize={"xs"}
-                                          ml={"0.5"}
-                                          fontWeight={"semibold"}
-                                        >
-                                          Projects
-                                        </Text>
-                                        {entityVersion.projects.length > 0 ? (
-                                          <Flex
-                                            direction={"row"}
-                                            gap={"2"}
-                                            align={"center"}
-                                          >
-                                            <Tag.Root
-                                              key={`v_c_${entityVersion.timestamp}_${entityVersion.projects[0]}`}
-                                              size={"sm"}
-                                            >
-                                              <Tag.Label fontSize={"xs"}>
-                                                <Linky
-                                                  type={"projects"}
-                                                  id={entityVersion.projects[0]}
-                                                  size={"xs"}
-                                                />
-                                              </Tag.Label>
-                                            </Tag.Root>
-                                            {entityVersion.projects.length >
-                                              1 && (
-                                              <Text
-                                                fontWeight={"semibold"}
-                                                fontSize={"xs"}
-                                              >
-                                                and{" "}
-                                                {entityVersion.projects.length -
-                                                  1}{" "}
-                                                others
-                                              </Text>
-                                            )}
-                                          </Flex>
-                                        ) : (
-                                          <Text fontSize={"xs"}>
-                                            No Projects
-                                          </Text>
-                                        )}
-                                      </Flex>
-
-                                      {/* Relationships */}
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"1"}
-                                        p={"2"}
-                                        rounded={"md"}
-                                        border={"1px solid"}
-                                        borderColor={"gray.300"}
-                                        grow={"1"}
-                                      >
-                                        <Text
-                                          fontWeight={"semibold"}
-                                          fontSize={"xs"}
-                                          ml={"0.5"}
-                                        >
-                                          Relationships
-                                        </Text>
-                                        <Flex direction={"row"} gap={"2"}>
-                                          <Flex w={"100%"}>
-                                            <Tag.Root
-                                              key={`v_o_${entityVersion.timestamp}`}
-                                              size={"sm"}
-                                            >
-                                              <Tag.Label fontSize={"xs"}>
-                                                {
-                                                  entityVersion?.relationships
-                                                    ?.length
-                                                }
-                                              </Tag.Label>
-                                            </Tag.Root>
-                                          </Flex>
                                         </Flex>
                                       </Flex>
-                                    </Flex>
-
-                                    <Flex direction={"row"} gap={"2"}>
-                                      {/* Attributes */}
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"1"}
-                                        p={"2"}
-                                        rounded={"md"}
-                                        border={"1px solid"}
-                                        borderColor={"gray.300"}
-                                        grow={"1"}
-                                      >
-                                        <Text
-                                          fontSize={"xs"}
-                                          ml={"0.5"}
-                                          fontWeight={"semibold"}
+                                      <Flex direction={"row"} gap={"1"}>
+                                        <Collapsible.Root
+                                          open={isExpanded}
+                                          onOpenChange={(event) => {
+                                            const newExpanded = new Set(
+                                              expandedVersions,
+                                            );
+                                            if (event.open) {
+                                              newExpanded.add(
+                                                entityVersion.version,
+                                              );
+                                            } else {
+                                              newExpanded.delete(
+                                                entityVersion.version,
+                                              );
+                                            }
+                                            setExpandedVersions(newExpanded);
+                                          }}
                                         >
-                                          Attributes
-                                        </Text>
-                                        {entityVersion.attributes.length > 0 ? (
-                                          <Flex
-                                            direction={"row"}
-                                            gap={"2"}
-                                            align={"center"}
-                                          >
-                                            <Tooltip
-                                              content={
-                                                "Values: " +
-                                                entityVersion.attributes[0]
-                                                  .values.length
+                                          <Collapsible.Trigger asChild>
+                                            <IconButton
+                                              size={"xs"}
+                                              variant={"subtle"}
+                                              colorPalette={"gray"}
+                                              aria-label={
+                                                isExpanded
+                                                  ? "Collapse details"
+                                                  : "Expand details"
                                               }
-                                              showArrow
                                             >
-                                              <Tag.Root
-                                                key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
-                                                size={"sm"}
-                                              >
-                                                <Tag.Label fontSize={"xs"}>
-                                                  {
-                                                    entityVersion.attributes[0]
-                                                      .name
-                                                  }
-                                                </Tag.Label>
-                                              </Tag.Root>
-                                            </Tooltip>
-                                            {entityVersion.attributes.length >
-                                              1 && (
-                                              <Text fontSize={"xs"}>
-                                                and{" "}
-                                                {entityVersion.attributes
-                                                  .length - 1}{" "}
-                                                other
-                                                {entityVersion.attributes
-                                                  .length > 2
-                                                  ? "s"
-                                                  : ""}
-                                              </Text>
-                                            )}
-                                          </Flex>
-                                        ) : (
-                                          <Text fontSize={"xs"}>
-                                            No Attributes
-                                          </Text>
-                                        )}
-                                      </Flex>
-
-                                      {/* Attachments */}
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"1"}
-                                        p={"2"}
-                                        rounded={"md"}
-                                        border={"1px solid"}
-                                        borderColor={"gray.300"}
-                                        grow={"1"}
-                                      >
-                                        <Text
-                                          fontSize={"xs"}
-                                          ml={"0.5"}
-                                          fontWeight={"semibold"}
+                                              <Icon
+                                                name={
+                                                  isExpanded ? "c_up" : "c_down"
+                                                }
+                                                size={"xs"}
+                                              />
+                                            </IconButton>
+                                          </Collapsible.Trigger>
+                                        </Collapsible.Root>
+                                        <Button
+                                          variant={"solid"}
+                                          size={"xs"}
+                                          rounded={"md"}
+                                          colorPalette={"orange"}
+                                          onClick={() =>
+                                            handleRestoreFromHistoryClick(
+                                              entityVersion,
+                                            )
+                                          }
+                                          disabled={entityArchived}
                                         >
-                                          Attachments
-                                        </Text>
-                                        {entityVersion.attachments.length >
-                                        0 ? (
-                                          <Flex
-                                            direction={"row"}
-                                            gap={"2"}
-                                            align={"center"}
-                                          >
-                                            <Tooltip
-                                              content={
-                                                entityVersion.attachments[0]
-                                                  .name
-                                              }
-                                              showArrow
-                                            >
-                                              <Tag.Root
-                                                key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
-                                                size={"sm"}
-                                              >
-                                                <Tag.Label fontSize={"xs"}>
-                                                  {_.truncate(
-                                                    entityVersion.attachments[0]
-                                                      .name,
-                                                    { length: 24 },
-                                                  )}
-                                                </Tag.Label>
-                                              </Tag.Root>
-                                            </Tooltip>
-                                            {entityVersion.attachments.length >
-                                              1 && (
-                                              <Text fontSize={"xs"}>
-                                                and{" "}
-                                                {entityVersion.attachments
-                                                  .length - 1}{" "}
-                                                other
-                                                {entityVersion.attachments
-                                                  .length > 2
-                                                  ? "s"
-                                                  : ""}
-                                              </Text>
-                                            )}
-                                          </Flex>
-                                        ) : (
-                                          <Text fontSize={"xs"}>
-                                            No Attachments
-                                          </Text>
-                                        )}
+                                          Restore
+                                          <Icon name={"rewind"} size={"xs"} />
+                                        </Button>
                                       </Flex>
                                     </Flex>
-                                  </Flex>
-                                </Card.Body>
 
-                                <Card.Footer p={"1"}>
-                                  <Flex w={"100%"} justify={"right"}>
-                                    <Button
-                                      variant={"solid"}
-                                      size={"xs"}
-                                      rounded={"md"}
-                                      colorPalette={"orange"}
-                                      onClick={() =>
-                                        handleRestoreFromHistoryClick(
-                                          entityVersion,
-                                        )
-                                      }
-                                      disabled={entityArchived}
+                                    <Collapsible.Root
+                                      open={isExpanded}
+                                      onOpenChange={(event) => {
+                                        const newExpanded = new Set(
+                                          expandedVersions,
+                                        );
+                                        if (event.open) {
+                                          newExpanded.add(
+                                            entityVersion.version,
+                                          );
+                                        } else {
+                                          newExpanded.delete(
+                                            entityVersion.version,
+                                          );
+                                        }
+                                        setExpandedVersions(newExpanded);
+                                      }}
                                     >
-                                      Restore
-                                      <Icon name={"rewind"} size={"xs"} />
-                                    </Button>
+                                      <Collapsible.Content>
+                                        <Flex
+                                          direction={"column"}
+                                          gap={"2"}
+                                          mt={"1"}
+                                          p={"2"}
+                                          bg={"gray.50"}
+                                          rounded={"md"}
+                                        >
+                                          <Flex
+                                            direction={"row"}
+                                            gap={"2"}
+                                            align={"center"}
+                                          >
+                                            <Text
+                                              fontSize={"xs"}
+                                              fontWeight={"semibold"}
+                                            >
+                                              Author:
+                                            </Text>
+                                            <ActorTag
+                                              orcid={entityVersion.author}
+                                              fallback={"Unknown User"}
+                                              size={"sm"}
+                                            />
+                                          </Flex>
+
+                                          <Flex
+                                            direction={"column"}
+                                            gap={"0.5"}
+                                          >
+                                            <Text
+                                              fontSize={"xs"}
+                                              fontWeight={"semibold"}
+                                            >
+                                              Description:
+                                            </Text>
+                                            {_.isEqual(
+                                              entityVersion.description,
+                                              "",
+                                            ) ? (
+                                              <Tag.Root
+                                                size={"sm"}
+                                                colorPalette={"orange"}
+                                              >
+                                                <Tag.Label fontSize={"xs"}>
+                                                  No Description
+                                                </Tag.Label>
+                                              </Tag.Root>
+                                            ) : (
+                                              <Text fontSize={"xs"}>
+                                                {entityVersion.description}
+                                              </Text>
+                                            )}
+                                          </Flex>
+
+                                          <Flex direction={"row"} gap={"1"}>
+                                            <Flex
+                                              direction={"column"}
+                                              gap={"1"}
+                                              p={"2"}
+                                              rounded={"md"}
+                                              border={"1px solid"}
+                                              borderColor={"gray.300"}
+                                              bg={"white"}
+                                              grow={"1"}
+                                            >
+                                              <Text
+                                                fontSize={"xs"}
+                                                fontWeight={"semibold"}
+                                              >
+                                                Projects
+                                              </Text>
+                                              {entityVersion.projects.length >
+                                              0 ? (
+                                                <Flex
+                                                  direction={"row"}
+                                                  gap={"2"}
+                                                  align={"center"}
+                                                  wrap={"wrap"}
+                                                >
+                                                  {entityVersion.projects.map(
+                                                    (projectId) => (
+                                                      <Tag.Root
+                                                        key={`v_c_${entityVersion.timestamp}_${projectId}`}
+                                                        size={"sm"}
+                                                      >
+                                                        <Tag.Label
+                                                          fontSize={"xs"}
+                                                        >
+                                                          <Linky
+                                                            type={"projects"}
+                                                            id={projectId}
+                                                            size={"xs"}
+                                                          />
+                                                        </Tag.Label>
+                                                      </Tag.Root>
+                                                    ),
+                                                  )}
+                                                </Flex>
+                                              ) : (
+                                                <Text fontSize={"xs"}>
+                                                  No Projects
+                                                </Text>
+                                              )}
+                                            </Flex>
+
+                                            <Flex
+                                              direction={"column"}
+                                              gap={"1"}
+                                              p={"2"}
+                                              rounded={"md"}
+                                              border={"1px solid"}
+                                              borderColor={"gray.300"}
+                                              bg={"white"}
+                                              grow={"1"}
+                                            >
+                                              <Text
+                                                fontSize={"xs"}
+                                                fontWeight={"semibold"}
+                                              >
+                                                Relationships
+                                              </Text>
+                                              <Flex direction={"row"} gap={"1"}>
+                                                <Tag.Root
+                                                  key={`v_o_${entityVersion.timestamp}`}
+                                                  size={"sm"}
+                                                >
+                                                  <Tag.Label fontSize={"xs"}>
+                                                    {entityVersion
+                                                      ?.relationships?.length ||
+                                                      0}
+                                                  </Tag.Label>
+                                                </Tag.Root>
+                                              </Flex>
+                                            </Flex>
+                                          </Flex>
+
+                                          <Flex direction={"row"} gap={"1"}>
+                                            <Flex
+                                              direction={"column"}
+                                              gap={"1"}
+                                              p={"2"}
+                                              rounded={"md"}
+                                              border={"1px solid"}
+                                              borderColor={"gray.300"}
+                                              bg={"white"}
+                                              grow={"1"}
+                                            >
+                                              <Text
+                                                fontSize={"xs"}
+                                                fontWeight={"semibold"}
+                                              >
+                                                Attributes
+                                              </Text>
+                                              {entityVersion.attributes.length >
+                                              0 ? (
+                                                <Flex
+                                                  direction={"row"}
+                                                  gap={"2"}
+                                                  align={"center"}
+                                                  wrap={"wrap"}
+                                                >
+                                                  {entityVersion.attributes
+                                                    .slice(0, 3)
+                                                    .map((attr) => (
+                                                      <Tooltip
+                                                        key={`v_a_${entityVersion.timestamp}_${attr._id}`}
+                                                        content={
+                                                          "Values: " +
+                                                          attr.values.length
+                                                        }
+                                                        showArrow
+                                                      >
+                                                        <Tag.Root size={"sm"}>
+                                                          <Tag.Label
+                                                            fontSize={"xs"}
+                                                          >
+                                                            {attr.name}
+                                                          </Tag.Label>
+                                                        </Tag.Root>
+                                                      </Tooltip>
+                                                    ))}
+                                                  {entityVersion.attributes
+                                                    .length > 3 && (
+                                                    <Text fontSize={"xs"}>
+                                                      and{" "}
+                                                      {entityVersion.attributes
+                                                        .length - 3}{" "}
+                                                      more
+                                                    </Text>
+                                                  )}
+                                                </Flex>
+                                              ) : (
+                                                <Text fontSize={"xs"}>
+                                                  No Attributes
+                                                </Text>
+                                              )}
+                                            </Flex>
+
+                                            <Flex
+                                              direction={"column"}
+                                              gap={"1"}
+                                              p={"2"}
+                                              rounded={"md"}
+                                              border={"1px solid"}
+                                              borderColor={"gray.300"}
+                                              bg={"white"}
+                                              grow={"1"}
+                                            >
+                                              <Text
+                                                fontSize={"xs"}
+                                                fontWeight={"semibold"}
+                                              >
+                                                Attachments
+                                              </Text>
+                                              {entityVersion.attachments
+                                                .length > 0 ? (
+                                                <Flex
+                                                  direction={"row"}
+                                                  gap={"2"}
+                                                  align={"center"}
+                                                  wrap={"wrap"}
+                                                >
+                                                  {entityVersion.attachments
+                                                    .slice(0, 3)
+                                                    .map((attachment) => (
+                                                      <Tooltip
+                                                        key={`v_at_${entityVersion.timestamp}_${attachment._id}`}
+                                                        content={
+                                                          attachment.name
+                                                        }
+                                                        showArrow
+                                                      >
+                                                        <Tag.Root size={"sm"}>
+                                                          <Tag.Label
+                                                            fontSize={"xs"}
+                                                          >
+                                                            {_.truncate(
+                                                              attachment.name,
+                                                              { length: 20 },
+                                                            )}
+                                                          </Tag.Label>
+                                                        </Tag.Root>
+                                                      </Tooltip>
+                                                    ))}
+                                                  {entityVersion.attachments
+                                                    .length > 3 && (
+                                                    <Text fontSize={"xs"}>
+                                                      and{" "}
+                                                      {entityVersion.attachments
+                                                        .length - 3}{" "}
+                                                      more
+                                                    </Text>
+                                                  )}
+                                                </Flex>
+                                              ) : (
+                                                <Text fontSize={"xs"}>
+                                                  No Attachments
+                                                </Text>
+                                              )}
+                                            </Flex>
+                                          </Flex>
+                                        </Flex>
+                                      </Collapsible.Content>
+                                    </Collapsible.Root>
                                   </Flex>
-                                </Card.Footer>
-                              </Card.Root>
+                                </Timeline.Content>
+                              </Timeline.Item>
                             );
-                          })
-                        ) : (
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            No History.
-                          </Text>
-                        )}
-                      </Stack>
+                          })}
+                        </Timeline.Root>
+                      ) : (
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          No History.
+                        </Text>
+                      )}
                     </Drawer.Body>
                   </Drawer.Content>
                 </Drawer.Positioner>
