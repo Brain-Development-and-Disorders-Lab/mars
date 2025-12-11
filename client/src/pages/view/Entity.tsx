@@ -1356,28 +1356,51 @@ const Entity = () => {
             gap={"2"}
             p={"2"}
             bg={"blue.100"}
-            borderBottom={"1px solid"}
-            borderColor={"blue.300"}
+            mx={"-1.5"}
+            mt={"-1.5"}
+            px={"1.5"}
+            pt={"1.5"}
           >
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Icon name={"clock"} size={"sm"} />
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Preview: Version {previewVersion.version.slice(0, 6)}
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"clock"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                Preview:
               </Text>
+              <Tag.Root colorPalette={"green"}>
+                <Tag.Label fontSize={"xs"}>
+                  {previewVersion.version.slice(0, 6)}
+                </Tag.Label>
+              </Tag.Root>
               <Text fontSize={"xs"} color={"gray.600"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
-            <Button
-              size={"xs"}
-              variant={"solid"}
-              colorPalette={"blue"}
-              rounded={"md"}
-              onClick={() => setPreviewVersion(null)}
-            >
-              Exit Preview
-              <Icon name={"cross"} size={"xs"} />
-            </Button>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"orange"}
+                rounded={"md"}
+                onClick={async () => {
+                  await handleRestoreFromHistoryClick(previewVersion);
+                  setPreviewVersion(null);
+                }}
+                disabled={entityArchived}
+              >
+                Restore
+                <Icon name={"rewind"} size={"xs"} />
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"solid"}
+                colorPalette={"red"}
+                rounded={"md"}
+                onClick={() => setPreviewVersion(null)}
+              >
+                Exit Preview
+                <Icon name={"logout"} size={"xs"} />
+              </Button>
+            </Flex>
           </Flex>
         )}
 
