@@ -918,6 +918,7 @@ const Workspace = () => {
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
@@ -929,7 +930,8 @@ const Workspace = () => {
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownEntities.length > 0 ? "" : "center"}
               minH={shownEntities.length > 0 ? "fit-content" : "200px"}
             >
@@ -969,7 +971,8 @@ const Workspace = () => {
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
-            basis={"50%"}
+            w={{ base: "100%", md: "50%" }}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
@@ -981,7 +984,8 @@ const Workspace = () => {
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownProjects.length > 0 ? "" : "center"}
               minH={shownProjects.length > 0 ? "fit-content" : "200px"}
             >
@@ -1020,6 +1024,7 @@ const Workspace = () => {
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
@@ -1031,7 +1036,8 @@ const Workspace = () => {
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownTemplates.length > 0 ? "" : "center"}
               minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
             >
@@ -1071,7 +1077,8 @@ const Workspace = () => {
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
-            basis={"50%"}
+            w={{ base: "100%", md: "50%" }}
+            minW={"0"}
           >
             <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
               <Icon name={"counter"} size={"xs"} />
@@ -1081,7 +1088,8 @@ const Workspace = () => {
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={counters.length > 0 ? "" : "center"}
               minH={counters.length > 0 ? "fit-content" : "200px"}
             >
