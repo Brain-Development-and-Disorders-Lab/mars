@@ -274,6 +274,11 @@ export class Entities {
       }
     }
 
+    // Attachments
+    if (!_.isUndefined(updated.attachments)) {
+      update.$set.attachments = updated.attachments;
+    }
+
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);

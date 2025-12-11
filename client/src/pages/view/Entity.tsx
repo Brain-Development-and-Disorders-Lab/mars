@@ -508,11 +508,6 @@ const Entity = () => {
   // Upload dialog
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const [previewAttachment, setPreviewAttachment] = useState(
-    {} as IGenericItem,
-  );
-  const [previewOpen, setPreviewOpen] = useState(false);
-
   // Toggle editing status
   const handleEditClick = () => {
     if (editing) {
@@ -793,77 +788,35 @@ const Entity = () => {
   const attachmentTableColumns = [
     attachmentTableColumnHelper.accessor("name", {
       cell: (info) => {
+        const attachmentId = info.row.original._id;
+        const attachmentName = info.row.original.name;
+
         const handleDownload = async () => {
-          await getDownload(info.getValue(), info.row.original.name);
+          await getDownload(attachmentId, attachmentName);
         };
 
-        const handlePreview = async () => {
-          // Update the attachment state
-          setPreviewAttachment({
-            _id: info.getValue(),
-            name: info.row.original.name,
-          });
-
-          // Open the preview modal
-          setPreviewOpen(true);
-        };
         return (
-          <Flex w={"100%"} justify={"space-between"} gap={"1"}>
-            <Tooltip content={info.getValue()} showArrow>
-              <Flex
-                align={"center"}
-                justify={"space-between"}
-                gap={"1"}
-                w={"100%"}
-              >
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 20 })}
-                </Text>
-              </Flex>
+          <Flex w={"100%"} justify={"space-between"} gap={"1"} align={"center"}>
+            <Tooltip content={attachmentName} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(attachmentName, { length: 36 })}
+              </Text>
             </Tooltip>
-            {/* Attachment preview modal */}
             <Flex gap={"1"} align={"center"}>
-              <Dialog.Root
-                open={previewOpen}
-                onOpenChange={(event) => setPreviewOpen(event.open)}
-                placement={"center"}
-                closeOnEscape
-                closeOnInteractOutside
-              >
-                <Dialog.Trigger asChild>
-                  <IconButton
-                    aria-label={"Preview attachment"}
-                    variant={"subtle"}
-                    size={"2xs"}
-                    key={`preview-file-${info.getValue()}`}
-                    colorPalette={"gray"}
-                    onClick={() => handlePreview()}
-                  >
-                    <Icon name={"expand"} size={"xs"} />
-                  </IconButton>
-                </Dialog.Trigger>
-                <Dialog.Backdrop />
-                <Dialog.Positioner>
-                  <Dialog.Content maxW={"100vw"} w={"fit-content"}>
-                    <Dialog.Header bg={"blue.300"}>
-                      Attachment Preview
-                    </Dialog.Header>
-                    <Dialog.Body>
-                      <Flex justify={"center"} align={"center"} pb={"2"}>
-                        <PreviewModal attachment={previewAttachment} />
-                      </Flex>
-                    </Dialog.Body>
-                  </Dialog.Content>
-                </Dialog.Positioner>
-              </Dialog.Root>
+              <PreviewModal
+                attachment={{
+                  _id: attachmentId,
+                  name: attachmentName,
+                }}
+              />
               {editing ? (
                 <IconButton
                   aria-label={"Remove attachment"}
                   size={"2xs"}
                   variant={"subtle"}
-                  key={`remove-file-${info.getValue()}`}
+                  key={`remove-file-${attachmentId}`}
                   colorPalette={"red"}
-                  onClick={() => removeAttachment(info.getValue())}
+                  onClick={() => removeAttachment(attachmentId)}
                 >
                   <Icon name={"delete"} size={"xs"} />
                 </IconButton>
@@ -872,7 +825,7 @@ const Entity = () => {
                   aria-label={"Download attachment"}
                   size={"2xs"}
                   variant={"subtle"}
-                  key={`download-file-${info.getValue()}`}
+                  key={`download-file-${attachmentId}`}
                   colorPalette={"blue"}
                   onClick={() => handleDownload()}
                 >
@@ -885,7 +838,7 @@ const Entity = () => {
       },
       header: "Name",
       meta: {
-        minWidth: 240,
+        minWidth: 360,
       },
     }),
     {
@@ -2971,6 +2924,11 @@ const Entity = () => {
           uploads={toUploadAttachments}
           setUploads={setToUploadAttachments}
           target={entityData._id}
+          onUploadSuccess={() => {
+            if (refetch) {
+              refetch();
+            }
+          }}
         />
 
         {/* Export modal */}
@@ -3365,8 +3323,9 @@ const Entity = () => {
         <Dialog.Root
           open={graphOpen}
           onOpenChange={(event) => setGraphOpen(event.open)}
-          size={"full"}
+          size={"cover"}
           closeOnEscape
+          closeOnInteractOutside
         >
           <Dialog.Backdrop />
           <Dialog.Positioner>

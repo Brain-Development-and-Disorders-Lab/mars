@@ -7,6 +7,7 @@ import Navigation from "@components/Navigation";
 import Error from "@components/Error";
 import Loading from "@components/Loading";
 import { Toaster } from "@components/Toast";
+import ErrorBoundary from "@components/ErrorBoundary";
 
 // Existing and custom types
 import { ContentProps } from "@types";
@@ -91,12 +92,15 @@ const Page: FC = () => {
           w={"100%"}
           minW="0"
           maxW="100%"
+          minH={{ base: "92vh", lg: "100vh" }}
           ml={{ base: "0", lg: "200px" }}
           mt={{ base: "8vh", lg: "0" }}
           overflowX="hidden"
         >
           {/* Main content components */}
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </Flex>
       </Flex>
     );

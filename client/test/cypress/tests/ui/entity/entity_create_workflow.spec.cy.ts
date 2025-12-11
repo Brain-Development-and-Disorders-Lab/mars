@@ -20,12 +20,17 @@ describe("Create Entities", () => {
   });
 
   it("should navigate through the steps", () => {
-    // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']")
+    // Wait for the form to be fully loaded
+    cy.get("h2").contains("Create Entity").should("be.visible");
+
+    // Wait for the input to exist, be visible, and not be disabled
+    cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.be.disabled")
-      .clear()
-      .type("Test Entity");
+      .should("not.have.attr", "disabled");
+
+    // Fill in the initial details
+    cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("[data-testid='create-entity-description']")
       .find("textarea")
@@ -42,6 +47,11 @@ describe("Create Entities", () => {
     // Click on the "Back" button to return to the start step
     cy.get("button").contains("Back").click();
     cy.get("h2").contains("Create Entity");
+
+    // Wait for the input to be enabled after navigating back
+    cy.get("[data-testid='create-entity-name']")
+      .should("be.visible")
+      .should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
     cy.get("button").contains("Continue").click();
@@ -61,12 +71,17 @@ describe("Create Entities", () => {
   });
 
   it("should allow adding Relationships", () => {
-    // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']")
+    // Wait for the form to be fully loaded
+    cy.get("h2").contains("Create Entity").should("be.visible");
+
+    // Wait for the input to exist, be visible, and not be disabled
+    cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.be.disabled")
-      .clear()
-      .type("Test Entity");
+      .should("not.have.attr", "disabled");
+
+    // Fill in the initial details
+    cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("[data-testid='create-entity-description']")
       .find("textarea")
@@ -91,12 +106,17 @@ describe("Create Entities", () => {
   });
 
   it("should allow adding Template Attributes", () => {
-    // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']")
+    // Wait for the form to be fully loaded
+    cy.get("h2").contains("Create Entity").should("be.visible");
+
+    // Wait for the input to exist, be visible, and not be disabled
+    cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.be.disabled")
-      .clear()
-      .type("Test Entity");
+      .should("not.have.attr", "disabled");
+
+    // Fill in the initial details
+    cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("[data-testid='create-entity-description']")
       .find("textarea")
@@ -135,12 +155,17 @@ describe("Create Entities", () => {
   });
 
   it("should complete Entity creation", () => {
-    // Fill in the initial details
-    cy.get("[data-testid='create-entity-name']")
+    // Wait for the form to be fully loaded
+    cy.get("h2").contains("Create Entity").should("be.visible");
+
+    // Wait for the input to exist, be visible, and not be disabled
+    cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.be.disabled")
-      .clear()
-      .type("Test Entity");
+      .should("not.have.attr", "disabled");
+
+    // Fill in the initial details
+    cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
     cy.get('input[type="date"]').type("2023-10-01");
     cy.get("[data-testid='create-entity-description']")
       .find("textarea")
