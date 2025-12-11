@@ -14,7 +14,8 @@
     "test": "jest --run-in-band --verbose",
     "clean": "rm -rf dist public",
     "lint:check": "prettier . --check",
-    "lint:fix": "prettier . --write"
+    "lint:fix": "prettier . --write",
+    "seed": "esbuild src/seed/generateSeedData.ts --platform=node --bundle --outfile=dist/seed.js --packages=external && node dist/seed.js"
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",
