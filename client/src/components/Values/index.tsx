@@ -546,7 +546,7 @@ const Values = (props: {
           return (
             <Flex
               w="100%"
-              h="100%"
+              h={"34px"}
               p={"0"}
               align="center"
               justify="center"
@@ -560,8 +560,10 @@ const Values = (props: {
                 borderColor: "blue.200",
                 boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
               }}
-              cursor="pointer"
-              onClick={() => openSelectModal(value._id)}
+              cursor={props.viewOnly ? "default" : "pointer"}
+              onClick={
+                props.viewOnly ? undefined : () => openSelectModal(value._id)
+              }
             >
               <Text fontSize="xs" fontWeight="semibold" color="blue.600">
                 Setup Options
