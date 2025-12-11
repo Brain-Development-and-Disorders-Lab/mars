@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -92,6 +92,9 @@ const Project = () => {
   const [expandedVersions, setExpandedVersions] = useState<Set<string>>(
     new Set(),
   );
+  const [historySortOrder, setHistorySortOrder] = useState<
+    "newest-first" | "oldest-first"
+  >("newest-first");
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -105,6 +108,23 @@ const Project = () => {
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
+
+  // Sorted history based on sort order
+  const sortedProjectHistory = useMemo(() => {
+    const sorted = [...projectHistory];
+    if (historySortOrder === "newest-first") {
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
+    } else {
+      return sorted.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+    }
+  }, [projectHistory, historySortOrder]);
+
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
   );
@@ -861,14 +881,75 @@ const Project = () => {
                             {projectHistory.length}
                           </Text>
                         </Flex>
+                        <Flex direction={"row"} align={"center"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Sort by:
+                          </Text>
+                          <Select.Root
+                            value={[historySortOrder]}
+                            w={"240px"}
+                            rounded={"md"}
+                            size={"xs"}
+                            collection={createListCollection({
+                              items: [
+                                {
+                                  value: "newest-first",
+                                  label: "Newest → Oldest",
+                                },
+                                {
+                                  value: "oldest-first",
+                                  label: "Oldest → Newest",
+                                },
+                              ],
+                            })}
+                            onValueChange={(details) =>
+                              setHistorySortOrder(
+                                details.value[0] as
+                                  | "newest-first"
+                                  | "oldest-first",
+                              )
+                            }
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {createListCollection({
+                                  items: [
+                                    {
+                                      value: "newest-first",
+                                      label: "Newest → Oldest",
+                                    },
+                                    {
+                                      value: "oldest-first",
+                                      label: "Oldest → Newest",
+                                    },
+                                  ],
+                                }).items.map((item) => (
+                                  <Select.Item item={item} key={item.value}>
+                                    {item.label}
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                ))}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Select.Root>
+                        </Flex>
                       </Flex>
                     </Flex>
                   </Drawer.Header>
 
                   <Drawer.Body p={"1"}>
-                    {projectHistory && projectHistory.length > 0 ? (
+                    {sortedProjectHistory && sortedProjectHistory.length > 0 ? (
                       <Timeline.Root size="sm" variant="subtle">
-                        {projectHistory.map((projectVersion) => {
+                        {sortedProjectHistory.map((projectVersion) => {
                           const isExpanded = expandedVersions.has(
                             projectVersion.version,
                           );

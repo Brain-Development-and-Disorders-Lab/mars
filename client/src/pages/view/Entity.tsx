@@ -143,6 +143,9 @@ const Entity = () => {
   const [expandedVersions, setExpandedVersions] = useState<Set<string>>(
     new Set(),
   );
+  const [historySortOrder, setHistorySortOrder] = useState<
+    "newest-first" | "oldest-first"
+  >("newest-first");
 
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
@@ -493,6 +496,23 @@ const Entity = () => {
     [] as AttributeModel[],
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
+
+  // Sorted history based on sort order
+  const sortedEntityHistory = useMemo(() => {
+    const sorted = [...entityHistory];
+    if (historySortOrder === "newest-first") {
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
+    } else {
+      return sorted.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+    }
+  }, [entityHistory, historySortOrder]);
+
   const [entityAttachments, setEntityAttachments] = useState(
     [] as IGenericItem[],
   );
@@ -1437,27 +1457,74 @@ const Entity = () => {
                             {entityHistory.length}
                           </Text>
                         </Flex>
-                        <Flex
-                          direction={"row"}
-                          gap={"1"}
-                          justify={"space-between"}
-                        >
-                          <Flex direction={"row"} gap={"1"}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                              Sorted:
-                            </Text>
-                            <Text fontSize={"xs"} fontWeight={"normal"}>
-                              Newest &rarr; Oldest
-                            </Text>
-                          </Flex>
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Sort by:
+                          </Text>
+                          <Select.Root
+                            value={[historySortOrder]}
+                            w={"240px"}
+                            rounded={"md"}
+                            size={"xs"}
+                            collection={createListCollection({
+                              items: [
+                                {
+                                  value: "newest-first",
+                                  label: "Newest → Oldest",
+                                },
+                                {
+                                  value: "oldest-first",
+                                  label: "Oldest → Newest",
+                                },
+                              ],
+                            })}
+                            onValueChange={(details) =>
+                              setHistorySortOrder(
+                                details.value[0] as
+                                  | "newest-first"
+                                  | "oldest-first",
+                              )
+                            }
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {createListCollection({
+                                  items: [
+                                    {
+                                      value: "newest-first",
+                                      label: "Newest → Oldest",
+                                    },
+                                    {
+                                      value: "oldest-first",
+                                      label: "Oldest → Newest",
+                                    },
+                                  ],
+                                }).items.map((item) => (
+                                  <Select.Item item={item} key={item.value}>
+                                    {item.label}
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                ))}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Select.Root>
                         </Flex>
                       </Flex>
                     </Drawer.Header>
 
                     <Drawer.Body pt={"0"} p={"1"}>
-                      {entityHistory.length > 0 ? (
+                      {sortedEntityHistory.length > 0 ? (
                         <Timeline.Root size="sm" variant="subtle">
-                          {entityHistory.map((entityVersion) => {
+                          {sortedEntityHistory.map((entityVersion) => {
                             const isExpanded = expandedVersions.has(
                               entityVersion.version,
                             );
