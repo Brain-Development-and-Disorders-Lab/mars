@@ -18,20 +18,26 @@ export const Toaster = () => {
     <Portal>
       <ChakraToaster toaster={toaster} insetInline={{ mdDown: "4" }}>
         {(toast) => (
-          <Toast.Root width={{ md: "sm" }}>
+          <Toast.Root width={"sm"} rounded={"md"}>
             {toast.type === "loading" ? (
               <Spinner size={"sm"} color={"blue.solid"} />
             ) : (
               <Toast.Indicator />
             )}
             <Stack gap={"1"} flex={"1"} maxWidth={"100%"}>
-              {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
+              {toast.title && (
+                <Toast.Title fontSize={"sm"}>{toast.title}</Toast.Title>
+              )}
               {toast.description && (
-                <Toast.Description>{toast.description}</Toast.Description>
+                <Toast.Description fontSize={"xs"}>
+                  {toast.description}
+                </Toast.Description>
               )}
             </Stack>
             {toast.action && (
-              <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>
+              <Toast.ActionTrigger fontSize={"xs"}>
+                {toast.action.label}
+              </Toast.ActionTrigger>
             )}
             {toast.meta?.closable && <Toast.CloseTrigger />}
           </Toast.Root>

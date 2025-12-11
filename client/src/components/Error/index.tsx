@@ -21,48 +21,53 @@ const Error = () => {
       p={"2"}
     >
       <Flex
-        gap={"4"}
-        p={"4"}
+        gap={"2"}
+        p={"2"}
         direction={"column"}
         justify={"center"}
         align={"center"}
         rounded={"md"}
         bg={"red.600"}
         color={"white"}
+        maxW={"md"}
       >
-        <Flex direction={"row"} gap={"2"} align={"center"}>
-          <Icon name={"exclamation"} size={"md"} />
+        <Flex direction={"row"} gap={"1"} align={"center"}>
+          <Icon name={"exclamation"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"lg"}>
-            Error
+            System Error
           </Heading>
         </Flex>
 
-        <Flex maxW={"md"} gap={"4"} direction={"column"}>
-          <Text fontWeight={"semibold"}>
+        <Flex direction={"column"} gap={"1"} w={"90%"}>
+          <Text fontWeight={"semibold"} fontSize={"sm"}>
             Metadatify experienced an error while attempting to access the
             requested resource. If this issues persists, please contact your
             system administrator.
           </Text>
         </Flex>
 
-        <Flex maxW={"md"} gap={"1"} direction={"column"}>
-          <Text fontWeight={"semibold"}>Possible Causes:</Text>
-          <Text>The requested resource does not exist or has been deleted</Text>
-          <Text>
+        <Flex direction={"column"} gap={"1"} w={"90%"}>
+          <Text fontWeight={"semibold"} fontSize={"sm"}>
+            Possible Causes:
+          </Text>
+          <Text fontSize={"xs"}>
+            The requested resource does not exist or has been deleted
+          </Text>
+          <Text fontSize={"xs"}>
             You do not have permission to access the requested resource
           </Text>
-          <Text>Network connectivity has been lost</Text>
+          <Text fontSize={"xs"}>Network connectivity has been lost</Text>
         </Flex>
 
         <Button
           onClick={() => navigate(0)}
-          size={"sm"}
+          size={"xs"}
           rounded={"md"}
           variant={"subtle"}
           colorPalette={"red"}
         >
-          Reload Page
-          <Icon name={"reload"} />
+          Reload
+          <Icon name={"reload"} size={"xs"} />
         </Button>
       </Flex>
     </Flex>
