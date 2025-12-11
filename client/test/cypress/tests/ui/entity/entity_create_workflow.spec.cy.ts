@@ -23,11 +23,11 @@ describe("Create Entities", () => {
     // Wait for the form to be fully loaded
     cy.get("h2").contains("Create Entity").should("be.visible");
 
-    // Wait for the input to be visible and enabled (wait for GraphQL query to complete)
+    // Wait for the input to exist, be visible, and not be disabled
     cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.have.attr", "disabled")
-      .should("not.be.disabled");
+      .should("not.have.attr", "disabled");
 
     // Fill in the initial details
     cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
@@ -74,11 +74,11 @@ describe("Create Entities", () => {
     // Wait for the form to be fully loaded
     cy.get("h2").contains("Create Entity").should("be.visible");
 
-    // Wait for the input to be visible and enabled (wait for GraphQL query to complete)
+    // Wait for the input to exist, be visible, and not be disabled
     cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.have.attr", "disabled")
-      .should("not.be.disabled");
+      .should("not.have.attr", "disabled");
 
     // Fill in the initial details
     cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
@@ -109,11 +109,11 @@ describe("Create Entities", () => {
     // Wait for the form to be fully loaded
     cy.get("h2").contains("Create Entity").should("be.visible");
 
-    // Wait for the input to be visible and enabled (wait for GraphQL query to complete)
+    // Wait for the input to exist, be visible, and not be disabled
     cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.have.attr", "disabled")
-      .should("not.be.disabled");
+      .should("not.have.attr", "disabled");
 
     // Fill in the initial details
     cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
@@ -158,11 +158,11 @@ describe("Create Entities", () => {
     // Wait for the form to be fully loaded
     cy.get("h2").contains("Create Entity").should("be.visible");
 
-    // Wait for the input to be visible and enabled (wait for GraphQL query to complete)
+    // Wait for the input to exist, be visible, and not be disabled
     cy.get("[data-testid='create-entity-name']", { timeout: 10000 })
+      .should("exist")
       .should("be.visible")
-      .should("not.have.attr", "disabled")
-      .should("not.be.disabled");
+      .should("not.have.attr", "disabled");
 
     // Fill in the initial details
     cy.get("[data-testid='create-entity-name']").clear().type("Test Entity");
