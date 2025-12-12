@@ -826,7 +826,6 @@ const Entity = () => {
               >
                 <Fieldset.Root>
                   <CheckboxGroup
-                    size={"xs"}
                     value={selectedProjects}
                     onValueChange={(event: string[]) => {
                       if (event) {
