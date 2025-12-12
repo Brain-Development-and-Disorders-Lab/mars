@@ -8,6 +8,7 @@ import { toaster } from "src/components/Toast";
 // Apollo imports
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { ApolloProvider } from "@apollo/client/react";
 import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
@@ -71,10 +72,13 @@ const authLink = new ApolloLink((operation, forward) => {
  * Error handling for GraphQL errors that occur throughout the application
  */
 const errorLink = new ErrorLink(({ error }) => {
-  if (error.name === "CombinedGraphQLErrors" && "errors" in error) {
-    const graphQLErrors = error.errors as Array<{ message: string }>;
-    for (const err of graphQLErrors) {
-      if (err.message === "Could not validate token") {
+  // Handle GraphQL errors
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const err of error.errors) {
+      const errorMessage = err.message;
+
+      // Handle authentication errors
+      if (errorMessage === "Could not validate token") {
         toaster.create({
           title: "Authentication Error",
           description: "Unable to authenticate user. Please log in again.",
@@ -94,6 +98,9 @@ const errorLink = new ErrorLink(({ error }) => {
         return;
       }
     }
+  } else {
+    // Handle network or other errors
+    consola.error("Network or other error:", error);
   }
 });
 
