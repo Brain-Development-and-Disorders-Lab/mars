@@ -24,7 +24,8 @@ import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 
 // GraphQL
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -58,9 +59,6 @@ const AccountMenu = () => {
   });
   const [getUser] = useLazyQuery<{ user: UserModel }>(GET_USER, {
     fetchPolicy: "network-only",
-    variables: {
-      _id: token.orcid,
-    },
   });
 
   useEffect(() => {
@@ -84,7 +82,11 @@ const AccountMenu = () => {
   const handleOpenClick = async () => {
     // If currently unopened, refresh the User detail
     if (open === false) {
-      const result = await getUser();
+      const result = await getUser({
+        variables: {
+          _id: token.orcid,
+        },
+      });
       if (result.data?.user) {
         setUser(result.data.user);
       }

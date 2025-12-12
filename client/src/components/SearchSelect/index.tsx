@@ -15,7 +15,8 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import { debounce } from "lodash";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 
 // Workspace context
@@ -45,12 +46,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
     useLazyQuery<{
       entities: { entities: IGenericItem[]; total: number };
-    }>(GET_ENTITIES, {
-      variables: {
-        limit: 20,
-        archived: true,
-      },
-    });
+    }>(GET_ENTITIES);
 
   // Query to retrieve Entities
   const GET_PROJECTS = gql`
@@ -156,7 +152,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   `;
   const [searchText, { loading: searchLoading, error: searchError }] =
-    useLazyQuery(SEARCH_TEXT);
+    useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT);
 
   // State
   const [results, setResults] = useState([] as EntityModel[]);
@@ -174,7 +170,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       },
     });
 
-    if (results.data.search) {
+    if (results.data?.search) {
       setResults(results.data.search);
 
       // Once results have been updated, set `hasSearched` state
@@ -183,11 +179,11 @@ const SearchSelect = (props: SearchSelectProps) => {
       setResults([]);
     }
 
-    if (searchError) {
+    if (searchError || !results.data?.search) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: searchError.message,
+        description: searchError || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });

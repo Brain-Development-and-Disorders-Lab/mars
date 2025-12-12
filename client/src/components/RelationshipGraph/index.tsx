@@ -22,7 +22,8 @@ import { toaster } from "@components/Toast";
 import { EntityNode, IRelationship } from "@types";
 
 // Utility functions and libraries
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
@@ -57,11 +58,9 @@ const RelationshipGraph = (props: {
   `;
 
   // Query to retrieve Entity data and associated data for editing
-  const [getEntity, { loading, error }] = useLazyQuery(GET_ENTITY_DATA, {
-    variables: {
-      _id: props.id,
-    },
-  });
+  const [getEntity, { loading, error }] = useLazyQuery<{ entity: EntityNode }>(
+    GET_ENTITY_DATA,
+  );
 
   /**
    * Utility function to execute GraphQL query and return Entity data necessary to construct a graph node
@@ -74,6 +73,9 @@ const RelationshipGraph = (props: {
         _id: id,
       },
     });
+    if (!result.data?.entity) {
+      throw new Error(`Unable to retrieve Entity data for ID: ${id}`);
+    }
     return result.data.entity;
   };
 

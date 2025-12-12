@@ -33,7 +33,8 @@ import {
 } from "@types";
 
 // GraphQL imports
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -113,10 +114,6 @@ const Workspace = () => {
     counters: CounterModel[];
   }>(GET_WORKSPACE_DATA, {
     fetchPolicy: "network-only",
-    variables: {
-      projectsArchived: true,
-      entitiesArchived: true,
-    },
   });
 
   // Mutation to archive Entities
@@ -232,7 +229,12 @@ const Workspace = () => {
         setIsPublic(workspaceResult.data.workspace.public);
       }
 
-      const workspaceData = await getWorkspaceData();
+      const workspaceData = await getWorkspaceData({
+        variables: {
+          projectsArchived: true,
+          entitiesArchived: true,
+        },
+      });
       if (workspaceData.data?.entities?.entities) {
         setEntities(workspaceData.data.entities.entities);
         // Filter to only show archived entities

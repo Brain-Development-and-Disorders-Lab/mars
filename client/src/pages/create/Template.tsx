@@ -24,13 +24,14 @@ import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { GenericValueType, IAttribute, IValue } from "@types";
+import { GenericValueType, IAttribute, IValue, ResponseData } from "@types";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { gql, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { isValidValues } from "src/util";
 
 // Authentication context
@@ -83,7 +84,9 @@ const Template = () => {
       }
     }
   `;
-  const [createTemplate, { loading, error }] = useMutation(CREATE_TEMPLATE);
+  const [createTemplate, { loading, error }] = useMutation<{
+    createTemplate: ResponseData<string>;
+  }>(CREATE_TEMPLATE);
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -118,7 +121,24 @@ const Template = () => {
       },
     });
 
-    if (response.data.createTemplate.success) {
+    if (
+      !response.data?.createTemplate ||
+      !response.data.createTemplate.success
+    ) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred when creating Template",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.createTemplate.success) {
+      toaster.create({
+        title: "Template created successfully",
+        type: "success",
+        duration: 2000,
+        closable: true,
+      });
       setIsSubmitting(false);
       navigate("/templates");
     }

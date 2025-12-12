@@ -14,7 +14,8 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // GraphQL resources
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";

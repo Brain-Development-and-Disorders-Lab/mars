@@ -13,7 +13,8 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
 
@@ -35,7 +36,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getEntity, { loading: loadingEntity }] = useLazyQuery(GET_ENTITY);
+  const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
+    entity: IGenericItem;
+  }>(GET_ENTITY);
 
   const GET_PROJECT = gql`
     query GetProject($_id: String) {
@@ -45,7 +48,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getProject, { loading: loadingProject }] = useLazyQuery(GET_PROJECT);
+  const [getProject, { loading: loadingProject }] = useLazyQuery<{
+    project: IGenericItem;
+  }>(GET_PROJECT);
 
   const GET_TEMPLATE = gql`
     query GetTemplate($_id: String) {
@@ -55,8 +60,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getTemplate, { loading: loadingTemplate }] =
-    useLazyQuery(GET_TEMPLATE);
+  const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
+    template: IGenericItem;
+  }>(GET_TEMPLATE);
 
   /**
    * Utility function to retrieve data of link target

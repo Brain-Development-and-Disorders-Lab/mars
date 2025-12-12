@@ -31,7 +31,8 @@ import {
 } from "@types";
 
 // GraphQL imports
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -98,7 +99,9 @@ const User = () => {
   const [
     generateKey,
     { loading: generateKeyLoading, error: generateKeyError },
-  ] = useLazyQuery<{ generateKey: ResponseData<APIKey> }>(GENERATE_KEY);
+  ] = useLazyQuery<{ generateKey: ResponseData<APIKey> }>(GENERATE_KEY, {
+    fetchPolicy: "network-only",
+  });
 
   useEffect(() => {
     if (data?.user) {
@@ -285,7 +288,6 @@ const User = () => {
         scope: "edit",
         workspaces: userWorkspaces.map((w) => w._id),
       },
-      fetchPolicy: "network-only",
     });
 
     if (generateKeyError) {

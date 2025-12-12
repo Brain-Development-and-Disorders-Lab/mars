@@ -55,7 +55,8 @@ import consola from "consola";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -157,8 +158,9 @@ const Entity = () => {
       entityNameExists(name: $name)
     }
   `;
-  const [entityNameExists, { error: entityNameError }] =
-    useLazyQuery(CHECK_ENTITY_NAME);
+  const [entityNameExists, { error: entityNameError }] = useLazyQuery<{
+    entityNameExists: boolean;
+  }>(CHECK_ENTITY_NAME);
 
   const GET_CREATE_ENTITIES_DATA = gql`
     query GetCreateEntitiesData {
@@ -181,7 +183,10 @@ const Entity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_CREATE_ENTITIES_DATA);
+  const { loading, error, data, refetch } = useQuery<{
+    projects: IGenericItem[];
+    templates: AttributeModel[];
+  }>(GET_CREATE_ENTITIES_DATA);
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -239,9 +244,9 @@ const Entity = () => {
         name: name,
       },
     });
-    setIsNameUnique(!response.data.entityNameExists);
+    setIsNameUnique(!response.data?.entityNameExists);
     if (entityNameError) {
-      consola.error("Failed to check entity name:", entityNameError.cause);
+      consola.error("Failed to check entity name:", entityNameError.message);
     }
   };
 
@@ -768,6 +773,7 @@ const Entity = () => {
                     />
                   </Flex>
                   <Button
+                    data-testid={"create-entity-add-relationship"}
                     colorPalette={"green"}
                     size={"xs"}
                     rounded={"md"}
@@ -1001,6 +1007,7 @@ const Entity = () => {
                 </Flex>
 
                 <Button
+                  data-testid={"create-entity-new-attribute"}
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
@@ -1162,6 +1169,7 @@ const Entity = () => {
       >
         <Flex gap={"2"}>
           <Button
+            data-testid={"create-entity-cancel"}
             size={"xs"}
             rounded={"md"}
             colorPalette={"red"}
@@ -1173,6 +1181,7 @@ const Entity = () => {
           </Button>
           {!_.isEqual("start", pageState) && (
             <Button
+              data-testid={"create-entity-back"}
               size={"xs"}
               rounded={"md"}
               colorPalette={"orange"}
@@ -1186,6 +1195,11 @@ const Entity = () => {
         </Flex>
 
         <Button
+          data-testid={
+            _.isEqual("attributes", pageState)
+              ? "create-entity-finish"
+              : "create-entity-continue"
+          }
           size={"xs"}
           rounded={"md"}
           colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}

@@ -6,13 +6,19 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
-import { DataTableAction, IRelationship, RelationshipsProps } from "@types";
+import {
+  DataTableAction,
+  IGenericItem,
+  IRelationship,
+  RelationshipsProps,
+} from "@types";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
 
 // GraphQL
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -29,7 +35,9 @@ const Relationships = (props: RelationshipsProps) => {
       }
     }
   `;
-  const [getEntityName] = useLazyQuery(GET_ENTITY_NAME);
+  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(
+    GET_ENTITY_NAME,
+  );
 
   // Extract all unique entity IDs from relationships
   const uniqueEntityIds = useMemo(() => {

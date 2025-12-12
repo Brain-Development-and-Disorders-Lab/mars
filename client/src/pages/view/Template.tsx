@@ -14,7 +14,7 @@ import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { AttributeModel, GenericValueType, IValue } from "@types";
+import { AttributeModel, GenericValueType, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -23,7 +23,8 @@ import FileSaver from "file-saver";
 
 // Routing and navigation
 import { useParams } from "react-router-dom";
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -63,7 +64,9 @@ const Template = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_TEMPLATE, {
+  const { loading, error, data, refetch } = useQuery<{
+    template: AttributeModel;
+  }>(GET_TEMPLATE, {
     variables: {
       _id: id,
     },
@@ -76,8 +79,9 @@ const Template = () => {
       exportTemplate(_id: $_id)
     }
   `;
-  const [exportTemplate, { error: exportError }] =
-    useLazyQuery(GET_TEMPLATE_EXPORT);
+  const [exportTemplate, { error: exportError }] = useLazyQuery<{
+    exportTemplate: string;
+  }>(GET_TEMPLATE_EXPORT);
 
   // Mutation to update Template
   const UPDATE_TEMPLATE = gql`
@@ -88,8 +92,9 @@ const Template = () => {
       }
     }
   `;
-  const [updateTemplate, { loading: updateLoading }] =
-    useMutation(UPDATE_TEMPLATE);
+  const [updateTemplate, { loading: updateLoading }] = useMutation<{
+    updateTemplate: ResponseData<string>;
+  }>(UPDATE_TEMPLATE);
 
   // Mutation to archive Template
   const ARCHIVE_TEMPLATE = gql`
@@ -100,8 +105,9 @@ const Template = () => {
       }
     }
   `;
-  const [archiveTemplate, { loading: archiveLoading }] =
-    useMutation(ARCHIVE_TEMPLATE);
+  const [archiveTemplate, { loading: archiveLoading }] = useMutation<{
+    archiveTemplate: ResponseData<string>;
+  }>(ARCHIVE_TEMPLATE);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -145,7 +151,18 @@ const Template = () => {
       },
     });
 
-    if (response.data.archiveTemplate.success) {
+    if (
+      !response.data?.archiveTemplate ||
+      !response.data.archiveTemplate.success
+    ) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred while archiving Template",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.archiveTemplate.success) {
       toaster.create({
         title: "Archived Successfully",
         type: "success",
@@ -154,14 +171,6 @@ const Template = () => {
       });
       setTemplateArchived(true);
       setArchiveDialogOpen(false);
-    } else {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred while archiving Template",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
     }
 
     setEditing(false);
@@ -176,7 +185,18 @@ const Template = () => {
       },
     });
 
-    if (response.data.archiveTemplate.success) {
+    if (
+      !response.data?.archiveTemplate ||
+      !response.data.archiveTemplate.success
+    ) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred while restoring Template",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.archiveTemplate.success) {
       toaster.create({
         title: "Restored Template successfully",
         type: "success",
@@ -185,14 +205,6 @@ const Template = () => {
       });
       setTemplateArchived(false);
       setArchiveDialogOpen(false);
-    } else {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred while restoring Template",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
     }
 
     setEditing(false);
@@ -213,25 +225,28 @@ const Template = () => {
           },
         },
       });
-      if (response.data.updateTemplate.success) {
+
+      if (
+        !response.data?.updateTemplate ||
+        !response.data.updateTemplate.success
+      ) {
+        toaster.create({
+          title: "Error",
+          description: "An error occurred when saving Template updates",
+          type: "error",
+          duration: 2000,
+          closable: true,
+        });
+        setEditing(true);
+      } else if (response.data.updateTemplate.success) {
         toaster.create({
           title: "Updated Successfully",
           type: "success",
           duration: 2000,
           closable: true,
         });
-      } else {
-        toaster.create({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          type: "error",
-          duration: 2000,
-          closable: true,
-        });
+        setEditing(false);
       }
-      setEditing(false);
-    } else {
-      setEditing(true);
     }
   };
 
@@ -257,7 +272,15 @@ const Template = () => {
       },
     });
 
-    if (response.data.exportTemplate) {
+    if (!response.data?.exportTemplate || exportError) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred exporting this Template",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.exportTemplate) {
       FileSaver.saveAs(
         new Blob([response.data.exportTemplate]),
         slugify(`${templateName.replace(" ", "")}_export.json`),
@@ -267,16 +290,6 @@ const Template = () => {
         title: "Success",
         description: `Generated JSON file`,
         type: "success",
-        duration: 2000,
-        closable: true,
-      });
-    }
-
-    if (exportError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred exporting this Project",
-        type: "error",
         duration: 2000,
         closable: true,
       });

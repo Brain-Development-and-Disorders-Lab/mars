@@ -32,7 +32,8 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import { createSelectOptions } from "src/util";
 
 const CounterSelect = (props: CounterProps) => {
@@ -91,8 +92,9 @@ const CounterSelect = (props: CounterProps) => {
       }
     }
   `;
-  const { data: counterData, refetch: refetchCounterData } =
-    useQuery(GET_COUNTERS);
+  const { data: counterData, refetch: refetchCounterData } = useQuery<{
+    counters: CounterModel[];
+  }>(GET_COUNTERS);
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -226,16 +228,22 @@ const CounterSelect = (props: CounterProps) => {
 
     if (result.data?.createCounter) {
       // Refetch the Counter data
-      await refetchCounterData();
+      const { data: refetchedData } = await refetchCounterData();
 
-      const selectedCounter = counterData.counters.filter(
+      const selectedCounter = (
+        refetchedData?.counters ||
+        counterData?.counters ||
+        []
+      ).find(
         (counter: CounterModel) =>
           counter._id === result.data?.createCounter.data,
       );
 
       // Update the selected Counter
-      setSelected(selectedCounter);
-      setOpen(false);
+      if (selectedCounter) {
+        setSelected(selectedCounter);
+        setOpen(false);
+      }
     }
   };
 

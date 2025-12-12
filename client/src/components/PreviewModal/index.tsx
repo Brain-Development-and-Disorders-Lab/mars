@@ -34,7 +34,8 @@ import {
 } from "react-zoom-pan-pinch";
 
 // GraphQL
-import { gql, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { STATIC_URL } from "src/variables";
 
 // Utility functions
@@ -536,12 +537,15 @@ const PreviewContent = (props: {
       downloadFile(_id: $_id)
     }
   `;
-  const { data, loading, error } = useQuery(GET_FILE_URL, {
-    variables: {
-      _id: props.attachment._id,
+  const { data, loading, error } = useQuery<{ downloadFile: string }>(
+    GET_FILE_URL,
+    {
+      variables: {
+        _id: props.attachment._id,
+      },
+      skip: !props.attachment._id,
     },
-    skip: !props.attachment._id,
-  });
+  );
 
   // Handlers for page view manipulation
   const onPreviewDocumentLoadSuccess = ({

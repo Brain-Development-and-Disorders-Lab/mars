@@ -59,7 +59,8 @@ import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 import { JSONPath } from "jsonpath-plus";
 
 const Search = () => {
@@ -117,7 +118,9 @@ const Search = () => {
       }
     }
   `;
-  const [searchText, { error }] = useLazyQuery(SEARCH_TEXT);
+  const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(
+    SEARCH_TEXT,
+  );
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
@@ -134,19 +137,17 @@ const Search = () => {
       },
     });
 
-    if (results.data.search) {
-      setResults(results.data.search);
-    }
-
-    if (error) {
-      setIsError(true);
+    if (error || !results.data?.search) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: error.message,
+        description: error?.message || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });
+      setIsError(true);
+    } else if (results.data.search) {
+      setResults(results.data.search);
     }
 
     setIsSearching(false);
@@ -538,8 +539,11 @@ const Search = () => {
       }
     }
   `;
-  const [searchAdvanced, { error: searchAdvancedError }] =
-    useLazyQuery(SEARCH_ADVANCED);
+  const [searchAdvanced, { error: searchAdvancedError }] = useLazyQuery<{
+    search: EntityModel[];
+  }>(SEARCH_ADVANCED, {
+    fetchPolicy: "network-only",
+  });
 
   // State to hold the query
   const [advancedQuery, setAdvancedQuery] = useState(initialAdvancedQuery);
@@ -562,21 +566,20 @@ const Search = () => {
         isBuilder: true,
         showArchived: false,
       },
-      fetchPolicy: "network-only",
     });
 
-    if (results.data.search) {
-      setResults(results.data.search);
-    }
-
-    if (searchAdvancedError) {
+    if (searchAdvancedError || !results.data?.search) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: searchAdvancedError.message,
+        description:
+          searchAdvancedError?.message || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });
+      setIsError(true);
+    } else if (results.data.search) {
+      setResults(results.data.search);
     }
 
     setIsSearching(false);

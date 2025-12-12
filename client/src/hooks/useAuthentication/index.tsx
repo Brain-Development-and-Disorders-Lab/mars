@@ -8,7 +8,8 @@ import { useToken } from "@hooks/useToken";
 import { IAuth, IResponseMessage, ResponseData, UserModel } from "@types";
 
 // GraphQL
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";

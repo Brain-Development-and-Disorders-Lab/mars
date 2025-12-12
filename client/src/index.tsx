@@ -6,15 +6,10 @@ import { createRoot } from "react-dom/client";
 import { toaster } from "src/components/Toast";
 
 // Apollo imports
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  ApolloLink,
-} from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
-import { onError } from "@apollo/client/link/error";
-import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
+import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
+import { ErrorLink } from "@apollo/client/link/error";
+import { ApolloProvider } from "@apollo/client/react";
+import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
 // Posthog
 import posthog from "posthog-js";
@@ -46,29 +41,38 @@ import consola from "consola";
 import App from "./App";
 
 // Setup Apollo client
-const httpLink = createUploadLink({
+const httpLink = new UploadHttpLink({
   uri: API_URL,
   headers: {
     "Apollo-Require-Preflight": "true",
   },
 });
 
-const authLink = setContext((_, { headers }) => {
-  return {
+/**
+ * Authentication link to add headers to each request
+ */
+const authLink = new ApolloLink((operation, forward) => {
+  const token = getToken(TOKEN_KEY);
+  const session = getSession(SESSION_KEY);
+
+  operation.setContext(({ headers = {} }) => ({
     headers: {
       ...headers,
-      user: getToken(TOKEN_KEY).orcid,
-      token: getToken(TOKEN_KEY).token,
-      workspace: getSession(SESSION_KEY).workspace,
+      user: token.orcid,
+      token: token.token,
+      workspace: session.workspace,
     },
-  };
+  }));
+
+  return forward(operation);
 });
 
 /**
  * Error handling for GraphQL errors that occur throughout the application
  */
-const errorLink = onError(({ graphQLErrors }) => {
-  if (graphQLErrors) {
+const errorLink = new ErrorLink(({ error }) => {
+  if (error.name === "CombinedGraphQLErrors" && "errors" in error) {
+    const graphQLErrors = error.errors as Array<{ message: string }>;
     for (const err of graphQLErrors) {
       if (err.message === "Could not validate token") {
         toaster.create({
@@ -94,13 +98,8 @@ const errorLink = onError(({ graphQLErrors }) => {
 });
 
 const client = new ApolloClient({
-  link: ApolloLink.from([
-    errorLink,
-    authLink,
-    httpLink as unknown as ApolloLink,
-  ]),
+  link: ApolloLink.from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache({
-    addTypename: false,
     typePolicies: {
       Workspace: {
         keyFields: ["_id"],

@@ -7,7 +7,8 @@ import React, {
 } from "react";
 
 // GraphQL
-import { gql, useLazyQuery, useApolloClient } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useApolloClient } from "@apollo/client/react";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
