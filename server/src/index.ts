@@ -16,7 +16,7 @@ import { connect } from "./connectors/database";
 
 // GraphQL
 import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@apollo/server/express4";
+import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { typedefs } from "./typedefs";
 
@@ -161,7 +161,7 @@ const start = async () => {
     graphqlUploadExpress({
       maxFileSize: 104857600, // 100MB
       maxFiles: 10,
-    }) as RequestHandler,
+    }) as unknown as RequestHandler,
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
         // Extract values from headers and create Context value
