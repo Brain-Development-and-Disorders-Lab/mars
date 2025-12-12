@@ -41,7 +41,7 @@ describe("Loading Component", () => {
       const rootElement = container.firstChild;
       expect(rootElement).toBeTruthy();
       // Verify it's a div (Flex renders as a div)
-      expect(rootElement?.tagName).toBe("DIV");
+      expect((rootElement as HTMLElement).tagName).toBe("DIV");
     });
 
     it("has minimum height", () => {
