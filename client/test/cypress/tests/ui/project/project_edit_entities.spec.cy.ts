@@ -27,7 +27,11 @@ describe("Project, edit Entities", () => {
 
     // Validate the Entity was added
     cy.get(".data-table-scroll-container").contains("Test Entity");
+    // Reload to verify persistence
     cy.reload();
+    cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
+      "be.visible",
+    );
     cy.get(".data-table-scroll-container").contains("Test Entity");
   });
 
@@ -159,23 +163,27 @@ describe("Project, edit Entities", () => {
       .click();
     cy.get("#addEntityDoneButton").should("be.visible").click();
 
-    // Wait for modal to close
-    cy.wait(300);
+    // Wait for modal to close (use assertion instead of arbitrary wait)
+    cy.get("#addEntityDoneButton").should("not.exist");
 
     cy.contains("button", "Save")
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Wait for save to complete
-    cy.url().should("include", "/edit");
-
+    // Save button opens a save modal - click Done in the modal
     cy.contains("button", "Done")
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Wait for navigation away from edit mode
+    // After save, exit edit mode, button should show "Edit"
+    cy.get("#editProjectButton", { timeout: 10000 })
+      .should("be.visible")
+      .should("contain", "Edit");
+
+    // Verify still on the project page (URL doesn't change)
+    cy.url().should("include", "/projects/");
     cy.url().should("not.include", "/edit");
     cy.reload();
 
@@ -204,14 +212,14 @@ describe("Project, edit Entities", () => {
           });
       });
 
-    // Wait for Entity page to load - wait for URL change and page elements
+    // Wait for Entity page to load
     cy.url().should("include", "/entities/");
     cy.get("#editEntityButton", { timeout: 10000 })
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Find the Linked Projects DataTable by looking for the project name
+    // Find the Linked Projects DataTable
     cy.contains(".data-table-scroll-container", projectName)
       .should("be.visible")
       .within(() => {
@@ -224,7 +232,6 @@ describe("Project, edit Entities", () => {
           .should("have.length.at.least", 1)
           .first()
           .within(() => {
-            // Find the button and store it as an alias to avoid race condition
             cy.get('button[aria-label="Remove Project"]')
               .should("be.visible")
               .should("not.be.disabled")
@@ -234,26 +241,31 @@ describe("Project, edit Entities", () => {
 
     cy.get("@removeProjectButton").click();
 
-    // Wait for the remove action to complete and DOM to stabilize
-    cy.wait(500);
+    // Wait for the remove action to complete
+    cy.get("@removeProjectButton").should("not.exist");
 
     cy.contains("button", "Save")
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Wait for save to complete
-    cy.url().should("include", "/edit");
-
+    // Save button opens a save modal - click Done in the modal
     cy.contains("button", "Done")
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Wait for navigation away from edit mode
+    // After save, exit edit mode, button should show "Edit"
+    // We're still on the Entity page, so check for editEntityButton
+    cy.get("#editEntityButton", { timeout: 10000 })
+      .should("be.visible")
+      .should("contain", "Edit");
+
+    // Verify still on the entity page (URL doesn't change)
+    cy.url().should("include", "/entities/");
     cy.url().should("not.include", "/edit");
 
-    // Navigate back to the Project
+    // Navigate to the Projects page
     cy.contains("button", "Projects")
       .should("be.visible")
       .should("not.be.disabled")
