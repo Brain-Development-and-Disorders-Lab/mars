@@ -39,6 +39,7 @@ const ActorTag = (props: ActorTagProps) => {
       variables: {
         _id: props.orcid,
       },
+      skip: !props.orcid || props.orcid.trim() === "",
     },
   );
 
