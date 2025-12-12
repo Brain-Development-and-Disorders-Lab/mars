@@ -115,8 +115,16 @@ describe("Project, edit Entities", () => {
     const projectName = "My First Project";
 
     // Navigate to Projects
-    cy.contains("button", "Projects").click();
-    cy.get(".data-table-scroll-container").should("be.visible");
+    cy.contains("button", "Projects")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    // Wait for navigation to Projects page
+    cy.url().should("include", "/projects");
+    cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
+      "be.visible",
+    );
 
     // Find the project by name, not by position
     cy.get(".data-table-scroll-container").within(() => {
@@ -130,11 +138,17 @@ describe("Project, edit Entities", () => {
         .within(() => {
           cy.get('button[aria-label="View Project"]')
             .should("be.visible")
+            .should("not.be.disabled")
             .click();
         });
     });
 
-    cy.get("#editProjectButton").should("be.visible").click();
+    // Wait for project page to load
+    cy.url().should("include", "/projects/");
+    cy.get("#editProjectButton", { timeout: 10000 })
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Add an Entity
     cy.get("#addEntityButton").should("be.visible").click();
@@ -144,8 +158,22 @@ describe("Project, edit Entities", () => {
       .should("be.visible")
       .click();
     cy.get("#addEntityDoneButton").should("be.visible").click();
-    cy.contains("button", "Save").should("be.visible").click();
-    cy.contains("button", "Done").should("be.visible").click();
+
+    // Wait for modal to close
+    cy.wait(300);
+
+    cy.contains("button", "Save")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    // Wait for save to complete
+    cy.url().should("include", "/edit");
+
+    cy.contains("button", "Done")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Wait for navigation away from edit mode
     cy.url().should("not.include", "/edit");
@@ -176,8 +204,12 @@ describe("Project, edit Entities", () => {
           });
       });
 
-    // Wait for Entity page to load
-    cy.get("#editEntityButton").should("be.visible").click();
+    // Wait for Entity page to load - wait for URL change and page elements
+    cy.url().should("include", "/entities/");
+    cy.get("#editEntityButton", { timeout: 10000 })
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Find the Linked Projects DataTable by looking for the project name
     cy.contains(".data-table-scroll-container", projectName)
@@ -192,21 +224,46 @@ describe("Project, edit Entities", () => {
           .should("have.length.at.least", 1)
           .first()
           .within(() => {
+            // Find the button and store it as an alias to avoid race condition
             cy.get('button[aria-label="Remove Project"]')
               .should("be.visible")
-              .click();
+              .should("not.be.disabled")
+              .as("removeProjectButton");
           });
       });
 
-    cy.contains("button", "Save").should("be.visible").click();
-    cy.contains("button", "Done").should("be.visible").click();
+    cy.get("@removeProjectButton").click();
+
+    // Wait for the remove action to complete and DOM to stabilize
+    cy.wait(500);
+
+    cy.contains("button", "Save")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    // Wait for save to complete
+    cy.url().should("include", "/edit");
+
+    cy.contains("button", "Done")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Wait for navigation away from edit mode
     cy.url().should("not.include", "/edit");
 
     // Navigate back to the Project
-    cy.contains("button", "Projects").click();
-    cy.get(".data-table-scroll-container").should("be.visible");
+    cy.contains("button", "Projects")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    // Wait for navigation to Projects page
+    cy.url().should("include", "/projects");
+    cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
+      "be.visible",
+    );
 
     // Find the project by name again
     cy.get(".data-table-scroll-container").within(() => {
@@ -220,11 +277,17 @@ describe("Project, edit Entities", () => {
         .within(() => {
           cy.get('button[aria-label="View Project"]')
             .should("be.visible")
+            .should("not.be.disabled")
             .click();
         });
     });
 
-    cy.get("#editProjectButton").should("be.visible").click();
+    // Wait for project page to load
+    cy.url().should("include", "/projects/");
+    cy.get("#editProjectButton", { timeout: 10000 })
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Validate the Entity was removed from the project
     cy.get("body").then(($body) => {

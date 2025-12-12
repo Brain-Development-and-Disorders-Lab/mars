@@ -31,7 +31,18 @@ module.exports = {
       },
       {
         test: /\.s[ac]ss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: [
+          "style-loader",
+          "css-loader",
+          {
+            loader: "sass-loader",
+            options: {
+              sassOptions: {
+                quietDeps: true,
+              },
+            },
+          },
+        ],
       },
     ],
   },
@@ -55,7 +66,7 @@ module.exports = {
         "./node_modules/parse5/node_modules/entities/dist/commonjs/escape.js",
       ),
     },
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: [".tsx", ".ts", ".js", ".mjs"],
   },
   output: {
     filename: "client.bundle.js",

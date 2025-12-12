@@ -41,12 +41,14 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Relationships");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Click on the "Back" button to return to the start step
-    cy.get("button").contains("Back").click();
-    cy.get("h2").contains("Create Entity");
+    cy.get("button").contains("Back").should("be.visible").click();
+    cy.get("h2").contains("Create Entity").should("be.visible");
 
     // Wait for the input to be enabled after navigating back
     cy.get("[data-testid='create-entity-name']")
@@ -54,20 +56,28 @@ describe("Create Entities", () => {
       .should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Relationships");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Click on the "Continue" button to go to the Attributes step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Attributes");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Attributes")
+      .should("be.visible");
 
     // Click on the "Back" button to return to the Relationships step
-    cy.get("button").contains("Back").click();
-    cy.get(".chakra-empty-state__description").contains("No Relationships");
+    cy.get("button").contains("Back").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Click on the "Continue" button to go to the Attributes step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Attributes");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Attributes")
+      .should("be.visible");
   });
 
   it("should allow adding Relationships", () => {
@@ -92,17 +102,21 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
-    cy.get("button").contains("Continue").click();
+    cy.get("button").contains("Continue").should("be.visible").click();
+
+    // Wait for relationships step to load
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Add a relationship
-    cy.get("[data-testid='search-select']").click();
-    cy.get("button").contains("Test Entity").click();
-    cy.get("button").contains("Add").click();
+    cy.get("[data-testid='search-select']").should("be.visible").click();
+    cy.get("button").contains("Test Entity").should("be.visible").click();
+    cy.get("button").contains("Add").should("be.visible").click();
 
     // Check if the relationship is displayed in a table
-    cy.get(".data-table-scroll-container").should("exist");
-    cy.get("#0_target").should("exist");
-    cy.get("#0_target").contains("Test Entity");
+    cy.get(".data-table-scroll-container").should("be.visible");
+    cy.get("#0_target").should("be.visible").contains("Test Entity");
   });
 
   it("should allow adding Template Attributes", () => {
@@ -127,13 +141,26 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the relationships step
-    cy.get("button").contains("Continue").click();
+    cy.get("button").contains("Continue").should("be.visible").click();
+
+    // Wait for relationships step to load
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Click on "Continue" to go to the Attributes step
-    cy.get("button").contains("Continue").click();
+    cy.get("button").contains("Continue").should("be.visible").click();
 
-    // Wait for templates to be loaded and select to be enabled
-    cy.get("[data-testid='select-template-trigger']").should("not.be.disabled");
+    // Wait for attributes step to load - check for the empty state or attributes section
+    cy.get(".chakra-empty-state__description")
+      .contains("No Attributes")
+      .should("be.visible");
+
+    // Wait for the template select to be visible and enabled
+    // The select might take time to load templates from the server
+    cy.get("[data-testid='select-template-trigger']", { timeout: 10000 })
+      .should("be.visible")
+      .should("not.be.disabled");
 
     // Add an Attribute
     cy.get("[data-testid='select-template-trigger']").click();
@@ -144,10 +171,14 @@ describe("Create Entities", () => {
       .click();
 
     // Check if the Attribute is displayed (wait for it to be visible)
-    cy.get("[data-testid='create-entity-attributes']").should("be.visible");
+    cy.get("[data-testid='create-entity-attributes']", {
+      timeout: 10000,
+    }).should("be.visible");
 
     // Save the Attribute and finish creating the Entity
     cy.get("button").contains("Save").should("be.visible").click();
+
+    // Wait for Save to complete before clicking Finish
     cy.get("button").contains("Finish").should("be.visible").click();
 
     // Check redirection
@@ -176,15 +207,19 @@ describe("Create Entities", () => {
     cy.get("button").contains("Continue").should("not.be.disabled");
 
     // Click on the "Continue" button to go to the Relationships step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Relationships");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Relationships")
+      .should("be.visible");
 
     // Click on the "Continue" button to go to the Attributes step
-    cy.get("button").contains("Continue").click();
-    cy.get(".chakra-empty-state__description").contains("No Attributes");
+    cy.get("button").contains("Continue").should("be.visible").click();
+    cy.get(".chakra-empty-state__description")
+      .contains("No Attributes")
+      .should("be.visible");
 
     // Click the button to finish creating the Entity
-    cy.get("button").contains("Finish").click();
+    cy.get("button").contains("Finish").should("be.visible").click();
 
     // Check redirection
     cy.url().should("include", "/entities"); // Check if redirected to Entities page
