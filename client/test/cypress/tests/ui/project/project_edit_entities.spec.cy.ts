@@ -224,15 +224,18 @@ describe("Project, edit Entities", () => {
           .should("have.length.at.least", 1)
           .first()
           .within(() => {
+            // Find the button and store it as an alias to avoid race condition
             cy.get('button[aria-label="Remove Project"]')
               .should("be.visible")
               .should("not.be.disabled")
-              .click();
+              .as("removeProjectButton");
           });
       });
 
-    // Wait for the remove action to complete (page might update)
-    cy.wait(500); // Brief wait for DOM update
+    cy.get("@removeProjectButton").click();
+
+    // Wait for the remove action to complete and DOM to stabilize
+    cy.wait(500);
 
     cy.contains("button", "Save")
       .should("be.visible")
