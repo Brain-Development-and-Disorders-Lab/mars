@@ -421,6 +421,27 @@ export const typedefs = `#graphql
     addedDay: Int
   }
 
+  # "EntitiesResponse" type for paginated results
+  type EntitiesResponse {
+    entities: [Entity]
+    total: Int
+  }
+
+  # "EntityFilterInput" input for filtering entities
+  input EntityFilterInput {
+    startDate: String
+    endDate: String
+    owners: [String]
+    hasAttachments: Boolean
+    attributeCountRanges: [String]
+  }
+
+  # "EntitySortInput" input for sorting entities
+  input EntitySortInput {
+    field: String!
+    direction: String!
+  }
+
   # "ProjectMetrics" type
   type ProjectMetrics {
     all: Int
@@ -474,7 +495,7 @@ export const typedefs = `#graphql
     projectMetrics: ProjectMetrics
 
     # Entity queries
-    entities(limit: Int, archived: Boolean, reverse: Boolean): [Entity]
+    entities(limit: Int, archived: Boolean, reverse: Boolean, page: Int, pageSize: Int, filter: EntityFilterInput, sort: EntitySortInput): EntitiesResponse
     entity(_id: String): Entity
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics

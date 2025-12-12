@@ -76,9 +76,24 @@ const includesSome = (
   ) {
     return true;
   }
-  return Array.isArray(filterValue)
-    ? filterValue.includes(row.getValue(columnId))
-    : true;
+  if (!Array.isArray(filterValue)) {
+    return true;
+  }
+
+  const rowValue = row.getValue(columnId);
+
+  // For arrays, compare by length (since we group by length in the filter)
+  if (Array.isArray(rowValue)) {
+    return filterValue.some((filterVal) => {
+      if (Array.isArray(filterVal)) {
+        return filterVal.length === rowValue.length;
+      }
+      return false;
+    });
+  }
+
+  // For non-arrays, use direct comparison
+  return filterValue.includes(rowValue);
 };
 
 (
@@ -106,20 +121,47 @@ const ColumnFilterMenu = <TData extends RowData>({
     return String(val);
   };
 
-  const getFilterKey = (val: unknown) => {
+  const getFilterKey = (val: unknown): string => {
     if (val === null || val === undefined) return "empty";
-    if (Array.isArray(val)) return val.length.toString();
-    if (typeof val === "object") return JSON.stringify(val);
-    return String(val);
+    if (Array.isArray(val)) {
+      // For arrays, use the length as the key (arrays with same length are considered equal for filtering)
+      return `array:${val.length}`;
+    }
+    if (typeof val === "object") {
+      // For objects, use JSON.stringify for deep comparison
+      return JSON.stringify(val);
+    }
+    // Normalize strings (trim whitespace) but preserve case
+    // Convert to string and trim to handle whitespace-only differences
+    const str = String(val).trim();
+    return str || "empty";
   };
 
-  const values = useMemo(
-    () =>
-      _.uniq(
-        data.map((row) => (row as Record<string, unknown>)[columnId]),
-      ).filter((val) => val !== null && val !== undefined),
-    [data, columnId],
-  );
+  const values = useMemo(() => {
+    const rawValues = data.map(
+      (row) => (row as Record<string, unknown>)[columnId],
+    );
+
+    // Use a Map to ensure uniqueness based on normalized keys
+    // For arrays, we want to group by length, so use the display value as the key
+    const uniqueMap = new Map<string, unknown>();
+    for (const val of rawValues) {
+      if (val !== null && val !== undefined) {
+        // For arrays, use display value as key to group by length
+        // For other types, use the normalized key
+        const key = Array.isArray(val)
+          ? getDisplayValue(val)
+          : getFilterKey(val);
+
+        // Only add if we haven't seen this normalized key before
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, val);
+        }
+      }
+    }
+
+    return Array.from(uniqueMap.values());
+  }, [data, columnId]);
 
   const filtered = useMemo(
     () =>
@@ -290,7 +332,52 @@ const customSortingFn = (
 
 const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
-  const [pageLength, setPageLength] = useState<string[]>(["20"]);
+  const [pageLength, setPageLength] = useState<string[]>([
+    props.pageSize?.toString() || "20",
+  ]);
+  const [pageIndex, setPageIndex] = useState(props.pageIndex ?? 0);
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    // Initialize sorting state from props if provided (for server-side sorting)
+    if (props.sortState) {
+      return [
+        {
+          id: props.sortState.field,
+          desc: props.sortState.direction === "desc",
+        },
+      ];
+    }
+    return [];
+  });
+
+  // Determine if we're using server-side pagination
+  const isServerSidePagination = props.pageCount !== undefined;
+
+  // Sync internal state with parent props when they change
+  useEffect(() => {
+    if (isServerSidePagination && props.pageIndex !== undefined) {
+      setPageIndex(props.pageIndex);
+    }
+  }, [props.pageIndex, isServerSidePagination]);
+
+  useEffect(() => {
+    if (isServerSidePagination && props.pageSize !== undefined) {
+      setPageLength([props.pageSize.toString()]);
+    }
+  }, [props.pageSize, isServerSidePagination]);
+
+  // Sync sorting state with parent props (for server-side sorting)
+  useEffect(() => {
+    if (props.sortState) {
+      setSorting([
+        {
+          id: props.sortState.field,
+          desc: props.sortState.direction === "desc",
+        },
+      ]);
+    } else if (props.sortState === null) {
+      setSorting([]);
+    }
+  }, [props.sortState]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initial: Record<string, boolean> = { ...props.visibleColumns };
@@ -303,7 +390,6 @@ const DataTable = (props: DataTableProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     props.columnFilters ?? [],
   );
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRowsRef = useRef(selectedRows);
@@ -521,13 +607,22 @@ const DataTable = (props: DataTableProps) => {
     data: props.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel:
+      isServerSidePagination && props.onSortChange
+        ? undefined
+        : getSortedRowModel(),
+    getPaginationRowModel: isServerSidePagination
+      ? undefined
+      : getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: isServerSidePagination,
+    manualSorting: isServerSidePagination && props.onSortChange ? true : false,
+    pageCount: props.pageCount,
     autoResetPageIndex: false,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageIndex: 0,
+        pageSize: parseInt(pageLength[0]) || 20,
       },
     },
     state: {
@@ -535,11 +630,49 @@ const DataTable = (props: DataTableProps) => {
       rowSelection: selectedRows,
       columnFilters,
       sorting,
+      pagination: {
+        pageIndex,
+        pageSize: parseInt(pageLength[0]) || 20,
+      },
     },
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const newSorting =
+        typeof updater === "function" ? updater(sorting) : updater;
+      setSorting(newSorting);
+
+      // Notify parent of sort changes for server-side sorting
+      if (props.onSortChange && newSorting.length > 0) {
+        const sort = newSorting[0];
+        const field = sort.id;
+        const direction = sort.desc ? "desc" : "asc";
+        props.onSortChange(field, direction);
+      } else if (props.onSortChange) {
+        props.onSortChange("", null);
+      }
+    },
+    onPaginationChange: (updater) => {
+      const currentState = table.getState().pagination;
+      const newState =
+        typeof updater === "function" ? updater(currentState) : updater;
+
+      const pageSizeChanged = newState.pageSize !== currentState.pageSize;
+
+      // If page size changed, reset to page 0
+      const finalPageIndex = pageSizeChanged ? 0 : newState.pageIndex;
+
+      setPageIndex(finalPageIndex);
+      if (pageSizeChanged) {
+        setPageLength([newState.pageSize.toString()]);
+      }
+
+      // For server-side pagination, notify parent
+      if (isServerSidePagination && props.onPaginationChange) {
+        props.onPaginationChange(finalPageIndex, newState.pageSize);
+      }
+    },
     filterFns: {
       includesSome,
     },
@@ -564,6 +697,20 @@ const DataTable = (props: DataTableProps) => {
       },
     },
   });
+
+  // Sync pagination changes to parent (for server-side pagination)
+  // Only call onPaginationChange when user actually changes pagination, not on initial render
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (isServerSidePagination && props.onPaginationChange) {
+      const currentPageSize = parseInt(pageLength[0]) || 20;
+      props.onPaginationChange(pageIndex, currentPageSize);
+    }
+  }, [pageIndex, pageLength, isServerSidePagination, props.onPaginationChange]);
 
   useEffect(() => {
     const currentColumnNames = columnNames.join(",");

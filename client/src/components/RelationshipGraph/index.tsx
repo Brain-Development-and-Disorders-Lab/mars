@@ -1,5 +1,5 @@
 // React
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
 // Existing and custom components
 import { Button, Flex, Text } from "@chakra-ui/react";
@@ -26,12 +26,14 @@ import { gql, useLazyQuery } from "@apollo/client";
 import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
-const Graph = (props: {
+const RelationshipGraph = (props: {
   id: string;
   entityNavigateHook: (id: string) => void;
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   // Queries
   const GET_ENTITY_DATA = gql`
@@ -436,6 +438,36 @@ const Graph = (props: {
     }
   };
 
+  // Update dimensions when container size changes
+  const updateDimensions = useCallback(() => {
+    if (containerRef.current) {
+      // Use clientWidth and clientHeight to get dimensions excluding padding and border
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+      setDimensions({ width, height });
+    }
+  }, []);
+
+  // Setup ResizeObserver to track container size changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Set initial dimensions
+    updateDimensions();
+
+    // Create ResizeObserver to watch for size changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    // Cleanup
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateDimensions]);
+
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
     setupGraph();
@@ -448,55 +480,65 @@ const Graph = (props: {
       justify={"center"}
       direction={"column"}
       w={"100%"}
-      p={"0"}
+      p={"1"}
       gap={"1"}
     >
       <Flex
+        ref={containerRef}
         p={"1"}
-        w={"97vw"}
-        h={"95vh"}
+        w={"100%"}
+        h={"100%"}
         rounded={"md"}
-        border={"1px"}
+        border={"1px solid"}
         borderColor={"gray.300"}
+        overflow={"hidden"}
+        bg={"white"}
         filter={loading ? "blur(10px);" : ""}
       >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeClick={onNodeClick}
-          attributionPosition={"bottom-right"}
-          fitView
-        >
-          <MiniMap
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            nodeStrokeColor={(node: any) => {
-              // Check for defined custom colors
-              if (node.style?.background) return node.style.background;
-              if (node.style?.borderColor) return node.style.borderColor;
-
-              // Default colors
-              if (node.type === "input") return "#0041d0";
-              if (node.type === "output") return "#ff0072";
-              if (node.type === "default") return "#1a192b";
-
-              return "#EEE";
+        {dimensions.width > 0 && dimensions.height > 0 && (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeClick={onNodeClick}
+            attributionPosition={"bottom-right"}
+            fitView
+            style={{
+              width: dimensions.width,
+              height: dimensions.height,
+              borderRadius: "6px",
             }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            nodeColor={(node: any) => {
-              if (node.style?.background) return node.style.background;
+          >
+            <MiniMap
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              nodeStrokeColor={(node: any) => {
+                // Check for defined custom colors
+                if (node.style?.background) return node.style.background;
+                if (node.style?.borderColor) return node.style.borderColor;
 
-              return "#fff";
-            }}
-            nodeBorderRadius={2}
-          />
-          <Controls />
-          <Background color={"#aaa"} gap={16} />
-        </ReactFlow>
+                // Default colors
+                if (node.type === "input") return "#0041d0";
+                if (node.type === "output") return "#ff0072";
+                if (node.type === "default") return "#1a192b";
+
+                return "#EEE";
+              }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              nodeColor={(node: any) => {
+                if (node.style?.background) return node.style.background;
+
+                return "#fff";
+              }}
+              nodeBorderRadius={2}
+            />
+            <Controls />
+            <Background color={"#aaa"} gap={16} />
+          </ReactFlow>
+        )}
       </Flex>
     </Flex>
   );
 };
 
-export default Graph;
+export default RelationshipGraph;

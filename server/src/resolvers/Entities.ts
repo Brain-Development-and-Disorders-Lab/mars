@@ -25,7 +25,23 @@ export const EntitiesResolvers = {
     // Retrieve all Entities
     entities: async (
       _parent: IResolverParent,
-      args: { limit: number | undefined; archived: boolean; reverse: boolean },
+      args: {
+        limit: number | undefined;
+        archived: boolean | undefined;
+        reverse: boolean | undefined;
+        page: number | undefined;
+        pageSize: number | undefined;
+        filter:
+          | {
+              startDate?: string;
+              endDate?: string;
+              owners?: string[];
+              hasAttachments?: boolean;
+              attributeCountRanges?: string[];
+            }
+          | undefined;
+        sort: { field: string; direction: string } | undefined;
+      },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -41,25 +57,50 @@ export const EntitiesResolvers = {
         });
       }
 
-      // Filter by ownership and Workspace membership
-      const entities = await Entities.getMany(workspace.entities);
+      // Determine archived filter value
+      // If archived is explicitly true, show all (including archived)
+      // If archived is false or undefined, show only non-archived
+      const archivedFilter: boolean | undefined =
+        args.archived === true ? undefined : false;
 
-      // Reverse the order of the Entities if requested
-      if (args.reverse) {
-        entities.reverse();
+      // Determine pagination parameters
+      let page = 0;
+      let pageSize = 20; // Default page size
+
+      // If pagination parameters are explicitly provided, use them
+      if (
+        !_.isUndefined(args.page) &&
+        !_.isUndefined(args.pageSize) &&
+        args.pageSize > 0
+      ) {
+        page = Math.max(0, args.page);
+        pageSize = Math.max(1, args.pageSize);
+      } else if (!_.isUndefined(args.limit) && args.limit > 0) {
+        // If limit is provided, use it as page size
+        pageSize = args.limit;
+        page = 0;
       }
 
-      return entities
-        .filter((entity) => {
-          if (args.archived === true) {
-            // If showing all Entities, including archived
-            return true;
-          } else {
-            // If only showing active Entities, not archived
-            return entity.archived === false;
-          }
-        })
-        .slice(0, _.isUndefined(args.limit) ? entities.length : args.limit);
+      const skip = page * pageSize;
+
+      // Get paginated entities and total count
+      const [entities, total] = await Promise.all([
+        Entities.getManyPaginated(
+          workspace.entities,
+          skip,
+          pageSize,
+          archivedFilter,
+          args.reverse || false,
+          args.filter,
+          args.sort,
+        ),
+        Entities.countMany(workspace.entities, archivedFilter, args.filter),
+      ]);
+
+      return {
+        entities,
+        total,
+      };
     },
 
     // Retrieve one Entity by _id

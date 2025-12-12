@@ -405,6 +405,14 @@ export type DataTableProps = {
 
   // Layout behavior
   fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
+
+  // Server-side pagination (if pageCount is provided, pagination is handled server-side)
+  pageCount?: number; // Total number of pages (enables server-side pagination)
+  pageIndex?: number; // Current page index (0-based) - for syncing with parent state
+  pageSize?: number; // Current page size - for syncing with parent state
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void; // Callback when pagination changes
+  onSortChange?: (field: string, direction: "asc" | "desc" | null) => void; // Callback when sorting changes (for server-side sorting)
+  sortState?: { field: string; direction: "asc" | "desc" } | null; // Current sort state (for syncing with server-side sorting)
 };
 
 export type DataTableAction = {

@@ -79,9 +79,12 @@ const Workspace = () => {
         archived
       }
       entities(archived: $entitiesArchived) {
-        _id
-        name
-        archived
+        entities {
+          _id
+          name
+          archived
+        }
+        total
       }
       templates {
         _id
@@ -101,7 +104,10 @@ const Workspace = () => {
     getWorkspaceData,
     { loading: workspaceDataLoading, error: workspaceDataError },
   ] = useLazyQuery<{
-    entities: (IGenericItem & { archived: boolean })[];
+    entities: {
+      entities: (IGenericItem & { archived: boolean })[];
+      total: number;
+    };
     projects: (IGenericItem & { archived: boolean })[];
     templates: (IGenericItem & { archived: boolean })[];
     counters: CounterModel[];
@@ -198,11 +204,6 @@ const Workspace = () => {
   );
   const [selectedTemplates, setSelectedTemplates] = useState({});
 
-  // State for Workspace content presentation (show archived or not)
-  const [showArchivedEntities, setShowArchivedEntities] = useState(false);
-  const [showArchivedProjects, setShowArchivedProjects] = useState(false);
-  const [showArchivedTemplates, setShowArchivedTemplates] = useState(false);
-
   // State for Workspace collaborators
   const [collaborators, setCollaborators] = useState([] as string[]);
 
@@ -231,31 +232,33 @@ const Workspace = () => {
         setIsPublic(workspaceResult.data.workspace.public);
       }
 
-      // Get all Workspace data
       const workspaceData = await getWorkspaceData();
-      if (workspaceData.data?.entities) {
-        setEntities(workspaceData.data.entities);
+      if (workspaceData.data?.entities?.entities) {
+        setEntities(workspaceData.data.entities.entities);
+        // Filter to only show archived entities
         setShownEntities([
-          ...workspaceData.data.entities.filter(
-            (entity) => entity.archived === showArchivedEntities,
+          ...workspaceData.data.entities.entities.filter(
+            (entity) => entity.archived === true,
           ),
         ]);
         setSelectedEntities({});
       }
       if (workspaceData.data?.projects) {
         setProjects(workspaceData.data.projects);
+        // Filter to only show archived projects
         setShownProjects([
           ...workspaceData.data.projects.filter(
-            (project) => project.archived === showArchivedProjects,
+            (project) => project.archived === true,
           ),
         ]);
         setSelectedProjects({});
       }
       if (workspaceData.data?.templates) {
         setTemplates(workspaceData.data.templates);
+        // Filter to only show archived templates
         setShownTemplates([
           ...workspaceData.data.templates.filter(
-            (template) => template.archived === showArchivedTemplates,
+            (template) => template.archived === true,
           ),
         ]);
         setSelectedTemplates({});
@@ -264,7 +267,7 @@ const Workspace = () => {
         setCounters(workspaceData.data.counters);
       }
 
-      if (workspaceError || workspaceDataError) {
+      if (workspaceError || workspaceDataError || workspaceData.error) {
         toaster.create({
           title: "Error",
           description: "Unable to refresh Workspace information",
@@ -279,32 +282,21 @@ const Workspace = () => {
     refreshWorkspace();
   }, [workspace]);
 
-  // Effect to manage what contents are shown when `showArchived` is changed or archive state changed
+  // Effect to manage what contents are shown - only show archived items
   useEffect(() => {
     setShownEntities([
-      ...entities.filter((entity) => entity.archived === showArchivedEntities),
+      ...entities.filter((entity) => entity.archived === true),
     ]);
     setSelectedEntities({});
     setShownProjects([
-      ...projects.filter(
-        (project) => project.archived === showArchivedProjects,
-      ),
+      ...projects.filter((project) => project.archived === true),
     ]);
     setSelectedProjects({});
     setShownTemplates([
-      ...templates.filter(
-        (template) => template.archived === showArchivedTemplates,
-      ),
+      ...templates.filter((template) => template.archived === true),
     ]);
     setSelectedTemplates({});
-  }, [
-    entities,
-    projects,
-    templates,
-    showArchivedEntities,
-    showArchivedProjects,
-    showArchivedTemplates,
-  ]);
+  }, [entities, projects, templates]);
 
   /**
    * Handler function for modal `Done` button, apply updates to the Workspace
@@ -512,20 +504,13 @@ const Workspace = () => {
               <Button
                 size={"2xs"}
                 rounded={"md"}
-                aria-label={"Archive"}
+                aria-label={"Restore"}
                 colorPalette={"orange"}
                 variant={"subtle"}
-                onClick={() =>
-                  archiveEntity(info.row.original._id, !showArchivedEntities)
-                }
+                onClick={() => archiveEntity(info.row.original._id, false)}
               >
-                {showArchivedEntities ? "Restore" : "Archive"}
-                {
-                  <Icon
-                    name={showArchivedEntities ? "rewind" : "archive"}
-                    size={"xs"}
-                  />
-                }
+                Restore
+                {<Icon name={"rewind"} size={"xs"} />}
               </Button>
               <Button
                 variant={"subtle"}
@@ -546,14 +531,14 @@ const Workspace = () => {
   ];
   const entitiesTableActions: DataTableAction[] = [
     {
-      label: showArchivedEntities ? "Restore Entities" : "Archive Entities",
-      icon: showArchivedEntities ? "rewind" : "archive",
+      label: "Restore Entities",
+      icon: "rewind",
       action(table, rows) {
-        const entitiesToArchive: string[] = [];
+        const entitiesToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          entitiesToArchive.push(table.getRow(rowIndex).original._id);
+          entitiesToRestore.push(table.getRow(rowIndex).original._id);
         }
-        archiveEntities(entitiesToArchive, !showArchivedEntities);
+        archiveEntities(entitiesToRestore, false);
       },
     },
   ];
@@ -585,20 +570,13 @@ const Workspace = () => {
               <Button
                 size={"2xs"}
                 rounded={"md"}
-                aria-label={"Archive Project"}
+                aria-label={"Restore Project"}
                 colorPalette={"orange"}
                 variant={"subtle"}
-                onClick={() =>
-                  archiveProject(info.row.original._id, !showArchivedProjects)
-                }
+                onClick={() => archiveProject(info.row.original._id, false)}
               >
-                {showArchivedProjects ? "Restore" : "Archive"}
-                {
-                  <Icon
-                    name={showArchivedProjects ? "rewind" : "archive"}
-                    size={"xs"}
-                  />
-                }
+                Restore
+                {<Icon name={"rewind"} size={"xs"} />}
               </Button>
               <Button
                 variant={"subtle"}
@@ -619,14 +597,14 @@ const Workspace = () => {
   ];
   const projectsTableActions: DataTableAction[] = [
     {
-      label: showArchivedProjects ? "Restore Projects" : "Archive Projects",
-      icon: showArchivedProjects ? "rewind" : "archive",
+      label: "Restore Projects",
+      icon: "rewind",
       action(table, rows) {
-        const projectsToArchive: string[] = [];
+        const projectsToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          projectsToArchive.push(table.getRow(rowIndex).original._id);
+          projectsToRestore.push(table.getRow(rowIndex).original._id);
         }
-        archiveProjects(projectsToArchive, !showArchivedProjects);
+        archiveProjects(projectsToRestore, false);
       },
     },
   ];
@@ -658,20 +636,13 @@ const Workspace = () => {
               <Button
                 size={"2xs"}
                 rounded={"md"}
-                aria-label={"Archive Template"}
+                aria-label={"Restore Template"}
                 colorPalette={"orange"}
                 variant={"subtle"}
-                onClick={() =>
-                  archiveTemplate(info.row.original._id, !showArchivedTemplates)
-                }
+                onClick={() => archiveTemplate(info.row.original._id, false)}
               >
-                {showArchivedTemplates ? "Restore" : "Archive"}
-                {
-                  <Icon
-                    name={showArchivedTemplates ? "rewind" : "archive"}
-                    size={"xs"}
-                  />
-                }
+                Restore
+                {<Icon name={"rewind"} size={"xs"} />}
               </Button>
               <Button
                 variant={"subtle"}
@@ -692,14 +663,14 @@ const Workspace = () => {
   ];
   const templatesTableActions: DataTableAction[] = [
     {
-      label: showArchivedTemplates ? "Restore Templates" : "Archive Templates",
-      icon: showArchivedTemplates ? "rewind" : "archive",
+      label: "Restore Templates",
+      icon: "rewind",
       action(table, rows) {
-        const templatesToArchive: string[] = [];
+        const templatesToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          templatesToArchive.push(table.getRow(rowIndex).original._id);
+          templatesToRestore.push(table.getRow(rowIndex).original._id);
         }
-        archiveTemplates(templatesToArchive, !showArchivedTemplates);
+        archiveTemplates(templatesToRestore, false);
       },
     },
   ];
@@ -947,27 +918,20 @@ const Workspace = () => {
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                 <Icon name={"entity"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {showArchivedEntities ? "Archived " : ""}Workspace Entities
+                  Archived Workspace Entities
                 </Text>
               </Flex>
-              <Button
-                colorPalette={"blue"}
-                size={"xs"}
-                rounded={"md"}
-                onClick={() => setShowArchivedEntities(!showArchivedEntities)}
-              >
-                {showArchivedEntities ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} size={"xs"} />
-              </Button>
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownEntities.length > 0 ? "" : "center"}
               minH={shownEntities.length > 0 ? "fit-content" : "200px"}
             >
@@ -988,8 +952,7 @@ const Workspace = () => {
                       <Icon name={"entity"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedEntities ? "archived " : ""}Workspace
-                      Entities
+                      No Archived Workspace Entities
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -1008,28 +971,21 @@ const Workspace = () => {
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
-            basis={"50%"}
+            w={{ base: "100%", md: "50%" }}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                 <Icon name={"project"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {showArchivedProjects ? "Archived " : ""}Workspace Projects
+                  Archived Workspace Projects
                 </Text>
               </Flex>
-              <Button
-                colorPalette={"blue"}
-                size={"xs"}
-                rounded={"md"}
-                onClick={() => setShowArchivedProjects(!showArchivedProjects)}
-              >
-                {showArchivedProjects ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} size={"xs"} />
-              </Button>
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownProjects.length > 0 ? "" : "center"}
               minH={shownProjects.length > 0 ? "fit-content" : "200px"}
             >
@@ -1050,8 +1006,7 @@ const Workspace = () => {
                       <Icon name={"project"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedProjects ? "archived " : ""}Workspace
-                      Projects
+                      No Archived Workspace Projects
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -1069,27 +1024,20 @@ const Workspace = () => {
             borderColor={"gray.300"}
             rounded={"md"}
             grow={"1"}
+            minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                 <Icon name={"template"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {showArchivedTemplates ? "Archived " : ""}Workspace Templates
+                  Archived Workspace Templates
                 </Text>
               </Flex>
-              <Button
-                colorPalette={"blue"}
-                size={"xs"}
-                rounded={"md"}
-                onClick={() => setShowArchivedTemplates(!showArchivedTemplates)}
-              >
-                {showArchivedTemplates ? "Hide" : "Show"} Archived
-                <Icon name={"archive"} size={"xs"} />
-              </Button>
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={shownTemplates.length > 0 ? "" : "center"}
               minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
             >
@@ -1110,8 +1058,7 @@ const Workspace = () => {
                       <Icon name={"template"} size={"lg"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>
-                      No {showArchivedTemplates ? "archived " : ""}Workspace
-                      Templates
+                      No Archived Workspace Templates
                     </EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
@@ -1130,7 +1077,8 @@ const Workspace = () => {
             border={"1px solid"}
             borderColor={"gray.300"}
             rounded={"md"}
-            basis={"50%"}
+            w={{ base: "100%", md: "50%" }}
+            minW={"0"}
           >
             <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
               <Icon name={"counter"} size={"xs"} />
@@ -1140,7 +1088,8 @@ const Workspace = () => {
             </Flex>
             <Flex
               w={"100%"}
-              justify={"center"}
+              minW={"0"}
+              justify={"flex-start"}
               align={counters.length > 0 ? "" : "center"}
               minH={counters.length > 0 ? "fit-content" : "200px"}
             >

@@ -73,14 +73,17 @@ const GET_DASHBOARD = gql`
       addedDay
     }
     entities(limit: $entityLimit, archived: $entitiesArchived, reverse: true) {
-      _id
-      archived
-      name
-      description
-      timestamp
-      attributes {
+      entities {
         _id
+        archived
+        name
+        description
+        timestamp
+        attributes {
+          _id
+        }
       }
+      total
     }
     entityMetrics {
       all
@@ -163,8 +166,8 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projectLimit: 8,
-      entityLimit: 8,
+      projectLimit: 10,
+      entityLimit: 10,
       entitiesArchived: false,
       activityLimit: 200,
     },
@@ -174,8 +177,8 @@ const Dashboard = () => {
 
   // Assign data
   useEffect(() => {
-    if (data?.entities) {
-      setEntityData(data.entities);
+    if (data?.entities?.entities) {
+      setEntityData(data.entities.entities);
     }
     if (data?.projects) {
       setProjectData(data.projects);

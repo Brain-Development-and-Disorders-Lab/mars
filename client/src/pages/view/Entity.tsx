@@ -32,7 +32,7 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import Graph from "@components/Graph";
+import RelationshipGraph from "@components/RelationshipGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
@@ -2232,13 +2232,16 @@ const Entity = () => {
                           })}
                         </Timeline.Root>
                       ) : (
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          ml={"0.5"}
-                        >
-                          No History.
-                        </Text>
+                        <EmptyState.Root>
+                          <EmptyState.Content>
+                            <EmptyState.Indicator>
+                              <Icon name={"clock"} size={"lg"} />
+                            </EmptyState.Indicator>
+                            <EmptyState.Description>
+                              No History
+                            </EmptyState.Description>
+                          </EmptyState.Content>
+                        </EmptyState.Root>
                       )}
                     </Drawer.Body>
                   </Drawer.Content>
@@ -3737,7 +3740,7 @@ const Entity = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"0"}>
-                <Graph
+                <RelationshipGraph
                   id={entityData._id}
                   entityNavigateHook={handleEntityNodeClick}
                 />

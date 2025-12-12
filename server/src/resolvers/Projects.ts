@@ -43,7 +43,7 @@ export const ProjectsResolvers = {
         });
       }
 
-      // Filter by ownership and Workspace membership
+      // Filter by ownership and Workspace membership, sort by most recent first
       const projects = await Projects.all();
       return projects
         .filter((project) => {
@@ -54,6 +54,12 @@ export const ProjectsResolvers = {
           }
         })
         .filter((project) => _.includes(workspace.projects, project._id))
+        .sort((a, b) => {
+          // Sort by timestamp descending (most recent first)
+          const timeA = new Date(a.timestamp || a.created || 0).getTime();
+          const timeB = new Date(b.timestamp || b.created || 0).getTime();
+          return timeB - timeA;
+        })
         .slice(0, args.limit);
     },
 

@@ -18,6 +18,9 @@ import {
   EmptyState,
   CloseButton,
   Field,
+  Input,
+  Checkbox,
+  Collapsible,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -40,8 +43,12 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import _ from "lodash";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import FileSaver from "file-saver";
 import slugify from "slugify";
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -57,6 +64,28 @@ const Entities = () => {
 
   // Column filters state for entity table
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // Filter state (temporary values before applying)
+  const [filterState, setFilterState] = useState({
+    startDate: "",
+    endDate: "",
+    owners: [] as string[],
+    hasAttachments: false,
+    attributeCountRanges: [] as string[],
+  });
+
+  // Applied filters state
+  const [appliedFilters, setAppliedFilters] = useState({
+    startDate: "",
+    endDate: "",
+    owners: [] as string[],
+    hasAttachments: false,
+    attributeCountRanges: [] as string[],
+  });
+
+  // Collapsible state for filters
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Entities export modal
   const {
@@ -106,35 +135,80 @@ const Entities = () => {
     }),
   ];
 
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+
+  // Sort state
+  const [sortState, setSortState] = useState<{
+    field: string;
+    direction: "asc" | "desc";
+  } | null>(null);
+
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities {
-      entities {
-        _id
-        archived
-        owner
-        name
-        description
-        created
-        attributes {
+    query GetEntities(
+      $page: Int
+      $pageSize: Int
+      $filter: EntityFilterInput
+      $sort: EntitySortInput
+    ) {
+      entities(page: $page, pageSize: $pageSize, filter: $filter, sort: $sort) {
+        entities {
           _id
+          archived
+          owner
           name
-          values {
+          description
+          created
+          attributes {
+            _id
+            name
+            values {
+              _id
+              name
+            }
+          }
+          attachments {
             _id
             name
           }
         }
-        attachments {
-          _id
-          name
-        }
+        total
       }
     }
   `;
+  // Build filter object (only include non-empty values)
+  const filterVariables =
+    appliedFilters.startDate ||
+    appliedFilters.endDate ||
+    appliedFilters.owners.length > 0 ||
+    appliedFilters.hasAttachments ||
+    appliedFilters.attributeCountRanges.length > 0
+      ? {
+          ...(appliedFilters.startDate && {
+            startDate: appliedFilters.startDate,
+          }),
+          ...(appliedFilters.endDate && { endDate: appliedFilters.endDate }),
+          ...(appliedFilters.owners.length > 0 && {
+            owners: appliedFilters.owners,
+          }),
+          ...(appliedFilters.hasAttachments && { hasAttachments: true }),
+          ...(appliedFilters.attributeCountRanges.length > 0 && {
+            attributeCountRanges: appliedFilters.attributeCountRanges,
+          }),
+        }
+      : undefined;
+
   const { loading, error, data, refetch } = useQuery<{
-    entities: EntityModel[];
+    entities: { entities: EntityModel[]; total: number };
   }>(GET_ENTITIES, {
-    variables: {},
+    variables: {
+      page,
+      pageSize,
+      filter: filterVariables,
+      sort: sortState || undefined,
+    },
   });
 
   // Query to generate exported data
@@ -148,11 +222,23 @@ const Entities = () => {
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.entities) {
-      // Unpack all the Entity data
-      setEntityData(data.entities);
+    if (data?.entities?.entities) {
+      // Set the paginated Entity data (already filtered and sorted on server)
+      setEntityData(data.entities.entities);
     }
   }, [data]);
+
+  // Calculate active filter count
+  useEffect(() => {
+    let count = 0;
+    if (appliedFilters.startDate) count++;
+    if (appliedFilters.endDate) count++;
+    if (appliedFilters.owners.length > 0) count += appliedFilters.owners.length;
+    if (appliedFilters.hasAttachments) count++;
+    if (appliedFilters.attributeCountRanges.length > 0)
+      count += appliedFilters.attributeCountRanges.length;
+    setActiveFilterCount(count);
+  }, [appliedFilters]);
 
   const { workspace } = useWorkspace();
 
@@ -162,6 +248,13 @@ const Entities = () => {
       refetch();
     }
   }, [workspace]);
+
+  // Refetch when pagination, filters, or sort changes
+  useEffect(() => {
+    if (refetch) {
+      refetch();
+    }
+  }, [page, pageSize, appliedFilters, sortState, refetch]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -182,11 +275,11 @@ const Entities = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 32}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 32 })}
               </Text>
             </Tooltip>
             <Button
@@ -205,7 +298,7 @@ const Entities = () => {
       },
       header: "Name",
       meta: {
-        minWidth: 200,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("description", {
@@ -366,8 +459,273 @@ const Entities = () => {
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
             All Entities in the current Workspace are shown below. Sort the
-            Entities using the column headers.
+            Entities using the column headers or use the filters below.
           </Text>
+
+          {/* Filter Section */}
+          <Collapsible.Root
+            open={filtersOpen}
+            onOpenChange={(event) => setFiltersOpen(event.open)}
+          >
+            <Flex
+              direction={"column"}
+              gap={"1"}
+              p={"1"}
+              rounded={"md"}
+              border={"1px solid"}
+              borderColor={"gray.300"}
+            >
+              <Flex
+                direction={"row"}
+                gap={"1"}
+                align={"center"}
+                justify={"space-between"}
+              >
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon name={"filter"} size={"sm"} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    Entity Filters
+                  </Text>
+                </Flex>
+                <Collapsible.Trigger asChild>
+                  <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
+                    {filtersOpen ? "Hide" : "Show"} Filters
+                    <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
+                  </Button>
+                </Collapsible.Trigger>
+              </Flex>
+              <Collapsible.Content>
+                <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
+                  {/* Date Range Filter */}
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    minW={"200px"}
+                    flexShrink={0}
+                  >
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Created Between
+                    </Text>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Field.Root gap={"0"}>
+                        <Field.Label fontSize={"xs"}>Start</Field.Label>
+                        <Input
+                          type={"date"}
+                          size={"xs"}
+                          bg={"white"}
+                          value={filterState.startDate}
+                          onChange={(e) =>
+                            setFilterState({
+                              ...filterState,
+                              startDate: e.target.value,
+                            })
+                          }
+                        />
+                      </Field.Root>
+                      <Field.Root gap={"0"}>
+                        <Field.Label fontSize={"xs"}>End</Field.Label>
+                        <Input
+                          type={"date"}
+                          size={"xs"}
+                          bg={"white"}
+                          value={filterState.endDate}
+                          onChange={(e) =>
+                            setFilterState({
+                              ...filterState,
+                              endDate: e.target.value,
+                            })
+                          }
+                        />
+                      </Field.Root>
+                    </Flex>
+                  </Flex>
+
+                  {/* Owner Filter */}
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    minW={"200px"}
+                    flexShrink={0}
+                  >
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Owner
+                    </Text>
+                    <Flex
+                      direction={"column"}
+                      gap={"1"}
+                      maxH={"200px"}
+                      overflowY={"auto"}
+                    >
+                      {_.uniq(entityData.map((e) => e.owner))
+                        .filter((owner) => owner)
+                        .map((owner) => (
+                          <Checkbox.Root
+                            key={owner}
+                            size={"xs"}
+                            colorPalette={"blue"}
+                            checked={filterState.owners.includes(owner)}
+                            onCheckedChange={(details) => {
+                              const isChecked = details.checked as boolean;
+                              if (isChecked) {
+                                setFilterState({
+                                  ...filterState,
+                                  owners: [...filterState.owners, owner],
+                                });
+                              } else {
+                                setFilterState({
+                                  ...filterState,
+                                  owners: filterState.owners.filter(
+                                    (o) => o !== owner,
+                                  ),
+                                });
+                              }
+                            }}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label fontSize={"xs"}>
+                              <ActorTag
+                                orcid={owner}
+                                fallback={"Unknown User"}
+                                size={"sm"}
+                                inline
+                              />
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        ))}
+                    </Flex>
+                  </Flex>
+
+                  {/* Has Attachments Filter */}
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    minW={"200px"}
+                    flexShrink={0}
+                  >
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Attachments
+                    </Text>
+                    <Checkbox.Root
+                      size={"xs"}
+                      colorPalette={"blue"}
+                      checked={filterState.hasAttachments}
+                      onCheckedChange={(details) => {
+                        setFilterState({
+                          ...filterState,
+                          hasAttachments: details.checked as boolean,
+                        });
+                      }}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label fontSize={"xs"}>
+                        Has Attachments
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Flex>
+
+                  {/* Attribute Count Range Filter */}
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    minW={"200px"}
+                    flexShrink={0}
+                  >
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Attribute Count
+                    </Text>
+                    <Flex direction={"column"} gap={"1"}>
+                      {["0", "1-5", "6-10", "11+"].map((range) => (
+                        <Checkbox.Root
+                          key={range}
+                          size={"xs"}
+                          colorPalette={"blue"}
+                          checked={filterState.attributeCountRanges.includes(
+                            range,
+                          )}
+                          onCheckedChange={(details) => {
+                            const isChecked = details.checked as boolean;
+                            if (isChecked) {
+                              setFilterState({
+                                ...filterState,
+                                attributeCountRanges: [
+                                  ...filterState.attributeCountRanges,
+                                  range,
+                                ],
+                              });
+                            } else {
+                              setFilterState({
+                                ...filterState,
+                                attributeCountRanges:
+                                  filterState.attributeCountRanges.filter(
+                                    (r) => r !== range,
+                                  ),
+                              });
+                            }
+                          }}
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label fontSize={"xs"}>
+                            {range === "0"
+                              ? "0 attributes"
+                              : range === "11+"
+                                ? "11+ attributes"
+                                : `${range} attributes`}
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                      ))}
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </Collapsible.Content>
+            </Flex>
+          </Collapsible.Root>
+
+          {/* Buttons and Active Filter Count */}
+          <Flex
+            direction={"row"}
+            gap={"1"}
+            align={"center"}
+            justify={"flex-end"}
+          >
+            <Text fontWeight={"semibold"} fontSize={"xs"}>
+              {activeFilterCount} Active Filter
+              {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
+            </Text>
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"blue"}
+              onClick={() => {
+                setAppliedFilters({ ...filterState });
+                setPage(0); // Reset to first page when filters change
+              }}
+            >
+              Apply
+            </Button>
+            <Button
+              size={"xs"}
+              variant={"outline"}
+              rounded={"md"}
+              onClick={() => {
+                const clearedState = {
+                  startDate: "",
+                  endDate: "",
+                  owners: [],
+                  hasAttachments: false,
+                  attributeCountRanges: [],
+                };
+                setFilterState(clearedState);
+                setAppliedFilters(clearedState);
+              }}
+              disabled={activeFilterCount === 0}
+            >
+              Clear
+            </Button>
+          </Flex>
+
           {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">
@@ -384,6 +742,33 @@ const Entities = () => {
                 showColumnSelect
                 showPagination
                 showSelection
+                pageCount={
+                  data?.entities?.total
+                    ? Math.ceil(data.entities.total / pageSize)
+                    : 0
+                }
+                pageIndex={page}
+                pageSize={pageSize}
+                onPaginationChange={(newPageIndex, newPageSize) => {
+                  // If page size changed, reset to first page
+                  if (newPageSize !== pageSize) {
+                    setPage(0);
+                    setPageSize(newPageSize);
+                  } else {
+                    setPage(newPageIndex);
+                    setPageSize(newPageSize);
+                  }
+                }}
+                sortState={sortState}
+                onSortChange={(field, direction) => {
+                  if (direction) {
+                    setSortState({ field, direction });
+                    setPage(0); // Reset to first page when sorting changes
+                  } else {
+                    setSortState(null);
+                    setPage(0);
+                  }
+                }}
               />
             </Box>
           ) : (
@@ -392,7 +777,11 @@ const Entities = () => {
                 <EmptyState.Indicator>
                   <Icon name={"entity"} size={"lg"} />
                 </EmptyState.Indicator>
-                <EmptyState.Description>No Entities</EmptyState.Description>
+                <EmptyState.Description>
+                  {activeFilterCount > 0
+                    ? "No entities match the selected filters"
+                    : "No Entities"}
+                </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
           )}
