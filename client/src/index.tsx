@@ -69,9 +69,45 @@ const authLink = new ApolloLink((operation, forward) => {
 });
 
 /**
+ * Extract error message and name from various error formats
+ * Handles Error objects, strings, or other types
+ */
+const parseError = (error: unknown): { message: string; name: string } => {
+  if (error instanceof Error) {
+    return { message: error.message || "", name: error.name || "" };
+  }
+  if (typeof error === "string") {
+    return { message: error, name: "" };
+  }
+  if (error && typeof error === "object" && "message" in error) {
+    return {
+      message: String(error.message || ""),
+      name: String((error as { name?: string }).name || ""),
+    };
+  }
+
+  // Default to empty string if error is not an object or string
+  return { message: String(error || ""), name: "" };
+};
+
+/**
+ * Check if an error is an abort error (expected when queries are cancelled)
+ */
+const isAbortError = (message: string, name: string): boolean => {
+  return (
+    message.includes("aborted") ||
+    message.includes("Abort") ||
+    name === "AbortError" ||
+    message === "The operation was aborted."
+  );
+};
+
+/**
  * Error handling for GraphQL errors that occur throughout the application
  */
 const errorLink = new ErrorLink(({ error }) => {
+  const { message: errorMessage, name: errorName } = parseError(error);
+
   // Handle GraphQL errors
   if (CombinedGraphQLErrors.is(error)) {
     for (const err of error.errors) {
@@ -99,7 +135,9 @@ const errorLink = new ErrorLink(({ error }) => {
       }
     }
   } else {
-    // Handle network or other errors
+    if (isAbortError(errorMessage, errorName)) {
+      return;
+    }
     consola.error("Network or other error:", error);
   }
 });
@@ -125,6 +163,30 @@ const client = new ApolloClient({
       },
     },
   }),
+});
+
+// Override console.error to filter out specifc or expected errors
+const consoleError = console.error;
+console.error = (...args: unknown[]) => {
+  const { message, name } = parseError(args[0]);
+  if (!isAbortError(message, name)) {
+    consoleError.apply(console, args);
+  }
+};
+
+// Global error handler to catch unhandled errors
+window.addEventListener("error", (event) => {
+  const { message } = parseError(event);
+  if (isAbortError(message, "")) {
+    event.preventDefault();
+  }
+});
+window.addEventListener("unhandledrejection", (event) => {
+  const { message, name } = parseError(event.reason);
+  if (isAbortError(message, name)) {
+    event.preventDefault();
+    event.stopImmediatePropagation?.();
+  }
 });
 
 // Render the application
