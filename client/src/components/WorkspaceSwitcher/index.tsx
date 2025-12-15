@@ -91,6 +91,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Async function to retrieve the name of the initially selected Workspace
    */
   const setInitialLabelValue = async () => {
+    // Don't fetch workspace if workspace is empty
+    if (workspace === "" || _.isUndefined(workspace)) {
+      setLabel("Select Workspace");
+      return;
+    }
+
     const workspaceResult = await getWorkspace({
       variables: {
         _id: workspace,

@@ -19,6 +19,9 @@ import _ from "lodash";
 // Session
 import { useSession } from "@hooks/useSession";
 
+// Variables
+import { SESSION_KEY } from "src/variables";
+
 type WorkspaceContextValue = {
   workspace: string;
   activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
@@ -78,12 +81,18 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       }
 
       await client.clearStore();
+      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
+      sessionStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ workspace: workspacesData[0]._id }),
+      );
       setActiveWorkspace(workspacesData[0]._id);
     } else {
       await client.clearStore();
+      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ workspace }));
       setActiveWorkspace(workspace);
     }
-
     return {
       success: true,
       message: "Set active Workspace",
