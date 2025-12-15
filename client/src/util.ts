@@ -149,3 +149,85 @@ export const createSelectOptions = <T>(
   }
   return options;
 };
+
+/**
+ * Extract error message and name from various error formats
+ * Handles Error objects, strings, or other types
+ * @param error The error to parse
+ * @returns Object with message and name properties
+ */
+export const parseError = (
+  error: unknown,
+): { message: string; name: string } => {
+  if (error instanceof Error) {
+    return { message: error.message || "", name: error.name || "" };
+  }
+  if (typeof error === "string") {
+    return { message: error, name: "" };
+  }
+  if (error && typeof error === "object" && "message" in error) {
+    return {
+      message: String(error.message || ""),
+      name: String((error as { name?: string }).name || ""),
+    };
+  }
+  return { message: String(error || ""), name: "" };
+};
+
+/**
+ * Check if an error is an abort error (expected when queries are cancelled)
+ * Can accept either an error object or message/name strings
+ * @param errorOrMessage Either an error object or error message string
+ * @param name Optional error name (only used if first param is a string)
+ * @returns true if the error is an abort error
+ */
+export const isAbortError = (
+  errorOrMessage: unknown | string,
+  name?: string,
+): boolean => {
+  let message: string;
+  let errorName: string;
+
+  if (typeof errorOrMessage === "string") {
+    // Called with (message, name)
+    message = errorOrMessage;
+    errorName = name || "";
+  } else {
+    // Called with (error) - parse it
+    const parsed = parseError(errorOrMessage);
+    message = parsed.message;
+    errorName = parsed.name;
+  }
+
+  return (
+    message.includes("aborted") ||
+    message.includes("Abort") ||
+    errorName === "AbortError" ||
+    message === "The operation was aborted."
+  );
+};
+
+/**
+ * Recursively remove __typename fields from an object or array.
+ * Apollo Client v4 automatically adds __typename to query results, but these
+ * fields are not allowed in GraphQL input types (mutations).
+ * @param obj The object or array to clean
+ * @returns A new object/array with all __typename fields removed
+ */
+export const removeTypename = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(removeTypename);
+  }
+  if (typeof obj === "object") {
+    const { __typename, ...rest } = obj;
+    const cleaned: any = {};
+    for (const key in rest) {
+      cleaned[key] = removeTypename(rest[key]);
+    }
+    return cleaned;
+  }
+  return obj;
+};

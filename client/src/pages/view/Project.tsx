@@ -65,6 +65,7 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
+import { removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -399,7 +400,7 @@ const Project = () => {
     try {
       await updateProject({
         variables: {
-          project: {
+          project: removeTypename({
             _id: updateData._id,
             name: updateData.name,
             timestamp: updateData.timestamp,
@@ -409,7 +410,7 @@ const Project = () => {
             collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
-          },
+          }),
           message: saveMessage,
         },
       });
@@ -545,7 +546,7 @@ const Project = () => {
     try {
       await updateProject({
         variables: {
-          project: {
+          project: removeTypename({
             _id: updateData._id,
             name: updateData.name,
             timestamp: updateData.timestamp,
@@ -555,7 +556,7 @@ const Project = () => {
             collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
-          },
+          }),
           message: `Restored Project version ${projectVersion.version}`,
         },
       });
@@ -1795,6 +1796,12 @@ const Project = () => {
                   value={selectedEntity}
                   onChange={setSelectedEntity}
                 />
+                {project.entities &&
+                  project.entities.includes(selectedEntity._id) && (
+                    <Text fontSize={"xs"} color={"red"} ml={"0.5"}>
+                      Entity is already linked to this Project
+                    </Text>
+                  )}
               </Dialog.Body>
 
               <Dialog.Footer p={"1"}>
@@ -1816,6 +1823,11 @@ const Project = () => {
                   colorPalette={"green"}
                   size={"xs"}
                   rounded={"md"}
+                  disabled={
+                    (project.entities &&
+                      project.entities.includes(selectedEntity._id)) ||
+                    !selectedEntity._id
+                  }
                   onClick={() => {
                     if (id) {
                       // Add the Origin to the Entity

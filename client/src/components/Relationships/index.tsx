@@ -54,6 +54,8 @@ const Relationships = (props: RelationshipsProps) => {
 
   // Fetch entity names for all unique IDs
   useEffect(() => {
+    let isMounted = true;
+
     const fetchEntityNames = async () => {
       const nameMap: Record<string, string> = {};
 
@@ -64,31 +66,47 @@ const Relationships = (props: RelationshipsProps) => {
             const { data } = await getEntityName({
               variables: { _id: entityId },
             });
-            if (data?.entity) {
+            if (data?.entity && isMounted) {
               nameMap[entityId] = data.entity.name;
             }
-          } catch {
+          } catch (error: any) {
             // If fetch fails, fall back to the name from relationship data
-            const relationship = props.relationships.find(
-              (rel) =>
-                rel.source._id === entityId || rel.target._id === entityId,
-            );
-            if (relationship) {
-              nameMap[entityId] =
-                relationship.source._id === entityId
-                  ? relationship.source.name
-                  : relationship.target.name;
+            if (isMounted) {
+              const relationship = props.relationships.find(
+                (rel) =>
+                  rel.source._id === entityId || rel.target._id === entityId,
+              );
+              if (relationship) {
+                nameMap[entityId] =
+                  relationship.source._id === entityId
+                    ? relationship.source.name
+                    : relationship.target.name;
+              }
             }
           }
         }),
       );
 
-      setEntityNames(nameMap);
+      if (isMounted) {
+        setEntityNames(nameMap);
+      }
     };
 
     if (uniqueEntityIds.length > 0) {
-      fetchEntityNames();
+      Promise.resolve(fetchEntityNames()).catch((error: any) => {
+        const isAbortError =
+          error?.name === "AbortError" ||
+          error?.message?.includes("aborted") ||
+          error?.message === "The operation was aborted.";
+        if (!isAbortError) {
+          console.error("Error in fetchEntityNames:", error);
+        }
+      });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [uniqueEntityIds, getEntityName, props.relationships]);
 
   /**

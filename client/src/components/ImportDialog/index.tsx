@@ -50,6 +50,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
+import { removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -748,7 +749,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       variables: {
         file: file,
         project: projectField,
-        attributes: attributesField,
+        attributes: removeTypename(attributesField),
       },
     });
     setImportLoading(false);
@@ -783,7 +784,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         created: dayjs(Date.now()).toISOString(),
         owner: token.orcid,
         project: projectField,
-        attributes: attributesField,
+        attributes: removeTypename(attributesField),
       },
       options: {
         counters: nameUseCounter ? [{ field: "name", _id: counter }] : [],
@@ -793,7 +794,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     setImportLoading(true);
     await importEntityCSV({
-      variables: importData,
+      variables: removeTypename(importData),
     });
     setImportLoading(false);
 

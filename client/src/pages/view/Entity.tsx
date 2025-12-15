@@ -70,7 +70,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions } from "src/util";
+import { createSelectOptions, removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -652,20 +652,21 @@ const Entity = () => {
   const handleSaveMessageDoneClick = async () => {
     setIsUpdating(updateLoading);
     try {
+      const mutationPayload = removeTypename({
+        _id: entityData._id,
+        name: entityName,
+        archived: entityArchived,
+        created: entityData.created,
+        owner: entityData.owner,
+        description: entityDescription,
+        projects: entityProjects,
+        relationships: entityRelationships,
+        attributes: entityAttributes,
+        attachments: entityAttachments,
+      });
       await updateEntity({
         variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityName,
-            archived: entityArchived,
-            created: entityData.created,
-            owner: entityData.owner,
-            description: entityDescription,
-            projects: entityProjects,
-            relationships: entityRelationships,
-            attributes: entityAttributes,
-            attachments: entityAttachments,
-          },
+          entity: mutationPayload,
           message: saveMessage,
         },
       });
@@ -1018,20 +1019,21 @@ const Entity = () => {
     entityVersion: EntityHistory,
   ) => {
     try {
+      const restorePayload = removeTypename({
+        _id: entityData._id,
+        name: entityVersion.name,
+        created: entityData.created,
+        archived: entityVersion.archived,
+        owner: entityVersion.owner,
+        description: entityVersion.description || "",
+        projects: entityVersion.projects || [],
+        relationships: entityVersion.relationships || [],
+        attributes: entityVersion.attributes || [],
+        attachments: entityVersion.attachments || [],
+      });
       await updateEntity({
         variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityVersion.name,
-            created: entityData.created,
-            archived: entityVersion.archived,
-            owner: entityVersion.owner,
-            description: entityVersion.description || "",
-            projects: entityVersion.projects || [],
-            relationships: entityVersion.relationships || [],
-            attributes: entityVersion.attributes || [],
-            attachments: entityVersion.attachments || [],
-          },
+          entity: restorePayload,
           message: saveMessage,
         },
       });
@@ -1150,7 +1152,7 @@ const Entity = () => {
     // Create a new Entity, with `(cloned)` appended to the name
     const response = await createEntity({
       variables: {
-        entity: {
+        entity: removeTypename({
           name: clonedEntityName,
           owner: entityData.owner,
           created: dayjs(Date.now()).toISOString(),
@@ -1160,7 +1162,7 @@ const Entity = () => {
           relationships: entityData.relationships,
           attributes: entityData.attributes,
           attachments: entityData.attachments,
-        },
+        }),
       },
     });
 

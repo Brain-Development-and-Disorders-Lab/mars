@@ -17,6 +17,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { AttributeModel, GenericValueType, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
+import { removeTypename } from "src/util";
 import _ from "lodash";
 import slugify from "slugify";
 import FileSaver from "file-saver";
@@ -205,6 +206,9 @@ const Template = () => {
       });
       setTemplateArchived(false);
       setArchiveDialogOpen(false);
+
+      // Refetch template data to ensure state is up to date
+      await refetch();
     }
 
     setEditing(false);
@@ -215,21 +219,40 @@ const Template = () => {
    */
   const handleEditClick = async () => {
     if (editing) {
-      const response = await updateTemplate({
-        variables: {
-          template: {
-            _id: template._id,
-            name: templateName,
-            description: templateDescription,
-            values: templateValues,
+      try {
+        const response = await updateTemplate({
+          variables: {
+            template: removeTypename({
+              _id: template._id,
+              name: templateName,
+              description: templateDescription,
+              values: templateValues,
+            }),
           },
-        },
-      });
+        });
 
-      if (
-        !response.data?.updateTemplate ||
-        !response.data.updateTemplate.success
-      ) {
+        if (
+          !response.data?.updateTemplate ||
+          !response.data.updateTemplate.success
+        ) {
+          toaster.create({
+            title: "Error",
+            description: "An error occurred when saving Template updates",
+            type: "error",
+            duration: 2000,
+            closable: true,
+          });
+          setEditing(true);
+        } else if (response.data.updateTemplate.success) {
+          toaster.create({
+            title: "Updated Successfully",
+            type: "success",
+            duration: 2000,
+            closable: true,
+          });
+          setEditing(false);
+        }
+      } catch {
         toaster.create({
           title: "Error",
           description: "An error occurred when saving Template updates",
@@ -238,15 +261,9 @@ const Template = () => {
           closable: true,
         });
         setEditing(true);
-      } else if (response.data.updateTemplate.success) {
-        toaster.create({
-          title: "Updated Successfully",
-          type: "success",
-          duration: 2000,
-          closable: true,
-        });
-        setEditing(false);
       }
+    } else {
+      setEditing(true);
     }
   };
 

@@ -56,11 +56,52 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
 
+  // Query to check if a specific Workspace exists
+  const GET_WORKSPACE = gql`
+    query GetWorkspace($_id: String) {
+      workspace(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+
   const activateWorkspace = async (
     workspace: string,
   ): Promise<IResponseMessage> => {
     if (workspace === "") {
-      // Option for simply activating any Workspace
+      // Check if there's a stored workspace in session
+      const storedWorkspace = session.workspace;
+
+      if (storedWorkspace && storedWorkspace !== "") {
+        // Verify the stored workspace exists
+        try {
+          const workspaceResponse = await getWorkspace({
+            variables: { _id: storedWorkspace },
+          });
+
+          if (workspaceResponse.data?.workspace && !workspaceError) {
+            // Stored workspace exists, use it
+            await client.clearStore();
+            sessionStorage.setItem(
+              SESSION_KEY,
+              JSON.stringify({ workspace: storedWorkspace }),
+            );
+            setActiveWorkspace(storedWorkspace);
+            return {
+              success: true,
+              message: "Set active Workspace",
+            };
+          }
+        } catch {
+          // Workspace doesn't exist or user doesn't have access, fall through to get all workspaces
+        }
+      }
+
+      // Stored workspace doesn't exist or wasn't found, get all workspaces
       const workspacesResponse = await getWorkspaces();
       const workspacesData = workspacesResponse.data?.workspaces;
 
@@ -76,12 +117,12 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       if (workspacesData.length === 0) {
         return {
           success: false,
-          message: "User is not a member of any Workspaces",
+          message: "No Workspaces exist",
         };
       }
 
+      // Use the first available workspace
       await client.clearStore();
-      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
       sessionStorage.setItem(
         SESSION_KEY,
         JSON.stringify({ workspace: workspacesData[0]._id }),

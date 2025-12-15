@@ -35,7 +35,7 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Utilities
-import { getSession, getToken } from "./util";
+import { getSession, getToken, parseError, isAbortError } from "./util";
 import consola from "consola";
 
 // Application
@@ -67,40 +67,6 @@ const authLink = new ApolloLink((operation, forward) => {
 
   return forward(operation);
 });
-
-/**
- * Extract error message and name from various error formats
- * Handles Error objects, strings, or other types
- */
-const parseError = (error: unknown): { message: string; name: string } => {
-  if (error instanceof Error) {
-    return { message: error.message || "", name: error.name || "" };
-  }
-  if (typeof error === "string") {
-    return { message: error, name: "" };
-  }
-  if (error && typeof error === "object" && "message" in error) {
-    return {
-      message: String(error.message || ""),
-      name: String((error as { name?: string }).name || ""),
-    };
-  }
-
-  // Default to empty string if error is not an object or string
-  return { message: String(error || ""), name: "" };
-};
-
-/**
- * Check if an error is an abort error (expected when queries are cancelled)
- */
-const isAbortError = (message: string, name: string): boolean => {
-  return (
-    message.includes("aborted") ||
-    message.includes("Abort") ||
-    name === "AbortError" ||
-    message === "The operation was aborted."
-  );
-};
 
 /**
  * Error handling for GraphQL errors that occur throughout the application

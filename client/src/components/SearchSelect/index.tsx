@@ -14,10 +14,10 @@ import { toaster } from "@components/Toast";
 import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
-import { debounce } from "lodash";
+import _, { debounce } from "lodash";
+import { isAbortError } from "src/util";
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
-import _ from "lodash";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -104,7 +104,11 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Retrieve the options on component load, depending on the specified target
   useEffect(() => {
-    getSelectOptions();
+    Promise.resolve(getSelectOptions()).catch((error: unknown) => {
+      if (!isAbortError(error)) {
+        console.error("Error in getSelectOptions:", error);
+      }
+    });
 
     // Set the placeholder text
     if (props.placeholder) {
