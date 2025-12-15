@@ -644,22 +644,22 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
-      columnMapping: {
-        namePrefix: namePrefixField,
-        name: nameField,
-        description: descriptionField,
-        created: dayjs(Date.now()).toISOString(),
-        owner: token.orcid,
-        project: projectField,
-        attributes: attributesField,
-      },
-      file: file,
+    const columnMapping: IColumnMapping = {
+      namePrefix: namePrefixField,
+      name: nameField,
+      description: descriptionField,
+      created: dayjs(Date.now()).toISOString(),
+      owner: token.orcid,
+      project: projectField,
+      attributes: removeTypename(attributesField),
     };
 
     setImportLoading(true);
     const reviewResponse = await reviewEntityCSV({
-      variables: mappingData,
+      variables: {
+        columnMapping: removeTypename(columnMapping),
+        file: file,
+      },
     });
     setImportLoading(false);
 
@@ -794,7 +794,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     setImportLoading(true);
     await importEntityCSV({
-      variables: removeTypename(importData),
+      variables: {
+        columnMapping: removeTypename(importData.columnMapping),
+        options: removeTypename(importData.options),
+        file: importData.file,
+      },
     });
     setImportLoading(false);
 
