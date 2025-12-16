@@ -238,6 +238,8 @@ describe("Project, edit Entities", () => {
     cy.get("#editProjectButton").should("be.visible");
 
     // Navigate to the Entity from the Project page
+    // Wait for the entity name to appear in the table (ensures data is loaded after reload)
+    cy.contains(entityName, { timeout: 10000 }).should("be.visible");
     cy.get(".data-table-scroll-container")
       .should("be.visible")
       .within(() => {
@@ -264,7 +266,9 @@ describe("Project, edit Entities", () => {
     cy.get("#editEntityButton", { timeout: 10000 })
       .should("be.visible")
       .should("not.be.disabled")
-      .click();
+      .should("not.have.attr", "aria-disabled", "true");
+    cy.get("body").should("be.visible");
+    cy.get("#editEntityButton").click();
 
     // Find the Linked Projects DataTable
     cy.contains(".data-table-scroll-container", testProjectName)
@@ -288,22 +292,19 @@ describe("Project, edit Entities", () => {
 
     cy.get("@removeProjectButton").click();
 
-    // Wait for the remove action to complete
     cy.get("@removeProjectButton").should("not.exist");
-
-    cy.contains("button", "Save")
+    cy.contains("button", "Save", { timeout: 5000 })
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
-    // Save button opens a save modal - click Done in the modal
+    // Save button opens a save modal, click Done in the modal
     cy.contains("button", "Done")
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
     // After save, exit edit mode, button should show "Edit"
-    // We're still on the Entity page, so check for editEntityButton
     cy.get("#editEntityButton", { timeout: 10000 })
       .should("be.visible")
       .should("contain", "Edit");
@@ -323,8 +324,9 @@ describe("Project, edit Entities", () => {
     cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
       "be.visible",
     );
+    cy.contains(testProjectName, { timeout: 10000 }).should("be.visible");
 
-    // Find the test project by name again
+    // Find Test Project by name again
     cy.get(".data-table-scroll-container").within(() => {
       cy.contains(testProjectName)
         .should("be.visible")
