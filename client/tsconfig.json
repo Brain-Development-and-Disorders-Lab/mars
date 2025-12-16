@@ -1,9 +1,10 @@
 {
   "include": ["src", "test"],
+  "exclude": ["node_modules", "../server", "../website"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
