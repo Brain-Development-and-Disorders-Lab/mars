@@ -756,10 +756,15 @@ const Entity = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={projectId}
-              disabled={projectId.length < 20}
+              disabled={projectId.length < 32}
               showArrow
             >
-              <Linky id={projectId} type={"projects"} size={"xs"} />
+              <Linky
+                id={projectId}
+                type={"projects"}
+                size={"xs"}
+                truncate={false}
+              />
             </Tooltip>
             {editing ? (
               <Button

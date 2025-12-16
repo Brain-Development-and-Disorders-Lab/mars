@@ -99,6 +99,12 @@ const errorLink = new ErrorLink(({ error }) => {
         sessionStorage.removeItem(SESSION_KEY);
         return;
       }
+
+      // Suppress "Workspace does not exist" errors - these are handled gracefully
+      // in activateWorkspace when checking if a stored workspace exists
+      if (errorMessage === "Workspace does not exist") {
+        return;
+      }
     }
   } else {
     if (isAbortError(errorMessage, errorName)) {

@@ -1,6 +1,6 @@
 describe("Security, check endpoint access", () => {
-  beforeEach(() => {
-    // Reset the database
+  before(() => {
+    // Reset the database once for the entire suite
     cy.task("database:teardown");
     cy.task("database:setup");
   });

@@ -41,5 +41,10 @@ export default cypress.defineConfig({
     screenshotsFolder: "test/cypress/screenshots",
     viewportWidth: 1280,
     viewportHeight: 720,
+    video: false,
+    screenshotOnRunFailure: true,
+    defaultCommandTimeout: 4000,
+    requestTimeout: 5000,
+    responseTimeout: 30000,
   },
 });

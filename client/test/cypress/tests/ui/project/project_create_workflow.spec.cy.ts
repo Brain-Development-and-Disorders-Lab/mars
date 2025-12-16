@@ -1,16 +1,13 @@
 describe("Create Project", () => {
-  beforeEach(() => {
-    // Reset the database
+  before(() => {
+    // Reset the database once for the entire suite
     cy.task("database:teardown");
     cy.task("database:setup");
+  });
 
-    // Navigate and login
-    cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
-
-    // Wait for login to complete
-    cy.url({ timeout: 10000 }).should("not.include", "/login");
-
+  beforeEach(() => {
+    // Use cached login session
+    cy.login();
     // Navigate to the "Create Project" page
     cy.visit("http://localhost:8080/create/project", { timeout: 10000 });
 

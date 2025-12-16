@@ -65,9 +65,12 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       }
     }
   `;
-  const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
+  const [getWorkspace] = useLazyQuery<{
     workspace: WorkspaceModel;
-  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+  }>(GET_WORKSPACE, {
+    fetchPolicy: "network-only",
+    errorPolicy: "all", // Don't throw on errors, return them in the response
+  });
 
   const activateWorkspace = async (
     workspace: string,
@@ -78,27 +81,25 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
 
       if (storedWorkspace && storedWorkspace !== "") {
         // Verify the stored workspace exists
-        try {
-          const workspaceResponse = await getWorkspace({
-            variables: { _id: storedWorkspace },
-          });
+        const workspaceResponse = await getWorkspace({
+          variables: { _id: storedWorkspace },
+        });
 
-          if (workspaceResponse.data?.workspace && !workspaceError) {
-            // Stored workspace exists, use it
-            await client.clearStore();
-            sessionStorage.setItem(
-              SESSION_KEY,
-              JSON.stringify({ workspace: storedWorkspace }),
-            );
-            setActiveWorkspace(storedWorkspace);
-            return {
-              success: true,
-              message: "Set active Workspace",
-            };
-          }
-        } catch {
-          // Workspace doesn't exist or user doesn't have access, fall through to get all workspaces
+        if (workspaceResponse.data?.workspace && !workspaceResponse.error) {
+          // Stored workspace exists, use it
+          await client.clearStore();
+          sessionStorage.setItem(
+            SESSION_KEY,
+            JSON.stringify({ workspace: storedWorkspace }),
+          );
+          setActiveWorkspace(storedWorkspace);
+          return {
+            success: true,
+            message: "Set active Workspace",
+          };
         }
+
+        sessionStorage.removeItem(SESSION_KEY);
       }
 
       // Stored workspace doesn't exist or wasn't found, get all workspaces

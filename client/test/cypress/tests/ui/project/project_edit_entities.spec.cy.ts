@@ -1,76 +1,120 @@
 describe("Project, edit Entities", () => {
-  beforeEach(() => {
-    // Reset the database
+  const testProjectName = "Test Project for Entities";
+
+  before(() => {
+    // Reset the database once for the entire suite
     cy.task("database:teardown");
     cy.task("database:setup");
 
-    // Navigate the "Login" page
+    // Create a fresh project for these tests
+    cy.login();
+    cy.visit("http://localhost:8080/create/project", { timeout: 10000 });
+    cy.contains("h2", "Create Project", { timeout: 10000 }).should(
+      "be.visible",
+    );
+
+    // Fill in project details
+    cy.get("[data-testid='create-project-name']", { timeout: 10000 })
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type(testProjectName);
+
+    cy.get('input[type="datetime-local"]')
+      .should("be.visible")
+      .clear()
+      .type("2023-10-01T12:00");
+
+    cy.get("[data-testid='create-project-description']")
+      .find("textarea")
+      .should("be.visible")
+      .clear()
+      .type("Test project for entity editing tests");
+
+    // Submit the form
+    cy.get("[data-testid='create-project-finish']", { timeout: 5000 })
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    // Wait for navigation to complete
+    cy.url({ timeout: 10000 }).should("include", "/projects");
+    cy.url().should("not.include", "/create/project");
+  });
+
+  beforeEach(() => {
+    // Login for each test
+    cy.login();
     cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
   });
 
   it("should be able to add an Entity", () => {
+    const entityName = "Test Entity";
+
+    // Navigate to the test project
     cy.contains("button", "Projects").click();
-    cy.get(".data-table-scroll-container")
-      .find('button[aria-label="View Project"]')
-      .first()
-      .click();
+    cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
+      "be.visible",
+    );
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains(testProjectName)
+        .parents()
+        .filter((_, el) => {
+          return !!(el.id && /^\d+$/.test(el.id));
+        })
+        .first()
+        .within(() => {
+          cy.get('button[aria-label="View Project"]').click();
+        });
+    });
+
     cy.get("#editProjectButton").click();
 
     // Add an Entity
     cy.get("#addEntityButton").click();
     cy.get("#entitySearchSelect").click();
-    cy.get("#entitySearchSelect").contains("button", "Test Entity").click();
-    cy.get("#addEntityDoneButton").click();
+    cy.get("#entitySearchSelect").contains("button", entityName).click();
+    // Wait for the button to be enabled after selecting an entity
+    cy.get("#addEntityDoneButton")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
     cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
     // Validate the Entity was added
-    cy.get(".data-table-scroll-container").contains("Test Entity");
+    cy.get(".data-table-scroll-container").contains(entityName);
     // Reload to verify persistence
     cy.reload();
     cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
       "be.visible",
     );
-    cy.get(".data-table-scroll-container").contains("Test Entity");
+    cy.get(".data-table-scroll-container").contains(entityName);
   });
 
   it("should be able to remove an Entity", () => {
     const entityName = "Test Entity";
 
-    // Navigate to Projects
+    // Navigate to the test project
     cy.contains("button", "Projects").click();
-    cy.get(".data-table-scroll-container").should("be.visible");
-
-    // Find and click any View Project button (order-independent)
-    cy.get(".data-table-scroll-container")
-      .find('button[aria-label="View Project"]')
-      .should("exist")
-      .first()
-      .click();
+    cy.get(".data-table-scroll-container", { timeout: 10000 }).should(
+      "be.visible",
+    );
+    cy.get(".data-table-scroll-container").within(() => {
+      cy.contains(testProjectName)
+        .parents()
+        .filter((_, el) => {
+          return !!(el.id && /^\d+$/.test(el.id));
+        })
+        .first()
+        .within(() => {
+          cy.get('button[aria-label="View Project"]').click();
+        });
+    });
 
     cy.get("#editProjectButton").should("be.visible").click();
 
-    // Add an Entity
-    cy.get("#addEntityButton").should("be.visible").click();
-    cy.get("#entitySearchSelect").should("be.visible").click();
-    cy.get("#entitySearchSelect")
-      .contains("button", entityName)
-      .should("be.visible")
-      .click();
-    cy.get("#addEntityDoneButton").should("be.visible").click();
-    cy.contains("button", "Save").should("be.visible").click();
-    cy.contains("button", "Done").should("be.visible").click();
-
-    // Wait for the page to update
-    cy.url().should("not.include", "/edit");
-    cy.reload();
-
-    // Wait for page to load after reload
-    cy.get("#editProjectButton").should("be.visible");
-
-    // Remove the Entity - find by entity name, not by position
-    cy.get("#editProjectButton").click();
+    // Remove the Entity (already added in the first test) - find by entity name, not by position
 
     // Wait for the data table to be visible
     cy.get(".data-table-scroll-container").should("be.visible");
@@ -116,7 +160,6 @@ describe("Project, edit Entities", () => {
 
   it("should be updated after removing the Project via the Entity", () => {
     const entityName = "Test Entity";
-    const projectName = "My First Project";
 
     // Navigate to Projects
     cy.contains("button", "Projects")
@@ -130,9 +173,9 @@ describe("Project, edit Entities", () => {
       "be.visible",
     );
 
-    // Find the project by name, not by position
+    // Navigate to the test project
     cy.get(".data-table-scroll-container").within(() => {
-      cy.contains(projectName)
+      cy.contains(testProjectName)
         .should("be.visible")
         .parents()
         .filter((_, el) => {
@@ -154,14 +197,18 @@ describe("Project, edit Entities", () => {
       .should("not.be.disabled")
       .click();
 
-    // Add an Entity
+    // Add an Entity (project starts empty)
     cy.get("#addEntityButton").should("be.visible").click();
     cy.get("#entitySearchSelect").should("be.visible").click();
     cy.get("#entitySearchSelect")
       .contains("button", entityName)
       .should("be.visible")
       .click();
-    cy.get("#addEntityDoneButton").should("be.visible").click();
+    // Wait for the button to be enabled after selecting an entity
+    cy.get("#addEntityDoneButton")
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
 
     // Wait for modal to close (use assertion instead of arbitrary wait)
     cy.get("#addEntityDoneButton").should("not.exist");
@@ -220,10 +267,10 @@ describe("Project, edit Entities", () => {
       .click();
 
     // Find the Linked Projects DataTable
-    cy.contains(".data-table-scroll-container", projectName)
+    cy.contains(".data-table-scroll-container", testProjectName)
       .should("be.visible")
       .within(() => {
-        cy.contains(projectName)
+        cy.contains(testProjectName)
           .should("be.visible")
           .parents()
           .filter((_, el) => {
@@ -277,9 +324,9 @@ describe("Project, edit Entities", () => {
       "be.visible",
     );
 
-    // Find the project by name again
+    // Find the test project by name again
     cy.get(".data-table-scroll-container").within(() => {
-      cy.contains(projectName)
+      cy.contains(testProjectName)
         .should("be.visible")
         .parents()
         .filter((_, el) => {

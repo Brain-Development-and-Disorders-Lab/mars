@@ -1,12 +1,14 @@
 describe("Interface launches", () => {
-  beforeEach(() => {
-    // Reset the database
+  before(() => {
+    // Reset the database once for the entire suite
     cy.task("database:teardown");
     cy.task("database:setup");
+  });
 
-    // Navigate the "Login" page
+  beforeEach(() => {
+    // Use cached login session
+    cy.login();
     cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
   });
 
   it("navigation menu items are visible", () => {
