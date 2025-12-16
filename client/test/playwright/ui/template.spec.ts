@@ -1,16 +1,21 @@
 import { test, expect } from "../fixtures";
+import {
+  navigateToSection,
+  openItemFromTable,
+  fillMDEditor,
+  clickButtonByText,
+} from "../helpers";
 
 test.describe("Template", () => {
   test("renders the Template details correctly", async ({
     authenticatedPage,
   }) => {
-    await authenticatedPage.goto("/");
-    await authenticatedPage.click('button:has-text("Templates")');
-    await authenticatedPage
-      .locator(".data-table-scroll-container")
-      .locator('button[aria-label="View Template"]')
-      .first()
-      .click();
+    await navigateToSection(authenticatedPage, "Templates");
+    await openItemFromTable(
+      authenticatedPage,
+      "Test Template",
+      "View Template",
+    );
 
     await expect(authenticatedPage.locator("h2")).toBeVisible();
     await expect(
@@ -22,13 +27,12 @@ test.describe("Template", () => {
   });
 
   test("allows editing the Template", async ({ authenticatedPage }) => {
-    await authenticatedPage.goto("/");
-    await authenticatedPage.click('button:has-text("Templates")');
-    await authenticatedPage
-      .locator(".data-table-scroll-container")
-      .locator('button[aria-label="View Template"]')
-      .first()
-      .click();
+    await navigateToSection(authenticatedPage, "Templates");
+    await openItemFromTable(
+      authenticatedPage,
+      "Test Template",
+      "View Template",
+    );
 
     // Get original name
     const originalName = await authenticatedPage.locator("h2").textContent();
@@ -38,14 +42,11 @@ test.describe("Template", () => {
     await authenticatedPage
       .locator("#attributeNameInput")
       .fill("New Template Name");
-    // MDEditor textarea is inside the wrapper
-    const descriptionTextarea = authenticatedPage.locator(
-      "#attributeDescriptionInput textarea",
+    await fillMDEditor(
+      authenticatedPage,
+      "#attributeDescriptionInput",
+      "New Description",
     );
-    await descriptionTextarea.waitFor({ state: "visible", timeout: 5000 });
-    await descriptionTextarea.click();
-    await descriptionTextarea.clear();
-    await descriptionTextarea.fill("New Description");
     await authenticatedPage.click("#editTemplateButton");
     await expect(
       authenticatedPage.locator(".chakra-toast__root"),
@@ -56,16 +57,11 @@ test.describe("Template", () => {
     await authenticatedPage
       .locator("#attributeNameInput")
       .fill(originalName || "");
-    const revertDescriptionTextarea = authenticatedPage.locator(
-      "#attributeDescriptionInput textarea",
+    await fillMDEditor(
+      authenticatedPage,
+      "#attributeDescriptionInput",
+      "Description for test Template",
     );
-    await revertDescriptionTextarea.waitFor({
-      state: "visible",
-      timeout: 5000,
-    });
-    await revertDescriptionTextarea.click();
-    await revertDescriptionTextarea.clear();
-    await revertDescriptionTextarea.fill("Description for test Template");
     await authenticatedPage.click("#editTemplateButton");
     await expect(
       authenticatedPage.locator(".chakra-toast__root"),
@@ -73,14 +69,12 @@ test.describe("Template", () => {
   });
 
   test("exports the Template", async ({ authenticatedPage }) => {
-    await authenticatedPage.goto("/");
-    await authenticatedPage.click('button:has-text("Templates")');
-    // Use the first template for export
-    await authenticatedPage
-      .locator(".data-table-scroll-container")
-      .locator('button[aria-label="View Template"]')
-      .first()
-      .click();
+    await navigateToSection(authenticatedPage, "Templates");
+    await openItemFromTable(
+      authenticatedPage,
+      "Test Template",
+      "View Template",
+    );
 
     await authenticatedPage.click('[data-testid="templateActionsButton"]');
     await authenticatedPage.click('[data-value="export"]');
@@ -90,18 +84,17 @@ test.describe("Template", () => {
   });
 
   test("archives the Template", async ({ authenticatedPage }) => {
-    await authenticatedPage.goto("/");
-    await authenticatedPage.click('button:has-text("Templates")');
-    await authenticatedPage
-      .locator(".data-table-scroll-container")
-      .locator('button[aria-label="View Template"]')
-      .first()
-      .click();
+    await navigateToSection(authenticatedPage, "Templates");
+    await openItemFromTable(
+      authenticatedPage,
+      "Test Template",
+      "View Template",
+    );
 
     // Archive the template
     await authenticatedPage.click('[data-testid="templateActionsButton"]');
     await authenticatedPage.click('[data-value="archive"]');
-    await authenticatedPage.click('button:has-text("Confirm")');
+    await clickButtonByText(authenticatedPage, "Confirm");
     await expect(
       authenticatedPage
         .locator(".chakra-toast__root")

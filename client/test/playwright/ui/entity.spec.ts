@@ -4,6 +4,7 @@ import {
   openItemFromTable,
   fillMDEditor,
   saveAndWait,
+  clickButtonByText,
 } from "../helpers";
 
 test.describe("Entity", () => {
@@ -266,16 +267,12 @@ test.describe("Entity", () => {
 
   test.describe("Edit attributes", () => {
     test.beforeEach(async ({ authenticatedPage }) => {
-      await authenticatedPage.goto("/");
-      await authenticatedPage.click('button:has-text("Entities")');
-
-      // Find and click on "Test Child Entity"
-      const table = authenticatedPage.locator(".data-table-scroll-container");
-      const entityRow = table
-        .locator("text=Test Child Entity")
-        .locator("..")
-        .locator("..");
-      await entityRow.locator('button[aria-label="View Entity"]').click();
+      await navigateToSection(authenticatedPage, "Entities");
+      await openItemFromTable(
+        authenticatedPage,
+        "Test Child Entity",
+        "View Entity",
+      );
 
       await expect(
         authenticatedPage.locator("text=No Attributes"),
@@ -377,8 +374,8 @@ test.describe("Entity", () => {
       await deleteButton.waitFor({ state: "visible", timeout: 10000 });
       await deleteButton.scrollIntoViewIfNeeded();
       await deleteButton.click();
-      await authenticatedPage.click('button:has-text("Save")');
-      await authenticatedPage.click('button:has-text("Done")');
+      await clickButtonByText(authenticatedPage, "Save");
+      await clickButtonByText(authenticatedPage, "Done");
 
       // Verify attribute deleted
       await expect(

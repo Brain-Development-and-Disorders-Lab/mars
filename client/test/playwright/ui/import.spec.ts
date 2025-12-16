@@ -1,5 +1,5 @@
 import { test, expect } from "../fixtures";
-import { waitForButtonEnabled, selectDropdownOption } from "../helpers";
+import { selectDropdownOption, clickButtonWhenEnabled } from "../helpers";
 import * as path from "path";
 
 test.describe("Import", () => {
@@ -7,8 +7,7 @@ test.describe("Import", () => {
     authenticatedPage,
   }) => {
     await authenticatedPage.goto("/");
-    await waitForButtonEnabled(authenticatedPage, "#navImportButtonDesktop");
-    await authenticatedPage.click("#navImportButtonDesktop");
+    await clickButtonWhenEnabled(authenticatedPage, "#navImportButtonDesktop");
 
     // Upload CSV file - relative to project root
     const csvPath = path.resolve(
@@ -24,8 +23,7 @@ test.describe("Import", () => {
       "Entities",
     );
 
-    await waitForButtonEnabled(authenticatedPage, "#importContinueButton");
-    await authenticatedPage.click("#importContinueButton");
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton");
 
     // Wait for details page to load before selecting columns
     await authenticatedPage.waitForLoadState("networkidle");
@@ -42,9 +40,9 @@ test.describe("Import", () => {
     );
 
     // Continue through remaining steps
-    await authenticatedPage.click("#importContinueButton"); // Attributes page
-    await authenticatedPage.click("#importContinueButton"); // Review page
-    await authenticatedPage.click("#importContinueButton"); // Finalize
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton"); // Attributes page
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton"); // Review page
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton"); // Finalize
 
     // Verify import success
     await authenticatedPage.click("#navProjectsButtonDesktop");
@@ -63,8 +61,7 @@ test.describe("Import", () => {
     authenticatedPage,
   }) => {
     await authenticatedPage.goto("/");
-    await waitForButtonEnabled(authenticatedPage, "#navImportButtonDesktop");
-    await authenticatedPage.click("#navImportButtonDesktop");
+    await clickButtonWhenEnabled(authenticatedPage, "#navImportButtonDesktop");
 
     // Upload JSON file - relative to project root
     const jsonPath = path.resolve(
@@ -81,36 +78,28 @@ test.describe("Import", () => {
     );
 
     // Wait for continue button to be enabled
-    await waitForButtonEnabled(authenticatedPage, "#importContinueButton");
-    await authenticatedPage.click("#importContinueButton");
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton");
     await authenticatedPage
       .locator('input[placeholder="Defined in JSON"]')
       .first()
       .waitFor({ state: "visible", timeout: 15000 });
     await authenticatedPage.waitForLoadState("networkidle");
 
-    const continueButton = authenticatedPage.locator("#importContinueButton");
-    await continueButton.waitFor({ state: "visible", timeout: 10000 });
-    await waitForButtonEnabled(authenticatedPage, "#importContinueButton");
-    await continueButton.click();
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton");
 
     await authenticatedPage
       .locator("text=Existing attributes defined in JSON will be preserved")
       .waitFor({ state: "visible", timeout: 10000 });
     await authenticatedPage.waitForLoadState("networkidle");
 
-    await continueButton.waitFor({ state: "visible", timeout: 10000 });
-    await waitForButtonEnabled(authenticatedPage, "#importContinueButton");
-    await continueButton.click();
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton");
 
     await authenticatedPage
       .locator('button:has-text("Finish")')
       .waitFor({ state: "visible", timeout: 15000 });
     await authenticatedPage.waitForLoadState("networkidle");
 
-    await continueButton.waitFor({ state: "visible", timeout: 10000 });
-    await waitForButtonEnabled(authenticatedPage, "#importContinueButton");
-    await continueButton.click();
+    await clickButtonWhenEnabled(authenticatedPage, "#importContinueButton");
 
     // Verify import success
     await authenticatedPage.click("#navEntitiesButtonDesktop");

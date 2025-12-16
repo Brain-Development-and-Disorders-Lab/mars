@@ -1,10 +1,11 @@
 import { test, expect } from "../fixtures";
+import { clickButtonByText } from "../helpers";
 
 test.describe("Search Query Builder", () => {
   test.beforeEach(async ({ authenticatedPage }) => {
     await authenticatedPage.goto("/");
     await authenticatedPage.click("#navSearchButtonDesktop");
-    await authenticatedPage.click('button:has-text("Query Builder")');
+    await clickButtonByText(authenticatedPage, "Query Builder");
   });
 
   test("should build a query with 1 Name inclusion rule", async ({
@@ -16,7 +17,7 @@ test.describe("Search Query Builder", () => {
     ).not.toBeVisible();
 
     // Create query
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-operators > select")
       .selectOption("contains");
@@ -39,7 +40,7 @@ test.describe("Search Query Builder", () => {
     ).not.toBeVisible();
 
     // First exclusion rule: exclude names containing "Entity"
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-operators > select")
       .selectOption("does not contain");
@@ -48,7 +49,7 @@ test.describe("Search Query Builder", () => {
       .fill("Entity");
 
     // Second exclusion rule: exclude names containing "Box"
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-operators > select")
       .nth(1)
@@ -73,7 +74,7 @@ test.describe("Search Query Builder", () => {
     ).not.toBeVisible();
 
     // First rule
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-operators > select")
       .selectOption("contains");
@@ -82,7 +83,7 @@ test.describe("Search Query Builder", () => {
       .fill("Entity");
 
     // Second rule
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-fields > select")
       .nth(1)
@@ -117,14 +118,14 @@ test.describe("Search Query Builder", () => {
     // Navigate back to search
     await authenticatedPage.goto("/");
     await authenticatedPage.click("#navSearchButtonDesktop");
-    await authenticatedPage.click('button:has-text("Query Builder")');
+    await clickButtonByText(authenticatedPage, "Query Builder");
 
     await expect(
       authenticatedPage.locator(".css-1ofqig9 > .chakra-heading"),
     ).not.toBeVisible();
 
     // First rule
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-operators > select")
       .selectOption("contains");
@@ -133,7 +134,7 @@ test.describe("Search Query Builder", () => {
       .fill("Entity");
 
     // Second rule
-    await authenticatedPage.click('button:has-text("Rule")');
+    await clickButtonByText(authenticatedPage, "Rule");
     await authenticatedPage
       .locator(".rule-fields > select")
       .nth(1)

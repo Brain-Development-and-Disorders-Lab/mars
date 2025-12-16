@@ -16,8 +16,6 @@ export async function navigateToSection(
 
 /**
  * Find and click a table row by text, then click the view button
- * The DataTable uses Flex components for rows, so we find the button
- * by checking which row contains both the text and the button
  */
 export async function openItemFromTable(
   page: Page,
@@ -25,67 +23,70 @@ export async function openItemFromTable(
   viewButtonLabel: "View Entity" | "View Project" | "View Template",
 ): Promise<void> {
   const table = page.locator(TABLE_CONTAINER);
-
-  // Wait for the table to be visible
   await table.waitFor({ state: "visible", timeout: 10000 });
 
-  // Find the text first to ensure it's loaded
-  const textLocator = table.locator(`text=${itemName}`).first();
-  await textLocator.waitFor({ state: "visible", timeout: 10000 });
+  // Wait for table to be populated - check that at least one view button exists
+  const buttons = table.locator(`button[aria-label="${viewButtonLabel}"]`);
+  await buttons.first().waitFor({ state: "visible", timeout: 15000 });
 
-  // Scroll the text into view to ensure it's visible
+  // Wait for network to be idle to ensure all data is loaded
+  await page.waitForLoadState("networkidle");
+
+  // Wait for the item name to appear
+  const textLocator = table.locator(`text=${itemName}`).first();
+  try {
+    await textLocator.waitFor({ state: "visible", timeout: 10000 });
+  } catch {
+    // If item not found, provide helpful error message
+    const allItems = await table.locator("text").allTextContents();
+    throw new Error(
+      `Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`,
+    );
+  }
   await textLocator.scrollIntoViewIfNeeded();
 
-  // Get all buttons with the correct aria-label
-  const allButtons = table.locator(`button[aria-label="${viewButtonLabel}"]`);
-  const buttonCount = await allButtons.count();
+  // Find buttons with the correct aria-label
+  const count = await buttons.count();
 
-  if (buttonCount === 0) {
+  if (count === 0) {
     throw new Error(
       `No button with aria-label "${viewButtonLabel}" found in table`,
     );
   }
 
-  if (buttonCount === 1) {
-    // Only one button, must be it
-    await allButtons.first().waitFor({ state: "visible", timeout: 10000 });
-    await allButtons.first().scrollIntoViewIfNeeded();
-    await allButtons.first().click();
-    return;
-  }
+  // If multiple buttons, find the one closest to the text by Y coordinate
+  if (count > 1) {
+    const textBox = await textLocator.boundingBox();
+    if (!textBox) {
+      throw new Error(`Text "${itemName}" not found or not visible`);
+    }
 
-  // Get the bounding box of the text
-  const textBox = await textLocator.boundingBox();
-  if (!textBox) {
-    throw new Error(`Text "${itemName}" not found or not visible`);
-  }
+    let closestBtn = null;
+    let minDistance = Infinity;
 
-  // Find the button closest to the text
-  let closestButton = null;
-  let minYDistance = Infinity;
-
-  for (let i = 0; i < buttonCount; i++) {
-    const btn = allButtons.nth(i);
-    const btnBox = await btn.boundingBox().catch(() => null);
-
-    if (btnBox) {
-      const yDistance = Math.abs(textBox.y - btnBox.y);
-
-      if (yDistance < 50 && yDistance < minYDistance) {
-        minYDistance = yDistance;
-        closestButton = btn;
+    for (let i = 0; i < count; i++) {
+      const btn = buttons.nth(i);
+      const btnBox = await btn.boundingBox().catch(() => null);
+      if (btnBox) {
+        const distance = Math.abs(textBox.y - btnBox.y);
+        if (distance < 50 && distance < minDistance) {
+          minDistance = distance;
+          closestBtn = btn;
+        }
       }
     }
-  }
 
-  if (closestButton) {
-    await closestButton.waitFor({ state: "visible", timeout: 10000 });
-    await closestButton.scrollIntoViewIfNeeded();
-    await closestButton.click();
+    if (!closestBtn) {
+      throw new Error(
+        `Could not find button "${viewButtonLabel}" in row containing "${itemName}"`,
+      );
+    }
+
+    await closestBtn.scrollIntoViewIfNeeded();
+    await closestBtn.click();
   } else {
-    throw new Error(
-      `Could not find button "${viewButtonLabel}" in row containing "${itemName}"`,
-    );
+    await buttons.first().scrollIntoViewIfNeeded();
+    await buttons.first().click();
   }
 }
 
@@ -108,11 +109,11 @@ export async function fillMDEditor(
  * Save changes and wait for completion
  */
 export async function saveAndWait(page: Page): Promise<void> {
-  await page.click('button:has-text("Save")');
+  await clickButtonByText(page, "Save");
   await page
     .locator('button:has-text("Done")')
     .waitFor({ state: "visible", timeout: 5000 });
-  await page.click('button:has-text("Done")');
+  await clickButtonByText(page, "Done");
   await page
     .locator('button:has-text("Edit")')
     .waitFor({ state: "visible", timeout: 10000 });
@@ -157,4 +158,45 @@ export async function waitForButtonEnabled(
     selector,
     { timeout },
   );
+}
+
+/**
+ * Click a button by text content
+ */
+export async function clickButtonByText(
+  page: Page,
+  text: string,
+  timeout = 10000,
+): Promise<void> {
+  let button = page.locator(`button:has-text("${text}")`);
+  const count = await button.count();
+
+  if (count > 1) {
+    // If multiple matches, find the first enabled button
+    let enabledButton = null;
+    for (let i = 0; i < count; i++) {
+      const btn = button.nth(i);
+      const isDisabled = await btn.getAttribute("disabled");
+      if (!isDisabled) {
+        enabledButton = btn;
+        break;
+      }
+    }
+    button = enabledButton || button.first();
+  }
+
+  await button.waitFor({ state: "visible", timeout });
+  await button.click();
+}
+
+/**
+ * Wait for and click a button, ensuring it's enabled first
+ */
+export async function clickButtonWhenEnabled(
+  page: Page,
+  selector: string,
+  timeout = 10000,
+): Promise<void> {
+  await waitForButtonEnabled(page, selector, timeout);
+  await page.click(selector);
 }
