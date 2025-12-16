@@ -1065,7 +1065,6 @@ const ImportDialog = (props: ImportDialogProps) => {
       size={"xl"}
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
-      onInteractOutside={handleOnClose}
     >
       <Dialog.Backdrop />
       <Dialog.Positioner>

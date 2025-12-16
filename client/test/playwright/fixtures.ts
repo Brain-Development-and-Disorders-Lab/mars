@@ -1,40 +1,71 @@
 import { test as base, Page } from "@playwright/test";
-import { createTestWorkspace } from "../../../server/test/util";
 
 /**
  * Suppress console errors and unhandled rejections for known non-critical errors
- * This function is injected into the browser context, so patterns must be defined inline
  */
 function suppressNonCriticalErrors() {
   const ignoredPatterns = [
     /AbortError/i,
     /Request aborted/i,
     /net::ERR_ABORTED/i,
-    /Failed to fetch/i,
-    /NetworkError/i,
     /The operation was aborted/i,
-    /Load failed/i,
+    /the user aborted a request/i,
     /ResizeObserver loop/i,
   ];
 
   const originalConsoleError = window.console.error;
   window.console.error = (...args: unknown[]) => {
+    const error = args[0];
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return;
+    }
     const message = args.map((arg) => String(arg)).join(" ");
     if (!ignoredPatterns.some((pattern) => pattern.test(message))) {
       originalConsoleError.apply(window.console, args);
     }
   };
 
+  // Suppress unhandled rejections
   window.addEventListener("unhandledrejection", (event) => {
-    const reason = event.reason?.message || String(event.reason || "");
-    if (ignoredPatterns.some((pattern) => pattern.test(reason))) {
+    const reason = event.reason;
+    if (reason instanceof DOMException && reason.name === "AbortError") {
       event.preventDefault();
+      event.stopImmediatePropagation?.();
+      return;
+    }
+    const reasonMessage = reason?.message || String(reason || "");
+    const errorName = reason?.name || "";
+    if (
+      ignoredPatterns.some((pattern) => pattern.test(reasonMessage)) ||
+      errorName === "AbortError"
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation?.();
+    }
+  });
+
+  // Suppress error events
+  window.addEventListener("error", (event) => {
+    const error = event.error;
+    if (error instanceof DOMException && error.name === "AbortError") {
+      event.preventDefault();
+      event.stopImmediatePropagation?.();
+      return;
+    }
+    const message = event.message || String(error || "");
+    const errorName = error?.name || "";
+    if (
+      ignoredPatterns.some((pattern) => pattern.test(message)) ||
+      errorName === "AbortError"
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation?.();
     }
   });
 }
 
 /**
- * Handle user setup if needed (should be rare since seed creates full user)
+ * Handle user setup if needed
  */
 async function handleUserSetup(page: Page): Promise<void> {
   const setupForm = page.locator("#userFirstNameInput");
@@ -55,7 +86,7 @@ async function handleUserSetup(page: Page): Promise<void> {
   await page.waitForLoadState("domcontentloaded");
 }
 
-// Extend base test with custom fixtures
+// Extend base test with authentication fixture
 export const test = base.extend<{
   authenticatedPage: Page;
 }>({
@@ -101,140 +132,6 @@ export const test = base.extend<{
       sessionStorage.clear();
       localStorage.clear();
     });
-  },
-});
-
-/**
- * Switch to a workspace by name via the UI
- */
-async function switchToWorkspace(
-  page: Page,
-  workspaceName: string,
-): Promise<void> {
-  await page.goto("/");
-  await page.waitForLoadState("domcontentloaded");
-
-  const workspaceSwitcher = page
-    .locator("#workspaceSwitcherDesktop, #workspaceSwitcherMobile")
-    .first();
-  await workspaceSwitcher.waitFor({ state: "visible", timeout: 10000 });
-  await workspaceSwitcher.locator("button").first().click();
-  await page.waitForTimeout(500);
-
-  const workspaceOption = page
-    .locator(`[role="menuitem"]:has-text("${workspaceName}")`)
-    .first();
-  await workspaceOption.waitFor({ state: "visible", timeout: 5000 });
-  await workspaceOption.click();
-
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(2000);
-}
-
-/**
- * Determine workspace name based on test suite name content
- * Uses plural, concise names to avoid truncation in UI
- */
-function getWorkspaceNameForSuite(suiteName: string): string {
-  const normalized = suiteName.toLowerCase();
-
-  if (normalized.includes("entity") || normalized.includes("entities")) {
-    return "Entities Workspace";
-  }
-  if (normalized.includes("project") || normalized.includes("projects")) {
-    return "Projects Workspace";
-  }
-  if (normalized.includes("template") || normalized.includes("templates")) {
-    return "Templates Workspace";
-  }
-  if (normalized.includes("query") || normalized.includes("search")) {
-    return "Query Workspace";
-  }
-  if (normalized.includes("import")) {
-    return "Import Workspace";
-  }
-
-  // Fallback
-  return "Test Workspace";
-}
-
-// Track created workspaces per file (normalized file path)
-const workspaceCache = new Map<string, string>();
-
-// Normalize file path to ensure consistent caching
-function normalizeFilePath(filePath: string): string {
-  if (!filePath) return "default";
-  // Extract just the filename to avoid absolute path differences
-  const match = filePath.match(/([^/\\]+\.spec\.ts)$/);
-  return match ? match[1] : filePath;
-}
-
-// Fixture to create and switch to a test workspace
-export const testWithWorkspace = test.extend<{
-  workspaceId: string;
-  authenticatedPage: Page;
-}>({
-  authenticatedPage: async ({ page }, use, testInfo) => {
-    await page.addInitScript(suppressNonCriticalErrors);
-
-    await page.goto("/");
-    await page.evaluate(() => {
-      sessionStorage.clear();
-      localStorage.clear();
-    });
-
-    await page.waitForLoadState("domcontentloaded");
-    await page
-      .locator("#orcidLoginButton")
-      .waitFor({ state: "visible", timeout: 10000 });
-    await page.click("#orcidLoginButton");
-
-    await page.waitForURL((url) => url.pathname !== "/login", {
-      timeout: 20000,
-    });
-    await page.waitForLoadState("domcontentloaded");
-
-    await handleUserSetup(page);
-
-    await page
-      .locator("#navSearchButtonDesktop, #navProjectsButtonDesktop")
-      .first()
-      .waitFor({
-        state: "visible",
-        timeout: 15000,
-      });
-
-    // Get workspace for this file
-    const fileKey = normalizeFilePath(testInfo.file || "");
-    const suiteName = testInfo.titlePath[0] || "default";
-    const workspaceName = getWorkspaceNameForSuite(suiteName);
-
-    let workspaceId = workspaceCache.get(fileKey);
-
-    if (!workspaceId) {
-      try {
-        workspaceId = await createTestWorkspace(workspaceName);
-        workspaceCache.set(fileKey, workspaceId);
-      } catch (error) {
-        console.error(`Failed to create workspace for ${fileKey}:`, error);
-        throw error;
-      }
-    }
-
-    await switchToWorkspace(page, workspaceName);
-
-    await use(page);
-
-    await page.evaluate(() => {
-      sessionStorage.clear();
-      localStorage.clear();
-    });
-  },
-
-  workspaceId: async (_args, use, testInfo) => {
-    const fileKey = normalizeFilePath(testInfo.file || "");
-    const workspaceId = workspaceCache.get(fileKey) || "";
-    await use(workspaceId);
   },
 });
 
