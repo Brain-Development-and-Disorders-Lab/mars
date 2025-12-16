@@ -35,7 +35,7 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Utilities
-import { getSession, getToken, parseError, isAbortError } from "./util";
+import { getSession, getToken, isAbortError } from "./util";
 import consola from "consola";
 
 // Application
@@ -72,7 +72,10 @@ const authLink = new ApolloLink((operation, forward) => {
  * Error handling for GraphQL errors that occur throughout the application
  */
 const errorLink = new ErrorLink(({ error }) => {
-  const { message: errorMessage, name: errorName } = parseError(error);
+  // Suppress AbortErrors - expected when Apollo Client cancels queries
+  if (isAbortError(error)) {
+    return;
+  }
 
   // Handle GraphQL errors
   if (CombinedGraphQLErrors.is(error)) {
@@ -107,11 +110,10 @@ const errorLink = new ErrorLink(({ error }) => {
       }
     }
   } else {
-    if (isAbortError(errorMessage, errorName)) {
-      return;
-    }
+    // Network or other errors that aren't AbortErrors
     consola.error("Network or other error:", error);
   }
+  // All code paths handled - implicit void return
 });
 
 const client = new ApolloClient({
@@ -135,27 +137,43 @@ const client = new ApolloClient({
       },
     },
   }),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: "all",
+    },
+    query: {
+      errorPolicy: "all",
+    },
+    mutate: {
+      errorPolicy: "all",
+    },
+  },
 });
 
-// Override console.error to filter out specifc or expected errors
+// Override console.error to filter out expected errors
+// AbortErrors are expected when Apollo Client cancels queries and should not be logged
 const consoleError = console.error;
 console.error = (...args: unknown[]) => {
-  const { message, name } = parseError(args[0]);
-  if (!isAbortError(message, name)) {
+  const error = args[0];
+  if (!isAbortError(error)) {
     consoleError.apply(console, args);
   }
 };
 
 // Global error handler to catch unhandled errors
+// Prevents AbortErrors from bubbling up and triggering error overlays
 window.addEventListener("error", (event) => {
-  const { message } = parseError(event);
-  if (isAbortError(message, "")) {
+  const error = event.error || event;
+  if (isAbortError(error)) {
     event.preventDefault();
+    event.stopImmediatePropagation?.();
   }
 });
+
+// Global unhandled rejection handler
+// Prevents AbortErrors from unhandled promise rejections
 window.addEventListener("unhandledrejection", (event) => {
-  const { message, name } = parseError(event.reason);
-  if (isAbortError(message, name)) {
+  if (isAbortError(event.reason)) {
     event.preventDefault();
     event.stopImmediatePropagation?.();
   }

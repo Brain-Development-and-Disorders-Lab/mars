@@ -176,7 +176,11 @@ export const parseError = (
 
 /**
  * Check if an error is an abort error (expected when queries are cancelled)
- * Can accept either an error object or message/name strings
+ *
+ * In Apollo Client v4, AbortErrors are expected when:
+ * - Component unmounts while query is in-flight
+ * - New query starts while previous query is still in-flight
+ *
  * @param errorOrMessage Either an error object or error message string
  * @param name Optional error name (only used if first param is a string)
  * @returns true if the error is an abort error
@@ -185,6 +189,11 @@ export const isAbortError = (
   errorOrMessage: unknown | string,
   name?: string,
 ): boolean => {
+  // Check for DOMException with AbortError name
+  if (errorOrMessage instanceof DOMException) {
+    return errorOrMessage.name === "AbortError";
+  }
+
   let message: string;
   let errorName: string;
 
@@ -199,11 +208,18 @@ export const isAbortError = (
     errorName = parsed.name;
   }
 
+  // Check error name first
+  if (errorName === "AbortError") {
+    return true;
+  }
+
+  // Check for abort-related messages
+  const normalizedMessage = message.toLowerCase();
   return (
-    message.includes("aborted") ||
-    message.includes("Abort") ||
-    errorName === "AbortError" ||
-    message === "The operation was aborted."
+    normalizedMessage.includes("aborted") ||
+    normalizedMessage.includes("err_aborted") ||
+    message === "The operation was aborted." ||
+    normalizedMessage.includes("the user aborted a request")
   );
 };
 

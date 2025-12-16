@@ -22,6 +22,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { isAbortError } from "src/util";
 
 const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();
@@ -93,12 +94,8 @@ const Relationships = (props: RelationshipsProps) => {
     };
 
     if (uniqueEntityIds.length > 0) {
-      Promise.resolve(fetchEntityNames()).catch((error: any) => {
-        const isAbortError =
-          error?.name === "AbortError" ||
-          error?.message?.includes("aborted") ||
-          error?.message === "The operation was aborted.";
-        if (!isAbortError) {
+      Promise.resolve(fetchEntityNames()).catch((error: unknown) => {
+        if (!isAbortError(error)) {
           console.error("Error in fetchEntityNames:", error);
         }
       });
