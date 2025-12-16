@@ -173,15 +173,18 @@ jobs:
           echo "REACT_APP_PUBLIC_POSTHOG_HOST=${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          wait-on: http://localhost:8080
-          working-directory: client
+      - name: Install Playwright browsers
+        working-directory: client
+        run: npx playwright install --with-deps chromium
 
-      - name: Upload Cypress screenshots
+      - name: Run Playwright tests
+        working-directory: client
+        run: yarn test:ui
+
+      - name: Upload Playwright test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
-          path: client/test/cypress/screenshots
+          name: playwright-report
+          path: client/playwright-report/
+          retention-days: 30
