@@ -1,6 +1,6 @@
 {
-  "include": ["src", "test"],
-  "exclude": ["node_modules", "../server", "../website"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "test", "../server", "../website"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
@@ -25,6 +25,7 @@
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["@testing-library/jest-dom", "node"]
   }
