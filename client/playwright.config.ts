@@ -28,7 +28,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "npm run start",
+    command: "yarn start",
     url: "http://localhost:8080",
     reuseExistingServer: true,
     timeout: 120 * 1000,
