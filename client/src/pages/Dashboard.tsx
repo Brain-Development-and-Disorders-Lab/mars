@@ -28,7 +28,6 @@ import ActivityFeed from "@components/ActivityFeed";
 import {
   ProjectModel,
   EntityModel,
-  ActivityModel,
   EntityMetrics,
   ProjectMetrics,
   TemplateMetrics,
@@ -60,7 +59,6 @@ const GET_DASHBOARD = gql`
     $entitiesArchived: Boolean
     $projectLimit: Int
     $projectsArchived: Boolean
-    $activityLimit: Int
   ) {
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -97,18 +95,6 @@ const GET_DASHBOARD = gql`
     workspaceMetrics {
       collaborators
     }
-    activity(limit: $activityLimit) {
-      _id
-      timestamp
-      type
-      actor
-      details
-      target {
-        _id
-        name
-        type
-      }
-    }
   }
 `;
 
@@ -132,7 +118,6 @@ const Dashboard = () => {
   const [projectData, setProjectData] = useState(
     [] as { _id: string; name: string; description: string; created: string }[],
   );
-  const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   // Metrics
   const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
@@ -172,16 +157,13 @@ const Dashboard = () => {
     entityMetrics: EntityMetrics;
     templateMetrics: TemplateMetrics;
     workspaceMetrics: WorkspaceMetrics;
-    activity: ActivityModel[];
   }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,
       entityLimit: 10,
       entitiesArchived: false,
-      activityLimit: 200,
     },
     fetchPolicy: "network-only",
-    pollInterval: 5000,
   });
 
   // Assign data
@@ -191,9 +173,6 @@ const Dashboard = () => {
     }
     if (data?.projects) {
       setProjectData(data.projects);
-    }
-    if (data?.activity) {
-      setActivityData(data.activity);
     }
 
     // Metrics
@@ -735,7 +714,7 @@ const Dashboard = () => {
           </Flex>
 
           {/* Activity */}
-          <ActivityFeed activities={activityData} />
+          <ActivityFeed />
         </Flex>
       </Flex>
     </Content>
