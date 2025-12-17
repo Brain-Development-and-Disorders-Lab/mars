@@ -49,8 +49,11 @@ test.describe("Template", () => {
     );
     await authenticatedPage.click("#editTemplateButton");
     await expect(
-      authenticatedPage.locator(".chakra-toast__root"),
-    ).toContainText("Updated Successfully");
+      authenticatedPage
+        .locator(".chakra-toast__root")
+        .filter({ hasText: "Updated Successfully" })
+        .first(),
+    ).toBeVisible();
 
     // Revert changes
     await authenticatedPage.click("#editTemplateButton");
@@ -64,8 +67,11 @@ test.describe("Template", () => {
     );
     await authenticatedPage.click("#editTemplateButton");
     await expect(
-      authenticatedPage.locator(".chakra-toast__root"),
-    ).toContainText("Updated Successfully");
+      authenticatedPage
+        .locator(".chakra-toast__root")
+        .filter({ hasText: "Updated Successfully" })
+        .first(),
+    ).toBeVisible();
   });
 
   test("exports the Template", async ({ authenticatedPage }) => {
