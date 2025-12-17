@@ -8,13 +8,13 @@ import {
   Flex,
   Heading,
   Input,
-  Menu,
-  Portal,
   Spacer,
   Spinner,
   Tabs,
   Tag,
   Text,
+  Checkbox,
+  Collapsible,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -81,6 +81,21 @@ const Search = () => {
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
 
+  // Text search filters
+  const [textSearchFilters, setTextSearchFilters] = useState({
+    startDate: "",
+    endDate: "",
+    hasAttachments: false,
+    hasAttributes: false,
+    hasRelationships: false,
+  });
+
+  // Collapsible state for text search filters
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Active filter count for text search filters
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
+
   // Query to search by text value
   const SEARCH_TEXT = gql`
     query Search(
@@ -88,12 +103,14 @@ const Search = () => {
       $resultType: String
       $isBuilder: Boolean
       $showArchived: Boolean
+      $filters: EntityFilterInput
     ) {
       search(
         query: $query
         resultType: $resultType
         isBuilder: $isBuilder
         showArchived: $showArchived
+        filters: $filters
       ) {
         __typename
         ... on Entity {
@@ -128,12 +145,30 @@ const Search = () => {
     setHasSearched(true);
     setResults([]);
 
+    const hasFilters =
+      textSearchFilters.startDate ||
+      textSearchFilters.endDate ||
+      textSearchFilters.hasAttachments ||
+      textSearchFilters.hasAttributes ||
+      textSearchFilters.hasRelationships;
+
+    const filters = hasFilters
+      ? {
+          startDate: textSearchFilters.startDate || undefined,
+          endDate: textSearchFilters.endDate || undefined,
+          hasAttachments: textSearchFilters.hasAttachments || undefined,
+          hasAttributes: textSearchFilters.hasAttributes || undefined,
+          hasRelationships: textSearchFilters.hasRelationships || undefined,
+        }
+      : undefined;
+
     const results = await searchText({
       variables: {
         query: query,
         resultType: "entity",
         isBuilder: false,
         showArchived: showArchived,
+        filters,
       },
     });
 
@@ -644,6 +679,26 @@ const Search = () => {
     validateQuery(advancedQuery);
   }, [advancedQuery]);
 
+  // Calculate active filter count for text search filters
+  useEffect(() => {
+    let count = 0;
+    if (showArchived) count++;
+    if (textSearchFilters.startDate) count++;
+    if (textSearchFilters.endDate) count++;
+    if (textSearchFilters.hasAttachments) count++;
+    if (textSearchFilters.hasAttributes) count++;
+    if (textSearchFilters.hasRelationships) count++;
+    setActiveFilterCount(count);
+  }, [showArchived, textSearchFilters]);
+
+  // Reset text search results when filters change
+  useEffect(() => {
+    // If filters change, clear current results so the next search reflects the new filters
+    setResults([]);
+    setHasSearched(false);
+    setIsSearching(false);
+  }, [showArchived, textSearchFilters]);
+
   return (
     <Content isError={isError}>
       <Flex direction={"column"} p={"1"} gap={"1"}>
@@ -699,59 +754,230 @@ const Search = () => {
           {/* Text search */}
           <Tabs.Content value={"text"} p={"1"}>
             <Flex direction={"column"} gap={"1"}>
-              {/* Search options */}
-              <Flex align={"center"} gap={"1"}>
-                <Menu.Root size={"sm"}>
-                  <Menu.Trigger asChild>
-                    <Button
-                      variant={"outline"}
-                      colorPalette={"gray"}
-                      size={"xs"}
-                      rounded={"md"}
-                    >
-                      <Icon name={"settings"} size={"xs"} />
-                      Search Options
-                    </Button>
-                  </Menu.Trigger>
-                  <Portal>
-                    <Menu.Positioner>
-                      <Menu.Content>
-                        <Menu.ItemGroup>
-                          <Menu.CheckboxItem
+              {/* Filter section */}
+              <Collapsible.Root
+                open={filtersOpen}
+                onOpenChange={(event) => setFiltersOpen(event.open)}
+              >
+                <Flex
+                  direction={"column"}
+                  gap={"1"}
+                  p={"1"}
+                  rounded={"md"}
+                  border={"1px solid"}
+                  borderColor={"gray.300"}
+                >
+                  <Flex
+                    direction={"row"}
+                    gap={"1"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"filter"} size={"sm"} />
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Search Filters
+                      </Text>
+                    </Flex>
+                    <Collapsible.Trigger asChild>
+                      <Button
+                        size={"xs"}
+                        variant={"ghost"}
+                        colorPalette={"gray"}
+                      >
+                        {filtersOpen ? "Hide" : "Show"} Filters
+                        <Icon
+                          name={filtersOpen ? "c_up" : "c_down"}
+                          size={"xs"}
+                        />
+                      </Button>
+                    </Collapsible.Trigger>
+                  </Flex>
+                  <Collapsible.Content>
+                    <Flex direction={"column"} gap={"2"} p={"1"}>
+                      <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
+                        {/* Search options section */}
+                        <Flex
+                          direction={"column"}
+                          gap={"1"}
+                          minW={"220px"}
+                          flexShrink={0}
+                        >
+                          <Text
                             fontSize={"xs"}
-                            key={"archived"}
-                            value={"archived"}
-                            checked={showArchived}
-                            onCheckedChange={(event) => setShowArchived(event)}
+                            fontWeight={"semibold"}
+                            color={"gray.600"}
                           >
-                            Show Archived Entities
-                            <Menu.ItemIndicator />
-                          </Menu.CheckboxItem>
-                        </Menu.ItemGroup>
-                      </Menu.Content>
-                    </Menu.Positioner>
-                  </Portal>
-                </Menu.Root>
+                            Search Options
+                          </Text>
+                          <Checkbox.Root
+                            size={"xs"}
+                            colorPalette={"blue"}
+                            checked={showArchived}
+                            onCheckedChange={(details) =>
+                              setShowArchived(details.checked as boolean)
+                            }
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label fontSize={"xs"}>
+                              Show Archived Entities
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        </Flex>
 
-                <Menu.Root size={"sm"}>
-                  <Menu.Trigger asChild>
-                    <Button
-                      variant={"outline"}
-                      colorPalette={"gray"}
-                      size={"xs"}
-                      rounded={"md"}
-                      disabled
-                    >
-                      <Icon name={"filter"} size={"xs"} />
-                      Search Filters
-                    </Button>
-                  </Menu.Trigger>
-                  <Portal>
-                    <Menu.Positioner>
-                      <Menu.Content></Menu.Content>
-                    </Menu.Positioner>
-                  </Portal>
-                </Menu.Root>
+                        {/* Entity filters section */}
+                        <Flex
+                          direction={"column"}
+                          gap={"1"}
+                          minW={"260px"}
+                          flexShrink={0}
+                        >
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={"gray.600"}
+                          >
+                            Entity Filters
+                          </Text>
+
+                          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                            {/* Date range */}
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"column"} gap={"0.5"}>
+                                <Text fontSize={"2xs"} color={"gray.600"}>
+                                  Created Start
+                                </Text>
+                                <Input
+                                  type={"date"}
+                                  size={"xs"}
+                                  bg={"white"}
+                                  value={textSearchFilters.startDate}
+                                  onChange={(e) =>
+                                    setTextSearchFilters((prev) => ({
+                                      ...prev,
+                                      startDate: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Flex>
+                              <Flex direction={"column"} gap={"0.5"}>
+                                <Text fontSize={"2xs"} color={"gray.600"}>
+                                  Created End
+                                </Text>
+                                <Input
+                                  type={"date"}
+                                  size={"xs"}
+                                  bg={"white"}
+                                  value={textSearchFilters.endDate}
+                                  onChange={(e) =>
+                                    setTextSearchFilters((prev) => ({
+                                      ...prev,
+                                      endDate: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Flex>
+                            </Flex>
+
+                            {/* Boolean filters */}
+                            <Flex direction={"column"} gap={"1"} mt={"1"}>
+                              <Checkbox.Root
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={textSearchFilters.hasAttachments}
+                                onCheckedChange={(details) =>
+                                  setTextSearchFilters((prev) => ({
+                                    ...prev,
+                                    hasAttachments: details.checked as boolean,
+                                  }))
+                                }
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  Has Attachments
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                              <Checkbox.Root
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={textSearchFilters.hasAttributes}
+                                onCheckedChange={(details) =>
+                                  setTextSearchFilters((prev) => ({
+                                    ...prev,
+                                    hasAttributes: details.checked as boolean,
+                                  }))
+                                }
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  Has Attributes
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                              <Checkbox.Root
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={textSearchFilters.hasRelationships}
+                                onCheckedChange={(details) =>
+                                  setTextSearchFilters((prev) => ({
+                                    ...prev,
+                                    hasRelationships:
+                                      details.checked as boolean,
+                                  }))
+                                }
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  Has Relationships
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            </Flex>
+                          </Flex>
+                        </Flex>
+                      </Flex>
+                    </Flex>
+                  </Collapsible.Content>
+                </Flex>
+              </Collapsible.Root>
+
+              {/* Active filter count and controls */}
+              <Flex
+                direction={"row"}
+                gap={"1"}
+                align={"center"}
+                justify={"flex-end"}
+              >
+                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                  {activeFilterCount} Active Filter
+                  {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
+                </Text>
+                <Button
+                  size={"xs"}
+                  variant={"outline"}
+                  rounded={"md"}
+                  colorPalette={"gray"}
+                  bg={"white"}
+                  _hover={{ bg: "gray.50" }}
+                  disabled={activeFilterCount === 0}
+                  onClick={() => {
+                    setShowArchived(false);
+                    setTextSearchFilters({
+                      startDate: "",
+                      endDate: "",
+                      hasAttachments: false,
+                      hasAttributes: false,
+                      hasRelationships: false,
+                    });
+                    setResults([]);
+                    setHasSearched(false);
+                    setIsSearching(false);
+                  }}
+                >
+                  Clear
+                </Button>
               </Flex>
 
               {/* Search input and submit */}
