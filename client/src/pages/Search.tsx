@@ -176,11 +176,11 @@ const Search = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 20}
+            disabled={info.getValue().length < 48}
             showArrow
           >
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 20 })}
+              {_.truncate(info.getValue(), { length: 48 })}
             </Text>
           </Tooltip>
           <Button
@@ -197,6 +197,9 @@ const Search = () => {
         </Flex>
       ),
       header: "Name",
+      meta: {
+        minWidth: 400,
+      },
     }),
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
@@ -210,16 +213,19 @@ const Search = () => {
         return (
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 30}
+            disabled={info.getValue().length < 64}
           >
             <Text fontSize={"xs"} lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 30 })}
+              {_.truncate(info.getValue(), { length: 64 })}
             </Text>
           </Tooltip>
         );
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {

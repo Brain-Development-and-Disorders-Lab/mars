@@ -277,11 +277,11 @@ const Entities = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 48}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 48 })}
               </Text>
             </Tooltip>
             <Button
@@ -300,7 +300,7 @@ const Entities = () => {
       },
       header: "Name",
       meta: {
-        minWidth: 300,
+        minWidth: 400,
       },
     }),
     columnHelper.accessor("description", {
@@ -316,11 +316,11 @@ const Entities = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 64}
               showArrow
             >
               <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 64 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -328,6 +328,9 @@ const Entities = () => {
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {

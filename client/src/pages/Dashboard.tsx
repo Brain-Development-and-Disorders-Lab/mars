@@ -225,11 +225,11 @@ const Dashboard = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 18}
+            disabled={info.getValue().length < 48}
             showArrow
           >
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 18 })}
+              {_.truncate(info.getValue(), { length: 48 })}
             </Text>
           </Tooltip>
           <Button
@@ -246,6 +246,9 @@ const Dashboard = () => {
         </Flex>
       ),
       header: "Name",
+      meta: {
+        minWidth: 400,
+      },
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
@@ -260,11 +263,11 @@ const Dashboard = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 64}
               showArrow
             >
               <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 64 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -272,6 +275,9 @@ const Dashboard = () => {
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     entityTableColumnHelper.accessor("timestamp", {
       cell: (info) => {
@@ -315,11 +321,11 @@ const Dashboard = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 48}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 48 })}
               </Text>
             </Tooltip>
             <Button
@@ -337,6 +343,9 @@ const Dashboard = () => {
         );
       },
       header: "Name",
+      meta: {
+        minWidth: 400,
+      },
     }),
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
@@ -351,11 +360,11 @@ const Dashboard = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 64}
               showArrow
             >
               <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 64 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -363,6 +372,9 @@ const Dashboard = () => {
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     projectTableColumnHelper.accessor("created", {
       cell: (info) => {
