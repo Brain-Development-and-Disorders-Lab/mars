@@ -50,11 +50,13 @@ import {
   ProjectModel,
   DataTableAction,
   IGenericItem,
+  ResponseData,
 } from "@types";
 import { Cell } from "@tanstack/react-table";
 
 // Apollo client imports
-import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
@@ -63,6 +65,7 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
+import { removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -254,15 +257,15 @@ const Project = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(
-    GET_PROJECT_WITH_ENTITIES,
-    {
-      variables: {
-        _id: id,
-      },
-      fetchPolicy: "network-only",
+  const { loading, error, data, refetch } = useQuery<{
+    project: ProjectModel;
+    entities: IGenericItem[];
+  }>(GET_PROJECT_WITH_ENTITIES, {
+    variables: {
+      _id: id,
     },
-  );
+    fetchPolicy: "network-only",
+  });
 
   // Query to get Project Entities export contents
   const GET_PROJECT_ENTITIES_EXPORT = gql`
@@ -273,7 +276,9 @@ const Project = () => {
   const [
     exportProjectEntities,
     { loading: exportEntitiesLoading, error: exportEntitiesError },
-  ] = useLazyQuery(GET_PROJECT_ENTITIES_EXPORT);
+  ] = useLazyQuery<{ exportProjectEntities: string }>(
+    GET_PROJECT_ENTITIES_EXPORT,
+  );
 
   // Query to get Project Entities export contents
   const GET_PROJECT_EXPORT = gql`
@@ -282,7 +287,7 @@ const Project = () => {
     }
   `;
   const [exportProject, { loading: exportLoading, error: exportError }] =
-    useLazyQuery(GET_PROJECT_EXPORT);
+    useLazyQuery<{ exportProject: string }>(GET_PROJECT_EXPORT);
 
   // Mutation to update Project
   const UPDATE_PROJECT = gql`
@@ -294,7 +299,7 @@ const Project = () => {
     }
   `;
   const [updateProject, { loading: updateLoading, error: updateError }] =
-    useMutation(UPDATE_PROJECT);
+    useMutation<{ updateProject: ResponseData<string> }>(UPDATE_PROJECT);
 
   // Mutation to archive Project
   const ARCHIVE_PROJECT = gql`
@@ -305,8 +310,9 @@ const Project = () => {
       }
     }
   `;
-  const [archiveProject, { loading: archiveLoading }] =
-    useMutation(ARCHIVE_PROJECT);
+  const [archiveProject, { loading: archiveLoading }] = useMutation<{
+    archiveProject: ResponseData<string>;
+  }>(ARCHIVE_PROJECT);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -394,7 +400,7 @@ const Project = () => {
     try {
       await updateProject({
         variables: {
-          project: {
+          project: removeTypename({
             _id: updateData._id,
             name: updateData.name,
             timestamp: updateData.timestamp,
@@ -404,7 +410,7 @@ const Project = () => {
             collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
-          },
+          }),
           message: saveMessage,
         },
       });
@@ -444,7 +450,19 @@ const Project = () => {
         state: true,
       },
     });
-    if (response.data.archiveProject.success) {
+
+    if (
+      !response.data?.archiveProject ||
+      !response.data.archiveProject.success
+    ) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred when archiving Project",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.archiveProject.success) {
       toaster.create({
         title: "Archived Successfully",
         type: "success",
@@ -453,15 +471,8 @@ const Project = () => {
       });
       setProjectArchived(true);
       setArchiveDialogOpen(false);
-    } else {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred when archiving Project",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
     }
+
     setEditing(false);
   };
 
@@ -473,15 +484,11 @@ const Project = () => {
         state: false,
       },
     });
-    if (response.data.archiveProject.success) {
-      toaster.create({
-        title: "Restored Successfully",
-        type: "success",
-        duration: 2000,
-        closable: true,
-      });
-      setProjectArchived(false);
-    } else {
+
+    if (
+      !response.data?.archiveProject ||
+      !response.data.archiveProject.success
+    ) {
       toaster.create({
         title: "Error",
         description: "An error occurred when restoring Project",
@@ -489,7 +496,16 @@ const Project = () => {
         duration: 2000,
         closable: true,
       });
+    } else if (response.data.archiveProject.success) {
+      toaster.create({
+        title: "Restored Successfully",
+        type: "success",
+        duration: 2000,
+        closable: true,
+      });
+      setProjectArchived(false);
     }
+
     setEditing(false);
   };
 
@@ -530,7 +546,7 @@ const Project = () => {
     try {
       await updateProject({
         variables: {
-          project: {
+          project: removeTypename({
             _id: updateData._id,
             name: updateData.name,
             timestamp: updateData.timestamp,
@@ -540,7 +556,7 @@ const Project = () => {
             collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
-          },
+          }),
           message: `Restored Project version ${projectVersion.version}`,
         },
       });
@@ -588,15 +604,26 @@ const Project = () => {
     const response = await exportProjectEntities({
       variables: { _id: project._id, format: "json" },
     });
-    if (response.data.exportProjectEntities) {
-      FileSaver.saveAs(
-        new Blob([response.data.exportProjectEntities]),
-        slugify(
-          `export_${project._id}_entities_${dayjs(Date.now()).format(
-            "YYYY_MM_DD",
-          )}.json`,
-        ),
-      );
+
+    if (!response.data?.exportProjectEntities) {
+      toaster.create({
+        title: "Error",
+        description: "Unable to export Project Entities",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      if (response.data.exportProjectEntities) {
+        FileSaver.saveAs(
+          new Blob([response.data.exportProjectEntities]),
+          slugify(
+            `export_${project._id}_entities_${dayjs(Date.now()).format(
+              "YYYY_MM_DD",
+            )}.json`,
+          ),
+        );
+      }
     }
 
     if (exportEntitiesError) {
@@ -632,7 +659,15 @@ const Project = () => {
       },
     });
 
-    if (response.data.exportProject) {
+    if (!response.data?.exportProject || exportError) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred exporting this Project",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.exportProject) {
       FileSaver.saveAs(
         new Blob([response.data.exportProject]),
         slugify(`${projectName.replace(" ", "")}_export.${format}`),
@@ -648,16 +683,6 @@ const Project = () => {
         title: "Info",
         description: `Generated ${format.toUpperCase()} file`,
         type: "info",
-        duration: 2000,
-        closable: true,
-      });
-    }
-
-    if (exportError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred exporting this Project",
-        type: "error",
         duration: 2000,
         closable: true,
       });
@@ -1771,6 +1796,12 @@ const Project = () => {
                   value={selectedEntity}
                   onChange={setSelectedEntity}
                 />
+                {project.entities &&
+                  project.entities.includes(selectedEntity._id) && (
+                    <Text fontSize={"xs"} color={"red"} ml={"0.5"}>
+                      Entity is already linked to this Project
+                    </Text>
+                  )}
               </Dialog.Body>
 
               <Dialog.Footer p={"1"}>
@@ -1792,6 +1823,11 @@ const Project = () => {
                   colorPalette={"green"}
                   size={"xs"}
                   rounded={"md"}
+                  disabled={
+                    (project.entities &&
+                      project.entities.includes(selectedEntity._id)) ||
+                    !selectedEntity._id
+                  }
                   onClick={() => {
                     if (id) {
                       // Add the Origin to the Entity

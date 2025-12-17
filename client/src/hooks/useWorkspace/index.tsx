@@ -7,7 +7,8 @@ import React, {
 } from "react";
 
 // GraphQL
-import { gql, useLazyQuery, useApolloClient } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useApolloClient } from "@apollo/client/react";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -17,6 +18,9 @@ import _ from "lodash";
 
 // Session
 import { useSession } from "@hooks/useSession";
+
+// Variables
+import { SESSION_KEY } from "src/variables";
 
 type WorkspaceContextValue = {
   workspace: string;
@@ -52,11 +56,53 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
 
+  // Query to check if a specific Workspace exists
+  const GET_WORKSPACE = gql`
+    query GetWorkspace($_id: String) {
+      workspace(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getWorkspace] = useLazyQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, {
+    fetchPolicy: "network-only",
+    errorPolicy: "all", // Don't throw on errors, return them in the response
+  });
+
   const activateWorkspace = async (
     workspace: string,
   ): Promise<IResponseMessage> => {
     if (workspace === "") {
-      // Option for simply activating any Workspace
+      // Check if there's a stored workspace in session
+      const storedWorkspace = session.workspace;
+
+      if (storedWorkspace && storedWorkspace !== "") {
+        // Verify the stored workspace exists
+        const workspaceResponse = await getWorkspace({
+          variables: { _id: storedWorkspace },
+        });
+
+        if (workspaceResponse.data?.workspace && !workspaceResponse.error) {
+          // Stored workspace exists, use it
+          await client.clearStore();
+          sessionStorage.setItem(
+            SESSION_KEY,
+            JSON.stringify({ workspace: storedWorkspace }),
+          );
+          setActiveWorkspace(storedWorkspace);
+          return {
+            success: true,
+            message: "Set active Workspace",
+          };
+        }
+
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+
+      // Stored workspace doesn't exist or wasn't found, get all workspaces
       const workspacesResponse = await getWorkspaces();
       const workspacesData = workspacesResponse.data?.workspaces;
 
@@ -72,17 +118,23 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       if (workspacesData.length === 0) {
         return {
           success: false,
-          message: "User is not a member of any Workspaces",
+          message: "No Workspaces exist",
         };
       }
 
+      // Use the first available workspace
       await client.clearStore();
+      sessionStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ workspace: workspacesData[0]._id }),
+      );
       setActiveWorkspace(workspacesData[0]._id);
     } else {
       await client.clearStore();
+      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ workspace }));
       setActiveWorkspace(workspace);
     }
-
     return {
       success: true,
       message: "Set active Workspace",

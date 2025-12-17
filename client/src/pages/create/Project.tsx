@@ -33,7 +33,8 @@ import dayjs from "dayjs";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
-import { gql, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 
 // Custom types
 import { IGenericItem, ResponseData } from "@types";
@@ -407,6 +408,7 @@ const Project = () => {
         p={"1"}
       >
         <Button
+          data-testid={"create-project-cancel"}
           size={"xs"}
           rounded={"md"}
           colorPalette={"red"}
@@ -419,6 +421,7 @@ const Project = () => {
 
         <Button
           id={"finishCreateProjectButton"}
+          data-testid={"create-project-finish"}
           size={"xs"}
           rounded={"md"}
           colorPalette={"green"}

@@ -45,7 +45,8 @@ import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
-import { useQuery, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -164,7 +165,15 @@ const Dashboard = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
+  const { loading, error, data, refetch } = useQuery<{
+    projects: ProjectModel[];
+    projectMetrics: ProjectMetrics;
+    entities: { entities: EntityModel[]; total: number };
+    entityMetrics: EntityMetrics;
+    templateMetrics: TemplateMetrics;
+    workspaceMetrics: WorkspaceMetrics;
+    activity: ActivityModel[];
+  }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,
       entityLimit: 10,

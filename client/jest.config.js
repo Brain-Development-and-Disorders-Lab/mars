@@ -1,6 +1,8 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
+  testMatch: ["**/test/components/**/*.test.[jt]s?(x)"],
+  testPathIgnorePatterns: ["/node_modules/", "/test/playwright/"],
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "^@components/(.*)$": "<rootDir>/src/components/$1",

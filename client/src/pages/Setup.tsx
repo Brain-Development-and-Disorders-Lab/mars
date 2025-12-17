@@ -103,8 +103,14 @@ const Setup = () => {
 
     if (result.success === true) {
       // Activate a Workspace and navigate to the Dashboard
-      await activateWorkspace("");
-      navigate("/");
+      const workspaceResult = await activateWorkspace("");
+      if (workspaceResult.message === "No Workspaces exist") {
+        navigate("/create/workspace");
+      } else if (workspaceResult.success) {
+        navigate("/");
+      } else {
+        navigate("/");
+      }
     }
   };
 
@@ -119,8 +125,14 @@ const Setup = () => {
 
     if (token.setup === true) {
       // Activate a Workspace and navigate to the dashboard
-      await activateWorkspace("");
-      navigate("/");
+      const workspaceResult = await activateWorkspace("");
+      if (workspaceResult.message === "No Workspaces exist") {
+        navigate("/create/workspace");
+      } else if (workspaceResult.success) {
+        navigate("/");
+      } else {
+        navigate("/");
+      }
       return;
     } else if (
       token.orcid === "" &&

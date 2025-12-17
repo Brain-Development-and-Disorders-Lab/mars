@@ -114,3 +114,9 @@ dist
 
 *storybook.log
 storybook-static
+
+# Playwright
+playwright-report/
+test-results/
+.playwright/
+*.webm

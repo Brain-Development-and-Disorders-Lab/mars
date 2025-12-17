@@ -6,15 +6,11 @@ import { createRoot } from "react-dom/client";
 import { toaster } from "src/components/Toast";
 
 // Apollo imports
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  ApolloLink,
-} from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
-import { onError } from "@apollo/client/link/error";
-import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
+import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
+import { ErrorLink } from "@apollo/client/link/error";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { ApolloProvider } from "@apollo/client/react";
+import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
 // Posthog
 import posthog from "posthog-js";
@@ -39,38 +35,55 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Utilities
-import { getSession, getToken } from "./util";
+import { getSession, getToken, isAbortError } from "./util";
 import consola from "consola";
 
 // Application
 import App from "./App";
 
 // Setup Apollo client
-const httpLink = createUploadLink({
+const httpLink = new UploadHttpLink({
   uri: API_URL,
   headers: {
     "Apollo-Require-Preflight": "true",
   },
 });
 
-const authLink = setContext((_, { headers }) => {
-  return {
+/**
+ * Authentication link to add headers to each request
+ */
+const authLink = new ApolloLink((operation, forward) => {
+  const token = getToken(TOKEN_KEY);
+  const session = getSession(SESSION_KEY);
+
+  operation.setContext(({ headers = {} }) => ({
     headers: {
       ...headers,
-      user: getToken(TOKEN_KEY).orcid,
-      token: getToken(TOKEN_KEY).token,
-      workspace: getSession(SESSION_KEY).workspace,
+      user: token.orcid,
+      token: token.token,
+      workspace: session.workspace,
     },
-  };
+  }));
+
+  return forward(operation);
 });
 
 /**
  * Error handling for GraphQL errors that occur throughout the application
  */
-const errorLink = onError(({ graphQLErrors }) => {
-  if (graphQLErrors) {
-    for (const err of graphQLErrors) {
-      if (err.message === "Could not validate token") {
+const errorLink = new ErrorLink(({ error }) => {
+  // Suppress AbortErrors - expected when Apollo Client cancels queries
+  if (isAbortError(error)) {
+    return;
+  }
+
+  // Handle GraphQL errors
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const err of error.errors) {
+      const errorMessage = err.message;
+
+      // Handle authentication errors
+      if (errorMessage === "Could not validate token") {
         toaster.create({
           title: "Authentication Error",
           description: "Unable to authenticate user. Please log in again.",
@@ -89,18 +102,23 @@ const errorLink = onError(({ graphQLErrors }) => {
         sessionStorage.removeItem(SESSION_KEY);
         return;
       }
+
+      // Suppress "Workspace does not exist" errors - these are handled gracefully
+      // in activateWorkspace when checking if a stored workspace exists
+      if (errorMessage === "Workspace does not exist") {
+        return;
+      }
     }
+  } else {
+    // Network or other errors that aren't AbortErrors
+    consola.error("Network or other error:", error);
   }
+  // All code paths handled - implicit void return
 });
 
 const client = new ApolloClient({
-  link: ApolloLink.from([
-    errorLink,
-    authLink,
-    httpLink as unknown as ApolloLink,
-  ]),
+  link: ApolloLink.from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache({
-    addTypename: false,
     typePolicies: {
       Workspace: {
         keyFields: ["_id"],
@@ -119,6 +137,46 @@ const client = new ApolloClient({
       },
     },
   }),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: "all",
+    },
+    query: {
+      errorPolicy: "all",
+    },
+    mutate: {
+      errorPolicy: "all",
+    },
+  },
+});
+
+// Override console.error to filter out expected errors
+// AbortErrors are expected when Apollo Client cancels queries and should not be logged
+const consoleError = console.error;
+console.error = (...args: unknown[]) => {
+  const error = args[0];
+  if (!isAbortError(error)) {
+    consoleError.apply(console, args);
+  }
+};
+
+// Global error handler to catch unhandled errors
+// Prevents AbortErrors from bubbling up and triggering error overlays
+window.addEventListener("error", (event) => {
+  const error = event.error || event;
+  if (isAbortError(error)) {
+    event.preventDefault();
+    event.stopImmediatePropagation?.();
+  }
+});
+
+// Global unhandled rejection handler
+// Prevents AbortErrors from unhandled promise rejections
+window.addEventListener("unhandledrejection", (event) => {
+  if (isAbortError(event.reason)) {
+    event.preventDefault();
+    event.stopImmediatePropagation?.();
+  }
 });
 
 // Render the application

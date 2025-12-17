@@ -36,7 +36,8 @@ dayjs.extend(isSameOrBefore);
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -89,7 +90,9 @@ const Templates = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_TEMPLATES);
+  const { loading, error, data, refetch } = useQuery<{
+    templates: AttributeModel[];
+  }>(GET_TEMPLATES);
 
   // Manage data once retrieved
   useEffect(() => {

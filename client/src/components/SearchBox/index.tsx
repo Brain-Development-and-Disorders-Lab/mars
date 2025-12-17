@@ -24,7 +24,8 @@ import { IGenericItem, SearchBoxProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
@@ -136,7 +137,9 @@ const SearchBox = (props: SearchBoxProps) => {
       }
     }
   `;
-  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
+  const [searchText, { loading, error }] = useLazyQuery<{
+    search: IGenericItem[];
+  }>(SEARCH_TEXT);
 
   // Determine resultType based on selected filters
   const getResultType = (): string | undefined => {
@@ -181,16 +184,16 @@ const SearchBox = (props: SearchBoxProps) => {
       },
     });
 
-    if (results.data.search) {
+    if (results.data?.search) {
       setResults(results.data.search);
     }
 
-    if (error) {
+    if (error || !results.data?.search) {
       setIsError(true);
       toaster.create({
         title: "Error",
         type: "error",
-        description: error.message,
+        description: error || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });

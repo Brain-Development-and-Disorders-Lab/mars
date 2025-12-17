@@ -47,15 +47,19 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { isValidAttributes, createSelectOptions } from "src/util";
+import {
+  isValidAttributes,
+  createSelectOptions,
+  removeTypename,
+} from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
-import consola from "consola";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -115,7 +119,6 @@ const Entity = () => {
   const [name, setName] = useState("");
   const [counter, setCounter] = useState("");
   const [useCounter, setUseCounter] = useState(false);
-  const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
   );
@@ -152,14 +155,6 @@ const Entity = () => {
   const [validAttributes, setValidAttributes] = useState(false);
 
   // GraphQL operations
-  const CHECK_ENTITY_NAME = gql`
-    query CheckEntityName($name: String) {
-      entityNameExists(name: $name)
-    }
-  `;
-  const [entityNameExists, { error: entityNameError }] =
-    useLazyQuery(CHECK_ENTITY_NAME);
-
   const GET_CREATE_ENTITIES_DATA = gql`
     query GetCreateEntitiesData {
       projects {
@@ -181,7 +176,10 @@ const Entity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_CREATE_ENTITIES_DATA);
+  const { loading, error, data, refetch } = useQuery<{
+    projects: IGenericItem[];
+    templates: AttributeModel[];
+  }>(GET_CREATE_ENTITIES_DATA);
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -232,23 +230,12 @@ const Entity = () => {
     }
   }, [data]);
 
-  const checkEntityName = async (name: string) => {
-    // Adjust the URL and HTTP client according to your setup
-    const response = await entityNameExists({
-      variables: {
-        name: name,
-      },
-    });
-    setIsNameUnique(!response.data.entityNameExists);
-    if (entityNameError) {
-      consola.error("Failed to check entity name:", entityNameError.cause);
-    }
-  };
-
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
-      refetch();
+      refetch().catch(() => {
+        // Silently handle refetch errors
+      });
     }
   }, []);
 
@@ -290,7 +277,6 @@ const Entity = () => {
     if (_.isEqual("start", pageState)) {
       // Capture event
       posthog.capture("create_entity_relationships");
-
       setPageState("relationships");
       setPageStep(1);
     } else if (_.isEqual("relationships", pageState)) {
@@ -355,7 +341,7 @@ const Entity = () => {
       // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
-          entity: {
+          entity: removeTypename({
             name: generatedName,
             owner: owner,
             created: created,
@@ -365,7 +351,7 @@ const Entity = () => {
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
-          },
+          }),
         },
       });
 
@@ -512,7 +498,7 @@ const Entity = () => {
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                <Fieldset.Root invalid={isNameError || !isNameUnique} gap={"1"}>
+                <Fieldset.Root invalid={isNameError} gap={"1"}>
                   <Fieldset.Content mt={"1"}>
                     <Field.Root required gap={"1"}>
                       <Field.Label
@@ -542,7 +528,6 @@ const Entity = () => {
                               rounded={"md"}
                               onChange={(event) => {
                                 setName(event.target.value);
-                                checkEntityName(event.target.value);
                               }}
                             />
                           </Flex>
@@ -568,12 +553,12 @@ const Entity = () => {
                           </Button>
                         </Flex>
                       </Flex>
-                      {(isNameError || !isNameUnique) && !useCounter && (
+                      {isNameError && !useCounter && (
                         <Field.ErrorText fontSize={"xs"}>
-                          A name or ID must be specified and unique.
+                          A name or ID must be specified.
                         </Field.ErrorText>
                       )}
-                      {(isNameError || !isNameUnique) && useCounter && (
+                      {isNameError && useCounter && (
                         <Field.ErrorText fontSize={"xs"}>
                           A Counter must be selected or created.
                         </Field.ErrorText>
@@ -768,6 +753,7 @@ const Entity = () => {
                     />
                   </Flex>
                   <Button
+                    data-testid={"create-entity-add-relationship"}
                     colorPalette={"green"}
                     size={"xs"}
                     rounded={"md"}
@@ -1001,6 +987,7 @@ const Entity = () => {
                 </Flex>
 
                 <Button
+                  data-testid={"create-entity-new-attribute"}
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
@@ -1162,6 +1149,7 @@ const Entity = () => {
       >
         <Flex gap={"2"}>
           <Button
+            data-testid={"create-entity-cancel"}
             size={"xs"}
             rounded={"md"}
             colorPalette={"red"}
@@ -1173,6 +1161,7 @@ const Entity = () => {
           </Button>
           {!_.isEqual("start", pageState) && (
             <Button
+              data-testid={"create-entity-back"}
               size={"xs"}
               rounded={"md"}
               colorPalette={"orange"}
@@ -1186,6 +1175,11 @@ const Entity = () => {
         </Flex>
 
         <Button
+          data-testid={
+            _.isEqual("attributes", pageState)
+              ? "create-entity-finish"
+              : "create-entity-continue"
+          }
           size={"xs"}
           rounded={"md"}
           colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}

@@ -76,13 +76,13 @@ To start the client, run `yarn start` in the `/client` directory. Start the serv
 
 ## Testing
 
-Metadatify includes Cypress tests and component tests for the client, and the server includes unit tests using Jest.
+Metadatify includes Playwright tests and component tests for the client, and the server includes unit tests using Jest.
 
 ### Testing - Client
 
 To run component tests, run `yarn test:components` in the `/client` directory.
 
-[Cypress](https://www.cypress.io/) is used for testing the client UI. Before running client tests, add an `.env` file in the `/client` directory with the following variables:
+[Playwright](https://playwright.dev/) is used for testing the client UI. Before running client tests, add an `.env` file in the `/client` directory with the following variables:
 
 - `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
 
@@ -93,9 +93,7 @@ An example `.env` file is shown below:
 CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
 ```
 
-Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Cypress tests in headless mode.
-
-To run component tests, run `yarn test` in the `/client` directory. To run Cypress tests, run `yarn cypress run` in the root `/` directory of the repository. Ensure the server is running, otherwise the Cypress tests will fail.
+Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Playwright tests. Ensure the server is running, otherwise the tests will fail.
 
 ### Testing - Server
 

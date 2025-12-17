@@ -13,7 +13,8 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
 
@@ -35,7 +36,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getEntity, { loading: loadingEntity }] = useLazyQuery(GET_ENTITY);
+  const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
+    entity: IGenericItem;
+  }>(GET_ENTITY);
 
   const GET_PROJECT = gql`
     query GetProject($_id: String) {
@@ -45,7 +48,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getProject, { loading: loadingProject }] = useLazyQuery(GET_PROJECT);
+  const [getProject, { loading: loadingProject }] = useLazyQuery<{
+    project: IGenericItem;
+  }>(GET_PROJECT);
 
   const GET_TEMPLATE = gql`
     query GetTemplate($_id: String) {
@@ -55,45 +60,71 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getTemplate, { loading: loadingTemplate }] =
-    useLazyQuery(GET_TEMPLATE);
+  const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
+    template: IGenericItem;
+  }>(GET_TEMPLATE);
 
   /**
    * Utility function to retrieve data of link target
    */
   const getLinkyData = async () => {
+    // If id is empty or missing, just use fallback without making a query
+    if (!props.id || props.id.trim() === "") {
+      const fallbackName = props.fallback || "Invalid Name";
+      setTooltipLabel(fallbackName);
+      setShowDeleted(true);
+
+      // Apply truncation if needed
+      if (props.truncate === false) {
+        setLinkLabel(fallbackName);
+      } else if (_.isNumber(props.truncate)) {
+        setLinkLabel(_.truncate(fallbackName, { length: props.truncate }));
+      } else {
+        setLinkLabel(
+          _.truncate(fallbackName, { length: DEFAULT_LINKY_LABEL_LENGTH }),
+        );
+      }
+      return;
+    }
+
     const data: IGenericItem = {
       _id: props.id,
       name: props.fallback || "Invalid Name",
     };
 
-    if (props.type === "templates") {
-      const response = await getTemplate({ variables: { _id: props.id } });
-      if (response.error || _.isUndefined(response.data)) {
-        setShowDeleted(true);
-        setTooltipLabel("Deleted or Private");
-      } else {
-        data.name = response.data.template.name;
-        setTooltipLabel(data.name);
+    try {
+      if (props.type === "templates") {
+        const response = await getTemplate({ variables: { _id: props.id } });
+        if (response.error || _.isUndefined(response.data)) {
+          setShowDeleted(true);
+          setTooltipLabel("Deleted or Private");
+        } else {
+          data.name = response.data.template.name;
+          setTooltipLabel(data.name);
+        }
+      } else if (props.type === "entities") {
+        const response = await getEntity({ variables: { _id: props.id } });
+        if (response.error || _.isUndefined(response.data)) {
+          setShowDeleted(true);
+          setTooltipLabel("Deleted or Private");
+        } else {
+          data.name = response.data.entity.name;
+          setTooltipLabel(data.name);
+        }
+      } else if (props.type === "projects") {
+        const response = await getProject({ variables: { _id: props.id } });
+        if (response.error || _.isUndefined(response.data)) {
+          setShowDeleted(true);
+          setTooltipLabel("Deleted or Private");
+        } else {
+          data.name = response.data.project.name;
+          setTooltipLabel(data.name);
+        }
       }
-    } else if (props.type === "entities") {
-      const response = await getEntity({ variables: { _id: props.id } });
-      if (response.error || _.isUndefined(response.data)) {
-        setShowDeleted(true);
-        setTooltipLabel("Deleted or Private");
-      } else {
-        data.name = response.data.entity.name;
-        setTooltipLabel(data.name);
-      }
-    } else if (props.type === "projects") {
-      const response = await getProject({ variables: { _id: props.id } });
-      if (response.error || _.isUndefined(response.data)) {
-        setShowDeleted(true);
-        setTooltipLabel("Deleted or Private");
-      } else {
-        data.name = response.data.project.name;
-        setTooltipLabel(data.name);
-      }
+    } catch (error) {
+      // If query fails completely, use fallback
+      setShowDeleted(true);
+      setTooltipLabel("Deleted or Private");
     }
 
     // Set the label text and apply truncating where specified

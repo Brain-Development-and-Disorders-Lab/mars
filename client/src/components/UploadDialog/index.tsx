@@ -19,7 +19,11 @@ import { toaster } from "@components/Toast";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
+
+// Custom types
+import { ResponseData } from "@types";
 
 const UploadDialog = (props: {
   open: boolean;
@@ -45,7 +49,9 @@ const UploadDialog = (props: {
       }
     }
   `;
-  const [uploadAttachment, { loading, error }] = useMutation(UPLOAD_ATTACHMENT);
+  const [uploadAttachment, { loading, error }] = useMutation<{
+    uploadAttachment: ResponseData<string>;
+  }>(UPLOAD_ATTACHMENT);
 
   // Update display name and type when file changes
   useEffect(() => {
@@ -69,11 +75,11 @@ const UploadDialog = (props: {
         },
       });
 
-      if (error) {
+      if (error || !response.data?.uploadAttachment) {
         toaster.create({
           title: "Upload Error",
           type: "error",
-          description: "Error occurred while uploading file",
+          description: "Unable to upload file",
           duration: 4000,
           closable: true,
         });
@@ -81,11 +87,11 @@ const UploadDialog = (props: {
         return;
       }
 
-      if (response.data.uploadAttachment.success) {
+      if (response.data?.uploadAttachment?.success) {
         // Add the upload to the existing list of uploads
         props.setUploads([
           ...props.uploads,
-          response.data.uploadAttachment.data,
+          response.data?.uploadAttachment.data,
         ]);
 
         // Reset file upload state

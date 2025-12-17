@@ -40,7 +40,8 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
-import { useQuery, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 // Queries
 const GET_PROJECTS = gql`
@@ -83,7 +84,9 @@ const Projects = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery(GET_PROJECTS);
+  const { loading, error, data, refetch } = useQuery<{
+    projects: ProjectModel[];
+  }>(GET_PROJECTS);
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);

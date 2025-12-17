@@ -27,6 +27,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
+import { toaster } from "@components/Toast";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -40,13 +41,14 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 import _ from "lodash";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import FileSaver from "file-saver";
-import slugify from "slugify";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
@@ -218,7 +220,7 @@ const Entities = () => {
     }
   `;
   const [exportEntities, { loading: exportLoading, error: exportError }] =
-    useLazyQuery(GET_ENTITIES_EXPORT);
+    useLazyQuery<{ exportEntities: string }>(GET_ENTITIES_EXPORT);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -403,7 +405,15 @@ const Entities = () => {
       },
     });
 
-    if (response.data.exportEntities) {
+    if (!response.data?.exportEntities) {
+      toaster.create({
+        title: "Error",
+        description: "Unable to export entities",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data?.exportEntities) {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
         slugify(

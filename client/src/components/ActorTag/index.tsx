@@ -9,7 +9,8 @@ import { ActorTagProps, UserModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { gql, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
@@ -38,6 +39,7 @@ const ActorTag = (props: ActorTagProps) => {
       variables: {
         _id: props.orcid,
       },
+      skip: !props.orcid || props.orcid.trim() === "",
     },
   );
 

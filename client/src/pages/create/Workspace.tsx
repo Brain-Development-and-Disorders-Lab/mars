@@ -24,7 +24,8 @@ import MDEditor from "@uiw/react-md-editor";
 import { IResponseMessage, WorkspaceModel } from "@types";
 
 // GraphQL imports
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";

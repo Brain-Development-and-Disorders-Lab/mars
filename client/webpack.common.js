@@ -22,8 +22,19 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: {
+          loader: "ts-loader",
+          options: {
+            configFile: path.resolve(__dirname, "tsconfig.json"),
+            onlyCompileBundledFiles: true,
+            transpileOnly: true,
+          },
+        },
+        exclude: [
+          /node_modules/,
+          path.resolve(__dirname, "../server"),
+          path.resolve(__dirname, "../website"),
+        ],
       },
       {
         test: /\.css$/i,

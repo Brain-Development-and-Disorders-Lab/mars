@@ -6,16 +6,23 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
-import { DataTableAction, IRelationship, RelationshipsProps } from "@types";
+import {
+  DataTableAction,
+  IGenericItem,
+  IRelationship,
+  RelationshipsProps,
+} from "@types";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
 
 // GraphQL
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { isAbortError } from "src/util";
 
 const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();
@@ -29,7 +36,9 @@ const Relationships = (props: RelationshipsProps) => {
       }
     }
   `;
-  const [getEntityName] = useLazyQuery(GET_ENTITY_NAME);
+  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(
+    GET_ENTITY_NAME,
+  );
 
   // Extract all unique entity IDs from relationships
   const uniqueEntityIds = useMemo(() => {
@@ -46,6 +55,8 @@ const Relationships = (props: RelationshipsProps) => {
 
   // Fetch entity names for all unique IDs
   useEffect(() => {
+    let isMounted = true;
+
     const fetchEntityNames = async () => {
       const nameMap: Record<string, string> = {};
 
@@ -56,31 +67,43 @@ const Relationships = (props: RelationshipsProps) => {
             const { data } = await getEntityName({
               variables: { _id: entityId },
             });
-            if (data?.entity) {
+            if (data?.entity && isMounted) {
               nameMap[entityId] = data.entity.name;
             }
-          } catch {
+          } catch (error: any) {
             // If fetch fails, fall back to the name from relationship data
-            const relationship = props.relationships.find(
-              (rel) =>
-                rel.source._id === entityId || rel.target._id === entityId,
-            );
-            if (relationship) {
-              nameMap[entityId] =
-                relationship.source._id === entityId
-                  ? relationship.source.name
-                  : relationship.target.name;
+            if (isMounted) {
+              const relationship = props.relationships.find(
+                (rel) =>
+                  rel.source._id === entityId || rel.target._id === entityId,
+              );
+              if (relationship) {
+                nameMap[entityId] =
+                  relationship.source._id === entityId
+                    ? relationship.source.name
+                    : relationship.target.name;
+              }
             }
           }
         }),
       );
 
-      setEntityNames(nameMap);
+      if (isMounted) {
+        setEntityNames(nameMap);
+      }
     };
 
     if (uniqueEntityIds.length > 0) {
-      fetchEntityNames();
+      Promise.resolve(fetchEntityNames()).catch((error: unknown) => {
+        if (!isAbortError(error)) {
+          console.error("Error in fetchEntityNames:", error);
+        }
+      });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [uniqueEntityIds, getEntityName, props.relationships]);
 
   /**

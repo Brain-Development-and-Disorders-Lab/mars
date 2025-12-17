@@ -14,9 +14,10 @@ import { toaster } from "@components/Toast";
 import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
-import { debounce } from "lodash";
-import { gql, useLazyQuery } from "@apollo/client";
-import _ from "lodash";
+import _, { debounce } from "lodash";
+import { isAbortError } from "src/util";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -45,12 +46,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
     useLazyQuery<{
       entities: { entities: IGenericItem[]; total: number };
-    }>(GET_ENTITIES, {
-      variables: {
-        limit: 20,
-        archived: true,
-      },
-    });
+    }>(GET_ENTITIES);
 
   // Query to retrieve Entities
   const GET_PROJECTS = gql`
@@ -108,7 +104,11 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Retrieve the options on component load, depending on the specified target
   useEffect(() => {
-    getSelectOptions();
+    Promise.resolve(getSelectOptions()).catch((error: unknown) => {
+      if (!isAbortError(error)) {
+        console.error("Error in getSelectOptions:", error);
+      }
+    });
 
     // Set the placeholder text
     if (props.placeholder) {
@@ -156,7 +156,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   `;
   const [searchText, { loading: searchLoading, error: searchError }] =
-    useLazyQuery(SEARCH_TEXT);
+    useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT);
 
   // State
   const [results, setResults] = useState([] as EntityModel[]);
@@ -174,7 +174,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       },
     });
 
-    if (results.data.search) {
+    if (results.data?.search) {
       setResults(results.data.search);
 
       // Once results have been updated, set `hasSearched` state
@@ -183,11 +183,11 @@ const SearchSelect = (props: SearchSelectProps) => {
       setResults([]);
     }
 
-    if (searchError) {
+    if (searchError || !results.data?.search) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: searchError.message,
+        description: searchError || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });

@@ -65,11 +65,12 @@ import {
   ISelectOption,
   IValue,
   RelationshipType,
+  ResponseData,
 } from "@types";
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions } from "src/util";
+import { createSelectOptions, removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -78,7 +79,8 @@ import { nanoid } from "nanoid";
 import QRCode from "react-qr-code";
 
 // Apollo client imports
-import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
@@ -282,7 +284,11 @@ const Entity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+  const { loading, error, data, refetch } = useQuery<{
+    entity: EntityModel;
+    projects: IGenericItem[];
+    templates: AttributeModel[];
+  }>(GET_ENTITY, {
     variables: {
       _id: id,
     },
@@ -294,7 +300,7 @@ const Entity = () => {
       downloadFile(_id: $_id)
     }
   `;
-  const [getFile] = useLazyQuery(GET_FILE_URL);
+  const [getFile] = useLazyQuery<{ downloadFile: string }>(GET_FILE_URL);
 
   // Query to export an Entity, returning the string contents of a file for download
   const EXPORT_ENTITY = gql`
@@ -303,7 +309,7 @@ const Entity = () => {
     }
   `;
   const [exportEntity, { loading: exportLoading, error: exportError }] =
-    useLazyQuery(EXPORT_ENTITY);
+    useLazyQuery<{ exportEntity: string }>(EXPORT_ENTITY);
 
   // Query to create a new Entity
   const CREATE_ENTITY = gql`
@@ -318,7 +324,7 @@ const Entity = () => {
   const [
     createEntity,
     { error: createEntityError, loading: createEntityLoading },
-  ] = useMutation(CREATE_ENTITY);
+  ] = useMutation<{ createEntity: ResponseData<string> }>(CREATE_ENTITY);
 
   // Query to create a template Template
   const CREATE_TEMPLATE = gql`
@@ -332,7 +338,7 @@ const Entity = () => {
   const [
     createTemplate,
     { loading: loadingTemplateCreate, error: errorTemplateCreate },
-  ] = useMutation(CREATE_TEMPLATE);
+  ] = useMutation<{ createTemplate: ResponseData<string> }>(CREATE_TEMPLATE);
 
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
@@ -355,7 +361,7 @@ const Entity = () => {
     }
   `;
   const [archiveEntity, { error: archiveError, loading: archiveLoading }] =
-    useMutation(ARCHIVE_ENTITY);
+    useMutation<{ archiveEntity: ResponseData<string> }>(ARCHIVE_ENTITY);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -430,23 +436,36 @@ const Entity = () => {
       },
     });
 
-    // Perform the "GET" request to retrieve the data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fileResponse = await requestStatic<any>(response.data.downloadFile, {
-      responseType: "blob",
-    });
-
-    // Attempt to download the received data
-    if (fileResponse.data) {
-      FileSaver.saveAs(new Blob([fileResponse.data]), slugify(filename));
-    } else {
+    if (!response.data?.downloadFile) {
       toaster.create({
         title: "Error",
+        description: "Unable to retrieve file for download",
         type: "error",
-        description: `Error creating download for file "${filename}"`,
         duration: 4000,
         closable: true,
       });
+    } else if (response.data.downloadFile) {
+      // Perform the "GET" request to retrieve the data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fileResponse = await requestStatic<any>(
+        response.data.downloadFile,
+        {
+          responseType: "blob",
+        },
+      );
+
+      // Attempt to download the received data
+      if (fileResponse.data) {
+        FileSaver.saveAs(new Blob([fileResponse.data]), slugify(filename));
+      } else {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: `Error creating download for file "${filename}"`,
+          duration: 4000,
+          closable: true,
+        });
+      }
     }
   };
 
@@ -466,7 +485,15 @@ const Entity = () => {
       },
     });
 
-    if (response.data.createTemplate.success) {
+    if (errorTemplateCreate || !response.data?.createTemplate) {
+      toaster.create({
+        title: "Error",
+        description: errorTemplateCreate?.message || "Unable to save Template",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else if (response.data.createTemplate.success) {
       toaster.create({
         title: "Saved!",
         type: "success",
@@ -474,16 +501,6 @@ const Entity = () => {
         closable: true,
       });
       setTemplates([...templates, attributeData as AttributeModel]);
-    }
-
-    if (errorTemplateCreate) {
-      toaster.create({
-        title: "Error",
-        description: errorTemplateCreate.message,
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
     }
   };
 
@@ -635,20 +652,21 @@ const Entity = () => {
   const handleSaveMessageDoneClick = async () => {
     setIsUpdating(updateLoading);
     try {
+      const mutationPayload = removeTypename({
+        _id: entityData._id,
+        name: entityName,
+        archived: entityArchived,
+        created: entityData.created,
+        owner: entityData.owner,
+        description: entityDescription,
+        projects: entityProjects,
+        relationships: entityRelationships,
+        attributes: entityAttributes,
+        attachments: entityAttachments,
+      });
       await updateEntity({
         variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityName,
-            archived: entityArchived,
-            created: entityData.created,
-            owner: entityData.owner,
-            description: entityDescription,
-            projects: entityProjects,
-            relationships: entityRelationships,
-            attributes: entityAttributes,
-            attachments: entityAttachments,
-          },
+          entity: mutationPayload,
           message: saveMessage,
         },
       });
@@ -738,10 +756,15 @@ const Entity = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={projectId}
-              disabled={projectId.length < 20}
+              disabled={projectId.length < 32}
               showArrow
             >
-              <Linky id={projectId} type={"projects"} size={"xs"} />
+              <Linky
+                id={projectId}
+                type={"projects"}
+                size={"xs"}
+                truncate={false}
+              />
             </Tooltip>
             {editing ? (
               <Button
@@ -1001,20 +1024,21 @@ const Entity = () => {
     entityVersion: EntityHistory,
   ) => {
     try {
+      const restorePayload = removeTypename({
+        _id: entityData._id,
+        name: entityVersion.name,
+        created: entityData.created,
+        archived: entityVersion.archived,
+        owner: entityVersion.owner,
+        description: entityVersion.description || "",
+        projects: entityVersion.projects || [],
+        relationships: entityVersion.relationships || [],
+        attributes: entityVersion.attributes || [],
+        attachments: entityVersion.attachments || [],
+      });
       await updateEntity({
         variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityVersion.name,
-            created: entityData.created,
-            archived: entityVersion.archived,
-            owner: entityVersion.owner,
-            description: entityVersion.description || "",
-            projects: entityVersion.projects || [],
-            relationships: entityVersion.relationships || [],
-            attributes: entityVersion.attributes || [],
-            attachments: entityVersion.attachments || [],
-          },
+          entity: restorePayload,
           message: saveMessage,
         },
       });
@@ -1133,7 +1157,7 @@ const Entity = () => {
     // Create a new Entity, with `(cloned)` appended to the name
     const response = await createEntity({
       variables: {
-        entity: {
+        entity: removeTypename({
           name: clonedEntityName,
           owner: entityData.owner,
           created: dayjs(Date.now()).toISOString(),
@@ -1143,11 +1167,19 @@ const Entity = () => {
           relationships: entityData.relationships,
           attributes: entityData.attributes,
           attachments: entityData.attachments,
-        },
+        }),
       },
     });
 
-    if (response.data.createEntity.success) {
+    if (createEntityError || !response.data?.createEntity) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred while cloning the Entity",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else if (response.data.createEntity.success) {
       setCloneOpen(false);
 
       toaster.create({
@@ -1160,16 +1192,6 @@ const Entity = () => {
       // Navigate to the new Entity
       navigate(`/entities/${response.data.createEntity.data}`);
     }
-
-    if (createEntityError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred while cloning the Entity",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
   };
 
   // Archive the Entity when confirmed
@@ -1181,7 +1203,15 @@ const Entity = () => {
       },
     });
 
-    if (response.data.archiveEntity.success) {
+    if (!response.data?.archiveEntity || !response.data.archiveEntity.success) {
+      toaster.create({
+        title: "Error",
+        description: "An error occurred while archiving Entity",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    } else if (response.data.archiveEntity.success) {
       toaster.create({
         title: "Archived Successfully",
         type: "success",
@@ -1190,14 +1220,6 @@ const Entity = () => {
       });
       setEntityArchived(true);
       setArchiveDialogOpen(false);
-    } else {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred while archiving Entity",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
     }
 
     setEditing(false);

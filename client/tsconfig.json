@@ -1,9 +1,10 @@
 {
-  "include": ["src", "test"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "test", "../server", "../website"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
@@ -24,7 +25,8 @@
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["cypress", "@testing-library/jest-dom", "node"]
+    "types": ["@testing-library/jest-dom", "node"]
   }
 }

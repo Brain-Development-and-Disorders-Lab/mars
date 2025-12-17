@@ -22,7 +22,8 @@ import {
 import { IGenericItem, ScanModalProps, ScannerProps } from "@types";
 
 // GraphQL
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";

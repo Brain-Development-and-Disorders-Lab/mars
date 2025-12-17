@@ -38,15 +38,19 @@ import {
   IColumnMapping,
   EntityModel,
   CSVImportData,
+  IResponseMessage,
+  ResponseData,
 } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // GraphQL
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
+import { removeTypename } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -149,8 +153,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       prepareEntityCSV(file: $file)
     }
   `;
-  const [prepareEntityCSV, { error: prepareEntityCSVError }] =
-    useMutation(PREPARE_ENTITY_CSV);
+  const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{
+    prepareEntityCSV: string[];
+  }>(PREPARE_ENTITY_CSV);
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
@@ -171,8 +176,10 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [getMappingData, { error: mappingDataError }] =
-    useLazyQuery(GET_MAPPING_DATA);
+  const [getMappingData, { error: mappingDataError }] = useLazyQuery<{
+    projects: IGenericItem[];
+    templates: AttributeModel[];
+  }>(GET_MAPPING_DATA);
 
   const REVIEW_ENTITY_CSV = gql`
     mutation ReviewEntityCSV(
@@ -189,8 +196,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [reviewEntityCSV, { error: reviewEntityCSVError }] =
-    useMutation(REVIEW_ENTITY_CSV);
+  const [reviewEntityCSV, { error: reviewEntityCSVError }] = useMutation<{
+    reviewEntityCSV: ResponseData<EntityImportReview[]>;
+  }>(REVIEW_ENTITY_CSV);
 
   const GET_COUNTER_VALUES = gql`
     query GetCounterValues($_id: String!, $count: Int!) {
@@ -201,8 +209,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [getCounterValues, { error: counterValuesError }] =
-    useLazyQuery(GET_COUNTER_VALUES);
+  const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
+    nextCounterValues: ResponseData<string[]>;
+  }>(GET_COUNTER_VALUES);
 
   const IMPORT_ENTITY_CSV = gql`
     mutation ImportEntityCSV(
@@ -235,8 +244,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [reviewEntityJSON, { error: reviewEntityJSONError }] =
-    useMutation(REVIEW_ENTITY_JSON);
+  const [reviewEntityJSON, { error: reviewEntityJSONError }] = useMutation<{
+    reviewEntityJSON: ResponseData<EntityImportReview[]>;
+  }>(REVIEW_ENTITY_JSON);
 
   const IMPORT_ENTITY_JSON = gql`
     mutation ImportEntityJSON(
@@ -254,8 +264,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [importEntityJSON, { error: importEntityJSONError }] =
-    useMutation(IMPORT_ENTITY_JSON);
+  const [importEntityJSON, { error: importEntityJSONError }] = useMutation<{
+    importEntityJSON: IResponseMessage;
+  }>(IMPORT_ENTITY_JSON);
 
   const REVIEW_TEMPLATE_JSON = gql`
     mutation ReviewTemplateJSON($file: [Upload]!) {
@@ -269,8 +280,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [reviewTemplateJSON, { error: reviewTemplateJSONError }] =
-    useMutation(REVIEW_TEMPLATE_JSON);
+  const [reviewTemplateJSON, { error: reviewTemplateJSONError }] = useMutation<{
+    reviewTemplateJSON: ResponseData<TemplateImportReview[]>;
+  }>(REVIEW_TEMPLATE_JSON);
 
   const IMPORT_TEMPLATE_JSON = gql`
     mutation ImportTemplateJSON($file: [Upload]!) {
@@ -280,8 +292,9 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
     }
   `;
-  const [importTemplateJSON, { error: importTemplateJSONError }] =
-    useMutation(IMPORT_TEMPLATE_JSON);
+  const [importTemplateJSON, { error: importTemplateJSONError }] = useMutation<{
+    importTemplateJSON: IResponseMessage;
+  }>(IMPORT_TEMPLATE_JSON);
 
   // Setup columns for review table
   const reviewTableColumnHelper = createColumnHelper<EntityImportReview>();
@@ -631,22 +644,22 @@ const ImportDialog = (props: ImportDialogProps) => {
    */
   const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
-    const mappingData: { columnMapping: IColumnMapping; file: unknown } = {
-      columnMapping: {
-        namePrefix: namePrefixField,
-        name: nameField,
-        description: descriptionField,
-        created: dayjs(Date.now()).toISOString(),
-        owner: token.orcid,
-        project: projectField,
-        attributes: attributesField,
-      },
-      file: file,
+    const columnMapping: IColumnMapping = {
+      namePrefix: namePrefixField,
+      name: nameField,
+      description: descriptionField,
+      created: dayjs(Date.now()).toISOString(),
+      owner: token.orcid,
+      project: projectField,
+      attributes: removeTypename(attributesField),
     };
 
     setImportLoading(true);
     const reviewResponse = await reviewEntityCSV({
-      variables: mappingData,
+      variables: {
+        columnMapping: removeTypename(columnMapping),
+        file: file,
+      },
     });
     setImportLoading(false);
 
@@ -655,31 +668,29 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
 
     // Retrieve and splice in counter values if being used for names
-    if (nameUseCounter) {
+    if (nameUseCounter && reviewResponse.data?.reviewEntityCSV?.data) {
+      const reviewData = reviewResponse.data.reviewEntityCSV.data;
       const counterResponse = await getCounterValues({
         variables: {
           _id: counter,
-          count: reviewResponse.data.reviewEntityCSV.data.length,
+          count: reviewData.length,
         },
       });
 
-      if (counterResponse.data.nextCounterValues.data.length > 0) {
-        const counterValuesSpliced =
-          reviewResponse.data.reviewEntityCSV.data.map(
-            (entity: EntityImportReview, index: number) => {
-              return {
-                ...entity,
-                name: counterResponse.data.nextCounterValues.data[index],
-              };
-            },
-          );
+      const counterValues = counterResponse.data?.nextCounterValues?.data;
+      if (counterValues && counterValues.length > 0) {
+        const counterValuesSpliced = reviewData.map(
+          (entity: EntityImportReview, index: number) => {
+            return {
+              ...entity,
+              name: counterValues[index],
+            };
+          },
+        );
         setReviewEntities(counterValuesSpliced);
       }
 
-      if (
-        counterValuesError ||
-        counterResponse.data.nextCounterValues.data.length === 0
-      ) {
+      if (counterValuesError || !counterValues || counterValues.length === 0) {
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -738,7 +749,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       variables: {
         file: file,
         project: projectField,
-        attributes: attributesField,
+        attributes: removeTypename(attributesField),
       },
     });
     setImportLoading(false);
@@ -753,7 +764,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       });
     }
 
-    if (response.data.importEntityJSON.success === true) {
+    if (response.data?.importEntityJSON?.success === true) {
       // Close the `ImportDialog` UI
       resetState();
       navigate(0);
@@ -773,7 +784,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         created: dayjs(Date.now()).toISOString(),
         owner: token.orcid,
         project: projectField,
-        attributes: attributesField,
+        attributes: removeTypename(attributesField),
       },
       options: {
         counters: nameUseCounter ? [{ field: "name", _id: counter }] : [],
@@ -783,7 +794,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     setImportLoading(true);
     await importEntityCSV({
-      variables: importData,
+      variables: {
+        columnMapping: removeTypename(importData.columnMapping),
+        options: removeTypename(importData.options),
+        file: importData.file,
+      },
     });
     setImportLoading(false);
 
@@ -1050,7 +1065,6 @@ const ImportDialog = (props: ImportDialogProps) => {
       size={"xl"}
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
-      onInteractOutside={handleOnClose}
     >
       <Dialog.Backdrop />
       <Dialog.Positioner>
