@@ -12,11 +12,11 @@ import {
 } from "@types";
 
 // Models
-import { Projects } from "./Projects";
+import { Projects } from "@models/Projects";
 
 // Custom functions
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 
 // Generate history version IDs
 import { customAlphabet } from "nanoid";

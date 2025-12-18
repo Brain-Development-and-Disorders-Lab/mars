@@ -5,9 +5,9 @@ import { GraphQLError } from "graphql";
 import { Context, CounterModel, IResolverParent } from "@types";
 
 // Models
-import { Authentication } from "src/models/Authentication";
-import { Counters } from "src/models/Counters";
-import { Workspaces } from "src/models/Workspaces";
+import { Authentication } from "@models/Authentication";
+import { Counters } from "@models/Counters";
+import { Workspaces } from "@models/Workspaces";
 
 // Utilities
 import _ from "lodash";

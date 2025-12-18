@@ -12,7 +12,7 @@ import "source-map-support/register";
 import _ from "lodash";
 
 // Get the connection functions
-import { connect } from "./connectors/database";
+import { connect } from "@connectors/database";
 
 // GraphQL
 import { ApolloServer } from "@apollo/server";
@@ -21,19 +21,19 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { typedefs } from "./typedefs";
 
 // Resolvers
-import { APIResolvers } from "./resolvers/API";
-import { ActivityResolvers } from "./resolvers/Activity";
-import { AuthenticationResolvers } from "./resolvers/Authentication";
-import { CountersResolvers } from "./resolvers/Counters";
-import { DataResolvers } from "./resolvers/Data";
-import { DateResolver } from "./resolvers/Date";
-import { EntitiesResolvers } from "./resolvers/Entities";
-import { ObjectResolver } from "./resolvers/Object";
-import { ProjectsResolvers } from "./resolvers/Projects";
-import { SearchResolvers } from "./resolvers/Search";
-import { TemplatesResolvers } from "./resolvers/Templates";
-import { UsersResolvers } from "./resolvers/Users";
-import { WorkspacesResolvers } from "./resolvers/Workspaces";
+import { APIResolvers } from "@resolvers/API";
+import { ActivityResolvers } from "@resolvers/Activity";
+import { AuthenticationResolvers } from "@resolvers/Authentication";
+import { CountersResolvers } from "@resolvers/Counters";
+import { DataResolvers } from "@resolvers/Data";
+import { DateResolver } from "@resolvers/Date";
+import { EntitiesResolvers } from "@resolvers/Entities";
+import { ObjectResolver } from "@resolvers/Object";
+import { ProjectsResolvers } from "@resolvers/Projects";
+import { SearchResolvers } from "@resolvers/Search";
+import { TemplatesResolvers } from "@resolvers/Templates";
+import { UsersResolvers } from "@resolvers/Users";
+import { WorkspacesResolvers } from "@resolvers/Workspaces";
 
 // Custom types
 import { Context } from "@types";
@@ -43,7 +43,7 @@ import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
 // Public REST API routers
-import APIRouter from "./models/API";
+import APIRouter from "@models/API";
 
 // Set logging level
 consola.level =

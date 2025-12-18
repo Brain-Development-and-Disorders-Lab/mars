@@ -21,16 +21,16 @@ import * as fs from "fs";
 import XLSX from "xlsx";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
-import { getAttachments } from "../connectors/database";
+import { getAttachments } from "@connectors/database";
 import _ from "lodash";
 
 // Models
-import { Activity } from "./Activity";
-import { Counters } from "./Counters";
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Templates } from "./Templates";
-import { Workspaces } from "./Workspaces";
+import { Activity } from "@models/Activity";
+import { Counters } from "@models/Counters";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Workspaces } from "@models/Workspaces";
 
 export class Data {
   /**

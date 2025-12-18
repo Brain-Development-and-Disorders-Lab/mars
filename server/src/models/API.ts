@@ -11,10 +11,10 @@ import { hash } from "bcryptjs";
 import { APIData, APIKey, EntityModel, ResponseData } from "@types";
 
 // Models
-import { Entities } from "./Entities";
-import { Users } from "./Users";
-import { Workspaces } from "./Workspaces";
-import { Activity } from "./Activity";
+import { Entities } from "@models/Entities";
+import { Users } from "@models/Users";
+import { Workspaces } from "@models/Workspaces";
+import { Activity } from "@models/Activity";
 
 // Setup the Express router
 const APIRouter = Router();

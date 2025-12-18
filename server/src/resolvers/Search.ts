@@ -5,9 +5,9 @@ import { GraphQLError } from "graphql";
 import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
-import { Search } from "src/models/Search";
-import { Authentication } from "src/models/Authentication";
-import { Workspaces } from "src/models/Workspaces";
+import { Search } from "@models/Search";
+import { Authentication } from "@models/Authentication";
+import { Workspaces } from "@models/Workspaces";
 
 export const SearchResolvers = {
   Query: {

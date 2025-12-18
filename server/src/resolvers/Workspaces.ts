@@ -13,9 +13,9 @@ import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
 // Models
-import { Authentication } from "src/models/Authentication";
-import { Workspaces } from "src/models/Workspaces";
-import { Users } from "src/models/Users";
+import { Authentication } from "@models/Authentication";
+import { Workspaces } from "@models/Workspaces";
+import { Users } from "@models/Users";
 
 // Posthog
 import { PostHogClient } from "src";

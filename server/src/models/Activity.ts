@@ -2,8 +2,8 @@
 import { ActivityModel, IActivity, ResponseData } from "@types";
 
 // Utility functions and libraries
-import { getIdentifier } from "../util";
-import { getDatabase } from "../connectors/database";
+import { getIdentifier } from "@lib/util";
+import { getDatabase } from "@connectors/database";
 import _ from "lodash";
 import consola from "consola";
 

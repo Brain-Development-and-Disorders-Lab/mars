@@ -1,5 +1,4 @@
-import { GraphQLScalarType } from "graphql";
-import { Kind } from "graphql";
+import { GraphQLScalarType, Kind } from "graphql";
 
 /**
  * Generic GraphQL scalar type to deal with dynamic types rarely used in codebase

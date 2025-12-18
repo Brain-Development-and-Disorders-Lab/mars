@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
-import { Users } from "./Users";
+import { Users } from "@models/Users";
 
 // Variables
 import { DEMO_USER_ORCID } from "src/variables";

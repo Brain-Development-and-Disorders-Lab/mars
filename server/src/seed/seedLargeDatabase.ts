@@ -7,7 +7,7 @@ import { Templates } from "../models/Templates";
 import { Activity } from "../models/Activity";
 import { Workspaces } from "../models/Workspaces";
 import { Users } from "../models/Users";
-import { getIdentifier } from "../util";
+import { getIdentifier } from "../lib/util";
 import dayjs from "dayjs";
 import consola from "consola";
 import {

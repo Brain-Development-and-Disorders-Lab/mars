@@ -9,10 +9,10 @@ import {
 } from "@types";
 
 // Models
-import { Activity } from "../models/Activity";
-import { Templates } from "../models/Templates";
-import { Workspaces } from "../models/Workspaces";
-import { Authentication } from "src/models/Authentication";
+import { Activity } from "@models/Activity";
+import { Templates } from "@models/Templates";
+import { Workspaces } from "@models/Workspaces";
+import { Authentication } from "@models/Authentication";
 
 // Utility functions and libraries
 import _ from "lodash";

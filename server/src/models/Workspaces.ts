@@ -12,7 +12,7 @@ import {
 
 // Utility functions and libraries
 import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getIdentifier } from "../lib/util";
 import dayjs from "dayjs";
 import _ from "lodash";
 

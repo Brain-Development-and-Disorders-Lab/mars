@@ -7,8 +7,8 @@ import {
 
 // Utility functions and libraries
 import _ from "lodash";
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 import consola from "consola";
 import dayjs from "dayjs";
 

@@ -1,8 +1,8 @@
 import { Context, IResolverParent, IResponseMessage, UserModel } from "@types";
 
 // Models
-import { Authentication } from "src/models/Authentication";
-import { Users } from "src/models/Users";
+import { Authentication } from "@models/Authentication";
+import { Users } from "@models/Users";
 
 export const UsersResolvers = {
   Query: {

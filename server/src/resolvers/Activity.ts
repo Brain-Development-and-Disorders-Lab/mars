@@ -2,9 +2,9 @@
 import { Context, IActivity, IResolverParent, IResponseMessage } from "@types";
 
 // Models
-import { Activity } from "../models/Activity";
-import { Workspaces } from "../models/Workspaces";
-import { Authentication } from "src/models/Authentication";
+import { Activity } from "@models/Activity";
+import { Workspaces } from "@models/Workspaces";
+import { Authentication } from "@models/Authentication";
 
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";

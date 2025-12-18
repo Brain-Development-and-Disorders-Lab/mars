@@ -15,10 +15,10 @@ import {
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
 import _ from "lodash";
-import { Authentication } from "src/models/Authentication";
 
-// Data model
-import { Data } from "src/models/Data";
+// Models
+import { Authentication } from "@models/Authentication";
+import { Data } from "@models/Data";
 
 export const DataResolvers = {
   Query: {

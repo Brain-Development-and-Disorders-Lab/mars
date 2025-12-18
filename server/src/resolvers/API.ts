@@ -1,7 +1,7 @@
 // Models
-import { API } from "src/models/API";
-import { Authentication } from "src/models/Authentication";
-import { Users } from "src/models/Users";
+import { API } from "@models/API";
+import { Authentication } from "@models/Authentication";
+import { Users } from "@models/Users";
 
 // Custom types
 import {

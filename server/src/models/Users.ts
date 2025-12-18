@@ -2,13 +2,13 @@
 import { APIKey, IResponseMessage, UserModel } from "@types";
 
 import _ from "lodash";
-import { getDatabase } from "../connectors/database";
+import { getDatabase } from "@connectors/database";
 import dayjs from "dayjs";
 
 // Models
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Workspaces } from "./Workspaces";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Workspaces } from "@models/Workspaces";
 
 // Collection name
 const USERS_COLLECTION = "users";

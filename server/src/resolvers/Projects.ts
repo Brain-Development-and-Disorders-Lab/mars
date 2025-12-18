@@ -14,10 +14,10 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 // Models
-import { Activity } from "../models/Activity";
-import { Projects } from "../models/Projects";
-import { Workspaces } from "../models/Workspaces";
-import { Authentication } from "src/models/Authentication";
+import { Activity } from "@models/Activity";
+import { Projects } from "@models/Projects";
+import { Workspaces } from "@models/Workspaces";
+import { Authentication } from "@models/Authentication";
 
 // Posthog
 import { PostHogClient } from "src";

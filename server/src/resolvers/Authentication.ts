@@ -1,5 +1,5 @@
 // Models
-import { Authentication } from "src/models/Authentication";
+import { Authentication } from "@models/Authentication";
 
 // Custom types
 import { IAuth, IResolverParent, ResponseData } from "@types";

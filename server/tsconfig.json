@@ -6,6 +6,10 @@
     "allowJs": true,
     "baseUrl": "./",
     "paths": {
+      "@connectors/*": ["src/connectors/*"],
+      "@models/*": ["src/models/*"],
+      "@resolvers/*": ["src/resolvers/*"],
+      "@lib/*": ["src/lib/*"],
       "@types": ["../types"]
     },
     "rootDirs": ["src"],
