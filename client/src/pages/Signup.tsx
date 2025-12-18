@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 
 // Utility imports
 import { isValidEmail } from "@lib/util";
+import dayjs from "dayjs";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -108,6 +109,12 @@ const Signup = () => {
         email: userEmail,
         name: joinedName,
         password: initialPassword,
+        firstName: userFirstName,
+        lastName: userLastName,
+        affiliation: userAffiliation,
+        lastLogin: dayjs(Date.now()).toISOString(),
+        workspaces: [],
+        api_keys: [],
         callbackURL: "/login",
       },
       {
@@ -173,9 +180,12 @@ const Signup = () => {
           rounded={"lg"}
           shadow={"sm"}
         >
-          <Heading size={"xl"} fontWeight={"semibold"}>
-            Create your Metadatify account
-          </Heading>
+          <Flex direction={"column"} gap={"2"} align={"center"}>
+            <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
+            <Heading size={"xl"} fontWeight={"semibold"}>
+              Create your Metadatify account
+            </Heading>
+          </Flex>
 
           <Fieldset.Root>
             <Fieldset.Content>
@@ -344,9 +354,20 @@ const Signup = () => {
                 </Field.Root>
               </Flex>
 
-              <Flex align={"center"} justify={"right"} w={"100%"}>
+              <Flex align={"center"} justify={"space-between"} w={"100%"}>
                 <Button
-                  id={"userDoneButton"}
+                  id={"returnLoginButton"}
+                  colorPalette={"orange"}
+                  size={"xs"}
+                  rounded={"md"}
+                  onClick={() => navigate("/login")}
+                >
+                  Return to Login
+                  <Icon name={"logout"} size={"xs"} />
+                </Button>
+
+                <Button
+                  id={"createAccountButton"}
                   colorPalette={"green"}
                   size={"xs"}
                   rounded={"md"}

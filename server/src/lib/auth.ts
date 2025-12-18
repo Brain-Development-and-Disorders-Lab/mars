@@ -21,5 +21,25 @@ export const createAuth = (database: Db) =>
     },
     user: {
       modelName: "user",
+      additionalFields: {
+        firstName: {
+          type: "string",
+        },
+        lastName: {
+          type: "string",
+        },
+        affiliation: {
+          type: "string",
+        },
+        lastLogin: {
+          type: "string",
+        },
+        workspaces: {
+          type: "string[]",
+        },
+        api_keys: {
+          type: "string[]",
+        },
+      },
     },
   });

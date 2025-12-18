@@ -271,7 +271,7 @@ const Login = () => {
                   </Field.Root>
 
                   <Button
-                    size={"sm"}
+                    size={"xs"}
                     rounded={"md"}
                     colorScheme={"green"}
                     disabled={email === "" || password === ""}
@@ -301,7 +301,7 @@ const Login = () => {
                 loading={isLoading}
                 disabled={isEmailLoginLoading}
                 loadingText={"Logging in..."}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorPalette={"green"}
               >
@@ -323,7 +323,7 @@ const Login = () => {
 
               <Button
                 w={"100%"}
-                size={"sm"}
+                size={"xs"}
                 rounded={"md"}
                 colorScheme={"green"}
                 onClick={() => navigate("/signup")}
