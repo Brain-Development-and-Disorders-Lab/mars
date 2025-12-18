@@ -18,6 +18,7 @@ export class Search {
    * @param {string} query Search query data
    * @param {string} resultType Search result type of either "entity" or "project"
    * @param {boolean} showArchived Include archived Entities
+   * @param {object} filters Optional Entity filters
    * @param {string} workspace Workspace identifier
    * @returns {Promise<EntityModel[] | ProjectModel[]>}
    */
@@ -25,6 +26,17 @@ export class Search {
     query: string,
     resultType: string,
     showArchived: boolean,
+    filters:
+      | {
+          startDate?: string;
+          endDate?: string;
+          owners?: string[];
+          hasAttachments?: boolean;
+          hasAttributes?: boolean;
+          hasRelationships?: boolean;
+          attributeCountRanges?: string[];
+        }
+      | undefined,
     workspace: string,
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Sanitize database query
@@ -117,9 +129,56 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      unprioritizedResults = _.filter(entities, (entity) =>
+      let filteredResults = _.filter(entities, (entity) =>
         _.includes(intersected, entity._id),
       );
+
+      // Apply optional Entity filters
+      if (filters) {
+        // Date range (created)
+        if (filters.startDate || filters.endDate) {
+          const startDate = filters.startDate
+            ? new Date(filters.startDate)
+            : undefined;
+          const endDate = filters.endDate
+            ? new Date(filters.endDate)
+            : undefined;
+          if (endDate) {
+            endDate.setHours(23, 59, 59, 999);
+          }
+
+          filteredResults = filteredResults.filter((entity) => {
+            if (!entity.created) return false;
+            const createdDate = new Date(entity.created);
+            if (startDate && createdDate < startDate) return false;
+            if (endDate && createdDate > endDate) return false;
+            return true;
+          });
+        }
+
+        // Has attachments
+        if (filters.hasAttachments === true) {
+          filteredResults = filteredResults.filter(
+            (entity) => entity.attachments && entity.attachments.length > 0,
+          );
+        }
+
+        // Has attributes
+        if (filters.hasAttributes === true) {
+          filteredResults = filteredResults.filter(
+            (entity) => entity.attributes && entity.attributes.length > 0,
+          );
+        }
+
+        // Has relationships
+        if (filters.hasRelationships === true) {
+          filteredResults = filteredResults.filter(
+            (entity) => entity.relationships && entity.relationships.length > 0,
+          );
+        }
+      }
+
+      unprioritizedResults = filteredResults;
     }
 
     // Re-sort the results to place the results into prioritized categories:

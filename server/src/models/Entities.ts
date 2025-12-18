@@ -92,6 +92,8 @@ export class Entities {
       endDate?: string;
       owners?: string[];
       hasAttachments?: boolean;
+      hasAttributes?: boolean;
+      hasRelationships?: boolean;
       attributeCountRanges?: string[];
     },
     sort?: { field: string; direction: string },
@@ -127,6 +129,16 @@ export class Entities {
     // Add has attachments filter
     if (filter?.hasAttachments === true) {
       queryFilter["attachments.0"] = { $exists: true };
+    }
+
+    // Add has attributes filter
+    if (filter?.hasAttributes === true) {
+      queryFilter["attributes.0"] = { $exists: true };
+    }
+
+    // Add has relationships filter
+    if (filter?.hasRelationships === true) {
+      queryFilter["relationships.0"] = { $exists: true };
     }
 
     let query = getDatabase()
@@ -242,6 +254,8 @@ export class Entities {
       endDate?: string;
       owners?: string[];
       hasAttachments?: boolean;
+      hasAttributes?: boolean;
+      hasRelationships?: boolean;
       attributeCountRanges?: string[];
     },
   ): Promise<number> => {
@@ -276,6 +290,16 @@ export class Entities {
     // Add has attachments filter
     if (filter?.hasAttachments === true) {
       queryFilter["attachments.0"] = { $exists: true };
+    }
+
+    // Add has attributes filter
+    if (filter?.hasAttributes === true) {
+      queryFilter["attributes.0"] = { $exists: true };
+    }
+
+    // Add has relationships filter
+    if (filter?.hasRelationships === true) {
+      queryFilter["relationships.0"] = { $exists: true };
     }
 
     let count = await getDatabase()

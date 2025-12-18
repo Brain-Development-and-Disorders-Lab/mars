@@ -17,23 +17,46 @@ import ActorTag from "@components/ActorTag";
 import ActivityGraph from "@components/ActivityGraph";
 
 // Existing and custom types
-import { ActivityModel } from "@types";
+import { ActivityModel, ActivityFeedProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// Context and hooks
+import { useWorkspace } from "@hooks/useWorkspace";
+
+// Apollo client imports
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
-interface ActivityFeedProps {
-  activities: ActivityModel[];
-  feedLimit?: number; // Number of activities to show in the feed (default: 5)
-}
+const GET_ACTIVITY = gql`
+  query GetActivity($limit: Int) {
+    activity(limit: $limit) {
+      _id
+      timestamp
+      type
+      actor
+      details
+      target {
+        _id
+        name
+        type
+      }
+    }
+  }
+`;
 
-const ActivityFeed = ({ activities, feedLimit = 5 }: ActivityFeedProps) => {
+const ActivityFeed = ({
+  activities: activitiesProp,
+  feedLimit = 5,
+}: ActivityFeedProps) => {
   const navigate = useNavigate();
+  const { workspace } = useWorkspace();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,6 +65,25 @@ const ActivityFeed = ({ activities, feedLimit = 5 }: ActivityFeedProps) => {
 
     return () => clearInterval(interval);
   }, []);
+
+  const { data, refetch } = useQuery<{
+    activity: ActivityModel[];
+  }>(GET_ACTIVITY, {
+    variables: {
+      limit: 200,
+    },
+    fetchPolicy: "network-only",
+    pollInterval: 5000,
+  });
+
+  // Refetch when workspace changes
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, [workspace]);
+
+  const activities = data?.activity ?? activitiesProp ?? [];
 
   // Use all activities for the chart, but limit the feed display
   const feedActivities = useMemo(() => {

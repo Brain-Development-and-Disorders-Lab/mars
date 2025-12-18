@@ -18,6 +18,15 @@ export const SearchResolvers = {
         resultType: string;
         isBuilder: boolean;
         showArchived: boolean;
+        filters?: {
+          startDate?: string;
+          endDate?: string;
+          owners?: string[];
+          hasAttachments?: boolean;
+          hasAttributes?: boolean;
+          hasRelationships?: boolean;
+          attributeCountRanges?: string[];
+        };
       },
       context: Context,
     ): Promise<EntityModel[] | ProjectModel[]> => {
@@ -46,6 +55,7 @@ export const SearchResolvers = {
           args.query,
           args.resultType,
           args.showArchived,
+          args.filters,
           context.workspace,
         );
       }

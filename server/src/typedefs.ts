@@ -433,6 +433,8 @@ export const typedefs = `#graphql
     endDate: String
     owners: [String]
     hasAttachments: Boolean
+    hasAttributes: Boolean
+    hasRelationships: Boolean
     attributeCountRanges: [String]
   }
 
@@ -531,7 +533,7 @@ export const typedefs = `#graphql
     downloadFile(_id: String): String
 
     # Search queries
-    search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean): [SearchResult]
+    search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean, filters: EntityFilterInput): [SearchResult]
 
     # Counters queries
     counter(_id: String): Counter

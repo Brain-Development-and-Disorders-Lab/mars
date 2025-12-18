@@ -28,7 +28,6 @@ import ActivityFeed from "@components/ActivityFeed";
 import {
   ProjectModel,
   EntityModel,
-  ActivityModel,
   EntityMetrics,
   ProjectMetrics,
   TemplateMetrics,
@@ -60,7 +59,6 @@ const GET_DASHBOARD = gql`
     $entitiesArchived: Boolean
     $projectLimit: Int
     $projectsArchived: Boolean
-    $activityLimit: Int
   ) {
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -97,18 +95,6 @@ const GET_DASHBOARD = gql`
     workspaceMetrics {
       collaborators
     }
-    activity(limit: $activityLimit) {
-      _id
-      timestamp
-      type
-      actor
-      details
-      target {
-        _id
-        name
-        type
-      }
-    }
   }
 `;
 
@@ -132,7 +118,6 @@ const Dashboard = () => {
   const [projectData, setProjectData] = useState(
     [] as { _id: string; name: string; description: string; created: string }[],
   );
-  const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   // Metrics
   const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
@@ -172,16 +157,13 @@ const Dashboard = () => {
     entityMetrics: EntityMetrics;
     templateMetrics: TemplateMetrics;
     workspaceMetrics: WorkspaceMetrics;
-    activity: ActivityModel[];
   }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,
       entityLimit: 10,
       entitiesArchived: false,
-      activityLimit: 200,
     },
     fetchPolicy: "network-only",
-    pollInterval: 5000,
   });
 
   // Assign data
@@ -191,9 +173,6 @@ const Dashboard = () => {
     }
     if (data?.projects) {
       setProjectData(data.projects);
-    }
-    if (data?.activity) {
-      setActivityData(data.activity);
     }
 
     // Metrics
@@ -246,11 +225,11 @@ const Dashboard = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip
             content={info.getValue()}
-            disabled={info.getValue().length < 18}
+            disabled={info.getValue().length < 48}
             showArrow
           >
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 18 })}
+              {_.truncate(info.getValue(), { length: 48 })}
             </Text>
           </Tooltip>
           <Button
@@ -267,6 +246,9 @@ const Dashboard = () => {
         </Flex>
       ),
       header: "Name",
+      meta: {
+        minWidth: 400,
+      },
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
@@ -281,11 +263,11 @@ const Dashboard = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 64}
               showArrow
             >
               <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 64 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -293,6 +275,9 @@ const Dashboard = () => {
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     entityTableColumnHelper.accessor("timestamp", {
       cell: (info) => {
@@ -336,11 +321,11 @@ const Dashboard = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 20}
+              disabled={info.getValue().length < 48}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 20 })}
+                {_.truncate(info.getValue(), { length: 48 })}
               </Text>
             </Tooltip>
             <Button
@@ -358,6 +343,9 @@ const Dashboard = () => {
         );
       },
       header: "Name",
+      meta: {
+        minWidth: 400,
+      },
     }),
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
@@ -372,11 +360,11 @@ const Dashboard = () => {
           <Flex>
             <Tooltip
               content={info.getValue()}
-              disabled={info.getValue().length < 32}
+              disabled={info.getValue().length < 64}
               showArrow
             >
               <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 32 })}
+                {_.truncate(info.getValue(), { length: 64 })}
               </Text>
             </Tooltip>
           </Flex>
@@ -384,6 +372,9 @@ const Dashboard = () => {
       },
       header: "Description",
       enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
     }),
     projectTableColumnHelper.accessor("created", {
       cell: (info) => {
@@ -735,7 +726,7 @@ const Dashboard = () => {
           </Flex>
 
           {/* Activity */}
-          <ActivityFeed activities={activityData} />
+          <ActivityFeed />
         </Flex>
       </Flex>
     </Content>

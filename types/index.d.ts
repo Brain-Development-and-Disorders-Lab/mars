@@ -356,6 +356,12 @@ export type ActivityModel = IActivity & {
   _id: string;
 };
 
+// ActivityFeed component props
+export type ActivityFeedProps = {
+  activities?: ActivityModel[];
+  feedLimit?: number; // Number of activities to show in the feed (default: 5)
+};
+
 // Content component
 export type ContentProps = {
   children: React.ReactElement | React.ReactElement[];
