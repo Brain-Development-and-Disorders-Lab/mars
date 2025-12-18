@@ -32,7 +32,7 @@ import { useBlocker, useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
-import { isValidValues } from "src/util";
+import { isValidValues } from "@lib/util";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";

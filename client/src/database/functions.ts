@@ -9,7 +9,7 @@ import { RequestMethod, ServerResponse } from "@types";
 import { API_URL, STATIC_URL, TOKEN_KEY } from "src/variables";
 
 // Token for request authorization
-import { getToken } from "src/util";
+import { getToken } from "@lib/util";
 
 export const request = async <T>(
   type: RequestMethod,

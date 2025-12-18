@@ -19,7 +19,7 @@ import Icon from "@components/Icon";
 // Custom types
 import { CollaboratorsProps } from "@types";
 import ActorTag from "@components/ActorTag";
-import { isValidOrcid } from "src/util";
+import { isValidOrcid } from "@lib/util";
 
 const Collaborators = (props: CollaboratorsProps) => {
   const [newCollaborator, setNewCollaborator] = useState("");

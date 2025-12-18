@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ISession } from "@types";
 
 // Utility functions and libraries
-import { getSession } from "src/util";
+import { getSession } from "@lib/util";
 import _ from "lodash";
 
 // Variables

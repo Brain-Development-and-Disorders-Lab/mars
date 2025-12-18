@@ -11,17 +11,17 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../lib/util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
-import { Activity } from "./Activity";
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Users } from "./Users";
-import { Templates } from "./Templates";
+import { Activity } from "@models/Activity";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Users } from "@models/Users";
+import { Templates } from "@models/Templates";
 
 // Collection name
 const WORKSPACES_COLLECTION = "workspaces";

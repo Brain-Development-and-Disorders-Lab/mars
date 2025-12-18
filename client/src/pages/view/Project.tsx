@@ -65,7 +65,7 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
-import { removeTypename } from "src/util";
+import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";

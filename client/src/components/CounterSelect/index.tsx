@@ -34,7 +34,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import _ from "lodash";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { createSelectOptions } from "src/util";
+import { createSelectOptions } from "@lib/util";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state

@@ -22,7 +22,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { isAbortError } from "src/util";
+import { isAbortError } from "@lib/util";
 
 const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();

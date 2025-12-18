@@ -41,7 +41,7 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail } from "src/util";
+import { isValidEmail } from "@lib/util";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();

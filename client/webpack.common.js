@@ -66,6 +66,7 @@ module.exports = {
       "@components": path.resolve(__dirname, "./src/components/"),
       "@database": path.resolve(__dirname, "./src/database/"),
       "@hooks": path.resolve(__dirname, "./src/hooks/"),
+      "@lib": path.resolve(__dirname, "./src/lib/"),
       "@pages": path.resolve(__dirname, "./src/pages/"),
       "@types": path.resolve(__dirname, "../types"),
       "entities/decode": path.resolve(

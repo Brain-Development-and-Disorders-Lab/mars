@@ -70,7 +70,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions, removeTypename } from "src/util";
+import { createSelectOptions, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";

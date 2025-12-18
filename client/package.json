@@ -36,6 +36,7 @@
     "@uiw/react-md-editor": "^4.0.5",
     "apollo-upload-client": "^19.0.0",
     "axios": "^1.12.0",
+    "better-auth": "^1.4.7",
     "consola": "^3.2.3",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.7",

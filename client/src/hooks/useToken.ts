@@ -4,7 +4,7 @@ import { useState } from "react";
 import { IAuth } from "@types";
 
 // Utility functions and libraries
-import { getToken } from "src/util";
+import { getToken } from "@lib/util";
 import _ from "lodash";
 
 // Variables

@@ -50,7 +50,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { removeTypename } from "src/util";
+import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";

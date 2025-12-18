@@ -21,7 +21,7 @@ import Icon from "@components/Icon";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
-import { isValidEmail } from "src/util";
+import { isValidEmail } from "@lib/util";
 
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";

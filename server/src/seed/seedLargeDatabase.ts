@@ -1,13 +1,13 @@
 // Seed script to generate comprehensive test data for MongoDB
 import "dotenv/config";
-import { connect, disconnect } from "../connectors/database";
-import { Entities } from "../models/Entities";
-import { Projects } from "../models/Projects";
-import { Templates } from "../models/Templates";
-import { Activity } from "../models/Activity";
-import { Workspaces } from "../models/Workspaces";
-import { Users } from "../models/Users";
-import { getIdentifier } from "../lib/util";
+import { connect, disconnect } from "@connectors/database";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Activity } from "@models/Activity";
+import { Workspaces } from "@models/Workspaces";
+import { Users } from "@models/Users";
+import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import consola from "consola";
 import {

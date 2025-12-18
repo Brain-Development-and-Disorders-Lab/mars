@@ -15,7 +15,7 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import _, { debounce } from "lodash";
-import { isAbortError } from "src/util";
+import { isAbortError } from "@lib/util";
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 

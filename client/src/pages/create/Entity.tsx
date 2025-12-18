@@ -51,7 +51,7 @@ import {
   isValidAttributes,
   createSelectOptions,
   removeTypename,
-} from "src/util";
+} from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";

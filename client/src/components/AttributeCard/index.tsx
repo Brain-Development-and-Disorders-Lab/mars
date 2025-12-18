@@ -21,7 +21,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { AttributeCardProps } from "@types";
 
 // Utility functions and libraries
-import { isValidValues } from "src/util";
+import { isValidValues } from "@lib/util";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const [name, setName] = useState(props.name);

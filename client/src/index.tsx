@@ -35,7 +35,7 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Utilities
-import { getSession, getToken, isAbortError } from "./util";
+import { getSession, getToken, isAbortError } from "@lib/util";
 import consola from "consola";
 
 // Application

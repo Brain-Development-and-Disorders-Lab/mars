@@ -17,7 +17,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { AttributeModel, GenericValueType, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
-import { removeTypename } from "src/util";
+import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import slugify from "slugify";
 import FileSaver from "file-saver";
