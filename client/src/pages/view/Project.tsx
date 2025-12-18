@@ -955,7 +955,7 @@ const Project = () => {
                 <Icon name={"rewind"} size={"xs"} />
               </Button>
             ) : (
-              <Flex gap={"2"}>
+              <Flex gap={"1"}>
                 {editing && (
                   <Button
                     onClick={handleCancelClick}
