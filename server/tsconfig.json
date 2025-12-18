@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src", "test"],
   "compilerOptions": {
     "module": "CommonJS",
     "target": "ES2016",
@@ -7,9 +7,10 @@
     "baseUrl": "./",
     "paths": {
       "@connectors/*": ["src/connectors/*"],
+      "@lib/*": ["src/lib/*"],
       "@models/*": ["src/models/*"],
       "@resolvers/*": ["src/resolvers/*"],
-      "@lib/*": ["src/lib/*"],
+      "@seed/*": ["src/seed/*"],
       "@types": ["../types"]
     },
     "rootDirs": ["src"],

@@ -32,7 +32,7 @@ import { ObjectResolver } from "@resolvers/Object";
 import { ProjectsResolvers } from "@resolvers/Projects";
 import { SearchResolvers } from "@resolvers/Search";
 import { TemplatesResolvers } from "@resolvers/Templates";
-import { UsersResolvers } from "@resolvers/Users";
+import { UserResolvers } from "@resolvers/User";
 import { WorkspacesResolvers } from "@resolvers/Workspaces";
 
 // Custom types
@@ -107,7 +107,7 @@ const start = async () => {
       ProjectsResolvers,
       SearchResolvers,
       TemplatesResolvers,
-      UsersResolvers,
+      UserResolvers,
       WorkspacesResolvers,
       {
         SearchResult: {

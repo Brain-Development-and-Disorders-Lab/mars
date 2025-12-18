@@ -668,15 +668,20 @@ export type APIData<D> = {
 export type IUser = {
   firstName: string;
   lastName: string;
+  name: string; // better-auth: Display name
   affiliation: string;
-  email: string;
+  email: string; // better-auth: Email
+  emailVerified: boolean; // better-auth: Email verification
+  image: string; // better-auth: Display image URL
+  createdAt: string; // better-auth: Created
+  updatedAt: string; // better-auth: Last updated
   lastLogin: string;
   workspaces: string[];
   api_keys: APIKey[];
 };
 
 export type UserModel = IUser & {
-  _id: string;
+  _id: string; // better-auth: Unique identifier
   token: string;
 };
 

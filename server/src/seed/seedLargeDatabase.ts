@@ -6,7 +6,7 @@ import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
 import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
-import { Users } from "@models/Users";
+import { Users } from "@models/User";
 import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import consola from "consola";

@@ -1,15 +1,15 @@
 // Utility functions and libraries
-import { connect, disconnect, getDatabase } from "../src/connectors/database";
+import { connect, disconnect, getDatabase } from "@connectors/database";
 
 // Import seed function from seed directory
-import { seedTestDatabase } from "../src/seed/seedTestDatabase";
+import { seedTestDatabase } from "@seed/seedTestDatabase";
 
 // Import models for workspace creation
-import { Workspaces } from "../src/models/Workspaces";
-import { Entities } from "../src/models/Entities";
-import { Projects } from "../src/models/Projects";
-import { Templates } from "../src/models/Templates";
-import { Users } from "../src/models/Users";
+import { Workspaces } from "@models/Workspaces";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { User } from "@models/User";
 import dayjs from "dayjs";
 import { DEMO_USER_ORCID } from "../src/variables";
 import { ResponseData } from "@types";
@@ -262,10 +262,10 @@ export const createTestWorkspace = async (
   await Workspaces.addTemplate(workspaceId, templateResult.data);
 
   // Ensure user has access to this workspace
-  const user = await Users.getOne(DEMO_USER_ORCID);
+  const user = await User.getOne(DEMO_USER_ORCID);
   if (user && !user.workspaces.includes(workspaceId)) {
     user.workspaces.push(workspaceId);
-    await Users.update(user);
+    await User.update(user);
   }
 
   return workspaceId;

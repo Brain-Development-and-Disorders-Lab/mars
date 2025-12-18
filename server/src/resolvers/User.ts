@@ -2,9 +2,9 @@ import { Context, IResolverParent, IResponseMessage, UserModel } from "@types";
 
 // Models
 import { Authentication } from "@models/Authentication";
-import { Users } from "@models/Users";
+import { User } from "@models/User";
 
-export const UsersResolvers = {
+export const UserResolvers = {
   Query: {
     // Retrieve all Users
     users: async (
@@ -15,7 +15,7 @@ export const UsersResolvers = {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
-      return await Users.all();
+      return await User.all();
     },
 
     // Retrieve one User by _id
@@ -27,7 +27,7 @@ export const UsersResolvers = {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
-      return await Users.getOne(args._id);
+      return await User.getOne(args._id);
     },
   },
   Mutation: {
@@ -40,7 +40,7 @@ export const UsersResolvers = {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
-      return await Users.create(args.user);
+      return await User.create(args.user);
     },
 
     // Update a User
@@ -52,7 +52,7 @@ export const UsersResolvers = {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
-      return await Users.update(args.user);
+      return await User.update(args.user);
     },
   },
 };

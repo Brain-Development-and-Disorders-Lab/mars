@@ -4,7 +4,7 @@ import { connect, disconnect } from "../connectors/database";
 import { Entities } from "../models/Entities";
 import { Projects } from "../models/Projects";
 import { Templates } from "../models/Templates";
-import { Users } from "../models/Users";
+import { User } from "../models/User";
 import { Workspaces } from "../models/Workspaces";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -173,14 +173,19 @@ export const seedTestDatabase = async (): Promise<void> => {
   await Workspaces.addTemplate(workspaceResult.data, templateResult.data);
 
   // Create a User
-  const userResult: IResponseMessage = await Users.create({
+  const userResult: IResponseMessage = await User.create({
     _id: DEMO_USER_ORCID,
     firstName: "Demo",
     lastName: "User",
+    name: "Demo User",
+    image: "",
     email: "demo@metadatify.com",
+    emailVerified: true,
     affiliation: "Demo Affiliation",
     workspaces: [workspaceResult.data],
     lastLogin: "",
+    createdAt: "",
+    updatedAt: "",
     api_keys: [],
     token: "",
   });

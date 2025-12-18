@@ -5,12 +5,12 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Activity model and types
-import { Activity } from "../src/models/Activity";
+import { Activity } from "@models/Activity";
 
 import dayjs from "dayjs";
 
 // Database connectivity
-import { connect, disconnect } from "../src/connectors/database";
+import { connect, disconnect } from "@connectors/database";
 import { clearDatabase } from "./util";
 
 describe("Activity model", () => {

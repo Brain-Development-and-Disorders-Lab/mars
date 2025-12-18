@@ -15,7 +15,7 @@ import { GraphQLError } from "graphql/index";
 // Models
 import { Authentication } from "@models/Authentication";
 import { Workspaces } from "@models/Workspaces";
-import { Users } from "@models/Users";
+import { User } from "@models/User";
 
 // Posthog
 import { PostHogClient } from "src";
@@ -240,7 +240,7 @@ export const WorkspacesResolvers = {
 
       if (result.success) {
         // If successful, add Workspace to the User
-        await Users.addWorkspace(context.user, result.data);
+        await User.addWorkspace(context.user, result.data);
       }
 
       // Capture event

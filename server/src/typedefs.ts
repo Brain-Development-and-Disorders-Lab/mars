@@ -40,8 +40,13 @@ export const typedefs = `#graphql
     token: String
     firstName: String
     lastName: String
+    name: String
     affiliation: String
     email: String
+    emailVerified: Boolean
+    image: String
+    createdAt: String
+    updatedAt: String
     workspaces: [String]
     api_keys: [APIKey]
   }
@@ -52,8 +57,13 @@ export const typedefs = `#graphql
     token: String
     firstName: String
     lastName: String
+    name: String
     affiliation: String
     email: String
+    emailVerified: Boolean
+    image: String
+    createdAt: String
+    updatedAt: String
     workspaces: [String]
     api_keys: [APIKeyInput]
   }

@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
-import { Users } from "@models/Users";
+import { User } from "@models/User";
 
 // Variables
 import { DEMO_USER_ORCID } from "src/variables";
@@ -68,15 +68,20 @@ export class Authentication {
     }
 
     // Check if the User exists, and create a new User if not
-    const user = await Users.getOne(authenticationPayload.orcid);
+    const user = await User.getOne(authenticationPayload.orcid);
     if (_.isNull(user)) {
-      await Users.create({
+      await User.create({
         _id: authenticationPayload.orcid,
         firstName: "",
         lastName: "",
+        name: "",
         email: "",
+        emailVerified: true,
         affiliation: "",
+        image: "",
         lastLogin: dayjs(Date.now()).toISOString(),
+        createdAt: dayjs(Date.now()).toISOString(),
+        updatedAt: dayjs(Date.now()).toISOString(),
         token: authenticationPayload.token,
         workspaces: [],
         api_keys: [],
@@ -112,13 +117,13 @@ export class Authentication {
         throw new Error("ORCiD could not be retrieved from login token");
       }
 
-      const user = await Users.getOne(orcid.toString());
+      const user = await User.getOne(orcid.toString());
       if (user) {
         return user;
       }
     } else {
       // Return the test user account
-      const user = await Users.getOne(DEMO_USER_ORCID);
+      const user = await User.getOne(DEMO_USER_ORCID);
       if (user) {
         return user;
       }

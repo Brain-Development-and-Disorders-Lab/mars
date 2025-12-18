@@ -11,9 +11,9 @@ import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
 
 // Collection name
-const USERS_COLLECTION = "users";
+const USERS_COLLECTION = "user";
 
-export class Users {
+export class User {
   /**
    * Get all User entries from the Users collection
    * @returns Collection of all User entries
@@ -65,12 +65,12 @@ export class Users {
     orcid: string,
     workspace: string,
   ): Promise<IResponseMessage> => {
-    const result = await Users.getOne(orcid);
+    const result = await User.getOne(orcid);
 
     // Attempt to update the `UserModel` with the Workspace
     if (result?.workspaces) {
       result.workspaces.push(workspace);
-      return await Users.update(result);
+      return await User.update(result);
     }
 
     return {
@@ -150,7 +150,7 @@ export class Users {
     orcid: string,
     key: APIKey,
   ): Promise<IResponseMessage> => {
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(orcid);
 
     if (_.isNull(user)) {
       return {
@@ -185,7 +185,7 @@ export class Users {
     orcid: string,
     key: string,
   ): Promise<IResponseMessage> => {
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(orcid);
 
     if (_.isNull(user)) {
       return {

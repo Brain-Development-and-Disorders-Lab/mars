@@ -1,7 +1,7 @@
 // Models
 import { API } from "@models/API";
 import { Authentication } from "@models/Authentication";
-import { Users } from "@models/Users";
+import { User } from "@models/User";
 
 // Custom types
 import {
@@ -25,7 +25,7 @@ export const APIResolvers = {
       const response = await API.generateKey(args.scope, args.workspaces);
 
       // Add the API key to the User
-      await Users.addKey(context.user, response.data);
+      await User.addKey(context.user, response.data);
 
       // Return the generated API key
       return response;
@@ -43,7 +43,7 @@ export const APIResolvers = {
       await Authentication.authenticate(context);
 
       // Remove the API key from the User
-      const response = await Users.removeKey(context.user, args.key);
+      const response = await User.removeKey(context.user, args.key);
 
       return response;
     },

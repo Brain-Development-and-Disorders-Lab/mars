@@ -16,7 +16,7 @@ db.createCollection("activity");
 db.createCollection("templates");
 db.createCollection("entities");
 db.createCollection("projects");
-db.createCollection("users");
+db.createCollection("user");
 db.createCollection("workspaces");
 db.createCollection("counters");
 

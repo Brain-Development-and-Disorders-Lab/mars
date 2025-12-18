@@ -20,7 +20,7 @@ import _ from "lodash";
 import { Activity } from "@models/Activity";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
-import { Users } from "@models/Users";
+import { User } from "@models/User";
 import { Templates } from "@models/Templates";
 
 // Collection name
@@ -327,7 +327,7 @@ export class Workspaces {
       .insertOne(joinedWorkspace);
 
     // Bootstrap the Workspace with an example Entity and Project
-    await Users.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
+    await User.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
 
     return {
       success: response.acknowledged,

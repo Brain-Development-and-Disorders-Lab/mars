@@ -75,6 +75,14 @@
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-ts",
+    "moduleNameMapper": {
+      "^@connectors/(.*)$": "<rootDir>/src/connectors/$1",
+      "^@lib/(.*)$": "<rootDir>/src/lib/$1",
+      "^@models/(.*)$": "<rootDir>/src/models/$1",
+      "^@resolvers/(.*)$": "<rootDir>/src/resolvers/$1",
+      "^@seed/(.*)$": "<rootDir>/src/seed/$1",
+      "^@types/(.*)$": "../types/$1"
+    },
     "testEnvironment": "node",
     "transformIgnorePatterns": [
       "node_modules/(?!(nanoid))"

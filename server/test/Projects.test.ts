@@ -5,11 +5,11 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Project model and types
-import { Projects } from "../src/models/Projects";
-import { ProjectModel, ResponseData } from "../../types";
+import { Projects } from "@models/Projects";
+import { ProjectModel, ResponseData } from "@types";
 
 // Database connectivity
-import { connect, disconnect } from "../src/connectors/database";
+import { connect, disconnect } from "@connectors/database";
 import { clearDatabase } from "./util";
 
 import dayjs from "dayjs";
