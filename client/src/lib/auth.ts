@@ -1,8 +1,7 @@
 // better-auth imports
-import { betterAuth } from "better-auth";
+import { createAuthClient } from "better-auth/react";
 
-const auth = betterAuth({
-  // ...
+export const auth = createAuthClient({
+  baseURL: "http://localhost:8000/",
+  basePath: "/auth",
 });
-
-export default auth;

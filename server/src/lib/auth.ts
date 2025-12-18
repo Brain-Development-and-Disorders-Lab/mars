@@ -2,11 +2,24 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
-// Database imports
-import { getDatabase } from "../connectors/database";
+// Database types
+import type { Db } from "mongodb";
 
-const auth = betterAuth({
-  database: mongodbAdapter(getDatabase()),
-});
-
-export default auth;
+/**
+ * Create a Better Auth instance using an active MongoDB database connection.
+ *
+ * NOTE:
+ * - The caller is responsible for ensuring that the database connection
+ *   has already been established (i.e. `MongoClient.connect()` has completed).
+ */
+export const createAuth = (database: Db) =>
+  betterAuth({
+    database: mongodbAdapter(database),
+    basePath: "/auth",
+    emailAndPassword: {
+      enabled: true,
+    },
+    user: {
+      modelName: "user",
+    },
+  });

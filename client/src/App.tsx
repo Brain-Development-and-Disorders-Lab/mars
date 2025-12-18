@@ -51,6 +51,7 @@ import Dashboard from "@pages/Dashboard";
 import Invalid from "@pages/Invalid";
 import Login from "@pages/Login";
 import Setup from "@pages/Setup";
+import Signup from "@pages/Signup";
 
 // Providers
 import { WorkspaceProvider } from "./hooks/useWorkspace";
@@ -90,6 +91,7 @@ const App = (): ReactElement => {
       <Route path="" element={<Providers />}>
         {/* Authentication not required */}
         <Route path={"/setup"} element={<Setup />} />
+        <Route path={"/signup"} element={<Signup />} />
         <Route path={"/login"} element={<Login />} />
 
         {/* Authentication required */}

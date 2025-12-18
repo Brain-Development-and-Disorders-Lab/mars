@@ -23,7 +23,6 @@ import { typedefs } from "./typedefs";
 // Resolvers
 import { APIResolvers } from "@resolvers/API";
 import { ActivityResolvers } from "@resolvers/Activity";
-import { AuthenticationResolvers } from "@resolvers/Authentication";
 import { CountersResolvers } from "@resolvers/Counters";
 import { DataResolvers } from "@resolvers/Data";
 import { DateResolver } from "@resolvers/Date";
@@ -34,6 +33,10 @@ import { SearchResolvers } from "@resolvers/Search";
 import { TemplatesResolvers } from "@resolvers/Templates";
 import { UserResolvers } from "@resolvers/User";
 import { WorkspacesResolvers } from "@resolvers/Workspaces";
+
+// Authentication
+import { toNodeHandler } from "better-auth/node";
+import { createAuth } from "@lib/auth";
 
 // Custom types
 import { Context } from "@types";
@@ -60,7 +63,6 @@ export const PostHogClient =
 
 const port = process.env.PORT || 8000;
 const app = express();
-const httpServer = http.createServer(app);
 
 // Setup CORS origins
 const origins =
@@ -77,7 +79,19 @@ const start = async () => {
 
   // Perform database connections
   try {
-    await connect();
+    const database = await connect();
+
+    // Configure authentication routes after the database connection is ready
+    const auth = createAuth(database);
+
+    app.all(
+      "/auth/{*any}",
+      cors<cors.CorsRequest>({
+        origin: origins,
+        credentials: true,
+      }),
+      toNodeHandler(auth),
+    );
   } catch {
     consola.error("Error connecting to databases, aborting server start...");
     return;
@@ -90,6 +104,7 @@ const start = async () => {
   }
 
   // Setup the GraphQL server
+  const httpServer = http.createServer(app);
   const server = new ApolloServer<Context>({
     typeDefs: typedefs,
     resolvers: [
@@ -98,7 +113,6 @@ const start = async () => {
       },
       ActivityResolvers,
       APIResolvers,
-      AuthenticationResolvers,
       CountersResolvers,
       DataResolvers,
       DateResolver,
@@ -156,7 +170,9 @@ const start = async () => {
   // Configure Express and GraphQL
   app.use(
     "/",
-    cors<cors.CorsRequest>({ origin: origins }),
+    cors<cors.CorsRequest>({
+      origin: origins,
+    }),
     express.json({ limit: "100mb" }),
     graphqlUploadExpress({
       maxFileSize: 104857600, // 100MB

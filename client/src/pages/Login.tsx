@@ -13,6 +13,10 @@ import {
   Box,
   AbsoluteCenter,
   Spacer,
+  Input,
+  Field,
+  FieldLabel,
+  Fieldset,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -21,9 +25,13 @@ import { toaster } from "@components/Toast";
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Contexts
+// Hooks
 import { useAuthentication } from "@hooks/useAuthentication";
+import { auth } from "@lib/auth";
 import { useWorkspace } from "@hooks/useWorkspace";
+
+// Utility imports
+import consola from "consola";
 
 // Define login parameters
 const clientID = "APP-BBVHCTCNDUJ4CAXV";
@@ -167,6 +175,24 @@ const Login = () => {
     checkLoginState();
   }, []);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isEmailLoginLoading, setIsEmailLoginLoading] = useState(false);
+
+  const newLogin = async () => {
+    consola.info("Running new login...");
+    setIsEmailLoginLoading(true);
+    const { data, error } = await auth.signIn.email(
+      {
+        email,
+        password,
+        callbackURL: "/",
+        rememberMe: false,
+      },
+      {},
+    );
+  };
+
   return (
     <Content>
       <Flex h={"10vh"} p={"4"}>
@@ -183,7 +209,6 @@ const Login = () => {
         align={"center"}
         alignSelf={"center"}
         gap={"8"}
-        w={["sm", "md", "lg"]}
         h={"80vh"}
         wrap={"wrap"}
       >
@@ -192,7 +217,6 @@ const Login = () => {
             direction={"column"}
             p={"8"}
             gap={"6"}
-            h={"md"}
             bg={"white"}
             align={"center"}
             justify={"center"}
@@ -207,17 +231,75 @@ const Login = () => {
                 Sign in
               </Heading>
 
-              <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.500"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
                 Use one of the sign in options below to get started.
               </Text>
             </Flex>
 
-            <Flex direction={"column"} gap={"2"} pt={"8"}>
+            <Flex direction={"column"} w={"100%"} gap={"2"} pt={"4"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Fieldset.Root>
+                  <Field.Root gap={"0.5"} required>
+                    <FieldLabel fontSize={"xs"}>
+                      Email
+                      <Field.RequiredIndicator />
+                    </FieldLabel>
+                    <Input
+                      rounded={"md"}
+                      size={"xs"}
+                      value={email}
+                      placeholder={"Email"}
+                      disabled={isEmailLoginLoading}
+                      onChange={(event) => setEmail(event.target.value)}
+                    />
+                  </Field.Root>
+
+                  <Field.Root gap={"0.5"} required>
+                    <FieldLabel fontSize={"xs"}>
+                      Password
+                      <Field.RequiredIndicator />
+                    </FieldLabel>
+                    <Input
+                      type={"password"}
+                      rounded={"md"}
+                      size={"xs"}
+                      value={password}
+                      placeholder={"Password"}
+                      disabled={isEmailLoginLoading}
+                      onChange={(event) => setPassword(event.target.value)}
+                    />
+                  </Field.Root>
+
+                  <Button
+                    size={"sm"}
+                    rounded={"md"}
+                    colorScheme={"green"}
+                    disabled={email === "" || password === ""}
+                    onClick={() => newLogin()}
+                    loading={isEmailLoginLoading}
+                    loadingText={"Logging in..."}
+                  >
+                    Login
+                    <Icon size={"xs"} name={"c_right"} />
+                  </Button>
+                </Fieldset.Root>
+              </Flex>
+
+              <Box position={"relative"} p={"4"}>
+                <Separator />
+                <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    or
+                  </Text>
+                </AbsoluteCenter>
+              </Box>
+
               <Button
                 id={"orcidLoginButton"}
                 variant={"subtle"}
                 onClick={onLoginClick}
                 loading={isLoading}
+                disabled={isEmailLoginLoading}
                 loadingText={"Logging in..."}
                 size={"sm"}
                 rounded={"md"}
@@ -230,30 +312,26 @@ const Login = () => {
                 />
                 Sign in with ORCiD
               </Button>
-
-              <Box position={"relative"} p={"4"}>
-                <Separator />
-                <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    or
-                  </Text>
-                </AbsoluteCenter>
-              </Box>
-
-              <Button
-                variant={"subtle"}
-                colorPalette={"gray"}
-                disabled
-                size={"sm"}
-                opacity={0.8}
-                rounded={"md"}
-              >
-                <Icon name={"clock"} size={"xs"} />
-                More sign in options coming soon.
-              </Button>
             </Flex>
 
             <Spacer />
+
+            <Flex direction={"column"} gap={"2"} align={"center"} w={"100%"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
+                Don't have an account yet?
+              </Text>
+
+              <Button
+                w={"100%"}
+                size={"sm"}
+                rounded={"md"}
+                colorScheme={"green"}
+                onClick={() => navigate("/signup")}
+              >
+                Create Account
+                <Icon size={"xs"} name={"add"} />
+              </Button>
+            </Flex>
 
             {/* Version number */}
             <Flex

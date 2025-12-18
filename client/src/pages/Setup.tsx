@@ -204,7 +204,7 @@ const Setup = () => {
               <Text
                 color={"gray.500"}
                 fontWeight={"semibold"}
-                fontSize={"sm"}
+                fontSize={"xs"}
                 textAlign={"center"}
               >
                 Please provide some additional information about yourself before
@@ -219,7 +219,7 @@ const Setup = () => {
                 justify={"left"}
                 pt={"8"}
               >
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Your ORCiD:
                 </Text>
                 <Tag.Root colorPalette={"primary"}>
@@ -232,8 +232,8 @@ const Setup = () => {
                   <Flex direction={"column"} gap={"4"}>
                     <Flex direction={"row"} gap={"4"}>
                       <Flex direction={"column"} w={"100%"}>
-                        <Field.Root required>
-                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
+                        <Field.Root gap={"0.5"} required>
+                          <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                             First Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -255,8 +255,8 @@ const Setup = () => {
                         </Field.Root>
                       </Flex>
                       <Flex direction={"column"} w={"100%"}>
-                        <Field.Root required>
-                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
+                        <Field.Root gap={"0.5"} required>
+                          <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                             Last Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -280,8 +280,12 @@ const Setup = () => {
                     </Flex>
                     <Flex direction={"column"} gap={"4"}>
                       <Flex direction={"column"}>
-                        <Field.Root invalid={emailError !== ""} required>
-                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
+                        <Field.Root
+                          gap={"0.5"}
+                          invalid={emailError !== ""}
+                          required
+                        >
+                          <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                             Email
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -312,8 +316,8 @@ const Setup = () => {
                         </Field.Root>
                       </Flex>
                       <Flex direction={"column"}>
-                        <Field.Root required>
-                          <Field.Label fontWeight={"semibold"} fontSize={"sm"}>
+                        <Field.Root gap={"0.5"} required>
+                          <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                             Affiliation
                             <Field.RequiredIndicator />
                           </Field.Label>
