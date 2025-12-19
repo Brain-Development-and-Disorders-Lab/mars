@@ -17,7 +17,6 @@ import { GraphQLError } from "graphql";
 import _ from "lodash";
 
 // Models
-import { Authentication } from "@models/Authentication";
 import { Data } from "@models/Data";
 
 export const DataResolvers = {
@@ -46,8 +45,6 @@ export const DataResolvers = {
       args: { target: string; file: IFile },
       context: Context,
     ): Promise<ResponseData<string>> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.uploadAttachment(args.target, args.file);
     },
 
@@ -57,8 +54,6 @@ export const DataResolvers = {
       args: { file: IFile[] },
       context: Context,
     ): Promise<string[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.prepareEntityCSV(args.file);
     },
 
@@ -68,8 +63,6 @@ export const DataResolvers = {
       args: { columnMapping: Record<string, string>; file: IFile[] },
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.reviewEntityCSV(args.columnMapping, args.file);
     },
 
@@ -83,8 +76,6 @@ export const DataResolvers = {
       },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.importEntityCSV(
         args.columnMapping,
         args.file,
@@ -99,8 +90,6 @@ export const DataResolvers = {
       args: { file: IFile[] },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.reviewEntityJSON(args.file);
     },
 
@@ -110,8 +99,6 @@ export const DataResolvers = {
       args: { file: IFile[]; project: string; attributes: AttributeModel[] },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.importEntityJSON(
         args.file,
         args.project,
@@ -126,8 +113,6 @@ export const DataResolvers = {
       args: { file: IFile[] },
       context: Context,
     ): Promise<ResponseData<TemplateImportReview[]>> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.reviewTemplateJSON(args.file);
     },
 
@@ -137,8 +122,6 @@ export const DataResolvers = {
       args: { file: IFile[] },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       return await Data.importTemplateJSON(args.file, context);
     },
   },

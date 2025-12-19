@@ -6,10 +6,13 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { RequestMethod, ServerResponse } from "@types";
 
 // Get the URL of the database
-import { API_URL, STATIC_URL, TOKEN_KEY } from "src/variables";
+import { API_URL, STATIC_URL } from "src/variables";
 
-// Token for request authorization
-import { getToken } from "@lib/util";
+// Authentication
+import { auth } from "@lib/auth";
+
+// Hooks
+import { useStorage } from "@hooks/useStorage";
 
 export const request = async <T>(
   type: RequestMethod,
@@ -17,18 +20,28 @@ export const request = async <T>(
   data?: any,
   options?: AxiosRequestConfig,
 ): Promise<ServerResponse<T>> => {
+  // Get the current session
+  const { data: sessionData, error: sessionError } = await auth.getSession();
+  if (!sessionData || sessionError) {
+    return {
+      success: false,
+      message: "Error while making request, check connectivity",
+      data: {} as T,
+    };
+  }
+
   // Merge in options if specified
   const requestOptions: AxiosRequestConfig = {
     ...options,
   };
 
-  // Configure authorization
-  if (!_.isUndefined(getToken(TOKEN_KEY))) {
-    requestOptions.headers = {
-      token: getToken(TOKEN_KEY)?.token,
-      ...requestOptions.headers,
-    };
-  }
+  // Add Workspace information
+  const { storage } = useStorage();
+  requestOptions.headers = {
+    user: sessionData.user.id,
+    workspace: storage.workspace,
+    ...requestOptions.headers,
+  };
 
   // Execute request and store response if successful
   let response: AxiosResponse;
@@ -62,15 +75,14 @@ export const request = async <T>(
           data: {} as T,
         };
       }
-      const contentTypeHeader = response.headers["content-type"];
-      if (_.isNull(contentTypeHeader)) {
+      if (_.isNull(response.headers["content-type"])) {
         return {
           success: false,
           message: "Invalid response received from server",
           data: {} as T,
         };
       } else if (
-        _.startsWith(contentTypeHeader, "application/json") &&
+        _.startsWith(response.headers["content-type"], "application/json") &&
         !_.isEqual(response.statusText, "OK")
       ) {
         return {
@@ -110,14 +122,6 @@ export const requestStatic = async <T>(
   const requestOptions: AxiosRequestConfig = {
     ...options,
   };
-
-  // Configure authorization
-  if (!_.isUndefined(getToken(TOKEN_KEY))) {
-    requestOptions.headers = {
-      token: getToken(TOKEN_KEY)?.token,
-      ...requestOptions.headers,
-    };
-  }
 
   // Execute request and store response if successful
   let response: AxiosResponse;

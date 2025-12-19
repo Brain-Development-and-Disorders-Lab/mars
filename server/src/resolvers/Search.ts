@@ -6,7 +6,6 @@ import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
 import { Search } from "@models/Search";
-import { Authentication } from "@models/Authentication";
 import { Workspaces } from "@models/Workspaces";
 
 export const SearchResolvers = {
@@ -30,9 +29,6 @@ export const SearchResolvers = {
       },
       context: Context,
     ): Promise<EntityModel[] | ProjectModel[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {

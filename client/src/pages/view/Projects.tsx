@@ -259,7 +259,7 @@ const Projects = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline
@@ -454,7 +454,7 @@ const Projects = () => {
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
                               <ActorTag
-                                orcid={owner}
+                                identifier={owner}
                                 fallback={"Unknown User"}
                                 size={"sm"}
                                 inline

@@ -49,8 +49,11 @@ import { useQuery } from "@apollo/client/react";
 
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useStorage } from "@hooks/useStorage";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -104,7 +107,16 @@ const Dashboard = () => {
 
   // Workspace context
   const { workspace } = useWorkspace();
-  const { token, setToken } = useAuthentication();
+  const { storage, updateStorageField } = useStorage();
+
+  // Authentication
+  const { data: session, isPending: isSessionPending } = auth.useSession();
+  const [user, setUser] = useState("");
+  useEffect(() => {
+    if (!isSessionPending && session) {
+      setUser(session.user.id);
+    }
+  }, [isSessionPending]);
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -477,19 +489,14 @@ const Dashboard = () => {
     const { action, type } = data;
     if (action === ACTIONS.SKIP || type === EVENTS.TOUR_END) {
       // Update the token and set the `firstLogin` flag to `false`
-      setToken({
-        orcid: token.orcid,
-        token: token.token,
-        setup: token.setup,
-        firstLogin: false,
-      });
+      updateStorageField("firstLogin", false);
     }
   };
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
-        {token.firstLogin === true && breakpoint !== "base" && (
+        {storage.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
             showProgress
@@ -515,7 +522,7 @@ const Dashboard = () => {
 
             <Flex>
               <ActorTag
-                orcid={token.orcid}
+                identifier={user}
                 fallback={"Unknown User"}
                 size={"md"}
               />

@@ -11,9 +11,6 @@ import * as fs from "fs";
 import "source-map-support/register";
 import _ from "lodash";
 
-// Get the connection functions
-import { connect } from "@connectors/database";
-
 // GraphQL
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
@@ -34,9 +31,11 @@ import { TemplatesResolvers } from "@resolvers/Templates";
 import { UserResolvers } from "@resolvers/User";
 import { WorkspacesResolvers } from "@resolvers/Workspaces";
 
+// Database
+import { connect } from "@connectors/database";
+
 // Authentication
 import { toNodeHandler } from "better-auth/node";
-import { createAuth } from "@lib/auth";
 
 // Custom types
 import { Context } from "@types";
@@ -77,25 +76,18 @@ const start = async () => {
     consola.warn("Server not secured!");
   }
 
-  // Perform database connections
-  try {
-    const database = await connect();
+  await connect();
+  const { auth } = await import("@lib/auth");
 
-    // Configure authentication routes after the database connection is ready
-    const auth = createAuth(database);
-
-    app.all(
-      "/auth/{*any}",
-      cors<cors.CorsRequest>({
-        origin: origins,
-        credentials: true,
-      }),
-      toNodeHandler(auth),
-    );
-  } catch {
-    consola.error("Error connecting to databases, aborting server start...");
-    return;
-  }
+  // Configure authentication routes after the database connection is ready
+  app.all(
+    "/auth/{*any}",
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
+    toNodeHandler(auth),
+  );
 
   // Create folder for serving static files
   if (!fs.existsSync(__dirname + "/public")) {
@@ -184,7 +176,6 @@ const start = async () => {
         return {
           user: (req.headers.user as string) || "",
           workspace: (req.headers.workspace as string) || "",
-          token: (req.headers.token as string) || "",
         };
       },
     }),

@@ -491,7 +491,7 @@ const Template = () => {
                     Template Owner
                   </Text>
                   <ActorTag
-                    orcid={template.owner}
+                    identifier={template.owner}
                     fallback={"No Owner"}
                     size={"sm"}
                   />

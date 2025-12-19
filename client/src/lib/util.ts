@@ -3,11 +3,10 @@ import _ from "lodash";
 
 // Custom types
 import {
+  ApplicationStorage,
   GenericValueType,
   IAttribute,
-  IAuth,
   ISelectOption,
-  ISession,
   IValue,
   UserModel,
 } from "@types";
@@ -93,38 +92,6 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-};
-
-/**
- * Retrieve an authentication token from session storage
- * @param {string} tokenKey the key of the token in storage
- * @returns {any}
- */
-export const getToken = (tokenKey: string): IAuth => {
-  const storedToken = sessionStorage.getItem(tokenKey);
-  if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
-    return JSON.parse(storedToken);
-  }
-  return {
-    orcid: "",
-    token: "",
-    setup: false,
-  };
-};
-
-/**
- * Retrieve a session vaue from session storage
- * @param {string} sessionKey the key of the token in storage
- * @returns {any}
- */
-export const getSession = (sessionKey: string): ISession => {
-  const storedSession = sessionStorage.getItem(sessionKey);
-  if (!_.isNull(storedSession) && !_.isUndefined(storedSession)) {
-    return JSON.parse(storedSession);
-  }
-  return {
-    workspace: "",
-  };
 };
 
 /**

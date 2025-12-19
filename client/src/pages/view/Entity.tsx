@@ -87,8 +87,10 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
 import { useBreakpoint } from "@hooks/useBreakpoint";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 const Entity = () => {
   const { id } = useParams();
@@ -102,9 +104,6 @@ const Entity = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
-
-  // Authentication
-  const { token } = useAuthentication();
 
   // Graph dialog
   const [graphOpen, setGraphOpen] = useState(false);
@@ -187,6 +186,31 @@ const Entity = () => {
     isAttributeNameError ||
     isAttributeDescriptionError ||
     isAttributeValueError;
+
+  // Authentication and user
+  const [user, setUser] = useState("");
+
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setUser(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Query to retrieve Entity data and associated data for editing
   const GET_ENTITY = gql`
@@ -473,7 +497,7 @@ const Entity = () => {
     const attributeData: IAttribute = {
       name: attributeName,
       archived: false,
-      owner: token.orcid,
+      owner: user,
       description: attributeDescription,
       values: attributeValues,
     };
@@ -2002,7 +2026,7 @@ const Entity = () => {
                                               Author:
                                             </Text>
                                             <ActorTag
-                                              orcid={entityVersion.author}
+                                              identifier={entityVersion.author}
                                               fallback={"Unknown User"}
                                               size={"sm"}
                                             />
@@ -2355,7 +2379,7 @@ const Entity = () => {
                     Entity Owner
                   </Text>
                   <ActorTag
-                    orcid={entityData.owner}
+                    identifier={entityData.owner}
                     fallback={"Unknown User"}
                     size={"sm"}
                   />
@@ -2841,7 +2865,7 @@ const Entity = () => {
                             </Text>
                             <Flex>
                               <ActorTag
-                                orcid={token.orcid}
+                                identifier={user}
                                 fallback={"Unknown User"}
                                 size={"sm"}
                               />

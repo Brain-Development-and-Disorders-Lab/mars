@@ -26,6 +26,9 @@ export const auth = createAuthClient({
         api_keys: {
           type: "string[]",
         },
+        account_orcid: {
+          type: "string",
+        },
       },
     }),
   ],

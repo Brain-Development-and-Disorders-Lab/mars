@@ -266,7 +266,7 @@ const Search = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline

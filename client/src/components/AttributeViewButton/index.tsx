@@ -139,7 +139,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       </Text>
                       <Flex>
                         <ActorTag
-                          orcid={props.attribute.owner}
+                          identifier={props.attribute.owner}
                           fallback={"Unknown User"}
                           size={"sm"}
                         />

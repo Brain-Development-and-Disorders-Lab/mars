@@ -35,22 +35,45 @@ import { useMutation } from "@apollo/client/react";
 import { isValidValues } from "@lib/util";
 
 // Authentication context
-import { useAuthentication } from "@hooks/useAuthentication";
+import { auth } from "@lib/auth";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
 const Template = () => {
   const posthog = usePostHog();
-  const { token } = useAuthentication();
 
   const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
+  const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [values, setValues] = useState([] as IValue<GenericValueType>[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Authentication and user
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwner(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Various validation error states
   const isNameError = name === "";
@@ -69,7 +92,7 @@ const Template = () => {
   // Store Template data
   const templateData: IAttribute = {
     name: name,
-    owner: token.orcid,
+    owner: owner,
     archived: false,
     description: description,
     values: values,

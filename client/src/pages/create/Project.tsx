@@ -40,15 +40,14 @@ import { useMutation } from "@apollo/client/react";
 import { IGenericItem, ResponseData } from "@types";
 import { Cell } from "@tanstack/react-table";
 
-// Authentication context
-import { useAuthentication } from "@hooks/useAuthentication";
+// Authentication
+import { auth } from "@lib/auth";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
 const Project = () => {
   const posthog = usePostHog();
-  const { token } = useAuthentication();
 
   // Information dialog state
   const [informationOpen, setInformationOpen] = useState(false);
@@ -57,8 +56,31 @@ const Project = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
   );
-  const [owner] = useState(token.orcid);
+  const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
+
+  // Authentication and user
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwner(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -248,7 +270,7 @@ const Project = () => {
                     </Field.Label>
                     <Flex>
                       <ActorTag
-                        orcid={owner}
+                        identifier={owner}
                         fallback={"Unknown User"}
                         size={"sm"}
                       />
@@ -437,7 +459,7 @@ const Project = () => {
               variables: {
                 project: {
                   name: name,
-                  owner: token.orcid,
+                  owner: owner,
                   archived: false,
                   description: description,
                   created: created,

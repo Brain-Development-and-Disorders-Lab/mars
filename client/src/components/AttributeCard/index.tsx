@@ -179,7 +179,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                     </Text>
                     <Flex>
                       <ActorTag
-                        orcid={attributeCardData.owner}
+                        identifier={attributeCardData.owner}
                         fallback={"Unknown User"}
                         size={"sm"}
                       />

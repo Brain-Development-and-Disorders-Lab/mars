@@ -32,7 +32,9 @@ import { useBlocker, useNavigate } from "react-router-dom";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
@@ -41,7 +43,6 @@ const CreateWorkspace = () => {
   const posthog = usePostHog();
 
   // Access token to set the active Workspace
-  const { token } = useAuthentication();
   const navigate = useNavigate();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     // Check if this is during the `create` mutation
@@ -57,17 +58,40 @@ const CreateWorkspace = () => {
 
   // Get contexts
   const { workspace, activateWorkspace } = useWorkspace();
-  const { logout } = useAuthentication();
 
   // State for Workspace details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [owner, setOwner] = useState("");
 
   // State for Workspace collaborators
   const [collaborators, setCollaborators] = useState([] as string[]);
 
   // State for submitting the form
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Authentication and user
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwner(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
@@ -116,7 +140,7 @@ const CreateWorkspace = () => {
         workspace: {
           name: name,
           description: description,
-          owner: token.orcid,
+          owner: owner,
           public: false,
           collaborators: collaborators,
           entities: [],
@@ -319,7 +343,7 @@ const CreateWorkspace = () => {
             size={"xs"}
             colorPalette={"orange"}
             rounded={"md"}
-            onClick={() => logout()}
+            onClick={() => auth.signOut()}
           >
             Log out
             <Icon name={"logout"} size={"xs"} />

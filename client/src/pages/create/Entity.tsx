@@ -61,8 +61,8 @@ import { useBlocker, useNavigate } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
-// Authentication context
-import { useAuthentication } from "@hooks/useAuthentication";
+// Authentication
+import { auth } from "@lib/auth";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
@@ -82,9 +82,7 @@ const Entity = () => {
     { title: "Attributes", description: "Specify metadata" },
   ];
   const [pageStep, setPageStep] = useState(0);
-
   const [informationOpen, setInformationOpen] = useState(false);
-  const { token } = useAuthentication();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -122,7 +120,7 @@ const Entity = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
   );
-  const [owner] = useState(token.orcid);
+  const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
@@ -144,6 +142,29 @@ const Entity = () => {
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>(
     [],
   );
+
+  // Authentication and user
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwner(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Various validation error states
   const isNameError =

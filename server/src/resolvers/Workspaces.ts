@@ -13,7 +13,6 @@ import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
 // Models
-import { Authentication } from "@models/Authentication";
 import { Workspaces } from "@models/Workspaces";
 import { User } from "@models/User";
 
@@ -28,9 +27,6 @@ export const WorkspacesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspaces = await Workspaces.all();
 
       // Access control
@@ -53,9 +49,6 @@ export const WorkspacesResolvers = {
       args: { _id: string },
       context: Context,
     ): Promise<WorkspaceModel | null> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(args._id);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -91,9 +84,6 @@ export const WorkspacesResolvers = {
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<EntityModel[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(args._id);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -130,9 +120,6 @@ export const WorkspacesResolvers = {
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<ProjectModel[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(args._id);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -169,9 +156,6 @@ export const WorkspacesResolvers = {
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<ActivityModel[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(args._id);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -208,9 +192,6 @@ export const WorkspacesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<WorkspaceMetrics> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -233,15 +214,7 @@ export const WorkspacesResolvers = {
       args: { workspace: IWorkspace },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const result = await Workspaces.create(args.workspace);
-
-      if (result.success) {
-        // If successful, add Workspace to the User
-        await User.addWorkspace(context.user, result.data);
-      }
 
       // Capture event
       if (process.env.DISABLE_CAPTURE !== "true") {
@@ -260,9 +233,6 @@ export const WorkspacesResolvers = {
       args: { workspace: WorkspaceModel },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const workspace = await Workspaces.getOne(args.workspace._id);
 
       // Access control

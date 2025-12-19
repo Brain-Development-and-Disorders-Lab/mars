@@ -2,13 +2,16 @@
 import { APIKey, IResponseMessage, UserModel } from "@types";
 
 import _ from "lodash";
-import { getDatabase } from "@connectors/database";
 import dayjs from "dayjs";
 
 // Models
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
+
+// Database
+import { ObjectId } from "mongodb";
+import { getDatabase } from "@connectors/database";
 
 // Collection name
 const USERS_COLLECTION = "user";
@@ -25,58 +28,18 @@ export class User {
       .toArray();
   };
 
-  static getOne = async (orcid: string): Promise<UserModel | null> => {
+  static getOne = async (_id: string): Promise<UserModel | null> => {
     return await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
+      .findOne({ _id: new ObjectId(_id) });
   };
 
-  static exists = async (orcid: string): Promise<boolean> => {
+  static exists = async (_id: string): Promise<boolean> => {
     const result = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
+      .findOne({ _id: new ObjectId(_id) });
 
     return !_.isNull(result);
-  };
-
-  /**
-   * Get the collection of Workspaces the User has access to
-   * @param orcid User ORCiD
-   * @return {Promise<string[]>}
-   */
-  static getWorkspaces = async (orcid: string): Promise<string[]> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
-
-    if (result?.workspaces) {
-      return result.workspaces;
-    }
-    return [];
-  };
-
-  /**
-   * Add a Workspace to the collection a User has access to
-   * @param orcid User ORCiD
-   * @param workspace Workspace to assign the User access to
-   * @return {Promise<IResponseMessage>}
-   */
-  static addWorkspace = async (
-    orcid: string,
-    workspace: string,
-  ): Promise<IResponseMessage> => {
-    const result = await User.getOne(orcid);
-
-    // Attempt to update the `UserModel` with the Workspace
-    if (result?.workspaces) {
-      result.workspaces.push(workspace);
-      return await User.update(result);
-    }
-
-    return {
-      success: false,
-      message: "Unable to add Workspace to User",
-    };
   };
 
   static update = async (updated: UserModel): Promise<IResponseMessage> => {
@@ -113,10 +76,6 @@ export class User {
 
     if (updated.lastLogin) {
       update.$set.lastLogin = updated.lastLogin;
-    }
-
-    if (updated.workspaces) {
-      update.$set.workspaces = updated.workspaces;
     }
 
     const response = await getDatabase()

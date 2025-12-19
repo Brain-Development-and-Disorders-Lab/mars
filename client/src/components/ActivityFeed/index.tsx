@@ -176,7 +176,7 @@ const ActivityFeed = ({
                 >
                   {activity.actor ? (
                     <ActorTag
-                      orcid={activity.actor}
+                      identifier={activity.actor}
                       fallback={"Unknown User"}
                       size={"sm"}
                       avatarOnly

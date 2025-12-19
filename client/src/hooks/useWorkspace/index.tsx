@@ -8,7 +8,7 @@ import React, {
 
 // GraphQL
 import { gql } from "@apollo/client";
-import { useLazyQuery, useApolloClient } from "@apollo/client/react";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -16,11 +16,8 @@ import { IResponseMessage, WorkspaceModel } from "@types";
 // Utility functions and libraries
 import _ from "lodash";
 
-// Session
-import { useSession } from "@hooks/useSession";
-
-// Variables
-import { SESSION_KEY } from "src/variables";
+// Hooks
+import { useStorage } from "@hooks/useStorage";
 
 type WorkspaceContextValue = {
   workspace: string;
@@ -29,16 +26,13 @@ type WorkspaceContextValue = {
 const WorkspaceContext = createContext({} as WorkspaceContextValue);
 
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
-  const [session, setSession] = useSession();
-  const [activeWorkspace, setActiveWorkspace] = useState(session.workspace);
-  const client = useApolloClient();
+  const { storage, updateStorageField } = useStorage();
+  const [activeWorkspace, setActiveWorkspace] = useState(storage.workspace);
 
   // If the active Workspace is updated and store the identifier in the session token
   useEffect(() => {
     // Update the session token
-    setSession({
-      workspace: activeWorkspace,
-    });
+    updateStorageField("workspace", activeWorkspace);
   }, [activeWorkspace]);
 
   // Query to retrieve Workspaces
@@ -77,7 +71,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   ): Promise<IResponseMessage> => {
     if (workspace === "") {
       // Check if there's a stored workspace in session
-      const storedWorkspace = session.workspace;
+      const storedWorkspace = storage.workspace;
 
       if (storedWorkspace && storedWorkspace !== "") {
         // Verify the stored workspace exists
@@ -87,19 +81,13 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
 
         if (workspaceResponse.data?.workspace && !workspaceResponse.error) {
           // Stored workspace exists, use it
-          await client.clearStore();
-          sessionStorage.setItem(
-            SESSION_KEY,
-            JSON.stringify({ workspace: storedWorkspace }),
-          );
+          updateStorageField("workspace", storedWorkspace);
           setActiveWorkspace(storedWorkspace);
           return {
             success: true,
             message: "Set active Workspace",
           };
         }
-
-        sessionStorage.removeItem(SESSION_KEY);
       }
 
       // Stored workspace doesn't exist or wasn't found, get all workspaces
@@ -123,16 +111,10 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       }
 
       // Use the first available workspace
-      await client.clearStore();
-      sessionStorage.setItem(
-        SESSION_KEY,
-        JSON.stringify({ workspace: workspacesData[0]._id }),
-      );
+      updateStorageField("workspace", workspacesData[0]._id);
       setActiveWorkspace(workspacesData[0]._id);
     } else {
-      await client.clearStore();
-      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ workspace }));
+      updateStorageField("workspace", workspace);
       setActiveWorkspace(workspace);
     }
     return {

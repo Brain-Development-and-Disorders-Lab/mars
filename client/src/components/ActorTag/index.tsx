@@ -20,16 +20,20 @@ const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 const ActorTag = (props: ActorTagProps) => {
   // Component state
   const [actorLabel, setActorLabel] = useState(props.fallback);
+  const [actorOrcid, setActorOrcid] = useState("");
 
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
+
   // GraphQL operations
   const GET_USER = gql`
     query GetUser($_id: String) {
       user(_id: $_id) {
         _id
+        name
         firstName
         lastName
+        account_orcid
       }
     }
   `;
@@ -37,9 +41,9 @@ const ActorTag = (props: ActorTagProps) => {
     GET_USER,
     {
       variables: {
-        _id: props.orcid,
+        _id: props.identifier,
       },
-      skip: !props.orcid || props.orcid.trim() === "",
+      skip: !props.identifier || props.identifier.trim() === "",
     },
   );
 
@@ -50,6 +54,11 @@ const ActorTag = (props: ActorTagProps) => {
           length: DEFAULT_ACTOR_LABEL_LENGTH,
         }),
       );
+
+      // Extract additional account information if specified
+      if (data.user.account_orcid) {
+        setActorOrcid(data.user.account_orcid);
+      }
     }
   }, [data]);
 
@@ -108,9 +117,9 @@ const ActorTag = (props: ActorTagProps) => {
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>
-          {isBreakpointActive("xl", "up") && (
+          {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
             <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.400"}>
-              {props.orcid}
+              {actorOrcid}
             </Text>
           )}
         </Flex>

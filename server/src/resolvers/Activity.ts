@@ -4,7 +4,6 @@ import { Context, IActivity, IResolverParent, IResponseMessage } from "@types";
 // Models
 import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
-import { Authentication } from "@models/Authentication";
 
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -20,9 +19,6 @@ export const ActivityResolvers = {
       args: { limit: 100 },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -44,9 +40,6 @@ export const ActivityResolvers = {
       args: { activity: IActivity },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Apply the create operation
       const result = await Activity.create(args.activity);
 

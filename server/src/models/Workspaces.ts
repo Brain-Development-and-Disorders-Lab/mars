@@ -320,7 +320,7 @@ export class Workspaces {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
-      ...workspace, // Unpack existing IEntity fields
+      ...workspace, // Unpack existing Workspace fields
     };
     const response = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)

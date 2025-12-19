@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import {
@@ -8,7 +8,7 @@ import {
   Button,
   Image,
   Text,
-  Link,
+  // Link,
   Separator,
   Box,
   AbsoluteCenter,
@@ -20,160 +20,158 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import { toaster } from "@components/Toast";
+// import { toaster } from "@components/Toast";
 
 // Routing and navigation
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Hooks
-import { useAuthentication } from "@hooks/useAuthentication";
 import { auth } from "@lib/auth";
-import { useWorkspace } from "@hooks/useWorkspace";
+// import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility imports
 import consola from "consola";
 
 // Define login parameters
-const clientID = "APP-BBVHCTCNDUJ4CAXV";
-const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
-const redirectURI = isLocalhost
-  ? "http://127.0.0.1:8080/login"
-  : "https://app.metadatify.com/login";
-const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
+// const clientID = "APP-BBVHCTCNDUJ4CAXV";
+// const isLocalhost =
+//   window.location.hostname === "localhost" ||
+//   window.location.hostname === "127.0.0.1";
+// const redirectURI = isLocalhost
+//   ? "http://127.0.0.1:8080/login"
+//   : "https://app.metadatify.com/login";
+// const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
-const useParameters = () => {
-  // Get URL query parameters
-  const { search } = useLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
-};
+// const useParameters = () => {
+//   // Get URL query parameters
+//   const { search } = useLocation();
+//   return useMemo(() => new URLSearchParams(search), [search]);
+// };
 
 const Login = () => {
-  const { token, login } = useAuthentication();
-  const { activateWorkspace } = useWorkspace();
+  // const { activateWorkspace } = useWorkspace();
 
-  const parameters = useParameters();
+  // const parameters = useParameters();
   const navigate = useNavigate();
 
   // Login state
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   // Extract query parameters
-  const accessCode = parameters.get("code");
+  // const accessCode = parameters.get("code");
 
   /**
    * Run the login operation, receiving a login code from the ORCiD API, then attempting to execute
    * the login operation on the backend
    * @param code Code provided as parameter of redirect URI
    */
-  const runLogin = async (code: string) => {
-    setIsLoading(true);
-    const result = await login(code);
+  // const runLogin = async (code: string) => {
+  //   setIsLoading(true);
+  //   const result = await login(code);
 
-    if (result.success) {
-      // If successful login, check if setup is completed
-      setIsLoading(false);
+  //   if (result.success) {
+  //     // If successful login, check if setup is completed
+  //     setIsLoading(false);
 
-      if (token.setup === true) {
-        // Navigate to the dashboard after activating a Workspace
-        const workspaceResult = await activateWorkspace("");
-        if (workspaceResult.message === "No Workspaces exist") {
-          navigate("/create/workspace");
-        } else if (workspaceResult.success) {
-          navigate("/");
-        } else {
-          navigate("/");
-        }
-      } else {
-        // Navigate to the Setup interface
-        navigate("/setup");
-      }
-    } else {
-      setIsLoading(false);
+  //     if (token.setup === true) {
+  //       // Navigate to the dashboard after activating a Workspace
+  //       const workspaceResult = await activateWorkspace("");
+  //       if (workspaceResult.message === "No Workspaces exist") {
+  //         navigate("/create/workspace");
+  //       } else if (workspaceResult.success) {
+  //         navigate("/");
+  //       } else {
+  //         navigate("/");
+  //       }
+  //     } else {
+  //       // Navigate to the Setup interface
+  //       navigate("/setup");
+  //     }
+  //   } else {
+  //     setIsLoading(false);
 
-      // Provide error information
-      if (
-        result.message.includes("Unable") &&
-        !toaster.isVisible("login-graphql-error-toast")
-      ) {
-        toaster.create({
-          id: "login-graphql-error-toast",
-          title: "Login Error",
-          type: "error",
-          description: result.message,
-          duration: 4000,
-          closable: true,
-        });
-      } else if (
-        result.message.includes("access") &&
-        !toaster.isVisible("login-access-error-toast")
-      ) {
-        toaster.create({
-          id: "login-access-error-toast",
-          title: "Access Unavailable",
-          type: "info",
-          description: (
-            <Flex direction={"column"}>
-              <Link
-                href={"https://forms.gle/q4GL4gF1bamem3DA9"}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Text fontWeight={"semibold"}>Join the waitlist here</Text>
-                  <Icon name={"a_right"} />
-                </Flex>
-              </Link>
-            </Flex>
-          ),
-          closable: true,
-        });
-      }
-    }
-  };
+  //     // Provide error information
+  //     if (
+  //       result.message.includes("Unable") &&
+  //       !toaster.isVisible("login-graphql-error-toast")
+  //     ) {
+  //       toaster.create({
+  //         id: "login-graphql-error-toast",
+  //         title: "Login Error",
+  //         type: "error",
+  //         description: result.message,
+  //         duration: 4000,
+  //         closable: true,
+  //       });
+  //     } else if (
+  //       result.message.includes("access") &&
+  //       !toaster.isVisible("login-access-error-toast")
+  //     ) {
+  //       toaster.create({
+  //         id: "login-access-error-toast",
+  //         title: "Access Unavailable",
+  //         type: "info",
+  //         description: (
+  //           <Flex direction={"column"}>
+  //             <Link
+  //               href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+  //               target="_blank"
+  //               rel="noopener noreferrer"
+  //             >
+  //               <Flex direction={"row"} gap={"1"} align={"center"}>
+  //                 <Text fontWeight={"semibold"}>Join the waitlist here</Text>
+  //                 <Icon name={"a_right"} />
+  //               </Flex>
+  //             </Link>
+  //           </Flex>
+  //         ),
+  //         closable: true,
+  //       });
+  //     }
+  //   }
+  // };
 
   /**
    * Wrapper function to handle login flow
    */
-  const onLoginClick = async () => {
-    if (process.env.NODE_ENV === "development") {
-      // If in a development environment, bypass the ORCiD login
-      await runLogin("");
-    } else {
-      // In production, navigate to the API login URI
-      window.location.href = requestURI;
-    }
-  };
+  // const onLoginClick = async () => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     // If in a development environment, bypass the ORCiD login
+  //     await runLogin("");
+  //   } else {
+  //     // In production, navigate to the API login URI
+  //     window.location.href = requestURI;
+  //   }
+  // };
 
   /**
    * Utility function to examine the login state, as a composition of other states,
    * and navigate the user accordingly
    */
-  const checkLoginState = async () => {
-    if (accessCode && token.token === "") {
-      // Not authenticated, no interest in setup yet
-      runLogin(accessCode);
-    } else if (token.token !== "" && token.setup === false) {
-      // Authenticated but not setup
-      navigate("/setup");
-    } else if (token.token !== "" && token.setup === true) {
-      // Authenticated and setup
-      const workspaceResult = await activateWorkspace("");
-      if (workspaceResult.message === "No Workspaces exist") {
-        navigate("/create/workspace");
-      } else if (workspaceResult.success) {
-        navigate("/");
-      } else {
-        navigate("/");
-      }
-    }
-  };
+  // const checkLoginState = async () => {
+  //   if (accessCode && token.token === "") {
+  //     // Not authenticated, no interest in setup yet
+  //     runLogin(accessCode);
+  //   } else if (token.token !== "" && token.setup === false) {
+  //     // Authenticated but not setup
+  //     navigate("/setup");
+  //   } else if (token.token !== "" && token.setup === true) {
+  //     // Authenticated and setup
+  //     const workspaceResult = await activateWorkspace("");
+  //     if (workspaceResult.message === "No Workspaces exist") {
+  //       navigate("/create/workspace");
+  //     } else if (workspaceResult.success) {
+  //       navigate("/");
+  //     } else {
+  //       navigate("/");
+  //     }
+  //   }
+  // };
 
   // On the page load, evaluate the login state components
-  useEffect(() => {
-    checkLoginState();
-  }, []);
+  // useEffect(() => {
+  //   checkLoginState();
+  // }, []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -297,9 +295,10 @@ const Login = () => {
               <Button
                 id={"orcidLoginButton"}
                 variant={"subtle"}
-                onClick={onLoginClick}
-                loading={isLoading}
-                disabled={isEmailLoginLoading}
+                // onClick={onLoginClick}
+                // loading={isLoading}
+                // disabled={isEmailLoginLoading}
+                disabled
                 loadingText={"Logging in..."}
                 size={"xs"}
                 rounded={"md"}

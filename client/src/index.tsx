@@ -7,9 +7,10 @@ import { toaster } from "src/components/Toast";
 
 // Apollo imports
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
-import { ErrorLink } from "@apollo/client/link/error";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { ApolloProvider } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { ErrorLink } from "@apollo/client/link/error";
+import { SetContextLink } from "@apollo/client/link/context";
 import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
 // Posthog
@@ -32,10 +33,16 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 });
 
 // Variables
-import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
+import { API_URL } from "./variables";
+
+// Authentication
+import { auth } from "@lib/auth";
+
+// Hooks
+import { useStorage } from "@hooks/useStorage";
 
 // Utilities
-import { getSession, getToken, isAbortError } from "@lib/util";
+import { isAbortError } from "@lib/util";
 import consola from "consola";
 
 // Application
@@ -52,20 +59,20 @@ const httpLink = new UploadHttpLink({
 /**
  * Authentication link to add headers to each request
  */
-const authLink = new ApolloLink((operation, forward) => {
-  const token = getToken(TOKEN_KEY);
-  const session = getSession(SESSION_KEY);
+const authLink = new SetContextLink(async (previousContext, _operation) => {
+  // Get session data
+  const { data: sessionData } = await auth.getSession();
 
-  operation.setContext(({ headers = {} }) => ({
+  // Get active Workspace
+  const { storage } = useStorage();
+
+  return {
     headers: {
-      ...headers,
-      user: token.orcid,
-      token: token.token,
-      workspace: session.workspace,
+      ...previousContext.headers,
+      user: sessionData?.user.id,
+      workspace: storage.workspace,
     },
-  }));
-
-  return forward(operation);
+  };
 });
 
 /**
@@ -98,8 +105,6 @@ const errorLink = new ErrorLink(({ error }) => {
           },
         });
 
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(SESSION_KEY);
         return;
       }
 

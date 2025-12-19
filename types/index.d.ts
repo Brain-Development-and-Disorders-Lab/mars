@@ -1,5 +1,6 @@
 // Import types
 import { ReadStream } from "fs";
+import { ObjectId } from "mongodb";
 
 // Request types to the server
 declare enum Requests {
@@ -130,7 +131,7 @@ export type LinkyProps = {
 
 // "Actor" component props
 export type ActorTagProps = {
-  orcid: string;
+  identifier: string;
   fallback: string;
   size: "sm" | "md";
   inline?: boolean;
@@ -608,25 +609,11 @@ export type ResponseData<D> = IResponseMessage & {
   data: D;
 };
 
-// Authentication types
-export type IAuth = {
-  orcid: string; // ORCiD value
-  token: string; // ORCiD token
+// Storage and local data management types
+export type ApplicationStorage = {
   setup: boolean; // Flag if application setup is complete
+  workspace: string; // ID of active Workspace
   firstLogin?: boolean; // (Optional) Flag if this is the first login
-};
-
-export type Token = IAuth & {
-  access_token: string;
-  token_type: string;
-  refesh_token: string;
-  expires_in: number;
-  scope: string;
-};
-
-// Session type
-export type ISession = {
-  workspace: string; // Active workspace
 };
 
 // File type
@@ -644,7 +631,6 @@ export type IResolverParent = Record<string, any>;
 export type Context = {
   user: string;
   workspace: string;
-  token: string;
 };
 
 // API key data
@@ -676,13 +662,12 @@ export type IUser = {
   createdAt: string; // better-auth: Created
   updatedAt: string; // better-auth: Last updated
   lastLogin: string;
-  workspaces: string[];
   api_keys: APIKey[];
+  account_orcid: string;
 };
 
 export type UserModel = IUser & {
-  _id: string; // better-auth: Unique identifier
-  token: string;
+  _id: ObjectId; // better-auth: Unique identifier
 };
 
 // Metrics

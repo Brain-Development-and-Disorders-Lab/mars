@@ -12,7 +12,6 @@ import {
 import { Activity } from "@models/Activity";
 import { Templates } from "@models/Templates";
 import { Workspaces } from "@models/Workspaces";
-import { Authentication } from "@models/Authentication";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -31,9 +30,6 @@ export const TemplatesResolvers = {
       args: { limit: 100 },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -59,9 +55,6 @@ export const TemplatesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -103,9 +96,6 @@ export const TemplatesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<TemplateMetrics> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -137,9 +127,6 @@ export const TemplatesResolvers = {
       args: { _id: string },
       context: Context,
     ): Promise<string> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -181,9 +168,6 @@ export const TemplatesResolvers = {
       args: { template: IAttribute },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const result = await Templates.create(args.template);
 
       if (result.success) {
@@ -224,9 +208,6 @@ export const TemplatesResolvers = {
       args: { template: AttributeModel },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -295,9 +276,6 @@ export const TemplatesResolvers = {
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -373,9 +351,6 @@ export const TemplatesResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
         const template = await Templates.getOne(_id);

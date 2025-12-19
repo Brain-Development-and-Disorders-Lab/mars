@@ -28,7 +28,9 @@ import _ from "lodash";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
@@ -45,7 +47,6 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
   // Get contexts
   const { workspace, activateWorkspace } = useWorkspace();
-  const { logout } = useAuthentication();
 
   // Switcher drop-down visibility state
   const [open, setOpen] = useState(false);
@@ -365,7 +366,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   <Text fontSize={"xs"}>Account settings</Text>
                 </Flex>
               </Menu.Item>
-              <Menu.Item value={"logout"} onClick={() => logout()}>
+              <Menu.Item value={"logout"} onClick={() => auth.signOut()}>
                 <Flex
                   id={"accountLogoutItem"}
                   direction={"row"}

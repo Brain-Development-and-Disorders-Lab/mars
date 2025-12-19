@@ -1,6 +1,5 @@
 // Models
 import { API } from "@models/API";
-import { Authentication } from "@models/Authentication";
 import { User } from "@models/User";
 
 // Custom types
@@ -20,8 +19,6 @@ export const APIResolvers = {
       args: { scope: "edit" | "view"; workspaces: string[] },
       context: Context,
     ): Promise<ResponseData<APIKey>> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
       const response = await API.generateKey(args.scope, args.workspaces);
 
       // Add the API key to the User
@@ -39,9 +36,6 @@ export const APIResolvers = {
       args: { key: string },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Remove the API key from the User
       const response = await User.removeKey(context.user, args.key);
 

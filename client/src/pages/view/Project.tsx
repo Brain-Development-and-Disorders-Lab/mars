@@ -1408,7 +1408,7 @@ const Project = () => {
                                             Author:
                                           </Text>
                                           <ActorTag
-                                            orcid={projectVersion.author}
+                                            identifier={projectVersion.author}
                                             fallback={"Unknown User"}
                                             size={"sm"}
                                           />
@@ -1631,7 +1631,7 @@ const Project = () => {
                     Project Owner
                   </Text>
                   <ActorTag
-                    orcid={project.owner}
+                    identifier={project.owner}
                     fallback={"Unknown User"}
                     size={"sm"}
                   />

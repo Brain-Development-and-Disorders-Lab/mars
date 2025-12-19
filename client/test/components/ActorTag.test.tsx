@@ -77,7 +77,7 @@ const renderActorTag = (
   props: Partial<React.ComponentProps<typeof ActorTag>> = {},
 ) => {
   const defaultProps: React.ComponentProps<typeof ActorTag> = {
-    orcid: "test-orcid",
+    identifier: "test-orcid",
     fallback: "Test User",
     size: "md",
     ...props,
@@ -145,7 +145,7 @@ describe("ActorTag Component", () => {
       render(
         <ChakraProvider value={theme}>
           <MockedProvider mocks={[errorMock]} cache={createTestCache()}>
-            <ActorTag orcid="test-orcid" fallback="Fallback" size="md" />
+            <ActorTag identifier="test-orcid" fallback="Fallback" size="md" />
           </MockedProvider>
         </ChakraProvider>,
       );

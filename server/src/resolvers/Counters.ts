@@ -5,7 +5,6 @@ import { GraphQLError } from "graphql";
 import { Context, CounterModel, IResolverParent } from "@types";
 
 // Models
-import { Authentication } from "@models/Authentication";
 import { Counters } from "@models/Counters";
 import { Workspaces } from "@models/Workspaces";
 
@@ -19,9 +18,6 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -60,9 +56,6 @@ export const CountersResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -80,9 +73,6 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -121,9 +111,6 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -162,9 +149,6 @@ export const CountersResolvers = {
       args: { _id: string; count: number },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -205,9 +189,6 @@ export const CountersResolvers = {
       args: { counter: CounterModel },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Apply create operation
       return await Counters.create(args.counter);
     },
@@ -216,9 +197,6 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {

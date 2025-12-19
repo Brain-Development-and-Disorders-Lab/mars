@@ -47,8 +47,8 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    workspaces: [String]
     api_keys: [APIKey]
+    account_orcid: String
   }
 
   # "UserInput" type
@@ -64,8 +64,8 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    workspaces: [String]
     api_keys: [APIKeyInput]
+    account_orcid: String
   }
 
   # "Project" type

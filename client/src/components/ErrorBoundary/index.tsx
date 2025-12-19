@@ -35,7 +35,7 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       // Render the Error component while preserving layout
-      return <Error />;
+      return <Error error={this.state.error} />;
     }
 
     return this.props.children;

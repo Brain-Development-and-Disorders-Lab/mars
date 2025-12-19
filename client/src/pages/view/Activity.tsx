@@ -272,7 +272,7 @@ const Activity = () => {
         }
         return (
           <ActorTag
-            orcid={actor}
+            identifier={actor}
             fallback={"Unknown User"}
             size={"sm"}
             inline

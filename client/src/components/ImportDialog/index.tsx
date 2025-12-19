@@ -55,8 +55,8 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
-// Authentication context
-import { useAuthentication } from "@hooks/useAuthentication";
+// Authentication
+import { auth } from "@lib/auth";
 
 // Variables
 const JSON_MIME_TYPE = "application/json";
@@ -80,7 +80,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [continueDisabled, setContinueDisabled] = useState(true);
 
   const navigate = useNavigate();
-  const { token } = useAuthentication();
 
   // State to differentiate which type of file is being imported
   const [importType, setImportType] = useState(
@@ -133,7 +132,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [nameUseCounter, setNameUseCounter] = useState(false);
   const [counter, setCounter] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
-  const [ownerField] = useState(token.orcid);
+  const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
@@ -146,6 +145,28 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [reviewTemplates, setReviewTemplates] = useState(
     [] as TemplateImportReview[],
   );
+
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwnerField(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Queries
   const PREPARE_ENTITY_CSV = gql`
@@ -649,7 +670,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       name: nameField,
       description: descriptionField,
       created: dayjs(Date.now()).toISOString(),
-      owner: token.orcid,
+      owner: ownerField,
       project: projectField,
       attributes: removeTypename(attributesField),
     };
@@ -782,7 +803,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
-        owner: token.orcid,
+        owner: ownerField,
         project: projectField,
         attributes: removeTypename(attributesField),
       },
@@ -1577,7 +1598,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Field.Label fontSize={"xs"}>Owner</Field.Label>
                           <Flex>
                             <ActorTag
-                              orcid={ownerField}
+                              identifier={ownerField}
                               fallback={"Unknown"}
                               size={"md"}
                             />
@@ -1719,7 +1740,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             _id: `a-${nanoid(6)}`,
                             name: "",
                             timestamp: dayjs(Date.now()).toISOString(),
-                            owner: token.orcid,
+                            owner: ownerField,
                             archived: false,
                             description: "",
                             values: [],

@@ -122,7 +122,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                 >
                   <Flex gap={"2"} align={"center"}>
                     <ActorTag
-                      orcid={collaborator}
+                      identifier={collaborator}
                       fallback={"New User"}
                       size={"sm"}
                     />

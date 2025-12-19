@@ -11,6 +11,5 @@ export const STATIC_URL =
     ? "http://localhost:8000/static"
     : "https://api.metadatify.com/static";
 
-// Keys of the local storage data containing the ORCiD token data and session data
-export const TOKEN_KEY = "metadatify_token";
-export const SESSION_KEY = "metadatify_session";
+// Key for the local storage data
+export const STORAGE_KEY = "metadatify_storage";

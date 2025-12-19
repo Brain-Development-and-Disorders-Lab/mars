@@ -35,8 +35,10 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Context and hooks
-import { useAuthentication } from "@hooks/useAuthentication";
 import { useBreakpoint } from "@hooks/useBreakpoint";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -46,8 +48,30 @@ import { isValidEmail } from "@lib/util";
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
 
-  // Authentication
-  const { token } = useAuthentication();
+  // Authentication and user
+  const [user, setUser] = useState("");
+
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setUser(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Query to get a User and Workspaces
   const GET_USER = gql`
@@ -64,6 +88,7 @@ const User = () => {
           scope
           workspaces
         }
+        account_orcid
       }
       workspaces {
         _id
@@ -77,7 +102,7 @@ const User = () => {
   }>(GET_USER, {
     fetchPolicy: "network-only",
     variables: {
-      _id: token.orcid,
+      _id: user,
     },
   });
 
@@ -106,13 +131,14 @@ const User = () => {
   useEffect(() => {
     if (data?.user) {
       setUserModel(data.user);
-      setUserOrcid(data.user._id);
+      setUserOrcid(data.user.account_orcid);
       setUserFirstName(data.user.firstName);
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
       setUserAffiliation(data.user.affiliation);
       setUserKeys(data.user.api_keys);
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
+
       // Initialize email validation state
       setIsEmailValid(isValidEmail(data.user.email));
     }
