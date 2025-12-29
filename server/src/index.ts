@@ -35,7 +35,7 @@ import { WorkspacesResolvers } from "@resolvers/Workspaces";
 import { connect } from "@connectors/database";
 
 // Authentication
-import { toNodeHandler } from "better-auth/node";
+import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 
 // Custom types
 import { Context } from "@types";
@@ -69,6 +69,9 @@ const origins =
     ? ["http://localhost:8080"]
     : ["https://app.metadatify.com"];
 
+// Specify non-secure paths
+const nonSecurePaths = ["/login"];
+
 // Start the GraphQL server
 const start = async () => {
   consola.info("Environment:", process.env.NODE_ENV);
@@ -78,6 +81,20 @@ const start = async () => {
 
   await connect();
   const { auth } = await import("@lib/auth");
+
+  // Setup authentication helper function
+  const checkSession: RequestHandler = async (req, res, next) => {
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+    if (!_.includes(nonSecurePaths, req.path) && session === null) {
+      res
+        .status(401)
+        .json({ message: `You do not have permission to access ${req.path}` });
+    } else {
+      next();
+    }
+  };
 
   // Configure authentication routes after the database connection is ready
   app.all(
@@ -144,7 +161,10 @@ const start = async () => {
   // Serve static resources
   app.use(
     "/static",
-    cors<cors.CorsRequest>({ origin: origins }),
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
     express.static(__dirname + "/public"),
     helmet(),
   );
@@ -164,7 +184,9 @@ const start = async () => {
     "/",
     cors<cors.CorsRequest>({
       origin: origins,
+      credentials: true,
     }),
+    checkSession,
     express.json({ limit: "100mb" }),
     graphqlUploadExpress({
       maxFileSize: 104857600, // 100MB

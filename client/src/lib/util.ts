@@ -3,7 +3,6 @@ import _ from "lodash";
 
 // Custom types
 import {
-  ApplicationStorage,
   GenericValueType,
   IAttribute,
   ISelectOption,

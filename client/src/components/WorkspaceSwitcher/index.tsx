@@ -240,6 +240,14 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     setOpen(false);
   };
 
+  /**
+   * Handle click events within the `Logout` button
+   */
+  const handleLogoutClick = async () => {
+    await auth.signOut();
+    navigate("/login");
+  };
+
   return (
     <Flex id={props.id ? props.id : "workspaceSwitcher"} pos={"relative"}>
       <Menu.Root
@@ -366,7 +374,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   <Text fontSize={"xs"}>Account settings</Text>
                 </Flex>
               </Menu.Item>
-              <Menu.Item value={"logout"} onClick={() => auth.signOut()}>
+              <Menu.Item value={"logout"} onClick={() => handleLogoutClick()}>
                 <Flex
                   id={"accountLogoutItem"}
                   direction={"row"}

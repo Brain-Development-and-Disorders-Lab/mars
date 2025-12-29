@@ -54,6 +54,9 @@ const httpLink = new UploadHttpLink({
   headers: {
     "Apollo-Require-Preflight": "true",
   },
+  fetchOptions: {
+    credentials: "include",
+  },
 });
 
 /**
