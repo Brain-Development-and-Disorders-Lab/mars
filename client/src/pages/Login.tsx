@@ -1,14 +1,10 @@
-// React
-import React, { useState } from "react";
-
-// Existing and custom components
+import React, { useState, useEffect } from "react";
 import {
   Flex,
   Heading,
   Button,
   Image,
   Text,
-  // Link,
   Separator,
   Box,
   AbsoluteCenter,
@@ -18,177 +14,95 @@ import {
   FieldLabel,
   Fieldset,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-// import { toaster } from "@components/Toast";
-
-// Routing and navigation
-import { useNavigate } from "react-router-dom";
-
-// Hooks
+import { toaster } from "@components/Toast";
 import { auth } from "@lib/auth";
-// import { useWorkspace } from "@hooks/useWorkspace";
-
-// Utility imports
-import consola from "consola";
-
-// Define login parameters
-// const clientID = "APP-BBVHCTCNDUJ4CAXV";
-// const isLocalhost =
-//   window.location.hostname === "localhost" ||
-//   window.location.hostname === "127.0.0.1";
-// const redirectURI = isLocalhost
-//   ? "http://127.0.0.1:8080/login"
-//   : "https://app.metadatify.com/login";
-// const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
-
-// const useParameters = () => {
-//   // Get URL query parameters
-//   const { search } = useLocation();
-//   return useMemo(() => new URLSearchParams(search), [search]);
-// };
 
 const Login = () => {
-  // const { activateWorkspace } = useWorkspace();
-
-  // const parameters = useParameters();
   const navigate = useNavigate();
-
-  // Login state
-  // const [isLoading, setIsLoading] = useState(false);
-
-  // Extract query parameters
-  // const accessCode = parameters.get("code");
-
-  /**
-   * Run the login operation, receiving a login code from the ORCiD API, then attempting to execute
-   * the login operation on the backend
-   * @param code Code provided as parameter of redirect URI
-   */
-  // const runLogin = async (code: string) => {
-  //   setIsLoading(true);
-  //   const result = await login(code);
-
-  //   if (result.success) {
-  //     // If successful login, check if setup is completed
-  //     setIsLoading(false);
-
-  //     if (token.setup === true) {
-  //       // Navigate to the dashboard after activating a Workspace
-  //       const workspaceResult = await activateWorkspace("");
-  //       if (workspaceResult.message === "No Workspaces exist") {
-  //         navigate("/create/workspace");
-  //       } else if (workspaceResult.success) {
-  //         navigate("/");
-  //       } else {
-  //         navigate("/");
-  //       }
-  //     } else {
-  //       // Navigate to the Setup interface
-  //       navigate("/setup");
-  //     }
-  //   } else {
-  //     setIsLoading(false);
-
-  //     // Provide error information
-  //     if (
-  //       result.message.includes("Unable") &&
-  //       !toaster.isVisible("login-graphql-error-toast")
-  //     ) {
-  //       toaster.create({
-  //         id: "login-graphql-error-toast",
-  //         title: "Login Error",
-  //         type: "error",
-  //         description: result.message,
-  //         duration: 4000,
-  //         closable: true,
-  //       });
-  //     } else if (
-  //       result.message.includes("access") &&
-  //       !toaster.isVisible("login-access-error-toast")
-  //     ) {
-  //       toaster.create({
-  //         id: "login-access-error-toast",
-  //         title: "Access Unavailable",
-  //         type: "info",
-  //         description: (
-  //           <Flex direction={"column"}>
-  //             <Link
-  //               href={"https://forms.gle/q4GL4gF1bamem3DA9"}
-  //               target="_blank"
-  //               rel="noopener noreferrer"
-  //             >
-  //               <Flex direction={"row"} gap={"1"} align={"center"}>
-  //                 <Text fontWeight={"semibold"}>Join the waitlist here</Text>
-  //                 <Icon name={"a_right"} />
-  //               </Flex>
-  //             </Link>
-  //           </Flex>
-  //         ),
-  //         closable: true,
-  //       });
-  //     }
-  //   }
-  // };
-
-  /**
-   * Wrapper function to handle login flow
-   */
-  // const onLoginClick = async () => {
-  //   if (process.env.NODE_ENV === "development") {
-  //     // If in a development environment, bypass the ORCiD login
-  //     await runLogin("");
-  //   } else {
-  //     // In production, navigate to the API login URI
-  //     window.location.href = requestURI;
-  //   }
-  // };
-
-  /**
-   * Utility function to examine the login state, as a composition of other states,
-   * and navigate the user accordingly
-   */
-  // const checkLoginState = async () => {
-  //   if (accessCode && token.token === "") {
-  //     // Not authenticated, no interest in setup yet
-  //     runLogin(accessCode);
-  //   } else if (token.token !== "" && token.setup === false) {
-  //     // Authenticated but not setup
-  //     navigate("/setup");
-  //   } else if (token.token !== "" && token.setup === true) {
-  //     // Authenticated and setup
-  //     const workspaceResult = await activateWorkspace("");
-  //     if (workspaceResult.message === "No Workspaces exist") {
-  //       navigate("/create/workspace");
-  //     } else if (workspaceResult.success) {
-  //       navigate("/");
-  //     } else {
-  //       navigate("/");
-  //     }
-  //   }
-  // };
-
-  // On the page load, evaluate the login state components
-  // useEffect(() => {
-  //   checkLoginState();
-  // }, []);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEmailLoginLoading, setIsEmailLoginLoading] = useState(false);
+  const [isOrcidLoading, setIsOrcidLoading] = useState(false);
+  const isDevelopment = process.env.NODE_ENV === "development";
 
-  const newLogin = async () => {
-    consola.info("Running new login...");
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get("error");
+    const code = urlParams.get("code");
+
+    if (error) {
+      toaster.create({
+        title: "ORCiD Authentication Error",
+        description: "Unable to authenticate with ORCiD. Please try again.",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      window.history.replaceState({}, document.title, "/login");
+      return;
+    }
+
+    if (code) {
+      auth.getSession().then(({ data: session }) => {
+        if (session) navigate("/");
+      });
+    }
+  }, [navigate]);
+
+  const onEmailLoginClick = async () => {
     setIsEmailLoginLoading(true);
-    const { data, error } = await auth.signIn.email(
-      {
-        email,
-        password,
-        callbackURL: "/",
-        rememberMe: false,
-      },
-      {},
-    );
+    const { error } = await auth.signIn.email({
+      email,
+      password,
+      callbackURL: "/",
+      rememberMe: false,
+    });
+    setIsEmailLoginLoading(false);
+
+    if (error) {
+      toaster.create({
+        title: "Authentication Error",
+        description: "Unable to authenticate user. Please log in again.",
+        type: "error",
+        duration: 4000,
+        closable: false,
+      });
+    } else {
+      navigate("/");
+    }
+  };
+
+  const onOrcidLoginClick = async () => {
+    setIsOrcidLoading(true);
+    const { error, data } = await auth.signIn.social({
+      provider: "orcid",
+      callbackURL: "/",
+    });
+
+    if (error) {
+      toaster.create({
+        title: "ORCiD Authentication Error",
+        description:
+          error.message ||
+          "Unable to authenticate with ORCiD. Please try again.",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      setIsOrcidLoading(false);
+    } else if (data?.url) {
+      window.location.href = data.url;
+    }
+  };
+
+  const checkKeyboardLogin = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (event.key === "Enter" && email !== "" && password !== "") {
+      onEmailLoginClick();
+    }
   };
 
   return (
@@ -209,6 +123,7 @@ const Login = () => {
         gap={"8"}
         h={"80vh"}
         wrap={"wrap"}
+        onKeyUp={(event) => checkKeyboardLogin(event)}
       >
         <Flex direction={"column"} gap={"4"}>
           <Flex
@@ -228,7 +143,6 @@ const Login = () => {
               <Heading size={"2xl"} fontWeight={"semibold"}>
                 Sign in
               </Heading>
-
               <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
                 Use one of the sign in options below to get started.
               </Text>
@@ -247,7 +161,7 @@ const Login = () => {
                       size={"xs"}
                       value={email}
                       placeholder={"Email"}
-                      disabled={isEmailLoginLoading}
+                      disabled={isEmailLoginLoading || isOrcidLoading}
                       onChange={(event) => setEmail(event.target.value)}
                     />
                   </Field.Root>
@@ -263,7 +177,7 @@ const Login = () => {
                       size={"xs"}
                       value={password}
                       placeholder={"Password"}
-                      disabled={isEmailLoginLoading}
+                      disabled={isEmailLoginLoading || isOrcidLoading}
                       onChange={(event) => setPassword(event.target.value)}
                     />
                   </Field.Root>
@@ -272,8 +186,8 @@ const Login = () => {
                     size={"xs"}
                     rounded={"md"}
                     colorScheme={"green"}
-                    disabled={email === "" || password === ""}
-                    onClick={() => newLogin()}
+                    disabled={email === "" || password === "" || isOrcidLoading}
+                    onClick={onEmailLoginClick}
                     loading={isEmailLoginLoading}
                     loadingText={"Logging in..."}
                   >
@@ -295,11 +209,10 @@ const Login = () => {
               <Button
                 id={"orcidLoginButton"}
                 variant={"subtle"}
-                // onClick={onLoginClick}
-                // loading={isLoading}
-                // disabled={isEmailLoginLoading}
-                disabled
-                loadingText={"Logging in..."}
+                onClick={onOrcidLoginClick}
+                loading={isOrcidLoading}
+                disabled={isDevelopment || isEmailLoginLoading}
+                loadingText={"Redirecting to ORCiD..."}
                 size={"xs"}
                 rounded={"md"}
                 colorPalette={"green"}
@@ -319,7 +232,6 @@ const Login = () => {
               <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
                 Don't have an account yet?
               </Text>
-
               <Button
                 w={"100%"}
                 size={"xs"}
@@ -332,7 +244,6 @@ const Login = () => {
               </Button>
             </Flex>
 
-            {/* Version number */}
             <Flex
               direction={"row"}
               gap={"2"}
