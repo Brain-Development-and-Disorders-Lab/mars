@@ -489,7 +489,7 @@ export class API {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: orcid,
-          details: "Updated existing Entity",
+          details: "Updated Entity",
           target: {
             _id: entity._id,
             type: "entities",

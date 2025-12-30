@@ -552,7 +552,7 @@ export class Data {
           if (!result.success) {
             return {
               success: false,
-              message: `Error updating existing Entity: "${entity.name}"`,
+              message: `Error updating Entity: "${entity.name}"`,
             };
           } else {
             // Add the Entity to the Workspace
@@ -562,7 +562,7 @@ export class Data {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
-              details: "Updated existing Entity",
+              details: "Updated Entity",
               target: {
                 _id: entity._id,
                 type: "entities",
@@ -589,7 +589,7 @@ export class Data {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
-              details: "Updated existing Entity",
+              details: "Updated Entity",
               target: {
                 _id: result.data,
                 type: "entities",
@@ -658,7 +658,7 @@ export class Data {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Template",
+          details: "Updated Template",
           target: {
             _id: parsed._id,
             type: "templates",

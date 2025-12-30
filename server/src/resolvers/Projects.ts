@@ -273,7 +273,7 @@ export const ProjectsResolvers = {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Project",
+          details: "Updated Project",
           target: {
             _id: project._id,
             type: "projects",

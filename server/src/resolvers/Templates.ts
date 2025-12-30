@@ -247,7 +247,7 @@ export const TemplatesResolvers = {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Template",
+          details: "Updated Template",
           target: {
             _id: args.template._id,
             type: "templates",

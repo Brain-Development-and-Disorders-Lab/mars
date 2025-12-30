@@ -369,7 +369,7 @@ export const EntitiesResolvers = {
             timestamp: dayjs(Date.now()).toISOString(),
             type: "update",
             actor: context.user,
-            details: "Updated existing Entity",
+            details: "Updated Entity",
             target: {
               _id: args.entity._id,
               type: "entities",
