@@ -91,18 +91,7 @@ const ActivityFeed = ({
   }, [activities, feedLimit]);
 
   return (
-    <Flex
-      direction={"column"}
-      maxW={{ lg: "md" }}
-      p={"1"}
-      gap={"1"}
-      grow={"1"}
-      rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
-      h={"fit-content"}
-      data-timestamp-update={timestampUpdate}
-    >
+    <Flex direction={"column"} data-timestamp-update={timestampUpdate}>
       {/* Activity heading */}
       <Flex
         id={"recentActivityHeader"}
@@ -164,7 +153,7 @@ const ActivityFeed = ({
       {/* Activity list */}
       {feedActivities.length > 0 ? (
         <Flex direction={"column"} gap={"1"}>
-          <Stack gap={"1.5"} w={"95%"}>
+          <Stack gap={"1"} w={"98%"}>
             {feedActivities.map((activity: ActivityModel) => {
               return (
                 <Flex
@@ -187,7 +176,12 @@ const ActivityFeed = ({
                     </Avatar.Root>
                   )}
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                    <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                    <Flex
+                      direction={"row"}
+                      w={"100%"}
+                      gap={"1"}
+                      justify={"space-between"}
+                    >
                       <Text fontSize={"xs"}>{activity.details}:</Text>
                       <Text
                         fontSize={"xs"}

@@ -602,13 +602,17 @@ const Dashboard = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"} gap={"1"} p={"0"}>
+        <Flex
+          direction={"row"}
+          wrap={{ base: "wrap", lg: "nowrap" }}
+          gap={"1"}
+          p={"0"}
+        >
           <Flex
             direction={"column"}
             gap={"1"}
-            grow={"1"}
+            flex={{ base: "1 1 100%", lg: "0 0 70%" }}
             minW={"0"}
-            maxW={"100%"}
           >
             {/* Projects and Entities */}
             <Flex
@@ -733,7 +737,18 @@ const Dashboard = () => {
           </Flex>
 
           {/* Activity */}
-          <ActivityFeed />
+          <Flex
+            direction={"column"}
+            flex={{ base: "1 1 100%", lg: "0 0 30%" }}
+            p={"1"}
+            gap={"1"}
+            rounded={"md"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+            h={"fit-content"}
+          >
+            <ActivityFeed />
+          </Flex>
         </Flex>
       </Flex>
     </Content>
