@@ -23,9 +23,6 @@ export const auth = createAuthClient({
         lastLogin: {
           type: "string",
         },
-        workspaces: {
-          type: "string[]",
-        },
         api_keys: {
           type: "string[]",
         },

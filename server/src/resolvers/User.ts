@@ -1,4 +1,9 @@
-import { IResolverParent, IResponseMessage, UserModel } from "@types";
+import {
+  IResolverParent,
+  IResponseMessage,
+  ResponseData,
+  UserModel,
+} from "@types";
 
 // Models
 import { User } from "@models/User";
@@ -11,8 +16,19 @@ export const UserResolvers = {
     },
 
     // Retrieve one User by _id
-    user: async (_parent: IResolverParent, args: { _id: string }) => {
+    user: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+    ): Promise<UserModel | null> => {
       return await User.getOne(args._id);
+    },
+
+    // Retrieve one User by email
+    userByEmail: async (
+      _parent: IResolverParent,
+      args: { email: string },
+    ): Promise<ResponseData<string>> => {
+      return await User.getByEmail(args.email);
     },
   },
   Mutation: {

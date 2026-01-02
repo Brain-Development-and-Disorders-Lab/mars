@@ -47,7 +47,7 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    api_keys: [APIKey]
+    api_keys: String
     account_orcid: String
   }
 
@@ -64,7 +64,7 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    api_keys: [APIKeyInput]
+    api_keys: String
     account_orcid: String
   }
 
@@ -500,6 +500,7 @@ export const typedefs = `#graphql
     # User queries
     users: [User]
     user(_id: String): User
+    userByEmail(email: String): ResponseDataString
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]

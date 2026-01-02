@@ -14,20 +14,97 @@ import {
 } from "@chakra-ui/react";
 
 // Custom components
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 
 // Custom types
-import { CollaboratorsProps } from "@types";
-import ActorTag from "@components/ActorTag";
-import { isValidOrcid } from "@lib/util";
+import { CollaboratorsProps, ResponseData } from "@types";
+
+// GraphQL imports
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
+
+// Utility functions
+import _ from "lodash";
+import { isValidEmail } from "@lib/util";
+
+const GET_USER_BY_EMAIL = gql`
+  query GetUserByEmail($email: String) {
+    userByEmail(email: $email) {
+      success
+      message
+      data
+    }
+  }
+`;
 
 const Collaborators = (props: CollaboratorsProps) => {
   const [newCollaborator, setNewCollaborator] = useState("");
-  const [validOrcid, setValidOrcid] = useState(false);
+  const [validEmail, setValidEmail] = useState(false);
 
-  // Check if the new collaborator is a valid ORCiD
+  const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
+
+  const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] =
+    useLazyQuery<{ userByEmail: ResponseData<string> }>(GET_USER_BY_EMAIL, {
+      fetchPolicy: "network-only",
+    });
+
+  const handleAddCollaborator = async () => {
+    setAddCollaboratorLoading(true);
+    // Prevent adding empty or duplicate collaborator
+    if (
+      newCollaborator &&
+      !props.projectCollaborators.includes(newCollaborator)
+    ) {
+      const result = await getCollaboratorUserId({
+        variables: {
+          email: newCollaborator,
+        },
+      });
+
+      if (!result.data || error) {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: "Could not retrieve User information",
+          duration: 4000,
+          closable: true,
+        });
+      } else if (result.data && result.data.userByEmail.data === "") {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: `Could not locate user with email address "${newCollaborator}"`,
+          duration: 4000,
+          closable: true,
+        });
+      } else if (result.data) {
+        const collaborator = result.data.userByEmail.data;
+        if (!_.includes(props.projectCollaborators, collaborator)) {
+          props.setProjectCollaborators((collaborators) => [
+            ...collaborators,
+            collaborator,
+          ]);
+        } else {
+          toaster.create({
+            title: "Warning",
+            type: "warning",
+            description: "Collaborator already exists in this Workspace",
+            duration: 4000,
+            closable: true,
+          });
+        }
+      }
+    }
+
+    setNewCollaborator(""); // Clear the input after adding
+    setAddCollaboratorLoading(false);
+  };
+
+  // Check if the new collaborator is a valid email
   useEffect(() => {
-    setValidOrcid(isValidOrcid(newCollaborator));
+    setValidEmail(isValidEmail(newCollaborator));
   }, [newCollaborator]);
 
   return (
@@ -52,13 +129,13 @@ const Collaborators = (props: CollaboratorsProps) => {
         <Flex direction={"row"} gap={"2"} align={"center"}>
           <Fieldset.Root>
             <Fieldset.Content>
-              <Field.Root invalid={newCollaborator !== "" && !validOrcid}>
+              <Field.Root invalid={newCollaborator !== "" && !validEmail}>
                 <Input
-                  placeholder={"ORCiD"}
+                  placeholder={"Email"}
                   size={"xs"}
                   rounded={"md"}
                   value={newCollaborator}
-                  onChange={(e) => setNewCollaborator(e.target.value)}
+                  onChange={(event) => setNewCollaborator(event.target.value)}
                   disabled={!props.editing}
                 />
               </Field.Root>
@@ -69,20 +146,10 @@ const Collaborators = (props: CollaboratorsProps) => {
             colorPalette={"green"}
             size={"xs"}
             rounded={"md"}
-            disabled={!props.editing || !validOrcid}
-            onClick={() => {
-              // Prevent adding empty or duplicate collaborator
-              if (
-                newCollaborator &&
-                !props.projectCollaborators.includes(newCollaborator)
-              ) {
-                props.setProjectCollaborators((collaborators) => [
-                  ...collaborators,
-                  newCollaborator,
-                ]);
-                setNewCollaborator(""); // Clear the input after adding
-              }
-            }}
+            disabled={!props.editing || !validEmail}
+            loading={addCollaboratorLoading || collaboratorQueryLoading}
+            loadingText={"Adding..."}
+            onClick={() => handleAddCollaborator()}
           >
             Add
             <Icon name={"add"} size={"xs"} />

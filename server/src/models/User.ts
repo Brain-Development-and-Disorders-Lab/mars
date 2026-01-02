@@ -1,5 +1,5 @@
 // Custom types
-import { APIKey, IResponseMessage, UserModel } from "@types";
+import { APIKey, IResponseMessage, ResponseData, UserModel } from "@types";
 
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -32,6 +32,26 @@ export class User {
     return await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .findOne({ _id: new ObjectId(_id) });
+  };
+
+  static getByEmail = async (email: string): Promise<ResponseData<string>> => {
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .findOne({ email: email });
+
+    // Return the User `_id`
+    if (result) {
+      return {
+        message: "User found successfully",
+        success: true,
+        data: result._id,
+      };
+    }
+    return {
+      message: "User not found",
+      success: false,
+      data: "",
+    };
   };
 
   static exists = async (_id: string): Promise<boolean> => {
@@ -106,10 +126,10 @@ export class User {
   };
 
   static addKey = async (
-    orcid: string,
+    _id: string,
     key: APIKey,
   ): Promise<IResponseMessage> => {
-    const user = await User.getOne(orcid);
+    const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
       return {
@@ -118,18 +138,19 @@ export class User {
       };
     }
 
-    const apiKeys = _.cloneDeep(user.api_keys);
+    // Note: Modifying outside of better-auth means that `api_keys` is stored as a JSON string
+    const apiKeys = JSON.parse(_.cloneDeep(user.api_keys));
     apiKeys.push(key);
 
     const update: { $set: Partial<UserModel> } = {
       $set: {
-        api_keys: apiKeys,
+        api_keys: JSON.stringify(apiKeys),
       },
     };
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: orcid }, update);
+      .updateOne({ _id: new ObjectId(_id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -141,10 +162,10 @@ export class User {
   };
 
   static removeKey = async (
-    orcid: string,
+    _id: string,
     key: string,
   ): Promise<IResponseMessage> => {
-    const user = await User.getOne(orcid);
+    const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
       return {
@@ -153,10 +174,11 @@ export class User {
       };
     }
 
-    const apiKeys = _.cloneDeep(user.api_keys);
+    // Note: Modifying outside of better-auth means that `api_keys` is stored as a JSON string
+    const apiKeys = JSON.parse(_.cloneDeep(user.api_keys));
 
     // Iterate through the list of API keys and set the removed key to have expiration 1 year ago
-    apiKeys.map((existingKey) => {
+    apiKeys.map((existingKey: APIKey) => {
       if (_.isEqual(existingKey.value, key)) {
         existingKey.expires = dayjs(Date.now())
           .subtract(1, "year")
@@ -166,13 +188,13 @@ export class User {
 
     const update: { $set: Partial<UserModel> } = {
       $set: {
-        api_keys: apiKeys,
+        api_keys: JSON.stringify(apiKeys),
       },
     };
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: orcid }, update);
+      .updateOne({ _id: new ObjectId(_id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {

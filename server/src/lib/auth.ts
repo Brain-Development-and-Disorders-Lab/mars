@@ -51,6 +51,7 @@ const getTrustedOrigins = () => {
 export const auth = betterAuth({
   database: mongodbAdapter(getDatabase(), {
     client: getClient(),
+    transaction: false,
   }),
   basePath: "/auth",
   baseURL:
@@ -80,9 +81,6 @@ export const auth = betterAuth({
       },
       lastLogin: {
         type: "string",
-      },
-      workspaces: {
-        type: "string[]",
       },
       api_keys: {
         type: "string[]",

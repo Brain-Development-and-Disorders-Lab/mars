@@ -662,7 +662,7 @@ export type IUser = {
   createdAt: string; // better-auth: Created
   updatedAt: string; // better-auth: Last updated
   lastLogin: string;
-  api_keys: APIKey[];
+  api_keys: string; // better-auth: Stored as a JSON string
   account_orcid: string;
 };
 

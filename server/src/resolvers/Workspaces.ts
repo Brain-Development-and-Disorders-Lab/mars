@@ -14,7 +14,6 @@ import { GraphQLError } from "graphql/index";
 
 // Models
 import { Workspaces } from "@models/Workspaces";
-import { User } from "@models/User";
 
 // Posthog
 import { PostHogClient } from "src";
