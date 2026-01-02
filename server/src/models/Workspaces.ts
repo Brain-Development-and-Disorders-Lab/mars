@@ -376,4 +376,30 @@ export class Workspaces {
           : "No changes made to Workspace",
     };
   };
+
+  /**
+   * Basic access check function to validate that the User has permission to interact with a Workspace
+   * @param user Identifier of the User attempting to interact with the Workspace
+   * @param workspace Identifier of the target Workspace
+   * @return {Promise<boolean>} `true` if the User has access, `false` if not
+   */
+  static checkAccess = async (
+    user: string,
+    workspace: string,
+  ): Promise<boolean> => {
+    // Special case where no Workspaces exist for the User, `workspace` will be `""`
+    if (workspace === "") {
+      return true;
+    }
+
+    const workspaceResult = await Workspaces.getOne(workspace);
+    if (workspaceResult === null) {
+      return false;
+    }
+
+    return (
+      workspaceResult.owner === user ||
+      _.includes(workspaceResult.collaborators, user)
+    );
+  };
 }

@@ -19,6 +19,19 @@ export const ActivityResolvers = {
       args: { limit: 100 },
       context: Context,
     ) => {
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -40,6 +53,19 @@ export const ActivityResolvers = {
       args: { activity: IActivity },
       context: Context,
     ): Promise<IResponseMessage> => {
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
       // Apply the create operation
       const result = await Activity.create(args.activity);
 

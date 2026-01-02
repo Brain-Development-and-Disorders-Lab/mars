@@ -112,7 +112,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         duration: 2000,
         closable: true,
       });
-    } else if (!_.isUndefined(workspaceResult.data)) {
+    } else if (
+      !_.isUndefined(workspaceResult.data) &&
+      !_.isNull(workspaceResult.data.workspace)
+    ) {
       setLabel(workspaceResult.data.workspace.name);
     }
   };
