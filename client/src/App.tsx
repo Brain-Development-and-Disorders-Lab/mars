@@ -49,6 +49,7 @@ import CreateProject from "@pages/create/Project";
 import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
 import Invalid from "@pages/Invalid";
+import Unauthorized from "@pages/Unauthorized";
 import Login from "@pages/Login";
 import Signup from "@pages/Signup";
 
@@ -128,6 +129,7 @@ const App = (): ReactElement => {
           <Route path={"/search"} element={<Search />} />
           <Route path={"/activity"} element={<Activity />} />
           <Route path={"/invalid"} element={<Invalid />} />
+          <Route path={"/unauthorized"} element={<Unauthorized />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
         </Route>
       </Route>,

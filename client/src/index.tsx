@@ -81,7 +81,7 @@ const authLink = new SetContextLink(async (previousContext, _operation) => {
 /**
  * Error handling for GraphQL errors that occur throughout the application
  */
-const errorLink = new ErrorLink(({ error }) => {
+const errorLink = new ErrorLink(({ error, operation }) => {
   // Suppress AbortErrors - expected when Apollo Client cancels queries
   if (isAbortError(error)) {
     return;
@@ -91,6 +91,21 @@ const errorLink = new ErrorLink(({ error }) => {
   if (CombinedGraphQLErrors.is(error)) {
     for (const err of error.errors) {
       const errorMessage = err.message;
+
+      // Handle access errors
+      if (err.extensions?.code === "UNAUTHORIZED") {
+        // Stop all polling queries before redirecting
+        operation.setContext({
+          fetchOptions: {
+            signal: AbortController ? new AbortController().signal : undefined,
+          },
+        });
+
+        if (window.location.pathname !== "/unauthorized") {
+          window.location.href = "/unauthorized";
+        }
+        return;
+      }
 
       // Handle authentication errors
       if (errorMessage === "Could not validate token") {

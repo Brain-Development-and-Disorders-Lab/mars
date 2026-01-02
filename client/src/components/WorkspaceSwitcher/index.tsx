@@ -189,7 +189,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [open]);
 
   // When the label is updated, refresh the list of Workspaces
   useEffect(() => {
@@ -211,6 +211,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
       setOpen(false);
       setIsLoading(false);
     }
+
+    // Navigate to the Dashboard
+    navigate("/");
+    setOpen(false);
   };
 
   /**
