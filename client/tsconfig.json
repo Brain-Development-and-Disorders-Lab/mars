@@ -13,7 +13,8 @@
       "@hooks/*": ["src/hooks/*"],
       "@lib/*": ["src/lib/*"],
       "@pages/*": ["src/pages/*"],
-      "@types": ["../types"]
+      "@types": ["../types"],
+      "@variables": ["src/variables"]
     },
     "rootDirs": ["src"],
     "strict": true,

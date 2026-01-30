@@ -18,7 +18,12 @@ import { useNavigate } from "react-router-dom";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+
+// Authentication
 import { auth } from "@lib/auth";
+
+// Variables
+import { APP_URL } from "@variables";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,30 +31,46 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isEmailLoginLoading, setIsEmailLoginLoading] = useState(false);
   const [isOrcidLoading, setIsOrcidLoading] = useState(false);
-  const isDevelopment = process.env.NODE_ENV === "development";
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get("error");
-    const code = urlParams.get("code");
+    const checkAuthStatus = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get("error");
 
-    if (error) {
-      toaster.create({
-        title: "ORCiD Authentication Error",
-        description: "Unable to authenticate with ORCiD. Please try again.",
-        type: "error",
-        duration: 4000,
-        closable: true,
-      });
-      window.history.replaceState({}, document.title, "/login");
-      return;
-    }
+      // Handle OAuth errors
+      if (error) {
+        toaster.create({
+          title: "ORCiD Authentication Error",
+          description: "Unable to authenticate with ORCiD. Please try again.",
+          type: "error",
+          duration: 4000,
+          closable: true,
+        });
+        window.history.replaceState({}, document.title, "/login");
+        return;
+      }
 
-    if (code) {
-      auth.getSession().then(({ data: session }) => {
-        if (session) navigate("/");
-      });
-    }
+      // Check if user is already logged in
+      const { data: session } = await auth.getSession();
+
+      if (session?.user) {
+        // User is logged in, check if profile is complete
+        const hasPlaceholderEmail =
+          session.user.email?.includes("@setup.placeholder");
+
+        if (!session.user.email || hasPlaceholderEmail) {
+          // Profile incomplete, redirect to signup
+          window.history.replaceState({}, document.title, "/login");
+          navigate("/signup");
+        } else {
+          // Profile complete, redirect to dashboard
+          window.history.replaceState({}, document.title, "/login");
+          navigate("/");
+        }
+      }
+    };
+
+    checkAuthStatus();
   }, [navigate]);
 
   const onEmailLoginClick = async () => {
@@ -79,7 +100,7 @@ const Login = () => {
     setIsOrcidLoading(true);
     const { error, data } = await auth.signIn.social({
       provider: "orcid",
-      callbackURL: "/",
+      callbackURL: `${APP_URL}/login`,
     });
 
     if (error) {
@@ -211,18 +232,19 @@ const Login = () => {
                 variant={"subtle"}
                 onClick={onOrcidLoginClick}
                 loading={isOrcidLoading}
-                disabled={isDevelopment || isEmailLoginLoading}
+                disabled={isEmailLoginLoading}
                 loadingText={"Redirecting to ORCiD..."}
                 size={"xs"}
+                gap={"1"}
                 rounded={"md"}
                 colorPalette={"green"}
               >
+                Sign in with ORCiD
                 <Image
                   src={
                     "https://orcid.org/sites/default/files/images/orcid_16x16.png"
                   }
                 />
-                Sign in with ORCiD
               </Button>
             </Flex>
 

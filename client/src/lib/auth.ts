@@ -2,7 +2,7 @@
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { genericOAuthClient } from "better-auth/client/plugins";
-import { API_URL } from "../variables";
+import { API_URL } from "@variables";
 
 export const auth = createAuthClient({
   baseURL: API_URL,

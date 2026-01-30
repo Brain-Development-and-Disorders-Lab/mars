@@ -69,6 +69,7 @@ module.exports = {
       "@lib": path.resolve(__dirname, "./src/lib/"),
       "@pages": path.resolve(__dirname, "./src/pages/"),
       "@types": path.resolve(__dirname, "../types"),
+      "@variables": path.resolve(__dirname, "./src/variables"),
       "entities/decode": path.resolve(
         __dirname,
         "./node_modules/parse5/node_modules/entities/dist/commonjs/decode.js",

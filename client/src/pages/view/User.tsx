@@ -45,6 +45,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { isValidEmail } from "@lib/util";
 
+// Variables
+import { APP_URL } from "@variables";
+
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
 
@@ -82,12 +85,7 @@ const User = () => {
         lastName
         email
         affiliation
-        api_keys {
-          value
-          expires
-          scope
-          workspaces
-        }
+        api_keys
         account_orcid
       }
       workspaces {
@@ -136,7 +134,7 @@ const User = () => {
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
       setUserAffiliation(data.user.affiliation);
-      setUserKeys(data.user.api_keys);
+      setUserKeys(JSON.parse(data.user.api_keys));
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
 
       // Initialize email validation state
@@ -209,6 +207,9 @@ const User = () => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [affiliationError, setAffiliationError] = useState("");
 
+  // ORCiD linking state
+  const [isOrcidLinking, setIsOrcidLinking] = useState(false);
+
   /**
    * Validate email format and update validation state
    */
@@ -268,7 +269,6 @@ const User = () => {
           _id: userOrcid,
           email: userEmail,
           affiliation: userAffiliation,
-          workspaces: userWorkspaces.map((workspace) => workspace._id),
         },
       },
     });
@@ -306,6 +306,28 @@ const User = () => {
 
     // Set editing state
     setEditing(false);
+  };
+
+  const handleLinkOrcidClick = async () => {
+    setIsOrcidLinking(true);
+    const { error, data } = await auth.signIn.social({
+      provider: "orcid",
+      callbackURL: `${APP_URL}/user`,
+    });
+
+    if (error) {
+      toaster.create({
+        title: "ORCiD Linking Error",
+        description:
+          error.message || "Unable to link ORCiD account. Please try again.",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      setIsOrcidLinking(false);
+    } else if (data?.url) {
+      window.location.href = data.url;
+    }
   };
 
   const handleGenerateKeyClick = async () => {
@@ -641,10 +663,29 @@ const User = () => {
                 >
                   ORCiD
                 </Text>
-                <Flex align={"center"} justify={"start"}>
-                  <Tag.Root colorPalette={"green"}>
-                    <Tag.Label>{userOrcid}</Tag.Label>
+                <Flex
+                  align={"center"}
+                  justify={"start"}
+                  gap={"2"}
+                  wrap={"wrap"}
+                >
+                  <Tag.Root colorPalette={userOrcid ? "green" : "gray"}>
+                    <Tag.Label>{userOrcid || "Not Connected"}</Tag.Label>
                   </Tag.Root>
+                  {!userOrcid && (
+                    <Button
+                      size={"2xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      variant={"subtle"}
+                      onClick={handleLinkOrcidClick}
+                      loading={isOrcidLinking}
+                      loadingText={"Linking..."}
+                    >
+                      Connect ORCiD
+                      <Icon name={"add"} size={"xs"} />
+                    </Button>
+                  )}
                 </Flex>
               </Flex>
 

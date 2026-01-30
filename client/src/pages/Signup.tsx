@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Existing and custom components
 import {
@@ -12,6 +12,11 @@ import {
   Field,
   Select,
   createListCollection,
+  Text,
+  Separator,
+  Box,
+  AbsoluteCenter,
+  Spacer,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -27,8 +32,34 @@ import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "@lib/util";
 import dayjs from "dayjs";
 
+// Variables
+import { APP_URL } from "@variables";
+
+// Custom types
+import { IResponseMessage } from "@types";
+
+// GraphQL imports
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
+
+// GraphQL mutation to create user profile
+const UPDATE_USER = gql`
+  mutation UpdateUser($user: UserInput) {
+    updateUser(user: $user) {
+      success
+      message
+    }
+  }
+`;
+
 const Signup = () => {
   const navigate = useNavigate();
+  const isDevelopment = process.env.NODE_ENV === "development";
+
+  // GraphQL mutation hook
+  const [updateUser, { loading: updateUserLoading }] = useMutation<{
+    updateUser: IResponseMessage;
+  }>(UPDATE_USER);
 
   // User information state
   const [userFirstName, setUserFirstName] = useState("");
@@ -47,6 +78,30 @@ const Signup = () => {
 
   // Loading state
   const [isAccountCreateLoading, setIsAccountCreateLoading] = useState(false);
+  const [isOrcidLoading, setIsOrcidLoading] = useState(false);
+
+  // ORCiD state
+  const [orcidId, setOrcidId] = useState("");
+  const [isExistingUser, setIsExistingUser] = useState(false);
+  const [existingUserId, setExistingUserId] = useState("");
+
+  // Check if user already has a session (from ORCiD login)
+  useEffect(() => {
+    auth.getSession().then(({ data: session }) => {
+      if (session?.user) {
+        const hasPlaceholderEmail =
+          session.user.email?.includes("@setup.placeholder");
+        if (hasPlaceholderEmail || !session.user.email) {
+          // User logged in via ORCiD but needs to complete profile
+          setIsExistingUser(true);
+          setExistingUserId(session.user.id);
+          if (session.user.account_orcid) {
+            setOrcidId(session.user.account_orcid);
+          }
+        }
+      }
+    });
+  }, []);
 
   const userComplete =
     userFirstName !== "" &&
@@ -54,7 +109,7 @@ const Signup = () => {
     userEmail !== "" &&
     userAffiliation !== "" &&
     isEmailValid &&
-    isPasswordValid;
+    (isExistingUser || isPasswordValid); // Password only required for new users
 
   // Affiliation options collection
   const affiliationCollection = createListCollection({
@@ -100,52 +155,135 @@ const Signup = () => {
   };
 
   /**
+   * Handle ORCiD signup button click
+   */
+  const onOrcidSignupClick = async () => {
+    setIsOrcidLoading(true);
+    const { error, data } = await auth.signIn.social({
+      provider: "orcid",
+      callbackURL: `${APP_URL}/signup`,
+    });
+
+    if (error) {
+      toaster.create({
+        title: "ORCiD Authentication Error",
+        description:
+          error.message ||
+          "Unable to authenticate with ORCiD. Please try again.",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      setIsOrcidLoading(false);
+    } else if (data?.url) {
+      window.location.href = data.url;
+    }
+  };
+
+  /**
    * Handle the "Done" button being clicked after user information is entered
    */
   const onDoneClick = async () => {
+    setIsAccountCreateLoading(true);
     const joinedName = `${userFirstName} ${userLastName}`;
-    const { data, error } = await auth.signUp.email(
-      {
-        email: userEmail,
-        name: joinedName,
-        password: initialPassword,
-        firstName: userFirstName,
-        lastName: userLastName,
-        affiliation: userAffiliation,
-        lastLogin: dayjs(Date.now()).toISOString(),
-        workspaces: [],
-        api_keys: [],
-        callbackURL: "/login",
-      },
-      {
-        onRequest: (ctx) => {
-          setIsAccountCreateLoading(true);
-        },
-        onSuccess: (ctx) => {
-          setIsAccountCreateLoading(false);
+
+    if (isExistingUser) {
+      // User already has an account from ORCiD login
+      try {
+        const result = await updateUser({
+          variables: {
+            user: {
+              _id: existingUserId,
+              firstName: userFirstName,
+              lastName: userLastName,
+              name: `${userFirstName} ${userLastName}`,
+              affiliation: userAffiliation,
+              email: userEmail,
+              emailVerified: false,
+              image: "",
+              createdAt: dayjs(Date.now()).toISOString(),
+              updatedAt: dayjs(Date.now()).toISOString(),
+              api_keys: JSON.stringify([]),
+              account_orcid: orcidId,
+            },
+          },
+        });
+
+        setIsAccountCreateLoading(false);
+
+        if (result.data?.updateUser) {
           toaster.create({
-            title: "Create Account",
+            title: "User Created",
             type: "success",
-            description: "Account created successfully!",
+            description: "Your account has been created successfully!",
             duration: 4000,
             closable: true,
           });
-          navigate("/login");
-        },
-        onError: (ctx) => {
-          setIsAccountCreateLoading(false);
+          navigate("/");
+        } else {
           toaster.create({
-            title: "Create Account",
+            title: "Failed to Create Account",
             type: "error",
-            description:
-              ctx.error.message ||
-              "An unknown error occurred. Please try again.",
+            description: "Failed to create account. Please try again.",
             duration: 4000,
             closable: true,
           });
+        }
+      } catch {
+        setIsAccountCreateLoading(false);
+        toaster.create({
+          title: "Failed to Create Account",
+          type: "error",
+          description: "Failed to create account. Please try again.",
+          duration: 4000,
+          closable: true,
+        });
+      }
+    } else {
+      // New user, create account
+      await auth.signUp.email(
+        {
+          email: userEmail,
+          name: joinedName,
+          password: initialPassword,
+          firstName: userFirstName,
+          lastName: userLastName,
+          affiliation: userAffiliation,
+          lastLogin: dayjs(Date.now()).toISOString(),
+          api_keys: [],
+          account_orcid: orcidId,
+          callbackURL: "/login",
         },
-      },
-    );
+        {
+          onRequest: () => {
+            setIsAccountCreateLoading(true);
+          },
+          onSuccess: () => {
+            setIsAccountCreateLoading(false);
+            toaster.create({
+              title: "Create Account",
+              type: "success",
+              description: "Account created successfully!",
+              duration: 4000,
+              closable: true,
+            });
+            navigate("/login");
+          },
+          onError: (ctx) => {
+            setIsAccountCreateLoading(false);
+            toaster.create({
+              title: "Create Account",
+              type: "error",
+              description:
+                ctx.error.message ||
+                "An unknown error occurred. Please try again.",
+              duration: 4000,
+              closable: true,
+            });
+          },
+        },
+      );
+    }
   };
 
   return (
@@ -318,53 +456,114 @@ const Signup = () => {
                 </Flex>
               </Flex>
 
-              <Flex direction={"column"} gap={"1"} w={"100%"}>
-                <Field.Root gap={"0.5"} required>
-                  <Field.Label fontSize={"xs"}>
-                    Password
-                    <Field.RequiredIndicator />
-                  </Field.Label>
-                  <Input
-                    type={"password"}
-                    rounded={"md"}
+              {!isExistingUser && (
+                <Flex direction={"column"} gap={"1"} w={"100%"}>
+                  <Field.Root gap={"0.5"} required>
+                    <Field.Label fontSize={"xs"}>
+                      Password
+                      <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      type={"password"}
+                      rounded={"md"}
+                      size={"xs"}
+                      value={initialPassword}
+                      placeholder={"Password"}
+                      disabled={isAccountCreateLoading}
+                      onChange={(event) =>
+                        setInitialPassword(event.target.value)
+                      }
+                    />
+                  </Field.Root>
+                  <Field.Root gap={"0.5"} invalid={!isPasswordValid} required>
+                    <Field.Label fontSize={"xs"}>
+                      Confirm Password
+                      <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      type={"password"}
+                      rounded={"md"}
+                      size={"xs"}
+                      value={confirmPassword}
+                      placeholder={"Confirm Password"}
+                      disabled={isAccountCreateLoading}
+                      onChange={(event) => validatePassword(event.target.value)}
+                    />
+                    <Field.ErrorText fontSize={"xs"}>
+                      Passwords do not match
+                    </Field.ErrorText>
+                  </Field.Root>
+                </Flex>
+              )}
+
+              {orcidId && (
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  gap={"2"}
+                  p={"2"}
+                  bg={"green.50"}
+                  rounded={"md"}
+                  border={"1px solid"}
+                  borderColor={"green.200"}
+                >
+                  <Icon name={"check"} size={"xs"} color={"green.600"} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"green.700"}
+                  >
+                    ORCiD {orcidId} will be linked to your account
+                  </Text>
+                </Flex>
+              )}
+
+              {!orcidId && (
+                <>
+                  <Box position={"relative"} p={"2"}>
+                    <Separator />
+                    <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Optional
+                      </Text>
+                    </AbsoluteCenter>
+                  </Box>
+
+                  <Button
+                    variant={"subtle"}
+                    onClick={onOrcidSignupClick}
+                    loading={isOrcidLoading}
+                    disabled={isDevelopment || isAccountCreateLoading}
+                    loadingText={"Redirecting to ORCiD..."}
                     size={"xs"}
-                    value={initialPassword}
-                    placeholder={"Password"}
-                    disabled={isAccountCreateLoading}
-                    onChange={(event) => setInitialPassword(event.target.value)}
-                  />
-                </Field.Root>
-                <Field.Root gap={"0.5"} invalid={!isPasswordValid} required>
-                  <Field.Label fontSize={"xs"}>
-                    Confirm Password
-                    <Field.RequiredIndicator />
-                  </Field.Label>
-                  <Input
-                    type={"password"}
                     rounded={"md"}
-                    size={"xs"}
-                    value={confirmPassword}
-                    placeholder={"Confirm Password"}
-                    disabled={isAccountCreateLoading}
-                    onChange={(event) => validatePassword(event.target.value)}
-                  />
-                  <Field.ErrorText fontSize={"xs"}>
-                    Passwords do not match
-                  </Field.ErrorText>
-                </Field.Root>
-              </Flex>
+                    colorPalette={"green"}
+                  >
+                    <Image
+                      src={
+                        "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+                      }
+                    />
+                    Sign up with ORCiD
+                  </Button>
+                </>
+              )}
 
               <Flex align={"center"} justify={"space-between"} w={"100%"}>
-                <Button
-                  id={"returnLoginButton"}
-                  colorPalette={"orange"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={() => navigate("/login")}
-                >
-                  Return to Login
-                  <Icon name={"logout"} size={"xs"} />
-                </Button>
+                {!isExistingUser ? (
+                  <Button
+                    id={"returnLoginButton"}
+                    colorPalette={"orange"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={() => navigate("/login")}
+                  >
+                    Return to Login
+                    <Icon name={"logout"} size={"xs"} />
+                  </Button>
+                ) : (
+                  <Spacer />
+                )}
 
                 <Button
                   id={"createAccountButton"}
@@ -373,10 +572,14 @@ const Signup = () => {
                   rounded={"md"}
                   onClick={() => onDoneClick()}
                   disabled={!userComplete}
-                  loading={isAccountCreateLoading}
-                  loadingText={"Creating Account..."}
+                  loading={isAccountCreateLoading || updateUserLoading}
+                  loadingText={
+                    isExistingUser
+                      ? "Completing Account..."
+                      : "Creating Account..."
+                  }
                 >
-                  Create Account
+                  {isExistingUser ? "Complete" : "Create"} Account
                   <Icon name={"check"} size={"xs"} />
                 </Button>
               </Flex>
