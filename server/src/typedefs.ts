@@ -54,7 +54,6 @@ export const typedefs = `#graphql
   # "UserInput" type
   input UserInput {
     _id: String!
-    token: String
     firstName: String
     lastName: String
     name: String
@@ -501,6 +500,7 @@ export const typedefs = `#graphql
     users: [User]
     user(_id: String): User
     userByEmail(email: String): ResponseDataString
+    userByOrcid(orcid: String): ResponseDataString
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]

@@ -30,10 +30,21 @@ export const UserResolvers = {
     ): Promise<ResponseData<string>> => {
       return await User.getByEmail(args.email);
     },
+
+    // Retrieve one User by ORCiD
+    userByOrcid: async (
+      _parent: IResolverParent,
+      args: { orcid: string },
+    ): Promise<ResponseData<string>> => {
+      return await User.getByOrcid(args.orcid);
+    },
   },
   Mutation: {
     // Create a User
-    createUser: async (_parent: IResolverParent, args: { user: UserModel }) => {
+    createUser: async (
+      _parent: IResolverParent,
+      args: { user: UserModel },
+    ): Promise<IResponseMessage> => {
       return await User.create(args.user);
     },
 

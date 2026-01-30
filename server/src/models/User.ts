@@ -54,6 +54,26 @@ export class User {
     };
   };
 
+  static getByOrcid = async (orcid: string): Promise<ResponseData<string>> => {
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .findOne({ account_orcid: orcid });
+
+    // Return the User `_id`
+    if (result) {
+      return {
+        message: "User found successfully",
+        success: true,
+        data: result._id,
+      };
+    }
+    return {
+      message: "User not found",
+      success: false,
+      data: "",
+    };
+  };
+
   static exists = async (_id: string): Promise<boolean> => {
     const result = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
@@ -98,9 +118,13 @@ export class User {
       update.$set.lastLogin = updated.lastLogin;
     }
 
+    if (updated.api_keys) {
+      update.$set.api_keys = updated.api_keys;
+    }
+
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: updated._id }, update);
+      .updateOne({ _id: new ObjectId(updated._id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
