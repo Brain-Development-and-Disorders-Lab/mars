@@ -66,7 +66,7 @@ const app = express();
 // Setup CORS origins
 const origins =
   process.env.NODE_ENV !== "production"
-    ? ["http://localhost:8080"]
+    ? ["http://127.0.0.1:8080"]
     : ["https://app.metadatify.com"];
 
 // Specify non-secure paths
@@ -207,7 +207,7 @@ const start = async () => {
   // Start the server
   consola.start("Starting Express server...");
   httpServer.listen({ port: port });
-  consola.success(`Express server running at: http://localhost:${port}/`);
+  consola.success(`Express server running at: http://127.0.0.1:${port}/`);
 };
 
 start();
