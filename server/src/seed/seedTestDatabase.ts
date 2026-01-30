@@ -1,15 +1,15 @@
 // Seed script to generate minimal test data for MongoDB (used in test suite)
 import "dotenv/config";
-import { connect, disconnect } from "../connectors/database";
-import { Entities } from "../models/Entities";
-import { Projects } from "../models/Projects";
-import { Templates } from "../models/Templates";
-import { User } from "../models/User";
-import { Workspaces } from "../models/Workspaces";
+import { connect, disconnect } from "@connectors/database";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { User } from "@models/User";
+import { Workspaces } from "@models/Workspaces";
 import dayjs from "dayjs";
 import consola from "consola";
 import { IResponseMessage, ResponseData } from "@types";
-import { DEMO_USER_ORCID } from "../variables";
+import { DEMO_USER_ORCID } from "@variables";
 
 /**
  * Utility to seed the database with minimal testing values

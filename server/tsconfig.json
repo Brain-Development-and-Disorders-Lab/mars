@@ -11,7 +11,8 @@
       "@models/*": ["src/models/*"],
       "@resolvers/*": ["src/resolvers/*"],
       "@seed/*": ["src/seed/*"],
-      "@types": ["../types"]
+      "@types": ["../types"],
+      "@variables": ["src/variables"]
     },
     "rootDirs": ["src"],
     "outDir": "dist",

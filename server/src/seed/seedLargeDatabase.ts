@@ -6,7 +6,7 @@ import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
 import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
-import { Users } from "@models/User";
+import { User } from "@models/User";
 import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -21,7 +21,7 @@ import {
   IValueType,
   IWorkspace,
 } from "@types";
-import { DEMO_USER_ORCID } from "../variables";
+import { DEMO_USER_ORCID } from "@variables";
 
 // Configuration
 const NUM_ENTITIES = 10000;
@@ -490,30 +490,20 @@ async function generateActivity(
 // Ensure test user exists and has access to workspace
 async function ensureTestUser(workspaceId: string): Promise<void> {
   consola.info("Ensuring test user exists...");
-  const user = await Users.getOne(DEMO_USER_ORCID);
+  const user = await User.getOne(DEMO_USER_ORCID);
   if (!user) {
     consola.info("Creating test user...");
-    await Users.create({
+    await User.create({
       _id: DEMO_USER_ORCID,
       firstName: "Demo",
       lastName: "User",
       email: "demo@metadatify.com",
       affiliation: "Test Organization",
       lastLogin: dayjs().toISOString(),
-      token: "test_token",
       workspaces: [workspaceId],
-      api_keys: [],
+      api_keys: JSON.stringify([]),
     });
     consola.success("Created test user");
-  } else {
-    // Add workspace to user if not already present
-    if (!user.workspaces.includes(workspaceId)) {
-      user.workspaces.push(workspaceId);
-      await Users.update(user);
-      consola.info("Added workspace to existing user");
-    } else {
-      consola.info("User already has access to workspace");
-    }
   }
 }
 
