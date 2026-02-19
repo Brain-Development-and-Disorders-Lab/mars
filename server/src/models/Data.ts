@@ -12,7 +12,6 @@ import {
   TemplateImportReview,
   IColumnMapping,
   IRow,
-  GenericValueType,
   CSVImportOptions,
 } from "@types";
 
@@ -177,7 +176,7 @@ export class Data {
           timestamp: attribute.timestamp,
           archived: false,
           description: attribute.description,
-          values: attribute.values.map((value: IValue<GenericValueType>) => {
+          values: attribute.values.map((value: IValue) => {
             // Clean the data for specific types
             let valueData = row[value.data];
             if (_.isEqual(value.type, "date")) {

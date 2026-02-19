@@ -24,7 +24,7 @@ import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { GenericValueType, IAttribute, IValue, ResponseData } from "@types";
+import { IAttribute, IValue, ResponseData } from "@types";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
@@ -48,7 +48,7 @@ const Template = () => {
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
-  const [values, setValues] = useState([] as IValue<GenericValueType>[]);
+  const [values, setValues] = useState<IValue[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 

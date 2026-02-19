@@ -54,7 +54,7 @@ export type IAttribute = {
   name: string;
   owner: string;
   description: string;
-  values: IValue<any>[];
+  values: IValue[];
   archived: boolean;
 };
 
@@ -98,13 +98,11 @@ export type IValueType =
   | "entity"
   | "select";
 
-export type GenericValueType = any;
-
-export type IValue<D> = {
+export type IValue = {
   _id: string;
   name: string;
   type: IValueType;
-  data: D;
+  data: string;
   disabled?: boolean;
   showRemove?: boolean;
   onRemove?: (id: string) => void;

@@ -58,7 +58,6 @@ import {
   DataTableAction,
   EntityHistory,
   EntityModel,
-  GenericValueType,
   IAttribute,
   IGenericItem,
   IRelationship,
@@ -175,9 +174,7 @@ const Entity = () => {
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeValues, setAttributeValues] = useState(
-    [] as IValue<GenericValueType>[],
-  );
+  const [attributeValues, setAttributeValues] = useState<IValue[]>([]);
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";

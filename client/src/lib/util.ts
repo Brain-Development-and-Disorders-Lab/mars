@@ -2,18 +2,9 @@
 import _ from "lodash";
 
 // Custom types
-import {
-  GenericValueType,
-  IAttribute,
-  ISelectOption,
-  IValue,
-  UserModel,
-} from "@types";
+import { IAttribute, ISelectOption, IValue, UserModel } from "@types";
 
-export const isValidValues = (
-  values: IValue<GenericValueType>[],
-  allowEmptyValues = false,
-) => {
+export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
     return false;
   }

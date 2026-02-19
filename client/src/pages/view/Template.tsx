@@ -14,7 +14,7 @@ import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { AttributeModel, GenericValueType, IValue, ResponseData } from "@types";
+import { AttributeModel, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -39,9 +39,7 @@ const Template = () => {
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [templateArchived, setTemplateArchived] = useState(false);
-  const [templateValues, setTemplateValues] = useState(
-    [] as IValue<GenericValueType>[],
-  );
+  const [templateValues, setTemplateValues] = useState<IValue[]>([]);
 
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
