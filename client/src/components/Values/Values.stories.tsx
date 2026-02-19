@@ -8,7 +8,7 @@ import { Box, Flex, Text } from "@chakra-ui/react";
 import Values from "./index";
 
 // Types
-import { IValue, GenericValueType } from "@types";
+import { IValue } from "@types";
 
 // Storybook
 import type { Meta, StoryObj } from "@storybook/react";
@@ -43,7 +43,7 @@ type Story = StoryObj<typeof Values>;
 // Default story with empty values
 export const Default: Story = {
   render: (args) => {
-    const [values, setValues] = useState<IValue<GenericValueType>[]>([]);
+    const [values, setValues] = useState<IValue[]>([]);
 
     return (
       <Box p={4}>
@@ -56,7 +56,7 @@ export const Default: Story = {
 // Story with pre-populated data
 export const WithData: Story = {
   render: (args) => {
-    const [values, setValues] = useState<IValue<GenericValueType>[]>([
+    const [values, setValues] = useState<IValue[]>([
       {
         _id: "1",
         name: "Project Name",
@@ -103,7 +103,7 @@ export const ReadOnly: Story = {
     viewOnly: true,
   },
   render: (args) => {
-    const [values, setValues] = useState<IValue<GenericValueType>[]>([
+    const [values, setValues] = useState<IValue[]>([
       {
         _id: "1",
         name: "Project Name",
@@ -129,14 +129,14 @@ export const ReadOnly: Story = {
 // Multiple rows to test scrolling
 export const ManyRows: Story = {
   render: (args) => {
-    const [values, setValues] = useState<IValue<GenericValueType>[]>([
+    const [values, setValues] = useState<IValue[]>([
       { _id: "1", name: "Row 1", type: "text", data: "Value 1" },
-      { _id: "2", name: "Row 2", type: "number", data: 100 },
+      { _id: "2", name: "Row 2", type: "number", data: "100" },
       { _id: "3", name: "Row 3", type: "text", data: "Value 3" },
       { _id: "4", name: "Row 4", type: "date", data: "2024-01-01" },
       { _id: "5", name: "Row 5", type: "url", data: "https://example.com" },
       { _id: "6", name: "Row 6", type: "text", data: "Value 6" },
-      { _id: "7", name: "Row 7", type: "number", data: 200 },
+      { _id: "7", name: "Row 7", type: "number", data: "200" },
       { _id: "8", name: "Row 8", type: "text", data: "Value 8" },
     ]);
 
@@ -151,7 +151,7 @@ export const ManyRows: Story = {
 // Responsive container test
 export const ResponsiveContainer: Story = {
   render: (args) => {
-    const [values, setValues] = useState<IValue<GenericValueType>[]>([
+    const [values, setValues] = useState<IValue[]>([
       {
         _id: "1",
         name: "Project Name",

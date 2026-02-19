@@ -15,7 +15,7 @@ const meta: Meta<typeof AttributeCard> = {
 export default meta;
 type Story = StoryObj<typeof AttributeCard>;
 
-const mockValues: IValue<any>[] = [
+const mockValues: IValue[] = [
   {
     _id: "value-1",
     name: "Sample Value",
