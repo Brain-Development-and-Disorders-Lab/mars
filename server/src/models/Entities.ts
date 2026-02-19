@@ -502,15 +502,6 @@ export class Entities {
       const updatedAttributes = updated.attributes.map((a) => a._id);
       const entityAttributes = entity.attributes.map((a) => a._id);
 
-      // Iterate over all Attributes, casting `number` values to floats
-      update.$set.attributes.forEach((attribute) => {
-        attribute.values.forEach((value) => {
-          if (value.type === "number") {
-            value.data = parseFloat(value.data);
-          }
-        });
-      });
-
       // Attributes added in updated Entity
       const addAttributeIdentifiers = _.difference(
         updatedAttributes,

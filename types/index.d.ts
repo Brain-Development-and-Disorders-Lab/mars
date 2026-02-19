@@ -84,8 +84,8 @@ export type AttributeGroupProps = AttributeCardActions & {
 export type AttributeViewButtonProps = {
   attribute: AttributeModel;
   editing?: boolean;
+  onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
-  doneCallback?: (updated: AttributeModel) => void;
   cancelCallback?: () => void;
 };
 

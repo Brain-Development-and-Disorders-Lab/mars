@@ -906,8 +906,8 @@ const ValueRow = (props: {
             }}
           >
             <SearchSelect
-              placeholder="Select Entity"
-              resultType="entity"
+              placeholder={"Select Entity"}
+              resultType={"entity"}
               value={JSON.parse(valueData) || { _id: "", name: "" }}
               onChange={(entity) => setValueData(JSON.stringify(entity))}
               disabled={props.viewOnly}
@@ -934,7 +934,11 @@ const ValueRow = (props: {
               boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
             }}
           >
-            <Linky type="entities" id={valueData || ""} size="xs" />
+            <Linky
+              type="entities"
+              id={JSON.parse(valueData)._id || ""}
+              size="xs"
+            />
           </Flex>
         );
       }

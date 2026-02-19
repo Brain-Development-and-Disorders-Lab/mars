@@ -313,7 +313,7 @@ const Entity = () => {
     variables: {
       _id: id,
     },
-    fetchPolicy: "network-only",
+    fetchPolicy: "no-cache",
   });
 
   const GET_FILE_URL = gql`
@@ -388,7 +388,7 @@ const Entity = () => {
   useEffect(() => {
     if (data?.entity) {
       // Unpack all the Entity data
-      setEntityData(data.entity);
+      setEntity(data.entity);
 
       if (!editing) {
         setEntityName(data.entity.name);
@@ -533,17 +533,21 @@ const Entity = () => {
   }, [attributeValues]);
 
   // Break up entity data into editable fields
-  const [entityData, setEntityData] = useState({} as EntityModel);
+  const [entity, setEntity] = useState<EntityModel>({} as EntityModel);
   const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
-  const [entityProjects, setEntityProjects] = useState([] as string[]);
-  const [entityRelationships, setEntityRelationships] = useState(
-    [] as IRelationship[],
+  const [entityProjects, setEntityProjects] = useState<string[]>([]);
+  const [entityRelationships, setEntityRelationships] = useState<
+    IRelationship[]
+  >([]);
+  const [entityAttributes, setEntityAttributes] = useState<AttributeModel[]>(
+    [],
   );
-  const [entityAttributes, setEntityAttributes] = useState(
-    [] as AttributeModel[],
-  );
-  const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
+  const [entityHistory, setEntityHistory] = useState<EntityHistory[]>([]);
+
+  useEffect(() => {
+    console.info("Entity Attributes:", entityAttributes);
+  }, [entityAttributes]);
 
   // Sorted and filtered history based on sort order and date range
   const sortedEntityHistory = useMemo(() => {
@@ -588,12 +592,10 @@ const Entity = () => {
     }
   }, [entityHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
 
-  const [entityAttachments, setEntityAttachments] = useState(
-    [] as IGenericItem[],
+  const [entityAttachments, setEntityAttachments] = useState<IGenericItem[]>(
+    [],
   );
-  const [toUploadAttachments, setToUploadAttachments] = useState(
-    [] as string[],
-  );
+  const [toUploadAttachments, setToUploadAttachments] = useState<string[]>([]);
 
   // Computed values that use preview data when in preview mode
   const displayEntityName = useMemo(() => {
@@ -629,7 +631,7 @@ const Entity = () => {
   const displayEntityData = useMemo(() => {
     if (previewVersion) {
       return {
-        ...entityData,
+        ...entity,
         name: previewVersion.name,
         description: previewVersion.description || "",
         projects: previewVersion.projects,
@@ -639,8 +641,8 @@ const Entity = () => {
         archived: previewVersion.archived,
       };
     }
-    return entityData;
-  }, [previewVersion, entityData]);
+    return entity;
+  }, [previewVersion, entity]);
 
   // Archive dialog
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -648,7 +650,7 @@ const Entity = () => {
   // Export dialog
   const selectExportFormatRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportFields, setExportFields] = useState(["owner"] as string[]);
+  const [exportFields, setExportFields] = useState<string[]>(["owner"]);
 
   const [exportFormat, setExportFormat] = useState("json");
 
@@ -674,17 +676,18 @@ const Entity = () => {
     setIsUpdating(updateLoading);
     try {
       const mutationPayload = removeTypename({
-        _id: entityData._id,
+        _id: entity._id,
         name: entityName,
         archived: entityArchived,
-        created: entityData.created,
-        owner: entityData.owner,
+        created: entity.created,
+        owner: entity.owner,
         description: entityDescription,
         projects: entityProjects,
         relationships: entityRelationships,
         attributes: entityAttributes,
         attachments: entityAttachments,
       });
+      console.info("Updated Entity:", mutationPayload);
       await updateEntity({
         variables: {
           entity: mutationPayload,
@@ -727,14 +730,14 @@ const Entity = () => {
     setEditing(false);
 
     // Reset all Entity states
-    setEntityData(entityData);
-    setEntityName(entityData.name);
-    setEntityDescription(entityData.description);
-    setEntityProjects(entityData.projects);
-    setEntityRelationships(entityData.relationships);
-    setEntityAttributes(entityData.attributes);
-    setEntityAttachments(entityData.attachments);
-    setEntityHistory(entityData.history);
+    setEntity(entity);
+    setEntityName(entity.name);
+    setEntityDescription(entity.description);
+    setEntityProjects(entity.projects);
+    setEntityRelationships(entity.relationships);
+    setEntityAttributes(entity.attributes);
+    setEntityAttachments(entity.attachments);
+    setEntityHistory(entity.history);
   };
 
   /**
@@ -743,7 +746,7 @@ const Entity = () => {
   const handleRestoreFromArchiveClick = async () => {
     await archiveEntity({
       variables: {
-        _id: entityData._id,
+        _id: entity._id,
         state: false,
       },
     });
@@ -854,7 +857,7 @@ const Entity = () => {
             <AttributeViewButton
               attribute={info.row.original}
               editing={editing}
-              doneCallback={handleUpdateAttribute}
+              onAttributeUpdate={onAttributeUpdate}
               cancelCallback={handleCancelAttribute}
               removeCallback={() => {
                 removeAttribute(info.row.original._id);
@@ -1046,9 +1049,9 @@ const Entity = () => {
   ) => {
     try {
       const restorePayload = removeTypename({
-        _id: entityData._id,
+        _id: entity._id,
         name: entityVersion.name,
-        created: entityData.created,
+        created: entity.created,
         archived: entityVersion.archived,
         owner: entityVersion.owner,
         description: entityVersion.description || "",
@@ -1098,7 +1101,7 @@ const Entity = () => {
 
   // Handle clicking the "Export" button
   const handleExportClick = () => {
-    setEntityData(entityData);
+    setEntity(entity);
     setExportOpen(true);
   };
 
@@ -1180,14 +1183,14 @@ const Entity = () => {
       variables: {
         entity: removeTypename({
           name: clonedEntityName,
-          owner: entityData.owner,
+          owner: entity.owner,
           created: dayjs(Date.now()).toISOString(),
           archived: false,
-          description: entityData.description,
-          projects: entityData.projects,
-          relationships: entityData.relationships,
-          attributes: entityData.attributes,
-          attachments: entityData.attachments,
+          description: entity.description,
+          projects: entity.projects,
+          relationships: entity.relationships,
+          attributes: entity.attributes,
+          attachments: entity.attachments,
         }),
       },
     });
@@ -1219,7 +1222,7 @@ const Entity = () => {
   const handleArchiveClick = async () => {
     const response = await archiveEntity({
       variables: {
-        _id: entityData._id,
+        _id: entity._id,
         state: true,
       },
     });
@@ -1256,7 +1259,7 @@ const Entity = () => {
     // Create the `IRelationship` data structure
     const relationship: IRelationship = {
       source: {
-        _id: entityData._id,
+        _id: entity._id,
         name: entityName,
       },
       target: {
@@ -1323,9 +1326,9 @@ const Entity = () => {
     setEntityAttributes(() => [
       ...entityAttributes,
       {
-        _id: `a-${entityData._id}-${nanoid(6)}`,
+        _id: `a-${entity._id}-${nanoid(6)}`,
         name: attributeName,
-        owner: entityData.owner,
+        owner: entity.owner,
         timestamp: dayjs(Date.now()).toISOString(),
         archived: false,
         description: attributeDescription,
@@ -1340,17 +1343,16 @@ const Entity = () => {
     setAttributeValues([]);
   };
 
-  // Handle updates to Attributes
-  const handleUpdateAttribute = (updated: AttributeModel) => {
-    // Find the Attribute and update the state
-    setEntityAttributes([
-      ...entityAttributes.map((attribute) => {
-        if (_.isEqual(attribute._id, updated._id)) {
-          return _.cloneDeep(updated);
-        }
-        return attribute;
-      }),
-    ]);
+  const onAttributeUpdate = (updated: AttributeModel) => {
+    const updatedAttributes = _.cloneDeep(entityAttributes).map((attribute) => {
+      if (attribute._id === updated._id) {
+        attribute.name = updated.name;
+        attribute.description = updated.description;
+        attribute.values = updated.values;
+      }
+      return attribute;
+    });
+    setEntityAttributes([...updatedAttributes]);
   };
 
   // Handle cancelling adding an Attribute by clearing the state
@@ -2356,7 +2358,7 @@ const Entity = () => {
                   />
                 </Flex>
                 <TimestampTag
-                  timestamp={entityData.created}
+                  timestamp={entity.created}
                   description={"Created"}
                 />
               </Flex>
@@ -2376,7 +2378,7 @@ const Entity = () => {
                     Entity Owner
                   </Text>
                   <ActorTag
-                    identifier={entityData.owner}
+                    identifier={entity.owner}
                     fallback={"Unknown User"}
                     size={"sm"}
                   />
@@ -3360,7 +3362,7 @@ const Entity = () => {
           setOpen={setUploadOpen}
           uploads={toUploadAttachments}
           setUploads={setToUploadAttachments}
-          target={entityData._id}
+          target={entity._id}
           onUploadSuccess={() => {
             if (refetch) {
               refetch();
@@ -3530,9 +3532,7 @@ const Entity = () => {
                               <Checkbox.Control />
                               <Checkbox.Label>
                                 Created:{" "}
-                                {dayjs(entityData.created).format(
-                                  "DD MMM YYYY",
-                                )}
+                                {dayjs(entity.created).format("DD MMM YYYY")}
                               </Checkbox.Label>
                             </Checkbox.Root>
                             <Checkbox.Root
@@ -3544,7 +3544,7 @@ const Entity = () => {
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
                               <Checkbox.Label>
-                                Owner: {entityData.owner}
+                                Owner: {entity.owner}
                               </Checkbox.Label>
                             </Checkbox.Root>
                             <Checkbox.Root
@@ -3784,7 +3784,7 @@ const Entity = () => {
               </Dialog.Header>
               <Dialog.Body p={"0"}>
                 <RelationshipGraph
-                  id={entityData._id}
+                  id={entity._id}
                   entityNavigateHook={handleEntityNodeClick}
                 />
               </Dialog.Body>

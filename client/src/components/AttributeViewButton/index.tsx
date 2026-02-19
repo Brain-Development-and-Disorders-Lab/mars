@@ -254,18 +254,15 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       setOpen(false);
 
                       // Run the 'done' action (if specified)
-                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                      props.doneCallback
-                        ? props.doneCallback({
-                            _id: props.attribute._id,
-                            name: name,
-                            timestamp: props.attribute.timestamp,
-                            owner: props.attribute.owner,
-                            archived: false,
-                            description: description,
-                            values: values,
-                          })
-                        : {};
+                      props.onAttributeUpdate({
+                        _id: props.attribute._id,
+                        name: name,
+                        timestamp: props.attribute.timestamp,
+                        owner: props.attribute.owner,
+                        archived: false,
+                        description: description,
+                        values: values,
+                      });
                     }}
                   >
                     Done

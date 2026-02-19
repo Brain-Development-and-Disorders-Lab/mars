@@ -126,7 +126,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: Object
+    data: String
   }
 
   # "ValueInput" input
@@ -134,7 +134,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: Object
+    data: String
   }
 
   # "Attribute" type
