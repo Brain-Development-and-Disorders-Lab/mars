@@ -121,7 +121,7 @@ export const seedTestDatabase = async (): Promise<void> => {
             _id: "v-00",
             name: "Test Number Value",
             type: "number",
-            data: 123,
+            data: "123",
           },
           {
             _id: "v-00",
@@ -133,19 +133,19 @@ export const seedTestDatabase = async (): Promise<void> => {
             _id: "v-00",
             name: "Test Entity Value",
             type: "entity",
-            data: {
+            data: JSON.stringify({
               _id: parentResult.data,
               name: "Test Parent Entity",
-            },
+            }),
           },
           {
             _id: "v-00",
             name: "Test Select Value",
             type: "select",
-            data: {
+            data: JSON.stringify({
               options: ["Option A", "Option B"],
               selected: "Option A",
-            },
+            }),
           },
         ],
       },
@@ -178,16 +178,15 @@ export const seedTestDatabase = async (): Promise<void> => {
     firstName: "Demo",
     lastName: "User",
     name: "Demo User",
+    account_orcid: DEMO_USER_ORCID,
     image: "",
     email: "demo@metadatify.com",
     emailVerified: true,
     affiliation: "Demo Affiliation",
-    workspaces: [workspaceResult.data],
     lastLogin: "",
     createdAt: "",
     updatedAt: "",
-    api_keys: [],
-    token: "",
+    api_keys: "",
   });
   if (userResult.success === false) throw new Error("Error creating User");
 };

@@ -280,7 +280,7 @@ export class User {
               _id: "v-01-example",
               type: "number",
               name: "Test Value 01",
-              data: 10,
+              data: "10",
             },
           ],
         },

@@ -81,6 +81,7 @@
       "^@models/(.*)$": "<rootDir>/src/models/$1",
       "^@resolvers/(.*)$": "<rootDir>/src/resolvers/$1",
       "^@seed/(.*)$": "<rootDir>/src/seed/$1",
+      "^@variables": "<rootDir>/src/variables",
       "^@types/(.*)$": "../types/$1"
     },
     "testEnvironment": "node",

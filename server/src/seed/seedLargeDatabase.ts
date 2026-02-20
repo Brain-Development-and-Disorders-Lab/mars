@@ -6,7 +6,6 @@ import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
 import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
-import { User } from "@models/User";
 import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -172,13 +171,13 @@ function generateValue(
   type: IValueType,
   index: number,
   entityIds?: string[],
-): { _id: string; name: string; type: IValueType; data: unknown } {
+): { _id: string; name: string; type: IValueType; data: string } {
   const name = VALUE_NAMES[index % VALUE_NAMES.length] || `Value ${index + 1}`;
-  let data: unknown;
+  let data: string;
 
   switch (type) {
     case "number":
-      data = Math.random() * 1000;
+      data = (Math.random() * 1000).toString();
       break;
     case "text":
       data = `Sample text data for ${name}`;
@@ -487,26 +486,6 @@ async function generateActivity(
   consola.success(`Generated ${activityIds.length} activity entries`);
 }
 
-// Ensure test user exists and has access to workspace
-async function ensureTestUser(workspaceId: string): Promise<void> {
-  consola.info("Ensuring test user exists...");
-  const user = await User.getOne(DEMO_USER_ORCID);
-  if (!user) {
-    consola.info("Creating test user...");
-    await User.create({
-      _id: DEMO_USER_ORCID,
-      firstName: "Demo",
-      lastName: "User",
-      email: "demo@metadatify.com",
-      affiliation: "Test Organization",
-      lastLogin: dayjs().toISOString(),
-      workspaces: [workspaceId],
-      api_keys: JSON.stringify([]),
-    });
-    consola.success("Created test user");
-  }
-}
-
 // Create workspace
 async function createWorkspace(): Promise<string> {
   consola.info("Creating workspace...");
@@ -579,9 +558,6 @@ async function seedDatabase(): Promise<void> {
 
     // Create workspace first
     const workspaceId = await createWorkspace();
-
-    // Ensure test user exists and has access
-    await ensureTestUser(workspaceId);
 
     // Generate in order: Templates -> Projects -> Entities -> Relationships -> Activity
     const templates = await generateTemplates();
