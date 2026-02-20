@@ -1,6 +1,23 @@
+// Playwright components
 import { Page } from "@playwright/test";
 
+// Access environment variables
+import "dotenv/config";
+
+// Locator variables
 const TABLE_CONTAINER = ".data-table-scroll-container";
+
+/**
+ * Perform login using information stored in environment variables
+ * @param page
+ */
+export async function performLogin(page: Page): Promise<void> {
+  await page.goto("/login");
+  await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL);
+  await page.locator("#userPasswordInput").fill(process.env.TEST_USER_PASSWORD);
+  await page.locator("#userLoginButton").click();
+  await page.waitForSelector("#workspaceSwitcherDesktop");
+}
 
 /**
  * Navigate to a section (Entities, Projects, Templates)
