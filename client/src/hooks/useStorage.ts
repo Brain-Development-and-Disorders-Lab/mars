@@ -6,7 +6,7 @@ import _ from "lodash";
 import consola from "consola";
 
 // Variables
-import { STORAGE_KEY } from "src/variables";
+import { STORAGE_KEY } from "@variables";
 
 export const useStorage = (): {
   storage: ApplicationStorage;

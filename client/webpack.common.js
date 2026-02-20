@@ -27,7 +27,10 @@ module.exports = {
           options: {
             configFile: path.resolve(__dirname, "tsconfig.json"),
             onlyCompileBundledFiles: true,
-            transpileOnly: true,
+            transpileOnly: process.env.NODE_ENV === "production",
+            compilerOptions: {
+              sourceMap: true,
+            },
           },
         },
         exclude: [

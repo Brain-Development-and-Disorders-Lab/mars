@@ -6,6 +6,7 @@
     "lib": ["dom", "esnext"],
     "declaration": false,
     "sourceMap": true,
+    "inlineSources": true,
     "baseUrl": "./",
     "paths": {
       "@components/*": ["src/components/*"],

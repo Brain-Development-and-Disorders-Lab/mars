@@ -11,7 +11,7 @@ import Values from "./index";
 import { IValue } from "@types";
 
 // Storybook
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const meta: Meta<typeof Values> = {
   title: "Components/Values",
@@ -67,7 +67,7 @@ export const WithData: Story = {
         _id: "2",
         name: "Budget",
         type: "number",
-        data: 50000,
+        data: "50000",
       },
       {
         _id: "3",
@@ -85,7 +85,7 @@ export const WithData: Story = {
         _id: "5",
         name: "Related Entity",
         type: "entity",
-        data: { _id: "entity_123", name: "Sample Entity" },
+        data: '{ _id: "entity_123", name: "Sample Entity" }',
       },
     ]);
 
@@ -114,7 +114,7 @@ export const ReadOnly: Story = {
         _id: "2",
         name: "Budget",
         type: "number",
-        data: 50000,
+        data: "50000",
       },
     ]);
 
@@ -162,7 +162,7 @@ export const ResponsiveContainer: Story = {
         _id: "2",
         name: "Budget",
         type: "number",
-        data: 50000,
+        data: "50000",
       },
       {
         _id: "3",
@@ -186,7 +186,7 @@ export const ResponsiveContainer: Story = {
         _id: "6",
         name: "Team Size",
         type: "number",
-        data: 15,
+        data: "15",
       },
       {
         _id: "7",
