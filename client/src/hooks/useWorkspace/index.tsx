@@ -10,6 +10,9 @@ import React, {
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
+// Routing
+import { useNavigate } from "react-router-dom";
+
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
 
@@ -19,6 +22,9 @@ import _ from "lodash";
 // Hooks
 import { useStorage } from "@hooks/useStorage";
 
+// Authentication
+import { auth } from "@lib/auth";
+
 type WorkspaceContextValue = {
   workspace: string;
   activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
@@ -26,14 +32,27 @@ type WorkspaceContextValue = {
 const WorkspaceContext = createContext({} as WorkspaceContextValue);
 
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
+  const navigate = useNavigate();
   const { storage, updateStorageField } = useStorage();
+  const { data: session, isPending: isSessionPending } = auth.useSession();
+
+  // Workspace state
   const [activeWorkspace, setActiveWorkspace] = useState(storage.workspace);
 
-  // If the active Workspace is updated and store the identifier in the session token
+  // Activate the stored workspace or fall back to the first available one
   useEffect(() => {
-    // Update the session token
-    updateStorageField("workspace", activeWorkspace);
-  }, [activeWorkspace]);
+    // Wait until session has loaded and authentication is complete
+    if (isSessionPending || !session?.user) return;
+
+    /**
+     * Activate the workspace on first render after the session has loaded
+     */
+    const initializeWorkspace = async () => {
+      const result = await activateWorkspace(storage.workspace);
+      if (!result.success) navigate("/create/workspace");
+    };
+    initializeWorkspace();
+  }, [isSessionPending, session?.user?.id]);
 
   // Query to retrieve Workspaces
   const GET_WORKSPACES = gql`

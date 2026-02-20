@@ -176,6 +176,7 @@ const Dashboard = () => {
       entitiesArchived: false,
     },
     fetchPolicy: "network-only",
+    skip: !workspace,
   });
 
   // Assign data
@@ -494,7 +495,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!!workspace && !loading}>
       <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
         {storage.firstLogin === true && breakpoint !== "base" && (
           <Joyride
