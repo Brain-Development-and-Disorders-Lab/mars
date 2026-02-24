@@ -178,6 +178,7 @@ const Login = () => {
                       <Field.RequiredIndicator />
                     </FieldLabel>
                     <Input
+                      id={"userEmailInput"}
                       rounded={"md"}
                       size={"xs"}
                       value={email}
@@ -193,6 +194,7 @@ const Login = () => {
                       <Field.RequiredIndicator />
                     </FieldLabel>
                     <Input
+                      id={"userPasswordInput"}
                       type={"password"}
                       rounded={"md"}
                       size={"xs"}
@@ -204,6 +206,7 @@ const Login = () => {
                   </Field.Root>
 
                   <Button
+                    id={"userLoginButton"}
                     size={"xs"}
                     rounded={"md"}
                     colorScheme={"green"}
@@ -255,6 +258,7 @@ const Login = () => {
                 Don't have an account yet?
               </Text>
               <Button
+                id={"createAccountButton"}
                 w={"100%"}
                 size={"xs"}
                 rounded={"md"}

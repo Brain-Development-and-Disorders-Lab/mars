@@ -1,15 +1,26 @@
-// Seed script to generate minimal test data for MongoDB (used in test suite)
-import "dotenv/config";
+/**
+ * Seed script to generate minimal test data for MongoDB (used in test suite)
+ */
+
+// Database connectivity
 import { connect, disconnect } from "@connectors/database";
+
+// Models
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
-import { User } from "@models/User";
 import { Workspaces } from "@models/Workspaces";
+
+// Custom types
+import { ResponseData } from "@types";
+
+// Variables
+import { DEMO_USER_ORCID } from "@variables";
+
+// Utility functions
+import "dotenv/config";
 import dayjs from "dayjs";
 import consola from "consola";
-import { IResponseMessage, ResponseData } from "@types";
-import { DEMO_USER_ORCID } from "@variables";
 
 /**
  * Utility to seed the database with minimal testing values
@@ -171,24 +182,6 @@ export const seedTestDatabase = async (): Promise<void> => {
     ],
   });
   await Workspaces.addTemplate(workspaceResult.data, templateResult.data);
-
-  // Create a User
-  const userResult: IResponseMessage = await User.create({
-    _id: DEMO_USER_ORCID,
-    firstName: "Demo",
-    lastName: "User",
-    name: "Demo User",
-    account_orcid: DEMO_USER_ORCID,
-    image: "",
-    email: "demo@metadatify.com",
-    emailVerified: true,
-    affiliation: "Demo Affiliation",
-    lastLogin: "",
-    createdAt: "",
-    updatedAt: "",
-    api_keys: "",
-  });
-  if (userResult.success === false) throw new Error("Error creating User");
 };
 
 /**

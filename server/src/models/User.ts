@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 // Models
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
 import { Workspaces } from "@models/Workspaces";
 
 // Database
@@ -239,19 +240,6 @@ export class User {
     user: string,
     workspace: string,
   ): Promise<IResponseMessage> => {
-    const project = await Projects.create({
-      name: "My First Project",
-      archived: false,
-      created: dayjs(Date.now()).toISOString(),
-      description:
-        "This is your first Project. Feel free to explore and modify it!",
-      owner: user,
-      entities: [], // Assuming you can add entities later
-      collaborators: [], // Assuming you might want collaborators
-      history: [],
-    });
-    await Workspaces.addProject(workspace, project.data);
-
     const entity = await Entities.create({
       name: "Example Entity",
       archived: false,
@@ -288,6 +276,45 @@ export class User {
       history: [],
     });
     await Workspaces.addEntity(workspace, entity.data);
+
+    const project = await Projects.create({
+      name: "Example Project",
+      archived: false,
+      created: dayjs(Date.now()).toISOString(),
+      description:
+        "This is an example Project. Feel free to explore and modify it!",
+      owner: user,
+      entities: [],
+      collaborators: [],
+      history: [],
+    });
+    await Workspaces.addProject(workspace, project.data);
+
+    // Add the example Entity to the Project
+    await Projects.addEntity(workspace, entity.data);
+
+    // Create an example Template
+    const template = await Templates.create({
+      name: "Example Template",
+      owner: user,
+      archived: false,
+      description: "An example Template Attribute",
+      values: [
+        {
+          _id: "v-01-example0",
+          type: "text",
+          name: "Test Value 01",
+          data: "Test Value Data",
+        },
+        {
+          _id: "v-02-example0",
+          type: "number",
+          name: "Test Value 01",
+          data: "0",
+        },
+      ],
+    });
+    await Workspaces.addTemplate(workspace, template.data);
 
     return {
       success: true,

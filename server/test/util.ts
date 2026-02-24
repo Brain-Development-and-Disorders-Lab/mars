@@ -70,11 +70,15 @@ export const clearUsers = async (): Promise<void> => {
  * @return {Promise<void>}
  */
 export const clearDatabase = async (): Promise<void> => {
+  await getDatabase().collection("account").deleteMany({});
   await getDatabase().collection("activity").deleteMany({});
+  await getDatabase().collection("counters").deleteMany({});
   await getDatabase().collection("entities").deleteMany({});
   await getDatabase().collection("projects").deleteMany({});
+  await getDatabase().collection("session").deleteMany({});
   await getDatabase().collection("templates").deleteMany({});
-  await getDatabase().collection("users").deleteMany({});
+  await getDatabase().collection("user").deleteMany({});
+  await getDatabase().collection("verification").deleteMany({});
   await getDatabase().collection("workspaces").deleteMany({});
 };
 

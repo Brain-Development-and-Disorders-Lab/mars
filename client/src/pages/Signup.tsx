@@ -464,6 +464,7 @@ const Signup = () => {
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
+                      id={"userPasswordInputInitial"}
                       type={"password"}
                       rounded={"md"}
                       size={"xs"}
@@ -481,6 +482,7 @@ const Signup = () => {
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
+                      id={"userPasswordInputConfirm"}
                       type={"password"}
                       rounded={"md"}
                       size={"xs"}
