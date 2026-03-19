@@ -1,5 +1,5 @@
 // Playwright imports
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 // Test helper functions
 import {
@@ -8,8 +8,25 @@ import {
   fillMDEditor,
   saveAndWait,
   clickButtonByText,
+  getUniqueName,
   performLogin,
 } from "../helpers";
+
+async function createTestEntity(page: Page, entityName: string): Promise<void> {
+  await page.goto("/create/entity");
+  await page
+    .locator("[data-testid='create-entity-name']")
+    .waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("[data-testid='create-entity-name']").fill(entityName);
+  await page.locator('input[type="date"]').fill("2023-10-01");
+  await page
+    .locator("[data-testid='create-entity-description'] textarea")
+    .fill("Test entity");
+  await page.click("[data-testid='create-entity-continue']");
+  await page.click("[data-testid='create-entity-continue']");
+  await page.click("[data-testid='create-entity-finish']");
+  await page.waitForURL(/\/entities/, { timeout: 10000 });
+}
 
 test.describe("Entity", () => {
   test.beforeEach(async ({ page }) => {
@@ -162,37 +179,34 @@ test.describe("Entity", () => {
 
   test.describe("Edit details", () => {
     test("should be able to rename the Entity", async ({ page }) => {
+      const entityName = getUniqueName("Test Entity");
+      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, "Test Entity", "View Entity");
+      await openItemFromTable(page, entityName, "View Entity");
 
       await page.click("#editEntityButton");
-      await page.locator("#entityNameInput").fill("Test Entity (Updated)");
+      await page.locator("#entityNameInput").fill(`${entityName} (Updated)`);
       await saveAndWait(page);
 
       await expect(page.locator("#entityNameTag")).toContainText(
-        "Test Entity (Updated)",
+        `${entityName} (Updated)`,
       );
 
       // Verify persistence after reload
       await page.reload();
       await expect(page.locator("#entityNameTag")).toContainText(
-        "Test Entity (Updated)",
+        `${entityName} (Updated)`,
       );
-
-      // Restore original name to avoid interfering with other tests
-      await page.click("#editEntityButton");
-      await page.locator("#entityNameInput").fill("Test Entity");
-      await saveAndWait(page);
     });
 
     test("should be able to update the Entity description", async ({
       page,
     }) => {
+      const entityName = getUniqueName("Test Entity");
+      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, "Test Entity", "View Entity");
+      await openItemFromTable(page, entityName, "View Entity");
 
-      // Get the original description for restoration
-      const originalDescription = "Description for test Entity";
       const updatedDescription = "Updated Entity description";
 
       // Enter edit mode and update description
@@ -214,19 +228,15 @@ test.describe("Entity", () => {
       await page
         .locator(`text=${updatedDescription}`)
         .waitFor({ state: "visible", timeout: 10000 });
-
-      // Restore original description to avoid interfering with other tests
-      await page.click("#editEntityButton");
-      await fillMDEditor(page, "#entityDescriptionInput", originalDescription);
-      await saveAndWait(page);
-      await page.waitForLoadState("networkidle");
     });
   });
 
   test.describe("Edit attributes", () => {
     test.beforeEach(async ({ page }) => {
+      const entityName = getUniqueName("Test Entity");
+      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, "Test Entity", "View Entity");
+      await openItemFromTable(page, entityName, "View Entity");
 
       await expect(page.locator("text=No Attributes")).toBeVisible();
     });
