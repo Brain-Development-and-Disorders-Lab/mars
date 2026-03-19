@@ -6,6 +6,7 @@ import {
   performLogin,
   selectDropdownOption,
   clickButtonWhenEnabled,
+  setupEnvironment,
 } from "../helpers";
 
 // Other imports
@@ -15,6 +16,9 @@ test.describe("Import", () => {
   test.beforeEach(async ({ page }) => {
     // Ensure the user is logged in
     await performLogin(page);
+
+    // Perform setup of the test environment
+    await setupEnvironment(page, "import");
 
     // Navigate to the dashboard
     await page.goto("/");
