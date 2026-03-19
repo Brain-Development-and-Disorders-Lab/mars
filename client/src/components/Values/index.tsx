@@ -381,6 +381,7 @@ const Values = (props: {
                 </Button>
               ) : (
                 <Button
+                  id="addValueRowButton"
                   size="xs"
                   variant="ghost"
                   colorPalette="green"
