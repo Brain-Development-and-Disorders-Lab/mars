@@ -18,6 +18,7 @@ import { IResponseMessage, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { ignoreAbort } from "@lib/util";
 
 // Hooks
 import { useStorage } from "@hooks/useStorage";
@@ -51,7 +52,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       const result = await activateWorkspace(storage.workspace);
       if (!result.success) navigate("/create/workspace");
     };
-    initializeWorkspace();
+    initializeWorkspace().catch(ignoreAbort);
   }, [isSessionPending, session?.user?.id]);
 
   // Query to retrieve Workspaces
@@ -67,7 +68,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   `;
   const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES);
+  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Query to check if a specific Workspace exists
   const GET_WORKSPACE = gql`

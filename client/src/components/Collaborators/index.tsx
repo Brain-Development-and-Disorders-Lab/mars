@@ -27,7 +27,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions
 import _ from "lodash";
-import { isValidEmail } from "@lib/util";
+import { isValidEmail, ignoreAbort } from "@lib/util";
 
 const GET_USER_BY_EMAIL = gql`
   query GetUserByEmail($email: String) {
@@ -61,9 +61,9 @@ const Collaborators = (props: CollaboratorsProps) => {
         variables: {
           email: newCollaborator,
         },
-      });
+      }).catch(ignoreAbort);
 
-      if (!result.data || error) {
+      if (!result?.data || error) {
         toaster.create({
           title: "Error",
           type: "error",

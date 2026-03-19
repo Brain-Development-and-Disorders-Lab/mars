@@ -91,7 +91,7 @@ const Templates = () => {
   `;
   const { loading, error, data } = useQuery<{
     templates: AttributeModel[];
-  }>(GET_TEMPLATES);
+  }>(GET_TEMPLATES, { fetchPolicy: "network-only" });
 
   // Manage data once retrieved
   useEffect(() => {

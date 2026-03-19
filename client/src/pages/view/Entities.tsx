@@ -39,9 +39,12 @@ import { useNavigate } from "react-router-dom";
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
-// Utility functions and libraries
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
+
+// Utility functions and libraries
+import { ignoreAbort } from "@lib/util";
 import _ from "lodash";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -204,6 +207,7 @@ const Entities = () => {
   const { loading, error, data } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
   }>(GET_ENTITIES, {
+    fetchPolicy: "network-only",
     variables: {
       page,
       pageSize,
@@ -389,9 +393,9 @@ const Entities = () => {
         entities: toExport.map((entity) => entity._id),
         format: exportFormat,
       },
-    });
+    }).catch(ignoreAbort);
 
-    if (!response.data?.exportEntities) {
+    if (!response?.data?.exportEntities) {
       toaster.create({
         title: "Error",
         description: "Unable to export entities",
@@ -399,7 +403,7 @@ const Entities = () => {
         duration: 2000,
         closable: true,
       });
-    } else if (response.data?.exportEntities) {
+    } else if (response?.data?.exportEntities) {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
         slugify(

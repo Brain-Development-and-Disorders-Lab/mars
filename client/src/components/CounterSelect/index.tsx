@@ -34,7 +34,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import _ from "lodash";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { createSelectOptions } from "@lib/util";
+import { createSelectOptions, ignoreAbort } from "@lib/util";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state
@@ -94,7 +94,7 @@ const CounterSelect = (props: CounterProps) => {
   `;
   const { data: counterData, refetch: refetchCounterData } = useQuery<{
     counters: CounterModel[];
-  }>(GET_COUNTERS);
+  }>(GET_COUNTERS, { fetchPolicy: "network-only" });
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -250,7 +250,7 @@ const CounterSelect = (props: CounterProps) => {
   // Get the next Counter value when the selected Counter has been updated
   useEffect(() => {
     if (selected?._id) {
-      getCounterPreview();
+      getCounterPreview().catch(ignoreAbort);
     }
   }, [selected]);
 

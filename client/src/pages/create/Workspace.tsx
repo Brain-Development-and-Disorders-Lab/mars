@@ -36,6 +36,9 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Utility imports
+import { ignoreAbort } from "@lib/util";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -153,9 +156,9 @@ const CreateWorkspace = () => {
 
     if (result.data?.createWorkspace.success) {
       // Update to use the new Workspace identifier
-      const workspaces = await getWorkspaces();
+      const workspaces = await getWorkspaces().catch(ignoreAbort);
       if (
-        workspaces.data?.workspaces &&
+        workspaces?.data?.workspaces &&
         workspaces.data.workspaces.length > 0
       ) {
         // Get the latest created Workspace

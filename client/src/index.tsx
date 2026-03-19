@@ -173,35 +173,6 @@ const client = new ApolloClient({
   },
 });
 
-// Override console.error to filter out expected errors
-// AbortErrors are expected when Apollo Client cancels queries and should not be logged
-const consoleError = console.error;
-console.error = (...args: unknown[]) => {
-  const error = args[0];
-  if (!isAbortError(error)) {
-    consoleError.apply(console, args);
-  }
-};
-
-// Global error handler to catch unhandled errors
-// Prevents AbortErrors from bubbling up and triggering error overlays
-window.addEventListener("error", (event) => {
-  const error = event.error || event;
-  if (isAbortError(error)) {
-    event.preventDefault();
-    event.stopImmediatePropagation?.();
-  }
-});
-
-// Global unhandled rejection handler
-// Prevents AbortErrors from unhandled promise rejections
-window.addEventListener("unhandledrejection", (event) => {
-  if (isAbortError(event.reason)) {
-    event.preventDefault();
-    event.stopImmediatePropagation?.();
-  }
-});
-
 // Render the application
 const container = document.getElementById("root");
 const root = createRoot(container!);

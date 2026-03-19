@@ -37,15 +37,13 @@ const ActorTag = (props: ActorTagProps) => {
       }
     }
   `;
-  const { loading, data, refetch } = useQuery<{ user: Partial<UserModel> }>(
-    GET_USER,
-    {
-      variables: {
-        _id: props.identifier,
-      },
-      skip: !props.identifier || props.identifier.trim() === "",
+  const { loading, data } = useQuery<{ user: Partial<UserModel> }>(GET_USER, {
+    variables: {
+      _id: props.identifier,
     },
-  );
+    skip: !props.identifier || props.identifier.trim() === "",
+    fetchPolicy: "network-only",
+  });
 
   useEffect(() => {
     if (data?.user) {
@@ -61,12 +59,6 @@ const ActorTag = (props: ActorTagProps) => {
       }
     }
   }, [data]);
-
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
 
   // If avatarOnly is true, show only the avatar
   if (props.avatarOnly) {

@@ -85,7 +85,7 @@ const Projects = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
-  }>(GET_PROJECTS);
+  }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);

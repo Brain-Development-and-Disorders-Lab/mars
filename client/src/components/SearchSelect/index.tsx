@@ -15,7 +15,7 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import _, { debounce } from "lodash";
-import { isAbortError } from "@lib/util";
+import { ignoreAbort } from "@lib/util";
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
@@ -46,7 +46,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
     useLazyQuery<{
       entities: { entities: IGenericItem[]; total: number };
-    }>(GET_ENTITIES);
+    }>(GET_ENTITIES, { fetchPolicy: "network-only" });
 
   // Query to retrieve Entities
   const GET_PROJECTS = gql`
@@ -60,7 +60,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [getProjects, { loading: projectsLoading, error: projectsError }] =
     useLazyQuery<{
       projects: IGenericItem[];
-    }>(GET_PROJECTS);
+    }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
   const [placeholder, setPlaceholder] = useState("Select Result");
   const [options, setOptions] = useState([] as IGenericItem[]);
@@ -104,11 +104,7 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Retrieve the options on component load, depending on the specified target
   useEffect(() => {
-    Promise.resolve(getSelectOptions()).catch((error: unknown) => {
-      if (!isAbortError(error)) {
-        console.error("Error in getSelectOptions:", error);
-      }
-    });
+    getSelectOptions().catch(ignoreAbort);
 
     // Set the placeholder text
     if (props.placeholder) {
@@ -122,9 +118,9 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   const { workspace } = useWorkspace();
 
-  // Check to see if data currently exists and refetch if so
+  // Re-fetch options when workspace changes
   useEffect(() => {
-    getSelectOptions();
+    getSelectOptions().catch(ignoreAbort);
   }, [workspace]);
 
   // Query to search by text value
@@ -156,7 +152,9 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   `;
   const [searchText, { loading: searchLoading, error: searchError }] =
-    useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT);
+    useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, {
+      fetchPolicy: "network-only",
+    });
 
   // State
   const [results, setResults] = useState([] as EntityModel[]);
@@ -172,7 +170,8 @@ const SearchSelect = (props: SearchSelectProps) => {
         isBuilder: false,
         showArchived: false,
       },
-    });
+    }).catch(ignoreAbort);
+    if (!results) return;
 
     if (results.data?.search) {
       setResults(results.data.search);

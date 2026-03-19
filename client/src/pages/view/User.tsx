@@ -43,7 +43,7 @@ import { auth } from "@lib/auth";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail } from "@lib/util";
+import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL } from "@variables";
@@ -146,13 +146,6 @@ const User = () => {
       setUserWorkspaces(data.workspaces);
     }
   }, [data]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
 
   // Mutation to update User
   const UPDATE_USER = gql`
@@ -336,7 +329,7 @@ const User = () => {
         scope: "edit",
         workspaces: userWorkspaces.map((w) => w._id),
       },
-    });
+    }).catch(ignoreAbort);
 
     if (generateKeyError) {
       toaster.create({
@@ -348,7 +341,7 @@ const User = () => {
       });
     }
 
-    if (result.data?.generateKey) {
+    if (result?.data?.generateKey) {
       setUserKeys([...userKeys, result.data.generateKey.data]);
     }
   };
@@ -370,7 +363,7 @@ const User = () => {
       });
       // Refetch user data to get updated keys
       if (refetch) {
-        refetch();
+        refetch().catch(ignoreAbort);
       }
     }
 

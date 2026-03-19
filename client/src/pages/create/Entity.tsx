@@ -197,10 +197,12 @@ const Entity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: IGenericItem[];
     templates: AttributeModel[];
-  }>(GET_CREATE_ENTITIES_DATA);
+  }>(GET_CREATE_ENTITIES_DATA, {
+    fetchPolicy: "network-only",
+  });
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -250,15 +252,6 @@ const Entity = () => {
       setTemplates(data.templates);
     }
   }, [data]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch().catch(() => {
-        // Silently handle refetch errors
-      });
-    }
-  }, []);
 
   // Capture event
   useEffect(() => {
