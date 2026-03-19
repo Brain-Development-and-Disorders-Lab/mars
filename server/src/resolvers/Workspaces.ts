@@ -188,10 +188,10 @@ export const WorkspacesResolvers = {
     // Get collection of Workspace metrics
     workspaceMetrics: async (
       _parent: IResolverParent,
-      _args: Record<string, unknown>,
+      args: { _id?: string },
       context: Context,
     ): Promise<WorkspaceMetrics> => {
-      const workspace = await Workspaces.getOne(context.workspace);
+      const workspace = await Workspaces.getOne(args._id || context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
           extensions: {

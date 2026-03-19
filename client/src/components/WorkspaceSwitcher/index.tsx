@@ -15,7 +15,7 @@ import { toaster } from "@components/Toast";
 
 // GraphQL resources
 import { gql } from "@apollo/client";
-import { useLazyQuery, useQuery } from "@apollo/client/react";
+import { useLazyQuery } from "@apollo/client/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -25,12 +25,24 @@ import { IGenericItem, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { ignoreAbort } from "@lib/util";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Authentication
 import { auth } from "@lib/auth";
+
+const GET_WORKSPACES = gql`
+  query GetWorkspaces {
+    workspaces {
+      _id
+      owner
+      name
+      description
+    }
+  }
+`;
 
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
@@ -54,76 +66,13 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   // Switcher loading state
   const [isLoading, setIsLoading] = useState(false);
 
-  // Switcher label text
-  const [label, setLabel] = useState("Select Workspace");
+  // Derived label from workspaces list
+  const label =
+    workspaces.find((w) => w._id === workspace)?.name ?? "Select Workspace";
 
-  // Queries (active and lazy) to retrieve all Workspaces
-  const GET_WORKSPACES = gql`
-    query GetWorkspaces {
-      workspaces {
-        _id
-        owner
-        name
-        description
-      }
-    }
-  `;
-  const { loading, error, data, refetch } = useQuery<{
-    workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
   const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
-
-  // Query to get a Workspace
-  const GET_WORKSPACE = gql`
-    query GetWorkspace($_id: String) {
-      workspace(_id: $_id) {
-        _id
-        name
-      }
-    }
-  `;
-  const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
-    workspace: WorkspaceModel;
-  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
-
-  /**
-   * Async function to retrieve the name of the initially selected Workspace
-   */
-  const setInitialLabelValue = async () => {
-    // Don't fetch workspace if workspace is empty
-    if (workspace === "" || _.isUndefined(workspace)) {
-      setLabel("Select Workspace");
-      return;
-    }
-
-    const workspaceResult = await getWorkspace({
-      variables: {
-        _id: workspace,
-      },
-    });
-
-    if (_.isUndefined(workspaceResult.data) && !_.isUndefined(workspaceError)) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to get name of current Workspace",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    } else if (
-      !_.isUndefined(workspaceResult.data) &&
-      !_.isNull(workspaceResult.data.workspace)
-    ) {
-      setLabel(workspaceResult.data.workspace.name);
-    }
-  };
-
-  // Update the label value on first render
-  useEffect(() => {
-    setInitialLabelValue();
-  }, [workspace]);
 
   // Present the transition overlay when loading
   useEffect(() => {
@@ -134,67 +83,41 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [isLoading]);
 
-  /**
-   * Utility function to update the list of Workspaces
-   */
-  const updateWorkspaces = async () => {
-    // Presenting the transition overlay
-    setIsLoading(true);
-
-    // Refresh the list of Workspaces
-    const resultWorkspaces = await getWorkspaces();
-    if (resultWorkspaces.data?.workspaces) {
-      setWorkspaces(resultWorkspaces.data.workspaces);
-    }
-
-    // Close the transition overlay
-    setIsLoading(false);
-
-    if (workspacesError) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to update list of Workspaces",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  };
-
-  // Manage data once retrieved
+  // Fetch workspace list once on mount (silently — no loading overlay)
   useEffect(() => {
-    if (data?.workspaces) {
-      // Unpack all the Entity data
-      setWorkspaces(data.workspaces);
+    getWorkspaces()
+      .then((result) => {
+        if (result.data?.workspaces) {
+          setWorkspaces(result.data.workspaces);
+          if (result.data.workspaces.length === 0) {
+            navigate("/create/workspace");
+          }
+        }
+        if (workspacesError) {
+          toaster.create({
+            title: "Error",
+            description: "Unable to retrieve Workspaces",
+            type: "error",
+            duration: 2000,
+            closable: true,
+          });
+        }
+      })
+      .catch(ignoreAbort);
+  }, []);
 
-      // If the User has no Workspaces, force them to create one
-      if (data.workspaces.length === 0) {
-        navigate("/create/workspace");
-      }
-    }
-
-    if (error) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to retrieve Workspaces",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  }, [loading]);
-
-  // Check to see if data currently exists and refetch if so
+  // Refresh the workspace list when the dropdown opens
   useEffect(() => {
-    if (data && refetch) {
-      refetch();
+    if (open) {
+      getWorkspaces()
+        .then((result) => {
+          if (result.data?.workspaces) {
+            setWorkspaces(result.data.workspaces);
+          }
+        })
+        .catch(ignoreAbort);
     }
   }, [open]);
-
-  // When the label is updated, refresh the list of Workspaces
-  useEffect(() => {
-    updateWorkspaces();
-  }, [label]);
 
   /**
    * Handle selecting a Workspace from the drop-down
@@ -204,10 +127,9 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     if (workspace !== selectedWorkspace._id) {
       // Present the transition overlay and activate the selected Workspace
       setIsLoading(true);
-      await activateWorkspace(selectedWorkspace._id);
+      await activateWorkspace(selectedWorkspace._id).catch(ignoreAbort);
 
-      // Update the switcher visual state and close the transition overlay
-      setLabel(selectedWorkspace.name);
+      // Close the transition overlay
       setOpen(false);
       setIsLoading(false);
     }

@@ -92,6 +92,7 @@ const start = async () => {
         .status(401)
         .json({ message: `You do not have permission to access ${req.path}` });
     } else {
+      res.locals.session = session;
       next();
     }
   };
@@ -193,10 +194,11 @@ const start = async () => {
       maxFiles: 10,
     }) as unknown as RequestHandler,
     expressMiddleware(server, {
-      context: async ({ req }): Promise<Context> => {
-        // Extract values from headers and create Context value
+      context: async ({ req, res }): Promise<Context> => {
+        // Use the verified better-auth session (already resolved in checkSession)
+        // rather than trusting the client-sent user header
         return {
-          user: (req.headers.user as string) || "",
+          user: res.locals.session?.user?.id || "",
           workspace: (req.headers.workspace as string) || "",
         };
       },
