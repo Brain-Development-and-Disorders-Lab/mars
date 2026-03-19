@@ -32,7 +32,7 @@ describe("Error Component", () => {
 
   it("renders error message", () => {
     renderError();
-    expect(screen.getByText("System Error")).toBeTruthy();
+    expect(screen.getByText("Error")).toBeTruthy();
   });
 
   it("renders error description", () => {
@@ -40,22 +40,20 @@ describe("Error Component", () => {
     expect(screen.getByText(/Metadatify experienced an error/i)).toBeTruthy();
   });
 
-  it("renders possible causes", () => {
+  it("renders additional information", () => {
     renderError();
-    expect(screen.getByText("Possible Causes:")).toBeTruthy();
-    expect(
-      screen.getByText(/The requested resource does not exist/i),
-    ).toBeTruthy();
+    expect(screen.getByText("Additional Information:")).toBeTruthy();
+    expect(screen.getByText(/No error details available/i)).toBeTruthy();
   });
 
   it("renders reload button", () => {
     renderError();
-    expect(screen.getByText("Reload")).toBeTruthy();
+    expect(screen.getByText("Reload Page")).toBeTruthy();
   });
 
   it("handles reload button click", () => {
     renderError();
-    const reloadButton = screen.getByText("Reload");
+    const reloadButton = screen.getByText("Reload Page");
     fireEvent.click(reloadButton);
 
     // Component uses navigate(0) to reload the page
