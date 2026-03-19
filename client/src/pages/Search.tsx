@@ -499,42 +499,116 @@ const Search = () => {
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $eq: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $eq: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $regex: new RegExp(
+                "^" + dayjs(customRule.value).format("YYYY-MM-DD"),
+              ).toString(),
             },
           });
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $gt: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $gt: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $gt: dayjs(customRule.value).endOf("day").toISOString(),
             },
           });
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $lt: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $lt: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $lt: dayjs(customRule.value).startOf("day").toISOString(),
             },
           });
         }

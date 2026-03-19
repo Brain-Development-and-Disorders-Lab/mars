@@ -267,8 +267,14 @@ export class User {
             {
               _id: "v-01-example",
               type: "number",
-              name: "Test Value 01",
+              name: "Test Value 02",
               data: "10",
+            },
+            {
+              _id: "v-01-example",
+              type: "date",
+              name: "Test Value 02",
+              data: "2026-03-19",
             },
           ],
         },
