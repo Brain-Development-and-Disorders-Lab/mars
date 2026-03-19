@@ -37,7 +37,6 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -84,7 +83,7 @@ const Projects = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
   }>(GET_PROJECTS);
 
@@ -169,15 +168,6 @@ const Projects = () => {
     setActiveFilterCount(activeFilterCount);
     setFilteredProjects(filtered);
   }, [projects, appliedFilters]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {

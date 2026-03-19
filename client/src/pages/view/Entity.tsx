@@ -69,7 +69,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions, removeTypename } from "@lib/util";
+import { createSelectOptions, ignoreAbort, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -85,7 +85,6 @@ import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Contexts and hooks
-import { useWorkspace } from "@hooks/useWorkspace";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Authentication
@@ -313,7 +312,7 @@ const Entity = () => {
     variables: {
       _id: id,
     },
-    fetchPolicy: "no-cache",
+    fetchPolicy: "network-only",
   });
 
   const GET_FILE_URL = gql`
@@ -370,7 +369,13 @@ const Entity = () => {
       }
     }
   `;
-  const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
+  const [updateEntity, { loading: updateLoading }] = useMutation(
+    UPDATE_ENTITY,
+    {
+      refetchQueries: ["GetEntityData"],
+      awaitRefetchQueries: true,
+    },
+  );
 
   // Mutation to archive Entity
   const ARCHIVE_ENTITY = gql`
@@ -382,7 +387,10 @@ const Entity = () => {
     }
   `;
   const [archiveEntity, { error: archiveError, loading: archiveLoading }] =
-    useMutation<{ archiveEntity: ResponseData<string> }>(ARCHIVE_ENTITY);
+    useMutation<{ archiveEntity: ResponseData<string> }>(ARCHIVE_ENTITY, {
+      refetchQueries: ["GetEntityData"],
+      awaitRefetchQueries: true,
+    });
 
   // Manage data once retrieved
   useEffect(() => {
@@ -434,15 +442,6 @@ const Entity = () => {
       });
     }
   }, [error]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   /**
    * Utility function to retrieve a file from the server for download
@@ -717,9 +716,6 @@ const Entity = () => {
 
     setEditing(false);
     setIsUpdating(false);
-
-    // Run a refetch operation
-    await refetch();
   };
 
   /**
@@ -3365,7 +3361,7 @@ const Entity = () => {
           target={entity._id}
           onUploadSuccess={() => {
             if (refetch) {
-              refetch();
+              refetch().catch(ignoreAbort);
             }
           }}
         />

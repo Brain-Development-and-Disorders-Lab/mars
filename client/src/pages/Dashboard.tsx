@@ -62,6 +62,7 @@ const GET_DASHBOARD = gql`
     $entitiesArchived: Boolean
     $projectLimit: Int
     $projectsArchived: Boolean
+    $workspace: String
   ) {
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -95,7 +96,7 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    workspaceMetrics {
+    workspaceMetrics(_id: $workspace) {
       collaborators
     }
   }
@@ -162,7 +163,7 @@ const Dashboard = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
     projectMetrics: ProjectMetrics;
     entities: { entities: EntityModel[]; total: number };
@@ -174,6 +175,7 @@ const Dashboard = () => {
       projectLimit: 10,
       entityLimit: 10,
       entitiesArchived: false,
+      workspace,
     },
     fetchPolicy: "network-only",
     skip: !workspace,
@@ -202,13 +204,6 @@ const Dashboard = () => {
       setWorkspaceMetrics(data.workspaceMetrics);
     }
   }, [data]);
-
-  // If the workspace changes, refetch the data
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {

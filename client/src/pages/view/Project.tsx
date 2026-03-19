@@ -62,7 +62,6 @@ import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Workspace context
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -257,7 +256,7 @@ const Project = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     project: ProjectModel;
     entities: IGenericItem[];
   }>(GET_PROJECT_WITH_ENTITIES, {
@@ -299,7 +298,10 @@ const Project = () => {
     }
   `;
   const [updateProject, { loading: updateLoading, error: updateError }] =
-    useMutation<{ updateProject: ResponseData<string> }>(UPDATE_PROJECT);
+    useMutation<{ updateProject: ResponseData<string> }>(UPDATE_PROJECT, {
+      refetchQueries: ["GetProjectWithEntities"],
+      awaitRefetchQueries: true,
+    });
 
   // Mutation to archive Project
   const ARCHIVE_PROJECT = gql`
@@ -312,7 +314,10 @@ const Project = () => {
   `;
   const [archiveProject, { loading: archiveLoading }] = useMutation<{
     archiveProject: ResponseData<string>;
-  }>(ARCHIVE_PROJECT);
+  }>(ARCHIVE_PROJECT, {
+    refetchQueries: ["GetProjectWithEntities"],
+    awaitRefetchQueries: true,
+  });
 
   // Manage data once retrieved
   useEffect(() => {
@@ -330,15 +335,6 @@ const Project = () => {
       setProjectHistory(data.project.history || []);
     }
   }, [data, editing]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -431,9 +427,6 @@ const Project = () => {
         });
       }
     }
-
-    // Refetch Project data
-    await refetch();
 
     setEditing(false);
     setIsUpdating(false);
@@ -586,9 +579,6 @@ const Project = () => {
     setProjectEntities(updateData.entities);
     setProjectHistory(updateData?.history || []);
     setProjectCollaborators(updateData?.collaborators || []);
-
-    // Refetch Project data
-    await refetch();
 
     setIsLoaded(true);
   };

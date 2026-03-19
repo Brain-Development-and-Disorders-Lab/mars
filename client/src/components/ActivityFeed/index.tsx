@@ -22,9 +22,6 @@ import { ActivityModel, ActivityFeedProps } from "@types";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Context and hooks
-import { useWorkspace } from "@hooks/useWorkspace";
-
 // Apollo client imports
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
@@ -56,7 +53,6 @@ const ActivityFeed = ({
   feedLimit = 5,
 }: ActivityFeedProps) => {
   const navigate = useNavigate();
-  const { workspace } = useWorkspace();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,7 +62,7 @@ const ActivityFeed = ({
     return () => clearInterval(interval);
   }, []);
 
-  const { data, refetch } = useQuery<{
+  const { data } = useQuery<{
     activity: ActivityModel[];
   }>(GET_ACTIVITY, {
     variables: {
@@ -75,13 +71,6 @@ const ActivityFeed = ({
     fetchPolicy: "network-only",
     pollInterval: 5000,
   });
-
-  // Refetch when workspace changes
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   const activities = data?.activity ?? activitiesProp ?? [];
 

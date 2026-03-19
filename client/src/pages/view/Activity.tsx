@@ -31,7 +31,6 @@ import { ActivityModel } from "@types";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { gql } from "@apollo/client";
@@ -111,7 +110,7 @@ const Activity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     activity: ActivityModel[];
   }>(GET_ACTIVITY, {
     variables: {
@@ -171,15 +170,6 @@ const Activity = () => {
     setActiveFilterCount(activeFilterCount);
     setFilteredActivityData(filtered);
   }, [activityData, appliedFilters]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {

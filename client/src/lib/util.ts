@@ -181,6 +181,15 @@ export const isAbortError = (
 };
 
 /**
+ * Re-throw any error that is not an AbortError.
+ * Use as `.catch(ignoreAbort)` on refetch() promises to suppress expected
+ * cancellations while preserving genuine error propagation.
+ */
+export const ignoreAbort = (e: unknown): void => {
+  if (!isAbortError(e)) throw e;
+};
+
+/**
  * Recursively remove __typename fields from an object or array.
  * Apollo Client v4 automatically adds __typename to query results, but these
  * fields are not allowed in GraphQL input types (mutations).

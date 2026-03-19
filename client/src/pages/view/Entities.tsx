@@ -38,7 +38,6 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { gql } from "@apollo/client";
@@ -202,7 +201,7 @@ const Entities = () => {
         }
       : undefined;
 
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
   }>(GET_ENTITIES, {
     variables: {
@@ -241,22 +240,6 @@ const Entities = () => {
       count += appliedFilters.attributeCountRanges.length;
     setActiveFilterCount(count);
   }, [appliedFilters]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
-
-  // Refetch when pagination, filters, or sort changes
-  useEffect(() => {
-    if (refetch) {
-      refetch();
-    }
-  }, [page, pageSize, appliedFilters, sortState, refetch]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {

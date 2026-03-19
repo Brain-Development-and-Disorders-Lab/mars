@@ -40,7 +40,6 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
-import { useWorkspace } from "@hooks/useWorkspace";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 const Templates = () => {
@@ -90,7 +89,7 @@ const Templates = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     templates: AttributeModel[];
   }>(GET_TEMPLATES);
 
@@ -162,15 +161,6 @@ const Templates = () => {
       });
     }
   }, [error]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
