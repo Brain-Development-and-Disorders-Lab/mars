@@ -40,11 +40,11 @@ export async function openItemFromTable(
   viewButtonLabel: "View Entity" | "View Project" | "View Template",
 ): Promise<void> {
   const table = page.locator(TABLE_CONTAINER);
-  await table.waitFor({ state: "visible", timeout: 10000 });
+  await table.waitFor({ state: "visible", timeout: 5000 });
 
   // Wait for table to be populated - check that at least one view button exists
   const buttons = table.locator(`button[aria-label="${viewButtonLabel}"]`);
-  await buttons.first().waitFor({ state: "visible", timeout: 15000 });
+  await buttons.first().waitFor({ state: "visible", timeout: 5000 });
 
   // Wait for network to be idle to ensure all data is loaded
   await page.waitForLoadState("networkidle");
@@ -52,7 +52,7 @@ export async function openItemFromTable(
   // Wait for the item name to appear
   const textLocator = table.locator(`text=${itemName}`).first();
   try {
-    await textLocator.waitFor({ state: "visible", timeout: 10000 });
+    await textLocator.waitFor({ state: "visible", timeout: 5000 });
   } catch {
     // If item not found, provide helpful error message
     const allItems = await table.locator("text").allTextContents();
@@ -134,6 +134,7 @@ export async function saveAndWait(page: Page): Promise<void> {
   await page
     .locator('button:has-text("Edit")')
     .waitFor({ state: "visible", timeout: 10000 });
+  await page.waitForLoadState("networkidle");
 }
 
 /**

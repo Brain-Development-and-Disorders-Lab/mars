@@ -1,4 +1,7 @@
+// Playwright imports
 import test, { expect } from "@playwright/test";
+
+// Test helper functions
 import { performLogin } from "../helpers";
 
 test.describe("Interface launches", () => {

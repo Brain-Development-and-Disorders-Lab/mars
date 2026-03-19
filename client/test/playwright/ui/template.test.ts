@@ -1,5 +1,7 @@
+// Playwright imports
 import { test, expect } from "@playwright/test";
 
+// Test helper functions
 import {
   navigateToSection,
   openItemFromTable,
