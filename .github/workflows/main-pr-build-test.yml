@@ -35,8 +35,8 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
@@ -100,8 +100,8 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
@@ -152,8 +152,8 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env

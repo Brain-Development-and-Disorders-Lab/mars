@@ -42,8 +42,8 @@ The `.env` file must have the following variables:
 
 The following variables are only required if deploying with ORCiD authentication, see [ORCiD Developer Tools](https://orcid.org/developer-tools):
 
-- `CLIENT_ID`: Client application ID
-- `CLIENT_SECRET`: Client application secret
+- `ORCID_PRODUCTION_CLIENT_ID`: Client application ID
+- `ORCID_PRODUCTION_CLIENT_SECRET`: Client application secret
 
 An example `.env` file is shown below:
 
@@ -56,8 +56,8 @@ GRAPHQL_PORT=8000
 NODE_ENV=development
 
 # ORCiD ID API variables
-CLIENT_ID=<ORCiD client ID>
-CLIENT_SECRET=<ORCiD client secret>
+ORCID_PRODUCTION_CLIENT_ID=<ORCiD client ID>
+ORCID_PRODUCTION_CLIENT_SECRET=<ORCiD client secret>
 ```
 
 ### Starting Docker containers
