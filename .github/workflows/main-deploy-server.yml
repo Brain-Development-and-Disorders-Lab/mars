@@ -36,6 +36,8 @@ jobs:
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
 
       - name: Build server
         working-directory: server
