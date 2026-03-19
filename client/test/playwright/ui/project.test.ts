@@ -9,6 +9,7 @@ import {
   saveAndWait,
   getUniqueName,
   performLogin,
+  setupEnvironment,
 } from "../helpers";
 
 async function createTestProject(
@@ -34,6 +35,9 @@ test.describe("Project", () => {
     test.beforeEach(async ({ page }) => {
       // Ensure the user is logged in
       await performLogin(page);
+
+      // Perform setup of the test environment
+      await setupEnvironment(page, "project");
 
       // Navigate to the base page
       await page.goto("/create/project");

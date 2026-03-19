@@ -8,12 +8,16 @@ import {
   fillMDEditor,
   clickButtonByText,
   performLogin,
+  setupEnvironment,
 } from "../helpers";
 
 test.describe("Template", () => {
   test.beforeEach(async ({ page }) => {
     // Ensure the user is logged in
     await performLogin(page);
+
+    // Perform setup of the test environment
+    await setupEnvironment(page, "template");
 
     // Navigate to the dashboard
     await page.goto("/");

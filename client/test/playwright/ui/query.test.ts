@@ -2,12 +2,15 @@
 import test, { expect } from "@playwright/test";
 
 // Test helper functions
-import { clickButtonByText, performLogin } from "../helpers";
+import { clickButtonByText, performLogin, setupEnvironment } from "../helpers";
 
 test.describe("Search Query Builder", () => {
   test.beforeEach(async ({ page }) => {
     // Ensure the user is logged in
     await performLogin(page);
+
+    // Perform setup of the test environment
+    await setupEnvironment(page, "query");
 
     // Navigate to the base page
     await page.goto("/");

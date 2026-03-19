@@ -10,6 +10,7 @@ import {
   clickButtonByText,
   getUniqueName,
   performLogin,
+  setupEnvironment,
 } from "../helpers";
 
 async function createTestEntity(page: Page, entityName: string): Promise<void> {
@@ -32,6 +33,9 @@ test.describe("Entity", () => {
   test.beforeEach(async ({ page }) => {
     // Ensure the user is logged in
     await performLogin(page);
+
+    // Perform setup of the test environment
+    await setupEnvironment(page, "entity");
 
     // Navigate to the dashboard
     await page.goto("/");

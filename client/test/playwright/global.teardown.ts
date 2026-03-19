@@ -1,9 +1,9 @@
 // Playwright imports
-import { test as setup } from "@playwright/test";
+import { test as teardown } from "@playwright/test";
 
 // Test helpers
 import { resetEnvironment } from "./helpers";
 
-setup("test setup", async ({ page }) => {
+teardown("test teardown", async ({ page }) => {
   await resetEnvironment(page);
 });

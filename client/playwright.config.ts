@@ -21,13 +21,18 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "setup user account",
+      name: "test setup",
       testMatch: /global\.setup\.ts/,
+      teardown: "test teardown",
+    },
+    {
+      name: "test teardown",
+      testMatch: /global\.teardown\.ts/,
     },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup user account"],
+      dependencies: ["test setup"],
     },
   ],
   webServer: {

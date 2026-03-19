@@ -276,6 +276,7 @@ const CreateWorkspace = () => {
                     </Field.Label>
                     <Input
                       id={"modalWorkspaceName"}
+                      data-testid={"create-workspace-name"}
                       size={"xs"}
                       rounded={"md"}
                       placeholder={"Name"}
@@ -308,6 +309,7 @@ const CreateWorkspace = () => {
                       minHeight={100}
                       maxHeight={400}
                       id={"modalWorkspaceDescription"}
+                      data-testid={"create-workspace-description"}
                       style={{ width: "100%" }}
                       value={description}
                       preview={"edit"}
@@ -365,6 +367,7 @@ const CreateWorkspace = () => {
         )}
         <Button
           id={"modalWorkspaceCreateButton"}
+          data-testid={"create-workspace-button"}
           size={"xs"}
           rounded={"md"}
           colorPalette={"green"}
