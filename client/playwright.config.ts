@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: "./test/playwright",
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
+  globalTimeout: process.env.CI ? 60 * 1000 : undefined,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: [["html", { open: "never" }]],
