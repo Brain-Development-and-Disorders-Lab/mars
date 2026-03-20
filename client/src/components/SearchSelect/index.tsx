@@ -255,7 +255,11 @@ const SearchSelect = (props: SearchSelectProps) => {
         data-testid={"search-select"}
         onClick={onInputClick}
         endElement={
-          showResults ? <Icon name={"c_up"} /> : <Icon name={"c_down"} />
+          showResults ? (
+            <Icon name={"c_up"} size={"xs"} />
+          ) : (
+            <Icon name={"c_down"} size={"xs"} />
+          )
         }
       >
         <Input

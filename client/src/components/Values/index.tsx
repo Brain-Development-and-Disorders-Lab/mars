@@ -27,6 +27,12 @@ import {
   components,
   Select as ReactSelect,
   OptionProps,
+  DropdownIndicatorProps,
+  ValueContainerProps,
+  ContainerProps,
+  SingleValueProps,
+  MenuListProps,
+  ControlProps,
 } from "chakra-react-select";
 
 // Custom components
@@ -80,7 +86,6 @@ const getIconConfiguration = (
     icon = "v_select";
     color = "teal.300";
   }
-
   return { icon, color };
 };
 
@@ -107,11 +112,14 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
 };
 
 /**
- * Custom styling for select container
+ * Custom styling for Value `type` select container
  */
-const ValueTypeSelectContainer = ({ children, ...props }) => {
+const ValueTypeSelectContainer = ({
+  children,
+  ...props
+}: ContainerProps<ValueTypeOption>) => {
   return (
-    <Box w={"100%"} border={"none"}>
+    <Box w={"100%"}>
       <components.SelectContainer {...props}>
         {children}
       </components.SelectContainer>
@@ -119,7 +127,13 @@ const ValueTypeSelectContainer = ({ children, ...props }) => {
   );
 };
 
-const ValueTypeValueContainer = ({ children, ...props }) => {
+/**
+ * Custom styling for Value `type` value container
+ */
+const ValueTypeValueContainer = ({
+  children,
+  ...props
+}: ValueContainerProps<ValueTypeOption>) => {
   return (
     <components.ValueContainer {...props}>
       <Flex w={"100%"} h={"34px"}>
@@ -129,7 +143,27 @@ const ValueTypeValueContainer = ({ children, ...props }) => {
   );
 };
 
-const ValueTypeSingleValue = ({ children, ...props }) => {
+const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
+  return (
+    <Box
+      pl={"1"}
+      pr={"3"}
+      border={"1px solid transparent"}
+      _hover={{
+        borderColor: "blue.300",
+      }}
+    >
+      <components.Control {...props} />
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `type` single value
+ */
+const ValueTypeSingleValue = ({
+  ...props
+}: SingleValueProps<ValueTypeOption>) => {
   const { icon, color } = getIconConfiguration(props.data.value);
   return (
     <Flex direction={"row"} align={"center"}>
@@ -144,9 +178,12 @@ const ValueTypeSingleValue = ({ children, ...props }) => {
 };
 
 /**
- * Custom styling for `MenuList` component containing all menu options
+ * Custom styling for Value `type` `MenuList` component containing all menu options
  */
-const ValueTypeMenuList = ({ children, ...props }) => {
+const ValueTypeMenuList = ({
+  children,
+  ...props
+}: MenuListProps<ValueTypeOption, false>) => {
   return (
     <Flex
       direction={"column"}
@@ -159,6 +196,142 @@ const ValueTypeMenuList = ({ children, ...props }) => {
     >
       <components.MenuList {...props}>{children}</components.MenuList>
     </Flex>
+  );
+};
+
+/**
+ * Custom styling for each Value `data`
+ */
+const ValueDataOption = (props: OptionProps<SelectOption>) => {
+  return (
+    <components.Option {...props}>
+      <Flex
+        direction={"row"}
+        h={"8"}
+        p={"0.5"}
+        gap={"1"}
+        align={"center"}
+        _hover={{ bg: "blue.100" }}
+      >
+        <Text fontSize={"xs"}>{props.data.label}</Text>
+      </Flex>
+    </components.Option>
+  );
+};
+
+/**
+ * Custom styling for Value `data` `DropdownIndicator` component
+ */
+const ValueTypeDropdownIndicator = (
+  props: DropdownIndicatorProps<ValueTypeOption, false>,
+) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <Icon
+        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
+        size={"xs"}
+      />
+    </components.DropdownIndicator>
+  );
+};
+
+/**
+ * Custom styling for Value `data` select container
+ */
+const ValueDataSelectContainer = ({
+  children,
+  ...props
+}: ContainerProps<SelectOption>) => {
+  return (
+    <Box w={"100%"}>
+      <components.SelectContainer {...props}>
+        {children}
+      </components.SelectContainer>
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `data` value container
+ */
+const ValueDataValueContainer = ({
+  children,
+  ...props
+}: ValueContainerProps<SelectOption>) => {
+  return (
+    <components.ValueContainer {...props}>
+      <Flex w={"100%"} h={"34px"}>
+        {children}
+      </Flex>
+    </components.ValueContainer>
+  );
+};
+
+const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
+  return (
+    <Box
+      pl={"2"}
+      pr={"3"}
+      border={"1px solid transparent"}
+      _hover={{
+        borderColor: "blue.300",
+      }}
+    >
+      <components.Control {...props} />
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `type` single value
+ */
+const ValueDataSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
+  return (
+    <Flex direction={"row"} align={"center"}>
+      <components.SingleValue {...props}>
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Text fontSize={"xs"}>{props.data.label}</Text>
+        </Flex>
+      </components.SingleValue>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for Value `type` `MenuList` component containing all menu options
+ */
+const ValueDataMenuList = ({
+  children,
+  ...props
+}: MenuListProps<SelectOption, false>) => {
+  return (
+    <Flex
+      direction={"column"}
+      border={"1px solid"}
+      borderColor={"gray.200"}
+      bg={"white"}
+      gap={"0.5"}
+      p={"0.5"}
+      rounded={"sm"}
+    >
+      <components.MenuList {...props}>{children}</components.MenuList>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for Value `type` `DropdownIndicator` component
+ */
+const ValueDataDropdownIndicator = (
+  props: DropdownIndicatorProps<SelectOption, false>,
+) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <Icon
+        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
+        size={"xs"}
+      />
+    </components.DropdownIndicator>
   );
 };
 
@@ -700,7 +873,12 @@ const ValueRow = (props: {
       label: initialSelectData.selected,
       value: initialSelectData.selected,
     };
-    initialSelectOptions = initialSelectData.options;
+    initialSelectOptions = initialSelectData.options.map((option: string) => {
+      return {
+        label: option,
+        value: option,
+      };
+    });
   }
   const [selectModalOpen, setSelectModalOpen] = useState(false); // Modal state
   const [selectOptions, setSelectOptions] =
@@ -801,7 +979,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           type="number"
@@ -829,7 +1007,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           readOnly={props.viewOnly}
@@ -856,7 +1034,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           readOnly={props.viewOnly}
@@ -883,7 +1061,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           type="date"
@@ -915,6 +1093,7 @@ const ValueRow = (props: {
             placeholder={"Select Option"}
             disabled={props.viewOnly}
             value={selectOption}
+            isSearchable={false}
             onChange={(event) => {
               if (event) {
                 // Update displayed selection
@@ -928,6 +1107,15 @@ const ValueRow = (props: {
                   }),
                 );
               }
+            }}
+            components={{
+              Control: ValueDataControl,
+              SelectContainer: ValueDataSelectContainer,
+              ValueContainer: ValueDataValueContainer,
+              SingleValue: ValueDataSingleValue,
+              DropdownIndicator: ValueDataDropdownIndicator,
+              MenuList: ValueDataMenuList,
+              Option: ValueDataOption,
             }}
             menuPortalTarget={document.body}
             menuPosition={"fixed"}
@@ -949,12 +1137,9 @@ const ValueRow = (props: {
               option: (base) => ({
                 ...base,
                 pointerEvents: "auto",
-                fontSize: "sm",
               }),
               control: (base) => ({
                 ...base,
-                minHeight: "32px",
-                border: "1px solid transparent",
               }),
             }}
             closeMenuOnScroll={false}
@@ -964,8 +1149,8 @@ const ValueRow = (props: {
         // Show "Setup Options" button
         return (
           <Flex
-            w="100%"
-            h={"34px"}
+            w={"100%"}
+            h={"100%"}
             p={"0"}
             align="center"
             justify="center"
@@ -997,7 +1182,7 @@ const ValueRow = (props: {
         return (
           <Flex
             w="100%"
-            h={props.viewOnly ? "34px" : "100%"}
+            h={"100%"}
             p={"0"}
             align="center"
             justify="center"
@@ -1025,8 +1210,8 @@ const ValueRow = (props: {
       } else {
         return (
           <Flex
-            w="100%"
-            h={props.viewOnly ? "34px" : "100%"}
+            w={"100%"}
+            h={"100%"}
             justify="center"
             pt={"0.5"}
             px={"2"}
@@ -1170,11 +1355,13 @@ const ValueRow = (props: {
           value={valueTypeOption}
           isSearchable={false}
           components={{
-            Option: ValueTypeOption,
+            Control: ValueTypeControl,
             SelectContainer: ValueTypeSelectContainer,
             ValueContainer: ValueTypeValueContainer,
             SingleValue: ValueTypeSingleValue,
+            DropdownIndicator: ValueTypeDropdownIndicator,
             MenuList: ValueTypeMenuList,
+            Option: ValueTypeOption,
           }}
           onChange={(event) => {
             if (event) {
@@ -1206,12 +1393,9 @@ const ValueRow = (props: {
             option: (base) => ({
               ...base,
               pointerEvents: "auto",
-              fontSize: "sm",
             }),
             control: (base) => ({
               ...base,
-              minHeight: "32px",
-              border: "1px solid transparent",
             }),
           }}
           closeMenuOnScroll={false}
