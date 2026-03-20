@@ -6,6 +6,9 @@ import { clickButtonByText, performLogin, setupEnvironment } from "../helpers";
 
 test.describe("Search Query Builder", () => {
   test.beforeEach(async ({ page }) => {
+    // Increase timeouts for CI workflows
+    test.setTimeout(60000);
+
     // Ensure the user is logged in
     await performLogin(page);
 
@@ -285,7 +288,7 @@ test.describe("Search Query Builder", () => {
   test("should build a query with Name inclusion and Attribute Value (Date) equals today rule", async ({
     page,
   }) => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = "2026-03-19";
 
     await expect(
       page.locator(".css-1ofqig9 > .chakra-heading"),

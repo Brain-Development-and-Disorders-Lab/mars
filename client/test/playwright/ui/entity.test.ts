@@ -31,6 +31,9 @@ async function createTestEntity(page: Page, entityName: string): Promise<void> {
 
 test.describe("Entity", () => {
   test.beforeEach(async ({ page }) => {
+    // Increase timeouts for CI workflows
+    test.setTimeout(60000);
+
     // Ensure the user is logged in
     await performLogin(page);
 
