@@ -8,7 +8,11 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-const Error = () => {
+interface ErrorProps {
+  error?: Error | null;
+}
+
+const Error = ({ error }: ErrorProps) => {
   const navigate = useNavigate();
 
   return (
@@ -34,29 +38,43 @@ const Error = () => {
         <Flex direction={"row"} gap={"1"} align={"center"}>
           <Icon name={"exclamation"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"lg"}>
-            System Error
+            Error
           </Heading>
         </Flex>
 
         <Flex direction={"column"} gap={"1"} w={"90%"}>
           <Text fontWeight={"semibold"} fontSize={"sm"}>
             Metadatify experienced an error while attempting to access the
-            requested resource. If this issues persists, please contact your
-            system administrator.
+            requested resource.
+          </Text>
+          <Text fontSize={"xs"}>
+            This may be caused by a network error, insufficient permissions, or
+            the requested resource may have been moved.
           </Text>
         </Flex>
 
         <Flex direction={"column"} gap={"1"} w={"90%"}>
           <Text fontWeight={"semibold"} fontSize={"sm"}>
-            Possible Causes:
+            Additional Information:
           </Text>
-          <Text fontSize={"xs"}>
-            The requested resource does not exist or has been deleted
-          </Text>
-          <Text fontSize={"xs"}>
-            You do not have permission to access the requested resource
-          </Text>
-          <Text fontSize={"xs"}>Network connectivity has been lost</Text>
+          <Flex
+            maxH={"200px"}
+            overflowY={"scroll"}
+            bg={"red.50"}
+            rounded={"md"}
+            p={"2"}
+            pr={"3"}
+            className={"error-scroll-container"}
+          >
+            <Text
+              fontSize={"xs"}
+              fontFamily={"monospace"}
+              whiteSpace={"pre-wrap"}
+              color={"red.900"}
+            >
+              {error?.stack || error?.message || "No error details available"}
+            </Text>
+          </Flex>
         </Flex>
 
         <Button
@@ -66,7 +84,7 @@ const Error = () => {
           variant={"subtle"}
           colorPalette={"red"}
         >
-          Reload
+          Reload Page
           <Icon name={"reload"} size={"xs"} />
         </Button>
       </Flex>

@@ -5,9 +5,9 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Entities model and types
-import { EntityModel, ProjectModel, ResponseData } from "../../types";
-import { Entities } from "../src/models/Entities";
-import { Projects } from "../src/models/Projects";
+import { EntityModel, ProjectModel, ResponseData } from "@types";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -17,7 +17,7 @@ import _ from "lodash";
 import { DEMO_USER_ORCID } from "../src/variables";
 
 // Database connectivity
-import { connect, disconnect } from "../src/connectors/database";
+import { connect, disconnect } from "@connectors/database";
 import { clearDatabase } from "./util";
 
 describe("Entity model", () => {

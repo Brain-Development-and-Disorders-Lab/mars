@@ -8,19 +8,23 @@ import React, {
 
 // GraphQL
 import { gql } from "@apollo/client";
-import { useLazyQuery, useApolloClient } from "@apollo/client/react";
+import { useLazyQuery } from "@apollo/client/react";
+
+// Routing
+import { useNavigate } from "react-router-dom";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { ignoreAbort } from "@lib/util";
 
-// Session
-import { useSession } from "@hooks/useSession";
+// Hooks
+import { useStorage } from "@hooks/useStorage";
 
-// Variables
-import { SESSION_KEY } from "src/variables";
+// Authentication
+import { auth } from "@lib/auth";
 
 type WorkspaceContextValue = {
   workspace: string;
@@ -29,17 +33,27 @@ type WorkspaceContextValue = {
 const WorkspaceContext = createContext({} as WorkspaceContextValue);
 
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
-  const [session, setSession] = useSession();
-  const [activeWorkspace, setActiveWorkspace] = useState(session.workspace);
-  const client = useApolloClient();
+  const navigate = useNavigate();
+  const { storage, updateStorageField } = useStorage();
+  const { data: session, isPending: isSessionPending } = auth.useSession();
 
-  // If the active Workspace is updated and store the identifier in the session token
+  // Workspace state
+  const [activeWorkspace, setActiveWorkspace] = useState(storage.workspace);
+
+  // Activate the stored workspace or fall back to the first available one
   useEffect(() => {
-    // Update the session token
-    setSession({
-      workspace: activeWorkspace,
-    });
-  }, [activeWorkspace]);
+    // Wait until session has loaded and authentication is complete
+    if (isSessionPending || !session?.user) return;
+
+    /**
+     * Activate the workspace on first render after the session has loaded
+     */
+    const initializeWorkspace = async () => {
+      const result = await activateWorkspace(storage.workspace);
+      if (!result.success) navigate("/create/workspace");
+    };
+    initializeWorkspace().catch(ignoreAbort);
+  }, [isSessionPending, session?.user?.id]);
 
   // Query to retrieve Workspaces
   const GET_WORKSPACES = gql`
@@ -54,7 +68,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   `;
   const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES);
+  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Query to check if a specific Workspace exists
   const GET_WORKSPACE = gql`
@@ -77,7 +91,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   ): Promise<IResponseMessage> => {
     if (workspace === "") {
       // Check if there's a stored workspace in session
-      const storedWorkspace = session.workspace;
+      const storedWorkspace = storage.workspace;
 
       if (storedWorkspace && storedWorkspace !== "") {
         // Verify the stored workspace exists
@@ -87,19 +101,13 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
 
         if (workspaceResponse.data?.workspace && !workspaceResponse.error) {
           // Stored workspace exists, use it
-          await client.clearStore();
-          sessionStorage.setItem(
-            SESSION_KEY,
-            JSON.stringify({ workspace: storedWorkspace }),
-          );
+          updateStorageField("workspace", storedWorkspace);
           setActiveWorkspace(storedWorkspace);
           return {
             success: true,
             message: "Set active Workspace",
           };
         }
-
-        sessionStorage.removeItem(SESSION_KEY);
       }
 
       // Stored workspace doesn't exist or wasn't found, get all workspaces
@@ -123,16 +131,10 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       }
 
       // Use the first available workspace
-      await client.clearStore();
-      sessionStorage.setItem(
-        SESSION_KEY,
-        JSON.stringify({ workspace: workspacesData[0]._id }),
-      );
+      updateStorageField("workspace", workspacesData[0]._id);
       setActiveWorkspace(workspacesData[0]._id);
     } else {
-      await client.clearStore();
-      // Write to sessionStorage synchronously before updating state to ensure authLink reads correct value
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ workspace }));
+      updateStorageField("workspace", workspace);
       setActiveWorkspace(workspace);
     }
     return {

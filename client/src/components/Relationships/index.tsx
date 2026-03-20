@@ -22,7 +22,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { isAbortError } from "src/util";
+import { ignoreAbort } from "@lib/util";
 
 const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();
@@ -38,6 +38,7 @@ const Relationships = (props: RelationshipsProps) => {
   `;
   const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(
     GET_ENTITY_NAME,
+    { fetchPolicy: "network-only" },
   );
 
   // Extract all unique entity IDs from relationships
@@ -94,11 +95,7 @@ const Relationships = (props: RelationshipsProps) => {
     };
 
     if (uniqueEntityIds.length > 0) {
-      Promise.resolve(fetchEntityNames()).catch((error: unknown) => {
-        if (!isAbortError(error)) {
-          console.error("Error in fetchEntityNames:", error);
-        }
-      });
+      fetchEntityNames().catch(ignoreAbort);
     }
 
     return () => {

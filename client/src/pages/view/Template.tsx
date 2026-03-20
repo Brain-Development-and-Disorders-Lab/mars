@@ -14,10 +14,10 @@ import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { AttributeModel, GenericValueType, IValue, ResponseData } from "@types";
+import { AttributeModel, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
-import { removeTypename } from "src/util";
+import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import slugify from "slugify";
 import FileSaver from "file-saver";
@@ -26,9 +26,6 @@ import FileSaver from "file-saver";
 import { useParams } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-
-// Workspace context
-import { useWorkspace } from "@hooks/useWorkspace";
 
 const Template = () => {
   const { id } = useParams();
@@ -39,9 +36,7 @@ const Template = () => {
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [templateArchived, setTemplateArchived] = useState(false);
-  const [templateValues, setTemplateValues] = useState(
-    [] as IValue<GenericValueType>[],
-  );
+  const [templateValues, setTemplateValues] = useState<IValue[]>([]);
 
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -65,7 +60,7 @@ const Template = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     template: AttributeModel;
   }>(GET_TEMPLATE, {
     variables: {
@@ -95,7 +90,10 @@ const Template = () => {
   `;
   const [updateTemplate, { loading: updateLoading }] = useMutation<{
     updateTemplate: ResponseData<string>;
-  }>(UPDATE_TEMPLATE);
+  }>(UPDATE_TEMPLATE, {
+    refetchQueries: ["GetTemplate"],
+    awaitRefetchQueries: true,
+  });
 
   // Mutation to archive Template
   const ARCHIVE_TEMPLATE = gql`
@@ -108,7 +106,10 @@ const Template = () => {
   `;
   const [archiveTemplate, { loading: archiveLoading }] = useMutation<{
     archiveTemplate: ResponseData<string>;
-  }>(ARCHIVE_TEMPLATE);
+  }>(ARCHIVE_TEMPLATE, {
+    refetchQueries: ["GetTemplate"],
+    awaitRefetchQueries: true,
+  });
 
   // Manage data once retrieved
   useEffect(() => {
@@ -133,15 +134,6 @@ const Template = () => {
       });
     }
   }, [error]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Archive the Template when confirmed
   const handleArchiveClick = async () => {
@@ -206,9 +198,6 @@ const Template = () => {
       });
       setTemplateArchived(false);
       setArchiveDialogOpen(false);
-
-      // Refetch template data to ensure state is up to date
-      await refetch();
     }
 
     setEditing(false);
@@ -491,7 +480,7 @@ const Template = () => {
                     Template Owner
                   </Text>
                   <ActorTag
-                    orcid={template.owner}
+                    identifier={template.owner}
                     fallback={"No Owner"}
                     size={"sm"}
                   />

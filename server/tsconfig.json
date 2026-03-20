@@ -1,12 +1,18 @@
 {
-  "include": ["src"],
+  "include": ["src", "test"],
   "compilerOptions": {
     "module": "CommonJS",
     "target": "ES2016",
     "allowJs": true,
     "baseUrl": "./",
     "paths": {
-      "@types": ["../types"]
+      "@connectors/*": ["src/connectors/*"],
+      "@lib/*": ["src/lib/*"],
+      "@models/*": ["src/models/*"],
+      "@resolvers/*": ["src/resolvers/*"],
+      "@seed/*": ["src/seed/*"],
+      "@types": ["../types"],
+      "@variables": ["src/variables"]
     },
     "rootDirs": ["src"],
     "outDir": "dist",

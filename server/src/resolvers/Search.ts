@@ -5,9 +5,8 @@ import { GraphQLError } from "graphql";
 import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
-import { Search } from "src/models/Search";
-import { Authentication } from "src/models/Authentication";
-import { Workspaces } from "src/models/Workspaces";
+import { Search } from "@models/Search";
+import { Workspaces } from "@models/Workspaces";
 
 export const SearchResolvers = {
   Query: {
@@ -30,9 +29,6 @@ export const SearchResolvers = {
       },
       context: Context,
     ): Promise<EntityModel[] | ProjectModel[]> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {

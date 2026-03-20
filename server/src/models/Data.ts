@@ -12,7 +12,6 @@ import {
   TemplateImportReview,
   IColumnMapping,
   IRow,
-  GenericValueType,
   CSVImportOptions,
 } from "@types";
 
@@ -21,16 +20,16 @@ import * as fs from "fs";
 import XLSX from "xlsx";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
-import { getAttachments } from "../connectors/database";
+import { getAttachments } from "@connectors/database";
 import _ from "lodash";
 
 // Models
-import { Activity } from "./Activity";
-import { Counters } from "./Counters";
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Templates } from "./Templates";
-import { Workspaces } from "./Workspaces";
+import { Activity } from "@models/Activity";
+import { Counters } from "@models/Counters";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Workspaces } from "@models/Workspaces";
 
 export class Data {
   /**
@@ -177,7 +176,7 @@ export class Data {
           timestamp: attribute.timestamp,
           archived: false,
           description: attribute.description,
-          values: attribute.values.map((value: IValue<GenericValueType>) => {
+          values: attribute.values.map((value: IValue) => {
             // Clean the data for specific types
             let valueData = row[value.data];
             if (_.isEqual(value.type, "date")) {
@@ -552,7 +551,7 @@ export class Data {
           if (!result.success) {
             return {
               success: false,
-              message: `Error updating existing Entity: "${entity.name}"`,
+              message: `Error updating Entity: "${entity.name}"`,
             };
           } else {
             // Add the Entity to the Workspace
@@ -562,7 +561,7 @@ export class Data {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
-              details: "Updated existing Entity",
+              details: "Updated Entity",
               target: {
                 _id: entity._id,
                 type: "entities",
@@ -589,7 +588,7 @@ export class Data {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
-              details: "Updated existing Entity",
+              details: "Updated Entity",
               target: {
                 _id: result.data,
                 type: "entities",
@@ -658,7 +657,7 @@ export class Data {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Template",
+          details: "Updated Template",
           target: {
             _id: parsed._id,
             type: "templates",

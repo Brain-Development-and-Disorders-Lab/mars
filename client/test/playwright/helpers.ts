@@ -1,6 +1,99 @@
+// Playwright components
 import { Page } from "@playwright/test";
 
+// Access environment variables
+import "dotenv/config";
+
+// Locator variables
 const TABLE_CONTAINER = ".data-table-scroll-container";
+
+// Server functions
+import { setupDatabase, teardownDatabase } from "../../../server/test/util";
+
+/**
+ * Perform login using information stored in environment variables
+ * @param page
+ */
+export async function performLogin(page: Page): Promise<void> {
+  await page.goto("/login");
+  await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL);
+  await page.locator("#userPasswordInput").fill(process.env.TEST_USER_PASSWORD);
+  await page.locator("#userLoginButton").click();
+  await page.waitForSelector("#workspaceSwitcherDesktop");
+}
+
+/**
+ * Create a new Workspace for a specific test or test suite
+ * @param page
+ */
+export async function setupEnvironment(
+  page: Page,
+  testName: string,
+): Promise<void> {
+  await page.goto("/create/workspace");
+  await page
+    .locator("[data-testid='create-workspace-name']")
+    .waitFor({ state: "visible", timeout: 10000 });
+  await page
+    .locator("[data-testid='create-workspace-name']")
+    .fill(`Test Workspace - ${testName}`);
+  await page
+    .locator("[data-testid='create-workspace-description'] textarea")
+    .fill(`Test Workspace for test: ${testName}`);
+  await page.click("[data-testid='create-workspace-button']");
+  await page.waitForURL("/", { timeout: 10000 });
+}
+
+/**
+ * Reset function used prior to running tests and after test completion. Clears and resets the database
+ * state, creates new user account with standard test credentials
+ * @param page
+ */
+export async function resetEnvironment(page: Page): Promise<void> {
+  // Setup database once before all tests
+  await teardownDatabase();
+  await setupDatabase();
+
+  // Access the baseURL from the config file if needed
+  await page.goto("/login");
+  await page.evaluate(() => {
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+  await page.waitForLoadState("domcontentloaded");
+
+  // Create user account
+  await page
+    .locator("#createAccountButton")
+    .waitFor({ state: "visible", timeout: 10000 });
+  await page.click("#createAccountButton");
+  await page.waitForLoadState("domcontentloaded");
+
+  // Populate user information (use environment variables for specific details)
+  await page.locator("#userFirstNameInput").fill("User");
+  await page.locator("#userLastNameInput").fill("Test");
+  await page
+    .locator("#userEmailInput")
+    .fill(process.env.TEST_USER_EMAIL || "test@test.com");
+  await selectDropdownOption(
+    page,
+    '[data-testid="affiliation-select-trigger"]',
+    "No Affiliation",
+  );
+  await page
+    .locator("#userPasswordInputInitial")
+    .fill(process.env.TEST_USER_PASSWORD || "test_password123");
+  await page
+    .locator("#userPasswordInputConfirm")
+    .fill(process.env.TEST_USER_PASSWORD || "test_password123");
+
+  // Finalize account creation
+  await page.locator("#createAccountButton").click();
+
+  // Create a Workspace
+  await page.locator("#modalWorkspaceName").fill("Test Workspace");
+  await page.locator("#modalWorkspaceCreateButton").click();
+}
 
 /**
  * Navigate to a section (Entities, Projects, Templates)
@@ -23,11 +116,11 @@ export async function openItemFromTable(
   viewButtonLabel: "View Entity" | "View Project" | "View Template",
 ): Promise<void> {
   const table = page.locator(TABLE_CONTAINER);
-  await table.waitFor({ state: "visible", timeout: 10000 });
+  await table.waitFor({ state: "visible", timeout: 5000 });
 
   // Wait for table to be populated - check that at least one view button exists
   const buttons = table.locator(`button[aria-label="${viewButtonLabel}"]`);
-  await buttons.first().waitFor({ state: "visible", timeout: 15000 });
+  await buttons.first().waitFor({ state: "visible", timeout: 5000 });
 
   // Wait for network to be idle to ensure all data is loaded
   await page.waitForLoadState("networkidle");
@@ -35,7 +128,7 @@ export async function openItemFromTable(
   // Wait for the item name to appear
   const textLocator = table.locator(`text=${itemName}`).first();
   try {
-    await textLocator.waitFor({ state: "visible", timeout: 10000 });
+    await textLocator.waitFor({ state: "visible", timeout: 5000 });
   } catch {
     // If item not found, provide helpful error message
     const allItems = await table.locator("text").allTextContents();
@@ -117,6 +210,7 @@ export async function saveAndWait(page: Page): Promise<void> {
   await page
     .locator('button:has-text("Edit")')
     .waitFor({ state: "visible", timeout: 10000 });
+  await page.waitForLoadState("networkidle");
 }
 
 /**

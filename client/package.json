@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.0",
-    "@chakra-ui/react": "^3.16.1",
+    "@chakra-ui/react": "^3.32.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^4.5.5",
@@ -36,6 +36,8 @@
     "@uiw/react-md-editor": "^4.0.5",
     "apollo-upload-client": "^19.0.0",
     "axios": "^1.12.0",
+    "better-auth": "^1.4.7",
+    "chakra-react-select": "^6.1.1",
     "consola": "^3.2.3",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.7",

@@ -1,19 +1,23 @@
 // Custom types
-import { APIKey, IResponseMessage, UserModel } from "@types";
+import { APIKey, IResponseMessage, ResponseData, UserModel } from "@types";
 
 import _ from "lodash";
-import { getDatabase } from "../connectors/database";
 import dayjs from "dayjs";
 
 // Models
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Workspaces } from "./Workspaces";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Workspaces } from "@models/Workspaces";
+
+// Database
+import { ObjectId } from "mongodb";
+import { getDatabase } from "@connectors/database";
 
 // Collection name
-const USERS_COLLECTION = "users";
+const USERS_COLLECTION = "user";
 
-export class Users {
+export class User {
   /**
    * Get all User entries from the Users collection
    * @returns Collection of all User entries
@@ -25,58 +29,58 @@ export class Users {
       .toArray();
   };
 
-  static getOne = async (orcid: string): Promise<UserModel | null> => {
+  static getOne = async (_id: string): Promise<UserModel | null> => {
     return await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
+      .findOne({ _id: new ObjectId(_id) });
   };
 
-  static exists = async (orcid: string): Promise<boolean> => {
+  static getByEmail = async (email: string): Promise<ResponseData<string>> => {
     const result = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
+      .findOne({ email: email });
+
+    // Return the User `_id`
+    if (result) {
+      return {
+        message: "User found successfully",
+        success: true,
+        data: result._id,
+      };
+    }
+    return {
+      message: "User not found",
+      success: false,
+      data: "",
+    };
+  };
+
+  static getByOrcid = async (orcid: string): Promise<ResponseData<string>> => {
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .findOne({ account_orcid: orcid });
+
+    // Return the User `_id`
+    if (result) {
+      return {
+        message: "User found successfully",
+        success: true,
+        data: result._id,
+      };
+    }
+    return {
+      message: "User not found",
+      success: false,
+      data: "",
+    };
+  };
+
+  static exists = async (_id: string): Promise<boolean> => {
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .findOne({ _id: new ObjectId(_id) });
 
     return !_.isNull(result);
-  };
-
-  /**
-   * Get the collection of Workspaces the User has access to
-   * @param orcid User ORCiD
-   * @return {Promise<string[]>}
-   */
-  static getWorkspaces = async (orcid: string): Promise<string[]> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: orcid });
-
-    if (result?.workspaces) {
-      return result.workspaces;
-    }
-    return [];
-  };
-
-  /**
-   * Add a Workspace to the collection a User has access to
-   * @param orcid User ORCiD
-   * @param workspace Workspace to assign the User access to
-   * @return {Promise<IResponseMessage>}
-   */
-  static addWorkspace = async (
-    orcid: string,
-    workspace: string,
-  ): Promise<IResponseMessage> => {
-    const result = await Users.getOne(orcid);
-
-    // Attempt to update the `UserModel` with the Workspace
-    if (result?.workspaces) {
-      result.workspaces.push(workspace);
-      return await Users.update(result);
-    }
-
-    return {
-      success: false,
-      message: "Unable to add Workspace to User",
-    };
   };
 
   static update = async (updated: UserModel): Promise<IResponseMessage> => {
@@ -115,13 +119,13 @@ export class Users {
       update.$set.lastLogin = updated.lastLogin;
     }
 
-    if (updated.workspaces) {
-      update.$set.workspaces = updated.workspaces;
+    if (updated.api_keys) {
+      update.$set.api_keys = updated.api_keys;
     }
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: updated._id }, update);
+      .updateOne({ _id: new ObjectId(updated._id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -147,10 +151,10 @@ export class Users {
   };
 
   static addKey = async (
-    orcid: string,
+    _id: string,
     key: APIKey,
   ): Promise<IResponseMessage> => {
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
       return {
@@ -159,18 +163,19 @@ export class Users {
       };
     }
 
-    const apiKeys = _.cloneDeep(user.api_keys);
+    // Note: Modifying outside of better-auth means that `api_keys` is stored as a JSON string
+    const apiKeys = JSON.parse(_.cloneDeep(user.api_keys));
     apiKeys.push(key);
 
     const update: { $set: Partial<UserModel> } = {
       $set: {
-        api_keys: apiKeys,
+        api_keys: JSON.stringify(apiKeys),
       },
     };
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: orcid }, update);
+      .updateOne({ _id: new ObjectId(_id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -182,10 +187,10 @@ export class Users {
   };
 
   static removeKey = async (
-    orcid: string,
+    _id: string,
     key: string,
   ): Promise<IResponseMessage> => {
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
       return {
@@ -194,10 +199,11 @@ export class Users {
       };
     }
 
-    const apiKeys = _.cloneDeep(user.api_keys);
+    // Note: Modifying outside of better-auth means that `api_keys` is stored as a JSON string
+    const apiKeys = JSON.parse(_.cloneDeep(user.api_keys));
 
     // Iterate through the list of API keys and set the removed key to have expiration 1 year ago
-    apiKeys.map((existingKey) => {
+    apiKeys.map((existingKey: APIKey) => {
       if (_.isEqual(existingKey.value, key)) {
         existingKey.expires = dayjs(Date.now())
           .subtract(1, "year")
@@ -207,13 +213,13 @@ export class Users {
 
     const update: { $set: Partial<UserModel> } = {
       $set: {
-        api_keys: apiKeys,
+        api_keys: JSON.stringify(apiKeys),
       },
     };
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: orcid }, update);
+      .updateOne({ _id: new ObjectId(_id) }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -234,19 +240,6 @@ export class Users {
     user: string,
     workspace: string,
   ): Promise<IResponseMessage> => {
-    const project = await Projects.create({
-      name: "My First Project",
-      archived: false,
-      created: dayjs(Date.now()).toISOString(),
-      description:
-        "This is your first Project. Feel free to explore and modify it!",
-      owner: user,
-      entities: [], // Assuming you can add entities later
-      collaborators: [], // Assuming you might want collaborators
-      history: [],
-    });
-    await Workspaces.addProject(workspace, project.data);
-
     const entity = await Entities.create({
       name: "Example Entity",
       archived: false,
@@ -274,8 +267,14 @@ export class Users {
             {
               _id: "v-01-example",
               type: "number",
-              name: "Test Value 01",
-              data: 10,
+              name: "Test Value 02",
+              data: "10",
+            },
+            {
+              _id: "v-01-example",
+              type: "date",
+              name: "Test Value 02",
+              data: "2026-03-19",
             },
           ],
         },
@@ -283,6 +282,45 @@ export class Users {
       history: [],
     });
     await Workspaces.addEntity(workspace, entity.data);
+
+    const project = await Projects.create({
+      name: "Example Project",
+      archived: false,
+      created: dayjs(Date.now()).toISOString(),
+      description:
+        "This is an example Project. Feel free to explore and modify it!",
+      owner: user,
+      entities: [],
+      collaborators: [],
+      history: [],
+    });
+    await Workspaces.addProject(workspace, project.data);
+
+    // Add the example Entity to the Project
+    await Projects.addEntity(workspace, entity.data);
+
+    // Create an example Template
+    const template = await Templates.create({
+      name: "Example Template",
+      owner: user,
+      archived: false,
+      description: "An example Template Attribute",
+      values: [
+        {
+          _id: "v-01-example0",
+          type: "text",
+          name: "Test Value 01",
+          data: "Test Value Data",
+        },
+        {
+          _id: "v-02-example0",
+          type: "number",
+          name: "Test Value 01",
+          data: "0",
+        },
+      ],
+    });
+    await Workspaces.addTemplate(workspace, template.data);
 
     return {
       success: true,

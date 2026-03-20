@@ -11,10 +11,10 @@ import { hash } from "bcryptjs";
 import { APIData, APIKey, EntityModel, ResponseData } from "@types";
 
 // Models
-import { Entities } from "./Entities";
-import { Users } from "./Users";
-import { Workspaces } from "./Workspaces";
-import { Activity } from "./Activity";
+import { Entities } from "@models/Entities";
+import { User } from "@models/User";
+import { Workspaces } from "@models/Workspaces";
+import { Activity } from "@models/Activity";
 
 // Setup the Express router
 const APIRouter = Router();
@@ -68,7 +68,7 @@ export class API {
     const providedKey = request.headers["api_key"].toString();
 
     // Validate that the API key exists
-    const apiUser = await Users.findByKey(providedKey);
+    const apiUser = await User.findByKey(providedKey);
     if (_.isNull(apiUser)) {
       const responseData: APIData<object> = {
         path: request.params.path,
@@ -183,7 +183,7 @@ export class API {
     }
 
     // Get the `UserModel` associated with the API key
-    const user = await Users.findByKey(apiKey.value);
+    const user = await User.findByKey(apiKey.value);
     if (_.isNull(user)) {
       return;
     }
@@ -336,7 +336,7 @@ export class API {
     }
 
     // Get all Entities that User has access to
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(orcid);
     if (_.isNull(user)) {
       return {
         path: `/${request.params.path}`,
@@ -409,7 +409,7 @@ export class API {
     }
 
     // Get all Entities that User has access to
-    const user = await Users.getOne(orcid);
+    const user = await User.getOne(orcid);
     if (_.isNull(user)) {
       return {
         path: `/${request.params.path}`,
@@ -489,7 +489,7 @@ export class API {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: orcid,
-          details: "Updated existing Entity",
+          details: "Updated Entity",
           target: {
             _id: entity._id,
             type: "entities",

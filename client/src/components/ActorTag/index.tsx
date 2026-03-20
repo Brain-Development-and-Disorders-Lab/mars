@@ -20,28 +20,30 @@ const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 const ActorTag = (props: ActorTagProps) => {
   // Component state
   const [actorLabel, setActorLabel] = useState(props.fallback);
+  const [actorOrcid, setActorOrcid] = useState("");
 
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
+
   // GraphQL operations
   const GET_USER = gql`
     query GetUser($_id: String) {
       user(_id: $_id) {
         _id
+        name
         firstName
         lastName
+        account_orcid
       }
     }
   `;
-  const { loading, data, refetch } = useQuery<{ user: Partial<UserModel> }>(
-    GET_USER,
-    {
-      variables: {
-        _id: props.orcid,
-      },
-      skip: !props.orcid || props.orcid.trim() === "",
+  const { loading, data } = useQuery<{ user: Partial<UserModel> }>(GET_USER, {
+    variables: {
+      _id: props.identifier,
     },
-  );
+    skip: !props.identifier || props.identifier.trim() === "",
+    fetchPolicy: "network-only",
+  });
 
   useEffect(() => {
     if (data?.user) {
@@ -50,14 +52,13 @@ const ActorTag = (props: ActorTagProps) => {
           length: DEFAULT_ACTOR_LABEL_LENGTH,
         }),
       );
+
+      // Extract additional account information if specified
+      if (data.user.account_orcid) {
+        setActorOrcid(data.user.account_orcid);
+      }
     }
   }, [data]);
-
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
 
   // If avatarOnly is true, show only the avatar
   if (props.avatarOnly) {
@@ -108,9 +109,9 @@ const ActorTag = (props: ActorTagProps) => {
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>
-          {isBreakpointActive("xl", "up") && (
+          {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
             <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.400"}>
-              {props.orcid}
+              {actorOrcid}
             </Text>
           )}
         </Flex>

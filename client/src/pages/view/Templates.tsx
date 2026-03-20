@@ -40,7 +40,6 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
-import { useWorkspace } from "@hooks/useWorkspace";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 const Templates = () => {
@@ -90,9 +89,9 @@ const Templates = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     templates: AttributeModel[];
-  }>(GET_TEMPLATES);
+  }>(GET_TEMPLATES, { fetchPolicy: "network-only" });
 
   // Manage data once retrieved
   useEffect(() => {
@@ -162,15 +161,6 @@ const Templates = () => {
       });
     }
   }, [error]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
@@ -257,7 +247,7 @@ const Templates = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline
@@ -450,7 +440,7 @@ const Templates = () => {
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
                               <ActorTag
-                                orcid={owner}
+                                identifier={owner}
                                 fallback={"Unknown User"}
                                 size="sm"
                                 inline

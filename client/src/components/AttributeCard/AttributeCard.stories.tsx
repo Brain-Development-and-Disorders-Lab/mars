@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-webpack5";
 import React from "react";
 import { Box } from "@chakra-ui/react";
 import AttributeCard from "./index";
@@ -15,7 +15,7 @@ const meta: Meta<typeof AttributeCard> = {
 export default meta;
 type Story = StoryObj<typeof AttributeCard>;
 
-const mockValues: IValue<any>[] = [
+const mockValues: IValue[] = [
   {
     _id: "value-1",
     name: "Sample Value",

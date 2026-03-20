@@ -37,7 +37,6 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -84,9 +83,9 @@ const Projects = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
-  }>(GET_PROJECTS);
+  }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);
@@ -170,15 +169,6 @@ const Projects = () => {
     setFilteredProjects(filtered);
   }, [projects, appliedFilters]);
 
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
-
   // Display error messages from GraphQL usage
   useEffect(() => {
     if ((!loading && _.isUndefined(data)) || error) {
@@ -259,7 +249,7 @@ const Projects = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline
@@ -454,7 +444,7 @@ const Projects = () => {
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
                               <ActorTag
-                                orcid={owner}
+                                identifier={owner}
                                 fallback={"Unknown User"}
                                 size={"sm"}
                                 inline

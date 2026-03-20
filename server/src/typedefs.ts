@@ -40,22 +40,31 @@ export const typedefs = `#graphql
     token: String
     firstName: String
     lastName: String
+    name: String
     affiliation: String
     email: String
-    workspaces: [String]
-    api_keys: [APIKey]
+    emailVerified: Boolean
+    image: String
+    createdAt: String
+    updatedAt: String
+    api_keys: String
+    account_orcid: String
   }
 
   # "UserInput" type
   input UserInput {
     _id: String!
-    token: String
     firstName: String
     lastName: String
+    name: String
     affiliation: String
     email: String
-    workspaces: [String]
-    api_keys: [APIKeyInput]
+    emailVerified: Boolean
+    image: String
+    createdAt: String
+    updatedAt: String
+    api_keys: String
+    account_orcid: String
   }
 
   # "Project" type
@@ -117,7 +126,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: Object
+    data: String
   }
 
   # "ValueInput" input
@@ -125,7 +134,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: Object
+    data: String
   }
 
   # "Attribute" type
@@ -490,6 +499,8 @@ export const typedefs = `#graphql
     # User queries
     users: [User]
     user(_id: String): User
+    userByEmail(email: String): ResponseDataString
+    userByOrcid(orcid: String): ResponseDataString
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
@@ -516,7 +527,7 @@ export const typedefs = `#graphql
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
     workspaceActivity(_id: String, limit: Int): [Activity]
-    workspaceMetrics: WorkspaceMetrics
+    workspaceMetrics(_id: String): WorkspaceMetrics
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String

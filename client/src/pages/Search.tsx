@@ -55,12 +55,15 @@ import { createColumnHelper } from "@tanstack/react-table";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// GraphQL imports
+import { gql } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
+
 // Utility libraries and functions
+import { ignoreAbort } from "@lib/util";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
 import { JSONPath } from "jsonpath-plus";
 
 const Search = () => {
@@ -137,6 +140,7 @@ const Search = () => {
   `;
   const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(
     SEARCH_TEXT,
+    { fetchPolicy: "network-only" },
   );
 
   const runSearch = async () => {
@@ -170,7 +174,12 @@ const Search = () => {
         showArchived: showArchived,
         filters,
       },
-    });
+    }).catch(ignoreAbort);
+
+    if (!results) {
+      setIsSearching(false);
+      return;
+    }
 
     if (error || !results.data?.search) {
       toaster.create({
@@ -266,7 +275,7 @@ const Search = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline
@@ -490,42 +499,116 @@ const Search = () => {
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $eq: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $eq: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $regex: new RegExp(
+                "^" + dayjs(customRule.value).format("YYYY-MM-DD"),
+              ).toString(),
             },
           });
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $gt: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $gt: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $gt: dayjs(customRule.value).endOf("day").toISOString(),
             },
           });
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
           processedCustomRules.push({
-            "attributes.values.data": {
-              $lt: parseFloat(customRule.value),
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            {
+                              $lt: [
+                                { $toDouble: "$$v.data" },
+                                parseFloat(customRule.value),
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
+              $lt: dayjs(customRule.value).startOf("day").toISOString(),
             },
           });
         }
@@ -607,7 +690,12 @@ const Search = () => {
         isBuilder: true,
         showArchived: false,
       },
-    });
+    }).catch(ignoreAbort);
+
+    if (!results) {
+      setIsSearching(false);
+      return;
+    }
 
     if (searchAdvancedError || !results.data?.search) {
       toaster.create({

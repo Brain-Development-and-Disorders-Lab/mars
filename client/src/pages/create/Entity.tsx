@@ -51,7 +51,7 @@ import {
   isValidAttributes,
   createSelectOptions,
   removeTypename,
-} from "src/util";
+} from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -61,8 +61,8 @@ import { useBlocker, useNavigate } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
-// Authentication context
-import { useAuthentication } from "@hooks/useAuthentication";
+// Authentication
+import { auth } from "@lib/auth";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
@@ -82,9 +82,7 @@ const Entity = () => {
     { title: "Attributes", description: "Specify metadata" },
   ];
   const [pageStep, setPageStep] = useState(0);
-
   const [informationOpen, setInformationOpen] = useState(false);
-  const { token } = useAuthentication();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -122,7 +120,7 @@ const Entity = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
   );
-  const [owner] = useState(token.orcid);
+  const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
@@ -144,6 +142,29 @@ const Entity = () => {
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>(
     [],
   );
+
+  // Authentication and user
+  /**
+   * Helper function to get user information
+   */
+  const getUser = async () => {
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setOwner(sessionResponse.data.user.id);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   // Various validation error states
   const isNameError =
@@ -176,10 +197,12 @@ const Entity = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: IGenericItem[];
     templates: AttributeModel[];
-  }>(GET_CREATE_ENTITIES_DATA);
+  }>(GET_CREATE_ENTITIES_DATA, {
+    fetchPolicy: "network-only",
+  });
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -229,15 +252,6 @@ const Entity = () => {
       setTemplates(data.templates);
     }
   }, [data]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch().catch(() => {
-        // Silently handle refetch errors
-      });
-    }
-  }, []);
 
   // Capture event
   useEffect(() => {

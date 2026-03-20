@@ -11,17 +11,17 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
-import { Activity } from "./Activity";
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
-import { Users } from "./Users";
-import { Templates } from "./Templates";
+import { Activity } from "@models/Activity";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { User } from "@models/User";
+import { Templates } from "@models/Templates";
 
 // Collection name
 const WORKSPACES_COLLECTION = "workspaces";
@@ -320,14 +320,14 @@ export class Workspaces {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
-      ...workspace, // Unpack existing IEntity fields
+      ...workspace, // Unpack existing Workspace fields
     };
     const response = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
       .insertOne(joinedWorkspace);
 
     // Bootstrap the Workspace with an example Entity and Project
-    await Users.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
+    await User.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
 
     return {
       success: response.acknowledged,
@@ -375,5 +375,31 @@ export class Workspaces {
           ? "Updated Workspace"
           : "No changes made to Workspace",
     };
+  };
+
+  /**
+   * Basic access check function to validate that the User has permission to interact with a Workspace
+   * @param user Identifier of the User attempting to interact with the Workspace
+   * @param workspace Identifier of the target Workspace
+   * @return {Promise<boolean>} `true` if the User has access, `false` if not
+   */
+  static checkAccess = async (
+    user: string,
+    workspace: string,
+  ): Promise<boolean> => {
+    // Special case where no Workspaces exist for the User, `workspace` will be `""`
+    if (workspace === "") {
+      return true;
+    }
+
+    const workspaceResult = await Workspaces.getOne(workspace);
+    if (workspaceResult === null) {
+      return false;
+    }
+
+    return (
+      workspaceResult.owner === user ||
+      _.includes(workspaceResult.collaborators, user)
+    );
   };
 }

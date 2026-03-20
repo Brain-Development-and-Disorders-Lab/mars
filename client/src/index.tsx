@@ -7,9 +7,10 @@ import { toaster } from "src/components/Toast";
 
 // Apollo imports
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
-import { ErrorLink } from "@apollo/client/link/error";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { ApolloProvider } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { ErrorLink } from "@apollo/client/link/error";
+import { SetContextLink } from "@apollo/client/link/context";
 import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
 // Posthog
@@ -32,10 +33,16 @@ posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
 });
 
 // Variables
-import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
+import { API_URL } from "./variables";
+
+// Authentication
+import { auth } from "@lib/auth";
+
+// Hooks
+import { useStorage } from "@hooks/useStorage";
 
 // Utilities
-import { getSession, getToken, isAbortError } from "./util";
+import { isAbortError } from "@lib/util";
 import consola from "consola";
 
 // Application
@@ -47,31 +54,34 @@ const httpLink = new UploadHttpLink({
   headers: {
     "Apollo-Require-Preflight": "true",
   },
+  fetchOptions: {
+    credentials: "include",
+  },
 });
 
 /**
  * Authentication link to add headers to each request
  */
-const authLink = new ApolloLink((operation, forward) => {
-  const token = getToken(TOKEN_KEY);
-  const session = getSession(SESSION_KEY);
+const authLink = new SetContextLink(async (previousContext, _operation) => {
+  // Get session data
+  const { data: sessionData } = await auth.getSession();
 
-  operation.setContext(({ headers = {} }) => ({
+  // Get active Workspace
+  const { storage } = useStorage();
+
+  return {
     headers: {
-      ...headers,
-      user: token.orcid,
-      token: token.token,
-      workspace: session.workspace,
+      ...previousContext.headers,
+      user: sessionData?.user.id,
+      workspace: storage.workspace,
     },
-  }));
-
-  return forward(operation);
+  };
 });
 
 /**
  * Error handling for GraphQL errors that occur throughout the application
  */
-const errorLink = new ErrorLink(({ error }) => {
+const errorLink = new ErrorLink(({ error, operation }) => {
   // Suppress AbortErrors - expected when Apollo Client cancels queries
   if (isAbortError(error)) {
     return;
@@ -81,6 +91,21 @@ const errorLink = new ErrorLink(({ error }) => {
   if (CombinedGraphQLErrors.is(error)) {
     for (const err of error.errors) {
       const errorMessage = err.message;
+
+      // Handle access errors
+      if (err.extensions?.code === "UNAUTHORIZED") {
+        // Stop all polling queries before redirecting
+        operation.setContext({
+          fetchOptions: {
+            signal: AbortController ? new AbortController().signal : undefined,
+          },
+        });
+
+        if (window.location.pathname !== "/unauthorized") {
+          window.location.href = "/unauthorized";
+        }
+        return;
+      }
 
       // Handle authentication errors
       if (errorMessage === "Could not validate token") {
@@ -98,8 +123,6 @@ const errorLink = new ErrorLink(({ error }) => {
           },
         });
 
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(SESSION_KEY);
         return;
       }
 
@@ -148,35 +171,6 @@ const client = new ApolloClient({
       errorPolicy: "all",
     },
   },
-});
-
-// Override console.error to filter out expected errors
-// AbortErrors are expected when Apollo Client cancels queries and should not be logged
-const consoleError = console.error;
-console.error = (...args: unknown[]) => {
-  const error = args[0];
-  if (!isAbortError(error)) {
-    consoleError.apply(console, args);
-  }
-};
-
-// Global error handler to catch unhandled errors
-// Prevents AbortErrors from bubbling up and triggering error overlays
-window.addEventListener("error", (event) => {
-  const error = event.error || event;
-  if (isAbortError(error)) {
-    event.preventDefault();
-    event.stopImmediatePropagation?.();
-  }
-});
-
-// Global unhandled rejection handler
-// Prevents AbortErrors from unhandled promise rejections
-window.addEventListener("unhandledrejection", (event) => {
-  if (isAbortError(event.reason)) {
-    event.preventDefault();
-    event.stopImmediatePropagation?.();
-  }
 });
 
 // Render the application

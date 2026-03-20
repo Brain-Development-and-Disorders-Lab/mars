@@ -1,12 +1,12 @@
 // React
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 // Existing and custom components
 import { Flex } from "@chakra-ui/react";
 import Navigation from "@components/Navigation";
 import Error from "@components/Error";
 import Loading from "@components/Loading";
-import { Toaster } from "@components/Toast";
+import { toaster, Toaster } from "@components/Toast";
 import ErrorBoundary from "@components/ErrorBoundary";
 
 // Existing and custom types
@@ -15,9 +15,12 @@ import { ContentProps } from "@types";
 // Utility functions and libraries
 import _ from "lodash";
 
-// Contexts
-import { useAuthentication } from "@hooks/useAuthentication";
+// Routing and navigation
 import { Navigate, Outlet } from "react-router-dom";
+
+// Authentication
+import { auth } from "@lib/auth";
+import { Session } from "better-auth";
 
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
@@ -54,15 +57,39 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 
 // Page container
 const Page: FC = () => {
-  // Observe the authentication state
-  const { token } = useAuthentication();
+  // Authentication state
+  const [session, setSession] = useState<Session>();
 
-  if (token.token === "") {
-    // If not authenticated, return the user to the Login page
-    return <Navigate to={"/login"} />;
-  } else if (token.setup === false) {
-    return <Navigate to={"/setup"} />;
-  } else {
+  // Error state
+  const [sessionError, setSessionError] = useState(false);
+
+  /**
+   * Helper function to validate session
+   */
+  const getSession = async () => {
+    // Retrieve the session information
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      // Issue retrieving session
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      setSessionError(true);
+    } else {
+      // Successfully obtained session
+      setSession(sessionResponse.data.session);
+    }
+  };
+
+  useEffect(() => {
+    getSession();
+  }, []);
+
+  if (session) {
     // Display content
     return (
       <Flex
@@ -104,6 +131,12 @@ const Page: FC = () => {
         </Flex>
       </Flex>
     );
+  } else if (sessionError) {
+    // Navigate to login on error
+    return <Navigate to={"/login"} />;
+  } else {
+    // Loading screen
+    return <Loading />;
   }
 };
 

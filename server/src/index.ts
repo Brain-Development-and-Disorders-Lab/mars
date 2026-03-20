@@ -11,9 +11,6 @@ import * as fs from "fs";
 import "source-map-support/register";
 import _ from "lodash";
 
-// Get the connection functions
-import { connect } from "./connectors/database";
-
 // GraphQL
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
@@ -21,19 +18,24 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { typedefs } from "./typedefs";
 
 // Resolvers
-import { APIResolvers } from "./resolvers/API";
-import { ActivityResolvers } from "./resolvers/Activity";
-import { AuthenticationResolvers } from "./resolvers/Authentication";
-import { CountersResolvers } from "./resolvers/Counters";
-import { DataResolvers } from "./resolvers/Data";
-import { DateResolver } from "./resolvers/Date";
-import { EntitiesResolvers } from "./resolvers/Entities";
-import { ObjectResolver } from "./resolvers/Object";
-import { ProjectsResolvers } from "./resolvers/Projects";
-import { SearchResolvers } from "./resolvers/Search";
-import { TemplatesResolvers } from "./resolvers/Templates";
-import { UsersResolvers } from "./resolvers/Users";
-import { WorkspacesResolvers } from "./resolvers/Workspaces";
+import { APIResolvers } from "@resolvers/API";
+import { ActivityResolvers } from "@resolvers/Activity";
+import { CountersResolvers } from "@resolvers/Counters";
+import { DataResolvers } from "@resolvers/Data";
+import { DateResolver } from "@resolvers/Date";
+import { EntitiesResolvers } from "@resolvers/Entities";
+import { ObjectResolver } from "@resolvers/Object";
+import { ProjectsResolvers } from "@resolvers/Projects";
+import { SearchResolvers } from "@resolvers/Search";
+import { TemplatesResolvers } from "@resolvers/Templates";
+import { UserResolvers } from "@resolvers/User";
+import { WorkspacesResolvers } from "@resolvers/Workspaces";
+
+// Database
+import { connect } from "@connectors/database";
+
+// Authentication
+import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 
 // Custom types
 import { Context } from "@types";
@@ -43,7 +45,7 @@ import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
 // Public REST API routers
-import APIRouter from "./models/API";
+import APIRouter from "@models/API";
 
 // Set logging level
 consola.level =
@@ -60,13 +62,15 @@ export const PostHogClient =
 
 const port = process.env.PORT || 8000;
 const app = express();
-const httpServer = http.createServer(app);
 
 // Setup CORS origins
 const origins =
   process.env.NODE_ENV !== "production"
-    ? ["http://localhost:8080"]
+    ? ["http://127.0.0.1:8080"]
     : ["https://app.metadatify.com"];
+
+// Specify non-secure paths
+const nonSecurePaths = ["/login"];
 
 // Start the GraphQL server
 const start = async () => {
@@ -75,13 +79,33 @@ const start = async () => {
     consola.warn("Server not secured!");
   }
 
-  // Perform database connections
-  try {
-    await connect();
-  } catch {
-    consola.error("Error connecting to databases, aborting server start...");
-    return;
-  }
+  await connect();
+  const { auth } = await import("@lib/auth");
+
+  // Setup authentication helper function
+  const checkSession: RequestHandler = async (req, res, next) => {
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+    if (!_.includes(nonSecurePaths, req.path) && session === null) {
+      res
+        .status(401)
+        .json({ message: `You do not have permission to access ${req.path}` });
+    } else {
+      res.locals.session = session;
+      next();
+    }
+  };
+
+  // Configure authentication routes after the database connection is ready
+  app.all(
+    "/auth/{*any}",
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
+    toNodeHandler(auth),
+  );
 
   // Create folder for serving static files
   if (!fs.existsSync(__dirname + "/public")) {
@@ -90,6 +114,7 @@ const start = async () => {
   }
 
   // Setup the GraphQL server
+  const httpServer = http.createServer(app);
   const server = new ApolloServer<Context>({
     typeDefs: typedefs,
     resolvers: [
@@ -98,7 +123,6 @@ const start = async () => {
       },
       ActivityResolvers,
       APIResolvers,
-      AuthenticationResolvers,
       CountersResolvers,
       DataResolvers,
       DateResolver,
@@ -107,7 +131,7 @@ const start = async () => {
       ProjectsResolvers,
       SearchResolvers,
       TemplatesResolvers,
-      UsersResolvers,
+      UserResolvers,
       WorkspacesResolvers,
       {
         SearchResult: {
@@ -138,7 +162,10 @@ const start = async () => {
   // Serve static resources
   app.use(
     "/static",
-    cors<cors.CorsRequest>({ origin: origins }),
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
     express.static(__dirname + "/public"),
     helmet(),
   );
@@ -156,19 +183,23 @@ const start = async () => {
   // Configure Express and GraphQL
   app.use(
     "/",
-    cors<cors.CorsRequest>({ origin: origins }),
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
+    checkSession,
     express.json({ limit: "100mb" }),
     graphqlUploadExpress({
       maxFileSize: 104857600, // 100MB
       maxFiles: 10,
     }) as unknown as RequestHandler,
     expressMiddleware(server, {
-      context: async ({ req }): Promise<Context> => {
-        // Extract values from headers and create Context value
+      context: async ({ req, res }): Promise<Context> => {
+        // Use the verified better-auth session (already resolved in checkSession)
+        // rather than trusting the client-sent user header
         return {
-          user: (req.headers.user as string) || "",
+          user: res.locals.session?.user?.id || "",
           workspace: (req.headers.workspace as string) || "",
-          token: (req.headers.token as string) || "",
         };
       },
     }),
@@ -178,7 +209,7 @@ const start = async () => {
   // Start the server
   consola.start("Starting Express server...");
   httpServer.listen({ port: port });
-  consola.success(`Express server running at: http://localhost:${port}/`);
+  consola.success(`Express server running at: http://127.0.0.1:${port}/`);
 };
 
 start();

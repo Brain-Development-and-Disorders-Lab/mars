@@ -27,7 +27,10 @@ module.exports = {
           options: {
             configFile: path.resolve(__dirname, "tsconfig.json"),
             onlyCompileBundledFiles: true,
-            transpileOnly: true,
+            transpileOnly: process.env.NODE_ENV === "production",
+            compilerOptions: {
+              sourceMap: true,
+            },
           },
         },
         exclude: [
@@ -66,8 +69,10 @@ module.exports = {
       "@components": path.resolve(__dirname, "./src/components/"),
       "@database": path.resolve(__dirname, "./src/database/"),
       "@hooks": path.resolve(__dirname, "./src/hooks/"),
+      "@lib": path.resolve(__dirname, "./src/lib/"),
       "@pages": path.resolve(__dirname, "./src/pages/"),
       "@types": path.resolve(__dirname, "../types"),
+      "@variables": path.resolve(__dirname, "./src/variables"),
       "entities/decode": path.resolve(
         __dirname,
         "./node_modules/parse5/node_modules/entities/dist/commonjs/decode.js",

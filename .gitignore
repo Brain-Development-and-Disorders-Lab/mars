@@ -4,6 +4,9 @@
 # Visual Studio Code
 .vscode
 
+# JetBrains
+.idea
+
 # Logs
 logs
 *.log

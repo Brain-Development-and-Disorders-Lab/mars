@@ -1,4 +1,7 @@
-import { test, expect } from "../fixtures";
+// Playwright imports
+import test, { expect } from "@playwright/test";
+
+// Test helper functions
 import { clearUsers } from "../../../../server/test/util";
 
 test.describe("Security, check endpoint access", () => {

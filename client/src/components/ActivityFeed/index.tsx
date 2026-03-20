@@ -22,9 +22,6 @@ import { ActivityModel, ActivityFeedProps } from "@types";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Context and hooks
-import { useWorkspace } from "@hooks/useWorkspace";
-
 // Apollo client imports
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
@@ -56,7 +53,6 @@ const ActivityFeed = ({
   feedLimit = 5,
 }: ActivityFeedProps) => {
   const navigate = useNavigate();
-  const { workspace } = useWorkspace();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,7 +62,7 @@ const ActivityFeed = ({
     return () => clearInterval(interval);
   }, []);
 
-  const { data, refetch } = useQuery<{
+  const { data } = useQuery<{
     activity: ActivityModel[];
   }>(GET_ACTIVITY, {
     variables: {
@@ -76,13 +72,6 @@ const ActivityFeed = ({
     pollInterval: 5000,
   });
 
-  // Refetch when workspace changes
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
-
   const activities = data?.activity ?? activitiesProp ?? [];
 
   // Use all activities for the chart, but limit the feed display
@@ -91,18 +80,7 @@ const ActivityFeed = ({
   }, [activities, feedLimit]);
 
   return (
-    <Flex
-      direction={"column"}
-      maxW={{ lg: "md" }}
-      p={"1"}
-      gap={"1"}
-      grow={"1"}
-      rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
-      h={"fit-content"}
-      data-timestamp-update={timestampUpdate}
-    >
+    <Flex direction={"column"} data-timestamp-update={timestampUpdate}>
       {/* Activity heading */}
       <Flex
         id={"recentActivityHeader"}
@@ -164,7 +142,7 @@ const ActivityFeed = ({
       {/* Activity list */}
       {feedActivities.length > 0 ? (
         <Flex direction={"column"} gap={"1"}>
-          <Stack gap={"1.5"} w={"95%"}>
+          <Stack gap={"1"} w={"98%"}>
             {feedActivities.map((activity: ActivityModel) => {
               return (
                 <Flex
@@ -176,7 +154,7 @@ const ActivityFeed = ({
                 >
                   {activity.actor ? (
                     <ActorTag
-                      orcid={activity.actor}
+                      identifier={activity.actor}
                       fallback={"Unknown User"}
                       size={"sm"}
                       avatarOnly
@@ -187,7 +165,12 @@ const ActivityFeed = ({
                     </Avatar.Root>
                   )}
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                    <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                    <Flex
+                      direction={"row"}
+                      w={"100%"}
+                      gap={"1"}
+                      justify={"space-between"}
+                    >
                       <Text fontSize={"xs"}>{activity.details}:</Text>
                       <Text
                         fontSize={"xs"}

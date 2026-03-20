@@ -1,13 +1,12 @@
 // Seed script to generate comprehensive test data for MongoDB
 import "dotenv/config";
-import { connect, disconnect } from "../connectors/database";
-import { Entities } from "../models/Entities";
-import { Projects } from "../models/Projects";
-import { Templates } from "../models/Templates";
-import { Activity } from "../models/Activity";
-import { Workspaces } from "../models/Workspaces";
-import { Users } from "../models/Users";
-import { getIdentifier } from "../util";
+import { connect, disconnect } from "@connectors/database";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Activity } from "@models/Activity";
+import { Workspaces } from "@models/Workspaces";
+import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import consola from "consola";
 import {
@@ -21,7 +20,7 @@ import {
   IValueType,
   IWorkspace,
 } from "@types";
-import { DEMO_USER_ORCID } from "../variables";
+import { DEMO_USER_ORCID } from "@variables";
 
 // Configuration
 const NUM_ENTITIES = 10000;
@@ -172,13 +171,13 @@ function generateValue(
   type: IValueType,
   index: number,
   entityIds?: string[],
-): { _id: string; name: string; type: IValueType; data: unknown } {
+): { _id: string; name: string; type: IValueType; data: string } {
   const name = VALUE_NAMES[index % VALUE_NAMES.length] || `Value ${index + 1}`;
-  let data: unknown;
+  let data: string;
 
   switch (type) {
     case "number":
-      data = Math.random() * 1000;
+      data = (Math.random() * 1000).toString();
       break;
     case "text":
       data = `Sample text data for ${name}`;
@@ -487,36 +486,6 @@ async function generateActivity(
   consola.success(`Generated ${activityIds.length} activity entries`);
 }
 
-// Ensure test user exists and has access to workspace
-async function ensureTestUser(workspaceId: string): Promise<void> {
-  consola.info("Ensuring test user exists...");
-  const user = await Users.getOne(DEMO_USER_ORCID);
-  if (!user) {
-    consola.info("Creating test user...");
-    await Users.create({
-      _id: DEMO_USER_ORCID,
-      firstName: "Demo",
-      lastName: "User",
-      email: "demo@metadatify.com",
-      affiliation: "Test Organization",
-      lastLogin: dayjs().toISOString(),
-      token: "test_token",
-      workspaces: [workspaceId],
-      api_keys: [],
-    });
-    consola.success("Created test user");
-  } else {
-    // Add workspace to user if not already present
-    if (!user.workspaces.includes(workspaceId)) {
-      user.workspaces.push(workspaceId);
-      await Users.update(user);
-      consola.info("Added workspace to existing user");
-    } else {
-      consola.info("User already has access to workspace");
-    }
-  }
-}
-
 // Create workspace
 async function createWorkspace(): Promise<string> {
   consola.info("Creating workspace...");
@@ -589,9 +558,6 @@ async function seedDatabase(): Promise<void> {
 
     // Create workspace first
     const workspaceId = await createWorkspace();
-
-    // Ensure test user exists and has access
-    await ensureTestUser(workspaceId);
 
     // Generate in order: Templates -> Projects -> Entities -> Relationships -> Activity
     const templates = await generateTemplates();

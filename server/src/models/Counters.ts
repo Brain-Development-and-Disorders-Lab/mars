@@ -1,10 +1,10 @@
 // Database operations
-import { getDatabase } from "src/connectors/database";
+import { getDatabase } from "@connectors/database";
 
 // Utilities
 import _ from "lodash";
 import dayjs from "dayjs";
-import { getIdentifier } from "src/util";
+import { getIdentifier } from "@lib/util";
 
 // Custom types
 import { CounterModel, ICounter, ResponseData } from "@types";

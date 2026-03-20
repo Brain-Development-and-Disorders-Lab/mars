@@ -1,12 +1,12 @@
 // Utility libraries and functions
-import { getDatabase } from "../connectors/database";
+import { getDatabase } from "@connectors/database";
 import _ from "lodash";
 
 // Models
 import { EntityModel, ProjectModel } from "@types";
-import { Workspaces } from "./Workspaces";
-import { Entities } from "./Entities";
-import { Projects } from "./Projects";
+import { Workspaces } from "@models/Workspaces";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
 
 // Collection names
 const ENTITIES_COLLECTION = "entities";

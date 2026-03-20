@@ -49,12 +49,12 @@ import CreateProject from "@pages/create/Project";
 import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
 import Invalid from "@pages/Invalid";
+import Unauthorized from "@pages/Unauthorized";
 import Login from "@pages/Login";
-import Setup from "@pages/Setup";
+import Signup from "@pages/Signup";
 
 // Providers
 import { WorkspaceProvider } from "./hooks/useWorkspace";
-import { AuthenticationProvider } from "./hooks/useAuthentication";
 
 // Theme extension
 import { theme } from "./styles/theme";
@@ -67,11 +67,9 @@ import { theme } from "./styles/theme";
 const Providers = (): React.JSX.Element => {
   return (
     <ChakraProvider value={theme}>
-      <AuthenticationProvider>
-        <WorkspaceProvider>
-          <Outlet />
-        </WorkspaceProvider>
-      </AuthenticationProvider>
+      <WorkspaceProvider>
+        <Outlet />
+      </WorkspaceProvider>
     </ChakraProvider>
   );
 };
@@ -89,7 +87,7 @@ const App = (): ReactElement => {
     createRoutesFromElements(
       <Route path="" element={<Providers />}>
         {/* Authentication not required */}
-        <Route path={"/setup"} element={<Setup />} />
+        <Route path={"/signup"} element={<Signup />} />
         <Route path={"/login"} element={<Login />} />
 
         {/* Authentication required */}
@@ -131,6 +129,7 @@ const App = (): ReactElement => {
           <Route path={"/search"} element={<Search />} />
           <Route path={"/activity"} element={<Activity />} />
           <Route path={"/invalid"} element={<Invalid />} />
+          <Route path={"/unauthorized"} element={<Unauthorized />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
         </Route>
       </Route>,

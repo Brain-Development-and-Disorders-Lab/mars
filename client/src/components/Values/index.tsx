@@ -22,13 +22,15 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 
+import { OptionBase, Select as ReactSelect } from "chakra-react-select";
+
 // Custom components
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 
 // Types
-import { IValue, IValueType, GenericValueType } from "@types";
+import { IValue, IValueType } from "@types";
 
 // Utility functions
 import _ from "lodash";
@@ -39,20 +41,14 @@ import dayjs from "dayjs";
  * Features a compact, spreadsheet-like layout with type selection, name, and value columns
  */
 const Values = (props: {
+  values: IValue[];
+  setValues: (values: React.SetStateAction<IValue[]>) => void;
   viewOnly?: boolean;
-  values: IValue<GenericValueType>[];
-  setValues: (value: React.SetStateAction<IValue<GenericValueType>[]>) => void;
   requireData?: boolean;
   permittedValues?: string[];
 }) => {
   // Counter for unique IDs
   const idCounter = React.useRef(0);
-
-  // State for select options modal
-  const [selectModalOpen, setSelectModalOpen] = useState(false);
-  const [editingSelectId, setEditingSelectId] = useState<string | null>(null);
-  const [selectOptions, setSelectOptions] = useState<string[]>([]);
-  const [newOption, setNewOption] = useState("");
 
   // State for column widths with minimum constraints
   const [columnWidths, setColumnWidths] = useState({
@@ -82,160 +78,23 @@ const Values = (props: {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Default data for new rows
-  const createNewValue = (suffix?: string): IValue<GenericValueType> => ({
-    _id: `v_text_${Date.now()}_${++idCounter.current}_${suffix || Math.random().toString(36).substr(2, 9)}`,
+  const createNewValue = (suffix?: string): IValue => ({
+    _id: `v_${Date.now()}_${++idCounter.current}_${suffix || Math.random().toString(36).slice(2, 9)}`,
     name: "",
     type: "text",
     data: "",
   });
 
-  // Initialize with a new row if empty, otherwise use provided values
-  const [localValues, setLocalValues] = useState<IValue<GenericValueType>[]>(
-    () => {
-      if (props.values.length === 0) {
-        return [createNewValue("row1")];
-      }
-      return props.values;
-    },
-  );
-
-  // Update local values when props.values changes
-  useEffect(() => {
-    if (props.values.length > 0) {
-      setLocalValues(props.values);
-    }
-  }, [props.values]);
-
   // Pagination calculations
-  const totalPages = Math.ceil(localValues.length / rowsPerPage);
+  const totalPages = Math.ceil(props.values.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const paginatedValues = localValues.slice(startIndex, endIndex);
+  const paginatedValues = props.values.slice(startIndex, endIndex);
 
   // Reset to first page when rows per page changes
   useEffect(() => {
     setCurrentPage(1);
   }, [rowsPerPage]);
-
-  // Handle type change
-  const handleTypeChange = (valueId: string, newType: IValueType) => {
-    const updatedValues = localValues.map((value) => {
-      if (value._id === valueId) {
-        let newData: GenericValueType;
-        switch (newType) {
-          case "number":
-            newData = 0;
-            break;
-          case "text":
-            newData = "";
-            break;
-          case "url":
-            newData = "";
-            break;
-          case "date":
-            newData = dayjs(Date.now()).toISOString();
-            break;
-          case "entity":
-            newData = { _id: "", name: "" };
-            break;
-          case "select":
-            newData = {
-              selected: "",
-              options: [],
-            };
-            break;
-          default:
-            newData = "";
-        }
-        return { ...value, type: newType, data: newData };
-      }
-      return value;
-    });
-    setLocalValues(updatedValues);
-    props.setValues(updatedValues);
-  };
-
-  // Handle name change
-  const handleNameChange = (valueId: string, newName: string) => {
-    const updatedValues = localValues.map((value) => {
-      if (value._id === valueId) {
-        return { ...value, name: newName };
-      }
-      return value;
-    });
-    setLocalValues(updatedValues);
-    props.setValues(updatedValues);
-  };
-
-  // Handle data change
-  const handleDataChange = (valueId: string, newData: GenericValueType) => {
-    const updatedValues = localValues.map((value) => {
-      if (value._id === valueId) {
-        return { ...value, data: newData };
-      }
-      return value;
-    });
-    setLocalValues(updatedValues);
-    props.setValues(updatedValues);
-  };
-
-  // Handle opening select options modal
-  const openSelectModal = (valueId: string) => {
-    setEditingSelectId(valueId);
-    setSelectOptions([]);
-    setNewOption("");
-    setSelectModalOpen(true);
-  };
-
-  // Handle adding a new option
-  const addOption = () => {
-    if (newOption.trim() && !selectOptions.includes(newOption.trim())) {
-      setSelectOptions([...selectOptions, newOption.trim()]);
-      setNewOption("");
-    }
-  };
-
-  // Handle removing an option
-  const removeOption = (optionToRemove: string) => {
-    setSelectOptions(
-      selectOptions.filter((option) => option !== optionToRemove),
-    );
-  };
-
-  // Handle confirming select options
-  const confirmSelectOptions = () => {
-    if (editingSelectId && selectOptions.length > 0) {
-      const updatedValues = localValues.map((value) => {
-        if (value._id === editingSelectId) {
-          return {
-            ...value,
-            data: {
-              selected: "",
-              options: selectOptions.map((opt) => ({
-                _id: `option_${Date.now()}_${opt}`,
-                name: opt,
-              })),
-            },
-          };
-        }
-        return value;
-      });
-      setLocalValues(updatedValues);
-      props.setValues(updatedValues);
-    }
-    setSelectModalOpen(false);
-    setEditingSelectId(null);
-    setSelectOptions([]);
-    setNewOption("");
-  };
-
-  // Handle canceling select options
-  const cancelSelectOptions = () => {
-    setSelectModalOpen(false);
-    setEditingSelectId(null);
-    setSelectOptions([]);
-    setNewOption("");
-  };
 
   // Handle column resize start
   const handleResizeStart = (column: string, event: React.MouseEvent) => {
@@ -269,7 +128,7 @@ const Values = (props: {
   };
 
   // Add event listeners for drag
-  React.useEffect(() => {
+  useEffect(() => {
     if (isResizing) {
       document.addEventListener("mousemove", handleResizeMove);
       document.addEventListener("mouseup", handleResizeEnd);
@@ -289,372 +148,41 @@ const Values = (props: {
   // Row manipulation functions
   const addRow = () => {
     const newValue = createNewValue();
-    const updatedValues = [...localValues, newValue];
-    setLocalValues(updatedValues);
+    const updatedValues = [...props.values, newValue];
     props.setValues(updatedValues);
   };
 
   const removeSelectedRows = () => {
     if (selectedRows.size === 0) return;
-    const updatedValues = localValues.filter(
+    const updatedValues = props.values.filter(
       (value) => !selectedRows.has(value._id),
     );
-    setLocalValues(updatedValues);
     props.setValues(updatedValues);
     setSelectedRows(new Set());
   };
 
-  const toggleRowSelection = (valueId: string) => {
-    const newSelection = new Set(selectedRows);
-    if (newSelection.has(valueId)) {
-      newSelection.delete(valueId);
-    } else {
-      newSelection.add(valueId);
-    }
-    setSelectedRows(newSelection);
-  };
-
-  // Get icon for value type
-  const getTypeIcon = (type: IValueType) => {
-    switch (type) {
-      case "number":
-        return <Icon size="xs" name="v_number" color="green.300" />;
-      case "text":
-        return <Icon size="xs" name="v_text" color="blue.300" />;
-      case "url":
-        return <Icon size="xs" name="v_url" color="yellow.300" />;
-      case "date":
-        return <Icon size="xs" name="v_date" color="orange.300" />;
-      case "select":
-        return <Icon size="xs" name="v_select" color="cyan.300" />;
-      case "entity":
-      default:
-        return <Icon size="xs" name="entity" color="purple.300" />;
-    }
-  };
-
-  // Helper function to check if select has configured options
-  const hasSelectOptions = (data: unknown): boolean => {
-    return !!(
-      data &&
-      typeof data === "object" &&
-      "options" in data &&
-      Array.isArray((data as { options: unknown[] }).options) &&
-      (data as { options: unknown[] }).options.length > 0
-    );
-  };
-
-  // Render data input based on type
-  const renderDataInput = (value: IValue<GenericValueType>) => {
-    switch (value.type) {
-      case "number":
-        return (
-          <Input
-            value={value.data?.toString() || ""}
-            onChange={(e) =>
-              handleDataChange(value._id, parseFloat(e.target.value) || 0)
-            }
-            size="xs"
-            h={props.viewOnly ? "34px" : "100%"}
-            borderRadius="none"
-            fontSize="xs"
-            type="number"
-            readOnly={props.viewOnly}
-            placeholder="Enter number"
-            border="1px solid transparent"
-            bg="transparent"
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-
-      case "text":
-        return (
-          <Input
-            value={value.data?.toString() || ""}
-            onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="xs"
-            h={props.viewOnly ? "34px" : "100%"}
-            borderRadius="none"
-            fontSize="xs"
-            readOnly={props.viewOnly}
-            placeholder="Enter text"
-            border="1px solid transparent"
-            bg="transparent"
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-
-      case "url":
-        return (
-          <Input
-            value={value.data?.toString() || ""}
-            onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="xs"
-            h={props.viewOnly ? "34px" : "100%"}
-            borderRadius="none"
-            fontSize="xs"
-            readOnly={props.viewOnly}
-            placeholder="Enter URL"
-            border="1px solid transparent"
-            bg="transparent"
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-
-      case "date":
-        return (
-          <Input
-            value={value.data?.toString() || ""}
-            onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="xs"
-            h={props.viewOnly ? "34px" : "100%"}
-            borderRadius="none"
-            fontSize="xs"
-            type="date"
-            readOnly={props.viewOnly}
-            border="1px solid transparent"
-            bg="transparent"
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-
-      case "select":
-        // Check if select has options configured
-        if (hasSelectOptions(value.data)) {
-          // Show dropdown with configured options
-          return (
-            <Select.Root
-              size="xs"
-              minW="100px"
-              h={props.viewOnly ? "34px" : "100%"}
-              border="1px solid transparent"
-              value={value.data.selected ? [value.data.selected._id] : []}
-              collection={createListCollection({
-                items: (
-                  value.data as {
-                    options: Array<{ _id: string; name: string }>;
-                  }
-                ).options.map((opt) => ({
-                  value: opt._id,
-                  label: opt.name,
-                })),
-              })}
-              onValueChange={(details) => {
-                const selectedOption = (
-                  value.data as {
-                    options: Array<{ _id: string; name: string }>;
-                  }
-                ).options.find((opt) => opt._id === details.value[0]);
-                handleDataChange(value._id, {
-                  ...value.data,
-                  selected: selectedOption || "",
-                });
-              }}
-              _focus={{
-                bg: "white",
-                border: "1px solid",
-                borderColor: "blue.300",
-              }}
-              _hover={{
-                border: "1px solid",
-                borderColor: "blue.200",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-              }}
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger
-                  border="none"
-                  borderRadius="none"
-                  disabled={props.viewOnly}
-                >
-                  <Select.ValueText placeholder="Select Value">
-                    {value.data.selected?.name || "Select Value"}
-                  </Select.ValueText>
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content zIndex={9999}>
-                    {(
-                      value.data as {
-                        options: Array<{ _id: string; name: string }>;
-                      }
-                    ).options.map((option) => (
-                      <Select.Item
-                        item={{ value: option._id, label: option.name }}
-                        key={option._id}
-                      >
-                        {option.name}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-          );
-        } else {
-          // Show "Setup Options" button
-          return (
-            <Flex
-              w="100%"
-              h={"34px"}
-              p={"0"}
-              align="center"
-              justify="center"
-              border="1px solid transparent"
-              _focus={{
-                bg: "white",
-                borderColor: "blue.300",
-              }}
-              _hover={{
-                border: "1px solid",
-                borderColor: "blue.200",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-              }}
-              cursor={props.viewOnly ? "default" : "pointer"}
-              onClick={
-                props.viewOnly ? undefined : () => openSelectModal(value._id)
-              }
-            >
-              <Text fontSize="xs" fontWeight="semibold" color="blue.600">
-                Setup Options
-              </Text>
-            </Flex>
-          );
-        }
-
-      case "entity":
-        if (!props.viewOnly) {
-          return (
-            <Flex
-              w="100%"
-              h={props.viewOnly ? "34px" : "100%"}
-              p={"0"}
-              align="center"
-              justify="center"
-              border="1px solid transparent"
-              _focus={{
-                bg: "white",
-                borderColor: "blue.300",
-              }}
-              _hover={{
-                border: "1px solid",
-                borderColor: "blue.200",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-              }}
-            >
-              <SearchSelect
-                placeholder="Select Entity"
-                resultType="entity"
-                value={value.data || { _id: "", name: "" }}
-                onChange={(entity) => handleDataChange(value._id, entity)}
-                disabled={props.viewOnly}
-                isEmbedded
-              />
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex
-              w="100%"
-              h={props.viewOnly ? "34px" : "100%"}
-              justify="center"
-              pt={"0.5"}
-              px={"2"}
-              border="1px solid transparent"
-              _focus={{
-                bg: "white",
-                borderColor: "blue.300",
-              }}
-              _hover={{
-                border: "1px solid",
-                borderColor: "blue.200",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-              }}
-            >
-              <Linky type="entities" id={value.data?._id || ""} size="xs" />
-            </Flex>
-          );
-        }
-
-      default:
-        return (
-          <Input
-            value={value.data?.toString() || ""}
-            onChange={(e) => handleDataChange(value._id, e.target.value)}
-            size="xs"
-            h={props.viewOnly ? "34px" : "100%"}
-            px={1}
-            py={0.5}
-            fontSize="xs"
-            readOnly={props.viewOnly}
-            placeholder="Enter value"
-            border="1px solid transparent"
-            bg="transparent"
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-    }
+  /**
+   * Propagate updated `Values` rows to the overall React state
+   * @param _id Unique identifier of the `IValue`
+   * @param name Updated name of the `IValue`
+   * @param type Updated `IValueType` of the `IValue`
+   * @param data Updated data of the `IValue`
+   */
+  const onValueChange = (
+    _id: string,
+    name: string,
+    type: IValueType,
+    data: string,
+  ) => {
+    const updatedValues = _.cloneDeep(props.values).map((value) => {
+      if (value._id === _id) {
+        value.name = name;
+        value.type = type;
+        value.data = data;
+      }
+      return value;
+    });
+    props.setValues(updatedValues);
   };
 
   return (
@@ -812,207 +340,15 @@ const Values = (props: {
           {/* Data Rows */}
           <Box overflowY="auto" overflowX="hidden">
             {paginatedValues.map((value, index) => (
-              <Flex
+              <ValueRow
                 key={value._id}
-                gap={0}
-                borderBottom={
-                  index < paginatedValues.length - 1 ? "1px solid" : "none"
-                }
-                borderColor="gray.200"
-                _hover={{ bg: "gray.25" }}
-                overflow="hidden"
-                bg={selectedRows.has(value._id) ? "blue.50" : "transparent"}
-              >
-                {/* Drag Handle Column - only show in edit mode */}
-                {!props.viewOnly && (
-                  <Box
-                    w="40px"
-                    px={1}
-                    py={0.5}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    borderRight="1px solid"
-                    borderColor="gray.200"
-                    bg={
-                      selectedRows.has(value._id) ? "blue.100" : "transparent"
-                    }
-                    _hover={
-                      !props.viewOnly
-                        ? {
-                            bg: selectedRows.has(value._id)
-                              ? "blue.200"
-                              : "gray.100",
-                          }
-                        : {}
-                    }
-                    cursor={props.viewOnly ? "default" : "pointer"}
-                  >
-                    <Checkbox.Root
-                      checked={selectedRows.has(value._id)}
-                      onChange={() =>
-                        !props.viewOnly && toggleRowSelection(value._id)
-                      }
-                      size="xs"
-                      colorPalette="blue"
-                      disabled={props.viewOnly}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                    </Checkbox.Root>
-                  </Box>
-                )}
-                {/* Type Column */}
-                <Box
-                  w={`${columnWidths.type}px`}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  borderRight="1px solid"
-                  borderColor="gray.200"
-                >
-                  {!props.viewOnly ? (
-                    <Select.Root
-                      size="xs"
-                      border="1px solid transparent"
-                      collection={createListCollection({
-                        items: [
-                          { value: "number", label: "Number" },
-                          { value: "text", label: "Text" },
-                          { value: "url", label: "URL" },
-                          { value: "date", label: "Date" },
-                          { value: "entity", label: "Entity" },
-                          { value: "select", label: "Select" },
-                        ],
-                      })}
-                      onValueChange={(details) =>
-                        handleTypeChange(
-                          value._id,
-                          details.items[0].value as IValueType,
-                        )
-                      }
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger
-                          minW="100px"
-                          borderRadius="none"
-                          border="none"
-                        >
-                          <Flex align="center" gap={1} h="16px">
-                            {getTypeIcon(value.type)}
-                            <Text fontSize="xs" color="gray.700">
-                              {value.type === "url"
-                                ? "URL"
-                                : _.capitalize(value.type)}
-                            </Text>
-                          </Flex>
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Select.Positioner>
-                        <Select.Content zIndex={9999}>
-                          {[
-                            { value: "number", label: "Number" },
-                            { value: "text", label: "Text" },
-                            { value: "url", label: "URL" },
-                            { value: "date", label: "Date" },
-                            { value: "entity", label: "Entity" },
-                            { value: "select", label: "Select" },
-                          ].map((option) => (
-                            <Select.Item item={option} key={option.value}>
-                              <Flex align="center" gap={2}>
-                                {getTypeIcon(option.value as IValueType)}
-                                {option.label}
-                              </Flex>
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Select.Root>
-                  ) : (
-                    <Flex align="center" gap={1} w="60px">
-                      {getTypeIcon(value.type)}
-                      <Text fontSize="xs" color="gray.700">
-                        {value.type === "url"
-                          ? "URL"
-                          : _.capitalize(value.type)}
-                      </Text>
-                    </Flex>
-                  )}
-                </Box>
-
-                {/* Name Column */}
-                <Box
-                  w={`${columnWidths.name}px`}
-                  p={"0"}
-                  m={"0"}
-                  borderRight="1px solid"
-                  borderColor="gray.200"
-                >
-                  <Input
-                    value={value.name}
-                    onChange={(e) =>
-                      handleNameChange(value._id, e.target.value)
-                    }
-                    size="xs"
-                    px={1}
-                    py={0}
-                    h="100%"
-                    fontSize="xs"
-                    readOnly={props.viewOnly}
-                    placeholder="Enter name"
-                    border="1px solid transparent"
-                    borderRadius="none"
-                    bg="transparent"
-                    cursor={props.viewOnly ? "default" : "text"}
-                    onClick={
-                      props.viewOnly ? (e) => e.preventDefault() : undefined
-                    }
-                    _focus={{
-                      bg: "white",
-                      border: "1px solid",
-                      borderColor: "blue.300",
-                    }}
-                    _hover={{
-                      border: "1px solid",
-                      borderColor: "blue.200",
-                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                    }}
-                  />
-                </Box>
-
-                {/* Value Column */}
-                <Flex
-                  w={`${columnWidths.value}px`}
-                  flex="1"
-                  p={"0"}
-                  overflow="visible"
-                  justify="space-between"
-                  align="center"
-                >
-                  {renderDataInput(value)}
-                  {props.viewOnly && value.type !== "entity" && (
-                    <IconButton
-                      aria-label="Copy value"
-                      size="2xs"
-                      mx={"1"}
-                      variant="outline"
-                      colorPalette="gray"
-                      onClick={() =>
-                        navigator.clipboard.writeText(
-                          value.data?.toString() || "",
-                        )
-                      }
-                    >
-                      <Icon name="copy" size="xs" />
-                    </IconButton>
-                  )}
-                </Flex>
-              </Flex>
+                value={value}
+                onValueChange={onValueChange}
+                columnWidths={columnWidths}
+                isSelected={selectedRows.has(value._id)}
+                hideBorder={index >= paginatedValues.length - 1}
+                viewOnly={props.viewOnly}
+              />
             ))}
           </Box>
 
@@ -1045,6 +381,7 @@ const Values = (props: {
                 </Button>
               ) : (
                 <Button
+                  id="addValueRowButton"
                   size="xs"
                   variant="ghost"
                   colorPalette="green"
@@ -1062,157 +399,6 @@ const Values = (props: {
               )}
             </Flex>
           )}
-
-          {/* Select Options Modal */}
-          <Dialog.Root
-            open={selectModalOpen}
-            size="sm"
-            placement="center"
-            closeOnEscape
-            closeOnInteractOutside
-          >
-            <Dialog.Backdrop />
-            <Dialog.Positioner>
-              <Dialog.Content>
-                <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
-                  <Flex direction="row" align="center" gap="1" p={"2"}>
-                    <Icon name="v_select" />
-                    <Text fontSize="xs" fontWeight="semibold">
-                      Setup Options
-                    </Text>
-                  </Flex>
-                  <Dialog.CloseTrigger asChild>
-                    <CloseButton
-                      size="2xs"
-                      top={"6px"}
-                      onClick={cancelSelectOptions}
-                    />
-                  </Dialog.CloseTrigger>
-                </Dialog.Header>
-                <Dialog.Body p="1" gap="1" pb="1">
-                  <Flex direction="column" gap="1">
-                    <Flex direction="row" gap="1">
-                      <Input
-                        size="xs"
-                        rounded="md"
-                        placeholder="Enter option value"
-                        value={newOption}
-                        onChange={(e) => setNewOption(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            addOption();
-                          }
-                        }}
-                      />
-                      <Button
-                        colorPalette="green"
-                        size="xs"
-                        rounded="md"
-                        onClick={addOption}
-                        disabled={
-                          !newOption.trim() ||
-                          selectOptions.includes(newOption.trim())
-                        }
-                      >
-                        Add
-                        <Icon name="add" />
-                      </Button>
-                    </Flex>
-                    <Box>
-                      <Stack
-                        gap="1"
-                        separator={<Separator />}
-                        pb="1"
-                        maxH="200px"
-                        overflowY={"auto"}
-                      >
-                        {selectOptions.length > 0 ? (
-                          selectOptions.map((option, index) => (
-                            <Flex
-                              key={option}
-                              direction="row"
-                              cursor={props.viewOnly ? "default" : "text"}
-                              onClick={
-                                props.viewOnly
-                                  ? (e) => e.preventDefault()
-                                  : undefined
-                              }
-                              justify="space-between"
-                              align="center"
-                            >
-                              <Flex gap="1">
-                                <Text
-                                  fontWeight="semibold"
-                                  fontSize="xs"
-                                  ml={"0.5"}
-                                >
-                                  Value {index + 1}:
-                                </Text>
-                                <Text fontSize="xs">{option}</Text>
-                              </Flex>
-                              <IconButton
-                                aria-label={`remove_${index}`}
-                                size="2xs"
-                                colorPalette="red"
-                                onClick={() => removeOption(option)}
-                              >
-                                <Icon name="delete" />
-                              </IconButton>
-                            </Flex>
-                          ))
-                        ) : (
-                          <Flex
-                            cursor={props.viewOnly ? "default" : "text"}
-                            onClick={
-                              props.viewOnly
-                                ? (e) => e.preventDefault()
-                                : undefined
-                            }
-                            align="center"
-                            justify="center"
-                            minH="60px"
-                            rounded="md"
-                            border="1px"
-                            borderColor="gray.300"
-                          >
-                            <Text
-                              fontSize="xs"
-                              fontWeight="semibold"
-                              color="gray.400"
-                            >
-                              No values added.
-                            </Text>
-                          </Flex>
-                        )}
-                      </Stack>
-                    </Box>
-                  </Flex>
-                </Dialog.Body>
-                <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
-                  <Button
-                    size="xs"
-                    rounded="md"
-                    colorPalette="red"
-                    onClick={cancelSelectOptions}
-                  >
-                    Cancel
-                    <Icon name="cross" />
-                  </Button>
-                  <Spacer />
-                  <Button
-                    size="xs"
-                    rounded="md"
-                    colorPalette="green"
-                    onClick={confirmSelectOptions}
-                    disabled={selectOptions.length === 0}
-                  >
-                    Confirm
-                    <Icon name="check" />
-                  </Button>
-                </Dialog.Footer>
-              </Dialog.Content>
-            </Dialog.Positioner>
-          </Dialog.Root>
         </Box>
       </Box>
 
@@ -1340,6 +526,754 @@ const Values = (props: {
         </Flex>
       </Flex>
     </Box>
+  );
+};
+
+const ValueRow = (props: {
+  key: string;
+  value: IValue;
+  onValueChange: (
+    _id: string,
+    name: string,
+    type: IValueType,
+    data: string,
+  ) => void;
+  columnWidths: { type: number; name: number; value: number };
+  isSelected: boolean;
+  hideBorder?: boolean;
+  viewOnly?: boolean;
+}) => {
+  interface ValueTypeOption extends OptionBase {
+    label: string;
+    value: IValueType;
+  }
+  const valueTypeOptions: ValueTypeOption[] = [
+    { label: "Number", value: "number" },
+    { label: "Text", value: "text" },
+    { label: "URL", value: "url" },
+    { label: "Date", value: "date" },
+    { label: "Entity", value: "entity" },
+    { label: "Select", value: "select" },
+  ];
+
+  interface SelectOption extends OptionBase {
+    label: string;
+    value: string;
+  }
+
+  // Get the initial `ValueTypeOption` based on the `IValue` type
+  const initialValueType = valueTypeOptions.filter(
+    (value) => value.value === props.value.type,
+  )[0];
+
+  // React state for value display
+  const [valueName, setValueName] = useState(props.value.name);
+  const [valueType, setValueType] = useState<IValueType>(props.value.type);
+  const [valueTypeOption, setValueTypeOption] =
+    useState<ValueTypeOption>(initialValueType);
+  const [valueData, setValueData] = useState(props.value.data);
+  const [valueChecked, setValueChecked] = useState(false);
+
+  // React state for `Select` value type display
+  let initialSelectOption;
+  let initialSelectOptions = [];
+  if (initialValueType.value === "select") {
+    const initialSelectData = JSON.parse(valueData);
+    initialSelectOption = {
+      label: initialSelectData.selected,
+      value: initialSelectData.selected,
+    };
+    initialSelectOptions = initialSelectData.options;
+  }
+  const [selectModalOpen, setSelectModalOpen] = useState(false); // Modal state
+  const [selectOptions, setSelectOptions] =
+    useState<SelectOption[]>(initialSelectOptions); // Collection of `Select` options
+  const [selectOption, setSelectOption] = useState<SelectOption | undefined>(
+    initialSelectOption,
+  ); // Selected option
+  const [selectOptionValue, setSelectOptionValue] = useState(""); // Current `Select` option value being created
+
+  useEffect(() => {
+    // Propagate changes to overall `Value` state
+    props.onValueChange(props.value._id, valueName, valueType, valueData);
+  }, [valueName, valueType, valueData]);
+
+  /**
+   *
+   * @param valueType The new `IValueType` that has been selected
+   * @returns
+   */
+  const generateDefaultData = (valueType: IValueType): string => {
+    switch (valueType) {
+      case "number":
+        return "0";
+      case "text":
+        return "";
+      case "url":
+        return "https://";
+      case "date":
+        return dayjs(Date.now()).toISOString();
+      case "entity":
+        return JSON.stringify({ _id: "", name: "" });
+      case "select":
+        return JSON.stringify({
+          selected: "",
+          options: [],
+        });
+    }
+  };
+
+  // Handle adding a new option
+  const addOption = () => {
+    if (!isSelectOption(selectOptionValue)) {
+      // Add to `selectOptions` and reset value
+      setSelectOptions([
+        ...selectOptions,
+        { label: selectOptionValue, value: selectOptionValue },
+      ]);
+      setSelectOptionValue("");
+    }
+  };
+
+  /**
+   * Utility function to check if an incoming option for `Select` type already exists
+   * @param {string} option Incoming option for `Select` type
+   * @return {boolean}
+   */
+  const isSelectOption = (option: string): boolean => {
+    return selectOptions.map((option) => option.value).includes(option);
+  };
+
+  // Handle removing an option
+  const removeOption = (toRemove: SelectOption) => {
+    setSelectOptions(
+      selectOptions.filter((option) => option.value !== toRemove.value),
+    );
+  };
+
+  // Handle confirming select options
+  const confirmSelectOptions = () => {
+    setValueData(
+      JSON.stringify({
+        selected: "",
+        options: selectOptions,
+      }),
+    );
+    setSelectOptionValue("");
+    setSelectModalOpen(false);
+  };
+
+  // Handle canceling select options
+  const cancelSelectOptions = () => {
+    setSelectOptionValue("");
+    setSelectModalOpen(false);
+  };
+
+  // const toggleRowSelection = (valueId: string) => {
+  //   console.info("valueId:", valueId);
+  //   // const newSelection = new Set(selectedRows);
+  //   // if (newSelection.has(valueId)) {
+  //   //   newSelection.delete(valueId);
+  //   // } else {
+  //   //   newSelection.add(valueId);
+  //   // }
+  //   // setSelectedRows(newSelection);
+  // };
+
+  // Handle opening select options modal
+  const openSelectModal = () => {
+    setSelectOptions([]);
+    setSelectOptionValue("");
+    setSelectModalOpen(true);
+  };
+
+  // Render data input based on type
+  const renderDataInput = (valueType: IValueType) => {
+    if (valueType === "number") {
+      return (
+        <Input
+          value={valueData}
+          onChange={(e) => setValueData(e.target.value)}
+          size="xs"
+          h={props.viewOnly ? "34px" : "100%"}
+          borderRadius="none"
+          fontSize="xs"
+          type="number"
+          readOnly={props.viewOnly}
+          placeholder="Enter number"
+          border="1px solid transparent"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      );
+    } else if (valueType === "text") {
+      return (
+        <Input
+          value={valueData}
+          onChange={(e) => setValueData(e.target.value)}
+          size="xs"
+          h={props.viewOnly ? "34px" : "100%"}
+          borderRadius="none"
+          fontSize="xs"
+          readOnly={props.viewOnly}
+          placeholder="Enter text"
+          border="1px solid transparent"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      );
+    } else if (valueType === "url") {
+      return (
+        <Input
+          value={valueData}
+          onChange={(e) => setValueData(e.target.value)}
+          size="xs"
+          h={props.viewOnly ? "34px" : "100%"}
+          borderRadius="none"
+          fontSize="xs"
+          readOnly={props.viewOnly}
+          placeholder="Enter URL"
+          border="1px solid transparent"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      );
+    } else if (valueType === "date") {
+      return (
+        <Input
+          value={valueData}
+          onChange={(e) => setValueData(e.target.value)}
+          size="xs"
+          h={props.viewOnly ? "34px" : "100%"}
+          borderRadius="none"
+          fontSize="xs"
+          type="date"
+          readOnly={props.viewOnly}
+          border="1px solid transparent"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      );
+    } else if (valueType === "select") {
+      // Check if select has options configured
+      if (selectOptions.length > 0) {
+        // Show dropdown with configured options
+        return (
+          <ReactSelect
+            options={selectOptions}
+            size={"sm"}
+            placeholder={"Select Option"}
+            disabled={props.viewOnly}
+            value={selectOption}
+            onChange={(event) => {
+              if (event) {
+                // Update displayed selection
+                setSelectOption(event);
+
+                // Update underlying data
+                setValueData(
+                  JSON.stringify({
+                    selected: event.value,
+                    options: selectOptions,
+                  }),
+                );
+              }
+            }}
+            menuPortalTarget={document.body}
+            menuPosition={"fixed"}
+            styles={{
+              menuPortal: (base) => ({
+                ...base,
+                zIndex: 15000,
+                pointerEvents: "auto",
+              }),
+              menu: (base) => ({
+                ...base,
+                zIndex: 15000,
+                pointerEvents: "auto",
+              }),
+              menuList: (base) => ({
+                ...base,
+                pointerEvents: "auto",
+              }),
+              option: (base) => ({
+                ...base,
+                pointerEvents: "auto",
+                fontSize: "sm",
+              }),
+              control: (base) => ({
+                ...base,
+                minHeight: "32px",
+                border: "1px solid transparent",
+              }),
+            }}
+            closeMenuOnScroll={false}
+          />
+        );
+      } else {
+        // Show "Setup Options" button
+        return (
+          <Flex
+            w="100%"
+            h={"34px"}
+            p={"0"}
+            align="center"
+            justify="center"
+            border="1px solid transparent"
+            _focus={{
+              bg: "white",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+            cursor={props.viewOnly ? "default" : "pointer"}
+            onClick={() => {
+              if (!props.viewOnly) {
+                openSelectModal();
+              }
+            }}
+          >
+            <Text fontSize="xs" fontWeight="semibold" color="blue.600">
+              Add Options
+            </Text>
+          </Flex>
+        );
+      }
+    } else if (valueType === "entity") {
+      if (!props.viewOnly) {
+        return (
+          <Flex
+            w="100%"
+            h={props.viewOnly ? "34px" : "100%"}
+            p={"0"}
+            align="center"
+            justify="center"
+            border="1px solid transparent"
+            _focus={{
+              bg: "white",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          >
+            <SearchSelect
+              placeholder={"Select Entity"}
+              resultType={"entity"}
+              value={JSON.parse(valueData) || { _id: "", name: "" }}
+              onChange={(entity) => setValueData(JSON.stringify(entity))}
+              disabled={props.viewOnly}
+              isEmbedded
+            />
+          </Flex>
+        );
+      } else {
+        return (
+          <Flex
+            w="100%"
+            h={props.viewOnly ? "34px" : "100%"}
+            justify="center"
+            pt={"0.5"}
+            px={"2"}
+            border="1px solid transparent"
+            _focus={{
+              bg: "white",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          >
+            <Linky
+              type="entities"
+              id={JSON.parse(valueData)._id || ""}
+              size="xs"
+            />
+          </Flex>
+        );
+      }
+    } else {
+      return (
+        <Input
+          value={valueData}
+          onChange={(e) => setValueData(e.target.value)}
+          size="xs"
+          h={props.viewOnly ? "34px" : "100%"}
+          px={1}
+          py={0.5}
+          fontSize="xs"
+          readOnly={props.viewOnly}
+          placeholder="Enter value"
+          border="1px solid transparent"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      );
+    }
+  };
+
+  return (
+    <Flex
+      gap={0}
+      borderBottom={props.hideBorder ? "none" : "1px solid"}
+      borderColor="gray.200"
+      _hover={{ bg: "gray.25" }}
+      overflow="hidden"
+      bg={props.isSelected ? "blue.50" : "transparent"}
+    >
+      {/* Drag Handle Column - only show in edit mode */}
+      {!props.viewOnly && (
+        <Box
+          w="40px"
+          px={1}
+          py={0.5}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          borderRight="1px solid"
+          borderColor="gray.200"
+          bg={props.isSelected ? "blue.100" : "transparent"}
+          _hover={{ bg: props.isSelected ? "blue.200" : "gray.100" }}
+          cursor={props.viewOnly ? "default" : "pointer"}
+        >
+          <Checkbox.Root
+            checked={valueChecked}
+            onChange={() => setValueChecked(!valueChecked)}
+            size="xs"
+            colorPalette="blue"
+            disabled={props.viewOnly}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+          </Checkbox.Root>
+        </Box>
+      )}
+      {/* Type Column */}
+      <Box
+        w={`${props.columnWidths.type}px`}
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        borderRight={"1px solid"}
+        borderColor={"gray.200"}
+      >
+        <ReactSelect
+          options={valueTypeOptions}
+          size={"sm"}
+          placeholder={"Type"}
+          disabled={props.viewOnly}
+          value={valueTypeOption}
+          onChange={(event) => {
+            if (event) {
+              // Update React state
+              setValueType(event.value);
+              setValueTypeOption({ label: event.label, value: event.value });
+
+              // Handle the updated data component
+              setValueData(generateDefaultData(event.value));
+            }
+          }}
+          menuPortalTarget={document.body}
+          menuPosition={"fixed"}
+          styles={{
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menu: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menuList: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+            }),
+            option: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+              fontSize: "sm",
+            }),
+            control: (base) => ({
+              ...base,
+              minHeight: "32px",
+              border: "1px solid transparent",
+            }),
+          }}
+          closeMenuOnScroll={false}
+        />
+      </Box>
+
+      {/* Name Column */}
+      <Box
+        w={`${props.columnWidths.name}px`}
+        p={"0"}
+        m={"0"}
+        borderRight="1px solid"
+        borderColor="gray.200"
+      >
+        <Input
+          value={valueName}
+          onChange={(e) => setValueName(e.target.value)}
+          size="xs"
+          px={1}
+          py={0}
+          h="100%"
+          fontSize="xs"
+          readOnly={props.viewOnly}
+          placeholder="Enter name"
+          border="1px solid transparent"
+          borderRadius="none"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      </Box>
+
+      {/* Value Column */}
+      <Flex
+        w={`${props.columnWidths.value}px`}
+        flex="1"
+        p={"0"}
+        overflow="visible"
+        justify="space-between"
+        align="center"
+      >
+        {renderDataInput(valueType)}
+        {props.viewOnly && valueType !== "entity" && (
+          <IconButton
+            aria-label="Copy value"
+            size="2xs"
+            mx={"1"}
+            variant="outline"
+            colorPalette="gray"
+            onClick={() =>
+              navigator.clipboard.writeText(valueData.toString() || "")
+            }
+          >
+            <Icon name="copy" size="xs" />
+          </IconButton>
+        )}
+      </Flex>
+
+      {/* Select Options Modal */}
+      <Dialog.Root
+        open={selectModalOpen}
+        size="sm"
+        placement="center"
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+              <Flex direction="row" align="center" gap="1" p={"2"}>
+                <Icon name="v_select" />
+                <Text fontSize="xs" fontWeight="semibold">
+                  Setup Options
+                </Text>
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size="2xs"
+                  top={"6px"}
+                  onClick={cancelSelectOptions}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p="1" gap="1" pb="1">
+              <Flex direction="column" gap="1">
+                <Flex direction="row" gap="1">
+                  <Input
+                    size="xs"
+                    rounded="md"
+                    placeholder="Enter option value"
+                    value={selectOptionValue}
+                    onChange={(e) => setSelectOptionValue(e.target.value)}
+                    onKeyUp={(e) => {
+                      if (e.key === "Enter") {
+                        addOption();
+                      }
+                    }}
+                  />
+                  <Button
+                    colorPalette="green"
+                    size="xs"
+                    rounded="md"
+                    onClick={addOption}
+                  >
+                    Add
+                    <Icon name="add" />
+                  </Button>
+                </Flex>
+                <Box>
+                  <Stack
+                    gap="1"
+                    separator={<Separator />}
+                    pb="1"
+                    maxH="200px"
+                    overflowY={"auto"}
+                  >
+                    {selectOptions.length > 0 ? (
+                      selectOptions.map((option, index) => (
+                        <Flex
+                          key={option.value}
+                          direction="row"
+                          cursor={props.viewOnly ? "default" : "text"}
+                          onClick={
+                            props.viewOnly
+                              ? (e) => e.preventDefault()
+                              : undefined
+                          }
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Flex gap="1">
+                            <Text
+                              fontWeight="semibold"
+                              fontSize="xs"
+                              ml={"0.5"}
+                            >
+                              Value {index + 1}:
+                            </Text>
+                            <Text fontSize="xs">{option.value}</Text>
+                          </Flex>
+                          <IconButton
+                            aria-label={`remove_${index}`}
+                            size="2xs"
+                            colorPalette="red"
+                            onClick={() => removeOption(option)}
+                          >
+                            <Icon name="delete" />
+                          </IconButton>
+                        </Flex>
+                      ))
+                    ) : (
+                      <Flex
+                        cursor={props.viewOnly ? "default" : "text"}
+                        onClick={
+                          props.viewOnly ? (e) => e.preventDefault() : undefined
+                        }
+                        align="center"
+                        justify="center"
+                        minH="60px"
+                        rounded="md"
+                        border="1px"
+                        borderColor="gray.300"
+                      >
+                        <Text
+                          fontSize="xs"
+                          fontWeight="semibold"
+                          color="gray.400"
+                        >
+                          No values added.
+                        </Text>
+                      </Flex>
+                    )}
+                  </Stack>
+                </Box>
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="red"
+                onClick={cancelSelectOptions}
+              >
+                Cancel
+                <Icon name="cross" />
+              </Button>
+              <Spacer />
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="green"
+                onClick={confirmSelectOptions}
+                disabled={selectOptions.length === 0}
+              >
+                Confirm
+                <Icon name="check" />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </Flex>
   );
 };
 

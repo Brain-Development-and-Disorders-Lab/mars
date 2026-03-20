@@ -24,8 +24,13 @@ import { IGenericItem, SearchBoxProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
+
+// Utility imports
+import { ignoreAbort } from "@lib/util";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
@@ -139,7 +144,7 @@ const SearchBox = (props: SearchBoxProps) => {
   `;
   const [searchText, { loading, error }] = useLazyQuery<{
     search: IGenericItem[];
-  }>(SEARCH_TEXT);
+  }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
 
   // Determine resultType based on selected filters
   const getResultType = (): string | undefined => {
@@ -182,7 +187,8 @@ const SearchBox = (props: SearchBoxProps) => {
         isBuilder: false,
         showArchived: false,
       },
-    });
+    }).catch(ignoreAbort);
+    if (!results) return;
 
     if (results.data?.search) {
       setResults(results.data.search);

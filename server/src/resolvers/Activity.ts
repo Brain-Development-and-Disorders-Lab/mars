@@ -2,9 +2,8 @@
 import { Context, IActivity, IResolverParent, IResponseMessage } from "@types";
 
 // Models
-import { Activity } from "../models/Activity";
-import { Workspaces } from "../models/Workspaces";
-import { Authentication } from "src/models/Authentication";
+import { Activity } from "@models/Activity";
+import { Workspaces } from "@models/Workspaces";
 
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -20,8 +19,18 @@ export const ActivityResolvers = {
       args: { limit: 100 },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -44,8 +53,18 @@ export const ActivityResolvers = {
       args: { activity: IActivity },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Apply the create operation
       const result = await Activity.create(args.activity);

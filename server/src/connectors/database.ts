@@ -13,10 +13,10 @@ if (_.isUndefined(CONNECTION_STRING)) {
 }
 
 // Setup the MongoDB client and databases
-const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 let database: Db;
 let storage: Db;
 let attachments: GridFSBucket;
+const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 
 /**
  * Connect to the primary database storing metadata
@@ -42,6 +42,10 @@ export const connect = (): Promise<Db> => {
  */
 export const disconnect = (): Promise<void> => {
   return client.close();
+};
+
+export const getClient = () => {
+  return client;
 };
 
 /**

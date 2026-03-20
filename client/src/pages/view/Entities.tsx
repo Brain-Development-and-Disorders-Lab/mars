@@ -38,11 +38,13 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
-// Utility functions and libraries
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
+
+// Utility functions and libraries
+import { ignoreAbort } from "@lib/util";
 import _ from "lodash";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -202,9 +204,10 @@ const Entities = () => {
         }
       : undefined;
 
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
   }>(GET_ENTITIES, {
+    fetchPolicy: "network-only",
     variables: {
       page,
       pageSize,
@@ -241,22 +244,6 @@ const Entities = () => {
       count += appliedFilters.attributeCountRanges.length;
     setActiveFilterCount(count);
   }, [appliedFilters]);
-
-  const { workspace } = useWorkspace();
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
-
-  // Refetch when pagination, filters, or sort changes
-  useEffect(() => {
-    if (refetch) {
-      refetch();
-    }
-  }, [page, pageSize, appliedFilters, sortState, refetch]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -336,7 +323,7 @@ const Entities = () => {
       cell: (info) => {
         return (
           <ActorTag
-            orcid={info.getValue()}
+            identifier={info.getValue()}
             fallback={"Unknown User"}
             size={"sm"}
             inline
@@ -406,9 +393,9 @@ const Entities = () => {
         entities: toExport.map((entity) => entity._id),
         format: exportFormat,
       },
-    });
+    }).catch(ignoreAbort);
 
-    if (!response.data?.exportEntities) {
+    if (!response?.data?.exportEntities) {
       toaster.create({
         title: "Error",
         description: "Unable to export entities",
@@ -416,7 +403,7 @@ const Entities = () => {
         duration: 2000,
         closable: true,
       });
-    } else if (response.data?.exportEntities) {
+    } else if (response?.data?.exportEntities) {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
         slugify(
@@ -598,7 +585,7 @@ const Entities = () => {
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
                               <ActorTag
-                                orcid={owner}
+                                identifier={owner}
                                 fallback={"Unknown User"}
                                 size={"sm"}
                                 inline

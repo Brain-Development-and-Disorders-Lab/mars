@@ -1,15 +1,26 @@
-// Seed script to generate minimal test data for MongoDB (used in test suite)
+/**
+ * Seed script to generate minimal test data for MongoDB (used in test suite)
+ */
+
+// Database connectivity
+import { connect, disconnect } from "@connectors/database";
+
+// Models
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
+import { Workspaces } from "@models/Workspaces";
+
+// Custom types
+import { ResponseData } from "@types";
+
+// Variables
+import { DEMO_USER_ORCID } from "@variables";
+
+// Utility functions
 import "dotenv/config";
-import { connect, disconnect } from "../connectors/database";
-import { Entities } from "../models/Entities";
-import { Projects } from "../models/Projects";
-import { Templates } from "../models/Templates";
-import { Users } from "../models/Users";
-import { Workspaces } from "../models/Workspaces";
 import dayjs from "dayjs";
 import consola from "consola";
-import { IResponseMessage, ResponseData } from "@types";
-import { DEMO_USER_ORCID } from "../variables";
 
 /**
  * Utility to seed the database with minimal testing values
@@ -121,7 +132,7 @@ export const seedTestDatabase = async (): Promise<void> => {
             _id: "v-00",
             name: "Test Number Value",
             type: "number",
-            data: 123,
+            data: "123",
           },
           {
             _id: "v-00",
@@ -133,19 +144,19 @@ export const seedTestDatabase = async (): Promise<void> => {
             _id: "v-00",
             name: "Test Entity Value",
             type: "entity",
-            data: {
+            data: JSON.stringify({
               _id: parentResult.data,
               name: "Test Parent Entity",
-            },
+            }),
           },
           {
             _id: "v-00",
             name: "Test Select Value",
             type: "select",
-            data: {
+            data: JSON.stringify({
               options: ["Option A", "Option B"],
               selected: "Option A",
-            },
+            }),
           },
         ],
       },
@@ -171,20 +182,6 @@ export const seedTestDatabase = async (): Promise<void> => {
     ],
   });
   await Workspaces.addTemplate(workspaceResult.data, templateResult.data);
-
-  // Create a User
-  const userResult: IResponseMessage = await Users.create({
-    _id: DEMO_USER_ORCID,
-    firstName: "Demo",
-    lastName: "User",
-    email: "demo@metadatify.com",
-    affiliation: "Demo Affiliation",
-    workspaces: [workspaceResult.data],
-    lastLogin: "",
-    api_keys: [],
-    token: "",
-  });
-  if (userResult.success === false) throw new Error("Error creating User");
 };
 
 /**

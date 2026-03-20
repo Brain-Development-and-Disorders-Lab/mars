@@ -49,8 +49,11 @@ import { useQuery } from "@apollo/client/react";
 
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
-import { useAuthentication } from "@hooks/useAuthentication";
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useStorage } from "@hooks/useStorage";
+
+// Authentication
+import { auth } from "@lib/auth";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -59,6 +62,7 @@ const GET_DASHBOARD = gql`
     $entitiesArchived: Boolean
     $projectLimit: Int
     $projectsArchived: Boolean
+    $workspace: String
   ) {
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -92,7 +96,7 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    workspaceMetrics {
+    workspaceMetrics(_id: $workspace) {
       collaborators
     }
   }
@@ -104,7 +108,16 @@ const Dashboard = () => {
 
   // Workspace context
   const { workspace } = useWorkspace();
-  const { token, setToken } = useAuthentication();
+  const { storage, updateStorageField } = useStorage();
+
+  // Authentication
+  const { data: session, isPending: isSessionPending } = auth.useSession();
+  const [user, setUser] = useState("");
+  useEffect(() => {
+    if (!isSessionPending && session) {
+      setUser(session.user.id);
+    }
+  }, [isSessionPending]);
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -150,7 +163,7 @@ const Dashboard = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery<{
+  const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
     projectMetrics: ProjectMetrics;
     entities: { entities: EntityModel[]; total: number };
@@ -162,8 +175,10 @@ const Dashboard = () => {
       projectLimit: 10,
       entityLimit: 10,
       entitiesArchived: false,
+      workspace,
     },
     fetchPolicy: "network-only",
+    skip: !workspace,
   });
 
   // Assign data
@@ -189,13 +204,6 @@ const Dashboard = () => {
       setWorkspaceMetrics(data.workspaceMetrics);
     }
   }, [data]);
-
-  // If the workspace changes, refetch the data
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -477,19 +485,14 @@ const Dashboard = () => {
     const { action, type } = data;
     if (action === ACTIONS.SKIP || type === EVENTS.TOUR_END) {
       // Update the token and set the `firstLogin` flag to `false`
-      setToken({
-        orcid: token.orcid,
-        token: token.token,
-        setup: token.setup,
-        firstLogin: false,
-      });
+      updateStorageField("firstLogin", false);
     }
   };
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!!workspace && !loading}>
       <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
-        {token.firstLogin === true && breakpoint !== "base" && (
+        {storage.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
             showProgress
@@ -515,7 +518,7 @@ const Dashboard = () => {
 
             <Flex>
               <ActorTag
-                orcid={token.orcid}
+                identifier={user}
                 fallback={"Unknown User"}
                 size={"md"}
               />
@@ -595,13 +598,17 @@ const Dashboard = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"} gap={"1"} p={"0"}>
+        <Flex
+          direction={"row"}
+          wrap={{ base: "wrap", lg: "nowrap" }}
+          gap={"1"}
+          p={"0"}
+        >
           <Flex
             direction={"column"}
             gap={"1"}
-            grow={"1"}
+            flex={{ base: "1 1 100%", lg: "0 0 70%" }}
             minW={"0"}
-            maxW={"100%"}
           >
             {/* Projects and Entities */}
             <Flex
@@ -726,7 +733,18 @@ const Dashboard = () => {
           </Flex>
 
           {/* Activity */}
-          <ActivityFeed />
+          <Flex
+            direction={"column"}
+            flex={{ base: "1 1 100%", lg: "0 0 30%" }}
+            p={"1"}
+            gap={"1"}
+            rounded={"md"}
+            border={"1px solid"}
+            borderColor={"gray.300"}
+            h={"fit-content"}
+          >
+            <ActivityFeed />
+          </Flex>
         </Flex>
       </Flex>
     </Content>

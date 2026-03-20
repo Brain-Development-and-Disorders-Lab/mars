@@ -1,15 +1,14 @@
 // Utility functions and libraries
-import { connect, disconnect, getDatabase } from "../src/connectors/database";
+import { connect, disconnect, getDatabase } from "@connectors/database";
 
 // Import seed function from seed directory
-import { seedTestDatabase } from "../src/seed/seedTestDatabase";
+import { seedTestDatabase } from "@seed/seedTestDatabase";
 
 // Import models for workspace creation
-import { Workspaces } from "../src/models/Workspaces";
-import { Entities } from "../src/models/Entities";
-import { Projects } from "../src/models/Projects";
-import { Templates } from "../src/models/Templates";
-import { Users } from "../src/models/Users";
+import { Workspaces } from "@models/Workspaces";
+import { Entities } from "@models/Entities";
+import { Projects } from "@models/Projects";
+import { Templates } from "@models/Templates";
 import dayjs from "dayjs";
 import { DEMO_USER_ORCID } from "../src/variables";
 import { ResponseData } from "@types";
@@ -71,11 +70,15 @@ export const clearUsers = async (): Promise<void> => {
  * @return {Promise<void>}
  */
 export const clearDatabase = async (): Promise<void> => {
+  await getDatabase().collection("account").deleteMany({});
   await getDatabase().collection("activity").deleteMany({});
+  await getDatabase().collection("counters").deleteMany({});
   await getDatabase().collection("entities").deleteMany({});
   await getDatabase().collection("projects").deleteMany({});
+  await getDatabase().collection("session").deleteMany({});
   await getDatabase().collection("templates").deleteMany({});
-  await getDatabase().collection("users").deleteMany({});
+  await getDatabase().collection("user").deleteMany({});
+  await getDatabase().collection("verification").deleteMany({});
   await getDatabase().collection("workspaces").deleteMany({});
 };
 
@@ -210,7 +213,7 @@ export const createTestWorkspace = async (
             _id: "v-00",
             name: "Test Number Value",
             type: "number",
-            data: 123,
+            data: "123",
           },
           {
             _id: "v-00",
@@ -222,19 +225,19 @@ export const createTestWorkspace = async (
             _id: "v-00",
             name: "Test Entity Value",
             type: "entity",
-            data: {
+            data: JSON.stringify({
               _id: parentResult.data,
               name: "Test Parent Entity",
-            },
+            }),
           },
           {
             _id: "v-00",
             name: "Test Select Value",
             type: "select",
-            data: {
+            data: JSON.stringify({
               options: ["Option A", "Option B"],
               selected: "Option A",
-            },
+            }),
           },
         ],
       },
@@ -260,13 +263,6 @@ export const createTestWorkspace = async (
     ],
   });
   await Workspaces.addTemplate(workspaceId, templateResult.data);
-
-  // Ensure user has access to this workspace
-  const user = await Users.getOne(DEMO_USER_ORCID);
-  if (user && !user.workspaces.includes(workspaceId)) {
-    user.workspaces.push(workspaceId);
-    await Users.update(user);
-  }
 
   return workspaceId;
 };

@@ -11,6 +11,9 @@ env:
   CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
   PORT: 8000
   DISABLE_CAPTURE: true
+  BETTER_AUTH_URL: http://127.0.0.1:8080
+  TEST_USER_EMAIL: test@test.com
+  TEST_USER_PASSWORD: test_password123
 
 jobs:
   build_server:
@@ -32,10 +35,12 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
 
       - name: Build server
         working-directory: server
@@ -95,10 +100,12 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
 
       - name: Test server
         working-directory: server
@@ -145,10 +152,12 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_ID=${{ secrets.ORCID_SANDBOX_CLIENT_ID }}" >> .env
+          echo "ORCID_SANDBOX_CLIENT_SECRET=${{ secrets.ORCID_SANDBOX_CLIENT_SECRET }}" >> .env
           echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
 
       - name: Start server
         working-directory: server
@@ -162,6 +171,10 @@ jobs:
           echo "REACT_APP_PUBLIC_POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "REACT_APP_PUBLIC_POSTHOG_HOST=${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
+          echo "TEST_USER_EMAIL=${{ env.TEST_USER_EMAIL }}" >> .env
+          echo "TEST_USER_PASSWORD=${{ env.TEST_USER_PASSWORD }}" >> .env
 
       - name: Install Playwright browsers
         working-directory: client

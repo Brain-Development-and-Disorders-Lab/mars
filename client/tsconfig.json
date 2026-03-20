@@ -6,13 +6,16 @@
     "lib": ["dom", "esnext"],
     "declaration": false,
     "sourceMap": true,
+    "inlineSources": true,
     "baseUrl": "./",
     "paths": {
       "@components/*": ["src/components/*"],
       "@database/*": ["src/database/*"],
       "@hooks/*": ["src/hooks/*"],
+      "@lib/*": ["src/lib/*"],
       "@pages/*": ["src/pages/*"],
-      "@types": ["../types"]
+      "@types": ["../types"],
+      "@variables": ["src/variables"]
     },
     "rootDirs": ["src"],
     "strict": true,

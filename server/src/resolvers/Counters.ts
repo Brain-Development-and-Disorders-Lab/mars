@@ -5,9 +5,8 @@ import { GraphQLError } from "graphql";
 import { Context, CounterModel, IResolverParent } from "@types";
 
 // Models
-import { Authentication } from "src/models/Authentication";
-import { Counters } from "src/models/Counters";
-import { Workspaces } from "src/models/Workspaces";
+import { Counters } from "@models/Counters";
+import { Workspaces } from "@models/Workspaces";
 
 // Utilities
 import _ from "lodash";
@@ -19,8 +18,18 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -60,8 +69,18 @@ export const CountersResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -80,8 +99,18 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -121,8 +150,18 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -162,8 +201,18 @@ export const CountersResolvers = {
       args: { _id: string; count: number },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -205,8 +254,18 @@ export const CountersResolvers = {
       args: { counter: CounterModel },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Apply create operation
       return await Counters.create(args.counter);
@@ -216,8 +275,18 @@ export const CountersResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(
+        context.user,
+        context.workspace,
+      );
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
 
       // Retrieve the Workspace to determine which Counter to return
       const workspace = await Workspaces.getOne(context.workspace);

@@ -19,6 +19,7 @@ export default tseslint.config(
       "gulpfile.js",
       "jest.config.js",
       "webpack.*.js",
+      ".storybook/main.js",
       "*.d.ts",
       "yarn.lock",
     ],

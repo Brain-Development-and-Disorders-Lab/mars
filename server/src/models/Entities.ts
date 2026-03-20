@@ -12,11 +12,11 @@ import {
 } from "@types";
 
 // Models
-import { Projects } from "./Projects";
+import { Projects } from "@models/Projects";
 
 // Custom functions
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 
 // Generate history version IDs
 import { customAlphabet } from "nanoid";
@@ -364,15 +364,6 @@ export class Entities {
     entity.name = entity.name.toString().trim();
     entity.description = entity.description.toString().trim();
 
-    // Iterate over all Attributes, casting `number` values to floats
-    entity.attributes.forEach((attribute) => {
-      attribute.values.forEach((value) => {
-        if (value.type === "number") {
-          value.data = parseFloat(value.data);
-        }
-      });
-    });
-
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
@@ -501,15 +492,6 @@ export class Entities {
       update.$set.attributes = updated.attributes;
       const updatedAttributes = updated.attributes.map((a) => a._id);
       const entityAttributes = entity.attributes.map((a) => a._id);
-
-      // Iterate over all Attributes, casting `number` values to floats
-      update.$set.attributes.forEach((attribute) => {
-        attribute.values.forEach((value) => {
-          if (value.type === "number") {
-            value.data = parseFloat(value.data);
-          }
-        });
-      });
 
       // Attributes added in updated Entity
       const addAttributeIdentifiers = _.difference(
@@ -1240,9 +1222,17 @@ export class Entities {
 
                 // Some values are JSON data stored as strings
                 if (value.type === "entity") {
-                  row.push(value.data.name);
+                  const entityData = JSON.parse(value.data) as {
+                    _id: string;
+                    name: string;
+                  };
+                  row.push(entityData.name);
                 } else if (value.type === "select") {
-                  row.push(value.data.selected);
+                  const selectData = JSON.parse(value.data) as {
+                    selected: string;
+                    options: string[];
+                  };
+                  row.push(selectData.selected);
                 } else {
                   row.push(value.data);
                 }

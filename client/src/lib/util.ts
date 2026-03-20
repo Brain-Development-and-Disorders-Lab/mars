@@ -2,20 +2,9 @@
 import _ from "lodash";
 
 // Custom types
-import {
-  GenericValueType,
-  IAttribute,
-  IAuth,
-  ISelectOption,
-  ISession,
-  IValue,
-  UserModel,
-} from "@types";
+import { IAttribute, ISelectOption, IValue, UserModel } from "@types";
 
-export const isValidValues = (
-  values: IValue<GenericValueType>[],
-  allowEmptyValues = false,
-) => {
+export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
     return false;
   }
@@ -93,38 +82,6 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-};
-
-/**
- * Retrieve an authentication token from session storage
- * @param {string} tokenKey the key of the token in storage
- * @returns {any}
- */
-export const getToken = (tokenKey: string): IAuth => {
-  const storedToken = sessionStorage.getItem(tokenKey);
-  if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
-    return JSON.parse(storedToken);
-  }
-  return {
-    orcid: "",
-    token: "",
-    setup: false,
-  };
-};
-
-/**
- * Retrieve a session vaue from session storage
- * @param {string} sessionKey the key of the token in storage
- * @returns {any}
- */
-export const getSession = (sessionKey: string): ISession => {
-  const storedSession = sessionStorage.getItem(sessionKey);
-  if (!_.isNull(storedSession) && !_.isUndefined(storedSession)) {
-    return JSON.parse(storedSession);
-  }
-  return {
-    workspace: "",
-  };
 };
 
 /**
@@ -221,6 +178,15 @@ export const isAbortError = (
     message === "The operation was aborted." ||
     normalizedMessage.includes("the user aborted a request")
   );
+};
+
+/**
+ * Re-throw any error that is not an AbortError.
+ * Use as `.catch(ignoreAbort)` on refetch() promises to suppress expected
+ * cancellations while preserving genuine error propagation.
+ */
+export const ignoreAbort = (e: unknown): void => {
+  if (!isAbortError(e)) throw e;
 };
 
 /**

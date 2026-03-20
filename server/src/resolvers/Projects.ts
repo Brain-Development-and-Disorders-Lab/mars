@@ -14,10 +14,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 // Models
-import { Activity } from "../models/Activity";
-import { Projects } from "../models/Projects";
-import { Workspaces } from "../models/Workspaces";
-import { Authentication } from "src/models/Authentication";
+import { Activity } from "@models/Activity";
+import { Projects } from "@models/Projects";
+import { Workspaces } from "@models/Workspaces";
 
 // Posthog
 import { PostHogClient } from "src";
@@ -30,9 +29,6 @@ export const ProjectsResolvers = {
       args: { limit: 100; archived: boolean },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -69,9 +65,6 @@ export const ProjectsResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -111,9 +104,6 @@ export const ProjectsResolvers = {
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -152,9 +142,6 @@ export const ProjectsResolvers = {
       args: { _id: string; format: "json" },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -194,9 +181,6 @@ export const ProjectsResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<ProjectMetrics> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -229,9 +213,6 @@ export const ProjectsResolvers = {
       args: { project: IProject },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Apply create operation
       const result = await Projects.create(args.project);
 
@@ -272,9 +253,6 @@ export const ProjectsResolvers = {
       args: { project: ProjectModel; message: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       const project = await Projects.getOne(args.project._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -295,7 +273,7 @@ export const ProjectsResolvers = {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Project",
+          details: "Updated Project",
           target: {
             _id: project._id,
             type: "projects",
@@ -323,9 +301,6 @@ export const ProjectsResolvers = {
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -398,9 +373,6 @@ export const ProjectsResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
         const project = await Projects.getOne(_id);
@@ -451,9 +423,6 @@ export const ProjectsResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {

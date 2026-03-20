@@ -1,5 +1,5 @@
 // Models
-import { Entities } from "./Entities";
+import { Entities } from "@models/Entities";
 
 // Custom types
 import {
@@ -13,8 +13,8 @@ import {
 
 // Utility functions and libraries
 import _ from "lodash";
-import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "../util";
+import { getDatabase } from "@connectors/database";
+import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import Papa from "papaparse";
 import consola from "consola";

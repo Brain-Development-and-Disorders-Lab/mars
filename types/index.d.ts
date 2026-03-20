@@ -1,5 +1,6 @@
 // Import types
 import { ReadStream } from "fs";
+import { ObjectId } from "mongodb";
 
 // Request types to the server
 declare enum Requests {
@@ -53,7 +54,7 @@ export type IAttribute = {
   name: string;
   owner: string;
   description: string;
-  values: IValue<any>[];
+  values: IValue[];
   archived: boolean;
 };
 
@@ -83,8 +84,8 @@ export type AttributeGroupProps = AttributeCardActions & {
 export type AttributeViewButtonProps = {
   attribute: AttributeModel;
   editing?: boolean;
+  onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
-  doneCallback?: (updated: AttributeModel) => void;
   cancelCallback?: () => void;
 };
 
@@ -97,13 +98,11 @@ export type IValueType =
   | "entity"
   | "select";
 
-export type GenericValueType = any;
-
-export type IValue<D> = {
+export type IValue = {
   _id: string;
   name: string;
   type: IValueType;
-  data: D;
+  data: string;
   disabled?: boolean;
   showRemove?: boolean;
   onRemove?: (id: string) => void;
@@ -130,7 +129,7 @@ export type LinkyProps = {
 
 // "Actor" component props
 export type ActorTagProps = {
-  orcid: string;
+  identifier: string;
   fallback: string;
   size: "sm" | "md";
   inline?: boolean;
@@ -608,25 +607,11 @@ export type ResponseData<D> = IResponseMessage & {
   data: D;
 };
 
-// Authentication types
-export type IAuth = {
-  orcid: string; // ORCiD value
-  token: string; // ORCiD token
+// Storage and local data management types
+export type ApplicationStorage = {
   setup: boolean; // Flag if application setup is complete
+  workspace: string; // ID of active Workspace
   firstLogin?: boolean; // (Optional) Flag if this is the first login
-};
-
-export type Token = IAuth & {
-  access_token: string;
-  token_type: string;
-  refesh_token: string;
-  expires_in: number;
-  scope: string;
-};
-
-// Session type
-export type ISession = {
-  workspace: string; // Active workspace
 };
 
 // File type
@@ -644,7 +629,6 @@ export type IResolverParent = Record<string, any>;
 export type Context = {
   user: string;
   workspace: string;
-  token: string;
 };
 
 // API key data
@@ -668,16 +652,20 @@ export type APIData<D> = {
 export type IUser = {
   firstName: string;
   lastName: string;
+  name: string; // better-auth: Display name
   affiliation: string;
-  email: string;
+  email: string; // better-auth: Email
+  emailVerified: boolean; // better-auth: Email verification
+  image: string; // better-auth: Display image URL
+  createdAt: string; // better-auth: Created
+  updatedAt: string; // better-auth: Last updated
   lastLogin: string;
-  workspaces: string[];
-  api_keys: APIKey[];
+  api_keys: string; // better-auth: Stored as a JSON string
+  account_orcid: string;
 };
 
 export type UserModel = IUser & {
-  _id: string;
-  token: string;
+  _id: ObjectId; // better-auth: Unique identifier
 };
 
 // Metrics
