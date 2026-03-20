@@ -21,11 +21,11 @@ const config = {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@components": path.resolve(__dirname, "../src/components/"),
-      // "@database": path.resolve(__dirname, "../src/database/"),
+      "@database": path.resolve(__dirname, "../src/database/"),
       "@hooks": path.resolve(__dirname, "../src/hooks/"),
       "@lib": path.resolve(__dirname, "../src/lib/"),
-      // "@pages": path.resolve(__dirname, "../src/pages/"),
-      // "@types": path.resolve(__dirname, "../../types"),
+      "@pages": path.resolve(__dirname, "../src/pages/"),
+      "@types": path.resolve(__dirname, "../../types"),
       "@variables": path.resolve(__dirname, "../src/variables"),
     };
 
