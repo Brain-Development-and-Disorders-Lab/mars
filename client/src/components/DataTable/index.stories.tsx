@@ -217,3 +217,69 @@ export const Default: Story = {
     showPagination: true,
   },
 } satisfies Story;
+
+export const Empty: Story = {
+  parameters: {
+    apolloMocks: [],
+  },
+  args: {
+    columns: columns,
+    data: [],
+    visibleColumns: {},
+    selectedRows: [],
+    showPagination: true,
+  },
+} satisfies Story;
+
+export const WithSelection: Story = {
+  parameters: {
+    apolloMocks: [],
+  },
+  args: {
+    columns: columns,
+    data: defaultData,
+    visibleColumns: {},
+    selectedRows: { 0: true, 1: true },
+    showPagination: true,
+    showSelection: true,
+    actions: [
+      {
+        label: "Archive",
+        icon: "archive",
+        action: () => {},
+      },
+      {
+        label: "Delete",
+        icon: "delete",
+        action: () => {},
+      },
+    ],
+  },
+} satisfies Story;
+
+export const HiddenColumns: Story = {
+  parameters: {
+    apolloMocks: [],
+  },
+  args: {
+    columns: columns,
+    data: defaultData,
+    visibleColumns: { description: false, owner: false },
+    selectedRows: [],
+    showPagination: true,
+    showColumnSelect: true,
+  },
+} satisfies Story;
+
+export const NoPagination: Story = {
+  parameters: {
+    apolloMocks: [],
+  },
+  args: {
+    columns: columns,
+    data: defaultData,
+    visibleColumns: {},
+    selectedRows: [],
+    showPagination: false,
+  },
+} satisfies Story;
