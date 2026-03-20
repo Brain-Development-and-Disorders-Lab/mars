@@ -285,7 +285,7 @@ const ValueDataSingleValue = ({
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
-        <Flex direction={"row"} align={"center"} gap={"2"}>
+        <Flex direction={"row"} align={"center"} gap={"2"} fontSize={"xs"}>
           {children}
         </Flex>
       </components.SingleValue>
@@ -466,16 +466,20 @@ const ValueDataSelect = (props: {
             menuPortal: (base) => ({
               ...base,
               zIndex: 15000,
+              pointerEvents: "auto",
             }),
             menu: (base) => ({
               ...base,
               zIndex: 15000,
+              pointerEvents: "auto",
             }),
             menuList: (base) => ({
               ...base,
+              pointerEvents: "auto",
             }),
             option: (base) => ({
               ...base,
+              pointerEvents: "auto",
             }),
             control: (base) => ({
               ...base,
@@ -1228,6 +1232,22 @@ const ValueRow = (props: {
     }
   };
 
+  /**
+   * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
+   * is `entity` or `select`
+   * @param {IValueType} valueType The type of the value to be copied
+   * @param {string} valueData Serialized value data
+   */
+  const copyToClipboard = (valueType: IValueType, valueData: string) => {
+    // If data is a serialized object, parse and copy relevant fields
+    if (valueType === "entity") {
+      valueData = JSON.parse(valueData)._id;
+    } else if (valueType === "select") {
+      valueData = JSON.parse(valueData).selected;
+    }
+    navigator.clipboard.writeText(valueData.toString() || "");
+  };
+
   // Render data input based on type
   const renderDataInput = (valueType: IValueType) => {
     if (valueType === "number") {
@@ -1608,9 +1628,7 @@ const ValueRow = (props: {
             mx={"1"}
             variant="outline"
             colorPalette="gray"
-            onClick={() =>
-              navigator.clipboard.writeText(valueData.toString() || "")
-            }
+            onClick={() => copyToClipboard(valueType, valueData)}
           >
             <Icon name="copy" size="xs" />
           </IconButton>
