@@ -544,10 +544,6 @@ const Entity = () => {
   );
   const [entityHistory, setEntityHistory] = useState<EntityHistory[]>([]);
 
-  useEffect(() => {
-    console.info("Entity Attributes:", entityAttributes);
-  }, [entityAttributes]);
-
   // Sorted and filtered history based on sort order and date range
   const sortedEntityHistory = useMemo(() => {
     let filtered = [...entityHistory];
@@ -686,7 +682,6 @@ const Entity = () => {
         attributes: entityAttributes,
         attachments: entityAttachments,
       });
-      console.info("Updated Entity:", mutationPayload);
       await updateEntity({
         variables: {
           entity: mutationPayload,

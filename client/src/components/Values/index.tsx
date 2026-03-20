@@ -278,12 +278,15 @@ const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
 /**
  * Custom styling for Value `type` single value
  */
-const ValueDataSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
+const ValueDataSingleValue = ({
+  children,
+  ...props
+}: SingleValueProps<SelectOption>) => {
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Text fontSize={"xs"}>{props.data.label}</Text>
+          {children}
         </Flex>
       </components.SingleValue>
     </Flex>
@@ -293,10 +296,7 @@ const ValueDataSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
 /**
  * Custom styling for Value `type` `MenuList` component containing all menu options
  */
-const ValueDataMenuList = ({
-  children,
-  ...props
-}: MenuListProps<SelectOption, false>) => {
+const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
     <Flex
       direction={"column"}
@@ -307,7 +307,7 @@ const ValueDataMenuList = ({
       p={"0.5"}
       rounded={"sm"}
     >
-      <components.MenuList {...props}>{children}</components.MenuList>
+      <components.MenuList {...props}>{props.children}</components.MenuList>
     </Flex>
   );
 };
@@ -328,6 +328,12 @@ const ValueDataDropdownIndicator = (
   );
 };
 
+/**
+ * Custom `Select` component for displaying `IValue` instances that have a
+ * `type` of `select`. A separate component was required to manage state
+ * and parse `data` correctly.
+ * @param props Required props for `ValueDataSelect` component
+ */
 const ValueDataSelect = (props: {
   valueData: string;
   setValueData: React.Dispatch<React.SetStateAction<string>>;
@@ -398,8 +404,8 @@ const ValueDataSelect = (props: {
   const confirmSelectOptions = () => {
     props.setValueData(
       JSON.stringify({
-        selected: options[0],
-        options: options,
+        selected: options[0].value,
+        options: options.map((o) => o.value),
       }),
     );
     setSelected(options[0]);
@@ -440,7 +446,7 @@ const ValueDataSelect = (props: {
               props.setValueData(
                 JSON.stringify({
                   selected: event.value,
-                  options: options,
+                  options: options.map((o) => o.value),
                 }),
               );
             }
@@ -664,8 +670,8 @@ const ValueDataSelect = (props: {
 };
 
 /**
- * Values component - A spreadsheet-like interface for editing key-value data
- * Features a compact, spreadsheet-like layout with type selection, name, and value columns
+ * A spreadsheet-like interface for editing key-value data with type selection,
+ * name, and value columns
  */
 const Values = (props: {
   values: IValue[];
