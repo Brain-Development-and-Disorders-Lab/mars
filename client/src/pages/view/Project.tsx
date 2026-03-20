@@ -263,7 +263,7 @@ const Project = () => {
     variables: {
       _id: id,
     },
-    fetchPolicy: "network-only",
+    fetchPolicy: "no-cache",
   });
 
   // Query to get Project Entities export contents

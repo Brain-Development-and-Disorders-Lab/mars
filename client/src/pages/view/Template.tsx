@@ -66,7 +66,7 @@ const Template = () => {
     variables: {
       _id: id,
     },
-    fetchPolicy: "network-only",
+    fetchPolicy: "no-cache",
   });
 
   // Query to get Template export contents

@@ -312,7 +312,7 @@ const Entity = () => {
     variables: {
       _id: id,
     },
-    fetchPolicy: "network-only",
+    fetchPolicy: "no-cache",
   });
 
   const GET_FILE_URL = gql`
