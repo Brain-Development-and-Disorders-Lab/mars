@@ -22,7 +22,12 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 
-import { OptionBase, Select as ReactSelect } from "chakra-react-select";
+import {
+  OptionBase,
+  components,
+  Select as ReactSelect,
+  OptionProps,
+} from "chakra-react-select";
 
 // Custom components
 import Icon from "@components/Icon";
@@ -30,11 +35,132 @@ import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 
 // Types
-import { IValue, IValueType } from "@types";
+import { IconNames, IValue, IValueType } from "@types";
 
 // Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
+
+interface SelectOption extends OptionBase {
+  label: string;
+  value: string;
+}
+
+interface ValueTypeOption extends OptionBase {
+  label: string;
+  value: IValueType;
+}
+
+/**
+ * Utility function to generate the corresponding `IconName` and color
+ * for each `IValueType`
+ * @param type `IValueType` representing the icon and color scheme
+ * @return {{ icon: IconNames, color: string }}
+ */
+const getIconConfiguration = (
+  type: IValueType,
+): { icon: IconNames; color: string } => {
+  let icon: IconNames = "v_text";
+  let color: string = "blue.300";
+
+  // Customize `Icon` color according to Value `type`
+  if (type === "date") {
+    icon = "v_date";
+    color = "orange.300";
+  } else if (type === "number") {
+    icon = "v_number";
+    color = "green.300";
+  } else if (type === "url") {
+    icon = "v_url";
+    color = "yellow.300";
+  } else if (type === "entity") {
+    icon = "entity";
+    color = "purple.300";
+  } else if (type === "select") {
+    icon = "v_select";
+    color = "teal.300";
+  }
+
+  return { icon, color };
+};
+
+/**
+ * Custom styling for each Value `type`, displaying colored icons
+ */
+const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
+  const { icon, color } = getIconConfiguration(props.data.value);
+  return (
+    <components.Option {...props}>
+      <Flex
+        direction={"row"}
+        h={"8"}
+        p={"0.5"}
+        gap={"1"}
+        align={"center"}
+        _hover={{ bg: "blue.100" }}
+      >
+        <Icon name={icon} size={"xs"} color={color} />
+        <Text fontSize={"xs"}>{props.data.label}</Text>
+      </Flex>
+    </components.Option>
+  );
+};
+
+/**
+ * Custom styling for select container
+ */
+const ValueTypeSelectContainer = ({ children, ...props }) => {
+  return (
+    <Box w={"100%"} border={"none"}>
+      <components.SelectContainer {...props}>
+        {children}
+      </components.SelectContainer>
+    </Box>
+  );
+};
+
+const ValueTypeValueContainer = ({ children, ...props }) => {
+  return (
+    <components.ValueContainer {...props}>
+      <Flex w={"100%"} h={"34px"}>
+        {children}
+      </Flex>
+    </components.ValueContainer>
+  );
+};
+
+const ValueTypeSingleValue = ({ children, ...props }) => {
+  const { icon, color } = getIconConfiguration(props.data.value);
+  return (
+    <Flex direction={"row"} align={"center"}>
+      <components.SingleValue {...props}>
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Icon name={icon} size={"xs"} color={color} />
+          <Text fontSize={"xs"}>{props.data.label}</Text>
+        </Flex>
+      </components.SingleValue>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for `MenuList` component containing all menu options
+ */
+const ValueTypeMenuList = ({ children, ...props }) => {
+  return (
+    <Flex
+      direction={"column"}
+      border={"1px solid"}
+      borderColor={"gray.200"}
+      bg={"white"}
+      gap={"0.5"}
+      p={"0.5"}
+      rounded={"sm"}
+    >
+      <components.MenuList {...props}>{children}</components.MenuList>
+    </Flex>
+  );
+};
 
 /**
  * Values component - A spreadsheet-like interface for editing key-value data
@@ -227,43 +353,6 @@ const Values = (props: {
               />
             )}
 
-            {/* Type Column Header */}
-            <Flex
-              w={`${columnWidths.type}px`}
-              flex="0 0 auto"
-              minW={`${columnWidths.type}px`}
-              px={1}
-              py={1}
-              fontSize="xs"
-              fontWeight="semibold"
-              color="gray.600"
-              bg="gray.100"
-              borderRight="1px solid"
-              borderColor="gray.200"
-              position="relative"
-              textAlign="center"
-              lineHeight="1.2"
-              align="center"
-              justify="center"
-              overflow="hidden"
-              flexShrink={0}
-            >
-              <Text textAlign="center">Type</Text>
-              {/* Resize Handle */}
-              <Box
-                position="absolute"
-                right="-1px"
-                top="0"
-                bottom="0"
-                width="3px"
-                cursor="col-resize"
-                bg="transparent"
-                _hover={{ bg: "blue.300" }}
-                onMouseDown={(e) => handleResizeStart("type", e)}
-                zIndex={10}
-              />
-            </Flex>
-
             {/* Name Column Header */}
             <Flex
               w={`${columnWidths.name}px`}
@@ -297,6 +386,43 @@ const Values = (props: {
                 bg="transparent"
                 _hover={{ bg: "blue.300" }}
                 onMouseDown={(e) => handleResizeStart("name", e)}
+                zIndex={10}
+              />
+            </Flex>
+
+            {/* Type Column Header */}
+            <Flex
+              w={`${columnWidths.type}px`}
+              flex="0 0 auto"
+              minW={`${columnWidths.type}px`}
+              px={1}
+              py={1}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="gray.600"
+              bg="gray.100"
+              borderRight="1px solid"
+              borderColor="gray.200"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+              align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
+            >
+              <Text textAlign="center">Type</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("type", e)}
                 zIndex={10}
               />
             </Flex>
@@ -543,10 +669,6 @@ const ValueRow = (props: {
   hideBorder?: boolean;
   viewOnly?: boolean;
 }) => {
-  interface ValueTypeOption extends OptionBase {
-    label: string;
-    value: IValueType;
-  }
   const valueTypeOptions: ValueTypeOption[] = [
     { label: "Number", value: "number" },
     { label: "Text", value: "text" },
@@ -555,11 +677,6 @@ const ValueRow = (props: {
     { label: "Entity", value: "entity" },
     { label: "Select", value: "select" },
   ];
-
-  interface SelectOption extends OptionBase {
-    label: string;
-    value: string;
-  }
 
   // Get the initial `ValueTypeOption` based on the `IValue` type
   const initialValueType = valueTypeOptions.filter(
@@ -668,17 +785,6 @@ const ValueRow = (props: {
     setSelectOptionValue("");
     setSelectModalOpen(false);
   };
-
-  // const toggleRowSelection = (valueId: string) => {
-  //   console.info("valueId:", valueId);
-  //   // const newSelection = new Set(selectedRows);
-  //   // if (newSelection.has(valueId)) {
-  //   //   newSelection.delete(valueId);
-  //   // } else {
-  //   //   newSelection.add(valueId);
-  //   // }
-  //   // setSelectedRows(newSelection);
-  // };
 
   // Handle opening select options modal
   const openSelectModal = () => {
@@ -1010,6 +1116,43 @@ const ValueRow = (props: {
           </Checkbox.Root>
         </Box>
       )}
+
+      {/* Name Column */}
+      <Box
+        w={`${props.columnWidths.name}px`}
+        p={"0"}
+        m={"0"}
+        borderRight="1px solid"
+        borderColor="gray.200"
+      >
+        <Input
+          value={valueName}
+          onChange={(e) => setValueName(e.target.value)}
+          size="xs"
+          px={1}
+          py={0}
+          h="100%"
+          fontSize="xs"
+          readOnly={props.viewOnly}
+          placeholder="Enter name"
+          border="1px solid transparent"
+          borderRadius="none"
+          bg="transparent"
+          cursor={props.viewOnly ? "default" : "text"}
+          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+          _focus={{
+            bg: "white",
+            border: "1px solid",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        />
+      </Box>
+
       {/* Type Column */}
       <Box
         w={`${props.columnWidths.type}px`}
@@ -1025,6 +1168,14 @@ const ValueRow = (props: {
           placeholder={"Type"}
           disabled={props.viewOnly}
           value={valueTypeOption}
+          isSearchable={false}
+          components={{
+            Option: ValueTypeOption,
+            SelectContainer: ValueTypeSelectContainer,
+            ValueContainer: ValueTypeValueContainer,
+            SingleValue: ValueTypeSingleValue,
+            MenuList: ValueTypeMenuList,
+          }}
           onChange={(event) => {
             if (event) {
               // Update React state
@@ -1064,42 +1215,6 @@ const ValueRow = (props: {
             }),
           }}
           closeMenuOnScroll={false}
-        />
-      </Box>
-
-      {/* Name Column */}
-      <Box
-        w={`${props.columnWidths.name}px`}
-        p={"0"}
-        m={"0"}
-        borderRight="1px solid"
-        borderColor="gray.200"
-      >
-        <Input
-          value={valueName}
-          onChange={(e) => setValueName(e.target.value)}
-          size="xs"
-          px={1}
-          py={0}
-          h="100%"
-          fontSize="xs"
-          readOnly={props.viewOnly}
-          placeholder="Enter name"
-          border="1px solid transparent"
-          borderRadius="none"
-          bg="transparent"
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
         />
       </Box>
 
