@@ -1,20 +1,22 @@
-const path = require("path");
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+
+// Setup filenames and directory paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /** @type { import('@storybook/react-webpack5').StorybookConfig } */
 const config = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
-  addons: ["@storybook/addon-webpack5-compiler-swc"],
-  framework: {
-    name: "@storybook/react-webpack5",
-    options: {},
-  },
+  stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  addons: [
+    "@storybook/addon-webpack5-compiler-swc",
+    "@storybook/addon-a11y",
+    "@storybook/addon-docs",
+    "@storybook/addon-onboarding",
+    "storybook-addon-apollo-client",
+  ],
+  framework: "@storybook/react-webpack5",
   webpackFinal: async (config) => {
-    // Add SCSS support
-    config.module.rules.push({
-      test: /\.s[ac]ss$/i,
-      use: ["style-loader", "css-loader", "sass-loader"],
-    });
-
     // Match path aliases from webpack.common.js
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -30,4 +32,4 @@ const config = {
     return config;
   },
 };
-module.exports = config;
+export default config;
