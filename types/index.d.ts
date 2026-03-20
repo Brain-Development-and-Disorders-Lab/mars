@@ -109,6 +109,11 @@ export type IValue = {
   onUpdate?: (data: D) => void;
 };
 
+export type IValueSelectData = {
+  selected: string;
+  options: string[];
+};
+
 // "Collaborators" component props
 export type CollaboratorsProps = {
   editing: boolean;

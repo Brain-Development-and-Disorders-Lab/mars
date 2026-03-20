@@ -41,7 +41,7 @@ import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 
 // Types
-import { IconNames, IValue, IValueType } from "@types";
+import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
 
 // Utility functions
 import _ from "lodash";
@@ -332,6 +332,344 @@ const ValueDataDropdownIndicator = (
         size={"xs"}
       />
     </components.DropdownIndicator>
+  );
+};
+
+const ValueDataSelect = (props: {
+  valueData: string;
+  setValueData: React.Dispatch<React.SetStateAction<string>>;
+  viewOnly?: boolean;
+}) => {
+  let selectData: IValueSelectData;
+  let initialSelected: SelectOption;
+  let initialOptions: SelectOption[];
+
+  // Clean and prepare data
+  try {
+    selectData = JSON.parse(props.valueData);
+    initialSelected = {
+      label: selectData.selected,
+      value: selectData.selected,
+    };
+    initialOptions = selectData.options.map((option: string) => {
+      return {
+        label: option,
+        value: option,
+      };
+    });
+  } catch {
+    // JSON parse failed, so set up with empty data
+    initialSelected = {
+      label: "",
+      value: "",
+    };
+    initialOptions = [];
+  }
+
+  // Setup state using this data
+  const [selected, setSelected] = useState<SelectOption>(initialSelected);
+  const [options, setOptions] = useState<SelectOption[]>(initialOptions);
+  const [addOptionModalOpen, setAddOptionModalOpen] = useState(false);
+
+  // Additional state
+  const [newOption, setNewOption] = useState<string>("");
+  const [invalidOption, setInvalidOption] = useState(true);
+
+  /**
+   * Update the `newOption` state and perform error check to ensure
+   * only valid Options are entered
+   * @param value Updated Option value entered through modal
+   */
+  const updateNewOption = (value: string) => {
+    setNewOption(value);
+    if (value === "" || options.map((option) => option.value).includes(value)) {
+      setInvalidOption(true);
+    } else {
+      setInvalidOption(false);
+    }
+  };
+
+  // Handle adding a new option
+  const addOption = () => {
+    // Add to `selectOptions` and reset value
+    setOptions([...options, { label: newOption, value: newOption }]);
+    setNewOption("");
+  };
+
+  // Handle removing an option
+  const removeOption = (toRemove: SelectOption) => {
+    setOptions(options.filter((option) => option.value !== toRemove.value));
+  };
+
+  // Handle confirming select options
+  const confirmSelectOptions = () => {
+    props.setValueData(
+      JSON.stringify({
+        selected: options[0],
+        options: options,
+      }),
+    );
+    setSelected(options[0]);
+    setNewOption("");
+    setAddOptionModalOpen(false);
+  };
+
+  // Handle canceling select options
+  const cancelSelectOptions = () => {
+    setNewOption("");
+    setAddOptionModalOpen(false);
+  };
+
+  // Handle opening select options modal
+  const openSelectModal = () => {
+    setOptions([]);
+    setNewOption("");
+    setAddOptionModalOpen(true);
+  };
+
+  return (
+    <>
+      {/* Select Options */}
+      {options.length > 0 ? (
+        <ReactSelect
+          options={options}
+          size={"sm"}
+          placeholder={"Select Option"}
+          disabled={props.viewOnly}
+          value={selected}
+          isSearchable={false}
+          onChange={(event) => {
+            if (event) {
+              // Update displayed selection
+              setSelected(event);
+
+              // Update underlying data
+              props.setValueData(
+                JSON.stringify({
+                  selected: event.value,
+                  options: options,
+                }),
+              );
+            }
+          }}
+          components={{
+            Control: ValueDataControl,
+            SelectContainer: ValueDataSelectContainer,
+            ValueContainer: ValueDataValueContainer,
+            SingleValue: ValueDataSingleValue,
+            DropdownIndicator: ValueDataDropdownIndicator,
+            MenuList: ValueDataMenuList,
+            Option: ValueDataOption,
+          }}
+          menuPortalTarget={document.body}
+          menuPosition={"fixed"}
+          styles={{
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 15000,
+            }),
+            menu: (base) => ({
+              ...base,
+              zIndex: 15000,
+            }),
+            menuList: (base) => ({
+              ...base,
+            }),
+            option: (base) => ({
+              ...base,
+            }),
+            control: (base) => ({
+              ...base,
+              _hover: {
+                borderColor: "blue.300",
+              },
+            }),
+          }}
+          closeMenuOnScroll={false}
+        />
+      ) : (
+        <Flex
+          w={"100%"}
+          h={"100%"}
+          p={"0"}
+          gap={"2"}
+          align="center"
+          justify="center"
+          border="1px solid transparent"
+          _focus={{
+            bg: "white",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+          cursor={props.viewOnly ? "default" : "pointer"}
+          onClick={() => {
+            if (!props.viewOnly) {
+              openSelectModal();
+            }
+          }}
+        >
+          <Icon name={"add"} color={"green"} size={"xs"} />
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"green"}>
+            Add Options
+          </Text>
+        </Flex>
+      )}
+
+      {/* Select Add Options Modal */}
+      <Dialog.Root
+        open={addOptionModalOpen}
+        size="sm"
+        placement="center"
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+              <Flex direction="row" align="center" gap="1" p={"2"}>
+                <Icon name="v_select" />
+                <Text fontSize="xs" fontWeight="semibold">
+                  Add Options
+                </Text>
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size="2xs"
+                  top={"6px"}
+                  onClick={cancelSelectOptions}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p="1" gap="1" pb="1">
+              <Flex direction="column" gap="1">
+                <Flex direction="row" gap="1">
+                  <Field.Root invalid={invalidOption} gap={"1"}>
+                    <Input
+                      size="xs"
+                      rounded="md"
+                      placeholder="Enter Option"
+                      value={newOption}
+                      onChange={(e) => updateNewOption(e.target.value)}
+                      onKeyUp={(e) => {
+                        if (e.key === "Enter" && !invalidOption) {
+                          addOption();
+                        }
+                      }}
+                    />
+                    <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
+                      Please specify a valid Option
+                    </Field.ErrorText>
+                  </Field.Root>
+                  <Button
+                    colorPalette="green"
+                    size="xs"
+                    rounded="md"
+                    onClick={addOption}
+                    disabled={invalidOption}
+                  >
+                    Add
+                    <Icon name="add" />
+                  </Button>
+                </Flex>
+                <Box>
+                  <Stack
+                    gap="1"
+                    separator={<Separator />}
+                    pb="1"
+                    maxH="200px"
+                    overflowY={"auto"}
+                  >
+                    {options.length > 0 ? (
+                      options.map((option, index) => (
+                        <Flex
+                          key={option.value}
+                          direction="row"
+                          cursor={props.viewOnly ? "default" : "text"}
+                          onClick={
+                            props.viewOnly
+                              ? (e) => e.preventDefault()
+                              : undefined
+                          }
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Flex gap="1">
+                            <Text
+                              fontWeight="semibold"
+                              fontSize="xs"
+                              ml={"0.5"}
+                            >
+                              Option {index + 1}:
+                            </Text>
+                            <Text fontSize="xs">{option.value}</Text>
+                          </Flex>
+                          <IconButton
+                            aria-label={`remove_${index}`}
+                            size="2xs"
+                            colorPalette="red"
+                            onClick={() => removeOption(option)}
+                          >
+                            <Icon name="delete" />
+                          </IconButton>
+                        </Flex>
+                      ))
+                    ) : (
+                      <Flex
+                        cursor={props.viewOnly ? "default" : "text"}
+                        onClick={
+                          props.viewOnly ? (e) => e.preventDefault() : undefined
+                        }
+                        align="center"
+                        justify="center"
+                        minH="60px"
+                        rounded="md"
+                        border="1px"
+                        borderColor="gray.300"
+                      >
+                        <Text
+                          fontSize="xs"
+                          fontWeight="semibold"
+                          color="gray.400"
+                        >
+                          No Options added
+                        </Text>
+                      </Flex>
+                    )}
+                  </Stack>
+                </Box>
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="red"
+                onClick={cancelSelectOptions}
+              >
+                Cancel
+                <Icon name="cross" />
+              </Button>
+              <Spacer />
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="green"
+                onClick={confirmSelectOptions}
+                disabled={options.length === 0}
+              >
+                Confirm
+                <Icon name="check" />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </>
   );
 };
 
@@ -667,14 +1005,14 @@ const Values = (props: {
                   variant="ghost"
                   colorPalette="red"
                   onClick={removeSelectedRows}
-                  aria-label="Delete selected rows"
+                  aria-label="Delete selected values"
                   w="100%"
                   h={"fit-content"}
                   p={"0.5"}
                 >
                   <Icon name="delete" size="xs" />
                   <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
+                    Delete {selectedRows.size === 1 ? "Value" : "Values"} (
                     {selectedRows.size})
                   </Text>
                 </Button>
@@ -685,14 +1023,14 @@ const Values = (props: {
                   variant="ghost"
                   colorPalette="green"
                   onClick={addRow}
-                  aria-label="Add row"
+                  aria-label="Add value"
                   w="100%"
                   h={"fit-content"}
                   p={"0.5"}
                 >
                   <Icon name="add" size="xs" />
                   <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Add Row
+                    Add Value
                   </Text>
                 </Button>
               )}
@@ -861,32 +1199,8 @@ const ValueRow = (props: {
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] =
     useState<ValueTypeOption>(initialValueType);
-  const [valueData, setValueData] = useState(props.value.data);
+  const [valueData, setValueData] = useState<string>(props.value.data);
   const [valueChecked, setValueChecked] = useState(false);
-
-  // React state for `Select` value type display
-  let initialSelectOption;
-  let initialSelectOptions = [];
-  if (initialValueType.value === "select") {
-    const initialSelectData = JSON.parse(valueData);
-    initialSelectOption = {
-      label: initialSelectData.selected,
-      value: initialSelectData.selected,
-    };
-    initialSelectOptions = initialSelectData.options.map((option: string) => {
-      return {
-        label: option,
-        value: option,
-      };
-    });
-  }
-  const [selectModalOpen, setSelectModalOpen] = useState(false); // Modal state
-  const [selectOptions, setSelectOptions] =
-    useState<SelectOption[]>(initialSelectOptions); // Collection of `Select` options
-  const [selectOption, setSelectOption] = useState<SelectOption | undefined>(
-    initialSelectOption,
-  ); // Selected option
-  const [selectOptionValue, setSelectOptionValue] = useState(""); // Current `Select` option value being created
 
   useEffect(() => {
     // Propagate changes to overall `Value` state
@@ -894,7 +1208,7 @@ const ValueRow = (props: {
   }, [valueName, valueType, valueData]);
 
   /**
-   *
+   * Utility function to generate default data when the `type` changes
    * @param valueType The new `IValueType` that has been selected
    * @returns
    */
@@ -916,59 +1230,6 @@ const ValueRow = (props: {
           options: [],
         });
     }
-  };
-
-  // Handle adding a new option
-  const addOption = () => {
-    if (!isSelectOption(selectOptionValue)) {
-      // Add to `selectOptions` and reset value
-      setSelectOptions([
-        ...selectOptions,
-        { label: selectOptionValue, value: selectOptionValue },
-      ]);
-      setSelectOptionValue("");
-    }
-  };
-
-  /**
-   * Utility function to check if an incoming option for `Select` type already exists
-   * @param {string} option Incoming option for `Select` type
-   * @return {boolean}
-   */
-  const isSelectOption = (option: string): boolean => {
-    return selectOptions.map((option) => option.value).includes(option);
-  };
-
-  // Handle removing an option
-  const removeOption = (toRemove: SelectOption) => {
-    setSelectOptions(
-      selectOptions.filter((option) => option.value !== toRemove.value),
-    );
-  };
-
-  // Handle confirming select options
-  const confirmSelectOptions = () => {
-    setValueData(
-      JSON.stringify({
-        selected: "",
-        options: selectOptions,
-      }),
-    );
-    setSelectOptionValue("");
-    setSelectModalOpen(false);
-  };
-
-  // Handle canceling select options
-  const cancelSelectOptions = () => {
-    setSelectOptionValue("");
-    setSelectModalOpen(false);
-  };
-
-  // Handle opening select options modal
-  const openSelectModal = () => {
-    setSelectOptions([]);
-    setSelectOptionValue("");
-    setSelectModalOpen(true);
   };
 
   // Render data input based on type
@@ -1084,99 +1345,13 @@ const ValueRow = (props: {
       );
     } else if (valueType === "select") {
       // Check if select has options configured
-      if (selectOptions.length > 0) {
-        // Show dropdown with configured options
-        return (
-          <ReactSelect
-            options={selectOptions}
-            size={"sm"}
-            placeholder={"Select Option"}
-            disabled={props.viewOnly}
-            value={selectOption}
-            isSearchable={false}
-            onChange={(event) => {
-              if (event) {
-                // Update displayed selection
-                setSelectOption(event);
-
-                // Update underlying data
-                setValueData(
-                  JSON.stringify({
-                    selected: event.value,
-                    options: selectOptions,
-                  }),
-                );
-              }
-            }}
-            components={{
-              Control: ValueDataControl,
-              SelectContainer: ValueDataSelectContainer,
-              ValueContainer: ValueDataValueContainer,
-              SingleValue: ValueDataSingleValue,
-              DropdownIndicator: ValueDataDropdownIndicator,
-              MenuList: ValueDataMenuList,
-              Option: ValueDataOption,
-            }}
-            menuPortalTarget={document.body}
-            menuPosition={"fixed"}
-            styles={{
-              menuPortal: (base) => ({
-                ...base,
-                zIndex: 15000,
-                pointerEvents: "auto",
-              }),
-              menu: (base) => ({
-                ...base,
-                zIndex: 15000,
-                pointerEvents: "auto",
-              }),
-              menuList: (base) => ({
-                ...base,
-                pointerEvents: "auto",
-              }),
-              option: (base) => ({
-                ...base,
-                pointerEvents: "auto",
-              }),
-              control: (base) => ({
-                ...base,
-              }),
-            }}
-            closeMenuOnScroll={false}
-          />
-        );
-      } else {
-        // Show "Setup Options" button
-        return (
-          <Flex
-            w={"100%"}
-            h={"100%"}
-            p={"0"}
-            align="center"
-            justify="center"
-            border="1px solid transparent"
-            _focus={{
-              bg: "white",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-            cursor={props.viewOnly ? "default" : "pointer"}
-            onClick={() => {
-              if (!props.viewOnly) {
-                openSelectModal();
-              }
-            }}
-          >
-            <Text fontSize="xs" fontWeight="semibold" color="blue.600">
-              Add Options
-            </Text>
-          </Flex>
-        );
-      }
+      return (
+        <ValueDataSelect
+          valueData={valueData}
+          setValueData={setValueData}
+          viewOnly={props.viewOnly}
+        />
+      );
     } else if (valueType === "entity") {
       if (!props.viewOnly) {
         return (
@@ -1427,151 +1602,6 @@ const ValueRow = (props: {
           </IconButton>
         )}
       </Flex>
-
-      {/* Select Options Modal */}
-      <Dialog.Root
-        open={selectModalOpen}
-        size="sm"
-        placement="center"
-        closeOnEscape
-        closeOnInteractOutside
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
-              <Flex direction="row" align="center" gap="1" p={"2"}>
-                <Icon name="v_select" />
-                <Text fontSize="xs" fontWeight="semibold">
-                  Setup Options
-                </Text>
-              </Flex>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size="2xs"
-                  top={"6px"}
-                  onClick={cancelSelectOptions}
-                />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-            <Dialog.Body p="1" gap="1" pb="1">
-              <Flex direction="column" gap="1">
-                <Flex direction="row" gap="1">
-                  <Input
-                    size="xs"
-                    rounded="md"
-                    placeholder="Enter option value"
-                    value={selectOptionValue}
-                    onChange={(e) => setSelectOptionValue(e.target.value)}
-                    onKeyUp={(e) => {
-                      if (e.key === "Enter") {
-                        addOption();
-                      }
-                    }}
-                  />
-                  <Button
-                    colorPalette="green"
-                    size="xs"
-                    rounded="md"
-                    onClick={addOption}
-                  >
-                    Add
-                    <Icon name="add" />
-                  </Button>
-                </Flex>
-                <Box>
-                  <Stack
-                    gap="1"
-                    separator={<Separator />}
-                    pb="1"
-                    maxH="200px"
-                    overflowY={"auto"}
-                  >
-                    {selectOptions.length > 0 ? (
-                      selectOptions.map((option, index) => (
-                        <Flex
-                          key={option.value}
-                          direction="row"
-                          cursor={props.viewOnly ? "default" : "text"}
-                          onClick={
-                            props.viewOnly
-                              ? (e) => e.preventDefault()
-                              : undefined
-                          }
-                          justify="space-between"
-                          align="center"
-                        >
-                          <Flex gap="1">
-                            <Text
-                              fontWeight="semibold"
-                              fontSize="xs"
-                              ml={"0.5"}
-                            >
-                              Value {index + 1}:
-                            </Text>
-                            <Text fontSize="xs">{option.value}</Text>
-                          </Flex>
-                          <IconButton
-                            aria-label={`remove_${index}`}
-                            size="2xs"
-                            colorPalette="red"
-                            onClick={() => removeOption(option)}
-                          >
-                            <Icon name="delete" />
-                          </IconButton>
-                        </Flex>
-                      ))
-                    ) : (
-                      <Flex
-                        cursor={props.viewOnly ? "default" : "text"}
-                        onClick={
-                          props.viewOnly ? (e) => e.preventDefault() : undefined
-                        }
-                        align="center"
-                        justify="center"
-                        minH="60px"
-                        rounded="md"
-                        border="1px"
-                        borderColor="gray.300"
-                      >
-                        <Text
-                          fontSize="xs"
-                          fontWeight="semibold"
-                          color="gray.400"
-                        >
-                          No values added.
-                        </Text>
-                      </Flex>
-                    )}
-                  </Stack>
-                </Box>
-              </Flex>
-            </Dialog.Body>
-            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
-              <Button
-                size="xs"
-                rounded="md"
-                colorPalette="red"
-                onClick={cancelSelectOptions}
-              >
-                Cancel
-                <Icon name="cross" />
-              </Button>
-              <Spacer />
-              <Button
-                size="xs"
-                rounded="md"
-                colorPalette="green"
-                onClick={confirmSelectOptions}
-                disabled={selectOptions.length === 0}
-              >
-                Confirm
-                <Icon name="check" />
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
     </Flex>
   );
 };
