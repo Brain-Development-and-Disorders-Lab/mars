@@ -269,14 +269,7 @@ const ValueDataValueContainer = ({
 
 const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
   return (
-    <Box
-      pl={"2"}
-      pr={"3"}
-      border={"1px solid transparent"}
-      _hover={{
-        borderColor: "blue.300",
-      }}
-    >
+    <Box pl={"2"} pr={"3"}>
       <components.Control {...props} />
     </Box>
   );
@@ -480,9 +473,6 @@ const ValueDataSelect = (props: {
             }),
             control: (base) => ({
               ...base,
-              _hover: {
-                borderColor: "blue.300",
-              },
             }),
           }}
           closeMenuOnScroll={false}
@@ -1346,11 +1336,29 @@ const ValueRow = (props: {
     } else if (valueType === "select") {
       // Check if select has options configured
       return (
-        <ValueDataSelect
-          valueData={valueData}
-          setValueData={setValueData}
-          viewOnly={props.viewOnly}
-        />
+        <Flex
+          w="100%"
+          h={"100%"}
+          p={"0"}
+          align="center"
+          justify="center"
+          border="1px solid transparent"
+          _focus={{
+            bg: "white",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        >
+          <ValueDataSelect
+            valueData={valueData}
+            setValueData={setValueData}
+            viewOnly={props.viewOnly}
+          />
+        </Flex>
       );
     } else if (valueType === "entity") {
       if (!props.viewOnly) {
