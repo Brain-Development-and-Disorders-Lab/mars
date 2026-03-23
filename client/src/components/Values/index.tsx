@@ -1,5 +1,5 @@
 // React
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Chakra UI components
 import {
@@ -22,7 +22,18 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 
-import { OptionBase, Select as ReactSelect } from "chakra-react-select";
+import {
+  OptionBase,
+  components,
+  Select as ReactSelect,
+  OptionProps,
+  DropdownIndicatorProps,
+  ValueContainerProps,
+  ContainerProps,
+  SingleValueProps,
+  MenuListProps,
+  ControlProps,
+} from "chakra-react-select";
 
 // Custom components
 import Icon from "@components/Icon";
@@ -30,15 +41,641 @@ import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 
 // Types
-import { IValue, IValueType } from "@types";
+import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
 
 // Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
 
+interface SelectOption extends OptionBase {
+  label: string;
+  value: string;
+}
+
+interface ValueTypeOption extends OptionBase {
+  label: string;
+  value: IValueType;
+}
+
 /**
- * Values component - A spreadsheet-like interface for editing key-value data
- * Features a compact, spreadsheet-like layout with type selection, name, and value columns
+ * Utility function to generate the corresponding `IconName` and color
+ * for each `IValueType`
+ * @param type `IValueType` representing the icon and color scheme
+ * @return {{ icon: IconNames, color: string }}
+ */
+const getIconConfiguration = (
+  type: IValueType,
+): { icon: IconNames; color: string } => {
+  let icon: IconNames = "v_text";
+  let color: string = "blue.300";
+
+  // Customize `Icon` color according to Value `type`
+  if (type === "date") {
+    icon = "v_date";
+    color = "orange.300";
+  } else if (type === "number") {
+    icon = "v_number";
+    color = "green.300";
+  } else if (type === "url") {
+    icon = "v_url";
+    color = "yellow.300";
+  } else if (type === "entity") {
+    icon = "entity";
+    color = "purple.300";
+  } else if (type === "select") {
+    icon = "v_select";
+    color = "teal.300";
+  }
+  return { icon, color };
+};
+
+/**
+ * Custom styling for each Value `type`, displaying colored icons
+ */
+const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
+  const { icon, color } = getIconConfiguration(props.data.value);
+  return (
+    <components.Option {...props}>
+      <Flex
+        direction={"row"}
+        h={"8"}
+        p={"0.5"}
+        gap={"1"}
+        align={"center"}
+        _hover={{ bg: "blue.100" }}
+      >
+        <Icon name={icon} size={"xs"} color={color} />
+        <Text fontSize={"xs"}>{props.data.label}</Text>
+      </Flex>
+    </components.Option>
+  );
+};
+
+/**
+ * Custom styling for Value `type` select container
+ */
+const ValueTypeSelectContainer = ({
+  children,
+  ...props
+}: ContainerProps<ValueTypeOption>) => {
+  return (
+    <Box w={"100%"}>
+      <components.SelectContainer {...props}>
+        {children}
+      </components.SelectContainer>
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `type` value container
+ */
+const ValueTypeValueContainer = ({
+  children,
+  ...props
+}: ValueContainerProps<ValueTypeOption>) => {
+  return (
+    <components.ValueContainer {...props}>
+      <Flex w={"100%"} h={"34px"}>
+        {children}
+      </Flex>
+    </components.ValueContainer>
+  );
+};
+
+const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
+  return (
+    <Box
+      pl={"1"}
+      pr={"3"}
+      border={"1px solid transparent"}
+      _hover={{
+        borderColor: "blue.300",
+      }}
+    >
+      <components.Control {...props} />
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `type` single value
+ */
+const ValueTypeSingleValue = ({
+  ...props
+}: SingleValueProps<ValueTypeOption>) => {
+  const { icon, color } = getIconConfiguration(props.data.value);
+  return (
+    <Flex direction={"row"} align={"center"}>
+      <components.SingleValue {...props}>
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Icon name={icon} size={"xs"} color={color} />
+          <Text fontSize={"xs"}>{props.data.label}</Text>
+        </Flex>
+      </components.SingleValue>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for Value `type` `MenuList` component containing all menu options
+ */
+const ValueTypeMenuList = ({
+  children,
+  ...props
+}: MenuListProps<ValueTypeOption, false>) => {
+  return (
+    <Flex
+      direction={"column"}
+      border={"1px solid"}
+      borderColor={"gray.200"}
+      bg={"white"}
+      gap={"0.5"}
+      p={"0.5"}
+      rounded={"sm"}
+    >
+      <components.MenuList {...props}>{children}</components.MenuList>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for each Value `data`
+ */
+const ValueDataOption = (props: OptionProps<SelectOption>) => {
+  return (
+    <components.Option {...props}>
+      <Flex
+        direction={"row"}
+        h={"8"}
+        p={"0.5"}
+        gap={"1"}
+        align={"center"}
+        _hover={{ bg: "blue.100" }}
+      >
+        <Text fontSize={"xs"}>{props.data.label}</Text>
+      </Flex>
+    </components.Option>
+  );
+};
+
+/**
+ * Custom styling for Value `data` `DropdownIndicator` component
+ */
+const ValueTypeDropdownIndicator = (
+  props: DropdownIndicatorProps<ValueTypeOption, false>,
+) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <Icon
+        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
+        size={"xs"}
+      />
+    </components.DropdownIndicator>
+  );
+};
+
+/**
+ * Custom styling for Value `data` select container
+ */
+const ValueDataSelectContainer = ({
+  children,
+  ...props
+}: ContainerProps<SelectOption>) => {
+  return (
+    <Box w={"100%"}>
+      <components.SelectContainer {...props}>
+        {children}
+      </components.SelectContainer>
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `data` value container
+ */
+const ValueDataValueContainer = ({
+  children,
+  ...props
+}: ValueContainerProps<SelectOption>) => {
+  return (
+    <components.ValueContainer {...props}>
+      <Flex w={"100%"} h={"34px"}>
+        {children}
+      </Flex>
+    </components.ValueContainer>
+  );
+};
+
+const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
+  return (
+    <Box pl={"2"} pr={"3"}>
+      <components.Control {...props} />
+    </Box>
+  );
+};
+
+/**
+ * Custom styling for Value `type` single value
+ */
+const ValueDataSingleValue = ({
+  children,
+  ...props
+}: SingleValueProps<SelectOption>) => {
+  return (
+    <Flex direction={"row"} align={"center"}>
+      <components.SingleValue {...props}>
+        <Flex direction={"row"} align={"center"} gap={"2"} fontSize={"xs"}>
+          {children}
+        </Flex>
+      </components.SingleValue>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for Value `type` `MenuList` component containing all menu options
+ */
+const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
+  return (
+    <Flex
+      direction={"column"}
+      border={"1px solid"}
+      borderColor={"gray.200"}
+      bg={"white"}
+      gap={"0.5"}
+      p={"0.5"}
+      rounded={"sm"}
+    >
+      <components.MenuList {...props}>{props.children}</components.MenuList>
+    </Flex>
+  );
+};
+
+/**
+ * Custom styling for Value `type` `DropdownIndicator` component
+ */
+const ValueDataDropdownIndicator = (
+  props: DropdownIndicatorProps<SelectOption, false>,
+) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <Icon
+        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
+        size={"xs"}
+      />
+    </components.DropdownIndicator>
+  );
+};
+
+/**
+ * Custom `Select` component for displaying `IValue` instances that have a
+ * `type` of `select`. A separate component was required to manage state
+ * and parse `data` correctly.
+ * @param props Required props for `ValueDataSelect` component
+ */
+const ValueDataSelect = (props: {
+  valueData: string;
+  setValueData: React.Dispatch<React.SetStateAction<string>>;
+  viewOnly?: boolean;
+}) => {
+  let selectData: IValueSelectData;
+  let initialSelected: SelectOption;
+  let initialOptions: SelectOption[];
+
+  // Clean and prepare data
+  try {
+    selectData = JSON.parse(props.valueData);
+    initialSelected = {
+      label: selectData.selected,
+      value: selectData.selected,
+    };
+    initialOptions = selectData.options.map((option: string) => {
+      return {
+        label: option,
+        value: option,
+      };
+    });
+  } catch {
+    // JSON parse failed, so set up with empty data
+    initialSelected = {
+      label: "",
+      value: "",
+    };
+    initialOptions = [];
+  }
+
+  // Setup state using this data
+  const [selected, setSelected] = useState<SelectOption>(initialSelected);
+  const [options, setOptions] = useState<SelectOption[]>(initialOptions);
+  const [addOptionModalOpen, setAddOptionModalOpen] = useState(false);
+
+  // Additional state
+  const [newOption, setNewOption] = useState<string>("");
+  const [invalidOption, setInvalidOption] = useState(true);
+
+  /**
+   * Update the `newOption` state and perform error check to ensure
+   * only valid Options are entered
+   * @param value Updated Option value entered through modal
+   */
+  const updateNewOption = (value: string) => {
+    setNewOption(value);
+    if (value === "" || options.map((option) => option.value).includes(value)) {
+      setInvalidOption(true);
+    } else {
+      setInvalidOption(false);
+    }
+  };
+
+  // Handle adding a new option
+  const addOption = () => {
+    // Add to `selectOptions` and reset value
+    setOptions([...options, { label: newOption, value: newOption }]);
+    setNewOption("");
+  };
+
+  // Handle removing an option
+  const removeOption = (toRemove: SelectOption) => {
+    setOptions(options.filter((option) => option.value !== toRemove.value));
+  };
+
+  // Handle confirming select options
+  const confirmSelectOptions = () => {
+    props.setValueData(
+      JSON.stringify({
+        selected: options[0].value,
+        options: options.map((o) => o.value),
+      }),
+    );
+    setSelected(options[0]);
+    setNewOption("");
+    setAddOptionModalOpen(false);
+  };
+
+  // Handle canceling select options
+  const cancelSelectOptions = () => {
+    setNewOption("");
+    setAddOptionModalOpen(false);
+  };
+
+  // Handle opening select options modal
+  const openSelectModal = () => {
+    setOptions([]);
+    setNewOption("");
+    setAddOptionModalOpen(true);
+  };
+
+  return (
+    <>
+      {/* Select Options */}
+      {options.length > 0 ? (
+        <ReactSelect
+          options={options}
+          size={"sm"}
+          placeholder={"Select Option"}
+          disabled={props.viewOnly}
+          value={selected}
+          isSearchable={false}
+          onChange={(event) => {
+            if (event) {
+              // Update displayed selection
+              setSelected(event);
+
+              // Update underlying data
+              props.setValueData(
+                JSON.stringify({
+                  selected: event.value,
+                  options: options.map((o) => o.value),
+                }),
+              );
+            }
+          }}
+          components={{
+            Control: ValueDataControl,
+            SelectContainer: ValueDataSelectContainer,
+            ValueContainer: ValueDataValueContainer,
+            SingleValue: ValueDataSingleValue,
+            DropdownIndicator: ValueDataDropdownIndicator,
+            MenuList: ValueDataMenuList,
+            Option: ValueDataOption,
+          }}
+          menuPortalTarget={document.body}
+          menuPosition={"fixed"}
+          styles={{
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menu: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menuList: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+            }),
+            option: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+            }),
+            control: (base) => ({
+              ...base,
+            }),
+          }}
+          closeMenuOnScroll={false}
+        />
+      ) : (
+        <Flex
+          w={"100%"}
+          h={"100%"}
+          p={"0"}
+          gap={"2"}
+          align="center"
+          justify="center"
+          border="1px solid transparent"
+          _focus={{
+            bg: "white",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+          cursor={props.viewOnly ? "default" : "pointer"}
+          onClick={() => {
+            if (!props.viewOnly) {
+              openSelectModal();
+            }
+          }}
+        >
+          <Icon name={"add"} color={"green"} size={"xs"} />
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"green"}>
+            Add Options
+          </Text>
+        </Flex>
+      )}
+
+      {/* Select Add Options Modal */}
+      <Dialog.Root
+        open={addOptionModalOpen}
+        size="sm"
+        placement="center"
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+              <Flex direction="row" align="center" gap="1" p={"2"}>
+                <Icon name="v_select" />
+                <Text fontSize="xs" fontWeight="semibold">
+                  Add Options
+                </Text>
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size="2xs"
+                  top={"6px"}
+                  onClick={cancelSelectOptions}
+                />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p="1" gap="1" pb="1">
+              <Flex direction="column" gap="1">
+                <Flex direction="row" gap="1">
+                  <Field.Root invalid={invalidOption} gap={"1"}>
+                    <Input
+                      size="xs"
+                      rounded="md"
+                      placeholder="Enter Option"
+                      value={newOption}
+                      onChange={(e) => updateNewOption(e.target.value)}
+                      onKeyUp={(e) => {
+                        if (e.key === "Enter" && !invalidOption) {
+                          addOption();
+                        }
+                      }}
+                    />
+                    <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
+                      Please specify a valid Option
+                    </Field.ErrorText>
+                  </Field.Root>
+                  <Button
+                    colorPalette="green"
+                    size="xs"
+                    rounded="md"
+                    onClick={addOption}
+                    disabled={invalidOption}
+                  >
+                    Add
+                    <Icon name="add" />
+                  </Button>
+                </Flex>
+                <Box>
+                  <Stack
+                    gap="1"
+                    separator={<Separator />}
+                    pb="1"
+                    maxH="200px"
+                    overflowY={"auto"}
+                  >
+                    {options.length > 0 ? (
+                      options.map((option, index) => (
+                        <Flex
+                          key={option.value}
+                          direction="row"
+                          cursor={props.viewOnly ? "default" : "text"}
+                          onClick={
+                            props.viewOnly
+                              ? (e) => e.preventDefault()
+                              : undefined
+                          }
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Flex gap="1">
+                            <Text
+                              fontWeight="semibold"
+                              fontSize="xs"
+                              ml={"0.5"}
+                            >
+                              Option {index + 1}:
+                            </Text>
+                            <Text fontSize="xs">{option.value}</Text>
+                          </Flex>
+                          <IconButton
+                            aria-label={`remove_${index}`}
+                            size="2xs"
+                            colorPalette="red"
+                            onClick={() => removeOption(option)}
+                          >
+                            <Icon name="delete" />
+                          </IconButton>
+                        </Flex>
+                      ))
+                    ) : (
+                      <Flex
+                        cursor={props.viewOnly ? "default" : "text"}
+                        onClick={
+                          props.viewOnly ? (e) => e.preventDefault() : undefined
+                        }
+                        align="center"
+                        justify="center"
+                        minH="60px"
+                        rounded="md"
+                        border="1px"
+                        borderColor="gray.300"
+                      >
+                        <Text
+                          fontSize="xs"
+                          fontWeight="semibold"
+                          color="gray.400"
+                        >
+                          No Options added
+                        </Text>
+                      </Flex>
+                    )}
+                  </Stack>
+                </Box>
+              </Flex>
+            </Dialog.Body>
+            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="red"
+                onClick={cancelSelectOptions}
+              >
+                Cancel
+                <Icon name="cross" />
+              </Button>
+              <Spacer />
+              <Button
+                size="xs"
+                rounded="md"
+                colorPalette="green"
+                onClick={confirmSelectOptions}
+                disabled={options.length === 0}
+              >
+                Confirm
+                <Icon name="check" />
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </>
+  );
+};
+
+/**
+ * A spreadsheet-like interface for editing key-value data with type selection,
+ * name, and value columns
  */
 const Values = (props: {
   values: IValue[];
@@ -47,28 +684,24 @@ const Values = (props: {
   requireData?: boolean;
   permittedValues?: string[];
 }) => {
+  // Local type for tracking column names
+  type ValuesColumn = "name" | "type" | "value";
+
   // Counter for unique IDs
-  const idCounter = React.useRef(0);
+  const idCounter = useRef(0);
 
-  // State for column widths with minimum constraints
-  const [columnWidths, setColumnWidths] = useState({
-    type: 120,
-    name: 220,
-    value: 260,
-  });
+  // Column widths and their minimums
+  const minColumnWidths = { name: 220, type: 120, value: 260 };
+  const [columnWidths, setColumnWidths] = useState({ ...minColumnWidths });
 
-  // Minimum column widths
-  const minColumnWidths = {
-    type: 120,
-    name: 220,
-    value: 260,
-  };
-
-  // State for drag resizing
-  const [isResizing, setIsResizing] = useState<string | null>(null);
-  const dragRef = React.useRef<{ startX: number; startWidth: number } | null>(
-    null,
-  );
+  // Refs for components involved in changing column widths
+  const tableRef = useRef<HTMLDivElement>(null);
+  const resizeRef = useRef<{
+    column: ValuesColumn;
+    startX: number;
+    startWidth: number;
+    otherFixedWidth: number;
+  } | null>(null);
 
   // State for row selection and manipulation
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -96,54 +729,61 @@ const Values = (props: {
     setCurrentPage(1);
   }, [rowsPerPage]);
 
-  // Handle column resize start
-  const handleResizeStart = (column: string, event: React.MouseEvent) => {
+  /**
+   * Handle a resize event on a column in the `Values` component
+   * @param {ValuesColumn} column Specific column being resized
+   * @param {React.MouseEvent} event Mouse event
+   */
+  const handleResizeStart = (column: ValuesColumn, event: React.MouseEvent) => {
     event.preventDefault();
-    setIsResizing(column);
-    dragRef.current = {
+    const allFixedWidth =
+      (props.viewOnly ? 0 : 40) + columnWidths.name + columnWidths.type;
+    const otherFixedWidth =
+      allFixedWidth - (column !== "value" ? columnWidths[column] : 0);
+    resizeRef.current = {
+      column,
       startX: event.clientX,
-      startWidth: columnWidths[column as keyof typeof columnWidths],
+      startWidth: columnWidths[column],
+      otherFixedWidth,
     };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", handleResizeMove);
+    document.addEventListener("mouseup", handleResizeEnd);
   };
 
-  // Handle column resize during drag
+  /**
+   * Handle movement within a column resize event in the `Values` component
+   * @param event Mouse event
+   * @return
+   */
   const handleResizeMove = (event: MouseEvent) => {
-    if (!isResizing || !dragRef.current) return;
-
-    const deltaX = event.clientX - dragRef.current.startX;
-    const minWidth =
-      minColumnWidths[isResizing as keyof typeof minColumnWidths];
-    const newWidth = Math.max(minWidth, dragRef.current.startWidth + deltaX);
-
-    setColumnWidths((prev) => ({
-      ...prev,
-      [isResizing]: newWidth,
-    }));
+    if (!resizeRef.current) return;
+    const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
+    const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
+    // Note: For `name` and `type`, leave room for the value column's minimum width
+    // Note: For `value`, the column itself is flexible, so only other fixed columns constrain it
+    const maxWidth =
+      containerWidth -
+      otherFixedWidth -
+      (column !== "value" ? minColumnWidths.value : 0);
+    const newWidth = Math.min(
+      maxWidth,
+      Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)),
+    );
+    setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
   };
 
-  // Handle column resize end
+  /**
+   * Handle the end of a column resize event in the `Values` component
+   */
   const handleResizeEnd = () => {
-    setIsResizing(null);
-    dragRef.current = null;
+    resizeRef.current = null;
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    document.removeEventListener("mousemove", handleResizeMove);
+    document.removeEventListener("mouseup", handleResizeEnd);
   };
-
-  // Add event listeners for drag
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", handleResizeMove);
-      document.addEventListener("mouseup", handleResizeEnd);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-
-      return () => {
-        document.removeEventListener("mousemove", handleResizeMove);
-        document.removeEventListener("mouseup", handleResizeEnd);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-    }
-    return undefined;
-  }, [isResizing]);
 
   // Row manipulation functions
   const addRow = () => {
@@ -195,6 +835,7 @@ const Values = (props: {
       {/* Table */}
       <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
         <Box
+          ref={tableRef}
           minW="800px"
           w="100%"
           border="1px solid"
@@ -214,7 +855,7 @@ const Values = (props: {
             {!props.viewOnly && (
               <Box
                 w="40px"
-                flex="0 0 auto"
+                flex={"0 0 auto"}
                 minW="40px"
                 px={1}
                 py={1}
@@ -227,47 +868,10 @@ const Values = (props: {
               />
             )}
 
-            {/* Type Column Header */}
-            <Flex
-              w={`${columnWidths.type}px`}
-              flex="0 0 auto"
-              minW={`${columnWidths.type}px`}
-              px={1}
-              py={1}
-              fontSize="xs"
-              fontWeight="semibold"
-              color="gray.600"
-              bg="gray.100"
-              borderRight="1px solid"
-              borderColor="gray.200"
-              position="relative"
-              textAlign="center"
-              lineHeight="1.2"
-              align="center"
-              justify="center"
-              overflow="hidden"
-              flexShrink={0}
-            >
-              <Text textAlign="center">Type</Text>
-              {/* Resize Handle */}
-              <Box
-                position="absolute"
-                right="-1px"
-                top="0"
-                bottom="0"
-                width="3px"
-                cursor="col-resize"
-                bg="transparent"
-                _hover={{ bg: "blue.300" }}
-                onMouseDown={(e) => handleResizeStart("type", e)}
-                zIndex={10}
-              />
-            </Flex>
-
             {/* Name Column Header */}
             <Flex
               w={`${columnWidths.name}px`}
-              flex="0 0 auto"
+              flex={"0 0 auto"}
               minW={`${columnWidths.name}px`}
               px={1}
               py={1}
@@ -301,15 +905,51 @@ const Values = (props: {
               />
             </Flex>
 
-            {/* Value Column Header */}
+            {/* Type Column Header */}
             <Flex
-              w={`${columnWidths.value}px`}
-              flex="0 0 auto"
-              minW={`${columnWidths.value}px`}
+              w={`${columnWidths.type}px`}
+              flex={"0 0 auto"}
+              minW={`${columnWidths.type}px`}
               px={1}
               py={1}
               fontSize="xs"
               fontWeight="semibold"
+              color="gray.600"
+              bg="gray.100"
+              borderRight="1px solid"
+              borderColor="gray.200"
+              position="relative"
+              textAlign="center"
+              lineHeight="1.2"
+              align="center"
+              justify="center"
+              overflow="hidden"
+              flexShrink={0}
+            >
+              <Text textAlign="center">Type</Text>
+              {/* Resize Handle */}
+              <Box
+                position="absolute"
+                right="-1px"
+                top="0"
+                bottom="0"
+                width="3px"
+                cursor="col-resize"
+                bg="transparent"
+                _hover={{ bg: "blue.300" }}
+                onMouseDown={(e) => handleResizeStart("type", e)}
+                zIndex={10}
+              />
+            </Flex>
+
+            {/* Value Column Header */}
+            <Flex
+              flex={"1 1 auto"}
+              minW={`${columnWidths.value}px`}
+              px={1}
+              py={1}
+              fontSize={"xs"}
+              fontWeight={"semibold"}
               color="gray.600"
               bg="gray.100"
               position="relative"
@@ -368,14 +1008,14 @@ const Values = (props: {
                   variant="ghost"
                   colorPalette="red"
                   onClick={removeSelectedRows}
-                  aria-label="Delete selected rows"
+                  aria-label="Delete selected values"
                   w="100%"
                   h={"fit-content"}
                   p={"0.5"}
                 >
                   <Icon name="delete" size="xs" />
                   <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Delete {selectedRows.size === 1 ? "Row" : "Rows"} (
+                    Delete {selectedRows.size === 1 ? "Value" : "Values"} (
                     {selectedRows.size})
                   </Text>
                 </Button>
@@ -386,14 +1026,14 @@ const Values = (props: {
                   variant="ghost"
                   colorPalette="green"
                   onClick={addRow}
-                  aria-label="Add row"
+                  aria-label="Add value"
                   w="100%"
                   h={"fit-content"}
                   p={"0.5"}
                 >
                   <Icon name="add" size="xs" />
                   <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Add Row
+                    Add Value
                   </Text>
                 </Button>
               )}
@@ -543,10 +1183,6 @@ const ValueRow = (props: {
   hideBorder?: boolean;
   viewOnly?: boolean;
 }) => {
-  interface ValueTypeOption extends OptionBase {
-    label: string;
-    value: IValueType;
-  }
   const valueTypeOptions: ValueTypeOption[] = [
     { label: "Number", value: "number" },
     { label: "Text", value: "text" },
@@ -555,11 +1191,6 @@ const ValueRow = (props: {
     { label: "Entity", value: "entity" },
     { label: "Select", value: "select" },
   ];
-
-  interface SelectOption extends OptionBase {
-    label: string;
-    value: string;
-  }
 
   // Get the initial `ValueTypeOption` based on the `IValue` type
   const initialValueType = valueTypeOptions.filter(
@@ -571,27 +1202,8 @@ const ValueRow = (props: {
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] =
     useState<ValueTypeOption>(initialValueType);
-  const [valueData, setValueData] = useState(props.value.data);
+  const [valueData, setValueData] = useState<string>(props.value.data);
   const [valueChecked, setValueChecked] = useState(false);
-
-  // React state for `Select` value type display
-  let initialSelectOption;
-  let initialSelectOptions = [];
-  if (initialValueType.value === "select") {
-    const initialSelectData = JSON.parse(valueData);
-    initialSelectOption = {
-      label: initialSelectData.selected,
-      value: initialSelectData.selected,
-    };
-    initialSelectOptions = initialSelectData.options;
-  }
-  const [selectModalOpen, setSelectModalOpen] = useState(false); // Modal state
-  const [selectOptions, setSelectOptions] =
-    useState<SelectOption[]>(initialSelectOptions); // Collection of `Select` options
-  const [selectOption, setSelectOption] = useState<SelectOption | undefined>(
-    initialSelectOption,
-  ); // Selected option
-  const [selectOptionValue, setSelectOptionValue] = useState(""); // Current `Select` option value being created
 
   useEffect(() => {
     // Propagate changes to overall `Value` state
@@ -599,7 +1211,7 @@ const ValueRow = (props: {
   }, [valueName, valueType, valueData]);
 
   /**
-   *
+   * Utility function to generate default data when the `type` changes
    * @param valueType The new `IValueType` that has been selected
    * @returns
    */
@@ -623,68 +1235,20 @@ const ValueRow = (props: {
     }
   };
 
-  // Handle adding a new option
-  const addOption = () => {
-    if (!isSelectOption(selectOptionValue)) {
-      // Add to `selectOptions` and reset value
-      setSelectOptions([
-        ...selectOptions,
-        { label: selectOptionValue, value: selectOptionValue },
-      ]);
-      setSelectOptionValue("");
-    }
-  };
-
   /**
-   * Utility function to check if an incoming option for `Select` type already exists
-   * @param {string} option Incoming option for `Select` type
-   * @return {boolean}
+   * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
+   * is `entity` or `select`
+   * @param {IValueType} valueType The type of the value to be copied
+   * @param {string} valueData Serialized value data
    */
-  const isSelectOption = (option: string): boolean => {
-    return selectOptions.map((option) => option.value).includes(option);
-  };
-
-  // Handle removing an option
-  const removeOption = (toRemove: SelectOption) => {
-    setSelectOptions(
-      selectOptions.filter((option) => option.value !== toRemove.value),
-    );
-  };
-
-  // Handle confirming select options
-  const confirmSelectOptions = () => {
-    setValueData(
-      JSON.stringify({
-        selected: "",
-        options: selectOptions,
-      }),
-    );
-    setSelectOptionValue("");
-    setSelectModalOpen(false);
-  };
-
-  // Handle canceling select options
-  const cancelSelectOptions = () => {
-    setSelectOptionValue("");
-    setSelectModalOpen(false);
-  };
-
-  // const toggleRowSelection = (valueId: string) => {
-  //   console.info("valueId:", valueId);
-  //   // const newSelection = new Set(selectedRows);
-  //   // if (newSelection.has(valueId)) {
-  //   //   newSelection.delete(valueId);
-  //   // } else {
-  //   //   newSelection.add(valueId);
-  //   // }
-  //   // setSelectedRows(newSelection);
-  // };
-
-  // Handle opening select options modal
-  const openSelectModal = () => {
-    setSelectOptions([]);
-    setSelectOptionValue("");
-    setSelectModalOpen(true);
+  const copyToClipboard = (valueType: IValueType, valueData: string) => {
+    // If data is a serialized object, parse and copy relevant fields
+    if (valueType === "entity") {
+      valueData = JSON.parse(valueData)._id;
+    } else if (valueType === "select") {
+      valueData = JSON.parse(valueData).selected;
+    }
+    navigator.clipboard.writeText(valueData.toString() || "");
   };
 
   // Render data input based on type
@@ -695,7 +1259,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           type="number"
@@ -723,7 +1287,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           readOnly={props.viewOnly}
@@ -750,7 +1314,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           readOnly={props.viewOnly}
@@ -777,7 +1341,7 @@ const ValueRow = (props: {
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
           size="xs"
-          h={props.viewOnly ? "34px" : "100%"}
+          h={"100%"}
           borderRadius="none"
           fontSize="xs"
           type="date"
@@ -800,98 +1364,37 @@ const ValueRow = (props: {
       );
     } else if (valueType === "select") {
       // Check if select has options configured
-      if (selectOptions.length > 0) {
-        // Show dropdown with configured options
-        return (
-          <ReactSelect
-            options={selectOptions}
-            size={"sm"}
-            placeholder={"Select Option"}
-            disabled={props.viewOnly}
-            value={selectOption}
-            onChange={(event) => {
-              if (event) {
-                // Update displayed selection
-                setSelectOption(event);
-
-                // Update underlying data
-                setValueData(
-                  JSON.stringify({
-                    selected: event.value,
-                    options: selectOptions,
-                  }),
-                );
-              }
-            }}
-            menuPortalTarget={document.body}
-            menuPosition={"fixed"}
-            styles={{
-              menuPortal: (base) => ({
-                ...base,
-                zIndex: 15000,
-                pointerEvents: "auto",
-              }),
-              menu: (base) => ({
-                ...base,
-                zIndex: 15000,
-                pointerEvents: "auto",
-              }),
-              menuList: (base) => ({
-                ...base,
-                pointerEvents: "auto",
-              }),
-              option: (base) => ({
-                ...base,
-                pointerEvents: "auto",
-                fontSize: "sm",
-              }),
-              control: (base) => ({
-                ...base,
-                minHeight: "32px",
-                border: "1px solid transparent",
-              }),
-            }}
-            closeMenuOnScroll={false}
+      return (
+        <Flex
+          w="100%"
+          h={"100%"}
+          p={"0"}
+          align="center"
+          justify="center"
+          border="1px solid transparent"
+          _focus={{
+            bg: "white",
+            borderColor: "blue.300",
+          }}
+          _hover={{
+            border: "1px solid",
+            borderColor: "blue.200",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        >
+          <ValueDataSelect
+            valueData={valueData}
+            setValueData={setValueData}
+            viewOnly={props.viewOnly}
           />
-        );
-      } else {
-        // Show "Setup Options" button
-        return (
-          <Flex
-            w="100%"
-            h={"34px"}
-            p={"0"}
-            align="center"
-            justify="center"
-            border="1px solid transparent"
-            _focus={{
-              bg: "white",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-            cursor={props.viewOnly ? "default" : "pointer"}
-            onClick={() => {
-              if (!props.viewOnly) {
-                openSelectModal();
-              }
-            }}
-          >
-            <Text fontSize="xs" fontWeight="semibold" color="blue.600">
-              Add Options
-            </Text>
-          </Flex>
-        );
-      }
+        </Flex>
+      );
     } else if (valueType === "entity") {
       if (!props.viewOnly) {
         return (
           <Flex
             w="100%"
-            h={props.viewOnly ? "34px" : "100%"}
+            h={"100%"}
             p={"0"}
             align="center"
             justify="center"
@@ -919,8 +1422,8 @@ const ValueRow = (props: {
       } else {
         return (
           <Flex
-            w="100%"
-            h={props.viewOnly ? "34px" : "100%"}
+            w={"100%"}
+            h={"100%"}
             justify="center"
             pt={"0.5"}
             px={"2"}
@@ -1010,66 +1513,11 @@ const ValueRow = (props: {
           </Checkbox.Root>
         </Box>
       )}
-      {/* Type Column */}
-      <Box
-        w={`${props.columnWidths.type}px`}
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"center"}
-        borderRight={"1px solid"}
-        borderColor={"gray.200"}
-      >
-        <ReactSelect
-          options={valueTypeOptions}
-          size={"sm"}
-          placeholder={"Type"}
-          disabled={props.viewOnly}
-          value={valueTypeOption}
-          onChange={(event) => {
-            if (event) {
-              // Update React state
-              setValueType(event.value);
-              setValueTypeOption({ label: event.label, value: event.value });
-
-              // Handle the updated data component
-              setValueData(generateDefaultData(event.value));
-            }
-          }}
-          menuPortalTarget={document.body}
-          menuPosition={"fixed"}
-          styles={{
-            menuPortal: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menu: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menuList: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-            }),
-            option: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-              fontSize: "sm",
-            }),
-            control: (base) => ({
-              ...base,
-              minHeight: "32px",
-              border: "1px solid transparent",
-            }),
-          }}
-          closeMenuOnScroll={false}
-        />
-      </Box>
 
       {/* Name Column */}
       <Box
         w={`${props.columnWidths.name}px`}
+        flex={"0 0 auto"}
         p={"0"}
         m={"0"}
         borderRight="1px solid"
@@ -1103,10 +1551,75 @@ const ValueRow = (props: {
         />
       </Box>
 
+      {/* Type Column */}
+      <Box
+        w={`${props.columnWidths.type}px`}
+        flex={"0 0 auto"}
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        borderRight={"1px solid"}
+        borderColor={"gray.200"}
+      >
+        <ReactSelect
+          options={valueTypeOptions}
+          size={"sm"}
+          placeholder={"Type"}
+          disabled={props.viewOnly}
+          value={valueTypeOption}
+          isSearchable={false}
+          components={{
+            Control: ValueTypeControl,
+            SelectContainer: ValueTypeSelectContainer,
+            ValueContainer: ValueTypeValueContainer,
+            SingleValue: ValueTypeSingleValue,
+            DropdownIndicator: ValueTypeDropdownIndicator,
+            MenuList: ValueTypeMenuList,
+            Option: ValueTypeOption,
+          }}
+          onChange={(event) => {
+            if (event) {
+              // Update React state
+              setValueType(event.value);
+              setValueTypeOption({ label: event.label, value: event.value });
+
+              // Handle the updated data component
+              setValueData(generateDefaultData(event.value));
+            }
+          }}
+          menuPortalTarget={document.body}
+          menuPosition={"fixed"}
+          styles={{
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menu: (base) => ({
+              ...base,
+              zIndex: 15000,
+              pointerEvents: "auto",
+            }),
+            menuList: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+            }),
+            option: (base) => ({
+              ...base,
+              pointerEvents: "auto",
+            }),
+            control: (base) => ({
+              ...base,
+            }),
+          }}
+          closeMenuOnScroll={false}
+        />
+      </Box>
+
       {/* Value Column */}
       <Flex
-        w={`${props.columnWidths.value}px`}
-        flex="1"
+        flex={"1 1 auto"}
+        minW={`${props.columnWidths.value}px`}
         p={"0"}
         overflow="visible"
         justify="space-between"
@@ -1120,159 +1633,12 @@ const ValueRow = (props: {
             mx={"1"}
             variant="outline"
             colorPalette="gray"
-            onClick={() =>
-              navigator.clipboard.writeText(valueData.toString() || "")
-            }
+            onClick={() => copyToClipboard(valueType, valueData)}
           >
             <Icon name="copy" size="xs" />
           </IconButton>
         )}
       </Flex>
-
-      {/* Select Options Modal */}
-      <Dialog.Root
-        open={selectModalOpen}
-        size="sm"
-        placement="center"
-        closeOnEscape
-        closeOnInteractOutside
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
-              <Flex direction="row" align="center" gap="1" p={"2"}>
-                <Icon name="v_select" />
-                <Text fontSize="xs" fontWeight="semibold">
-                  Setup Options
-                </Text>
-              </Flex>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size="2xs"
-                  top={"6px"}
-                  onClick={cancelSelectOptions}
-                />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-            <Dialog.Body p="1" gap="1" pb="1">
-              <Flex direction="column" gap="1">
-                <Flex direction="row" gap="1">
-                  <Input
-                    size="xs"
-                    rounded="md"
-                    placeholder="Enter option value"
-                    value={selectOptionValue}
-                    onChange={(e) => setSelectOptionValue(e.target.value)}
-                    onKeyUp={(e) => {
-                      if (e.key === "Enter") {
-                        addOption();
-                      }
-                    }}
-                  />
-                  <Button
-                    colorPalette="green"
-                    size="xs"
-                    rounded="md"
-                    onClick={addOption}
-                  >
-                    Add
-                    <Icon name="add" />
-                  </Button>
-                </Flex>
-                <Box>
-                  <Stack
-                    gap="1"
-                    separator={<Separator />}
-                    pb="1"
-                    maxH="200px"
-                    overflowY={"auto"}
-                  >
-                    {selectOptions.length > 0 ? (
-                      selectOptions.map((option, index) => (
-                        <Flex
-                          key={option.value}
-                          direction="row"
-                          cursor={props.viewOnly ? "default" : "text"}
-                          onClick={
-                            props.viewOnly
-                              ? (e) => e.preventDefault()
-                              : undefined
-                          }
-                          justify="space-between"
-                          align="center"
-                        >
-                          <Flex gap="1">
-                            <Text
-                              fontWeight="semibold"
-                              fontSize="xs"
-                              ml={"0.5"}
-                            >
-                              Value {index + 1}:
-                            </Text>
-                            <Text fontSize="xs">{option.value}</Text>
-                          </Flex>
-                          <IconButton
-                            aria-label={`remove_${index}`}
-                            size="2xs"
-                            colorPalette="red"
-                            onClick={() => removeOption(option)}
-                          >
-                            <Icon name="delete" />
-                          </IconButton>
-                        </Flex>
-                      ))
-                    ) : (
-                      <Flex
-                        cursor={props.viewOnly ? "default" : "text"}
-                        onClick={
-                          props.viewOnly ? (e) => e.preventDefault() : undefined
-                        }
-                        align="center"
-                        justify="center"
-                        minH="60px"
-                        rounded="md"
-                        border="1px"
-                        borderColor="gray.300"
-                      >
-                        <Text
-                          fontSize="xs"
-                          fontWeight="semibold"
-                          color="gray.400"
-                        >
-                          No values added.
-                        </Text>
-                      </Flex>
-                    )}
-                  </Stack>
-                </Box>
-              </Flex>
-            </Dialog.Body>
-            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
-              <Button
-                size="xs"
-                rounded="md"
-                colorPalette="red"
-                onClick={cancelSelectOptions}
-              >
-                Cancel
-                <Icon name="cross" />
-              </Button>
-              <Spacer />
-              <Button
-                size="xs"
-                rounded="md"
-                colorPalette="green"
-                onClick={confirmSelectOptions}
-                disabled={selectOptions.length === 0}
-              >
-                Confirm
-                <Icon name="check" />
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
     </Flex>
   );
 };

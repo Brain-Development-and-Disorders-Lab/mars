@@ -115,8 +115,7 @@ const UploadDialog = (props: {
           closable: true,
         });
       }
-    } catch (error) {
-      console.error("Upload error:", error);
+    } catch {
       toaster.create({
         title: "Error",
         description: "Failed to upload file",
