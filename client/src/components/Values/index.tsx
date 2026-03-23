@@ -1,5 +1,5 @@
 // React
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Chakra UI components
 import {
@@ -684,28 +684,24 @@ const Values = (props: {
   requireData?: boolean;
   permittedValues?: string[];
 }) => {
+  // Local type for tracking column names
+  type ValuesColumn = "name" | "type" | "value";
+
   // Counter for unique IDs
-  const idCounter = React.useRef(0);
+  const idCounter = useRef(0);
 
-  // State for column widths with minimum constraints
-  const [columnWidths, setColumnWidths] = useState({
-    type: 120,
-    name: 220,
-    value: 260,
-  });
+  // Column widths and their minimums
+  const minColumnWidths = { name: 220, type: 120, value: 260 };
+  const [columnWidths, setColumnWidths] = useState({ ...minColumnWidths });
 
-  // Minimum column widths
-  const minColumnWidths = {
-    type: 120,
-    name: 220,
-    value: 260,
-  };
-
-  // State for drag resizing
-  const [isResizing, setIsResizing] = useState<string | null>(null);
-  const dragRef = React.useRef<{ startX: number; startWidth: number } | null>(
-    null,
-  );
+  // Refs for components involved in changing column widths
+  const tableRef = useRef<HTMLDivElement>(null);
+  const resizeRef = useRef<{
+    column: ValuesColumn;
+    startX: number;
+    startWidth: number;
+    otherFixedWidth: number;
+  } | null>(null);
 
   // State for row selection and manipulation
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -733,54 +729,61 @@ const Values = (props: {
     setCurrentPage(1);
   }, [rowsPerPage]);
 
-  // Handle column resize start
-  const handleResizeStart = (column: string, event: React.MouseEvent) => {
+  /**
+   * Handle a resize event on a column in the `Values` component
+   * @param {ValuesColumn} column Specific column being resized
+   * @param {React.MouseEvent} event Mouse event
+   */
+  const handleResizeStart = (column: ValuesColumn, event: React.MouseEvent) => {
     event.preventDefault();
-    setIsResizing(column);
-    dragRef.current = {
+    const allFixedWidth =
+      (props.viewOnly ? 0 : 40) + columnWidths.name + columnWidths.type;
+    const otherFixedWidth =
+      allFixedWidth - (column !== "value" ? columnWidths[column] : 0);
+    resizeRef.current = {
+      column,
       startX: event.clientX,
-      startWidth: columnWidths[column as keyof typeof columnWidths],
+      startWidth: columnWidths[column],
+      otherFixedWidth,
     };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", handleResizeMove);
+    document.addEventListener("mouseup", handleResizeEnd);
   };
 
-  // Handle column resize during drag
+  /**
+   * Handle movement within a column resize event in the `Values` component
+   * @param event Mouse event
+   * @return
+   */
   const handleResizeMove = (event: MouseEvent) => {
-    if (!isResizing || !dragRef.current) return;
-
-    const deltaX = event.clientX - dragRef.current.startX;
-    const minWidth =
-      minColumnWidths[isResizing as keyof typeof minColumnWidths];
-    const newWidth = Math.max(minWidth, dragRef.current.startWidth + deltaX);
-
-    setColumnWidths((prev) => ({
-      ...prev,
-      [isResizing]: newWidth,
-    }));
+    if (!resizeRef.current) return;
+    const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
+    const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
+    // Note: For `name` and `type`, leave room for the value column's minimum width
+    // Note: For `value`, the column itself is flexible, so only other fixed columns constrain it
+    const maxWidth =
+      containerWidth -
+      otherFixedWidth -
+      (column !== "value" ? minColumnWidths.value : 0);
+    const newWidth = Math.min(
+      maxWidth,
+      Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)),
+    );
+    setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
   };
 
-  // Handle column resize end
+  /**
+   * Handle the end of a column resize event in the `Values` component
+   */
   const handleResizeEnd = () => {
-    setIsResizing(null);
-    dragRef.current = null;
+    resizeRef.current = null;
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    document.removeEventListener("mousemove", handleResizeMove);
+    document.removeEventListener("mouseup", handleResizeEnd);
   };
-
-  // Add event listeners for drag
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", handleResizeMove);
-      document.addEventListener("mouseup", handleResizeEnd);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-
-      return () => {
-        document.removeEventListener("mousemove", handleResizeMove);
-        document.removeEventListener("mouseup", handleResizeEnd);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-    }
-    return undefined;
-  }, [isResizing]);
 
   // Row manipulation functions
   const addRow = () => {
@@ -832,6 +835,7 @@ const Values = (props: {
       {/* Table */}
       <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
         <Box
+          ref={tableRef}
           minW="800px"
           w="100%"
           border="1px solid"
@@ -851,7 +855,7 @@ const Values = (props: {
             {!props.viewOnly && (
               <Box
                 w="40px"
-                flex="0 0 auto"
+                flex={"0 0 auto"}
                 minW="40px"
                 px={1}
                 py={1}
@@ -867,7 +871,7 @@ const Values = (props: {
             {/* Name Column Header */}
             <Flex
               w={`${columnWidths.name}px`}
-              flex="0 0 auto"
+              flex={"0 0 auto"}
               minW={`${columnWidths.name}px`}
               px={1}
               py={1}
@@ -904,7 +908,7 @@ const Values = (props: {
             {/* Type Column Header */}
             <Flex
               w={`${columnWidths.type}px`}
-              flex="0 0 auto"
+              flex={"0 0 auto"}
               minW={`${columnWidths.type}px`}
               px={1}
               py={1}
@@ -940,13 +944,12 @@ const Values = (props: {
 
             {/* Value Column Header */}
             <Flex
-              w={`${columnWidths.value}px`}
-              flex="0 0 auto"
+              flex={"1 1 auto"}
               minW={`${columnWidths.value}px`}
               px={1}
               py={1}
-              fontSize="xs"
-              fontWeight="semibold"
+              fontSize={"xs"}
+              fontWeight={"semibold"}
               color="gray.600"
               bg="gray.100"
               position="relative"
@@ -1514,6 +1517,7 @@ const ValueRow = (props: {
       {/* Name Column */}
       <Box
         w={`${props.columnWidths.name}px`}
+        flex={"0 0 auto"}
         p={"0"}
         m={"0"}
         borderRight="1px solid"
@@ -1550,6 +1554,7 @@ const ValueRow = (props: {
       {/* Type Column */}
       <Box
         w={`${props.columnWidths.type}px`}
+        flex={"0 0 auto"}
         display={"flex"}
         alignItems={"center"}
         justifyContent={"center"}
@@ -1613,8 +1618,8 @@ const ValueRow = (props: {
 
       {/* Value Column */}
       <Flex
-        w={`${props.columnWidths.value}px`}
-        flex="1"
+        flex={"1 1 auto"}
+        minW={`${props.columnWidths.value}px`}
         p={"0"}
         overflow="visible"
         justify="space-between"
