@@ -54,8 +54,9 @@ const ActorTag = (props: ActorTagProps) => {
       );
 
       // Extract additional account information if specified
-      if (data.user.account_orcid) {
-        setActorOrcid(data.user.account_orcid);
+      if (data.user.account_orcid && data.user.account_orcid !== "") {
+        const startOrcid = data.user.account_orcid.lastIndexOf("/");
+        setActorOrcid(data.user.account_orcid.substring(startOrcid + 1));
       }
     }
   }, [data]);
@@ -110,7 +111,7 @@ const ActorTag = (props: ActorTagProps) => {
             {actorLabel}
           </Text>
           {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
-            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.400"}>
+            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.500"}>
               {actorOrcid}
             </Text>
           )}

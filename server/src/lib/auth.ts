@@ -41,38 +41,36 @@ const getOAuthConfig = () => {
     authorizationUrl: `${baseUrl}/oauth/authorize`,
     tokenUrl: `${baseUrl}/oauth/token`,
     userInfoUrl: `${baseUrl}/oauth/userinfo`,
-    scopes: ["openid", "email"],
+    scopes: ["openid"],
     mapProfileToUser: async (response: Record<string, unknown>) => {
       // ORCiD userinfo endpoint returns 'sub' as the ORCiD ID per OpenID Connect spec
       const sub = typeof response.sub === "string" ? response.sub : "";
-      const email = typeof response.email === "string" ? response.email : "";
       const given_name =
         typeof response.given_name === "string" ? response.given_name : "";
       const family_name =
         typeof response.family_name === "string" ? response.family_name : "";
 
-      // Attempt to get the User ID if they exist
+      // Note: Returning ORCiD user, look up their real email so better-auth can
+      // match the session correctly
       const userIdResult = await User.getByOrcid(sub);
       if (userIdResult.success) {
-        // Retrieve the existing User information
         const existingUser = await User.getOne(userIdResult.data);
         return {
           account_orcid: sub,
           email: existingUser?.email,
-          emailVerified: !!email,
-          name: `${given_name} ${family_name}`.trim(),
-        };
-      } else {
-        // Generate placeholder email prior to setup
-        const userEmail =
-          email || `${sub.replace(/\//g, "-")}@setup.placeholder`;
-        return {
-          account_orcid: sub,
-          email: userEmail,
-          emailVerified: !!email,
+          emailVerified: true,
           name: `${given_name} ${family_name}`.trim(),
         };
       }
+
+      // Note: New user or first-time link, better-auth requires an email, so use a
+      // placeholder
+      return {
+        account_orcid: sub,
+        email: `${sub.replace(/\//g, "-")}@orcid.placeholder`,
+        emailVerified: false,
+        name: `${given_name} ${family_name}`.trim(),
+      };
     },
   };
 };
@@ -104,6 +102,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  account: {
+    accountLinking: {
+      allowDifferentEmails: true,
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,
@@ -117,6 +120,9 @@ export const auth = betterAuth({
   ],
   user: {
     modelName: "user",
+    deleteUser: {
+      enabled: true,
+    },
     additionalFields: {
       firstName: {
         type: "string",

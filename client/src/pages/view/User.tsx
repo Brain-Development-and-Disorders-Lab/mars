@@ -128,8 +128,29 @@ const User = () => {
 
   useEffect(() => {
     if (data?.user) {
+      // If the DB has no ORCiD but better-auth has a linked account, sync it
+      if (!data.user.account_orcid) {
+        auth.listAccounts().then(({ data: accounts }) => {
+          const orcidAccount = accounts?.find((a) => a.providerId === "orcid");
+          if (orcidAccount) {
+            updateUser({
+              variables: {
+                user: { _id: user, account_orcid: orcidAccount.accountId },
+              },
+            }).then(() => refetch?.().catch(ignoreAbort));
+          }
+        });
+      }
+
+      // Trim the ORCiD URL
+      if (data.user.account_orcid !== "") {
+        const startOrcid = data.user.account_orcid.lastIndexOf("/");
+        setUserOrcid(data.user.account_orcid.substring(startOrcid + 1));
+      } else {
+        setUserOrcid(data.user.account_orcid);
+      }
+
       setUserModel(data.user);
-      setUserOrcid(data.user.account_orcid);
       setUserFirstName(data.user.firstName);
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
@@ -303,9 +324,9 @@ const User = () => {
 
   const handleLinkOrcidClick = async () => {
     setIsOrcidLinking(true);
-    const { error, data } = await auth.signIn.social({
+    const { error, data } = await auth.linkSocial({
       provider: "orcid",
-      callbackURL: `${APP_URL}/user`,
+      callbackURL: `${APP_URL}/profile`,
     });
 
     if (error) {
