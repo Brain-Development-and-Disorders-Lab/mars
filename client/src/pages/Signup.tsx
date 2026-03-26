@@ -88,15 +88,21 @@ const Signup = () => {
   // Check if user already has a session (from ORCiD login)
   useEffect(() => {
     auth.getSession().then(({ data: session }) => {
-      if (session?.user) {
-        const hasPlaceholderEmail =
-          session.user.email?.includes("@setup.placeholder");
-        if (hasPlaceholderEmail || !session.user.email) {
-          // User logged in via ORCiD but needs to complete profile
-          setIsExistingUser(true);
-          setExistingUserId(session.user.id);
-          if (session.user.account_orcid) {
-            setOrcidId(session.user.account_orcid);
+      if (session?.user?.email?.endsWith("@orcid.placeholder")) {
+        // User logged in via ORCiD but needs to complete profile
+        setIsExistingUser(true);
+        setExistingUserId(session.user.id);
+        if (session.user.account_orcid) {
+          setOrcidId(session.user.account_orcid);
+        }
+        // Pre-fill name from ORCiD
+        if (session.user.name) {
+          const spaceIndex = session.user.name.indexOf(" ");
+          if (spaceIndex !== -1) {
+            setUserFirstName(session.user.name.slice(0, spaceIndex));
+            setUserLastName(session.user.name.slice(spaceIndex + 1));
+          } else {
+            setUserFirstName(session.user.name);
           }
         }
       }
@@ -375,7 +381,7 @@ const Signup = () => {
                   </Flex>
                 </Flex>
                 <Flex direction={"column"} gap={"4"}>
-                  <Flex direction={"column"}>
+                  <Flex direction={"column"} gap={"1"}>
                     <Field.Root
                       gap={"0.5"}
                       invalid={emailError !== ""}

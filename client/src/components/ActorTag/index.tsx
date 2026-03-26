@@ -25,6 +25,13 @@ const ActorTag = (props: ActorTagProps) => {
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
 
+  // Avatar color information
+  const colorPalette = ["red", "blue", "green", "yellow", "purple", "orange"];
+  const pickPalette = (name: string) => {
+    const index = name.charCodeAt(0) % colorPalette.length;
+    return colorPalette[index];
+  };
+
   // GraphQL operations
   const GET_USER = gql`
     query GetUser($_id: String) {
@@ -54,8 +61,9 @@ const ActorTag = (props: ActorTagProps) => {
       );
 
       // Extract additional account information if specified
-      if (data.user.account_orcid) {
-        setActorOrcid(data.user.account_orcid);
+      if (data.user.account_orcid && data.user.account_orcid !== "") {
+        const startOrcid = data.user.account_orcid.lastIndexOf("/");
+        setActorOrcid(data.user.account_orcid.substring(startOrcid + 1));
       }
     }
   }, [data]);
@@ -66,7 +74,7 @@ const ActorTag = (props: ActorTagProps) => {
       <Avatar.Root
         size={props.inline ? "2xs" : props.size === "sm" ? "xs" : "sm"}
         key={actorLabel}
-        colorPalette={"blue"}
+        colorPalette={pickPalette(actorLabel)}
       >
         <Avatar.Fallback name={actorLabel} />
       </Avatar.Root>
@@ -75,7 +83,11 @@ const ActorTag = (props: ActorTagProps) => {
 
   return props.inline ? (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={"blue"}>
+      <Avatar.Root
+        size={"2xs"}
+        key={actorLabel}
+        colorPalette={pickPalette(actorLabel)}
+      >
         <Avatar.Fallback name={actorLabel} />
       </Avatar.Root>
       <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
@@ -100,7 +112,7 @@ const ActorTag = (props: ActorTagProps) => {
       <Avatar.Root
         size={props.size === "sm" ? "xs" : "sm"}
         key={actorLabel}
-        colorPalette={"blue"}
+        colorPalette={pickPalette(actorLabel)}
       >
         <Avatar.Fallback name={actorLabel} />
       </Avatar.Root>
@@ -110,7 +122,7 @@ const ActorTag = (props: ActorTagProps) => {
             {actorLabel}
           </Text>
           {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
-            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.400"}>
+            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.500"}>
               {actorOrcid}
             </Text>
           )}

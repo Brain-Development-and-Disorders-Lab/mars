@@ -26,53 +26,45 @@ const Invalid = () => {
         direction={"column"}
         justify={"center"}
         align={"center"}
-        alignSelf={"center"}
-        gap={"8"}
-        w={["xs", "sm", "2xl"]}
         h={"100%"}
-        wrap={"wrap"}
+        mt={{ base: "10%", lg: "0" }}
+        p={"2"}
       >
         <Flex
-          gap={"4"}
-          p={"4"}
+          gap={"2"}
+          p={"2"}
           direction={"column"}
           justify={"center"}
           align={"center"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
           rounded={"md"}
+          bg={"orange.500"}
+          color={"white"}
+          maxW={"md"}
         >
-          <Flex direction={"row"} gap={"2"} align={"center"}>
-            <Icon name={"exclamation"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Icon name={"exclamation"} size={"sm"} />
+            <Heading fontWeight={"semibold"} size={"lg"}>
               Not Found
             </Heading>
           </Flex>
 
-          <Flex w={"md"} gap={"4"} direction={"column"}>
-            <Text fontWeight={"semibold"} color={"gray.600"}>
+          <Flex direction={"column"} gap={"1"} w={"90%"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"}>
               Metadatify could not locate the requested resource.
             </Text>
-          </Flex>
-
-          <Flex w={"md"} gap={"1"} direction={"column"}>
-            <Text fontWeight={"semibold"} color={"gray.600"}>
-              Possible Causes:
+            <Text fontSize={"xs"}>
+              The requested resource does not exist or has been deleted, you do
+              not have permission to access it, or network connectivity has been
+              lost.
             </Text>
-            <Text color={"gray.600"}>
-              The requested resource does not exist or has been deleted
-            </Text>
-            <Text color={"gray.600"}>
-              You do not have permission to access the requested resource
-            </Text>
-            <Text color={"gray.600"}>Network connectivity has been lost</Text>
           </Flex>
 
           <Button
             onClick={() => navigate("/")}
-            colorPalette={"orange"}
-            size={"sm"}
+            size={"xs"}
             rounded={"md"}
+            variant={"subtle"}
+            colorPalette={"orange"}
           >
             Dashboard
             <Icon name={"a_right"} />

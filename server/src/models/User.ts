@@ -123,6 +123,10 @@ export class User {
       update.$set.api_keys = updated.api_keys;
     }
 
+    if (updated.account_orcid) {
+      update.$set.account_orcid = updated.account_orcid;
+    }
+
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .updateOne({ _id: new ObjectId(updated._id) }, update);
