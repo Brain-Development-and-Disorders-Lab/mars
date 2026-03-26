@@ -533,7 +533,7 @@ const User = () => {
           <Tooltip content={info.getValue()} showArrow>
             <Text fontSize={"xs"}>
               {_.truncate(info.getValue(), {
-                length: truncateTableText ? 24 : 36,
+                length: truncateTableText ? 16 : 24,
               })}
             </Text>
           </Tooltip>
