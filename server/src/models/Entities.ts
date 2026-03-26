@@ -109,12 +109,12 @@ export class Entities {
     if (filter?.startDate || filter?.endDate) {
       const dateFilter: Record<string, unknown> = {};
       if (filter.startDate) {
-        dateFilter.$gte = new Date(filter.startDate);
+        dateFilter.$gte = new Date(filter.startDate).toISOString();
       }
       if (filter.endDate) {
         const endDate = new Date(filter.endDate);
         endDate.setHours(23, 59, 59, 999);
-        dateFilter.$lte = endDate;
+        dateFilter.$lte = endDate.toISOString();
       }
       if (Object.keys(dateFilter).length > 0) {
         queryFilter.created = dateFilter;
@@ -270,12 +270,12 @@ export class Entities {
     if (filter?.startDate || filter?.endDate) {
       const dateFilter: Record<string, unknown> = {};
       if (filter.startDate) {
-        dateFilter.$gte = new Date(filter.startDate);
+        dateFilter.$gte = new Date(filter.startDate).toISOString();
       }
       if (filter.endDate) {
         const endDate = new Date(filter.endDate);
         endDate.setHours(23, 59, 59, 999);
-        dateFilter.$lte = endDate;
+        dateFilter.$lte = endDate.toISOString();
       }
       if (Object.keys(dateFilter).length > 0) {
         queryFilter.created = dateFilter;
