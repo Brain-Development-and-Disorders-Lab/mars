@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Skeleton, Text } from "@chakra-ui/react";
+import { Avatar, Badge, Flex, Skeleton, Text } from "@chakra-ui/react";
 
 // Existing and custom types
 import { ActorTagProps, UserModel } from "@types";
@@ -86,13 +86,15 @@ const ActorTag = (props: ActorTagProps) => {
       <Avatar.Root
         size={"2xs"}
         key={actorLabel}
-        colorPalette={pickPalette(actorLabel)}
+        colorPalette={loading ? "gray" : pickPalette(actorLabel)}
       >
-        <Avatar.Fallback name={actorLabel} />
+        <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
-      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-        {actorLabel}
-      </Text>
+      <Skeleton asChild loading={loading} w={"120px"}>
+        <Badge fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+          {!loading && actorLabel}
+        </Badge>
+      </Skeleton>
     </Flex>
   ) : (
     <Flex
@@ -112,9 +114,9 @@ const ActorTag = (props: ActorTagProps) => {
       <Avatar.Root
         size={props.size === "sm" ? "xs" : "sm"}
         key={actorLabel}
-        colorPalette={pickPalette(actorLabel)}
+        colorPalette={loading ? "gray" : pickPalette(actorLabel)}
       >
-        <Avatar.Fallback name={actorLabel} />
+        <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
       <Skeleton loading={loading} asChild>
         <Flex direction={"column"} gap={"0.5"} align={"center"}>
