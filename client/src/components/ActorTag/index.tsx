@@ -74,9 +74,9 @@ const ActorTag = (props: ActorTagProps) => {
       <Avatar.Root
         size={props.inline ? "2xs" : props.size === "sm" ? "xs" : "sm"}
         key={actorLabel}
-        colorPalette={pickPalette(actorLabel)}
+        colorPalette={loading ? "gray" : pickPalette(actorLabel)}
       >
-        <Avatar.Fallback name={actorLabel} />
+        <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
     );
   }
