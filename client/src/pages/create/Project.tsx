@@ -333,6 +333,7 @@ const Project = () => {
                       ml={"0.5"}
                     >
                       Project Description
+                      <Field.RequiredIndicator />
                     </Field.Label>
                     <Box data-testid={"create-project-description"} w={"100%"}>
                       <MDEditor
