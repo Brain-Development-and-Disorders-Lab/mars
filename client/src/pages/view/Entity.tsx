@@ -147,6 +147,8 @@ const Entity = () => {
   >("newest-first");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [appliedStartDate, setAppliedStartDate] = useState<string>("");
+  const [appliedEndDate, setAppliedEndDate] = useState<string>("");
   const [dateFilterApplied, setDateFilterApplied] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<EntityHistory | null>(
     null,
@@ -558,13 +560,13 @@ const Entity = () => {
           itemDate.getDate(),
         );
 
-        if (startDate) {
-          const start = new Date(startDate);
+        if (appliedStartDate) {
+          const start = new Date(appliedStartDate);
           if (itemDateOnly < start) return false;
         }
 
-        if (endDate) {
-          const end = new Date(endDate);
+        if (appliedEndDate) {
+          const end = new Date(appliedEndDate);
           end.setHours(23, 59, 59, 999); // Include the entire end date
           if (itemDateOnly > end) return false;
         }
@@ -585,7 +587,13 @@ const Entity = () => {
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
       );
     }
-  }, [entityHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
+  }, [
+    entityHistory,
+    historySortOrder,
+    dateFilterApplied,
+    appliedStartDate,
+    appliedEndDate,
+  ]);
 
   const [entityAttachments, setEntityAttachments] = useState<IGenericItem[]>(
     [],
@@ -1628,13 +1636,22 @@ const Entity = () => {
                         bg={"gray.100"}
                         p={"1"}
                       >
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          ml={"0.5"}
+                        <Flex
+                          direction={"row"}
+                          gap={"1"}
+                          align={"center"}
+                          justify={"space-between"}
+                          w={"full"}
+                          mx={"0.5"}
                         >
-                          Date filter:
-                        </Text>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Date filter:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            {dateFilterApplied ? 1 : 0} Active Filter
+                            {!dateFilterApplied ? "s" : ""}
+                          </Text>
+                        </Flex>
 
                         <Flex
                           direction={"row"}
@@ -1681,6 +1698,8 @@ const Entity = () => {
                             alignSelf={"end"}
                             onClick={() => {
                               if (startDate || endDate) {
+                                setAppliedStartDate(startDate);
+                                setAppliedEndDate(endDate);
                                 setDateFilterApplied(true);
                               }
                             }}
@@ -1697,6 +1716,8 @@ const Entity = () => {
                             onClick={() => {
                               setStartDate("");
                               setEndDate("");
+                              setAppliedStartDate("");
+                              setAppliedEndDate("");
                               setDateFilterApplied(false);
                             }}
                           >
@@ -1821,9 +1842,9 @@ const Entity = () => {
                                     w={"100%"}
                                   >
                                     <Flex
-                                      direction={"row"}
+                                      direction={{ base: "column", sm: "row" }}
                                       gap={"2"}
-                                      align={"center"}
+                                      align={{ base: "start", sm: "center" }}
                                       justify={"space-between"}
                                     >
                                       <Flex
@@ -1902,7 +1923,11 @@ const Entity = () => {
                                           )}
                                         </Flex>
                                       </Flex>
-                                      <Flex direction={"row"} gap={"1"}>
+                                      <Flex
+                                        direction={"row"}
+                                        gap={"1"}
+                                        wrap={"wrap"}
+                                      >
                                         <Collapsible.Root
                                           open={isExpanded}
                                           onOpenChange={(event) => {
@@ -2036,14 +2061,16 @@ const Entity = () => {
                                               entityVersion.description,
                                               "",
                                             ) ? (
-                                              <Tag.Root
-                                                size={"sm"}
-                                                colorPalette={"orange"}
-                                              >
-                                                <Tag.Label fontSize={"xs"}>
-                                                  No Description
-                                                </Tag.Label>
-                                              </Tag.Root>
+                                              <Flex>
+                                                <Tag.Root
+                                                  size={"sm"}
+                                                  colorPalette={"orange"}
+                                                >
+                                                  <Tag.Label fontSize={"xs"}>
+                                                    No Description
+                                                  </Tag.Label>
+                                                </Tag.Root>
+                                              </Flex>
                                             ) : (
                                               <Text fontSize={"xs"}>
                                                 {entityVersion.description}
@@ -3555,7 +3582,7 @@ const Entity = () => {
                                 <Text lineClamp={1} fontSize={"xs"}>
                                   Description:{" "}
                                   {_.isEqual(entityDescription, "")
-                                    ? "No description"
+                                    ? "No Description"
                                     : _.truncate(entityDescription, {
                                         length: 32,
                                       })}

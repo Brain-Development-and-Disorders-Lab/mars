@@ -98,6 +98,8 @@ const Project = () => {
   >("newest-first");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [appliedStartDate, setAppliedStartDate] = useState<string>("");
+  const [appliedEndDate, setAppliedEndDate] = useState<string>("");
   const [dateFilterApplied, setDateFilterApplied] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<ProjectHistory | null>(
     null,
@@ -130,13 +132,13 @@ const Project = () => {
           itemDate.getDate(),
         );
 
-        if (startDate) {
-          const start = new Date(startDate);
+        if (appliedStartDate) {
+          const start = new Date(appliedStartDate);
           if (itemDateOnly < start) return false;
         }
 
-        if (endDate) {
-          const end = new Date(endDate);
+        if (appliedEndDate) {
+          const end = new Date(appliedEndDate);
           end.setHours(23, 59, 59, 999); // Include the entire end date
           if (itemDateOnly > end) return false;
         }
@@ -157,7 +159,13 @@ const Project = () => {
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
       );
     }
-  }, [projectHistory, historySortOrder, dateFilterApplied, startDate, endDate]);
+  }, [
+    projectHistory,
+    historySortOrder,
+    dateFilterApplied,
+    appliedStartDate,
+    appliedEndDate,
+  ]);
 
   const [projectCollaborators, setProjectCollaborators] = useState(
     [] as string[],
@@ -1025,9 +1033,22 @@ const Project = () => {
                       bg={"gray.100"}
                       p={"1"}
                     >
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Date filter:
-                      </Text>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"center"}
+                        justify={"space-between"}
+                        w={"full"}
+                        ml={"0.5"}
+                      >
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Date filter:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          {dateFilterApplied ? 1 : 0} Active Filter
+                          {!dateFilterApplied ? "s" : ""}
+                        </Text>
+                      </Flex>
 
                       <Flex
                         direction={"row"}
@@ -1072,6 +1093,8 @@ const Project = () => {
                           alignSelf={"end"}
                           onClick={() => {
                             if (startDate || endDate) {
+                              setAppliedStartDate(startDate);
+                              setAppliedEndDate(endDate);
                               setDateFilterApplied(true);
                             }
                           }}
@@ -1088,6 +1111,8 @@ const Project = () => {
                           onClick={() => {
                             setStartDate("");
                             setEndDate("");
+                            setAppliedStartDate("");
+                            setAppliedEndDate("");
                             setDateFilterApplied(false);
                           }}
                         >
@@ -1208,9 +1233,9 @@ const Project = () => {
                               <Timeline.Content>
                                 <Flex direction={"column"} gap={"1"} w={"100%"}>
                                   <Flex
-                                    direction={"row"}
+                                    direction={{ base: "column", sm: "row" }}
                                     gap={"2"}
-                                    align={"center"}
+                                    align={{ base: "start", sm: "center" }}
                                     justify={"space-between"}
                                   >
                                     <Flex
@@ -1275,18 +1300,24 @@ const Project = () => {
                                             </Text>
                                           </Tooltip>
                                         ) : (
-                                          <Tag.Root
-                                            size={"sm"}
-                                            colorPalette={"orange"}
-                                          >
-                                            <Tag.Label fontSize={"xs"}>
-                                              No description
-                                            </Tag.Label>
-                                          </Tag.Root>
+                                          <Flex>
+                                            <Tag.Root
+                                              size={"sm"}
+                                              colorPalette={"orange"}
+                                            >
+                                              <Tag.Label fontSize={"xs"}>
+                                                No message
+                                              </Tag.Label>
+                                            </Tag.Root>
+                                          </Flex>
                                         )}
                                       </Flex>
                                     </Flex>
-                                    <Flex direction={"row"} gap={"1"}>
+                                    <Flex
+                                      direction={"row"}
+                                      gap={"1"}
+                                      wrap={"wrap"}
+                                    >
                                       <Collapsible.Root
                                         open={isExpanded}
                                         onOpenChange={(event) => {
@@ -2034,7 +2065,7 @@ const Project = () => {
                               <Text lineClamp={1} fontSize={"xs"}>
                                 Description:{" "}
                                 {_.isEqual(projectDescription, "")
-                                  ? "No description"
+                                  ? "No Description"
                                   : _.truncate(projectDescription, {
                                       length: 32,
                                     })}
