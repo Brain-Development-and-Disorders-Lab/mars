@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Avatar, Badge, Flex, Skeleton, Text } from "@chakra-ui/react";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { ActorTagProps, UserModel } from "@types";
@@ -76,7 +77,9 @@ const ActorTag = (props: ActorTagProps) => {
         key={actorLabel}
         colorPalette={loading ? "gray" : pickPalette(actorLabel)}
       >
-        <Avatar.Fallback name={loading ? "" : actorLabel} />
+        <Tooltip content={actorLabel} showArrow>
+          <Avatar.Fallback name={loading ? "" : actorLabel} />
+        </Tooltip>
       </Avatar.Root>
     );
   }
