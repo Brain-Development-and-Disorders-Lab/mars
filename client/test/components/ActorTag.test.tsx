@@ -100,7 +100,7 @@ describe("ActorTag Component", () => {
     });
 
     it("renders inline variant", () => {
-      renderActorTag({ inline: true });
+      renderActorTag({ inline: true, identifier: "" });
       expect(screen.getByText("Test User")).toBeTruthy();
     });
 
