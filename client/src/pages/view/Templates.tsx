@@ -363,7 +363,9 @@ const Templates = () => {
                     </Text>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Start</Field.Label>
+                        <Field.Label fontSize={"xs"}>
+                          Start (optional)
+                        </Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -378,7 +380,9 @@ const Templates = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>End</Field.Label>
+                        <Field.Label fontSize={"xs"}>
+                          End (optional)
+                        </Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}

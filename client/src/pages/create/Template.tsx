@@ -311,13 +311,29 @@ const Template = () => {
           </Flex>
         </Flex>
 
-        <Flex w={"100%"} p={"1"} gap={"1"} direction={"column"}>
-          <Values
-            viewOnly={false}
-            values={values}
-            setValues={setValues}
-            requireData={true}
-          />
+        <Flex w={"100%"} p={"1"} gap={"0.5"} direction={"column"}>
+          <Fieldset.Root>
+            <Fieldset.Content>
+              <Field.Root required gap={"1"}>
+                <Flex direction={"column"} gap={"0.5"} ml={"0.5"}>
+                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                    Template Value
+                    <Field.RequiredIndicator />
+                  </Field.Label>
+                  <Text fontSize={"xs"}>
+                    Specify at least 1 Value for this Template. A name and type
+                    is required, however the actual value is optional.
+                  </Text>
+                </Flex>
+                <Values
+                  viewOnly={false}
+                  values={values}
+                  setValues={setValues}
+                  requireData={true}
+                />
+              </Field.Root>
+            </Fieldset.Content>
+          </Fieldset.Root>
         </Flex>
       </Flex>
 

@@ -47,6 +47,7 @@ import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL } from "@variables";
+import ActorTag from "@components/ActorTag";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
@@ -668,6 +669,73 @@ const User = () => {
               border={"1px solid"}
               borderColor={"gray.300"}
             >
+              {/* Avatar */}
+              <Flex direction={"column"} p={"0"} gap={"1"}>
+                <Text
+                  ml={"0.5"}
+                  textAlign={"left"}
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                >
+                  Avatar
+                </Text>
+                <ActorTag
+                  identifier={userModel._id}
+                  fallback={"Unknown User"}
+                  size={"md"}
+                  avatarOnly
+                />
+              </Flex>
+
+              {/* Name */}
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Field.Root gap={"0"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                      >
+                        First Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserFirstName"}
+                        size={"xs"}
+                        rounded={"md"}
+                        placeholder={"First Name"}
+                        type={"text"}
+                        value={userFirstName}
+                        mt={"0.5"}
+                        disabled
+                      />
+                    </Field.Root>
+                    <Field.Root gap={"0"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                      >
+                        Last Name
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      <Input
+                        id={"modalUserLastName"}
+                        size={"xs"}
+                        rounded={"md"}
+                        placeholder={"Last Name"}
+                        type={"text"}
+                        value={userLastName}
+                        mt={"0.5"}
+                        disabled
+                      />
+                    </Field.Root>
+                  </Flex>
+                </Fieldset.Content>
+              </Fieldset.Root>
+
+              {/* ORCiD */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
                 <Text
                   ml={"0.5"}
@@ -703,6 +771,7 @@ const User = () => {
                 </Flex>
               </Flex>
 
+              {/* Email */}
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root invalid={emailError !== ""} required gap={"0"}>
@@ -737,6 +806,7 @@ const User = () => {
                 </Fieldset.Content>
               </Fieldset.Root>
 
+              {/* Affiliation */}
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root

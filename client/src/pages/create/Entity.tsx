@@ -636,7 +636,7 @@ const Entity = () => {
                       >
                         Entity Description
                       </Field.Label>
-                      <Box data-testid={"create-entity-description"}>
+                      <Box data-testid={"create-entity-description"} w={"100%"}>
                         <MDEditor
                           height={150}
                           minHeight={100}
