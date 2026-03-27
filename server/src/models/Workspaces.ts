@@ -357,9 +357,6 @@ export class Workspaces {
         description: updated.description,
         public: updated.public,
         collaborators: updated.collaborators,
-        entities: updated.entities,
-        projects: updated.projects,
-        templates: updated.templates,
       },
     };
 

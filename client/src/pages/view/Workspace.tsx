@@ -313,9 +313,6 @@ const Workspace = () => {
           owner: owner,
           public: isPublic,
           collaborators: collaborators,
-          entities: entities.map((e) => e._id),
-          projects: projects.map((p) => p._id),
-          templates: templates.map((t) => t._id),
         },
       },
     });
