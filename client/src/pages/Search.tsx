@@ -138,10 +138,7 @@ const Search = () => {
       }
     }
   `;
-  const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(
-    SEARCH_TEXT,
-    { fetchPolicy: "network-only" },
-  );
+  const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
@@ -218,11 +215,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 48}
-            showArrow
-          >
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Text fontSize={"xs"} fontWeight={"semibold"}>
               {_.truncate(info.getValue(), { length: 48 })}
             </Text>
@@ -255,10 +248,7 @@ const Search = () => {
           );
         }
         return (
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 64}
-          >
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
             <Text fontSize={"xs"} lineClamp={1}>
               {_.truncate(info.getValue(), { length: 64 })}
             </Text>
@@ -273,14 +263,7 @@ const Search = () => {
     }),
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {
-        return (
-          <ActorTag
-            identifier={info.getValue()}
-            fallback={"Unknown User"}
-            size={"sm"}
-            inline
-          />
-        );
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "Owner",
     }),
@@ -288,9 +271,7 @@ const Search = () => {
       cell: (info) => {
         return (
           <Tag.Root colorPalette={"green"}>
-            <Tag.Label fontSize={"xs"}>
-              {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
-            </Tag.Label>
+            <Tag.Label fontSize={"xs"}>{_.isUndefined(info.getValue()) ? 0 : info.getValue().length}</Tag.Label>
           </Tag.Root>
         );
       },
@@ -300,15 +281,8 @@ const Search = () => {
       cell: (info) => {
         return (
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Icon
-              name={info.getValue() ? "archive" : "check"}
-              color={info.getValue() ? "orange" : "green"}
-            />
-            <Text
-              fontWeight={"semibold"}
-              fontSize={"xs"}
-              color={info.getValue() ? "orange" : "green"}
-            >
+            <Icon name={info.getValue() ? "archive" : "check"} color={info.getValue() ? "orange" : "green"} />
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "orange" : "green"}>
               {info.getValue() ? "Archived" : "Active"}
             </Text>
           </Flex>
@@ -334,9 +308,7 @@ const Search = () => {
         if (response.success) {
           FileSaver.saveAs(
             new Blob([response.data]),
-            slugify(
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
-            ),
+            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
           );
         }
 
@@ -360,9 +332,7 @@ const Search = () => {
         if (response.success) {
           FileSaver.saveAs(
             new Blob([response.data]),
-            slugify(
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-            ),
+            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
           );
         }
 
@@ -378,47 +348,29 @@ const Search = () => {
       operators: [
         { name: "=", label: "is" },
         ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain", "beginsWith", "endsWith"].includes(
-            operator.name,
-          ),
+          ["contains", "doesNotContain", "beginsWith", "endsWith"].includes(operator.name),
         ),
       ],
     },
     {
       name: "description",
       label: "Description",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
+      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
     },
     {
       name: "projects",
       label: "Projects",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
+      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
     },
     {
       name: "relationships",
       label: "Relationships",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
+      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
     },
     {
       name: "attributes",
       label: "Attributes",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
+      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
     },
   ];
 
@@ -477,9 +429,7 @@ const Search = () => {
       const customRule = JSON.parse(rule.value);
 
       // Create a base custom rule structure
-      const processedCustomRules: Record<string, any>[] = [
-        { "attributes.values.type": customRule.type },
-      ];
+      const processedCustomRules: Record<string, any>[] = [{ "attributes.values.type": customRule.type }];
 
       // Append query components depending on the specified operator
       if (customRule.operator === "contains") {
@@ -513,10 +463,7 @@ const Search = () => {
                           $and: [
                             { $eq: ["$$v.type", "number"] },
                             {
-                              $eq: [
-                                { $toDouble: "$$v.data" },
-                                parseFloat(customRule.value),
-                              ],
+                              $eq: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
                             },
                           ],
                         },
@@ -530,9 +477,7 @@ const Search = () => {
         } else {
           processedCustomRules.push({
             "attributes.values.data": {
-              $regex: new RegExp(
-                "^" + dayjs(customRule.value).format("YYYY-MM-DD"),
-              ).toString(),
+              $regex: new RegExp("^" + dayjs(customRule.value).format("YYYY-MM-DD")).toString(),
             },
           });
         }
@@ -553,10 +498,7 @@ const Search = () => {
                           $and: [
                             { $eq: ["$$v.type", "number"] },
                             {
-                              $gt: [
-                                { $toDouble: "$$v.data" },
-                                parseFloat(customRule.value),
-                              ],
+                              $gt: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
                             },
                           ],
                         },
@@ -591,10 +533,7 @@ const Search = () => {
                           $and: [
                             { $eq: ["$$v.type", "number"] },
                             {
-                              $lt: [
-                                { $toDouble: "$$v.data" },
-                                parseFloat(customRule.value),
-                              ],
+                              $lt: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
                             },
                           ],
                         },
@@ -628,18 +567,8 @@ const Search = () => {
 
   // Query to search by text value
   const SEARCH_ADVANCED = gql`
-    query Search(
-      $query: String
-      $resultType: String
-      $isBuilder: Boolean
-      $showArchived: Boolean
-    ) {
-      search(
-        query: $query
-        resultType: $resultType
-        isBuilder: $isBuilder
-        showArchived: $showArchived
-      ) {
+    query Search($query: String, $resultType: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(query: $query, resultType: $resultType, isBuilder: $isBuilder, showArchived: $showArchived) {
         __typename
         ... on Entity {
           _id
@@ -701,8 +630,7 @@ const Search = () => {
       toaster.create({
         title: "Error",
         type: "error",
-        description:
-          searchAdvancedError?.message || "Unable to retrieve search results",
+        description: searchAdvancedError?.message || "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });
@@ -742,10 +670,7 @@ const Search = () => {
           if (key in currentLevel) {
             // If the key is a `value` statement, check if it is valid
             if (key === "value") {
-              if (
-                _.isUndefined(currentLevel[key]) ||
-                currentLevel[key] === ""
-              ) {
+              if (_.isUndefined(currentLevel[key]) || currentLevel[key] === "") {
                 setIsValid(false);
                 return;
               }
@@ -791,12 +716,7 @@ const Search = () => {
     <Content isError={isError}>
       <Flex direction={"column"} p={"1"} gap={"1"}>
         {/* Page header */}
-        <Flex
-          direction={"row"}
-          p={"1"}
-          align={"center"}
-          justify={"space-between"}
-        >
+        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"search"} size={"sm"} />
             <Text fontSize={"md"} fontWeight={"semibold"}>
@@ -806,33 +726,17 @@ const Search = () => {
         </Flex>
 
         {/* Search components */}
-        <Tabs.Root
-          w={"100%"}
-          size={"sm"}
-          defaultValue={"text"}
-          variant={"subtle"}
-          onValueChange={onTabChange}
-        >
+        <Tabs.Root w={"100%"} size={"sm"} defaultValue={"text"} variant={"subtle"} onValueChange={onTabChange}>
           <Tabs.List p={"1"} gap={"1"} pb={"0"}>
             <Flex gap={"1"} align={"center"}>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Search Using:
               </Text>
-              <Tabs.Trigger
-                value={"text"}
-                disabled={isSearching}
-                fontSize={"xs"}
-                gap={"1"}
-              >
+              <Tabs.Trigger value={"text"} disabled={isSearching} fontSize={"xs"} gap={"1"}>
                 <Icon name={"text"} size={"xs"} />
                 Text
               </Tabs.Trigger>
-              <Tabs.Trigger
-                value={"advanced"}
-                disabled={isSearching}
-                fontSize={"xs"}
-                gap={"1"}
-              >
+              <Tabs.Trigger value={"advanced"} disabled={isSearching} fontSize={"xs"} gap={"1"}>
                 <Icon name={"search_query"} size={"xs"} />
                 Query Builder
               </Tabs.Trigger>
@@ -843,10 +747,7 @@ const Search = () => {
           <Tabs.Content value={"text"} p={"1"}>
             <Flex direction={"column"} gap={"1"}>
               {/* Filter section */}
-              <Collapsible.Root
-                open={filtersOpen}
-                onOpenChange={(event) => setFiltersOpen(event.open)}
-              >
+              <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
                 <Flex
                   direction={"column"}
                   gap={"1"}
@@ -855,12 +756,7 @@ const Search = () => {
                   border={"1px solid"}
                   borderColor={"gray.300"}
                 >
-                  <Flex
-                    direction={"row"}
-                    gap={"1"}
-                    align={"center"}
-                    justify={"space-between"}
-                  >
+                  <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Icon name={"filter"} size={"sm"} />
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -868,16 +764,9 @@ const Search = () => {
                       </Text>
                     </Flex>
                     <Collapsible.Trigger asChild>
-                      <Button
-                        size={"xs"}
-                        variant={"ghost"}
-                        colorPalette={"gray"}
-                      >
+                      <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
                         {filtersOpen ? "Hide" : "Show"} Filters
-                        <Icon
-                          name={filtersOpen ? "c_up" : "c_down"}
-                          size={"xs"}
-                        />
+                        <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
                       </Button>
                     </Collapsible.Trigger>
                   </Flex>
@@ -885,47 +774,25 @@ const Search = () => {
                     <Flex direction={"column"} gap={"2"} p={"1"}>
                       <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
                         {/* Search options section */}
-                        <Flex
-                          direction={"column"}
-                          gap={"1"}
-                          minW={"220px"}
-                          flexShrink={0}
-                        >
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={"gray.600"}
-                          >
+                        <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                             Search Options
                           </Text>
                           <Checkbox.Root
                             size={"xs"}
                             colorPalette={"blue"}
                             checked={showArchived}
-                            onCheckedChange={(details) =>
-                              setShowArchived(details.checked as boolean)
-                            }
+                            onCheckedChange={(details) => setShowArchived(details.checked as boolean)}
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              Show Archived Entities
-                            </Checkbox.Label>
+                            <Checkbox.Label fontSize={"xs"}>Show Archived Entities</Checkbox.Label>
                           </Checkbox.Root>
                         </Flex>
 
                         {/* Entity filters section */}
-                        <Flex
-                          direction={"column"}
-                          gap={"1"}
-                          minW={"260px"}
-                          flexShrink={0}
-                        >
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={"gray.600"}
-                          >
+                        <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                             Entity Filters
                           </Text>
 
@@ -983,9 +850,7 @@ const Search = () => {
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  Has Attachments
-                                </Checkbox.Label>
+                                <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
                               </Checkbox.Root>
                               <Checkbox.Root
                                 size={"xs"}
@@ -1000,9 +865,7 @@ const Search = () => {
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  Has Attributes
-                                </Checkbox.Label>
+                                <Checkbox.Label fontSize={"xs"}>Has Attributes</Checkbox.Label>
                               </Checkbox.Root>
                               <Checkbox.Root
                                 size={"xs"}
@@ -1011,16 +874,13 @@ const Search = () => {
                                 onCheckedChange={(details) =>
                                   setTextSearchFilters((prev) => ({
                                     ...prev,
-                                    hasRelationships:
-                                      details.checked as boolean,
+                                    hasRelationships: details.checked as boolean,
                                   }))
                                 }
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  Has Relationships
-                                </Checkbox.Label>
+                                <Checkbox.Label fontSize={"xs"}>Has Relationships</Checkbox.Label>
                               </Checkbox.Root>
                             </Flex>
                           </Flex>
@@ -1032,12 +892,7 @@ const Search = () => {
               </Collapsible.Root>
 
               {/* Active filter count and controls */}
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"flex-end"}
-              >
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
                 <Text fontWeight={"semibold"} fontSize={"xs"}>
                   {activeFilterCount} Active Filter
                   {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
@@ -1132,9 +987,7 @@ const Search = () => {
             <Flex direction={"column"} gap={"1"}>
               <Flex direction={"column"} gap={"1"}>
                 <QueryBuilderChakra>
-                  <QueryBuilderDnD
-                    dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}
-                  >
+                  <QueryBuilderDnD dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}>
                     <QueryBuilder
                       controlClassnames={{
                         queryBuilder: "queryBuilder-branches",
@@ -1188,19 +1041,10 @@ const Search = () => {
           )}
 
           {hasSearched && !isSearching && (
-            <Flex
-              id={"resultsContainer"}
-              direction={"column"}
-              w={"100%"}
-              gap={"1"}
-            >
+            <Flex id={"resultsContainer"} direction={"column"} w={"100%"} gap={"1"}>
               {results.length > 0 ? (
                 <>
-                  <Heading
-                    id={"resultsHeading"}
-                    size={"sm"}
-                    fontWeight={"semibold"}
-                  >
+                  <Heading id={"resultsHeading"} size={"sm"} fontWeight={"semibold"}>
                     {results.length} result
                     {results.length > 1 ? "s" : ""}
                   </Heading>
@@ -1215,17 +1059,8 @@ const Search = () => {
                   />
                 </>
               ) : (
-                <Flex
-                  w={"100%"}
-                  minH={"200px"}
-                  align={"center"}
-                  justify={"center"}
-                >
-                  <Text
-                    fontSize={"sm"}
-                    fontWeight={"semibold"}
-                    color={"gray.600"}
-                  >
+                <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
                     No results found
                   </Text>
                 </Flex>
@@ -1239,9 +1074,7 @@ const Search = () => {
                 <EmptyState.Indicator>
                   <Icon name={"search"} size={"lg"} />
                 </EmptyState.Indicator>
-                <EmptyState.Description>
-                  Enter a search query to find Entities
-                </EmptyState.Description>
+                <EmptyState.Description>Enter a search query to find Entities</EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
           )}

@@ -21,20 +21,13 @@ import { PostHogClient } from "src";
 export const WorkspacesResolvers = {
   Query: {
     // Retrieve all Workspaces
-    workspaces: async (
-      _parent: IResolverParent,
-      _args: Record<string, unknown>,
-      context: Context,
-    ) => {
+    workspaces: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
       const workspaces = await Workspaces.all();
 
       // Access control
       if (workspaces.length > 0) {
         return workspaces.filter((workspace) => {
-          return (
-            _.isEqual(workspace.owner, context.user) ||
-            _.includes(workspace.collaborators, context.user)
-          );
+          return _.isEqual(workspace.owner, context.user) || _.includes(workspace.collaborators, context.user);
         });
       }
 
@@ -60,20 +53,16 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         return workspace;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -95,21 +84,17 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getEntities(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -131,21 +116,17 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getProjects(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -167,21 +148,17 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getActivity(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -237,8 +214,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);
@@ -253,14 +229,11 @@ export const WorkspacesResolvers = {
 
         return result;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
   },

@@ -2,16 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Input,
-  Text,
-  Fieldset,
-  Field,
-  Collapsible,
-  IconButton,
-} from "@chakra-ui/react";
+import { Button, Flex, Input, Text, Fieldset, Field, Collapsible, IconButton } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -34,8 +25,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   const isDescriptionError = description === "";
   const [validValues, setValidValues] = useState(false);
 
-  const validAttributes =
-    !isNameError && !isDescriptionError && validValues && values.length > 0;
+  const validAttributes = !isNameError && !isDescriptionError && validValues && values.length > 0;
 
   useEffect(() => {
     setValidValues(isValidValues(values));
@@ -52,25 +42,9 @@ const AttributeCard = (props: AttributeCardProps) => {
   };
 
   return (
-    <Collapsible.Root
-      open={isOpen}
-      onOpenChange={(event) => setIsOpen(event.open)}
-    >
-      <Flex
-        direction={"column"}
-        gap={"1"}
-        border={"1px solid"}
-        borderColor={"gray.300"}
-        rounded={"md"}
-        p={"1"}
-      >
-        <Flex
-          w={"100%"}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          gap={"1"}
-        >
+    <Collapsible.Root open={isOpen} onOpenChange={(event) => setIsOpen(event.open)}>
+      <Flex direction={"column"} gap={"1"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"} p={"1"}>
+        <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"} gap={"1"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Collapsible.Trigger asChild>
               <IconButton
@@ -83,14 +57,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 <Icon name={isOpen ? "c_down" : "c_right"} size={"xs"} />
               </IconButton>
             </Collapsible.Trigger>
-            <Flex
-              align={"center"}
-              gap={"1"}
-              p={"1"}
-              border={"2px solid"}
-              rounded={"md"}
-              w={"fit-content"}
-            >
+            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"} w={"fit-content"}>
               <Icon name={"template"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Attribute{name !== "" ? `: ${name}` : ""}
@@ -148,11 +115,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                     <Fieldset.Root>
                       <Fieldset.Content>
                         <Field.Root required>
-                          <Field.Label
-                            fontWeight={"semibold"}
-                            fontSize={"xs"}
-                            ml={"0.5"}
-                          >
+                          <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                             Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -178,11 +141,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                       Owner
                     </Text>
                     <Flex>
-                      <ActorTag
-                        identifier={attributeCardData.owner}
-                        fallback={"Unknown User"}
-                        size={"sm"}
-                      />
+                      <ActorTag identifier={attributeCardData.owner} fallback={"Unknown User"} size={"sm"} />
                     </Flex>
                   </Flex>
                 </Flex>
@@ -233,12 +192,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 requireData
               />
             ) : (
-              <Values
-                viewOnly={finished}
-                values={values}
-                setValues={setValues}
-                requireData
-              />
+              <Values viewOnly={finished} values={values} setValues={setValues} requireData />
             )}
           </Flex>
         </Collapsible.Content>

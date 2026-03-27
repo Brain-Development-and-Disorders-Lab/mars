@@ -2,15 +2,7 @@
 import React, { useMemo } from "react";
 
 // Chart components
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // Existing and custom components
 import { Flex, Text, Box } from "@chakra-ui/react";
@@ -33,11 +25,7 @@ interface ChartDataPoint {
   count: number;
 }
 
-const ActivityGraph = ({
-  activities,
-  title,
-  height = "180px",
-}: ActivityGraphProps) => {
+const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphProps) => {
   // Process activity data to get daily counts for the last 7 days
   const chartData = useMemo(() => {
     const today = dayjs().startOf("day");
@@ -62,9 +50,7 @@ const ActivityGraph = ({
       })
       .forEach((activity) => {
         const activityDate = dayjs(activity.timestamp).startOf("day");
-        const dayIndex = days.findIndex((day) =>
-          dayjs(day.date).isSame(activityDate, "day"),
-        );
+        const dayIndex = days.findIndex((day) => dayjs(day.date).isSame(activityDate, "day"));
 
         if (dayIndex !== -1) {
           days[dayIndex].count += 1;
@@ -78,14 +64,7 @@ const ActivityGraph = ({
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <Box
-          bg={"white"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
-          rounded={"md"}
-          p={"1"}
-          boxShadow={"md"}
-        >
+        <Box bg={"white"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"} p={"1"} boxShadow={"md"}>
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             {payload[0].payload.dateLabel}
           </Text>
@@ -102,14 +81,7 @@ const ActivityGraph = ({
   const CustomXTick = (props: any) => {
     const { x, y, payload } = props;
     return (
-      <text
-        x={x}
-        y={y}
-        dy={16}
-        textAnchor="middle"
-        fill="#52525b"
-        style={{ fontSize: "12px", fontWeight: "normal" }}
-      >
+      <text x={x} y={y} dy={16} textAnchor="middle" fill="#52525b" style={{ fontSize: "12px", fontWeight: "normal" }}>
         {payload.value}
       </text>
     );
@@ -119,29 +91,14 @@ const ActivityGraph = ({
   const CustomYTick = (props: any) => {
     const { x, y, payload } = props;
     return (
-      <text
-        x={x}
-        y={y}
-        dx={-4}
-        textAnchor="end"
-        fill="#52525b"
-        style={{ fontSize: "12px", fontWeight: "normal" }}
-      >
+      <text x={x} y={y} dx={-4} textAnchor="end" fill="#52525b" style={{ fontSize: "12px", fontWeight: "normal" }}>
         {payload.value}
       </text>
     );
   };
 
   return (
-    <Flex
-      direction={"column"}
-      gap={"1"}
-      p={"1"}
-      rounded={"md"}
-      bg={"gray.50"}
-      h={height}
-      w={"100%"}
-    >
+    <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} bg={"gray.50"} h={height} w={"100%"}>
       {title && (
         <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
           {title}
@@ -150,7 +107,7 @@ const ActivityGraph = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
-          margin={{ top: 15, right: 10, bottom: 5, left: -30 }}
+          margin={{ top: 15, right: 10, bottom: 5, left: -20 }}
           width={"100%"}
           height={"100%"}
         >

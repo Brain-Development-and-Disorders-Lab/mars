@@ -48,8 +48,7 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 import APIRouter from "@models/API";
 
 // Set logging level
-consola.level =
-  process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
+consola.level = process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
 
 // Posthog
 import { PostHog } from "posthog-node";
@@ -64,10 +63,7 @@ const port = process.env.PORT || 8000;
 const app = express();
 
 // Setup CORS origins
-const origins =
-  process.env.NODE_ENV !== "production"
-    ? ["http://127.0.0.1:8080"]
-    : ["https://app.metadatify.com"];
+const origins = process.env.NODE_ENV !== "production" ? ["http://127.0.0.1:8080"] : ["https://app.metadatify.com"];
 
 // Specify non-secure paths
 const nonSecurePaths = ["/login"];
@@ -88,9 +84,7 @@ const start = async () => {
       headers: fromNodeHeaders(req.headers),
     });
     if (!_.includes(nonSecurePaths, req.path) && session === null) {
-      res
-        .status(401)
-        .json({ message: `You do not have permission to access ${req.path}` });
+      res.status(401).json({ message: `You do not have permission to access ${req.path}` });
     } else {
       res.locals.session = session;
       next();

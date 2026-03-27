@@ -6,16 +6,7 @@ import { Flex, Spinner } from "@chakra-ui/react";
 
 const Loading = () => {
   return (
-    <Flex
-      align={"center"}
-      justify={"center"}
-      direction={"column"}
-      gap={"3"}
-      p={"8"}
-      m={"8"}
-      minH={"90vh"}
-      h={"100%"}
-    >
+    <Flex align={"center"} justify={"center"} direction={"column"} gap={"3"} p={"8"} m={"8"} minH={"90vh"} h={"100%"}>
       <Spinner size={"lg"} color={"gray.600"} role="status" />
     </Flex>
   );

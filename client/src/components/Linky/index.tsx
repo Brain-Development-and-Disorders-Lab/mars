@@ -80,9 +80,7 @@ const Linky = (props: LinkyProps) => {
       } else if (_.isNumber(props.truncate)) {
         setLinkLabel(_.truncate(fallbackName, { length: props.truncate }));
       } else {
-        setLinkLabel(
-          _.truncate(fallbackName, { length: DEFAULT_LINKY_LABEL_LENGTH }),
-        );
+        setLinkLabel(_.truncate(fallbackName, { length: DEFAULT_LINKY_LABEL_LENGTH }));
       }
       return;
     }
@@ -136,9 +134,7 @@ const Linky = (props: LinkyProps) => {
       setLinkLabel(_.truncate(data.name, { length: props.truncate }));
     } else {
       // Truncate the label text to a default length
-      setLinkLabel(
-        _.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }),
-      );
+      setLinkLabel(_.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }));
     }
   };
 
@@ -155,10 +151,7 @@ const Linky = (props: LinkyProps) => {
   return (
     <Tooltip showArrow content={tooltipLabel}>
       {loadingTemplate || loadingEntity || loadingProject ? (
-        <SkeletonText
-          noOfLines={1}
-          loading={loadingTemplate || loadingEntity || loadingProject}
-        >
+        <SkeletonText noOfLines={1} loading={loadingTemplate || loadingEntity || loadingProject}>
           {linkLabel}
         </SkeletonText>
       ) : (

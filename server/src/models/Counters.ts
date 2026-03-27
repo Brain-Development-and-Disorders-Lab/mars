@@ -19,17 +19,13 @@ export class Counters {
       created: dayjs(Date.now()).toISOString(),
     };
 
-    const response = await getDatabase()
-      .collection<CounterModel>(COUNTERS_COLLECTION)
-      .insertOne(joinedCounter);
+    const response = await getDatabase().collection<CounterModel>(COUNTERS_COLLECTION).insertOne(joinedCounter);
     const successStatus = _.isEqual(response.insertedId, joinedCounter._id);
 
     // Return the Counter identifier if successful
     return {
       success: successStatus,
-      message: successStatus
-        ? "Created new Counter"
-        : "Unable to create Counter",
+      message: successStatus ? "Created new Counter" : "Unable to create Counter",
       data: response.insertedId.toString(),
     };
   };
@@ -40,9 +36,7 @@ export class Counters {
    * @return {CounterModel}
    */
   static getCounter = async (_id: string): Promise<CounterModel | null> => {
-    return await getDatabase()
-      .collection<CounterModel>(COUNTERS_COLLECTION)
-      .findOne({ _id: _id });
+    return await getDatabase().collection<CounterModel>(COUNTERS_COLLECTION).findOne({ _id: _id });
   };
 
   /**
@@ -51,19 +45,14 @@ export class Counters {
    * @return {Promise<CounterModel[]>}
    */
   static getCounters = async (workspace: string): Promise<CounterModel[]> => {
-    return await getDatabase()
-      .collection<CounterModel>(COUNTERS_COLLECTION)
-      .find({ workspace: workspace })
-      .toArray();
+    return await getDatabase().collection<CounterModel>(COUNTERS_COLLECTION).find({ workspace: workspace }).toArray();
   };
 
   /**
    * Get the current Counter value based on the state of the Counter
    * @param _id Unique identifier of the Counter instance
    */
-  static getCurrentValue = async (
-    _id: string,
-  ): Promise<ResponseData<string>> => {
+  static getCurrentValue = async (_id: string): Promise<ResponseData<string>> => {
     const counter = await Counters.getCounter(_id);
 
     // Cover the case of no Counter found
@@ -99,10 +88,7 @@ export class Counters {
     }
 
     // Generate the next Counter value
-    const generated = counter.format.replace(
-      "{}",
-      (counter.current + counter.increment).toString(),
-    );
+    const generated = counter.format.replace("{}", (counter.current + counter.increment).toString());
 
     // Return the value of the Counter, subsituting within the `format`
     return {
@@ -112,10 +98,7 @@ export class Counters {
     };
   };
 
-  static getNextValues = async (
-    _id: string,
-    count: number,
-  ): Promise<ResponseData<string[]>> => {
+  static getNextValues = async (_id: string, count: number): Promise<ResponseData<string[]>> => {
     const counter = await Counters.getCounter(_id);
 
     // Cover the case of no Counter found
@@ -146,9 +129,7 @@ export class Counters {
     };
   };
 
-  static incrementValue = async (
-    _id: string,
-  ): Promise<ResponseData<string>> => {
+  static incrementValue = async (_id: string): Promise<ResponseData<string>> => {
     const counter = await Counters.getCounter(_id);
 
     // Cover the case of no Counter found
@@ -176,22 +157,15 @@ export class Counters {
     update.$set.current = counter.current + counter.increment;
 
     // Update the stored Counter value
-    const response = await getDatabase()
-      .collection<CounterModel>(COUNTERS_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<CounterModel>(COUNTERS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount === 1;
 
     // Generate the Counter value
-    const generated = counter.format.replace(
-      "{}",
-      update.$set.current.toString(),
-    );
+    const generated = counter.format.replace("{}", update.$set.current.toString());
 
     return {
       success: successStatus,
-      message: successStatus
-        ? `Generated next value for Counter "${counter.name}"`
-        : "Unable to generate next value",
+      message: successStatus ? `Generated next value for Counter "${counter.name}"` : "Unable to generate next value",
       data: successStatus ? generated : "Invalid",
     };
   };

@@ -39,8 +39,7 @@ export const seedTestDatabase = async (): Promise<void> => {
     templates: [],
     activity: [],
   });
-  if (workspaceResult.success === false)
-    throw new Error("Error creating Workspace");
+  if (workspaceResult.success === false) throw new Error("Error creating Workspace");
 
   // Create a Project
   const projectResult: ResponseData<string> = await Projects.create({
@@ -53,8 +52,7 @@ export const seedTestDatabase = async (): Promise<void> => {
     entities: [],
     history: [],
   });
-  if (projectResult.success === false)
-    throw new Error("Error creating Project");
+  if (projectResult.success === false) throw new Error("Error creating Project");
   await Workspaces.addProject(workspaceResult.data, projectResult.data);
 
   // Create parent and child Entities

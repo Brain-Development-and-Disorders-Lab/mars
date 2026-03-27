@@ -27,10 +27,7 @@ import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
-const RelationshipGraph = (props: {
-  id: string;
-  entityNavigateHook: (id: string) => void;
-}) => {
+const RelationshipGraph = (props: { id: string; entityNavigateHook: (id: string) => void }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,9 +55,7 @@ const RelationshipGraph = (props: {
   `;
 
   // Query to retrieve Entity data and associated data for editing
-  const [getEntity, { loading, error }] = useLazyQuery<{ entity: EntityNode }>(
-    GET_ENTITY_DATA,
-  );
+  const [getEntity, { loading, error }] = useLazyQuery<{ entity: EntityNode }>(GET_ENTITY_DATA);
 
   /**
    * Utility function to execute GraphQL query and return Entity data necessary to construct a graph node
@@ -105,11 +100,7 @@ const RelationshipGraph = (props: {
             id: relationship.target._id,
             type: "default",
             data: {
-              label: createLabel(
-                relationship.target._id,
-                relationship.target.name,
-                false,
-              ),
+              label: createLabel(relationship.target._id, relationship.target.name, false),
             },
             position: { x: 250, y: 0 },
             style: {
@@ -191,10 +182,7 @@ const RelationshipGraph = (props: {
    */
   const containsEdge = (relationship: IRelationship): boolean => {
     for (const edge of edges) {
-      if (
-        _.isEqual(edge.source, relationship.source._id) &&
-        _.isEqual(edge.target, relationship.target._id)
-      ) {
+      if (_.isEqual(edge.source, relationship.source._id) && _.isEqual(edge.target, relationship.target._id)) {
         // Check for source -> target edge
         return true;
       } else if (
@@ -204,10 +192,7 @@ const RelationshipGraph = (props: {
       ) {
         // Check for target -> source edge, general relationship type
         return true;
-      } else if (
-        _.isEqual(edge.source, relationship.target._id) &&
-        _.isEqual(edge.target, relationship.source._id)
-      ) {
+      } else if (_.isEqual(edge.source, relationship.target._id) && _.isEqual(edge.target, relationship.source._id)) {
         // Check for target -> source edge, other relationships
         return true;
       }
@@ -221,10 +206,7 @@ const RelationshipGraph = (props: {
    * @param layoutEdges Edges to present in a layout
    * @return {Promise<ElkNode>}
    */
-  const generateLayout = async (
-    layoutNodes: Node[],
-    layoutEdges: Edge[],
-  ): Promise<ElkNode> => {
+  const generateLayout = async (layoutNodes: Node[], layoutEdges: Edge[]): Promise<ElkNode> => {
     // Set the layout of the graph using ELK
     const elk = new ELK();
 
@@ -266,46 +248,19 @@ const RelationshipGraph = (props: {
    * There should be only one primary Node per graph
    * @return {React.JSX.Element}
    */
-  const createLabel = (
-    id: string,
-    name: string,
-    isPrimary: boolean,
-  ): React.JSX.Element => {
+  const createLabel = (id: string, name: string, isPrimary: boolean): React.JSX.Element => {
     return (
-      <Flex
-        key={`label_${id}`}
-        direction={"column"}
-        align={"center"}
-        w={"100%"}
-        gap={"2"}
-      >
-        <Flex
-          key={`label_inner_container_${id}`}
-          w={"100%"}
-          gap={"2"}
-          direction={"row"}
-          align={"center"}
-        >
+      <Flex key={`label_${id}`} direction={"column"} align={"center"} w={"100%"} gap={"2"}>
+        <Flex key={`label_inner_container_${id}`} w={"100%"} gap={"2"} direction={"row"} align={"center"}>
           <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
           <Tooltip key={`tooltip_${id}`} content={name}>
-            <Text
-              key={`inner_label_text_${id}`}
-              fontWeight={"semibold"}
-              textAlign={"left"}
-            >
+            <Text key={`inner_label_text_${id}`} fontWeight={"semibold"} textAlign={"left"}>
               {_.truncate(name, { length: 16 })}
             </Text>
           </Tooltip>
         </Flex>
 
-        <Flex
-          key={`inner_label_${id}`}
-          direction={"row"}
-          align={"center"}
-          justify={"left"}
-          w={"100%"}
-          py={"1"}
-        >
+        <Flex key={`inner_label_${id}`} direction={"row"} align={"center"} justify={"left"} w={"100%"} py={"1"}>
           <Button
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
@@ -327,10 +282,7 @@ const RelationshipGraph = (props: {
    * @param _event Click event information
    * @param node Node that was clicked
    */
-  const onNodeClick = async (
-    _event: React.MouseEvent,
-    node: Node,
-  ): Promise<void> => {
+  const onNodeClick = async (_event: React.MouseEvent, node: Node): Promise<void> => {
     if (!_.isEqual(node.id.toString(), props.id.toString())) {
       // If the primary Entity hasn't been clicked, obtain relationships and setup missing nodes and edges
       // for the selected Entity
@@ -354,11 +306,7 @@ const RelationshipGraph = (props: {
                 id: relationship.target._id,
                 type: "default",
                 data: {
-                  label: createLabel(
-                    relationship.target._id,
-                    relationship.target.name,
-                    false,
-                  ),
+                  label: createLabel(relationship.target._id, relationship.target.name, false),
                 },
                 position: { x: 100, y: 200 },
                 style: {
@@ -476,15 +424,7 @@ const RelationshipGraph = (props: {
   }, []);
 
   return (
-    <Flex
-      h={"100%"}
-      align={"center"}
-      justify={"center"}
-      direction={"column"}
-      w={"100%"}
-      p={"1"}
-      gap={"1"}
-    >
+    <Flex h={"100%"} align={"center"} justify={"center"} direction={"column"} w={"100%"} p={"1"} gap={"1"}>
       <Flex
         ref={containerRef}
         p={"1"}

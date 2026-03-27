@@ -82,9 +82,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const navigate = useNavigate();
 
   // State to differentiate which type of file is being imported
-  const [importType, setImportType] = useState(
-    "entities" as "entities" | "template",
-  );
+  const [importType, setImportType] = useState("entities" as "entities" | "template");
   const [importTypeSelected, setImportTypeSelected] = useState(false);
   const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
 
@@ -92,9 +90,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [entityInterfacePage, setEntityInterfacePage] = useState(
     "upload" as "upload" | "details" | "mapping" | "review",
   );
-  const [templateInterfacePage, setTemplateInterfacePage] = useState(
-    "upload" as "upload" | "review",
-  );
+  const [templateInterfacePage, setTemplateInterfacePage] = useState("upload" as "upload" | "review");
 
   // Used to generated numerical steps and a progress bar
   // Entity steps
@@ -112,14 +108,10 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
-  const [columnsCollection, setColumnsCollection] = useState(
-    createListCollection({ items: [] as string[] }),
-  );
+  const [columnsCollection, setColumnsCollection] = useState(createListCollection({ items: [] as string[] }));
 
   // Projects
-  const [projectsCollection, setProjectsCollection] = useState(
-    createListCollection({ items: [] as IGenericItem[] }),
-  );
+  const [projectsCollection, setProjectsCollection] = useState(createListCollection({ items: [] as IGenericItem[] }));
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
@@ -134,17 +126,11 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
-  const [attributesField, setAttributesField] = useState(
-    [] as AttributeModel[],
-  );
+  const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
 
   // Review state
-  const [reviewEntities, setReviewEntities] = useState(
-    [] as EntityImportReview[],
-  );
-  const [reviewTemplates, setReviewTemplates] = useState(
-    [] as TemplateImportReview[],
-  );
+  const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
+  const [reviewTemplates, setReviewTemplates] = useState([] as TemplateImportReview[]);
 
   /**
    * Helper function to get user information
@@ -203,10 +189,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   }>(GET_MAPPING_DATA);
 
   const REVIEW_ENTITY_CSV = gql`
-    mutation ReviewEntityCSV(
-      $columnMapping: ColumnMappingInput
-      $file: [Upload]!
-    ) {
+    mutation ReviewEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
       reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
         success
         message
@@ -235,23 +218,14 @@ const ImportDialog = (props: ImportDialogProps) => {
   }>(GET_COUNTER_VALUES);
 
   const IMPORT_ENTITY_CSV = gql`
-    mutation ImportEntityCSV(
-      $columnMapping: ColumnMappingInput
-      $file: [Upload]!
-      $options: OptionsInput
-    ) {
-      importEntityCSV(
-        columnMapping: $columnMapping
-        file: $file
-        options: $options
-      ) {
+    mutation ImportEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
+      importEntityCSV(columnMapping: $columnMapping, file: $file, options: $options) {
         success
         message
       }
     }
   `;
-  const [importEntityCSV, { error: importEntityCSVError }] =
-    useMutation(IMPORT_ENTITY_CSV);
+  const [importEntityCSV, { error: importEntityCSVError }] = useMutation(IMPORT_ENTITY_CSV);
 
   const REVIEW_ENTITY_JSON = gql`
     mutation ReviewEntityJSON($file: [Upload]!) {
@@ -270,16 +244,8 @@ const ImportDialog = (props: ImportDialogProps) => {
   }>(REVIEW_ENTITY_JSON);
 
   const IMPORT_ENTITY_JSON = gql`
-    mutation ImportEntityJSON(
-      $file: [Upload]!
-      $project: String
-      $attributes: [AttributeInput]
-    ) {
-      importEntityJSON(
-        file: $file
-        project: $project
-        attributes: $attributes
-      ) {
+    mutation ImportEntityJSON($file: [Upload]!, $project: String, $attributes: [AttributeInput]) {
+      importEntityJSON(file: $file, project: $project, attributes: $attributes) {
         success
         message
       }
@@ -324,11 +290,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       cell: (info) => {
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              showArrow
-              disabled={info.getValue().length < 30}
-            >
+            <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 30 })}
               </Text>
@@ -346,11 +308,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             color={info.getValue() === "update" ? "blue.600" : "green"}
             size={"xs"}
           />
-          <Text
-            fontWeight={"semibold"}
-            fontSize={"xs"}
-            color={info.getValue() === "update" ? "blue.600" : "green"}
-          >
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() === "update" ? "blue.600" : "green"}>
             {_.capitalize(info.getValue())}
           </Text>
         </Flex>
@@ -360,18 +318,13 @@ const ImportDialog = (props: ImportDialogProps) => {
   ];
 
   // Setup columns for template review table
-  const templateReviewTableColumnHelper =
-    createColumnHelper<TemplateImportReview>();
+  const templateReviewTableColumnHelper = createColumnHelper<TemplateImportReview>();
   const templateReviewTableColumns = [
     templateReviewTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              showArrow
-              disabled={info.getValue().length < 30}
-            >
+            <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 30 })}
               </Text>
@@ -389,11 +342,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             color={info.getValue() === "update" ? "blue.600" : "green"}
             size={"xs"}
           />
-          <Text
-            fontWeight={"semibold"}
-            fontSize={"xs"}
-            color={info.getValue() === "update" ? "blue.600" : "green"}
-          >
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() === "update" ? "blue.600" : "green"}>
             {_.capitalize(info.getValue())}
           </Text>
         </Flex>
@@ -404,38 +353,23 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (
-      _.isEqual(entityInterfacePage, "upload") &&
-      fileName !== "" &&
-      importTypeSelected
-    ) {
+    if (_.isEqual(entityInterfacePage, "upload") && fileName !== "" && importTypeSelected) {
       setContinueDisabled(false);
     }
   }, [fileName, importTypeSelected]);
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
-    if (
-      _.isEqual(entityInterfacePage, "details") &&
-      nameField !== "" &&
-      fileType === CSV_MIME_TYPE
-    ) {
+    if (_.isEqual(entityInterfacePage, "details") && nameField !== "" && fileType === CSV_MIME_TYPE) {
       setContinueDisabled(false);
-    } else if (
-      _.isEqual(entityInterfacePage, "details") &&
-      !_.isEqual(counter, "") &&
-      nameUseCounter
-    ) {
+    } else if (_.isEqual(entityInterfacePage, "details") && !_.isEqual(counter, "") && nameUseCounter) {
       setContinueDisabled(false);
     }
   }, [nameField, counter]);
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
-    if (
-      _.isEqual(entityInterfacePage, "details") &&
-      fileType === JSON_MIME_TYPE
-    ) {
+    if (_.isEqual(entityInterfacePage, "details") && fileType === JSON_MIME_TYPE) {
       setContinueDisabled(false);
     }
   }, [entityInterfacePage]);
@@ -444,9 +378,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    * Read a JSON file and update `Importer` state, raising errors if invalid
    * @param {File} file JSON file instance
    */
-  const parseJSONFile = async (
-    file: File,
-  ): Promise<{ entities: EntityModel[] }> => {
+  const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
     setImportLoading(true);
     const data = await file.text();
@@ -565,14 +497,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
       if (response.data && response.data.prepareEntityCSV.length > 0) {
         // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet: string[] =
-          response.data.prepareEntityCSV.filter((column: string) => {
-            return !_.startsWith(column, "__EMPTY");
-          });
+        const filteredColumnSet: string[] = response.data.prepareEntityCSV.filter((column: string) => {
+          return !_.startsWith(column, "__EMPTY");
+        });
         setColumns(filteredColumnSet);
-        setColumnsCollection(
-          createListCollection({ items: filteredColumnSet }),
-        );
+        setColumnsCollection(createListCollection({ items: filteredColumnSet }));
 
         setImportLoading(true);
         const mappingResult = await setupMapping();
@@ -607,14 +536,10 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
 
     if (response.data?.templates) {
-      setTemplatesCollection(
-        createListCollection({ items: response.data.templates }),
-      );
+      setTemplatesCollection(createListCollection({ items: response.data.templates }));
     }
     if (response.data?.projects) {
-      setProjectsCollection(
-        createListCollection({ items: response.data.projects }),
-      );
+      setProjectsCollection(createListCollection({ items: response.data.projects }));
     }
 
     if (mappingDataError) {
@@ -700,14 +625,12 @@ const ImportDialog = (props: ImportDialogProps) => {
 
       const counterValues = counterResponse.data?.nextCounterValues?.data;
       if (counterValues && counterValues.length > 0) {
-        const counterValuesSpliced = reviewData.map(
-          (entity: EntityImportReview, index: number) => {
-            return {
-              ...entity,
-              name: counterValues[index],
-            };
-          },
-        );
+        const counterValuesSpliced = reviewData.map((entity: EntityImportReview, index: number) => {
+          return {
+            ...entity,
+            name: counterValues[index],
+          };
+        });
         setReviewEntities(counterValuesSpliced);
       }
 
@@ -866,10 +789,7 @@ const ImportDialog = (props: ImportDialogProps) => {
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
    * @returns {ReactElement}
    */
-  const getSelectComponent = (
-    key: string,
-    onValueChange: React.Dispatch<React.SetStateAction<string>>,
-  ) => {
+  const getSelectComponent = (key: string, onValueChange: React.Dispatch<React.SetStateAction<string>>) => {
     return (
       <Select.Root
         key={key}
@@ -906,9 +826,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   // Removal callback
   const onRemoveAttribute = (identifier: string) => {
     // We need to filter the removed attribute
-    setAttributesField(
-      attributesField.filter((attribute) => attribute._id !== identifier),
-    );
+    setAttributesField(attributesField.filter((attribute) => attribute._id !== identifier));
   };
 
   // Used to receive data from a Attribute component
@@ -1060,12 +978,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     setCounter("");
     setDescriptionField("");
     setProjectField("");
-    setProjectsCollection(
-      createListCollection({ items: [] as IGenericItem[] }),
-    );
-    setTemplatesCollection(
-      createListCollection({ items: [] as AttributeModel[] }),
-    );
+    setProjectsCollection(createListCollection({ items: [] as IGenericItem[] }));
+    setTemplatesCollection(createListCollection({ items: [] as AttributeModel[] }));
     setAttributesField([]);
     setReviewEntities([]);
     setReviewTemplates([]);
@@ -1090,23 +1004,13 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header
-            p={"2"}
-            fontWeight={"semibold"}
-            roundedTop={"md"}
-            bg={"blue.300"}
-          >
+          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"upload"} size={"xs"} />
               Import File
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton
-                size={"2xs"}
-                top={"6px"}
-                onClick={handleOnClose}
-                _hover={{ bg: "gray.200" }}
-              />
+              <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} _hover={{ bg: "gray.200" }} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"1"} gap={"1"}>
@@ -1152,14 +1056,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             )}
 
             {/* Select file type of import */}
-            <Flex
-              direction={"row"}
-              gap={"1"}
-              align={"center"}
-              justify={"left"}
-              w={"100%"}
-              pb={"1"}
-            >
+            <Flex direction={"row"} gap={"1"} align={"center"} justify={"left"} w={"100%"} pb={"1"}>
               <Text fontWeight={"semibold"} fontSize={"xs"}>
                 File Contents:
               </Text>
@@ -1172,9 +1069,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   items: ["Entities", "Template"],
                 })}
                 onValueChange={(details) => {
-                  setImportType(
-                    details.items[0].toLowerCase() as "entities" | "template",
-                  );
+                  setImportType(details.items[0].toLowerCase() as "entities" | "template");
                   setImportTypeSelected(true);
                 }}
                 disabled={isTypeSelectDisabled}
@@ -1194,10 +1089,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       {createListCollection({
                         items: ["Entities", "Template"],
                       }).items.map((importType: string) => (
-                        <Select.Item
-                          item={importType}
-                          key={importType.toLowerCase()}
-                        >
+                        <Select.Item item={importType} key={importType.toLowerCase()}>
                           {importType}
                           <Select.ItemIndicator />
                         </Select.Item>
@@ -1223,715 +1115,540 @@ const ImportDialog = (props: ImportDialogProps) => {
             </Flex>
 
             {/* Display filename and list of columns if a CSV file after upload */}
-            {_.isEqual(importType, "entities") &&
-              !_.isEqual(entityInterfacePage, "upload") && (
-                <Flex
-                  w={"100%"}
-                  justify={"left"}
-                  gap={"1"}
-                  align={"baseline"}
-                  direction={"column"}
-                  rounded={"md"}
-                  bg={"gray.100"}
-                  p={"1"}
-                  mb={"1"}
-                >
-                  <Flex direction={"row"} gap={"1"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      File Name:
-                    </Text>
-                    <Text fontSize={"xs"} color={"gray.600"}>
-                      {fileName}
-                    </Text>
-                  </Flex>
-
-                  {fileType === CSV_MIME_TYPE && (
-                    <Flex
-                      w={"100%"}
-                      gap={"1"}
-                      align={"center"}
-                      justify={"left"}
-                      wrap={"wrap"}
-                    >
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Columns:
-                      </Text>
-                      {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
-                        return (
-                          <Tag.Root
-                            key={column}
-                            colorPalette={
-                              columnSelected(column) ? "green" : "blue"
-                            }
-                          >
-                            <Tag.Label fontSize={"xs"}>{column}</Tag.Label>
-                          </Tag.Root>
-                        );
-                      })}
-                      {columns.length > MAX_DISPLAYED_COLUMNS && (
-                        <Tag.Root>
-                          <Tag.Label fontSize={"xs"}>
-                            and {columns.length - MAX_DISPLAYED_COLUMNS} more
-                          </Tag.Label>
-                        </Tag.Root>
-                      )}
-                    </Flex>
-                  )}
+            {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+              <Flex
+                w={"100%"}
+                justify={"left"}
+                gap={"1"}
+                align={"baseline"}
+                direction={"column"}
+                rounded={"md"}
+                bg={"gray.100"}
+                p={"1"}
+                mb={"1"}
+              >
+                <Flex direction={"row"} gap={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                    File Name:
+                  </Text>
+                  <Text fontSize={"xs"} color={"gray.600"}>
+                    {fileName}
+                  </Text>
                 </Flex>
-              )}
+
+                {fileType === CSV_MIME_TYPE && (
+                  <Flex w={"100%"} gap={"1"} align={"center"} justify={"left"} wrap={"wrap"}>
+                    <Text fontWeight={"semibold"} fontSize={"xs"}>
+                      Columns:
+                    </Text>
+                    {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
+                      return (
+                        <Tag.Root key={column} colorPalette={columnSelected(column) ? "green" : "blue"}>
+                          <Tag.Label fontSize={"xs"}>{column}</Tag.Label>
+                        </Tag.Root>
+                      );
+                    })}
+                    {columns.length > MAX_DISPLAYED_COLUMNS && (
+                      <Tag.Root>
+                        <Tag.Label fontSize={"xs"}>and {columns.length - MAX_DISPLAYED_COLUMNS} more</Tag.Label>
+                      </Tag.Root>
+                    )}
+                  </Flex>
+                )}
+              </Flex>
+            )}
 
             {/* Entity Step 1: Upload */}
-            {_.isEqual(importType, "entities") &&
-              _.isEqual(entityInterfacePage, "upload") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  align={"center"}
-                  justify={"center"}
-                >
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Flex
-                          direction={"column"}
-                          minH={"40vh"}
-                          w={"100%"}
-                          align={"center"}
-                          justify={"center"}
-                          border={"2px"}
-                          borderStyle={fileName === "" ? "dashed" : "solid"}
-                          borderColor={"gray.300"}
-                          rounded={"md"}
-                          background={fileName === "" ? "gray.50" : "white"}
-                        >
-                          {_.isEqual(file, {}) ? (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                Drag file here
-                              </Text>
-                              <Text fontSize={"xs"}>or click to upload</Text>
-                            </Flex>
-                          ) : (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                {file.name}
-                              </Text>
-                            </Flex>
-                          )}
-                        </Flex>
+            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "upload") && (
+              <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Flex
+                        direction={"column"}
+                        minH={"40vh"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={fileName === "" ? "dashed" : "solid"}
+                        borderColor={"gray.300"}
+                        rounded={"md"}
+                        background={fileName === "" ? "gray.50" : "white"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"}>
+                              Drag file here
+                            </Text>
+                            <Text fontSize={"xs"}>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"}>
+                              {file.name}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Flex>
 
-                        <Input
-                          type={"file"}
-                          h={"100%"}
-                          w={"100%"}
-                          position={"absolute"}
-                          rounded={"md"}
-                          top={"0"}
-                          left={"0"}
-                          opacity={"0"}
-                          aria-hidden={"true"}
-                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                            if (
-                              event.target.files &&
-                              event.target.files.length > 0
-                            ) {
-                              // Only accept defined file types
-                              if (
-                                _.includes(
-                                  [CSV_MIME_TYPE, JSON_MIME_TYPE],
-                                  event.target.files[0].type,
-                                )
-                              ) {
-                                // Capture event
-                                posthog.capture("import_upload_file", {
-                                  importType: importType,
-                                  fileName: event.target.files[0].name,
-                                });
+                      <Input
+                        type={"file"}
+                        h={"100%"}
+                        w={"100%"}
+                        position={"absolute"}
+                        rounded={"md"}
+                        top={"0"}
+                        left={"0"}
+                        opacity={"0"}
+                        aria-hidden={"true"}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.files && event.target.files.length > 0) {
+                            // Only accept defined file types
+                            if (_.includes([CSV_MIME_TYPE, JSON_MIME_TYPE], event.target.files[0].type)) {
+                              // Capture event
+                              posthog.capture("import_upload_file", {
+                                importType: importType,
+                                fileName: event.target.files[0].name,
+                              });
 
-                                setFileName(event.target.files[0].name);
-                                setFileType(event.target.files[0].type);
-                                setFile(event.target.files[0]);
-                              } else {
-                                toaster.create({
-                                  title: "Warning",
-                                  type: "warning",
-                                  description:
-                                    "Please upload a JSON or CSV file",
-                                  duration: 2000,
-                                  closable: true,
-                                });
-                              }
+                              setFileName(event.target.files[0].name);
+                              setFileType(event.target.files[0].type);
+                              setFile(event.target.files[0]);
+                            } else {
+                              toaster.create({
+                                title: "Warning",
+                                type: "warning",
+                                description: "Please upload a JSON or CSV file",
+                                duration: 2000,
+                                closable: true,
+                              });
                             }
-                          }}
-                        />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
-              )}
+                          }
+                        }}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
+              </Flex>
+            )}
 
             {/* Entity Step 2: Simple mapping, details */}
-            {_.isEqual(importType, "entities") &&
-              _.isEqual(entityInterfacePage, "details") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"1"}
-                  p={"1"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
-                  {fileType === CSV_MIME_TYPE && (
-                    <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Field.Root>
-                            <Field.Label fontSize={"xs"}>
-                              Name Prefix
-                            </Field.Label>
-                            <Input
-                              value={namePrefixField}
-                              placeholder={"Name Prefix"}
-                              size={"xs"}
-                              rounded={"md"}
-                              onChange={(event) =>
-                                setNamePrefixField(event.target.value)
-                              }
-                            />
-                            <Field.HelperText fontSize={"xs"}>
-                              Add a prefix to each Entity name
-                            </Field.HelperText>
-                          </Field.Root>
-
-                          <Field.Root
-                            required
-                            invalid={
-                              (!nameUseCounter && _.isEqual(nameField, "")) ||
-                              (nameUseCounter && _.isEqual(counter, ""))
-                            }
-                          >
-                            <Field.Label fontSize={"xs"}>
-                              Name
-                              <Field.RequiredIndicator />
-                            </Field.Label>
-                            <Flex direction={"row"} gap={"1"} w={"100%"}>
-                              {!nameUseCounter &&
-                                getSelectComponent("name", setNameField)}
-                              {nameUseCounter && (
-                                <CounterSelect
-                                  counter={counter}
-                                  setCounter={setCounter}
-                                  showCreate
-                                />
-                              )}
-                              <Button
-                                size={"xs"}
-                                rounded={"md"}
-                                colorPalette={"blue"}
-                                onClick={() => {
-                                  setNameUseCounter(!nameUseCounter);
-                                  // Reset state of name and counter fields
-                                  setNameField("");
-                                  setCounter("");
-                                  // Disable 'Continue' button
-                                  setContinueDisabled(true);
-                                }}
-                              >
-                                Use {nameUseCounter ? "Column" : "Counter"}
-                                <Icon
-                                  name={nameUseCounter ? "text" : "counter"}
-                                  size={"xs"}
-                                />
-                              </Button>
-                            </Flex>
-                            {!nameUseCounter && (
-                              <Field.HelperText fontSize={"xs"}>
-                                Column containing Entity names
-                              </Field.HelperText>
-                            )}
-                          </Field.Root>
-                        </Flex>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  )}
-
-                  {fileType === JSON_MIME_TYPE && (
-                    <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Field.Root>
-                            <Field.Label fontSize={"xs"}>
-                              Name Prefix
-                            </Field.Label>
-                            <Input
-                              value={namePrefixField}
-                              placeholder={"Name Prefix"}
-                              size={"xs"}
-                              rounded={"md"}
-                              onChange={(event) =>
-                                setNamePrefixField(event.target.value)
-                              }
-                            />
-                            <Field.HelperText fontSize={"xs"}>
-                              Add a prefix to each Entity name
-                            </Field.HelperText>
-                          </Field.Root>
-
-                          <Field.Root>
-                            <Field.Label fontSize={"xs"}>Name</Field.Label>
-                            <Input
-                              size={"xs"}
-                              rounded={"md"}
-                              placeholder={"Defined in JSON"}
-                              disabled
-                              readOnly
-                            />
-                            <Field.HelperText fontSize={"xs"}>
-                              Field containing Entity names
-                            </Field.HelperText>
-                          </Field.Root>
-                        </Flex>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  )}
-
-                  <Flex direction={"row"} gap={"1"}>
-                    <Fieldset.Root>
-                      <Fieldset.Content>
-                        <Flex direction={"row"} gap={"1"}>
-                          {/* Description */}
-                          <Field.Root w={"50%"}>
-                            <Field.Label fontSize={"xs"}>
-                              Description
-                            </Field.Label>
-                            {fileType === CSV_MIME_TYPE ? (
-                              getSelectComponent(
-                                "description",
-                                setDescriptionField,
-                              )
-                            ) : (
-                              <Input
-                                size={"xs"}
-                                rounded={"md"}
-                                placeholder={"Defined in JSON"}
-                                disabled
-                                readOnly
-                              />
-                            )}
-                            <Field.HelperText fontSize={"xs"}>
-                              {fileType === CSV_MIME_TYPE
-                                ? "Column containing Entity descriptions"
-                                : "Field containing Entity descriptions"}
-                            </Field.HelperText>
-                          </Field.Root>
-
-                          {/* Project */}
-                          <Field.Root w={"50%"}>
-                            <Field.Label fontSize={"xs"}>Project</Field.Label>
-                            <Select.Root
-                              key={"select-project"}
-                              size={"xs"}
-                              rounded={"md"}
-                              collection={projectsCollection}
-                              onValueChange={(details) =>
-                                setProjectField(details.items[0]._id)
-                              }
-                            >
-                              <Select.HiddenSelect />
-                              <Select.Control>
-                                <Select.Trigger
-                                  data-testid={
-                                    "import-column-select-trigger-project"
-                                  }
-                                >
-                                  <Select.ValueText
-                                    placeholder={"Select Project"}
-                                  />
-                                </Select.Trigger>
-                                <Select.IndicatorGroup>
-                                  <Select.Indicator />
-                                </Select.IndicatorGroup>
-                              </Select.Control>
-                              <Portal>
-                                <Select.Positioner>
-                                  <Select.Content>
-                                    {projectsCollection.items?.map(
-                                      (project: IGenericItem) => (
-                                        <Select.Item
-                                          item={project}
-                                          key={project._id}
-                                        >
-                                          {project.name}
-                                          <Select.ItemIndicator />
-                                        </Select.Item>
-                                      ),
-                                    ) || []}
-                                  </Select.Content>
-                                </Select.Positioner>
-                              </Portal>
-                            </Select.Root>
-                            <Field.HelperText fontSize={"xs"}>
-                              Add Entities to a Project
-                            </Field.HelperText>
-                          </Field.Root>
-                        </Flex>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-
-                  <Flex direction={"row"} gap={"2"} w={"50%"}>
-                    {/* Owner */}
-                    <Fieldset.Root>
-                      <Fieldset.Content>
+            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"1"}
+                p={"1"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                {fileType === CSV_MIME_TYPE && (
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Flex direction={"row"} gap={"1"}>
                         <Field.Root>
-                          <Field.Label fontSize={"xs"}>Owner</Field.Label>
-                          <Flex>
-                            <ActorTag
-                              identifier={ownerField}
-                              fallback={"Unknown"}
-                              size={"md"}
-                            />
+                          <Field.Label fontSize={"xs"}>Name Prefix</Field.Label>
+                          <Input
+                            value={namePrefixField}
+                            placeholder={"Name Prefix"}
+                            size={"xs"}
+                            rounded={"md"}
+                            onChange={(event) => setNamePrefixField(event.target.value)}
+                          />
+                          <Field.HelperText fontSize={"xs"}>Add a prefix to each Entity name</Field.HelperText>
+                        </Field.Root>
+
+                        <Field.Root
+                          required
+                          invalid={
+                            (!nameUseCounter && _.isEqual(nameField, "")) || (nameUseCounter && _.isEqual(counter, ""))
+                          }
+                        >
+                          <Field.Label fontSize={"xs"}>
+                            Name
+                            <Field.RequiredIndicator />
+                          </Field.Label>
+                          <Flex direction={"row"} gap={"1"} w={"100%"}>
+                            {!nameUseCounter && getSelectComponent("name", setNameField)}
+                            {nameUseCounter && <CounterSelect counter={counter} setCounter={setCounter} showCreate />}
+                            <Button
+                              size={"xs"}
+                              rounded={"md"}
+                              colorPalette={"blue"}
+                              onClick={() => {
+                                setNameUseCounter(!nameUseCounter);
+                                // Reset state of name and counter fields
+                                setNameField("");
+                                setCounter("");
+                                // Disable 'Continue' button
+                                setContinueDisabled(true);
+                              }}
+                            >
+                              Use {nameUseCounter ? "Column" : "Counter"}
+                              <Icon name={nameUseCounter ? "text" : "counter"} size={"xs"} />
+                            </Button>
                           </Flex>
+                          {!nameUseCounter && (
+                            <Field.HelperText fontSize={"xs"}>Column containing Entity names</Field.HelperText>
+                          )}
+                        </Field.Root>
+                      </Flex>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                )}
+
+                {fileType === JSON_MIME_TYPE && (
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Field.Root>
+                          <Field.Label fontSize={"xs"}>Name Prefix</Field.Label>
+                          <Input
+                            value={namePrefixField}
+                            placeholder={"Name Prefix"}
+                            size={"xs"}
+                            rounded={"md"}
+                            onChange={(event) => setNamePrefixField(event.target.value)}
+                          />
+                          <Field.HelperText fontSize={"xs"}>Add a prefix to each Entity name</Field.HelperText>
+                        </Field.Root>
+
+                        <Field.Root>
+                          <Field.Label fontSize={"xs"}>Name</Field.Label>
+                          <Input size={"xs"} rounded={"md"} placeholder={"Defined in JSON"} disabled readOnly />
+                          <Field.HelperText fontSize={"xs"}>Field containing Entity names</Field.HelperText>
+                        </Field.Root>
+                      </Flex>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                )}
+
+                <Flex direction={"row"} gap={"1"}>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Flex direction={"row"} gap={"1"}>
+                        {/* Description */}
+                        <Field.Root w={"50%"}>
+                          <Field.Label fontSize={"xs"}>Description</Field.Label>
+                          {fileType === CSV_MIME_TYPE ? (
+                            getSelectComponent("description", setDescriptionField)
+                          ) : (
+                            <Input size={"xs"} rounded={"md"} placeholder={"Defined in JSON"} disabled readOnly />
+                          )}
                           <Field.HelperText fontSize={"xs"}>
-                            Owner of imported Entities
+                            {fileType === CSV_MIME_TYPE
+                              ? "Column containing Entity descriptions"
+                              : "Field containing Entity descriptions"}
                           </Field.HelperText>
                         </Field.Root>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-                </Flex>
-              )}
 
-            {/* Entity Step 3: Advanced mapping */}
-            {_.isEqual(importType, "entities") &&
-              _.isEqual(entityInterfacePage, "mapping") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"1"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
-                  {_.isEqual(fileType, CSV_MIME_TYPE) ? (
-                    <Text fontSize={"xs"}>
-                      Columns can be assigned to Values within Attributes. When
-                      adding Values to an Attribute, select the column
-                      containing the data for each Value. Use an existing
-                      Template Attribute from the drop-down or create a new
-                      Attribute.
-                    </Text>
-                  ) : (
-                    <Text fontSize={"xs"}>
-                      Existing attributes defined in JSON will be preserved. Use
-                      an existing Template Attribute from the drop-down or
-                      create a new Attribute to be added to all Entities.
-                    </Text>
-                  )}
-
-                  <Flex
-                    direction={"row"}
-                    gap={"1"}
-                    align={"center"}
-                    justify={"space-between"}
-                    wrap={["wrap", "nowrap"]}
-                  >
-                    {/* Drop-down to select a Template */}
-                    <Fieldset.Root maxW={"sm"}>
-                      <Fieldset.Content>
-                        <Field.Root>
-                          <Tooltip
-                            content={
-                              templatesCollection.items?.length > 0
-                                ? "Select an existing Template"
-                                : "No Templates exist yet"
-                            }
-                            showArrow
+                        {/* Project */}
+                        <Field.Root w={"50%"}>
+                          <Field.Label fontSize={"xs"}>Project</Field.Label>
+                          <Select.Root
+                            key={"select-project"}
+                            size={"xs"}
+                            rounded={"md"}
+                            collection={projectsCollection}
+                            onValueChange={(details) => setProjectField(details.items[0]._id)}
                           >
-                            <Select.Root
-                              key={"select-template"}
-                              size={"xs"}
-                              rounded={"md"}
-                              collection={templatesCollection}
-                              onValueChange={(details) => {
-                                const selectedTemplate = details.items[0];
-                                if (!_.isEqual(selectedTemplate._id, "")) {
-                                  for (const template of templatesCollection.items ||
-                                    []) {
-                                    if (
-                                      _.isEqual(
-                                        selectedTemplate._id,
-                                        template._id,
-                                      )
-                                    ) {
-                                      setAttributesField([
-                                        ...attributesField,
-                                        {
-                                          _id: `a-${nanoid(6)}`,
-                                          name: template.name,
-                                          timestamp: template.timestamp,
-                                          owner: template.owner,
-                                          archived: false,
-                                          description: template.description,
-                                          values: template.values,
-                                        },
-                                      ]);
-                                      break;
-                                    }
-                                  }
-                                }
-                              }}
-                              disabled={templatesCollection.items?.length === 0}
-                            >
-                              <Select.HiddenSelect />
-                              <Select.Control>
-                                <Select.Trigger>
-                                  <Select.ValueText
-                                    placeholder={"Select Template"}
-                                  />
-                                </Select.Trigger>
-                                <Select.IndicatorGroup>
-                                  <Select.Indicator />
-                                </Select.IndicatorGroup>
-                              </Select.Control>
-                              <Portal>
-                                <Select.Positioner>
-                                  <Select.Content>
-                                    {templatesCollection.items?.map(
-                                      (template: AttributeModel) => (
-                                        <Select.Item
-                                          item={template}
-                                          key={template._id}
-                                        >
-                                          {template.name}
-                                          <Select.ItemIndicator />
-                                        </Select.Item>
-                                      ),
-                                    ) || []}
-                                  </Select.Content>
-                                </Select.Positioner>
-                              </Portal>
-                            </Select.Root>
-                          </Tooltip>
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger data-testid={"import-column-select-trigger-project"}>
+                                <Select.ValueText placeholder={"Select Project"} />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {projectsCollection.items?.map((project: IGenericItem) => (
+                                    <Select.Item item={project} key={project._id}>
+                                      {project.name}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  )) || []}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
+                          <Field.HelperText fontSize={"xs"}>Add Entities to a Project</Field.HelperText>
                         </Field.Root>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"green"}
-                      onClick={() => {
-                        // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
-                        setAttributesField([
-                          ...attributesField,
-                          {
-                            _id: `a-${nanoid(6)}`,
-                            name: "",
-                            timestamp: dayjs(Date.now()).toISOString(),
-                            owner: ownerField,
-                            archived: false,
-                            description: "",
-                            values: [],
-                          },
-                        ]);
-                      }}
-                    >
-                      Create
-                      <Icon name={"add"} size={"xs"} />
-                    </Button>
-                  </Flex>
-
-                  {fileType === CSV_MIME_TYPE
-                    ? // If importing from CSV, use column-mapping
-                      attributesField.map((attribute) => {
-                        return (
-                          <Attribute
-                            _id={attribute._id}
-                            key={attribute._id}
-                            name={attribute.name}
-                            owner={attribute.owner}
-                            archived={attribute.archived}
-                            description={attribute.description}
-                            values={attribute.values}
-                            restrictDataValues={true}
-                            permittedDataValues={columns}
-                            onRemove={onRemoveAttribute}
-                            onUpdate={onUpdateAttribute}
-                          />
-                        );
-                      })
-                    : // If importing from JSON, allow new Attributes
-                      attributesField.map((attribute) => {
-                        return (
-                          <Attribute
-                            _id={attribute._id}
-                            key={attribute._id}
-                            name={attribute.name}
-                            owner={attribute.owner}
-                            archived={attribute.archived}
-                            description={attribute.description}
-                            values={attribute.values}
-                            restrictDataValues={true}
-                            onRemove={onRemoveAttribute}
-                            onUpdate={onUpdateAttribute}
-                          />
-                        );
-                      })}
+                      </Flex>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
                 </Flex>
-              )}
 
-            {/* Entity Step 4: Review */}
-            {_.isEqual(importType, "entities") &&
-              _.isEqual(entityInterfacePage, "review") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"1"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
-                  <DataTable
-                    columns={reviewTableColumns}
-                    data={reviewEntities}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    showPagination
-                  />
-                </Flex>
-              )}
-
-            {/* Template Step 1: Upload */}
-            {_.isEqual(importType, "template") &&
-              _.isEqual(templateInterfacePage, "upload") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  align={"center"}
-                  justify={"center"}
-                >
+                <Flex direction={"row"} gap={"2"} w={"50%"}>
+                  {/* Owner */}
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Flex
-                          direction={"column"}
-                          minH={"40vh"}
-                          w={"100%"}
-                          align={"center"}
-                          justify={"center"}
-                          border={"2px"}
-                          borderStyle={fileName === "" ? "dashed" : "solid"}
-                          borderColor={"gray.300"}
-                          rounded={"md"}
-                          background={fileName === "" ? "gray.50" : "white"}
-                        >
-                          {_.isEqual(file, {}) ? (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                Drag file here
-                              </Text>
-                              <Text fontSize={"xs"}>or click to upload</Text>
-                            </Flex>
-                          ) : (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                {file.name}
-                              </Text>
-                            </Flex>
-                          )}
+                        <Field.Label fontSize={"xs"}>Owner</Field.Label>
+                        <Flex>
+                          <ActorTag identifier={ownerField} fallback={"Unknown"} size={"md"} />
                         </Flex>
-
-                        <Input
-                          type={"file"}
-                          h={"100%"}
-                          w={"100%"}
-                          position={"absolute"}
-                          rounded={"md"}
-                          top={"0"}
-                          left={"0"}
-                          opacity={"0"}
-                          aria-hidden={"true"}
-                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                            if (
-                              event.target.files &&
-                              event.target.files.length > 0
-                            ) {
-                              // Only accept defined file types
-                              if (
-                                _.includes(
-                                  [JSON_MIME_TYPE],
-                                  event.target.files[0].type,
-                                )
-                              ) {
-                                // Capture event
-                                posthog.capture("import_upload_file", {
-                                  importType: importType,
-                                  fileName: event.target.files[0].name,
-                                });
-
-                                setFileName(event.target.files[0].name);
-                                setFileType(event.target.files[0].type);
-                                setFile(event.target.files[0]);
-                              } else {
-                                toaster.create({
-                                  title: "Warning",
-                                  type: "warning",
-                                  description: "Please upload a JSON file",
-                                  duration: 2000,
-                                  closable: true,
-                                });
-                              }
-                            }
-                          }}
-                        />
+                        <Field.HelperText fontSize={"xs"}>Owner of imported Entities</Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
                 </Flex>
-              )}
+              </Flex>
+            )}
+
+            {/* Entity Step 3: Advanced mapping */}
+            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && (
+              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+                {_.isEqual(fileType, CSV_MIME_TYPE) ? (
+                  <Text fontSize={"xs"}>
+                    Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the
+                    column containing the data for each Value. Use an existing Template Attribute from the drop-down or
+                    create a new Attribute.
+                  </Text>
+                ) : (
+                  <Text fontSize={"xs"}>
+                    Existing attributes defined in JSON will be preserved. Use an existing Template Attribute from the
+                    drop-down or create a new Attribute to be added to all Entities.
+                  </Text>
+                )}
+
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} wrap={["wrap", "nowrap"]}>
+                  {/* Drop-down to select a Template */}
+                  <Fieldset.Root maxW={"sm"}>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Tooltip
+                          content={
+                            templatesCollection.items?.length > 0
+                              ? "Select an existing Template"
+                              : "No Templates exist yet"
+                          }
+                          showArrow
+                        >
+                          <Select.Root
+                            key={"select-template"}
+                            size={"xs"}
+                            rounded={"md"}
+                            collection={templatesCollection}
+                            onValueChange={(details) => {
+                              const selectedTemplate = details.items[0];
+                              if (!_.isEqual(selectedTemplate._id, "")) {
+                                for (const template of templatesCollection.items || []) {
+                                  if (_.isEqual(selectedTemplate._id, template._id)) {
+                                    setAttributesField([
+                                      ...attributesField,
+                                      {
+                                        _id: `a-${nanoid(6)}`,
+                                        name: template.name,
+                                        timestamp: template.timestamp,
+                                        owner: template.owner,
+                                        archived: false,
+                                        description: template.description,
+                                        values: template.values,
+                                      },
+                                    ]);
+                                    break;
+                                  }
+                                }
+                              }
+                            }}
+                            disabled={templatesCollection.items?.length === 0}
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText placeholder={"Select Template"} />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Portal>
+                              <Select.Positioner>
+                                <Select.Content>
+                                  {templatesCollection.items?.map((template: AttributeModel) => (
+                                    <Select.Item item={template} key={template._id}>
+                                      {template.name}
+                                      <Select.ItemIndicator />
+                                    </Select.Item>
+                                  )) || []}
+                                </Select.Content>
+                              </Select.Positioner>
+                            </Portal>
+                          </Select.Root>
+                        </Tooltip>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => {
+                      // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
+                      setAttributesField([
+                        ...attributesField,
+                        {
+                          _id: `a-${nanoid(6)}`,
+                          name: "",
+                          timestamp: dayjs(Date.now()).toISOString(),
+                          owner: ownerField,
+                          archived: false,
+                          description: "",
+                          values: [],
+                        },
+                      ]);
+                    }}
+                  >
+                    Create
+                    <Icon name={"add"} size={"xs"} />
+                  </Button>
+                </Flex>
+
+                {fileType === CSV_MIME_TYPE
+                  ? // If importing from CSV, use column-mapping
+                    attributesField.map((attribute) => {
+                      return (
+                        <Attribute
+                          _id={attribute._id}
+                          key={attribute._id}
+                          name={attribute.name}
+                          owner={attribute.owner}
+                          archived={attribute.archived}
+                          description={attribute.description}
+                          values={attribute.values}
+                          restrictDataValues={true}
+                          permittedDataValues={columns}
+                          onRemove={onRemoveAttribute}
+                          onUpdate={onUpdateAttribute}
+                        />
+                      );
+                    })
+                  : // If importing from JSON, allow new Attributes
+                    attributesField.map((attribute) => {
+                      return (
+                        <Attribute
+                          _id={attribute._id}
+                          key={attribute._id}
+                          name={attribute.name}
+                          owner={attribute.owner}
+                          archived={attribute.archived}
+                          description={attribute.description}
+                          values={attribute.values}
+                          restrictDataValues={true}
+                          onRemove={onRemoveAttribute}
+                          onUpdate={onUpdateAttribute}
+                        />
+                      );
+                    })}
+              </Flex>
+            )}
+
+            {/* Entity Step 4: Review */}
+            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
+              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+                <DataTable
+                  columns={reviewTableColumns}
+                  data={reviewEntities}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  showPagination
+                />
+              </Flex>
+            )}
+
+            {/* Template Step 1: Upload */}
+            {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "upload") && (
+              <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
+                <Fieldset.Root>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Flex
+                        direction={"column"}
+                        minH={"40vh"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={fileName === "" ? "dashed" : "solid"}
+                        borderColor={"gray.300"}
+                        rounded={"md"}
+                        background={fileName === "" ? "gray.50" : "white"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"}>
+                              Drag file here
+                            </Text>
+                            <Text fontSize={"xs"}>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"}>
+                              {file.name}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Flex>
+
+                      <Input
+                        type={"file"}
+                        h={"100%"}
+                        w={"100%"}
+                        position={"absolute"}
+                        rounded={"md"}
+                        top={"0"}
+                        left={"0"}
+                        opacity={"0"}
+                        aria-hidden={"true"}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.files && event.target.files.length > 0) {
+                            // Only accept defined file types
+                            if (_.includes([JSON_MIME_TYPE], event.target.files[0].type)) {
+                              // Capture event
+                              posthog.capture("import_upload_file", {
+                                importType: importType,
+                                fileName: event.target.files[0].name,
+                              });
+
+                              setFileName(event.target.files[0].name);
+                              setFileType(event.target.files[0].type);
+                              setFile(event.target.files[0]);
+                            } else {
+                              toaster.create({
+                                title: "Warning",
+                                type: "warning",
+                                description: "Please upload a JSON file",
+                                duration: 2000,
+                                closable: true,
+                              });
+                            }
+                          }
+                        }}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
+              </Flex>
+            )}
 
             {/* Template Step 2: Review */}
-            {_.isEqual(importType, "template") &&
-              _.isEqual(templateInterfacePage, "review") && (
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"1"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
-                  <DataTable
-                    columns={templateReviewTableColumns}
-                    data={reviewTemplates}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    showPagination
-                  />
-                </Flex>
-              )}
+            {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && (
+              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+                <DataTable
+                  columns={templateReviewTableColumns}
+                  data={reviewTemplates}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  showPagination
+                />
+              </Flex>
+            )}
           </Dialog.Body>
 
           <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
@@ -1962,8 +1679,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={
-                    _.isEqual(templateInterfacePage, "review") ||
-                    _.isEqual(entityInterfacePage, "review")
+                    _.isEqual(templateInterfacePage, "review") || _.isEqual(entityInterfacePage, "review")
                       ? "green"
                       : "blue"
                   }
@@ -1974,32 +1690,17 @@ const ImportDialog = (props: ImportDialogProps) => {
                   loadingText={"Processing"}
                 >
                   {/* Entities import type */}
-                  {_.isEqual(importType, "entities") &&
-                    _.isEqual(entityInterfacePage, "upload") &&
-                    "Continue"}
-                  {_.isEqual(importType, "entities") &&
-                    _.isEqual(entityInterfacePage, "details") &&
-                    "Continue"}
-                  {_.isEqual(importType, "entities") &&
-                    _.isEqual(entityInterfacePage, "mapping") &&
-                    "Continue"}
-                  {_.isEqual(importType, "entities") &&
-                    _.isEqual(entityInterfacePage, "review") &&
-                    "Finish"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "upload") && "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
                   {/* Template import type */}
-                  {_.isEqual(importType, "template") &&
-                    _.isEqual(entityInterfacePage, "upload") &&
-                    "Continue"}
-                  {_.isEqual(importType, "template") &&
-                    _.isEqual(entityInterfacePage, "review") &&
-                    "Finish"}
+                  {_.isEqual(importType, "template") && _.isEqual(entityInterfacePage, "upload") && "Continue"}
+                  {_.isEqual(importType, "template") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
                   {/* Icon */}
-                  {_.includes(
-                    ["upload", "details", "mapping"],
-                    entityInterfacePage,
-                  ) ? (
+                  {_.includes(["upload", "details", "mapping"], entityInterfacePage) ? (
                     <Icon name={"c_right"} size={"xs"} />
                   ) : (
                     <Icon name={"check"} size={"xs"} />

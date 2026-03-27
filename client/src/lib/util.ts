@@ -113,9 +113,7 @@ export const createSelectOptions = <T>(
  * @param error The error to parse
  * @returns Object with message and name properties
  */
-export const parseError = (
-  error: unknown,
-): { message: string; name: string } => {
+export const parseError = (error: unknown): { message: string; name: string } => {
   if (error instanceof Error) {
     return { message: error.message || "", name: error.name || "" };
   }
@@ -142,10 +140,7 @@ export const parseError = (
  * @param name Optional error name (only used if first param is a string)
  * @returns true if the error is an abort error
  */
-export const isAbortError = (
-  errorOrMessage: unknown | string,
-  name?: string,
-): boolean => {
+export const isAbortError = (errorOrMessage: unknown | string, name?: string): boolean => {
   // Check for DOMException with AbortError name
   if (errorOrMessage instanceof DOMException) {
     return errorOrMessage.name === "AbortError";

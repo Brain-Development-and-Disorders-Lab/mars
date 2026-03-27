@@ -13,16 +13,9 @@ import _ from "lodash";
 
 export const CountersResolvers = {
   Query: {
-    counter: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    counter: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -54,26 +47,16 @@ export const CountersResolvers = {
       if (_.isEqual(counter.workspace, workspace._id)) {
         return counter;
       } else {
-        throw new GraphQLError(
-          "This Counter is outside the current Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("This Counter is outside the current Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
-    counters: async (
-      _parent: IResolverParent,
-      _args: Record<string, unknown>,
-      context: Context,
-    ) => {
+    counters: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -94,16 +77,9 @@ export const CountersResolvers = {
 
       return await Counters.getCounters(context.workspace);
     },
-    currentCounterValue: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    currentCounterValue: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -135,26 +111,16 @@ export const CountersResolvers = {
       if (_.isEqual(counter.workspace, workspace._id)) {
         return await Counters.getCurrentValue(args._id);
       } else {
-        throw new GraphQLError(
-          "This Counter is outside the current Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("This Counter is outside the current Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
-    nextCounterValue: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    nextCounterValue: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -186,26 +152,16 @@ export const CountersResolvers = {
       if (_.isEqual(counter.workspace, workspace._id)) {
         return await Counters.getNextValue(args._id);
       } else {
-        throw new GraphQLError(
-          "This Counter is outside the current Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("This Counter is outside the current Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
-    nextCounterValues: async (
-      _parent: IResolverParent,
-      args: { _id: string; count: number },
-      context: Context,
-    ) => {
+    nextCounterValues: async (_parent: IResolverParent, args: { _id: string; count: number }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -237,28 +193,18 @@ export const CountersResolvers = {
       if (_.isEqual(counter.workspace, workspace._id)) {
         return await Counters.getNextValues(args._id, args.count);
       } else {
-        throw new GraphQLError(
-          "This Counter is outside the current Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("This Counter is outside the current Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
   },
   Mutation: {
-    createCounter: async (
-      _parent: IResolverParent,
-      args: { counter: CounterModel },
-      context: Context,
-    ) => {
+    createCounter: async (_parent: IResolverParent, args: { counter: CounterModel }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -270,16 +216,9 @@ export const CountersResolvers = {
       // Apply create operation
       return await Counters.create(args.counter);
     },
-    incrementCounter: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    incrementCounter: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -311,14 +250,11 @@ export const CountersResolvers = {
       if (_.isEqual(counter.workspace, workspace._id)) {
         return await Counters.incrementValue(args._id);
       } else {
-        throw new GraphQLError(
-          "This Counter is outside the current Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("This Counter is outside the current Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
   },

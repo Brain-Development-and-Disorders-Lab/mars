@@ -70,8 +70,7 @@ const Projects = () => {
   });
 
   useEffect(() => {
-    const isMobile =
-      breakpoint === "base" || breakpoint === "sm" || breakpoint === "md";
+    const isMobile = breakpoint === "base" || breakpoint === "sm" || breakpoint === "md";
     const isTablet = breakpoint === "lg";
 
     setVisibleColumns({
@@ -128,24 +127,18 @@ const Projects = () => {
     // Filter by date range
     if (appliedFilters.startDate) {
       const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((project) =>
-        dayjs(project.created).isSameOrAfter(startDate),
-      );
+      filtered = filtered.filter((project) => dayjs(project.created).isSameOrAfter(startDate));
       activeFilterCount++;
     }
     if (appliedFilters.endDate) {
       const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((project) =>
-        dayjs(project.created).isSameOrBefore(endDate),
-      );
+      filtered = filtered.filter((project) => dayjs(project.created).isSameOrBefore(endDate));
       activeFilterCount++;
     }
 
     // Filter by owners
     if (appliedFilters.owners.length > 0) {
-      filtered = filtered.filter((project) =>
-        appliedFilters.owners.includes(project.owner),
-      );
+      filtered = filtered.filter((project) => appliedFilters.owners.includes(project.owner));
       activeFilterCount += appliedFilters.owners.length;
     }
 
@@ -153,12 +146,8 @@ const Projects = () => {
     if (appliedFilters.entityCountMin || appliedFilters.entityCountMax) {
       filtered = filtered.filter((project) => {
         const entityCount = project.entities.length;
-        const min = appliedFilters.entityCountMin
-          ? parseInt(appliedFilters.entityCountMin)
-          : 0;
-        const max = appliedFilters.entityCountMax
-          ? parseInt(appliedFilters.entityCountMax)
-          : Infinity;
+        const min = appliedFilters.entityCountMin ? parseInt(appliedFilters.entityCountMin) : 0;
+        const max = appliedFilters.entityCountMax ? parseInt(appliedFilters.entityCountMax) : Infinity;
         return entityCount >= min && entityCount <= max;
       });
       if (appliedFilters.entityCountMin) activeFilterCount++;
@@ -189,11 +178,7 @@ const Projects = () => {
     columnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 48}
-            showArrow
-          >
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Text fontSize={"xs"} fontWeight={"semibold"}>
               {_.truncate(info.getValue(), { length: 48 })}
             </Text>
@@ -227,14 +212,8 @@ const Projects = () => {
         }
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 64}
-              showArrow
-            >
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 64 })}
-              </Text>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
             </Tooltip>
           </Flex>
         );
@@ -247,14 +226,7 @@ const Projects = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return (
-          <ActorTag
-            identifier={info.getValue()}
-            fallback={"Unknown User"}
-            size={"sm"}
-            inline
-          />
-        );
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "Owner",
     }),
@@ -283,33 +255,15 @@ const Projects = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex
-        direction={"row"}
-        p={"1"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"1"}
-        justify={"center"}
-      >
-        <Flex
-          w={"100%"}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-        >
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} justify={"center"}>
+        <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"project"} size={"sm"} />
             <Heading fontWeight={"bold"} size={"md"}>
               Projects
             </Heading>
             <Spacer />
-            <Button
-              colorPalette={"green"}
-              onClick={() => navigate("/create/project")}
-              size={"xs"}
-              rounded={"md"}
-            >
+            <Button colorPalette={"green"} onClick={() => navigate("/create/project")} size={"xs"} rounded={"md"}>
               Create Project
               <Icon name={"add"} size={"xs"} />
             </Button>
@@ -317,29 +271,14 @@ const Projects = () => {
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"}>
           <Text fontSize={"xs"} ml={"0.5"}>
-            All Projects in the current Workspace are shown below. Sort the
-            Projects using the column headers or use the filters below.
+            All Projects in the current Workspace are shown below. Sort the Projects using the column headers or use the
+            filters below.
           </Text>
 
           {/* Filter Section */}
-          <Collapsible.Root
-            open={filtersOpen}
-            onOpenChange={(event) => setFiltersOpen(event.open)}
-          >
-            <Flex
-              direction={"column"}
-              gap={"1"}
-              p={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"space-between"}
-              >
+          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
+            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -356,20 +295,13 @@ const Projects = () => {
               <Collapsible.Content>
                 <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
                   {/* Date Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Created Between
                     </Text>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          Start (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -384,9 +316,7 @@ const Projects = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          End (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -404,21 +334,11 @@ const Projects = () => {
                   </Flex>
 
                   {/* Owner Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Owner
                     </Text>
-                    <Flex
-                      direction={"column"}
-                      gap={"1"}
-                      maxH={"200px"}
-                      overflowY={"auto"}
-                    >
+                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
                       {_.uniq(projects.map((p) => p.owner))
                         .filter((owner) => owner)
                         .map((owner) => (
@@ -437,9 +357,7 @@ const Projects = () => {
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  owners: filterState.owners.filter(
-                                    (o) => o !== owner,
-                                  ),
+                                  owners: filterState.owners.filter((o) => o !== owner),
                                 });
                               }
                             }}
@@ -447,12 +365,7 @@ const Projects = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag
-                                identifier={owner}
-                                fallback={"Unknown User"}
-                                size={"sm"}
-                                inline
-                              />
+                              <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
@@ -460,12 +373,7 @@ const Projects = () => {
                   </Flex>
 
                   {/* Entity Count Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Entity Count
                     </Text>
@@ -512,12 +420,7 @@ const Projects = () => {
           </Collapsible.Root>
 
           {/* Buttons and Active Filter Count */}
-          <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"flex-end"}
-          >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
             <Text fontWeight={"semibold"} fontSize={"xs"}>
               {activeFilterCount} Active Filter
               {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
@@ -570,9 +473,7 @@ const Projects = () => {
                   <Icon name={"project"} size={"lg"} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0
-                    ? "No projects match the selected filters"
-                    : "No Projects"}
+                  {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>

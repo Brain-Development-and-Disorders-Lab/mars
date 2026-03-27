@@ -114,10 +114,7 @@ export const request = async <T>(
   };
 };
 
-export const requestStatic = async <T>(
-  path: string,
-  options?: AxiosRequestConfig,
-): Promise<ServerResponse<T>> => {
+export const requestStatic = async <T>(path: string, options?: AxiosRequestConfig): Promise<ServerResponse<T>> => {
   // Merge in options if specified
   const requestOptions: AxiosRequestConfig = {
     ...options,

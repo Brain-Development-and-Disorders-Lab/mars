@@ -63,9 +63,7 @@ interface ValueTypeOption extends OptionBase {
  * @param type `IValueType` representing the icon and color scheme
  * @return {{ icon: IconNames, color: string }}
  */
-const getIconConfiguration = (
-  type: IValueType,
-): { icon: IconNames; color: string } => {
+const getIconConfiguration = (type: IValueType): { icon: IconNames; color: string } => {
   let icon: IconNames = "v_text";
   let color: string = "blue.300";
 
@@ -96,14 +94,7 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
   const { icon, color } = getIconConfiguration(props.data.value);
   return (
     <components.Option {...props}>
-      <Flex
-        direction={"row"}
-        h={"8"}
-        p={"0.5"}
-        gap={"1"}
-        align={"center"}
-        _hover={{ bg: "blue.100" }}
-      >
+      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
         <Icon name={icon} size={"xs"} color={color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
@@ -114,15 +105,10 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
 /**
  * Custom styling for Value `type` select container
  */
-const ValueTypeSelectContainer = ({
-  children,
-  ...props
-}: ContainerProps<ValueTypeOption>) => {
+const ValueTypeSelectContainer = ({ children, ...props }: ContainerProps<ValueTypeOption>) => {
   return (
     <Box w={"100%"}>
-      <components.SelectContainer {...props}>
-        {children}
-      </components.SelectContainer>
+      <components.SelectContainer {...props}>{children}</components.SelectContainer>
     </Box>
   );
 };
@@ -130,10 +116,7 @@ const ValueTypeSelectContainer = ({
 /**
  * Custom styling for Value `type` value container
  */
-const ValueTypeValueContainer = ({
-  children,
-  ...props
-}: ValueContainerProps<ValueTypeOption>) => {
+const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<ValueTypeOption>) => {
   return (
     <components.ValueContainer {...props}>
       <Flex w={"100%"} h={"34px"}>
@@ -161,9 +144,7 @@ const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
 /**
  * Custom styling for Value `type` single value
  */
-const ValueTypeSingleValue = ({
-  ...props
-}: SingleValueProps<ValueTypeOption>) => {
+const ValueTypeSingleValue = ({ ...props }: SingleValueProps<ValueTypeOption>) => {
   const { icon, color } = getIconConfiguration(props.data.value);
   return (
     <Flex direction={"row"} align={"center"}>
@@ -180,10 +161,7 @@ const ValueTypeSingleValue = ({
 /**
  * Custom styling for Value `type` `MenuList` component containing all menu options
  */
-const ValueTypeMenuList = ({
-  children,
-  ...props
-}: MenuListProps<ValueTypeOption, false>) => {
+const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption, false>) => {
   return (
     <Flex
       direction={"column"}
@@ -205,14 +183,7 @@ const ValueTypeMenuList = ({
 const ValueDataOption = (props: OptionProps<SelectOption>) => {
   return (
     <components.Option {...props}>
-      <Flex
-        direction={"row"}
-        h={"8"}
-        p={"0.5"}
-        gap={"1"}
-        align={"center"}
-        _hover={{ bg: "blue.100" }}
-      >
+      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -222,15 +193,10 @@ const ValueDataOption = (props: OptionProps<SelectOption>) => {
 /**
  * Custom styling for Value `data` `DropdownIndicator` component
  */
-const ValueTypeDropdownIndicator = (
-  props: DropdownIndicatorProps<ValueTypeOption, false>,
-) => {
+const ValueTypeDropdownIndicator = (props: DropdownIndicatorProps<ValueTypeOption, false>) => {
   return (
     <components.DropdownIndicator {...props}>
-      <Icon
-        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
-        size={"xs"}
-      />
+      <Icon name={props.selectProps.menuIsOpen ? "c_up" : "c_down"} size={"xs"} />
     </components.DropdownIndicator>
   );
 };
@@ -238,15 +204,10 @@ const ValueTypeDropdownIndicator = (
 /**
  * Custom styling for Value `data` select container
  */
-const ValueDataSelectContainer = ({
-  children,
-  ...props
-}: ContainerProps<SelectOption>) => {
+const ValueDataSelectContainer = ({ children, ...props }: ContainerProps<SelectOption>) => {
   return (
     <Box w={"100%"}>
-      <components.SelectContainer {...props}>
-        {children}
-      </components.SelectContainer>
+      <components.SelectContainer {...props}>{children}</components.SelectContainer>
     </Box>
   );
 };
@@ -254,10 +215,7 @@ const ValueDataSelectContainer = ({
 /**
  * Custom styling for Value `data` value container
  */
-const ValueDataValueContainer = ({
-  children,
-  ...props
-}: ValueContainerProps<SelectOption>) => {
+const ValueDataValueContainer = ({ children, ...props }: ValueContainerProps<SelectOption>) => {
   return (
     <components.ValueContainer {...props}>
       <Flex w={"100%"} h={"34px"}>
@@ -278,10 +236,7 @@ const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
 /**
  * Custom styling for Value `type` single value
  */
-const ValueDataSingleValue = ({
-  children,
-  ...props
-}: SingleValueProps<SelectOption>) => {
+const ValueDataSingleValue = ({ children, ...props }: SingleValueProps<SelectOption>) => {
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
@@ -315,15 +270,10 @@ const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
 /**
  * Custom styling for Value `type` `DropdownIndicator` component
  */
-const ValueDataDropdownIndicator = (
-  props: DropdownIndicatorProps<SelectOption, false>,
-) => {
+const ValueDataDropdownIndicator = (props: DropdownIndicatorProps<SelectOption, false>) => {
   return (
     <components.DropdownIndicator {...props}>
-      <Icon
-        name={props.selectProps.menuIsOpen ? "c_up" : "c_down"}
-        size={"xs"}
-      />
+      <Icon name={props.selectProps.menuIsOpen ? "c_up" : "c_down"} size={"xs"} />
     </components.DropdownIndicator>
   );
 };
@@ -520,13 +470,7 @@ const ValueDataSelect = (props: {
       )}
 
       {/* Select Add Options Modal */}
-      <Dialog.Root
-        open={addOptionModalOpen}
-        size="sm"
-        placement="center"
-        closeOnEscape
-        closeOnInteractOutside
-      >
+      <Dialog.Root open={addOptionModalOpen} size="sm" placement="center" closeOnEscape closeOnInteractOutside>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
@@ -538,11 +482,7 @@ const ValueDataSelect = (props: {
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size="2xs"
-                  top={"6px"}
-                  onClick={cancelSelectOptions}
-                />
+                <CloseButton size="2xs" top={"6px"} onClick={cancelSelectOptions} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p="1" gap="1" pb="1">
@@ -565,45 +505,25 @@ const ValueDataSelect = (props: {
                       Please specify a valid Option
                     </Field.ErrorText>
                   </Field.Root>
-                  <Button
-                    colorPalette="green"
-                    size="xs"
-                    rounded="md"
-                    onClick={addOption}
-                    disabled={invalidOption}
-                  >
+                  <Button colorPalette="green" size="xs" rounded="md" onClick={addOption} disabled={invalidOption}>
                     Add
                     <Icon name="add" />
                   </Button>
                 </Flex>
                 <Box>
-                  <Stack
-                    gap="1"
-                    separator={<Separator />}
-                    pb="1"
-                    maxH="200px"
-                    overflowY={"auto"}
-                  >
+                  <Stack gap="1" separator={<Separator />} pb="1" maxH="200px" overflowY={"auto"}>
                     {options.length > 0 ? (
                       options.map((option, index) => (
                         <Flex
                           key={option.value}
                           direction="row"
                           cursor={props.viewOnly ? "default" : "text"}
-                          onClick={
-                            props.viewOnly
-                              ? (e) => e.preventDefault()
-                              : undefined
-                          }
+                          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
                           justify="space-between"
                           align="center"
                         >
                           <Flex gap="1">
-                            <Text
-                              fontWeight="semibold"
-                              fontSize="xs"
-                              ml={"0.5"}
-                            >
+                            <Text fontWeight="semibold" fontSize="xs" ml={"0.5"}>
                               Option {index + 1}:
                             </Text>
                             <Text fontSize="xs">{option.value}</Text>
@@ -621,9 +541,7 @@ const ValueDataSelect = (props: {
                     ) : (
                       <Flex
                         cursor={props.viewOnly ? "default" : "text"}
-                        onClick={
-                          props.viewOnly ? (e) => e.preventDefault() : undefined
-                        }
+                        onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
                         align="center"
                         justify="center"
                         minH="60px"
@@ -631,11 +549,7 @@ const ValueDataSelect = (props: {
                         border="1px"
                         borderColor="gray.300"
                       >
-                        <Text
-                          fontSize="xs"
-                          fontWeight="semibold"
-                          color="gray.400"
-                        >
+                        <Text fontSize="xs" fontWeight="semibold" color="gray.400">
                           No Options added
                         </Text>
                       </Flex>
@@ -645,12 +559,7 @@ const ValueDataSelect = (props: {
               </Flex>
             </Dialog.Body>
             <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
-              <Button
-                size="xs"
-                rounded="md"
-                colorPalette="red"
-                onClick={cancelSelectOptions}
-              >
+              <Button size="xs" rounded="md" colorPalette="red" onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name="cross" />
               </Button>
@@ -736,10 +645,8 @@ const Values = (props: {
    */
   const handleResizeStart = (column: ValuesColumn, event: React.MouseEvent) => {
     event.preventDefault();
-    const allFixedWidth =
-      (props.viewOnly ? 0 : 40) + columnWidths.name + columnWidths.type;
-    const otherFixedWidth =
-      allFixedWidth - (column !== "value" ? columnWidths[column] : 0);
+    const allFixedWidth = (props.viewOnly ? 0 : 40) + columnWidths.name + columnWidths.type;
+    const otherFixedWidth = allFixedWidth - (column !== "value" ? columnWidths[column] : 0);
     resizeRef.current = {
       column,
       startX: event.clientX,
@@ -763,14 +670,8 @@ const Values = (props: {
     const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
     // Note: For `name` and `type`, leave room for the value column's minimum width
     // Note: For `value`, the column itself is flexible, so only other fixed columns constrain it
-    const maxWidth =
-      containerWidth -
-      otherFixedWidth -
-      (column !== "value" ? minColumnWidths.value : 0);
-    const newWidth = Math.min(
-      maxWidth,
-      Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)),
-    );
+    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? minColumnWidths.value : 0);
+    const newWidth = Math.min(maxWidth, Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)));
     setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
   };
 
@@ -794,9 +695,7 @@ const Values = (props: {
 
   const removeSelectedRows = () => {
     if (selectedRows.size === 0) return;
-    const updatedValues = props.values.filter(
-      (value) => !selectedRows.has(value._id),
-    );
+    const updatedValues = props.values.filter((value) => !selectedRows.has(value._id));
     props.setValues(updatedValues);
     setSelectedRows(new Set());
   };
@@ -808,12 +707,7 @@ const Values = (props: {
    * @param type Updated `IValueType` of the `IValue`
    * @param data Updated data of the `IValue`
    */
-  const onValueChange = (
-    _id: string,
-    name: string,
-    type: IValueType,
-    data: string,
-  ) => {
+  const onValueChange = (_id: string, name: string, type: IValueType, data: string) => {
     const updatedValues = _.cloneDeep(props.values).map((value) => {
       if (value._id === _id) {
         value.name = name;
@@ -826,12 +720,7 @@ const Values = (props: {
   };
 
   return (
-    <Box
-      w="100%"
-      display="flex"
-      flexDirection="column"
-      css={{ WebkitOverflowScrolling: "touch" }}
-    >
+    <Box w="100%" display="flex" flexDirection="column" css={{ WebkitOverflowScrolling: "touch" }}>
       {/* Table */}
       <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
         <Box
@@ -844,13 +733,7 @@ const Values = (props: {
           overflow="hidden"
         >
           {/* Header Row */}
-          <Flex
-            gap={0}
-            bg="gray.100"
-            borderBottom="1px solid"
-            borderColor="gray.200"
-            direction="row"
-          >
+          <Flex gap={0} bg="gray.100" borderBottom="1px solid" borderColor="gray.200" direction="row">
             {/* Drag Handle Column Header - only show in edit mode */}
             {!props.viewOnly && (
               <Box
@@ -994,14 +877,7 @@ const Values = (props: {
 
           {/* Add or Delete Selected Rows Button */}
           {!props.viewOnly && (
-            <Flex
-              borderTop="1px solid"
-              borderColor="gray.200"
-              p={0}
-              justify="center"
-              align="center"
-              bg="gray.100"
-            >
+            <Flex borderTop="1px solid" borderColor="gray.200" p={0} justify="center" align="center" bg="gray.100">
               {selectedRows.size > 0 ? (
                 <Button
                   size="xs"
@@ -1015,8 +891,7 @@ const Values = (props: {
                 >
                   <Icon name="delete" size="xs" />
                   <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Delete {selectedRows.size === 1 ? "Value" : "Values"} (
-                    {selectedRows.size})
+                    Delete {selectedRows.size === 1 ? "Value" : "Values"} ({selectedRows.size})
                   </Text>
                 </Button>
               ) : (
@@ -1089,9 +964,7 @@ const Values = (props: {
             size="xs"
             rounded="md"
             aria-label="next page"
-            onClick={() =>
-              setCurrentPage(Math.min(totalPages, currentPage + 1))
-            }
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage >= totalPages}
           >
             <Icon name="c_right" />
@@ -1128,9 +1001,7 @@ const Values = (props: {
                     ],
                   })}
                   value={[rowsPerPage.toString()]}
-                  onValueChange={(details) =>
-                    setRowsPerPage(parseInt(details.value[0]))
-                  }
+                  onValueChange={(details) => setRowsPerPage(parseInt(details.value[0]))}
                 >
                   <Select.HiddenSelect />
                   <Select.Control>
@@ -1172,12 +1043,7 @@ const Values = (props: {
 const ValueRow = (props: {
   key: string;
   value: IValue;
-  onValueChange: (
-    _id: string,
-    name: string,
-    type: IValueType,
-    data: string,
-  ) => void;
+  onValueChange: (_id: string, name: string, type: IValueType, data: string) => void;
   columnWidths: { type: number; name: number; value: number };
   isSelected: boolean;
   hideBorder?: boolean;
@@ -1193,15 +1059,12 @@ const ValueRow = (props: {
   ];
 
   // Get the initial `ValueTypeOption` based on the `IValue` type
-  const initialValueType = valueTypeOptions.filter(
-    (value) => value.value === props.value.type,
-  )[0];
+  const initialValueType = valueTypeOptions.filter((value) => value.value === props.value.type)[0];
 
   // React state for value display
   const [valueName, setValueName] = useState(props.value.name);
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
-  const [valueTypeOption, setValueTypeOption] =
-    useState<ValueTypeOption>(initialValueType);
+  const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
   const [valueData, setValueData] = useState<string>(props.value.data);
   const [valueChecked, setValueChecked] = useState(false);
 
@@ -1382,11 +1245,7 @@ const ValueRow = (props: {
             boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
           }}
         >
-          <ValueDataSelect
-            valueData={valueData}
-            setValueData={setValueData}
-            viewOnly={props.viewOnly}
-          />
+          <ValueDataSelect valueData={valueData} setValueData={setValueData} viewOnly={props.viewOnly} />
         </Flex>
       );
     } else if (valueType === "entity") {
@@ -1438,11 +1297,7 @@ const ValueRow = (props: {
               boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
             }}
           >
-            <Linky
-              type="entities"
-              id={JSON.parse(valueData)._id || ""}
-              size="xs"
-            />
+            <Linky type="entities" id={JSON.parse(valueData)._id || ""} size="xs" />
           </Flex>
         );
       }

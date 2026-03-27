@@ -1,16 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Flex,
-  Spacer,
-  Input,
-  Button,
-  Text,
-  Heading,
-  Fieldset,
-  Field,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Flex, Spacer, Input, Button, Text, Heading, Fieldset, Field, useDisclosure } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
@@ -105,8 +95,9 @@ const CreateWorkspace = () => {
       }
     }
   `;
-  const [createWorkspace, { loading: createLoading, error: createError }] =
-    useMutation<{ createWorkspace: IResponseMessage }>(CREATE_WORKSPACE);
+  const [createWorkspace, { loading: createLoading, error: createError }] = useMutation<{
+    createWorkspace: IResponseMessage;
+  }>(CREATE_WORKSPACE);
 
   // Query to retrieve all Workspaces
   const GET_WORKSPACES = gql`
@@ -157,13 +148,9 @@ const CreateWorkspace = () => {
     if (result.data?.createWorkspace.success) {
       // Update to use the new Workspace identifier
       const workspaces = await getWorkspaces().catch(ignoreAbort);
-      if (
-        workspaces?.data?.workspaces &&
-        workspaces.data.workspaces.length > 0
-      ) {
+      if (workspaces?.data?.workspaces && workspaces.data.workspaces.length > 0) {
         // Get the latest created Workspace
-        const created =
-          workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
+        const created = workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
 
         // Update the stored Workspace identifier and collection of Workspaces
         navigate("/");
@@ -207,24 +194,9 @@ const CreateWorkspace = () => {
 
   return (
     <Content>
-      <Flex
-        direction={"column"}
-        p={"1"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"1"}
-        minW="0"
-        maxW="100%"
-      >
+      <Flex direction={"column"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         {/* Page header */}
-        <Flex
-          w={"100%"}
-          minW="0"
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-        >
+        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} pt={"1"} minW="0">
             <Icon name={"workspace"} size={"sm"} />
             <Heading size={"md"}>Create Workspace</Heading>
@@ -234,29 +206,22 @@ const CreateWorkspace = () => {
         <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"}>
           {workspace === "" ? (
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-              Before you can get started using Metadatify, you must be invited
-              as Collaborator on an existing Workspace or create a new Workspace
-              below.
+              Before you can get started using Metadatify, you must be invited as Collaborator on an existing Workspace
+              or create a new Workspace below.
             </Text>
           ) : (
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-              Workspaces can be used to organize Entities and Projects, as well
-              as inviting collaborators to work together on experiments.
+              Workspaces can be used to organize Entities and Projects, as well as inviting collaborators to work
+              together on experiments.
             </Text>
           )}
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-            Use the Workspace switcher in the navigation bar to view all
-            Workspaces and switch the active Workspace.
+            Use the Workspace switcher in the navigation bar to view all Workspaces and switch the active Workspace.
           </Text>
         </Flex>
 
         <Flex direction={"row"} p={"1"} gap={"1"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"0"}
-            gap={"1"}
-            w={{ base: "100%", md: "50%" }}
-          >
+          <Flex direction={"column"} p={"0"} gap={"1"} w={{ base: "100%", md: "50%" }}>
             {/* Workspace name */}
             <Flex
               direction={"column"}
@@ -336,31 +301,15 @@ const CreateWorkspace = () => {
       {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
 
-      <Flex
-        p={"1"}
-        gap={"1"}
-        align={"center"}
-        w={"100%"}
-        justify={"space-between"}
-      >
+      <Flex p={"1"} gap={"1"} align={"center"} w={"100%"} justify={"space-between"}>
         {workspace === "" && (
-          <Button
-            size={"xs"}
-            colorPalette={"orange"}
-            rounded={"md"}
-            onClick={() => auth.signOut()}
-          >
+          <Button size={"xs"} colorPalette={"orange"} rounded={"md"} onClick={() => auth.signOut()}>
             Log out
             <Icon name={"logout"} size={"xs"} />
           </Button>
         )}
         {workspace !== "" && (
-          <Button
-            size={"xs"}
-            rounded={"md"}
-            colorPalette={"red"}
-            onClick={() => handleCancelClick()}
-          >
+          <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
             Cancel
             <Icon name={"cross"} size={"xs"} />
           </Button>

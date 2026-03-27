@@ -92,12 +92,7 @@ const Page: FC = () => {
   if (session) {
     // Display content
     return (
-      <Flex
-        direction={{ base: "column", lg: "row" }}
-        w={"100%"}
-        p={"0"}
-        m={"0"}
-      >
+      <Flex direction={{ base: "column", lg: "row" }} w={"100%"} p={"0"} m={"0"}>
         {/* Navigation component */}
         <Flex
           justify={"center"}

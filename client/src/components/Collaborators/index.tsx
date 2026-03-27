@@ -45,18 +45,16 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
 
-  const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] =
-    useLazyQuery<{ userByEmail: ResponseData<string> }>(GET_USER_BY_EMAIL, {
-      fetchPolicy: "network-only",
-    });
+  const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] = useLazyQuery<{
+    userByEmail: ResponseData<string>;
+  }>(GET_USER_BY_EMAIL, {
+    fetchPolicy: "network-only",
+  });
 
   const handleAddCollaborator = async () => {
     setAddCollaboratorLoading(true);
     // Prevent adding empty or duplicate collaborator
-    if (
-      newCollaborator &&
-      !props.projectCollaborators.includes(newCollaborator)
-    ) {
+    if (newCollaborator && !props.projectCollaborators.includes(newCollaborator)) {
       const result = await getCollaboratorUserId({
         variables: {
           email: newCollaborator,
@@ -82,10 +80,7 @@ const Collaborators = (props: CollaboratorsProps) => {
       } else if (result.data) {
         const collaborator = result.data.userByEmail.data;
         if (!_.includes(props.projectCollaborators, collaborator)) {
-          props.setProjectCollaborators((collaborators) => [
-            ...collaborators,
-            collaborator,
-          ]);
+          props.setProjectCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
           toaster.create({
             title: "Warning",
@@ -169,30 +164,15 @@ const Collaborators = (props: CollaboratorsProps) => {
                 <EmptyState.Indicator>
                   <Icon name={"person"} size={"lg"} />
                 </EmptyState.Indicator>
-                <EmptyState.Description>
-                  No Collaborators
-                </EmptyState.Description>
+                <EmptyState.Description>No Collaborators</EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
           ) : (
-            <Stack
-              gap={"1"}
-              separator={<Separator variant={"solid"} />}
-              w={"100%"}
-            >
+            <Stack gap={"1"} separator={<Separator variant={"solid"} />} w={"100%"}>
               {props.projectCollaborators.map((collaborator, index) => (
-                <Flex
-                  key={index}
-                  align={"center"}
-                  w={"100%"}
-                  justify={"space-between"}
-                >
+                <Flex key={index} align={"center"} w={"100%"} justify={"space-between"}>
                   <Flex gap={"2"} align={"center"}>
-                    <ActorTag
-                      identifier={collaborator}
-                      fallback={"New User"}
-                      size={"sm"}
-                    />
+                    <ActorTag identifier={collaborator} fallback={"New User"} size={"sm"} />
                     <Tag.Root colorPalette={"green"}>
                       <Tag.Label fontSize={"xs"}>Collaborator</Tag.Label>
                     </Tag.Root>

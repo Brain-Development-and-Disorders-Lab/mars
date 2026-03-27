@@ -23,10 +23,7 @@ export class User {
    * @returns Collection of all User entries
    */
   static all = async (): Promise<UserModel[]> => {
-    return await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .find()
-      .toArray();
+    return await getDatabase().collection<UserModel>(USERS_COLLECTION).find().toArray();
   };
 
   static getOne = async (_id: string): Promise<UserModel | null> => {
@@ -36,9 +33,7 @@ export class User {
   };
 
   static getByEmail = async (email: string): Promise<ResponseData<string>> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ email: email });
+    const result = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ email: email });
 
     // Return the User `_id`
     if (result) {
@@ -56,9 +51,7 @@ export class User {
   };
 
   static getByOrcid = async (orcid: string): Promise<ResponseData<string>> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ account_orcid: orcid });
+    const result = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ account_orcid: orcid });
 
     // Return the User `_id`
     if (result) {
@@ -134,30 +127,20 @@ export class User {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Updated User successfully"
-        : "Unable to update User",
+      message: successStatus ? "Updated User successfully" : "Unable to update User",
     };
   };
 
   static create = async (user: UserModel): Promise<IResponseMessage> => {
-    const response = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .insertOne(user);
+    const response = await getDatabase().collection<UserModel>(USERS_COLLECTION).insertOne(user);
 
     return {
       success: response.insertedId === user._id,
-      message:
-        response.insertedId === user._id
-          ? "Successfully created User"
-          : "Error creating User",
+      message: response.insertedId === user._id ? "Successfully created User" : "Error creating User",
     };
   };
 
-  static addKey = async (
-    _id: string,
-    key: APIKey,
-  ): Promise<IResponseMessage> => {
+  static addKey = async (_id: string, key: APIKey): Promise<IResponseMessage> => {
     const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
@@ -184,16 +167,11 @@ export class User {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added API key to User successfully"
-        : "Unable to add API key to User",
+      message: successStatus ? "Added API key to User successfully" : "Unable to add API key to User",
     };
   };
 
-  static removeKey = async (
-    _id: string,
-    key: string,
-  ): Promise<IResponseMessage> => {
+  static removeKey = async (_id: string, key: string): Promise<IResponseMessage> => {
     const user = await User.getOne(_id);
 
     if (_.isNull(user)) {
@@ -209,9 +187,7 @@ export class User {
     // Iterate through the list of API keys and set the removed key to have expiration 1 year ago
     apiKeys.map((existingKey: APIKey) => {
       if (_.isEqual(existingKey.value, key)) {
-        existingKey.expires = dayjs(Date.now())
-          .subtract(1, "year")
-          .toISOString();
+        existingKey.expires = dayjs(Date.now()).subtract(1, "year").toISOString();
       }
     });
 
@@ -228,9 +204,7 @@ export class User {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Revoked API key successfully"
-        : "Unable to revoke API key",
+      message: successStatus ? "Revoked API key successfully" : "Unable to revoke API key",
     };
   };
 
@@ -240,10 +214,7 @@ export class User {
     });
   };
 
-  static bootstrap = async (
-    user: string,
-    workspace: string,
-  ): Promise<IResponseMessage> => {
+  static bootstrap = async (user: string, workspace: string): Promise<IResponseMessage> => {
     const entity = await Entities.create({
       name: "Example Entity",
       archived: false,
@@ -291,8 +262,7 @@ export class User {
       name: "Example Project",
       archived: false,
       created: dayjs(Date.now()).toISOString(),
-      description:
-        "This is an example Project. Feel free to explore and modify it!",
+      description: "This is an example Project. Feel free to explore and modify it!",
       owner: user,
       entities: [],
       collaborators: [],

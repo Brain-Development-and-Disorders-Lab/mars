@@ -1,12 +1,5 @@
 // Custom types
-import {
-  AttributeModel,
-  Context,
-  IAttribute,
-  IResolverParent,
-  IResponseMessage,
-  TemplateMetrics,
-} from "@types";
+import { AttributeModel, Context, IAttribute, IResolverParent, IResponseMessage, TemplateMetrics } from "@types";
 
 // Models
 import { Activity } from "@models/Activity";
@@ -25,11 +18,7 @@ import { PostHogClient } from "src";
 export const TemplatesResolvers = {
   Query: {
     // Retrieve all Templates
-    templates: async (
-      _parent: IResolverParent,
-      args: { limit: 100 },
-      context: Context,
-    ) => {
+    templates: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -43,18 +32,12 @@ export const TemplatesResolvers = {
       // Filter by ownership and Workspace membership
       const templates = await Templates.all();
       return templates
-        .filter((template: AttributeModel) =>
-          _.includes(workspace.templates, template._id),
-        )
+        .filter((template: AttributeModel) => _.includes(workspace.templates, template._id))
         .slice(0, args.limit);
     },
 
     // Retrieve one Template by _id
-    template: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    template: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -79,14 +62,11 @@ export const TemplatesResolvers = {
       if (_.includes(workspace.templates, template._id)) {
         return template;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Template",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Template", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -108,9 +88,7 @@ export const TemplatesResolvers = {
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const templates = await Templates.all();
-      const workspaceTemplates = templates.filter((template) =>
-        _.includes(workspace.templates, template._id),
-      );
+      const workspaceTemplates = templates.filter((template) => _.includes(workspace.templates, template._id));
       const templatesAddedDay = workspaceTemplates.filter((template) =>
         dayjs(template.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
       );
@@ -122,11 +100,7 @@ export const TemplatesResolvers = {
     },
 
     // Export a Template
-    exportTemplate: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ): Promise<string> => {
+    exportTemplate: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<string> => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -149,25 +123,18 @@ export const TemplatesResolvers = {
       if (_.includes(workspace.templates, args._id)) {
         return await Templates.export(args._id);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Template",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Template", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
   },
 
   Mutation: {
     // Create a new Template
-    createTemplate: async (
-      _parent: IResolverParent,
-      args: { template: IAttribute },
-      context: Context,
-    ) => {
+    createTemplate: async (_parent: IResolverParent, args: { template: IAttribute }, context: Context) => {
       const result = await Templates.create(args.template);
 
       if (result.success) {
@@ -203,11 +170,7 @@ export const TemplatesResolvers = {
     },
 
     // Update an existing Template
-    updateTemplate: async (
-      _parent: IResolverParent,
-      args: { template: AttributeModel },
-      context: Context,
-    ) => {
+    updateTemplate: async (_parent: IResolverParent, args: { template: AttributeModel }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -228,14 +191,11 @@ export const TemplatesResolvers = {
       }
 
       if (!_.includes(workspace.templates, args.template._id)) {
-        throw new GraphQLError(
-          "You do not have permission to modify this Template",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify this Template", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
 
       // Execute update operation
@@ -271,11 +231,7 @@ export const TemplatesResolvers = {
     },
 
     // Archive a Template
-    archiveTemplate: async (
-      _parent: IResolverParent,
-      args: { _id: string; state: boolean },
-      context: Context,
-    ) => {
+    archiveTemplate: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -296,14 +252,11 @@ export const TemplatesResolvers = {
       }
 
       if (!_.includes(workspace.templates, args._id)) {
-        throw new GraphQLError(
-          "You do not have permission to modify the archive state of this Template",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify the archive state of this Template", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
 
       // Capture event

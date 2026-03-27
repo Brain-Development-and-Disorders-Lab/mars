@@ -2,16 +2,7 @@
 import React from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Card,
-  Flex,
-  Heading,
-  Separator,
-  Stack,
-  Tag,
-  Text,
-} from "@chakra-ui/react";
+import { Button, Card, Flex, Heading, Separator, Stack, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
@@ -27,48 +18,17 @@ const Create = () => {
 
   return (
     <Content>
-      <Flex
-        direction={"column"}
-        gap={"4"}
-        p={"1"}
-        h={"100%"}
-        justify={"center"}
-        align={"center"}
-      >
-        <Flex
-          direction={"row"}
-          gap={"1"}
-          w={"100%"}
-          justify={"center"}
-          align={"center"}
-        >
+      <Flex direction={"column"} gap={"4"} p={"1"} h={"100%"} justify={"center"} align={"center"}>
+        <Flex direction={"row"} gap={"1"} w={"100%"} justify={"center"} align={"center"}>
           <Icon name={"add"} size={"sm"} />
           <Heading size={"lg"}>Create</Heading>
         </Flex>
-        <Text
-          fontSize={"sm"}
-          fontWeight={"semibold"}
-          color={"gray.600"}
-          textAlign={"center"}
-        >
-          Create a new Entity, Template, or Project to continue building your
-          metadata catalog.
+        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"} textAlign={"center"}>
+          Create a new Entity, Template, or Project to continue building your metadata catalog.
         </Text>
-        <Flex
-          direction={"row"}
-          gap={"1"}
-          wrap={"wrap"}
-          align={"center"}
-          justify={"center"}
-        >
+        <Flex direction={"row"} gap={"1"} wrap={"wrap"} align={"center"} justify={"center"}>
           {/* Entity card */}
-          <Card.Root
-            maxW={"340px"}
-            h={"340px"}
-            variant={"outline"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-          >
+          <Card.Root maxW={"340px"} h={"340px"} variant={"outline"} border={"1px solid"} borderColor={"gray.300"}>
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
                 <Icon name={"entity"} size={"sm"} />
@@ -81,21 +41,14 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
                   </Heading>
-                  <Text fontSize={"sm"}>
-                    Create an Entity to store metadata of a physical or digital
-                    resource.
-                  </Text>
+                  <Text fontSize={"sm"}>Create an Entity to store metadata of a physical or digital resource.</Text>
                 </Flex>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.600"}
-                    >
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
                       Required:
                     </Text>
                     <Tag.Root>
@@ -107,11 +60,7 @@ const Create = () => {
                   </Flex>
 
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.600"}
-                    >
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -150,13 +99,7 @@ const Create = () => {
           </Card.Root>
 
           {/* Template card */}
-          <Card.Root
-            maxW={"340px"}
-            h={"340px"}
-            variant={"outline"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-          >
+          <Card.Root maxW={"340px"} h={"340px"} variant={"outline"} border={"1px solid"} borderColor={"gray.300"}>
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
                 <Icon name={"template"} size={"sm"} />
@@ -169,21 +112,14 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
                   </Heading>
-                  <Text fontSize={"sm"}>
-                    Create a Template to reuse metadata structures across
-                    Entities.
-                  </Text>
+                  <Text fontSize={"sm"}>Create a Template to reuse metadata structures across Entities.</Text>
                 </Flex>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.600"}
-                    >
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
                       Required:
                     </Text>
                     <Tag.Root>
@@ -219,13 +155,7 @@ const Create = () => {
           </Card.Root>
 
           {/* Project card */}
-          <Card.Root
-            maxW={"340px"}
-            h={"340px"}
-            variant={"outline"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-          >
+          <Card.Root maxW={"340px"} h={"340px"} variant={"outline"} border={"1px solid"} borderColor={"gray.300"}>
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
                 <Icon name={"project"} size={"sm"} />
@@ -238,20 +168,14 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
                   </Heading>
-                  <Text fontSize={"sm"}>
-                    Create a Project to organize and share Entities.
-                  </Text>
+                  <Text fontSize={"sm"}>Create a Project to organize and share Entities.</Text>
                 </Flex>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.600"}
-                    >
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
                       Required:
                     </Text>
                     <Tag.Root>

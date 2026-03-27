@@ -8,14 +8,7 @@ import Icon from "@components/Icon";
 // Routing and navigation
 const Unauthorized = () => {
   return (
-    <Flex
-      direction={"column"}
-      justify={"center"}
-      align={"center"}
-      h={"100%"}
-      mt={{ base: "10%", lg: "0" }}
-      p={"2"}
-    >
+    <Flex direction={"column"} justify={"center"} align={"center"} h={"100%"} mt={{ base: "10%", lg: "0" }} p={"2"}>
       <Flex
         gap={"2"}
         p={"2"}
@@ -39,14 +32,10 @@ const Unauthorized = () => {
             You no longer have access to this Workspace.
           </Text>
           <Text fontSize={"xs"}>
-            You may have been removed as a collaborator, or the Workspace may no
-            longer exist. Please contact the Workspace owner if you believe this
-            is a mistake.
+            You may have been removed as a collaborator, or the Workspace may no longer exist. Please contact the
+            Workspace owner if you believe this is a mistake.
           </Text>
-          <Text fontSize={"xs"}>
-            Use the Workspace switcher to select a Workspace you currently have
-            access to.
-          </Text>
+          <Text fontSize={"xs"}>Use the Workspace switcher to select a Workspace you currently have access to.</Text>
         </Flex>
 
         <Flex direction={"column"} gap={"1"} w={"90%"}>
@@ -62,12 +51,7 @@ const Unauthorized = () => {
             pr={"3"}
             className={"error-scroll-container"}
           >
-            <Text
-              fontSize={"xs"}
-              fontFamily={"monospace"}
-              whiteSpace={"pre-wrap"}
-              color={"orange.900"}
-            >
+            <Text fontSize={"xs"} fontFamily={"monospace"} whiteSpace={"pre-wrap"} color={"orange.900"}>
               {"UNAUTHORIZED"}
             </Text>
           </Flex>

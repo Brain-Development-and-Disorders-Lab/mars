@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Input,
-  Button,
-  Flex,
-  InputGroup,
-  Text,
-  Spinner,
-  Box,
-} from "@chakra-ui/react";
+import { Input, Button, Flex, InputGroup, Text, Spinner, Box } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
@@ -43,10 +35,9 @@ const SearchSelect = (props: SearchSelectProps) => {
       }
     }
   `;
-  const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
-    useLazyQuery<{
-      entities: { entities: IGenericItem[]; total: number };
-    }>(GET_ENTITIES, { fetchPolicy: "network-only" });
+  const [getEntities, { loading: entitiesLoading, error: entitiesError }] = useLazyQuery<{
+    entities: { entities: IGenericItem[]; total: number };
+  }>(GET_ENTITIES, { fetchPolicy: "network-only" });
 
   // Query to retrieve Entities
   const GET_PROJECTS = gql`
@@ -57,10 +48,9 @@ const SearchSelect = (props: SearchSelectProps) => {
       }
     }
   `;
-  const [getProjects, { loading: projectsLoading, error: projectsError }] =
-    useLazyQuery<{
-      projects: IGenericItem[];
-    }>(GET_PROJECTS, { fetchPolicy: "network-only" });
+  const [getProjects, { loading: projectsLoading, error: projectsError }] = useLazyQuery<{
+    projects: IGenericItem[];
+  }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
   const [placeholder, setPlaceholder] = useState("Select Result");
   const [options, setOptions] = useState([] as IGenericItem[]);
@@ -125,18 +115,8 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search(
-      $query: String
-      $resultType: String
-      $isBuilder: Boolean
-      $showArchived: Boolean
-    ) {
-      search(
-        query: $query
-        resultType: $resultType
-        isBuilder: $isBuilder
-        showArchived: $showArchived
-      ) {
+    query Search($query: String, $resultType: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(query: $query, resultType: $resultType, isBuilder: $isBuilder, showArchived: $showArchived) {
         __typename
         ... on Entity {
           _id
@@ -151,10 +131,12 @@ const SearchSelect = (props: SearchSelectProps) => {
       }
     }
   `;
-  const [searchText, { loading: searchLoading, error: searchError }] =
-    useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, {
+  const [searchText, { loading: searchLoading, error: searchError }] = useLazyQuery<{ search: EntityModel[] }>(
+    SEARCH_TEXT,
+    {
       fetchPolicy: "network-only",
-    });
+    },
+  );
 
   // State
   const [results, setResults] = useState([] as EntityModel[]);
@@ -221,9 +203,7 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle search text input
    * @param event Input event
    */
-  const handleInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value === "") {
       // Case where search input is empty, reset `hasSearched` state
       setHasSearched(false);
@@ -254,13 +234,7 @@ const SearchSelect = (props: SearchSelectProps) => {
         ref={inputRef}
         data-testid={"search-select"}
         onClick={onInputClick}
-        endElement={
-          showResults ? (
-            <Icon name={"c_up"} size={"xs"} />
-          ) : (
-            <Icon name={"c_down"} size={"xs"} />
-          )
-        }
+        endElement={showResults ? <Icon name={"c_up"} size={"xs"} /> : <Icon name={"c_down"} size={"xs"} />}
       >
         <Input
           placeholder={placeholder}
@@ -319,11 +293,7 @@ const SearchSelect = (props: SearchSelectProps) => {
               mb={"2"}
             />
 
-            <Box
-              maxH="200px"
-              overflowY="auto"
-              className={"search-select-results"}
-            >
+            <Box maxH="200px" overflowY="auto" className={"search-select-results"}>
               {/* Has searched, search operation complete, multiple results */}
               {hasSearched &&
                 searchLoading === false &&
@@ -344,15 +314,13 @@ const SearchSelect = (props: SearchSelectProps) => {
                 ))}
 
               {/* Has searched, search operation complete, no results */}
-              {hasSearched &&
-                searchLoading === false &&
-                results.length === 0 && (
-                  <Flex w="100%" minH="100px" align="center" justify="center">
-                    <Text fontSize="sm" fontWeight="semibold">
-                      No Results
-                    </Text>
-                  </Flex>
-                )}
+              {hasSearched && searchLoading === false && results.length === 0 && (
+                <Flex w="100%" minH="100px" align="center" justify="center">
+                  <Text fontSize="sm" fontWeight="semibold">
+                    No Results
+                  </Text>
+                </Flex>
+              )}
 
               {/* Has not yet searched, search operation complete */}
               {!hasSearched &&

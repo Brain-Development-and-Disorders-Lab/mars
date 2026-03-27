@@ -28,10 +28,8 @@ const Beacon = styled.span`
   width: 2.2rem;
 `;
 
-const WalkthroughBeacon = forwardRef<HTMLButtonElement, BeaconRenderProps>(
-  (props, ref) => {
-    return <Beacon ref={ref} {...props} />;
-  },
-);
+const WalkthroughBeacon = forwardRef<HTMLButtonElement, BeaconRenderProps>((props, ref) => {
+  return <Beacon ref={ref} {...props} />;
+});
 
 export default WalkthroughBeacon;

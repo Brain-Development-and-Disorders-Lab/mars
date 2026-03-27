@@ -92,11 +92,7 @@ const Entities = () => {
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Entities export modal
-  const {
-    open: isExportOpen,
-    onOpen: onExportOpen,
-    onClose: onExportClose,
-  } = useDisclosure();
+  const { open: isExportOpen, onOpen: onExportOpen, onClose: onExportClose } = useDisclosure();
 
   const [toExport, setToExport] = useState([] as IGenericItem[]);
   const [exportFormat, setExportFormat] = useState("json" as "json" | "csv");
@@ -151,12 +147,7 @@ const Entities = () => {
 
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities(
-      $page: Int
-      $pageSize: Int
-      $filter: EntityFilterInput
-      $sort: EntitySortInput
-    ) {
+    query GetEntities($page: Int, $pageSize: Int, $filter: EntityFilterInput, $sort: EntitySortInput) {
       entities(page: $page, pageSize: $pageSize, filter: $filter, sort: $sort) {
         entities {
           _id
@@ -222,8 +213,9 @@ const Entities = () => {
       exportEntities(entities: $entities, format: $format)
     }
   `;
-  const [exportEntities, { loading: exportLoading, error: exportError }] =
-    useLazyQuery<{ exportEntities: string }>(GET_ENTITIES_EXPORT);
+  const [exportEntities, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportEntities: string }>(
+    GET_ENTITIES_EXPORT,
+  );
 
   // Manage data once retrieved
   useEffect(() => {
@@ -240,8 +232,7 @@ const Entities = () => {
     if (appliedFilters.endDate) count++;
     if (appliedFilters.owners.length > 0) count += appliedFilters.owners.length;
     if (appliedFilters.hasAttachments) count++;
-    if (appliedFilters.attributeCountRanges.length > 0)
-      count += appliedFilters.attributeCountRanges.length;
+    if (appliedFilters.attributeCountRanges.length > 0) count += appliedFilters.attributeCountRanges.length;
     setActiveFilterCount(count);
   }, [appliedFilters]);
 
@@ -262,11 +253,7 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 48}
-              showArrow
-            >
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -301,14 +288,8 @@ const Entities = () => {
         }
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 64}
-              showArrow
-            >
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 64 })}
-              </Text>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
             </Tooltip>
           </Flex>
         );
@@ -321,14 +302,7 @@ const Entities = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return (
-          <ActorTag
-            identifier={info.getValue()}
-            fallback={"Unknown User"}
-            size={"sm"}
-            inline
-          />
-        );
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "Owner",
       enableHiding: true,
@@ -406,11 +380,7 @@ const Entities = () => {
     } else if (response?.data?.exportEntities) {
       FileSaver.saveAs(
         new Blob([response.data.exportEntities]),
-        slugify(
-          `export_entities_${dayjs(Date.now()).format(
-            "YYYY_MM_DD",
-          )}.${exportFormat}`,
-        ),
+        slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
       );
     }
 
@@ -420,37 +390,14 @@ const Entities = () => {
   };
 
   return (
-    <Content
-      isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
-      isLoaded={!loading && !exportLoading}
-    >
-      <Flex
-        direction={"row"}
-        p={"1"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"1"}
-        minW="0"
-        maxW="100%"
-      >
-        <Flex
-          w={"100%"}
-          minW="0"
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-        >
+    <Content isError={!_.isUndefined(error) || !_.isUndefined(exportError)} isLoaded={!loading && !exportLoading}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"entity"} size={"sm"} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
-            <Button
-              colorPalette={"green"}
-              onClick={() => navigate("/create/entity")}
-              size={"xs"}
-              rounded={"md"}
-            >
+            <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
               Create Entity
               <Icon name={"add"} size={"xs"} />
             </Button>
@@ -458,29 +405,14 @@ const Entities = () => {
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
-            All Entities in the current Workspace are shown below. Sort the
-            Entities using the column headers or use the filters below.
+            All Entities in the current Workspace are shown below. Sort the Entities using the column headers or use the
+            filters below.
           </Text>
 
           {/* Filter Section */}
-          <Collapsible.Root
-            open={filtersOpen}
-            onOpenChange={(event) => setFiltersOpen(event.open)}
-          >
-            <Flex
-              direction={"column"}
-              gap={"1"}
-              p={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"space-between"}
-              >
+          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
+            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -497,20 +429,13 @@ const Entities = () => {
               <Collapsible.Content>
                 <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
                   {/* Date Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Created Between
                     </Text>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          Start (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -525,9 +450,7 @@ const Entities = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          End (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -545,21 +468,11 @@ const Entities = () => {
                   </Flex>
 
                   {/* Owner Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Owner
                     </Text>
-                    <Flex
-                      direction={"column"}
-                      gap={"1"}
-                      maxH={"200px"}
-                      overflowY={"auto"}
-                    >
+                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
                       {_.uniq(entityData.map((e) => e.owner))
                         .filter((owner) => owner)
                         .map((owner) => (
@@ -578,9 +491,7 @@ const Entities = () => {
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  owners: filterState.owners.filter(
-                                    (o) => o !== owner,
-                                  ),
+                                  owners: filterState.owners.filter((o) => o !== owner),
                                 });
                               }
                             }}
@@ -588,12 +499,7 @@ const Entities = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag
-                                identifier={owner}
-                                fallback={"Unknown User"}
-                                size={"sm"}
-                                inline
-                              />
+                              <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
@@ -601,12 +507,7 @@ const Entities = () => {
                   </Flex>
 
                   {/* Has Attachments Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Attachments
                     </Text>
@@ -623,19 +524,12 @@ const Entities = () => {
                     >
                       <Checkbox.HiddenInput />
                       <Checkbox.Control />
-                      <Checkbox.Label fontSize={"xs"}>
-                        Has Attachments
-                      </Checkbox.Label>
+                      <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
                     </Checkbox.Root>
                   </Flex>
 
                   {/* Attribute Count Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Attribute Count
                     </Text>
@@ -645,26 +539,18 @@ const Entities = () => {
                           key={range}
                           size={"xs"}
                           colorPalette={"blue"}
-                          checked={filterState.attributeCountRanges.includes(
-                            range,
-                          )}
+                          checked={filterState.attributeCountRanges.includes(range)}
                           onCheckedChange={(details) => {
                             const isChecked = details.checked as boolean;
                             if (isChecked) {
                               setFilterState({
                                 ...filterState,
-                                attributeCountRanges: [
-                                  ...filterState.attributeCountRanges,
-                                  range,
-                                ],
+                                attributeCountRanges: [...filterState.attributeCountRanges, range],
                               });
                             } else {
                               setFilterState({
                                 ...filterState,
-                                attributeCountRanges:
-                                  filterState.attributeCountRanges.filter(
-                                    (r) => r !== range,
-                                  ),
+                                attributeCountRanges: filterState.attributeCountRanges.filter((r) => r !== range),
                               });
                             }
                           }}
@@ -688,12 +574,7 @@ const Entities = () => {
           </Collapsible.Root>
 
           {/* Buttons and Active Filter Count */}
-          <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"flex-end"}
-          >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
             <Text fontWeight={"semibold"} fontSize={"xs"}>
               {activeFilterCount} Active Filter
               {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
@@ -730,14 +611,11 @@ const Entities = () => {
             </Button>
           </Flex>
 
-          {entityData.filter((entity) => _.isEqual(entity.archived, false))
-            .length > 0 ? (
+          {entityData.filter((entity) => _.isEqual(entity.archived, false)).length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">
               <DataTable
                 columns={columns}
-                data={entityData.filter((entity) =>
-                  _.isEqual(entity.archived, false),
-                )}
+                data={entityData.filter((entity) => _.isEqual(entity.archived, false))}
                 visibleColumns={visibleColumns}
                 selectedRows={{}}
                 actions={actions}
@@ -746,11 +624,7 @@ const Entities = () => {
                 showColumnSelect
                 showPagination
                 showSelection
-                pageCount={
-                  data?.entities?.total
-                    ? Math.ceil(data.entities.total / pageSize)
-                    : 0
-                }
+                pageCount={data?.entities?.total ? Math.ceil(data.entities.total / pageSize) : 0}
                 pageIndex={page}
                 pageSize={pageSize}
                 onPaginationChange={(newPageIndex, newPageSize) => {
@@ -782,9 +656,7 @@ const Entities = () => {
                   <Icon name={"entity"} size={"lg"} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0
-                    ? "No entities match the selected filters"
-                    : "No Entities"}
+                  {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
@@ -805,12 +677,7 @@ const Entities = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header
-              p={"2"}
-              fontWeight={"semibold"}
-              roundedTop={"md"}
-              bg={"blue.300"}
-            >
+            <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
               Export Entities
               <Dialog.CloseTrigger asChild>
                 <CloseButton size={"2xs"} top={"6px"} onClick={onExportClose} />
@@ -819,13 +686,7 @@ const Entities = () => {
             <Dialog.Body p={"1"}>
               {/* Select export format */}
               <Flex gap={"1"} direction={"column"}>
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  gap={"1"}
-                  align={"center"}
-                  ml={"0.5"}
-                >
+                <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     File Format:
                   </Text>
@@ -840,18 +701,14 @@ const Entities = () => {
                           items: ["JSON", "CSV"],
                         })}
                         onValueChange={(details) => {
-                          setExportFormat(
-                            details.items[0].toLowerCase() as "json" | "csv",
-                          );
+                          setExportFormat(details.items[0].toLowerCase() as "json" | "csv");
                           setExportFormatSelected(true);
                         }}
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
                           <Select.Trigger>
-                            <Select.ValueText
-                              placeholder={"Select export format"}
-                            />
+                            <Select.ValueText placeholder={"Select export format"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>
                             <Select.Indicator />
@@ -876,14 +733,7 @@ const Entities = () => {
                   </Flex>
                 </Flex>
 
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"2"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                >
+                <Flex w={"100%"} direction={"column"} gap={"2"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
                   <DataTable
                     columns={exportTableColumns}
                     data={toExport}
@@ -897,13 +747,7 @@ const Entities = () => {
             <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 {/* "Export" button */}
-                <Flex
-                  direction={"row"}
-                  w={"100%"}
-                  gap={"2"}
-                  justify={"right"}
-                  align={"center"}
-                >
+                <Flex direction={"row"} w={"100%"} gap={"2"} justify={"right"} align={"center"}>
                   <Button
                     colorPalette={"blue"}
                     size={"xs"}

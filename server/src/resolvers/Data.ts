@@ -23,16 +23,9 @@ import { Workspaces } from "@models/Workspaces";
 export const DataResolvers = {
   Query: {
     // Retrieve the URL for a file to be downloaded by client
-    downloadFile: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ): Promise<string> => {
+    downloadFile: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<string> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -61,10 +54,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -83,10 +73,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<string[]> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -105,10 +92,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -131,10 +115,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -143,12 +124,7 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.importEntityCSV(
-        args.columnMapping,
-        args.file,
-        args.options,
-        context,
-      );
+      return await Data.importEntityCSV(args.columnMapping, args.file, args.options, context);
     },
 
     // Review a JSON file, return collection of Entity names and their updates
@@ -158,10 +134,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -180,10 +153,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -192,12 +162,7 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.importEntityJSON(
-        args.file,
-        args.project,
-        args.attributes,
-        context,
-      );
+      return await Data.importEntityJSON(args.file, args.project, args.attributes, context);
     },
 
     // Review a Template JSON file, return collection of Template names and their updates
@@ -207,10 +172,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<TemplateImportReview[]>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -229,10 +191,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {

@@ -6,12 +6,7 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
-import {
-  DataTableAction,
-  IGenericItem,
-  IRelationship,
-  RelationshipsProps,
-} from "@types";
+import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps } from "@types";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -36,10 +31,7 @@ const Relationships = (props: RelationshipsProps) => {
       }
     }
   `;
-  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(
-    GET_ENTITY_NAME,
-    { fetchPolicy: "network-only" },
-  );
+  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, { fetchPolicy: "network-only" });
 
   // Extract all unique entity IDs from relationships
   const uniqueEntityIds = useMemo(() => {
@@ -75,14 +67,11 @@ const Relationships = (props: RelationshipsProps) => {
             // If fetch fails, fall back to the name from relationship data
             if (isMounted) {
               const relationship = props.relationships.find(
-                (rel) =>
-                  rel.source._id === entityId || rel.target._id === entityId,
+                (rel) => rel.source._id === entityId || rel.target._id === entityId,
               );
               if (relationship) {
                 nameMap[entityId] =
-                  relationship.source._id === entityId
-                    ? relationship.source.name
-                    : relationship.target.name;
+                  relationship.source._id === entityId ? relationship.source.name : relationship.target.name;
               }
             }
           }
@@ -111,11 +100,7 @@ const Relationships = (props: RelationshipsProps) => {
    * @return {boolean}
    */
   const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean => {
-    return (
-      _.isEqual(a.source._id, b.source._id) &&
-      _.isEqual(a.target._id, b.target._id) &&
-      _.isEqual(a.type, b.type)
-    );
+    return _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
   };
 
   /**
@@ -125,10 +110,7 @@ const Relationships = (props: RelationshipsProps) => {
    * @param relationships Collection of existing Relationships
    * @return {boolean}
    */
-  const relationshipExists = (
-    relationship: IRelationship,
-    relationships: IRelationship[],
-  ): boolean => {
+  const relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean => {
     for (const r of relationships) {
       if (relationshipIsEqual(r, relationship)) {
         return true;
@@ -165,17 +147,8 @@ const Relationships = (props: RelationshipsProps) => {
         const displayName = entityNames[sourceEntity._id] || sourceEntity.name;
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip
-              content={displayName}
-              disabled={displayName.length < 32}
-              showArrow
-            >
-              <Flex
-                align={"center"}
-                gap={"1"}
-                w={"100%"}
-                justify={"space-between"}
-              >
+            <Tooltip content={displayName} disabled={displayName.length < 32} showArrow>
+              <Flex align={"center"} gap={"1"} w={"100%"} justify={"space-between"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(displayName, { length: 32 })}
                 </Text>
@@ -210,11 +183,7 @@ const Relationships = (props: RelationshipsProps) => {
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"}>
             <Flex align={"center"} gap={"1"} w={"100%"}>
-              <Tooltip
-                content={displayName}
-                disabled={displayName.length < 32}
-                showArrow
-              >
+              <Tooltip content={displayName} disabled={displayName.length < 32} showArrow>
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(displayName, { length: 32 })}
                 </Text>

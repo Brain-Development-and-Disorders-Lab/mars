@@ -33,13 +33,7 @@ const AlertDialog = (props: AlertDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header
-            p={"2"}
-            fontWeight={"semibold"}
-            fontSize={"sm"}
-            roundedTop={"md"}
-            bg={"orange.300"}
-          >
+          <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"orange.300"}>
             <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />
               {header}
@@ -58,12 +52,7 @@ const AlertDialog = (props: AlertDialogProps) => {
               <Icon name={"cross"} size={"xs"} />
             </Button>
             <Spacer />
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={rightButtonColor}
-              onClick={rightButtonAction}
-            >
+            <Button size={"xs"} rounded={"md"} colorPalette={rightButtonColor} onClick={rightButtonAction}>
               {rightButtonLabel}
               <Icon name={"check"} size={"xs"} />
             </Button>

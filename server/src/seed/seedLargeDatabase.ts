@@ -31,8 +31,7 @@ const MIN_VALUES_PER_TEMPLATE = 15;
 const MIN_ENTITIES_WITH_RELATIONSHIPS = 200;
 const ACTIVITY_WEEKS = 8;
 const WORKSPACE_NAME = "Test Data Workspace";
-const WORKSPACE_DESCRIPTION =
-  "Comprehensive test dataset for application scale testing";
+const WORKSPACE_DESCRIPTION = "Comprehensive test dataset for application scale testing";
 
 // Sample data pools
 const ENTITY_NAMES = [
@@ -139,12 +138,7 @@ const VALUE_NAMES = [
 
 const RELATIONSHIP_TYPES: RelationshipType[] = ["parent", "child", "general"];
 
-const ACTIVITY_TYPES: IActivity["type"][] = [
-  "create",
-  "update",
-  "delete",
-  "archived",
-];
+const ACTIVITY_TYPES: IActivity["type"][] = ["create", "update", "delete", "archived"];
 
 // Helper functions
 function randomElement<T>(array: T[]): T {
@@ -161,9 +155,7 @@ function randomInt(min: number, max: number): number {
 }
 
 function randomDate(start: Date, end: Date): string {
-  const date = new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
-  );
+  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   return dayjs(date).toISOString();
 }
 
@@ -186,10 +178,7 @@ function generateValue(
       data = `https://example.com/resource/${index}`;
       break;
     case "date":
-      data = randomDate(
-        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-        new Date(),
-      );
+      data = randomDate(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), new Date());
       break;
     case "entity":
       // Use a random entity ID if available, otherwise use empty string
@@ -249,17 +238,13 @@ async function generateTemplates(): Promise<AttributeModel[]> {
 }
 
 // Generate Entities
-async function generateEntities(
-  templates: AttributeModel[],
-  projectIds: string[],
-): Promise<string[]> {
+async function generateEntities(templates: AttributeModel[], projectIds: string[]): Promise<string[]> {
   consola.info(`Generating ${NUM_ENTITIES} entities...`);
   const entityIds: string[] = [];
 
   // First, create all entities without relationships
   for (let i = 0; i < NUM_ENTITIES; i++) {
-    const entityName =
-      ENTITY_NAMES[i % ENTITY_NAMES.length] || `Entity ${i + 1}`;
+    const entityName = ENTITY_NAMES[i % ENTITY_NAMES.length] || `Entity ${i + 1}`;
     const numProjects = randomInt(1, 3);
     const selectedProjects = randomElements(projectIds, numProjects);
 
@@ -292,10 +277,7 @@ async function generateEntities(
       name: `${entityName} ${i + 1}`,
       owner: DEMO_USER_ORCID,
       archived: Math.random() < 0.05, // 5% archived
-      created: randomDate(
-        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-        new Date(),
-      ),
+      created: randomDate(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), new Date()),
       description: `Test entity ${i + 1} for comprehensive dataset`,
       projects: selectedProjects,
       relationships: [],
@@ -313,9 +295,7 @@ async function generateEntities(
   consola.success(`Generated ${entityIds.length} entities`);
 
   // Now add relationships to at least MIN_ENTITIES_WITH_RELATIONSHIPS entities
-  consola.info(
-    `Adding relationships to ${MIN_ENTITIES_WITH_RELATIONSHIPS} entities...`,
-  );
+  consola.info(`Adding relationships to ${MIN_ENTITIES_WITH_RELATIONSHIPS} entities...`);
   const entitiesWithRelationships = randomElements(
     entityIds,
     Math.max(MIN_ENTITIES_WITH_RELATIONSHIPS, entityIds.length * 0.1),
@@ -351,9 +331,7 @@ async function generateEntities(
     }
   }
 
-  consola.success(
-    `Added relationships to ${entitiesWithRelationships.length} entities`,
-  );
+  consola.success(`Added relationships to ${entitiesWithRelationships.length} entities`);
 
   return entityIds;
 }
@@ -370,10 +348,7 @@ async function generateProjects(): Promise<string[]> {
       name: projectName,
       owner: DEMO_USER_ORCID,
       archived: Math.random() < 0.1, // 10% archived
-      created: randomDate(
-        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-        new Date(),
-      ),
+      created: randomDate(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), new Date()),
       collaborators: [],
       description: `Test project ${i + 1} for comprehensive dataset`,
       entities: [], // Will be populated after entities are created
@@ -391,17 +366,11 @@ async function generateProjects(): Promise<string[]> {
 }
 
 // Assign entities to projects
-async function assignEntitiesToProjects(
-  entityIds: string[],
-  projectIds: string[],
-): Promise<void> {
+async function assignEntitiesToProjects(entityIds: string[], projectIds: string[]): Promise<void> {
   consola.info("Assigning entities to projects...");
 
   for (const projectId of projectIds) {
-    const numEntities = randomInt(
-      MIN_ENTITIES_PER_PROJECT,
-      Math.min(15, entityIds.length),
-    );
+    const numEntities = randomInt(MIN_ENTITIES_PER_PROJECT, Math.min(15, entityIds.length));
     const selectedEntities = randomElements(entityIds, numEntities);
 
     const project = await Projects.getOne(projectId);
@@ -426,9 +395,7 @@ async function generateActivity(
 ): Promise<void> {
   consola.info("Generating activity entries...");
 
-  const startDate = new Date(
-    Date.now() - ACTIVITY_WEEKS * 7 * 24 * 60 * 60 * 1000,
-  );
+  const startDate = new Date(Date.now() - ACTIVITY_WEEKS * 7 * 24 * 60 * 60 * 1000);
   const endDate = new Date();
   const allTargets = [
     ...entityIds.map((id) => ({ type: "entities" as const, id })),
@@ -472,9 +439,7 @@ async function generateActivity(
   }
 
   // Sort by timestamp and create
-  activities.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
+  activities.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   for (const activity of activities) {
     const result = await Activity.create(activity);
@@ -573,13 +538,7 @@ async function seedDatabase(): Promise<void> {
     await generateActivity(entityIds, projectIds, templateIds, activityIds);
 
     // Associate all data with workspace
-    await associateDataWithWorkspace(
-      workspaceId,
-      entityIds,
-      projectIds,
-      templateIds,
-      activityIds,
-    );
+    await associateDataWithWorkspace(workspaceId, entityIds, projectIds, templateIds, activityIds);
 
     consola.success("Database seeding completed successfully!");
     consola.info(`Summary:`);

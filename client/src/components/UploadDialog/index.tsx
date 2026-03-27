@@ -2,17 +2,7 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Dialog,
-  CloseButton,
-  Field,
-  Fieldset,
-  Flex,
-  Input,
-  Tag,
-  Text,
-} from "@chakra-ui/react";
+import { Button, Dialog, CloseButton, Field, Fieldset, Flex, Input, Tag, Text } from "@chakra-ui/react";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -89,10 +79,7 @@ const UploadDialog = (props: {
 
       if (response.data?.uploadAttachment?.success) {
         // Add the upload to the existing list of uploads
-        props.setUploads([
-          ...props.uploads,
-          response.data?.uploadAttachment.data,
-        ]);
+        props.setUploads([...props.uploads, response.data?.uploadAttachment.data]);
 
         // Reset file upload state
         setFile({} as File);
@@ -144,10 +131,7 @@ const UploadDialog = (props: {
 
       // Only accept image or PDF files
       if (
-        _.includes(
-          ["image/jpeg", "image/png", "application/pdf"],
-          droppedFile.type,
-        ) ||
+        _.includes(["image/jpeg", "image/png", "application/pdf"], droppedFile.type) ||
         _.endsWith(droppedFile.name, ".dna")
       ) {
         setFile(droppedFile);
@@ -155,8 +139,7 @@ const UploadDialog = (props: {
         toaster.create({
           title: "Warning",
           type: "warning",
-          description:
-            "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
+          description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
           duration: 4000,
           closable: true,
         });
@@ -188,35 +171,16 @@ const UploadDialog = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header
-                p={"2"}
-                fontWeight={"semibold"}
-                roundedTop={"md"}
-                bg={"blue.300"}
-              >
-                <Flex
-                  direction={"row"}
-                  justify={"space-between"}
-                  align={"center"}
-                  wrap={"wrap"}
-                >
-                  <Flex
-                    align={"center"}
-                    gap={"1"}
-                    border={"2px"}
-                    rounded={"md"}
-                  >
+              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
+                <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+                  <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
                     <Icon name={"upload"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Upload Attachment
                     </Text>
                   </Flex>
                   <Dialog.CloseTrigger asChild>
-                    <CloseButton
-                      size={"2xs"}
-                      top={"6px"}
-                      onClick={() => props.setOpen(false)}
-                    />
+                    <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} />
                   </Dialog.CloseTrigger>
                 </Flex>
               </Dialog.Header>
@@ -260,32 +224,18 @@ const UploadDialog = (props: {
                           onDrop={handleDrop}
                         >
                           {_.isEqual(file, {}) ? (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
+                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
                               <Text fontWeight={"semibold"} fontSize={"sm"}>
                                 Drag file here
                               </Text>
                               <Text fontSize={"sm"}>or click to upload</Text>
                             </Flex>
                           ) : (
-                            <Flex
-                              direction={"column"}
-                              w={"100%"}
-                              justify={"center"}
-                              align={"center"}
-                            >
+                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
                               <Text fontWeight={"semibold"} fontSize={"sm"}>
                                 {displayName}
                               </Text>
-                              <Text
-                                fontWeight={"semibold"}
-                                fontSize={"xs"}
-                                color={"gray.600"}
-                              >
+                              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
                                 {displayType}
                               </Text>
                             </Flex>
@@ -303,21 +253,12 @@ const UploadDialog = (props: {
                             left={"0"}
                             opacity={"0"}
                             aria-hidden={"true"}
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>,
-                            ) => {
-                              if (
-                                event.target.files &&
-                                event.target.files.length > 0
-                              ) {
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                              if (event.target.files && event.target.files.length > 0) {
                                 // Only accept image or PDF files
                                 if (
                                   _.includes(
-                                    [
-                                      "image/jpeg",
-                                      "image/png",
-                                      "application/pdf",
-                                    ],
+                                    ["image/jpeg", "image/png", "application/pdf"],
                                     event.target.files[0].type,
                                   ) ||
                                   _.endsWith(event.target.files[0].name, ".dna")
@@ -327,8 +268,7 @@ const UploadDialog = (props: {
                                   toaster.create({
                                     title: "Warning",
                                     type: "warning",
-                                    description:
-                                      "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
+                                    description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
                                     duration: 4000,
                                     closable: true,
                                   });

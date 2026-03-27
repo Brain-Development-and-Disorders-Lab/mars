@@ -2,15 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
-import {
-  Flex,
-  Text,
-  Button,
-  Avatar,
-  Stack,
-  EmptyState,
-  Box,
-} from "@chakra-ui/react";
+import { Flex, Text, Button, Avatar, Stack, EmptyState, Box } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
@@ -48,10 +40,7 @@ const GET_ACTIVITY = gql`
   }
 `;
 
-const ActivityFeed = ({
-  activities: activitiesProp,
-  feedLimit = 5,
-}: ActivityFeedProps) => {
+const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFeedProps) => {
   const navigate = useNavigate();
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
   useEffect(() => {
@@ -82,13 +71,7 @@ const ActivityFeed = ({
   return (
     <Flex direction={"column"} data-timestamp-update={timestampUpdate}>
       {/* Activity heading */}
-      <Flex
-        id={"recentActivityHeader"}
-        align={"center"}
-        gap={"1"}
-        ml={"0.5"}
-        justify={"space-between"}
-      >
+      <Flex id={"recentActivityHeader"} align={"center"} gap={"1"} ml={"0.5"} justify={"space-between"}>
         <Flex align={"center"} gap={"1"}>
           <Icon name={"activity"} size={"xs"} />
           <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -96,13 +79,7 @@ const ActivityFeed = ({
           </Text>
         </Flex>
         <Flex align={"center"} gap={"1"} mr={"0.5"}>
-          <Box
-            w={"8px"}
-            h={"8px"}
-            borderRadius={"full"}
-            bg={"green.500"}
-            className="live-indicator"
-          />
+          <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
           <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
             Live
           </Text>
@@ -124,18 +101,12 @@ const ActivityFeed = ({
           Activity:
         </Text>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-          {dayjs().subtract(6, "day").format("MMM D, YYYY")} -{" "}
-          {dayjs().format("MMM D, YYYY")}
+          {dayjs().subtract(6, "day").format("MMM D, YYYY")} - {dayjs().format("MMM D, YYYY")}
         </Text>
       </Flex>
       <ActivityGraph activities={activities} height="180px" />
 
-      <Text
-        fontSize={"xs"}
-        fontWeight={"semibold"}
-        color={"gray.700"}
-        ml={"0.5"}
-      >
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"} ml={"0.5"}>
         Activity Feed
       </Text>
 
@@ -145,38 +116,18 @@ const ActivityFeed = ({
           <Stack gap={"1"} w={"98%"}>
             {feedActivities.map((activity: ActivityModel) => {
               return (
-                <Flex
-                  direction={"row"}
-                  width={"100%"}
-                  gap={"2"}
-                  key={`activity-${activity._id}`}
-                  align={"center"}
-                >
+                <Flex direction={"row"} width={"100%"} gap={"2"} key={`activity-${activity._id}`} align={"center"}>
                   {activity.actor ? (
-                    <ActorTag
-                      identifier={activity.actor}
-                      fallback={"Unknown User"}
-                      size={"sm"}
-                      avatarOnly
-                    />
+                    <ActorTag identifier={activity.actor} fallback={"Unknown User"} size={"sm"} avatarOnly />
                   ) : (
                     <Avatar.Root size={"xs"} colorPalette={"blue"}>
                       <Avatar.Fallback name={"Unknown"} />
                     </Avatar.Root>
                   )}
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
-                    <Flex
-                      direction={"row"}
-                      w={"100%"}
-                      gap={"1"}
-                      justify={"space-between"}
-                    >
+                    <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                       <Text fontSize={"xs"}>{activity.details}:</Text>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={"gray.500"}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
                         {dayjs(activity.timestamp).fromNow()}
                       </Text>
                     </Flex>
@@ -197,12 +148,7 @@ const ActivityFeed = ({
           </Stack>
 
           <Flex justify={"right"} pr={"0.5"} pb={"0.5"}>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              onClick={() => navigate("/activity")}
-            >
+            <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={() => navigate("/activity")}>
               View All
               <Icon name={"c_right"} size={"xs"} />
             </Button>

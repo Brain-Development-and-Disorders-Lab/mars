@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -86,9 +80,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
     errorPolicy: "all", // Don't throw on errors, return them in the response
   });
 
-  const activateWorkspace = async (
-    workspace: string,
-  ): Promise<IResponseMessage> => {
+  const activateWorkspace = async (workspace: string): Promise<IResponseMessage> => {
     if (workspace === "") {
       // Check if there's a stored workspace in session
       const storedWorkspace = storage.workspace;
@@ -151,11 +143,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
     [activeWorkspace],
   );
 
-  return (
-    <WorkspaceContext.Provider value={value}>
-      {props.children}
-    </WorkspaceContext.Provider>
-  );
+  return <WorkspaceContext.Provider value={value}>{props.children}</WorkspaceContext.Provider>;
 };
 
 export const useWorkspace = () => {
