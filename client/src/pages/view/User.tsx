@@ -17,17 +17,17 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
 import { Content } from "@components/Container";
-import DataTable from "@components/DataTable";
+import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
 
 // Custom types
 import {
   APIKey,
   DataTableAction,
-  IGenericItem,
   IResponseMessage,
   ResponseData,
   UserModel,
+  WorkspaceModel,
 } from "@types";
 
 // GraphQL imports
@@ -92,12 +92,22 @@ const User = () => {
       workspaces {
         _id
         name
+        description
+        public
+        owner
+        collaborators
       }
     }
   `;
+
+  type WorkspacePartial = Pick<
+    WorkspaceModel,
+    "_id" | "name" | "description" | "public" | "owner" | "collaborators"
+  >;
+
   const { loading, data, error, refetch } = useQuery<{
     user: UserModel;
-    workspaces: IGenericItem[];
+    workspaces: WorkspacePartial[];
   }>(GET_USER, {
     fetchPolicy: "network-only",
     variables: {
@@ -193,6 +203,19 @@ const User = () => {
   const [revokeKey, { loading: revokeKeyLoading, error: revokeKeyError }] =
     useMutation<{ revokeKey: IResponseMessage }>(REVOKE_KEY);
 
+  // Mutation to leave a Workspace (remove self from collaborators)
+  const LEAVE_WORKSPACE = gql`
+    mutation UpdateWorkspace($workspace: WorkspaceUpdateInput) {
+      updateWorkspace(workspace: $workspace) {
+        success
+        message
+      }
+    }
+  `;
+  const [leaveWorkspace, { loading: leaveWorkspaceLoading }] = useMutation<{
+    updateWorkspace: IResponseMessage;
+  }>(LEAVE_WORKSPACE);
+
   // State for User details
   const [userModel, setUserModel] = useState({} as UserModel);
   const [userOrcid, setUserOrcid] = useState("");
@@ -207,9 +230,11 @@ const User = () => {
 
   // State for User Workspaces
   const [userStaticWorkspaces, setUserStaticWorkspaces] = useState(
-    [] as IGenericItem[],
+    [] as WorkspacePartial[],
   );
-  const [userWorkspaces, setUserWorkspaces] = useState([] as IGenericItem[]);
+  const [userWorkspaces, setUserWorkspaces] = useState(
+    [] as WorkspacePartial[],
+  );
 
   // State for editing
   const [editing, setEditing] = useState(false);
@@ -402,19 +427,67 @@ const User = () => {
 
   const truncateTableText = !isBreakpointActive("md", "up");
 
-  // Utility functions for removing Workspace contents
-  const removeWorkspace = (_id: string) => {
-    const updated = userWorkspaces.filter((workspace) => {
-      return !_.isEqual(workspace._id, _id);
+  /**
+   * Utility function to remove current user from Workspace
+   * @param {string} _id Workspace identifier to remove the current user from
+   */
+  const removeWorkspace = async (_id: string) => {
+    const workspace = userWorkspaces.find((w) => _.isEqual(w._id, _id));
+    if (!workspace) return;
+
+    const result = await leaveWorkspace({
+      variables: {
+        workspace: {
+          _id,
+          name: workspace.name,
+          description: workspace.description,
+          public: workspace.public,
+          collaborators: workspace.collaborators.filter((c) => c !== user),
+        },
+      },
     });
-    setUserWorkspaces(updated);
+
+    if (result.data?.updateWorkspace?.success) {
+      setUserWorkspaces((prev) => prev.filter((w) => !_.isEqual(w._id, _id)));
+    } else {
+      toaster.create({
+        title: "Error",
+        description: "Unable to leave Workspace",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    }
   };
 
-  const removeWorkspaces = (toRemove: string[]) => {
-    const updated = userWorkspaces.filter((workspace) => {
-      return !_.includes(toRemove, workspace._id);
-    });
-    setUserWorkspaces(updated);
+  /**
+   * Utility function to mass-remove current user from Workspaces
+   * @param {string[]} toRemove List of Workspace identifiers to remove the current user from
+   */
+  const removeWorkspaces = async (toRemove: string[]) => {
+    const canLeave = userWorkspaces.filter(
+      (w) => _.includes(toRemove, w._id) && !_.isEqual(w.owner, user),
+    );
+
+    await Promise.all(
+      canLeave.map((w) =>
+        leaveWorkspace({
+          variables: {
+            workspace: {
+              _id: w._id,
+              name: w.name,
+              description: w.description,
+              public: w.public,
+              collaborators: w.collaborators.filter((c) => c !== user),
+            },
+          },
+        }),
+      ),
+    );
+
+    setUserWorkspaces((prev) =>
+      prev.filter((w) => !canLeave.some((c) => _.isEqual(c._id, w._id))),
+    );
   };
 
   // Setup `DataTable` components
@@ -526,7 +599,7 @@ const User = () => {
     }),
   ];
 
-  const workspacesTableColumnHelper = createColumnHelper<IGenericItem>();
+  const workspacesTableColumnHelper = createColumnHelper<WorkspacePartial>();
   const workspacesTableColumns = [
     workspacesTableColumnHelper.accessor("name", {
       cell: (info) => {
@@ -534,21 +607,38 @@ const User = () => {
           <Tooltip content={info.getValue()} showArrow>
             <Text fontSize={"xs"}>
               {_.truncate(info.getValue(), {
-                length: truncateTableText ? 16 : 24,
+                length: truncateTableText ? 24 : 36,
               })}
             </Text>
           </Tooltip>
         );
       },
       header: "Name",
+      meta: { minWidth: 260 } as ColumnMeta,
+    }),
+    workspacesTableColumnHelper.accessor("owner", {
+      cell: (info) => {
+        const isOwner = _.isEqual(info.getValue(), user);
+        return (
+          <Tag.Root colorPalette={isOwner ? "green" : "blue"} size={"sm"}>
+            <Tag.Label>{isOwner ? "Owner" : "Collaborator"}</Tag.Label>
+          </Tag.Root>
+        );
+      },
+      header: "Role",
     }),
     workspacesTableColumnHelper.accessor("_id", {
       cell: (info) => {
+        const workspace = info.row.original;
+        const isOwner = _.isEqual(workspace.owner, user);
+        const tooltipContent = isOwner
+          ? "You cannot leave a Workspace as an Owner"
+          : "You cannot leave your only Workspace";
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"}>
             <Tooltip
-              content={"You cannot leave your only Workspace"}
-              disabled={userWorkspaces.length > 1}
+              content={tooltipContent}
+              disabled={editing && !isOwner && userWorkspaces.length > 1}
               showArrow
             >
               <Button
@@ -557,10 +647,9 @@ const User = () => {
                 aria-label={"Leave Workspace"}
                 colorPalette={"orange"}
                 variant={"subtle"}
-                disabled={!editing || userWorkspaces.length === 1}
-                onClick={() => {
-                  removeWorkspace(info.row.original._id);
-                }}
+                disabled={!editing || isOwner || userWorkspaces.length === 1}
+                loading={leaveWorkspaceLoading}
+                onClick={() => removeWorkspace(workspace._id)}
               >
                 Leave Workspace
                 <Icon name={"logout"} size={"xs"} />
@@ -570,6 +659,7 @@ const User = () => {
         );
       },
       header: "",
+      meta: { fixedWidth: 160 } as ColumnMeta,
     }),
   ];
   const workspacesTableActions: DataTableAction[] = [
