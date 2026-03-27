@@ -3,13 +3,7 @@ import { API } from "@models/API";
 import { User } from "@models/User";
 
 // Custom types
-import {
-  APIKey,
-  Context,
-  IResolverParent,
-  IResponseMessage,
-  ResponseData,
-} from "@types";
+import { APIKey, Context, IResolverParent, IResponseMessage, ResponseData } from "@types";
 
 export const APIResolvers = {
   Query: {
@@ -31,11 +25,7 @@ export const APIResolvers = {
 
   Mutation: {
     // Generate a new API key
-    revokeKey: async (
-      _parent: IResolverParent,
-      args: { key: string },
-      context: Context,
-    ): Promise<IResponseMessage> => {
+    revokeKey: async (_parent: IResolverParent, args: { key: string }, context: Context): Promise<IResponseMessage> => {
       // Remove the API key from the User
       const response = await User.removeKey(context.user, args.key);
 

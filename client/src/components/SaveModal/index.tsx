@@ -31,19 +31,10 @@ const SaveModal = (props: SaveModalProps) => {
     : "Specify a description of the changes made.";
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      placement={"center"}
-      closeOnEscape
-      closeOnInteractOutside
-    >
+    <Dialog.Root open={open} onOpenChange={onOpenChange} placement={"center"} closeOnEscape closeOnInteractOutside>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content
-          gap={showCloseButton ? "0" : undefined}
-          w={showCloseButton ? ["md", "lg", "xl"] : undefined}
-        >
+        <Dialog.Content gap={showCloseButton ? "0" : undefined} w={showCloseButton ? ["md", "lg", "xl"] : undefined}>
           <Dialog.Header
             p={"2"}
             fontWeight={"semibold"}
@@ -59,19 +50,13 @@ const SaveModal = (props: SaveModalProps) => {
             </Flex>
             {showCloseButton && (
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  top={"6px"}
-                  onClick={() => onOpenChange({ open: false })}
-                />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => onOpenChange({ open: false })} />
               </Dialog.CloseTrigger>
             )}
           </Dialog.Header>
           <Dialog.Body p={"1"}>
             <Flex direction={"column"} gap={"1"}>
-              {(description !== undefined
-                ? description
-                : defaultDescription) && (
+              {(description !== undefined ? description : defaultDescription) && (
                 <Text fontSize={"xs"} color={"gray.600"}>
                   {description !== undefined ? description : defaultDescription}
                 </Text>
@@ -86,9 +71,7 @@ const SaveModal = (props: SaveModalProps) => {
                 preview={"edit"}
                 extraCommands={[]}
                 textareaProps={
-                  placeholder !== undefined
-                    ? { placeholder: placeholder || defaultPlaceholder }
-                    : undefined
+                  placeholder !== undefined ? { placeholder: placeholder || defaultPlaceholder } : undefined
                 }
                 onChange={(newValue) => {
                   onChange(newValue || "");
@@ -101,12 +84,7 @@ const SaveModal = (props: SaveModalProps) => {
             bg={showCloseButton ? "gray.100" : undefined}
             roundedBottom={showCloseButton ? "md" : undefined}
           >
-            <Flex
-              direction={"row"}
-              w={"100%"}
-              gap={"1"}
-              justify={"space-between"}
-            >
+            <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
               <Button
                 variant={"solid"}
                 size={"xs"}
@@ -117,13 +95,7 @@ const SaveModal = (props: SaveModalProps) => {
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
               </Button>
-              <Button
-                variant={"solid"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"green"}
-                onClick={onDone}
-              >
+              <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"green"} onClick={onDone}>
                 Done
                 <Icon name={"check"} size={"xs"} />
               </Button>

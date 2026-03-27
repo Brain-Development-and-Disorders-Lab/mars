@@ -26,8 +26,7 @@ const mediaQueries = Object.entries(breakpoints).reduce(
  * @returns {Object} Object containing current breakpoint and isBreakpointActive function
  */
 export const useBreakpoint = () => {
-  const [currentBreakpoint, setCurrentBreakpoint] =
-    useState<Breakpoint>("base");
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<Breakpoint>("base");
 
   useEffect(() => {
     // Function to determine the current breakpoint
@@ -64,10 +63,7 @@ export const useBreakpoint = () => {
    * @param comparison Optional comparison operator ('up' or 'down')
    * @returns boolean indicating if the breakpoint condition is met
    */
-  const isBreakpointActive = (
-    breakpoint: Breakpoint,
-    comparison?: "up" | "down",
-  ) => {
+  const isBreakpointActive = (breakpoint: Breakpoint, comparison?: "up" | "down") => {
     const breakpointValue = breakpoints[breakpoint];
     const currentValue = breakpoints[currentBreakpoint];
 
@@ -84,10 +80,7 @@ export const useBreakpoint = () => {
     breakpoint: currentBreakpoint,
     isBreakpointActive,
     // Helper function to get a responsive value based on breakpoint
-    getResponsiveValue: <T>(
-      values: Partial<Record<Breakpoint, T>>,
-      defaultValue: T,
-    ): T => {
+    getResponsiveValue: <T>(values: Partial<Record<Breakpoint, T>>, defaultValue: T): T => {
       // Check breakpoints from largest to smallest
       const breakpointKeys = Object.keys(breakpoints).reverse() as Breakpoint[];
 

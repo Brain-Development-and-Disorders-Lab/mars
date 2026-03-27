@@ -2,15 +2,7 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Input,
-  Dialog,
-  Text,
-  CloseButton,
-  EmptyState,
-} from "@chakra-ui/react";
+import { Button, Flex, Input, Dialog, Text, CloseButton, EmptyState } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -69,32 +61,10 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       >
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content
-            maxH={"90vh"}
-            display={"flex"}
-            flexDirection={"column"}
-            p={"0"}
-          >
-            <Dialog.Header
-              p={"1"}
-              flexShrink={0}
-              bg={"blue.300"}
-              borderBottom={"2px"}
-              roundedTop={"md"}
-            >
-              <Flex
-                direction={"row"}
-                justify={"space-between"}
-                align={"center"}
-                wrap={"wrap"}
-              >
-                <Flex
-                  align={"center"}
-                  gap={"1"}
-                  p={"1"}
-                  border={"2px"}
-                  rounded={"md"}
-                >
+          <Dialog.Content maxH={"90vh"} display={"flex"} flexDirection={"column"} p={"0"}>
+            <Dialog.Header p={"1"} flexShrink={0} bg={"blue.300"} borderBottom={"2px"} roundedTop={"md"}>
+              <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+                <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
                   <Icon name={"template"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     {props.attribute.name}
@@ -102,11 +72,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  top={"6px"}
-                  onClick={() => setOpen(false)}
-                />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -138,11 +104,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                         Owner
                       </Text>
                       <Flex>
-                        <ActorTag
-                          identifier={props.attribute.owner}
-                          fallback={"Unknown User"}
-                          size={"sm"}
-                        />
+                        <ActorTag identifier={props.attribute.owner} fallback={"Unknown User"} size={"sm"} />
                       </Flex>
                     </Flex>
                   </Flex>
@@ -174,13 +136,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   </Flex>
                 </Flex>
 
-                <Flex
-                  direction={"column"}
-                  gap={"1"}
-                  grow={"1"}
-                  h={"fit-content"}
-                  bg={"white"}
-                >
+                <Flex direction={"column"} gap={"1"} grow={"1"} h={"fit-content"} bg={"white"}>
                   <Flex
                     direction={"column"}
                     gap={"1"}
@@ -189,17 +145,11 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     minH={values.length > 0 ? "fit-content" : "200px"}
                   >
                     {values && values.length > 0 ? (
-                      <Values
-                        viewOnly={!isEditing}
-                        values={values}
-                        setValues={setValues}
-                      />
+                      <Values viewOnly={!isEditing} values={values} setValues={setValues} />
                     ) : (
                       <EmptyState.Root>
                         <EmptyState.Content>
-                          <EmptyState.Description>
-                            No Values
-                          </EmptyState.Description>
+                          <EmptyState.Description>No Values</EmptyState.Description>
                         </EmptyState.Content>
                       </EmptyState.Root>
                     )}
@@ -217,12 +167,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 borderTop={"1px"}
                 borderColor={"gray.200"}
               >
-                <Flex
-                  direction={"row"}
-                  justify={"space-between"}
-                  gap={"4"}
-                  w={"100%"}
-                >
+                <Flex direction={"row"} justify={"space-between"} gap={"4"} w={"100%"}>
                   <Button
                     colorPalette={"red"}
                     size={"xs"}

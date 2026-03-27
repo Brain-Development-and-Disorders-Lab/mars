@@ -104,11 +104,7 @@ const columns = [
     cell: (info) => {
       return (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 48}
-            showArrow
-          >
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Text fontSize={"xs"} fontWeight={"semibold"}>
               {_.truncate(info.getValue(), { length: 48 })}
             </Text>
@@ -143,14 +139,8 @@ const columns = [
       }
       return (
         <Flex>
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 64}
-            showArrow
-          >
-            <Text fontSize={"xs"}>
-              {_.truncate(info.getValue(), { length: 64 })}
-            </Text>
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+            <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
           </Tooltip>
         </Flex>
       );
@@ -163,14 +153,7 @@ const columns = [
   }),
   columnHelper.accessor("owner", {
     cell: (info) => {
-      return (
-        <ActorTag
-          identifier={info.getValue()}
-          fallback={"Unknown User"}
-          size={"sm"}
-          inline
-        />
-      );
+      return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
     },
     header: "Owner",
     enableHiding: true,

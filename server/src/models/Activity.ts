@@ -17,11 +17,7 @@ export class Activity {
    */
   static all = async (): Promise<ActivityModel[]> => {
     consola.debug("Retrieving all Activity...");
-    return await getDatabase()
-      .collection<ActivityModel>(ACTIVITY_COLLECTION)
-      .find()
-      .sort({ timestamp: -1 })
-      .toArray();
+    return await getDatabase().collection<ActivityModel>(ACTIVITY_COLLECTION).find().sort({ timestamp: -1 }).toArray();
   };
 
   /**
@@ -42,9 +38,7 @@ export class Activity {
    * @param activity Activity data
    * @return {IResponseMessage}
    */
-  static create = async (
-    activity: IActivity,
-  ): Promise<ResponseData<string>> => {
+  static create = async (activity: IActivity): Promise<ResponseData<string>> => {
     consola.debug(`Creating new Activity entry...`);
     const activityModel: ActivityModel = {
       _id: getIdentifier("activity"),
@@ -53,17 +47,11 @@ export class Activity {
 
     consola.debug("Activity:", activityModel.type, activityModel.target._id);
 
-    const response = await getDatabase()
-      .collection<ActivityModel>(ACTIVITY_COLLECTION)
-      .insertOne(activityModel);
+    const response = await getDatabase().collection<ActivityModel>(ACTIVITY_COLLECTION).insertOne(activityModel);
 
     const successStatus = _.isEqual(response.insertedId, activityModel._id);
     if (!successStatus) {
-      consola.error(
-        "Unable to create new Activity entry:",
-        activityModel.type,
-        activityModel.target._id,
-      );
+      consola.error("Unable to create new Activity entry:", activityModel.type, activityModel.target._id);
     }
 
     return {

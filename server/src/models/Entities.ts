@@ -39,11 +39,7 @@ export class Entities {
    * @returns Collection of all Entity entries
    */
   static all = async (): Promise<EntityModel[]> => {
-    return await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .find()
-      .sort({ timestamp: 1 })
-      .toArray();
+    return await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find().sort({ timestamp: 1 }).toArray();
   };
 
   /**
@@ -52,9 +48,7 @@ export class Entities {
    * @returns `null` if the Entity does not exist
    */
   static getOne = async (_id: string): Promise<EntityModel | null> => {
-    return await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ _id: _id });
+    return await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).findOne({ _id: _id });
   };
 
   /**
@@ -141,9 +135,7 @@ export class Entities {
       queryFilter["relationships.0"] = { $exists: true };
     }
 
-    let query = getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .find(queryFilter);
+    let query = getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(queryFilter);
 
     // Determine sort field and direction
     let sortField = "timestamp";
@@ -176,8 +168,7 @@ export class Entities {
 
     // If attribute count filtering is active, we need to fetch more results
     // to ensure we can fill a full page after filtering
-    const needsAttributeFilter =
-      filter?.attributeCountRanges && filter.attributeCountRanges.length > 0;
+    const needsAttributeFilter = filter?.attributeCountRanges && filter.attributeCountRanges.length > 0;
 
     if (needsAttributeFilter) {
       // When filtering by attribute count, fetch a large batch, filter, then paginate
@@ -202,10 +193,8 @@ export class Entities {
         const attributeCount = entity.attributes.length;
         return filter.attributeCountRanges!.some((range) => {
           if (range === "0") return attributeCount === 0;
-          if (range === "1-5")
-            return attributeCount >= 1 && attributeCount <= 5;
-          if (range === "6-10")
-            return attributeCount >= 6 && attributeCount <= 10;
+          if (range === "1-5") return attributeCount >= 1 && attributeCount <= 5;
+          if (range === "6-10") return attributeCount >= 6 && attributeCount <= 10;
           if (range === "11+") return attributeCount >= 11;
           return false;
         });
@@ -223,14 +212,8 @@ export class Entities {
     // Handle sorting for array fields (attributes, attachments) by length
     if (sort && (sort.field === "attributes" || sort.field === "attachments")) {
       results.sort((a, b) => {
-        const aLength =
-          sort.field === "attributes"
-            ? a.attributes.length
-            : a.attachments.length;
-        const bLength =
-          sort.field === "attributes"
-            ? b.attributes.length
-            : b.attachments.length;
+        const aLength = sort.field === "attributes" ? a.attributes.length : a.attachments.length;
+        const bLength = sort.field === "attributes" ? b.attributes.length : b.attachments.length;
         const direction = sort.direction === "desc" ? -1 : 1;
         return (aLength - bLength) * direction;
       });
@@ -302,27 +285,17 @@ export class Entities {
       queryFilter["relationships.0"] = { $exists: true };
     }
 
-    let count = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .countDocuments(queryFilter);
+    let count = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).countDocuments(queryFilter);
 
     // Apply attribute count range filter (client-side as it requires counting)
-    if (
-      filter?.attributeCountRanges &&
-      filter.attributeCountRanges.length > 0
-    ) {
-      const allEntities = await getDatabase()
-        .collection<EntityModel>(ENTITIES_COLLECTION)
-        .find(queryFilter)
-        .toArray();
+    if (filter?.attributeCountRanges && filter.attributeCountRanges.length > 0) {
+      const allEntities = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(queryFilter).toArray();
       count = allEntities.filter((entity) => {
         const attributeCount = entity.attributes.length;
         return filter.attributeCountRanges!.some((range) => {
           if (range === "0") return attributeCount === 0;
-          if (range === "1-5")
-            return attributeCount >= 1 && attributeCount <= 5;
-          if (range === "6-10")
-            return attributeCount >= 6 && attributeCount <= 10;
+          if (range === "1-5") return attributeCount >= 1 && attributeCount <= 5;
+          if (range === "6-10") return attributeCount >= 6 && attributeCount <= 10;
           if (range === "11+") return attributeCount >= 11;
           return false;
         });
@@ -333,9 +306,7 @@ export class Entities {
   };
 
   static exists = async (_id: string): Promise<boolean> => {
-    const entity = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ _id: _id });
+    const entity = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).findOne({ _id: _id });
 
     return !_.isNull(entity);
   };
@@ -349,9 +320,7 @@ export class Entities {
   };
 
   static getByName = async (name: string): Promise<EntityModel | null> => {
-    return await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, archived: false });
+    return await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).findOne({ name: name, archived: false });
   };
 
   /**
@@ -388,9 +357,7 @@ export class Entities {
       await Projects.addEntity(project, joinedEntity._id);
     }
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .insertOne(joinedEntity);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).insertOne(joinedEntity);
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
 
     // Apply updated statistics
@@ -494,25 +461,15 @@ export class Entities {
       const entityAttributes = entity.attributes.map((a) => a._id);
 
       // Attributes added in updated Entity
-      const addAttributeIdentifiers = _.difference(
-        updatedAttributes,
-        entityAttributes,
-      );
-      const addAttributes = updated.attributes.filter((a) =>
-        _.includes(addAttributeIdentifiers, a._id),
-      );
+      const addAttributeIdentifiers = _.difference(updatedAttributes, entityAttributes);
+      const addAttributes = updated.attributes.filter((a) => _.includes(addAttributeIdentifiers, a._id));
       for await (const attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
 
       // Attributes removed in updated Entity
-      const removeAttributeIdentifiers = _.difference(
-        entityAttributes,
-        updatedAttributes,
-      );
-      const removeAttributes = entity.attributes.filter((a) =>
-        _.includes(removeAttributeIdentifiers, a._id),
-      );
+      const removeAttributeIdentifiers = _.difference(entityAttributes, updatedAttributes);
+      const removeAttributes = entity.attributes.filter((a) => _.includes(removeAttributeIdentifiers, a._id));
       for await (const attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
@@ -529,10 +486,7 @@ export class Entities {
 
     return {
       success: true,
-      message:
-        response.modifiedCount == 1
-          ? "Updated Entity"
-          : "No changes made to Entity",
+      message: response.modifiedCount == 1 ? "Updated Entity" : "No changes made to Entity",
     };
   };
 
@@ -589,10 +543,7 @@ export class Entities {
 
     return {
       success: true,
-      message:
-        response.modifiedCount === 1
-          ? "Added history to Entity"
-          : "No history added to Entity",
+      message: response.modifiedCount === 1 ? "Added history to Entity" : "No history added to Entity",
     };
   };
 
@@ -602,10 +553,7 @@ export class Entities {
    * @param state Entity archive state
    * @return {Promise<IResponseMessage>}
    */
-  static setArchived = async (
-    _id: string,
-    state: boolean,
-  ): Promise<IResponseMessage> => {
+  static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
     consola.debug("Setting archive state of Entity:", _id, "Archived:", state);
     const entity = await Entities.getOne(_id);
     if (_.isNull(entity)) {
@@ -624,19 +572,14 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
       consola.info("Set archive state of Entity:", _id, "Archived:", state);
     }
 
     return {
       success: true,
-      message:
-        response.modifiedCount === 1
-          ? "Set archive state of Entity"
-          : "No changes made to Entity",
+      message: response.modifiedCount === 1 ? "Set archive state of Entity" : "No changes made to Entity",
     };
   };
 
@@ -646,10 +589,7 @@ export class Entities {
    * @param project_id Project identifier to associate with Entity
    * @returns {Promise<IResponseMessage>}
    */
-  static addProject = async (
-    _id: string,
-    project_id: string,
-  ): Promise<IResponseMessage> => {
+  static addProject = async (_id: string, project_id: string): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -674,16 +614,12 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added Project successfully"
-        : "Unable to add Project",
+      message: successStatus ? "Added Project successfully" : "Unable to add Project",
     };
   };
 
@@ -693,10 +629,7 @@ export class Entities {
    * @param project_id Project identifier to remove from Entity
    * @returns {Promise<IResponseMessage>}
    */
-  static removeProject = async (
-    _id: string,
-    project_id: string,
-  ): Promise<IResponseMessage> => {
+  static removeProject = async (_id: string, project_id: string): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -713,16 +646,12 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Removed Project successfully"
-        : "Unable to remove Project",
+      message: successStatus ? "Removed Project successfully" : "Unable to remove Project",
     };
   };
 
@@ -732,26 +661,19 @@ export class Entities {
    * @param {string} description Update Entity description
    * @returns {IResponseMessage}
    */
-  static setDescription = async (
-    _id: string,
-    description: string,
-  ): Promise<IResponseMessage> => {
+  static setDescription = async (_id: string, description: string): Promise<IResponseMessage> => {
     const update = {
       $set: {
         description: description,
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Set description successfully"
-        : "Unable to set description",
+      message: successStatus ? "Set description successfully" : "Unable to set description",
     };
   };
 
@@ -762,15 +684,8 @@ export class Entities {
    * @param b Relationship
    * @return {boolean}
    */
-  private static relationshipIsEqual = (
-    a: IRelationship,
-    b: IRelationship,
-  ): boolean => {
-    return (
-      _.isEqual(a.source._id, b.source._id) &&
-      _.isEqual(a.target._id, b.target._id) &&
-      _.isEqual(a.type, b.type)
-    );
+  private static relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean => {
+    return _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
   };
 
   /**
@@ -780,10 +695,7 @@ export class Entities {
    * @param relationships Collection of existing Relationships
    * @return {boolean}
    */
-  private static relationshipExists = (
-    relationship: IRelationship,
-    relationships: IRelationship[],
-  ): boolean => {
+  private static relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean => {
     for (const r of relationships) {
       if (Entities.relationshipIsEqual(r, relationship)) {
         return true;
@@ -797,9 +709,7 @@ export class Entities {
    * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
    * @return {Promise<IResponseMessage>}
    */
-  static addRelationship = async (
-    relationship: IRelationship,
-  ): Promise<IResponseMessage> => {
+  static addRelationship = async (relationship: IRelationship): Promise<IResponseMessage> => {
     // Create a clone of the `IRelationship` instance for the target Entity
     const targetRelationship = _.cloneDeep(relationship);
     const targetEntity = await Entities.getOne(targetRelationship.target._id);
@@ -827,12 +737,7 @@ export class Entities {
     }
 
     // Confirm that the relationship does not exist on the target Entity
-    if (
-      Entities.relationshipExists(
-        targetRelationship,
-        targetEntity.relationships,
-      )
-    ) {
+    if (Entities.relationshipExists(targetRelationship, targetEntity.relationships)) {
       return {
         success: false,
         message: "Relationship between Entities already exists",
@@ -840,9 +745,7 @@ export class Entities {
     }
 
     // Add the new `IRelationship` to the target Entity
-    const relationships: IRelationship[] = _.cloneDeep(
-      targetEntity.relationships,
-    );
+    const relationships: IRelationship[] = _.cloneDeep(targetEntity.relationships);
     relationships.push(targetRelationship);
 
     const update: { $set: Partial<EntityModel> } = {
@@ -858,9 +761,7 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added relationship successfully"
-        : "Unable to add relationship",
+      message: successStatus ? "Added relationship successfully" : "Unable to add relationship",
     };
   };
 
@@ -869,9 +770,7 @@ export class Entities {
    * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
    * @return {Promise<IResponseMessage>}
    */
-  static removeRelationship = async (
-    relationship: IRelationship,
-  ): Promise<IResponseMessage> => {
+  static removeRelationship = async (relationship: IRelationship): Promise<IResponseMessage> => {
     // Create a clone of the `IRelationship` instance for the target Entity
     const targetRelationship = _.cloneDeep(relationship);
     const targetEntity = await Entities.getOne(targetRelationship.target._id);
@@ -899,12 +798,7 @@ export class Entities {
     }
 
     // Confirm that the relationship to remove currently exists on the target Entity
-    if (
-      !Entities.relationshipExists(
-        targetRelationship,
-        targetEntity.relationships,
-      )
-    ) {
+    if (!Entities.relationshipExists(targetRelationship, targetEntity.relationships)) {
       return {
         success: false,
         message: "Relationship between Entities does not exist",
@@ -912,9 +806,7 @@ export class Entities {
     }
 
     // Remove the existing `IRelationship`
-    const relationships: IRelationship[] = _.cloneDeep(
-      targetEntity.relationships,
-    ).filter((r) => {
+    const relationships: IRelationship[] = _.cloneDeep(targetEntity.relationships).filter((r) => {
       return !Entities.relationshipIsEqual(r, targetRelationship);
     });
 
@@ -931,9 +823,7 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Removed relationship successfully"
-        : "Unable to remove relationship",
+      message: successStatus ? "Removed relationship successfully" : "Unable to remove relationship",
     };
   };
 
@@ -943,10 +833,7 @@ export class Entities {
    * @param attribute Attribute data
    * @returns {Promise<IResponseMessage>}
    */
-  static addAttribute = async (
-    _id: string,
-    attribute: AttributeModel,
-  ): Promise<IResponseMessage> => {
+  static addAttribute = async (_id: string, attribute: AttributeModel): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -965,16 +852,12 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added Attribute successfully"
-        : "Unable to add Attribute",
+      message: successStatus ? "Added Attribute successfully" : "Unable to add Attribute",
     };
   };
 
@@ -984,10 +867,7 @@ export class Entities {
    * @param attribute Attribute identifier to remove
    * @returns {Promise<IResponseMessage>}
    */
-  static removeAttribute = async (
-    _id: string,
-    attribute: string,
-  ): Promise<IResponseMessage> => {
+  static removeAttribute = async (_id: string, attribute: string): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -998,9 +878,7 @@ export class Entities {
     }
 
     // Exclude the Attribute identifier
-    const attributeCollection = _.cloneDeep(entity.attributes).filter(
-      (a) => a._id != attribute,
-    );
+    const attributeCollection = _.cloneDeep(entity.attributes).filter((a) => a._id != attribute);
     if (attributeCollection.length === entity.attributes.length) {
       return {
         success: false,
@@ -1014,16 +892,12 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Removed Attribute successfully"
-        : "Unable to remove Attribute",
+      message: successStatus ? "Removed Attribute successfully" : "Unable to remove Attribute",
     };
   };
 
@@ -1033,10 +907,7 @@ export class Entities {
    * @param attribute Updated Attribute
    * @returns {Promise<IResponseMessage>}
    */
-  static updateAttribute = async (
-    _id: string,
-    attribute: AttributeModel,
-  ): Promise<IResponseMessage> => {
+  static updateAttribute = async (_id: string, attribute: AttributeModel): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -1064,16 +935,12 @@ export class Entities {
       },
     };
 
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Updated Attribute successfully"
-        : "Unable to update Attribute",
+      message: successStatus ? "Updated Attribute successfully" : "Unable to update Attribute",
     };
   };
 
@@ -1084,11 +951,7 @@ export class Entities {
    * @param fields Optional argument to specify Entity data fields for export
    * @returns {Promise<string>}
    */
-  static export = async (
-    _id: string,
-    format: "json" | "csv",
-    fields?: string[],
-  ): Promise<string> => {
+  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
     const entity = await Entities.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -1113,9 +976,7 @@ export class Entities {
         // Assemble exported object using specified fields
         for await (const field of fields) {
           if (_.isEqual(field, "created")) {
-            formatted["created"] = dayjs(entity.created)
-              .format("DD MMM YYYY")
-              .toString();
+            formatted["created"] = dayjs(entity.created).format("DD MMM YYYY").toString();
           } else if (_.isEqual(field, "description")) {
             // "description" data field
             formatted["description"] = entity.description;
@@ -1154,10 +1015,7 @@ export class Entities {
 
             // Get the Attribute details and add to the collection of exported Attributes
             const attribute = entity.attributes.find((attribute) => {
-              return _.isEqual(
-                attribute._id,
-                field.slice(ATTRIBUTE_PREFIX_LENGTH),
-              );
+              return _.isEqual(attribute._id, field.slice(ATTRIBUTE_PREFIX_LENGTH));
             });
             if (attribute) {
               formatted.attributes.push(attribute);
@@ -1181,9 +1039,7 @@ export class Entities {
 
         // Iterate and generate fields for Origins, Products, Projects, and Attributes
         for await (const relationship of entity.relationships) {
-          exportFields.push(
-            `relationship_${relationship.target._id}_${relationship.type}`,
-          );
+          exportFields.push(`relationship_${relationship.target._id}_${relationship.type}`);
         }
         for await (const project of entity.projects) {
           exportFields.push(`project_${project}`);
@@ -1258,10 +1114,7 @@ export class Entities {
    * @param format The format to generate (JSON or CSV)
    * @return {Promise<string>}
    */
-  static exportMany = async (
-    entities: string[],
-    format: string,
-  ): Promise<string> => {
+  static exportMany = async (entities: string[], format: string): Promise<string> => {
     if (format === "json") {
       // Handle JSON format
       const collection = [];
@@ -1305,10 +1158,7 @@ export class Entities {
     }
   };
 
-  static addAttachment = async (
-    _id: string,
-    attachment: IGenericItem,
-  ): Promise<IResponseMessage> => {
+  static addAttachment = async (_id: string, attachment: IGenericItem): Promise<IResponseMessage> => {
     const entity = await Entities.getOne(_id);
     if (_.isNull(entity)) {
       return {
@@ -1326,16 +1176,11 @@ export class Entities {
         attachments: attachments,
       },
     };
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
 
     return {
       success: response.modifiedCount > 0,
-      message:
-        response.modifiedCount > 0
-          ? "Added attachment successfully"
-          : "Error adding attachment",
+      message: response.modifiedCount > 0 ? "Added attachment successfully" : "Error adding attachment",
     };
   };
 

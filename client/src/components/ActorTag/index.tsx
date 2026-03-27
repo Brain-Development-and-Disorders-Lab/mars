@@ -86,11 +86,7 @@ const ActorTag = (props: ActorTagProps) => {
 
   return props.inline ? (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Avatar.Root
-        size={"2xs"}
-        key={actorLabel}
-        colorPalette={loading ? "gray" : pickPalette(actorLabel)}
-      >
+      <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={loading ? "gray" : pickPalette(actorLabel)}>
         <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
       <Skeleton asChild loading={loading} w={"120px"}>

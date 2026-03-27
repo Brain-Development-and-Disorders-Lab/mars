@@ -1,12 +1,5 @@
 // Custom types
-import {
-  Context,
-  IProject,
-  ProjectMetrics,
-  ProjectModel,
-  IResponseMessage,
-  IResolverParent,
-} from "@types";
+import { Context, IProject, ProjectMetrics, ProjectModel, IResponseMessage, IResolverParent } from "@types";
 
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
@@ -24,11 +17,7 @@ import { PostHogClient } from "src";
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
-    projects: async (
-      _parent: IResolverParent,
-      args: { limit: 100; archived: boolean },
-      context: Context,
-    ) => {
+    projects: async (_parent: IResolverParent, args: { limit: 100; archived: boolean }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -60,11 +49,7 @@ export const ProjectsResolvers = {
     },
 
     // Retrieve one Project by _id
-    project: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    project: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -88,14 +73,11 @@ export const ProjectsResolvers = {
       if (_.includes(workspace.projects, project._id)) {
         return project;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Project",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -126,14 +108,11 @@ export const ProjectsResolvers = {
       if (_.includes(workspace.projects, args._id)) {
         return await Projects.export(args._id, args.format, args.fields);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Project",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -164,14 +143,11 @@ export const ProjectsResolvers = {
       if (_.includes(workspace.projects, args._id)) {
         return await Projects.exportEntities(args._id, args.format);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Project",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -193,9 +169,7 @@ export const ProjectsResolvers = {
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const projects = await Projects.all();
-      const workspaceProjects = projects.filter((project) =>
-        _.includes(workspace.projects, project._id),
-      );
+      const workspaceProjects = projects.filter((project) => _.includes(workspace.projects, project._id));
       const projectsAddedDay = workspaceProjects.filter((project) =>
         dayjs(project.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
       );
@@ -208,11 +182,7 @@ export const ProjectsResolvers = {
   },
 
   Mutation: {
-    createProject: async (
-      _parent: IResolverParent,
-      args: { project: IProject },
-      context: Context,
-    ) => {
+    createProject: async (_parent: IResolverParent, args: { project: IProject }, context: Context) => {
       // Apply create operation
       const result = await Projects.create(args.project);
 
@@ -296,11 +266,7 @@ export const ProjectsResolvers = {
       return result;
     },
 
-    archiveProject: async (
-      _parent: IResolverParent,
-      args: { _id: string; state: boolean },
-      context: Context,
-    ) => {
+    archiveProject: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -321,14 +287,11 @@ export const ProjectsResolvers = {
       }
 
       if (!_.includes(workspace.projects, args._id)) {
-        throw new GraphQLError(
-          "You do not have permission to modify the archive state of this Project",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify the archive state of this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
 
       // Capture event
@@ -418,11 +381,7 @@ export const ProjectsResolvers = {
       };
     },
 
-    deleteProject: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    deleteProject: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -443,14 +402,11 @@ export const ProjectsResolvers = {
       }
 
       if (!_.includes(workspace.projects, args._id)) {
-        throw new GraphQLError(
-          "You do not have permission to delete this Project",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to delete this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
 
       const result = await Projects.delete(args._id);

@@ -42,11 +42,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       minW={"120px"}
       h={"54px"}
     >
-      <Icon
-        name={props.isPublic ? "l_globus" : "lock"}
-        size={"xs"}
-        color={"green.400"}
-      />
+      <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} color={"green.400"} />
       <Flex direction={"column"} gap={"0"}>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
           {props.isPublic ? "Public" : "Private"}
@@ -59,26 +55,13 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       </Flex>
       <Spacer />
       {props.isInherited ? (
-        <Tooltip
-          content={
-            "This visibility state is inherited and cannot be changed directly"
-          }
-          showArrow
-        >
-          <IconButton
-            ml={"1"}
-            aria-label={"set-visibility"}
-            size={"xs"}
-            disabled
-          >
+        <Tooltip content={"This visibility state is inherited and cannot be changed directly"} showArrow>
+          <IconButton ml={"1"} aria-label={"set-visibility"} size={"xs"} disabled>
             <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip
-          content={props.isPublic ? "Make Private" : "Make Public"}
-          showArrow
-        >
+        <Tooltip content={props.isPublic ? "Make Private" : "Make Public"} showArrow>
           <IconButton
             ml={"1"}
             aria-label={"set-visibility"}

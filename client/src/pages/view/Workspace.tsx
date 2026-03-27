@@ -1,14 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import {
-  Flex,
-  Input,
-  Button,
-  Text,
-  Heading,
-  Code,
-  EmptyState,
-} from "@chakra-ui/react";
+import { Flex, Input, Button, Text, Heading, Code, EmptyState } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -24,13 +16,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
-import {
-  CounterModel,
-  DataTableAction,
-  IGenericItem,
-  IResponseMessage,
-  WorkspaceModel,
-} from "@types";
+import { CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -63,17 +49,13 @@ const Workspace = () => {
       }
     }
   `;
-  const [getWorkspace, { loading: workspaceLoading, error: workspaceError }] =
-    useLazyQuery<{
-      workspace: WorkspaceModel;
-    }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+  const [getWorkspace, { loading: workspaceLoading, error: workspaceError }] = useLazyQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
 
   // Queries
   const GET_WORKSPACE_DATA = gql`
-    query GetWorkspaceData(
-      $projectsArchived: Boolean
-      $entitiesArchived: Boolean
-    ) {
+    query GetWorkspaceData($projectsArchived: Boolean, $entitiesArchived: Boolean) {
       projects(archived: $projectsArchived) {
         _id
         name
@@ -101,10 +83,7 @@ const Workspace = () => {
       }
     }
   `;
-  const [
-    getWorkspaceData,
-    { loading: workspaceDataLoading, error: workspaceDataError },
-  ] = useLazyQuery<{
+  const [getWorkspaceData, { loading: workspaceDataLoading, error: workspaceDataError }] = useLazyQuery<{
     entities: {
       entities: (IGenericItem & { archived: boolean })[];
       total: number;
@@ -125,10 +104,8 @@ const Workspace = () => {
       }
     }
   `;
-  const [
-    archiveEntitiesQuery,
-    { error: archiveEntitiesError, loading: archiveEntitiesLoading },
-  ] = useMutation(ARCHIVE_ENTITIES);
+  const [archiveEntitiesQuery, { error: archiveEntitiesError, loading: archiveEntitiesLoading }] =
+    useMutation(ARCHIVE_ENTITIES);
 
   // Mutation to archive Projects
   const ARCHIVE_PROJECTS = gql`
@@ -139,10 +116,8 @@ const Workspace = () => {
       }
     }
   `;
-  const [
-    archiveProjectsQuery,
-    { error: archiveProjectsError, loading: archiveProjectsLoading },
-  ] = useMutation(ARCHIVE_PROJECTS);
+  const [archiveProjectsQuery, { error: archiveProjectsError, loading: archiveProjectsLoading }] =
+    useMutation(ARCHIVE_PROJECTS);
 
   // Mutation to archive Templates
   const ARCHIVE_TEMPLATES = gql`
@@ -153,10 +128,8 @@ const Workspace = () => {
       }
     }
   `;
-  const [
-    archiveTemplatesQuery,
-    { error: archiveTemplatesError, loading: archiveTemplatesLoading },
-  ] = useMutation(ARCHIVE_TEMPLATES);
+  const [archiveTemplatesQuery, { error: archiveTemplatesError, loading: archiveTemplatesLoading }] =
+    useMutation(ARCHIVE_TEMPLATES);
 
   // Mutation to update Workspace
   const UPDATE_WORKSPACE = gql`
@@ -167,10 +140,8 @@ const Workspace = () => {
       }
     }
   `;
-  const [
-    updateWorkspace,
-    { loading: workspaceUpdateLoading, error: workspaceUpdateError },
-  ] = useMutation<IResponseMessage>(UPDATE_WORKSPACE);
+  const [updateWorkspace, { loading: workspaceUpdateLoading, error: workspaceUpdateError }] =
+    useMutation<IResponseMessage>(UPDATE_WORKSPACE);
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -179,26 +150,14 @@ const Workspace = () => {
   const [created, setCreated] = useState("");
 
   // State for Workspace contents
-  const [entities, setEntities] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
-  const [projects, setProjects] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
-  const [templates, setTemplates] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
-  const [shownEntities, setShownEntities] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
+  const [entities, setEntities] = useState([] as (IGenericItem & { archived: boolean })[]);
+  const [projects, setProjects] = useState([] as (IGenericItem & { archived: boolean })[]);
+  const [templates, setTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
+  const [shownEntities, setShownEntities] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedEntities, setSelectedEntities] = useState({});
-  const [shownProjects, setShownProjects] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
+  const [shownProjects, setShownProjects] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedProjects, setSelectedProjects] = useState({});
-  const [shownTemplates, setShownTemplates] = useState(
-    [] as (IGenericItem & { archived: boolean })[],
-  );
+  const [shownTemplates, setShownTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedTemplates, setSelectedTemplates] = useState({});
 
   // State for Workspace collaborators
@@ -238,31 +197,19 @@ const Workspace = () => {
       if (workspaceData.data?.entities?.entities) {
         setEntities(workspaceData.data.entities.entities);
         // Filter to only show archived entities
-        setShownEntities([
-          ...workspaceData.data.entities.entities.filter(
-            (entity) => entity.archived === true,
-          ),
-        ]);
+        setShownEntities([...workspaceData.data.entities.entities.filter((entity) => entity.archived === true)]);
         setSelectedEntities({});
       }
       if (workspaceData.data?.projects) {
         setProjects(workspaceData.data.projects);
         // Filter to only show archived projects
-        setShownProjects([
-          ...workspaceData.data.projects.filter(
-            (project) => project.archived === true,
-          ),
-        ]);
+        setShownProjects([...workspaceData.data.projects.filter((project) => project.archived === true)]);
         setSelectedProjects({});
       }
       if (workspaceData.data?.templates) {
         setTemplates(workspaceData.data.templates);
         // Filter to only show archived templates
-        setShownTemplates([
-          ...workspaceData.data.templates.filter(
-            (template) => template.archived === true,
-          ),
-        ]);
+        setShownTemplates([...workspaceData.data.templates.filter((template) => template.archived === true)]);
         setSelectedTemplates({});
       }
       if (workspaceData.data?.counters) {
@@ -286,17 +233,11 @@ const Workspace = () => {
 
   // Effect to manage what contents are shown - only show archived items
   useEffect(() => {
-    setShownEntities([
-      ...entities.filter((entity) => entity.archived === true),
-    ]);
+    setShownEntities([...entities.filter((entity) => entity.archived === true)]);
     setSelectedEntities({});
-    setShownProjects([
-      ...projects.filter((project) => project.archived === true),
-    ]);
+    setShownProjects([...projects.filter((project) => project.archived === true)]);
     setSelectedProjects({});
-    setShownTemplates([
-      ...templates.filter((template) => template.archived === true),
-    ]);
+    setShownTemplates([...templates.filter((template) => template.archived === true)]);
     setSelectedTemplates({});
   }, [entities, projects, templates]);
 
@@ -320,17 +261,13 @@ const Workspace = () => {
     // Update Entity archive state
     await archiveEntitiesQuery({
       variables: {
-        toArchive: entities
-          .filter((entity) => entity.archived === true)
-          .map((entity) => entity._id),
+        toArchive: entities.filter((entity) => entity.archived === true).map((entity) => entity._id),
         state: true,
       },
     });
     await archiveEntitiesQuery({
       variables: {
-        toArchive: entities
-          .filter((entity) => entity.archived === false)
-          .map((entity) => entity._id),
+        toArchive: entities.filter((entity) => entity.archived === false).map((entity) => entity._id),
         state: false,
       },
     });
@@ -338,17 +275,13 @@ const Workspace = () => {
     // Update Project archive state
     await archiveProjectsQuery({
       variables: {
-        toArchive: projects
-          .filter((project) => project.archived === true)
-          .map((project) => project._id),
+        toArchive: projects.filter((project) => project.archived === true).map((project) => project._id),
         state: true,
       },
     });
     await archiveProjectsQuery({
       variables: {
-        toArchive: projects
-          .filter((project) => project.archived === false)
-          .map((project) => project._id),
+        toArchive: projects.filter((project) => project.archived === false).map((project) => project._id),
         state: false,
       },
     });
@@ -356,17 +289,13 @@ const Workspace = () => {
     // Update Template archive state
     await archiveTemplatesQuery({
       variables: {
-        toArchive: templates
-          .filter((template) => template.archived === true)
-          .map((template) => template._id),
+        toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
         state: true,
       },
     });
     await archiveTemplatesQuery({
       variables: {
-        toArchive: templates
-          .filter((template) => template.archived === false)
-          .map((template) => template._id),
+        toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
         state: false,
       },
     });
@@ -481,18 +410,8 @@ const Workspace = () => {
     entitiesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex
-            w={"100%"}
-            justify={"space-between"}
-            p={"0.5"}
-            gap={"2"}
-            align={"center"}
-          >
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 24}
-              showArrow
-            >
+          <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
@@ -547,18 +466,8 @@ const Workspace = () => {
     projectsTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex
-            w={"100%"}
-            justify={"space-between"}
-            p={"0.5"}
-            gap={"2"}
-            align={"center"}
-          >
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 24}
-              showArrow
-            >
+          <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
@@ -613,18 +522,8 @@ const Workspace = () => {
     templatesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Flex
-            w={"100%"}
-            justify={"space-between"}
-            p={"0.5"}
-            gap={"2"}
-            align={"center"}
-          >
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 24}
-              showArrow
-            >
+          <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
@@ -680,11 +579,7 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex p={"0.5"}>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 24}
-              showArrow
-            >
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), {
                   length: truncateTableText ? 12 : 24,
@@ -701,9 +596,7 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              content={
-                'Counter format string, where "{}" represents the position of the numeric value'
-              }
+              content={'Counter format string, where "{}" represents the position of the numeric value'}
               showArrow
             >
               <Code>{info.getValue()}</Code>
@@ -717,12 +610,7 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex>
-            <Tooltip
-              content={
-                "Current numeric value to be substituted into the Counter format string"
-              }
-              showArrow
-            >
+            <Tooltip content={"Current numeric value to be substituted into the Counter format string"} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {info.getValue()}
               </Text>
@@ -737,9 +625,7 @@ const Workspace = () => {
         return (
           <Flex>
             <Tooltip
-              content={
-                "After a Counter value is consumed, the numeric value is increment by this value"
-              }
+              content={"After a Counter value is consumed, the numeric value is increment by this value"}
               showArrow
             >
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -755,9 +641,7 @@ const Workspace = () => {
 
   return (
     <Content
-      isError={
-        !_.isUndefined(workspaceDataError) || !_.isUndefined(workspaceError)
-      }
+      isError={!_.isUndefined(workspaceDataError) || !_.isUndefined(workspaceError)}
       isLoaded={!workspaceDataLoading && !workspaceLoading}
     >
       <Flex
@@ -769,25 +653,14 @@ const Workspace = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex
-          align={"center"}
-          gap={"1"}
-          p={"1"}
-          border={"2px solid"}
-          rounded={"md"}
-        >
+        <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
           <Icon name={"workspace"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"sm"}>
             {name}
           </Heading>
         </Flex>
         <Flex direction={"row"} align={"center"} gap={"1"}>
-          <Button
-            size={"xs"}
-            rounded={"md"}
-            colorPalette={"red"}
-            onClick={() => navigate("/")}
-          >
+          <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
             Cancel
             <Icon name={"cross"} size={"xs"} />
           </Button>
@@ -798,10 +671,7 @@ const Workspace = () => {
             colorPalette={"green"}
             disabled={name === ""}
             loading={
-              workspaceUpdateLoading ||
-              archiveEntitiesLoading ||
-              archiveProjectsLoading ||
-              archiveTemplatesLoading
+              workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
             }
             onClick={() => handleUpdateClick()}
           >
@@ -856,11 +726,7 @@ const Workspace = () => {
                   Owner
                 </Text>
                 <Flex>
-                  <ActorTag
-                    identifier={owner}
-                    fallback={"Unknown User"}
-                    size={"sm"}
-                  />
+                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -950,9 +816,7 @@ const Workspace = () => {
                     <EmptyState.Indicator>
                       <Icon name={"entity"} size={"lg"} />
                     </EmptyState.Indicator>
-                    <EmptyState.Description>
-                      No Archived Workspace Entities
-                    </EmptyState.Description>
+                    <EmptyState.Description>No Archived Workspace Entities</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}
@@ -1004,9 +868,7 @@ const Workspace = () => {
                     <EmptyState.Indicator>
                       <Icon name={"project"} size={"lg"} />
                     </EmptyState.Indicator>
-                    <EmptyState.Description>
-                      No Archived Workspace Projects
-                    </EmptyState.Description>
+                    <EmptyState.Description>No Archived Workspace Projects</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}
@@ -1056,9 +918,7 @@ const Workspace = () => {
                     <EmptyState.Indicator>
                       <Icon name={"template"} size={"lg"} />
                     </EmptyState.Indicator>
-                    <EmptyState.Description>
-                      No Archived Workspace Templates
-                    </EmptyState.Description>
+                    <EmptyState.Description>No Archived Workspace Templates</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}
@@ -1107,9 +967,7 @@ const Workspace = () => {
                     <EmptyState.Indicator>
                       <Icon name={"counter"} size={"lg"} />
                     </EmptyState.Indicator>
-                    <EmptyState.Description>
-                      No Workspace Counters
-                    </EmptyState.Description>
+                    <EmptyState.Description>No Workspace Counters</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}

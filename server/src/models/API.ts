@@ -23,10 +23,7 @@ const APIRouter = Router();
 const API_VERSION = "v1";
 
 export class API {
-  static generateKey = async (
-    scope: "edit" | "view",
-    workspaces: string[],
-  ): Promise<ResponseData<APIKey>> => {
+  static generateKey = async (scope: "edit" | "view", workspaces: string[]): Promise<ResponseData<APIKey>> => {
     const token = crypto.randomUUID();
     const output = (await hash(token, 10)).slice(7);
 
@@ -42,10 +39,7 @@ export class API {
     };
   };
 
-  static validateRequest = async (
-    request: Request,
-    response: Response,
-  ): Promise<APIKey | null> => {
+  static validateRequest = async (request: Request, response: Response): Promise<APIKey | null> => {
     // Check if API key provided
     if (_.isUndefined(request.headers["api_key"])) {
       const responseData: APIData<object> = {
@@ -56,11 +50,7 @@ export class API {
         data: {},
       };
 
-      response
-        .contentType("application/json")
-        .status(401)
-        .send(JSON.stringify(responseData))
-        .end();
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
     }
 
@@ -77,19 +67,13 @@ export class API {
         message: "Invalid API key",
         data: {},
       };
-      response
-        .contentType("application/json")
-        .status(401)
-        .send(JSON.stringify(responseData))
-        .end();
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
     }
 
     // Validate that the API key is current
     // Get the `APIKey` instance
-    const apiKey = apiUser.api_keys
-      .filter((key) => _.isEqual(key.value, providedKey))
-      .pop();
+    const apiKey = apiUser.api_keys.filter((key) => _.isEqual(key.value, providedKey)).pop();
     if (_.isUndefined(apiKey)) {
       const responseData: APIData<object> = {
         path: request.params.path,
@@ -98,22 +82,14 @@ export class API {
         message: "API key not associated with User",
         data: {},
       };
-      response
-        .contentType("application/json")
-        .status(401)
-        .send(JSON.stringify(responseData))
-        .end();
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
     }
 
     return apiKey;
   };
 
-  static authenticate = async (
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) => {
+  static authenticate = async (request: Request, response: Response, next: NextFunction) => {
     const apiKey = await API.validateRequest(request, response);
     if (_.isNull(apiKey)) {
       return;
@@ -128,11 +104,7 @@ export class API {
         message: "API key expired",
         data: {},
       };
-      response
-        .contentType("application/json")
-        .status(401)
-        .send(JSON.stringify(responseData))
-        .end();
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return;
     }
 
@@ -146,10 +118,7 @@ export class API {
    * @param response
    * @return {Promise<void>}
    */
-  static status = async (
-    _request: Request,
-    response: Response,
-  ): Promise<void> => {
+  static status = async (_request: Request, response: Response): Promise<void> => {
     const responseData: APIData<object> = {
       path: "/",
       version: API_VERSION,
@@ -158,11 +127,7 @@ export class API {
       data: {},
     };
 
-    response
-      .contentType("application/json")
-      .status(200)
-      .send(JSON.stringify(responseData))
-      .end();
+    response.contentType("application/json").status(200).send(JSON.stringify(responseData)).end();
     return;
   };
 
@@ -172,10 +137,7 @@ export class API {
    * @param response
    * @return {Promise<void>}
    */
-  static handler = async (
-    request: Request,
-    response: Response,
-  ): Promise<void> => {
+  static handler = async (request: Request, response: Response): Promise<void> => {
     // Validate the API request
     const apiKey = await API.validateRequest(request, response);
     if (_.isNull(apiKey)) {
@@ -195,11 +157,7 @@ export class API {
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
-          response
-            .contentType("application/json")
-            .status(status)
-            .send(JSON.stringify(responseData))
-            .end();
+          response.contentType("application/json").status(status).send(JSON.stringify(responseData)).end();
           return;
         }
         case "entity": {
@@ -207,11 +165,7 @@ export class API {
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
-          response
-            .contentType("application/json")
-            .status(status)
-            .send(JSON.stringify(responseData))
-            .end();
+          response.contentType("application/json").status(status).send(JSON.stringify(responseData)).end();
           return;
         }
         default: {
@@ -223,11 +177,7 @@ export class API {
             data: {},
           };
 
-          response
-            .contentType("application/json")
-            .status(400)
-            .send(JSON.stringify(responseData))
-            .end();
+          response.contentType("application/json").status(400).send(JSON.stringify(responseData)).end();
           return;
         }
       }
@@ -238,11 +188,7 @@ export class API {
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
-          response
-            .contentType("application/json")
-            .status(status)
-            .send(JSON.stringify(responseData))
-            .end();
+          response.contentType("application/json").status(status).send(JSON.stringify(responseData)).end();
           return;
         }
         default: {
@@ -254,21 +200,14 @@ export class API {
             data: {},
           };
 
-          response
-            .contentType("application/json")
-            .status(400)
-            .send(JSON.stringify(responseData))
-            .end();
+          response.contentType("application/json").status(400).send(JSON.stringify(responseData)).end();
           return;
         }
       }
     }
   };
 
-  static getEntities = async (
-    orcid: string,
-    request: Request,
-  ): Promise<APIData<EntityModel[]>> => {
+  static getEntities = async (orcid: string, request: Request): Promise<APIData<EntityModel[]>> => {
     // Extract the query parameters
     const workspaceIdentifier = request.query.workspace;
     if (_.isUndefined(workspaceIdentifier)) {
@@ -294,10 +233,7 @@ export class API {
     }
 
     // Ensure User is the owner or a collaborator
-    if (
-      !_.isEqual(workspace.owner, orcid) &&
-      !_.includes(workspace.collaborators, orcid)
-    ) {
+    if (!_.isEqual(workspace.owner, orcid) && !_.includes(workspace.collaborators, orcid)) {
       return {
         path: `/${request.params.path}`,
         version: API_VERSION,
@@ -319,10 +255,7 @@ export class API {
     };
   };
 
-  static getEntity = async (
-    orcid: string,
-    request: Request,
-  ): Promise<APIData<EntityModel>> => {
+  static getEntity = async (orcid: string, request: Request): Promise<APIData<EntityModel>> => {
     // Extract query parameters
     const entityIdentifier = request.query.id;
     if (_.isUndefined(entityIdentifier)) {
@@ -392,10 +325,7 @@ export class API {
     }
   };
 
-  static updateEntity = async (
-    orcid: string,
-    request: Request,
-  ): Promise<APIData<object>> => {
+  static updateEntity = async (orcid: string, request: Request): Promise<APIData<object>> => {
     // Extract query parameters
     const entityIdentifier = request.body._id;
     if (_.isUndefined(entityIdentifier)) {

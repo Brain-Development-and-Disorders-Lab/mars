@@ -2,14 +2,7 @@
 import { Entities } from "@models/Entities";
 
 // Custom types
-import {
-  EntityModel,
-  IProject,
-  ProjectHistory,
-  ProjectModel,
-  IResponseMessage,
-  ResponseData,
-} from "@types";
+import { EntityModel, IProject, ProjectHistory, ProjectModel, IResponseMessage, ResponseData } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -32,16 +25,11 @@ export class Projects {
    * @returns {Promise<ProjectModel[]>} Collection of all Project entries
    */
   static all = async (): Promise<ProjectModel[]> => {
-    return await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .find()
-      .toArray();
+    return await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).find().toArray();
   };
 
   static getOne = async (_id: string) => {
-    return await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .findOne({ _id: _id });
+    return await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).findOne({ _id: _id });
   };
 
   static getMany = async (projects: string[]) => {
@@ -70,16 +58,12 @@ export class Projects {
       await Entities.addProject(entity, projectModel._id);
     }
 
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .insertOne(projectModel);
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).insertOne(projectModel);
     const successStatus = _.isEqual(response.insertedId, projectModel._id);
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Created new Project"
-        : "Could not create new Project",
+      message: successStatus ? "Created new Project" : "Could not create new Project",
       data: response.insertedId.toString(),
     };
   };
@@ -190,10 +174,7 @@ export class Projects {
 
     return {
       success: true,
-      message:
-        response.modifiedCount === 1
-          ? "Added history to Project"
-          : "No history added to Project",
+      message: response.modifiedCount === 1 ? "Added history to Project" : "No history added to Project",
     };
   };
 
@@ -203,10 +184,7 @@ export class Projects {
    * @param state Project archive state
    * @return {Promise<IResponseMessage>}
    */
-  static setArchived = async (
-    _id: string,
-    state: boolean,
-  ): Promise<IResponseMessage> => {
+  static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
     consola.debug("Setting archive state of Project:", _id, "Archived:", state);
     const project = await Projects.getOne(_id);
     if (_.isNull(project)) {
@@ -225,19 +203,14 @@ export class Projects {
       },
     };
 
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
       consola.info("Set archive state of Project:", _id, "Archived:", state);
     }
 
     return {
       success: true,
-      message:
-        response.modifiedCount === 1
-          ? "Set archive state of Project"
-          : "No changes made to Project",
+      message: response.modifiedCount === 1 ? "Set archive state of Project" : "No changes made to Project",
     };
   };
 
@@ -256,23 +229,15 @@ export class Projects {
     }
 
     // Execute delete operation
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .deleteOne({ _id: _id });
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).deleteOne({ _id: _id });
 
     return {
       success: response.deletedCount > 0,
-      message:
-        response.deletedCount > 0
-          ? "Deleted Project successfully"
-          : "Unable to delete Project",
+      message: response.deletedCount > 0 ? "Deleted Project successfully" : "Unable to delete Project",
     };
   };
 
-  static addEntity = async (
-    _id: string,
-    entity: string,
-  ): Promise<IResponseMessage> => {
+  static addEntity = async (_id: string, entity: string): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -291,23 +256,16 @@ export class Projects {
       },
     };
 
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added Entity to Project"
-        : "Could not add Entity to Project",
+      message: successStatus ? "Added Entity to Project" : "Could not add Entity to Project",
     };
   };
 
-  static addEntities = async (
-    _id: string,
-    entities: string[],
-  ): Promise<IResponseMessage> => {
+  static addEntities = async (_id: string, entities: string[]): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -323,23 +281,16 @@ export class Projects {
       },
     };
 
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Added Entities to Project"
-        : "Could not add Entities to Project",
+      message: successStatus ? "Added Entities to Project" : "Could not add Entities to Project",
     };
   };
 
-  static removeEntity = async (
-    _id: string,
-    entity: string,
-  ): Promise<IResponseMessage> => {
+  static removeEntity = async (_id: string, entity: string): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -355,16 +306,12 @@ export class Projects {
       },
     };
 
-    const response = await getDatabase()
-      .collection<ProjectModel>(PROJECTS_COLLECTION)
-      .updateOne({ _id: _id }, update);
+    const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus
-        ? "Removed Entity from Project"
-        : "Could not remove Entity from Project",
+      message: successStatus ? "Removed Entity from Project" : "Could not remove Entity from Project",
     };
   };
 
@@ -375,11 +322,7 @@ export class Projects {
    * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
-  static export = async (
-    _id: string,
-    format: "json" | "csv",
-    fields?: string[],
-  ): Promise<string> => {
+  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -434,9 +377,7 @@ export class Projects {
         // Assemble exported object using specified fields
         for await (const field of fields) {
           if (_.isEqual(field, "created")) {
-            formatted["created"] = dayjs(project.created)
-              .format("DD MMM YYYY")
-              .toString();
+            formatted["created"] = dayjs(project.created).format("DD MMM YYYY").toString();
           } else if (_.isEqual(field, "owner")) {
             // "owner" data field
             formatted["owner"] = project.owner;
@@ -466,10 +407,7 @@ export class Projects {
    * @param format Exported file format
    * @return {Promise<string>}
    */
-  static exportEntities = async (
-    _id: string,
-    format: "json",
-  ): Promise<string> => {
+  static exportEntities = async (_id: string, format: "json"): Promise<string> => {
     const project = await Projects.getOne(_id);
 
     if (format !== "json") {

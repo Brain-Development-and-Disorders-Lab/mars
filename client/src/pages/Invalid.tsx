@@ -22,14 +22,7 @@ const Invalid = () => {
 
   return (
     <Content>
-      <Flex
-        direction={"column"}
-        justify={"center"}
-        align={"center"}
-        h={"100%"}
-        mt={{ base: "10%", lg: "0" }}
-        p={"2"}
-      >
+      <Flex direction={"column"} justify={"center"} align={"center"} h={"100%"} mt={{ base: "10%", lg: "0" }} p={"2"}>
         <Flex
           gap={"2"}
           p={"2"}
@@ -53,19 +46,12 @@ const Invalid = () => {
               Metadatify could not locate the requested resource.
             </Text>
             <Text fontSize={"xs"}>
-              The requested resource does not exist or has been deleted, you do
-              not have permission to access it, or network connectivity has been
-              lost.
+              The requested resource does not exist or has been deleted, you do not have permission to access it, or
+              network connectivity has been lost.
             </Text>
           </Flex>
 
-          <Button
-            onClick={() => navigate("/")}
-            size={"xs"}
-            rounded={"md"}
-            variant={"subtle"}
-            colorPalette={"orange"}
-          >
+          <Button onClick={() => navigate("/")} size={"xs"} rounded={"md"} variant={"subtle"} colorPalette={"orange"}>
             Dashboard
             <Icon name={"a_right"} />
           </Button>

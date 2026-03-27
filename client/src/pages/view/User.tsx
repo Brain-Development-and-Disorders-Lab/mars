@@ -1,16 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import {
-  Flex,
-  Input,
-  Button,
-  Text,
-  Heading,
-  IconButton,
-  Tag,
-  Fieldset,
-  Field,
-} from "@chakra-ui/react";
+import { Flex, Input, Button, Text, Heading, IconButton, Tag, Fieldset, Field } from "@chakra-ui/react";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -21,14 +11,7 @@ import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
 
 // Custom types
-import {
-  APIKey,
-  DataTableAction,
-  IResponseMessage,
-  ResponseData,
-  UserModel,
-  WorkspaceModel,
-} from "@types";
+import { APIKey, DataTableAction, IResponseMessage, ResponseData, UserModel, WorkspaceModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -100,10 +83,7 @@ const User = () => {
     }
   `;
 
-  type WorkspacePartial = Pick<
-    WorkspaceModel,
-    "_id" | "name" | "description" | "public" | "owner" | "collaborators"
-  >;
+  type WorkspacePartial = Pick<WorkspaceModel, "_id" | "name" | "description" | "public" | "owner" | "collaborators">;
 
   const { loading, data, error, refetch } = useQuery<{
     user: UserModel;
@@ -130,10 +110,9 @@ const User = () => {
       }
     }
   `;
-  const [
-    generateKey,
-    { loading: generateKeyLoading, error: generateKeyError },
-  ] = useLazyQuery<{ generateKey: ResponseData<APIKey> }>(GENERATE_KEY, {
+  const [generateKey, { loading: generateKeyLoading, error: generateKeyError }] = useLazyQuery<{
+    generateKey: ResponseData<APIKey>;
+  }>(GENERATE_KEY, {
     fetchPolicy: "network-only",
   });
 
@@ -200,8 +179,9 @@ const User = () => {
       }
     }
   `;
-  const [revokeKey, { loading: revokeKeyLoading, error: revokeKeyError }] =
-    useMutation<{ revokeKey: IResponseMessage }>(REVOKE_KEY);
+  const [revokeKey, { loading: revokeKeyLoading, error: revokeKeyError }] = useMutation<{
+    revokeKey: IResponseMessage;
+  }>(REVOKE_KEY);
 
   // Mutation to leave a Workspace (remove self from collaborators)
   const LEAVE_WORKSPACE = gql`
@@ -224,17 +204,11 @@ const User = () => {
   const [userEmail, setUserEmail] = useState("");
   const [userAffiliation, setUserAffiliation] = useState("");
   const [userKeys, setUserKeys] = useState([] as APIKey[]);
-  const [showKeyValues, setShowKeyValues] = useState<Record<string, boolean>>(
-    {},
-  );
+  const [showKeyValues, setShowKeyValues] = useState<Record<string, boolean>>({});
 
   // State for User Workspaces
-  const [userStaticWorkspaces, setUserStaticWorkspaces] = useState(
-    [] as WorkspacePartial[],
-  );
-  const [userWorkspaces, setUserWorkspaces] = useState(
-    [] as WorkspacePartial[],
-  );
+  const [userStaticWorkspaces, setUserStaticWorkspaces] = useState([] as WorkspacePartial[]);
+  const [userWorkspaces, setUserWorkspaces] = useState([] as WorkspacePartial[]);
 
   // State for editing
   const [editing, setEditing] = useState(false);
@@ -358,8 +332,7 @@ const User = () => {
     if (error) {
       toaster.create({
         title: "ORCiD Linking Error",
-        description:
-          error.message || "Unable to link ORCiD account. Please try again.",
+        description: error.message || "Unable to link ORCiD account. Please try again.",
         type: "error",
         duration: 4000,
         closable: true,
@@ -465,9 +438,7 @@ const User = () => {
    * @param {string[]} toRemove List of Workspace identifiers to remove the current user from
    */
   const removeWorkspaces = async (toRemove: string[]) => {
-    const canLeave = userWorkspaces.filter(
-      (w) => _.includes(toRemove, w._id) && !_.isEqual(w.owner, user),
-    );
+    const canLeave = userWorkspaces.filter((w) => _.includes(toRemove, w._id) && !_.isEqual(w.owner, user));
 
     await Promise.all(
       canLeave.map((w) =>
@@ -485,9 +456,7 @@ const User = () => {
       ),
     );
 
-    setUserWorkspaces((prev) =>
-      prev.filter((w) => !canLeave.some((c) => _.isEqual(c._id, w._id))),
-    );
+    setUserWorkspaces((prev) => prev.filter((w) => !canLeave.some((c) => _.isEqual(c._id, w._id))));
   };
 
   // Setup `DataTable` components
@@ -504,13 +473,7 @@ const User = () => {
                 Revoked
               </Text>
             ) : (
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"space-between"}
-                w={"100%"}
-              >
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {dayjs(apiKey.expires).format("DD MMM YYYY")}
                 </Text>
@@ -570,10 +533,7 @@ const User = () => {
                 });
               }}
             >
-              <Icon
-                name={showValue ? "visibility_hide" : "visibility_show"}
-                size={"xs"}
-              />
+              <Icon name={showValue ? "visibility_hide" : "visibility_show"} size={"xs"} />
             </IconButton>
             <IconButton
               size={"2xs"}
@@ -636,11 +596,7 @@ const User = () => {
           : "You cannot leave your only Workspace";
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"}>
-            <Tooltip
-              content={tooltipContent}
-              disabled={editing && !isOwner && userWorkspaces.length > 1}
-              showArrow
-            >
+            <Tooltip content={tooltipContent} disabled={editing && !isOwner && userWorkspaces.length > 1} showArrow>
               <Button
                 size={"2xs"}
                 rounded={"md"}
@@ -688,13 +644,7 @@ const User = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex
-          align={"center"}
-          gap={"1"}
-          p={"1"}
-          border={"2px solid"}
-          rounded={"md"}
-        >
+        <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
           <Icon name={"person"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"sm"}>
             {staticName}
@@ -702,12 +652,7 @@ const User = () => {
         </Flex>
         {editing ? (
           <Flex direction={"row"} align={"center"} gap={"1"}>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"red"}
-              onClick={() => handleCancelClick()}
-            >
+            <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
               Cancel
               <Icon name={"cross"} size={"xs"} />
             </Button>
@@ -744,37 +689,15 @@ const User = () => {
 
       <Flex direction={"column"} gap={"1"} p={"1"}>
         <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"0"}
-            gap={"1"}
-            w={{ base: "100%", md: "40%" }}
-          >
+          <Flex direction={"column"} p={"0"} gap={"1"} w={{ base: "100%", md: "40%" }}>
             {/* User details */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
               {/* Avatar */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text
-                  ml={"0.5"}
-                  textAlign={"left"}
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                >
+                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   Avatar
                 </Text>
-                <ActorTag
-                  identifier={userModel._id}
-                  fallback={"Unknown User"}
-                  size={"md"}
-                  avatarOnly
-                />
+                <ActorTag identifier={userModel._id} fallback={"Unknown User"} size={"md"} avatarOnly />
               </Flex>
 
               {/* Name */}
@@ -782,11 +705,7 @@ const User = () => {
                 <Fieldset.Content>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Field.Root gap={"0"}>
-                      <Field.Label
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                      >
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         First Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -802,11 +721,7 @@ const User = () => {
                       />
                     </Field.Root>
                     <Field.Root gap={"0"}>
-                      <Field.Label
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                      >
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Last Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -827,20 +742,10 @@ const User = () => {
 
               {/* ORCiD */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text
-                  ml={"0.5"}
-                  textAlign={"left"}
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                >
+                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   ORCiD
                 </Text>
-                <Flex
-                  align={"center"}
-                  justify={"start"}
-                  gap={"2"}
-                  wrap={"wrap"}
-                >
+                <Flex align={"center"} justify={"start"} gap={"2"} wrap={"wrap"}>
                   <Tag.Root colorPalette={userOrcid ? "green" : "gray"}>
                     <Tag.Label>{userOrcid || "Not Connected"}</Tag.Label>
                   </Tag.Root>
@@ -865,11 +770,7 @@ const User = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root invalid={emailError !== ""} required gap={"0"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Email
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -899,16 +800,8 @@ const User = () => {
               {/* Affiliation */}
               <Fieldset.Root>
                 <Fieldset.Content>
-                  <Field.Root
-                    invalid={affiliationError !== ""}
-                    required
-                    gap={"0"}
-                  >
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                  <Field.Root invalid={affiliationError !== ""} required gap={"0"}>
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Affiliation
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -936,28 +829,9 @@ const User = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            p={"0"}
-            gap={"1"}
-            grow={"1"}
-            w={{ base: "100%", md: "50%" }}
-          >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                p={"0"}
-                gap={"1"}
-                align={"center"}
-                ml={"0.5"}
-              >
+          <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} w={{ base: "100%", md: "50%" }}>
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
                 <Icon name={"workspace"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Workspaces
@@ -993,27 +867,10 @@ const User = () => {
         <Flex direction={"row"} gap={"1"}>
           <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} basis={"50%"}>
             {/* API options */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Flex
-                  direction={"row"}
-                  justify={"space-between"}
-                  align={"center"}
-                >
-                  <Flex
-                    direction={"row"}
-                    p={"0"}
-                    gap={"1"}
-                    align={"center"}
-                    ml={"0.5"}
-                  >
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
                     <Icon name={"key"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       API Access
@@ -1039,12 +896,7 @@ const User = () => {
                     showPagination
                   />
                 ) : (
-                  <Text
-                    fontWeight={"semibold"}
-                    fontSize={"xs"}
-                    color={"gray.400"}
-                    ml={"0.5"}
-                  >
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.400"} ml={"0.5"}>
                     No API keys
                   </Text>
                 )}

@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Flex,
@@ -65,15 +59,8 @@ const PAGE_SIZE_OPTIONS = [
   { label: "100", value: "100" },
 ];
 
-const includesSome = (
-  row: { getValue: (columnId: string) => unknown },
-  columnId: string,
-  filterValue: unknown[],
-) => {
-  if (
-    !filterValue ||
-    (Array.isArray(filterValue) && filterValue.length === 0)
-  ) {
+const includesSome = (row: { getValue: (columnId: string) => unknown }, columnId: string, filterValue: unknown[]) => {
+  if (!filterValue || (Array.isArray(filterValue) && filterValue.length === 0)) {
     return true;
   }
   if (!Array.isArray(filterValue)) {
@@ -96,9 +83,7 @@ const includesSome = (
   return filterValue.includes(rowValue);
 };
 
-(
-  includesSome as unknown as { autoRemove: (val: unknown) => boolean }
-).autoRemove = (val: unknown) =>
+(includesSome as unknown as { autoRemove: (val: unknown) => boolean }).autoRemove = (val: unknown) =>
   !val || (Array.isArray(val) && val.length === 0);
 
 type ColumnFilterMenuProps<TData extends RowData> = {
@@ -107,11 +92,7 @@ type ColumnFilterMenuProps<TData extends RowData> = {
   table: Table<TData>;
 };
 
-const ColumnFilterMenu = <TData extends RowData>({
-  columnId,
-  data,
-  table,
-}: ColumnFilterMenuProps<TData>) => {
+const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: ColumnFilterMenuProps<TData>) => {
   const [query, setQuery] = useState("");
 
   const getDisplayValue = (val: unknown) => {
@@ -138,9 +119,7 @@ const ColumnFilterMenu = <TData extends RowData>({
   };
 
   const values = useMemo(() => {
-    const rawValues = data.map(
-      (row) => (row as Record<string, unknown>)[columnId],
-    );
+    const rawValues = data.map((row) => (row as Record<string, unknown>)[columnId]);
 
     // Use a Map to ensure uniqueness based on normalized keys
     // For arrays, we want to group by length, so use the display value as the key
@@ -149,9 +128,7 @@ const ColumnFilterMenu = <TData extends RowData>({
       if (val !== null && val !== undefined) {
         // For arrays, use display value as key to group by length
         // For other types, use the normalized key
-        const key = Array.isArray(val)
-          ? getDisplayValue(val)
-          : getFilterKey(val);
+        const key = Array.isArray(val) ? getDisplayValue(val) : getFilterKey(val);
 
         // Only add if we haven't seen this normalized key before
         if (!uniqueMap.has(key)) {
@@ -164,32 +141,17 @@ const ColumnFilterMenu = <TData extends RowData>({
   }, [data, columnId]);
 
   const filtered = useMemo(
-    () =>
-      values.filter((val) =>
-        getDisplayValue(val).toLowerCase().includes(query.toLowerCase()),
-      ),
+    () => values.filter((val) => getDisplayValue(val).toLowerCase().includes(query.toLowerCase())),
     [values, query],
   );
 
-  const currentFilter =
-    (table.getColumn(columnId)?.getFilterValue() as unknown[]) || [];
+  const currentFilter = (table.getColumn(columnId)?.getFilterValue() as unknown[]) || [];
 
   return (
     <Menu.Root>
       <Menu.Trigger asChild>
-        <Button
-          variant="subtle"
-          size="xs"
-          p={0}
-          minW="auto"
-          h="auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Icon
-            name="filter"
-            size="xs"
-            color={currentFilter.length > 0 ? "blue.700" : "gray.600"}
-          />
+        <Button variant="subtle" size="xs" p={0} minW="auto" h="auto" onClick={(e) => e.stopPropagation()}>
+          <Icon name="filter" size="xs" color={currentFilter.length > 0 ? "blue.700" : "gray.600"} />
         </Button>
       </Menu.Trigger>
       <Portal>
@@ -240,9 +202,7 @@ const ColumnFilterMenu = <TData extends RowData>({
                     closeOnSelect={false}
                     onCheckedChange={(checked) => {
                       const prev = currentFilter;
-                      const next = checked
-                        ? [...prev, value]
-                        : prev.filter((v) => v !== value);
+                      const next = checked ? [...prev, value] : prev.filter((v) => v !== value);
                       table.getColumn(columnId)?.setFilterValue(next);
                     }}
                   >
@@ -332,9 +292,7 @@ const customSortingFn = (
 
 const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
-  const [pageLength, setPageLength] = useState<string[]>([
-    props.pageSize?.toString() || "20",
-  ]);
+  const [pageLength, setPageLength] = useState<string[]>([props.pageSize?.toString() || "20"]);
   const [pageIndex, setPageIndex] = useState(props.pageIndex ?? 0);
   const [sorting, setSorting] = useState<SortingState>(() => {
     // Initialize sorting state from props if provided (for server-side sorting)
@@ -387,9 +345,7 @@ const DataTable = (props: DataTableProps) => {
     return initial;
   });
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    props.columnFilters ?? [],
-  );
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(props.columnFilters ?? []);
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRowsRef = useRef(selectedRows);
@@ -401,10 +357,7 @@ const DataTable = (props: DataTableProps) => {
   const prevShowSelectionRef = useRef(props.showSelection);
 
   const getColumnId = useCallback(
-    (column: {
-      id?: string | ((...args: unknown[]) => string);
-      accessorKey?: string;
-    }) => {
+    (column: { id?: string | ((...args: unknown[]) => string); accessorKey?: string }) => {
       // Handle id as string
       if (typeof column.id === "string") {
         return column.id;
@@ -421,16 +374,10 @@ const DataTable = (props: DataTableProps) => {
     [],
   );
 
-  const pageLengthsCollection = useMemo(
-    () => createListCollection({ items: PAGE_SIZE_OPTIONS }),
-    [],
-  );
+  const pageLengthsCollection = useMemo(() => createListCollection({ items: PAGE_SIZE_OPTIONS }), []);
 
   useEffect(() => {
-    if (
-      props.onSelectedRowsChange &&
-      !_.isEqual(prevSelectedRowsRef.current, selectedRows)
-    ) {
+    if (props.onSelectedRowsChange && !_.isEqual(prevSelectedRowsRef.current, selectedRows)) {
       const rowSet = Object.keys(selectedRows)
         .map((idx) => props.data[parseInt(idx)])
         .filter(Boolean);
@@ -440,10 +387,7 @@ const DataTable = (props: DataTableProps) => {
   }, [selectedRows, props.data, props.onSelectedRowsChange]);
 
   useEffect(() => {
-    if (
-      props.onColumnFiltersChange &&
-      !_.isEqual(prevColumnFiltersRef.current, columnFilters)
-    ) {
+    if (props.onColumnFiltersChange && !_.isEqual(prevColumnFiltersRef.current, columnFilters)) {
       props.onColumnFiltersChange(columnFilters);
       prevColumnFiltersRef.current = columnFilters;
     }
@@ -512,13 +456,7 @@ const DataTable = (props: DataTableProps) => {
             <Checkbox.Root
               size="xs"
               colorPalette="blue"
-              checked={
-                row.getIsSelected()
-                  ? true
-                  : row.getIsSomeSelected()
-                    ? "indeterminate"
-                    : false
-              }
+              checked={row.getIsSelected() ? true : row.getIsSomeSelected() ? "indeterminate" : false}
               disabled={!row.getCanSelect() || props.viewOnly}
               onChange={row.getToggleSelectedHandler()}
             >
@@ -543,13 +481,7 @@ const DataTable = (props: DataTableProps) => {
     () =>
       columns
         .map((col) => getColumnId(col))
-        .filter(
-          (id) =>
-            id &&
-            typeof id === "string" &&
-            id.trim().length > 0 &&
-            !NON_TOGGLEABLE_COLUMNS.includes(id),
-        ),
+        .filter((id) => id && typeof id === "string" && id.trim().length > 0 && !NON_TOGGLEABLE_COLUMNS.includes(id)),
     [columns, getColumnId],
   );
 
@@ -570,9 +502,7 @@ const DataTable = (props: DataTableProps) => {
 
   const columnNamesCollection = useMemo(() => {
     const items = allColumnIds
-      .filter(
-        (name) => name && typeof name === "string" && name.trim().length > 0,
-      )
+      .filter((name) => name && typeof name === "string" && name.trim().length > 0)
       .map((name) => ({
         value: name,
         label: _.capitalize(name) || name,
@@ -596,24 +526,14 @@ const DataTable = (props: DataTableProps) => {
     merged["select"] = !!props.showSelection;
 
     return merged;
-  }, [
-    columnVisibility,
-    props.visibleColumns,
-    columnNames,
-    props.showSelection,
-  ]);
+  }, [columnVisibility, props.visibleColumns, columnNames, props.showSelection]);
 
   const table = useReactTable({
     data: props.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel:
-      isServerSidePagination && props.onSortChange
-        ? undefined
-        : getSortedRowModel(),
-    getPaginationRowModel: isServerSidePagination
-      ? undefined
-      : getPaginationRowModel(),
+    getSortedRowModel: isServerSidePagination && props.onSortChange ? undefined : getSortedRowModel(),
+    getPaginationRowModel: isServerSidePagination ? undefined : getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     manualPagination: isServerSidePagination,
     manualSorting: isServerSidePagination && props.onSortChange ? true : false,
@@ -639,8 +559,7 @@ const DataTable = (props: DataTableProps) => {
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: (updater) => {
-      const newSorting =
-        typeof updater === "function" ? updater(sorting) : updater;
+      const newSorting = typeof updater === "function" ? updater(sorting) : updater;
       setSorting(newSorting);
 
       // Notify parent of sort changes for server-side sorting
@@ -655,8 +574,7 @@ const DataTable = (props: DataTableProps) => {
     },
     onPaginationChange: (updater) => {
       const currentState = table.getState().pagination;
-      const newState =
-        typeof updater === "function" ? updater(currentState) : updater;
+      const newState = typeof updater === "function" ? updater(currentState) : updater;
 
       const pageSizeChanged = newState.pageSize !== currentState.pageSize;
 
@@ -725,8 +643,7 @@ const DataTable = (props: DataTableProps) => {
       const id = getColumnId(column);
       if (id && !NON_TOGGLEABLE_COLUMNS.includes(id) && !columnWidths[id]) {
         const meta = column.meta as ColumnMeta | undefined;
-        initialWidths[id] =
-          meta?.fixedWidth || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+        initialWidths[id] = meta?.fixedWidth || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
         hasNewWidths = true;
       }
     });
@@ -736,14 +653,9 @@ const DataTable = (props: DataTableProps) => {
   }, [columnIdsFromProps, columnNames, columnWidths, columns, getColumnId]);
 
   useEffect(() => {
-    const columnIdsChanged =
-      columnIdsFromProps.join(",") !== prevColumnIdsRef.current.join(",");
-    const visibleColumnsChanged = !_.isEqual(
-      prevVisibleColumnsRef.current,
-      props.visibleColumns,
-    );
-    const showSelectionChanged =
-      prevShowSelectionRef.current !== props.showSelection;
+    const columnIdsChanged = columnIdsFromProps.join(",") !== prevColumnIdsRef.current.join(",");
+    const visibleColumnsChanged = !_.isEqual(prevVisibleColumnsRef.current, props.visibleColumns);
+    const showSelectionChanged = prevShowSelectionRef.current !== props.showSelection;
 
     if (!columnIdsChanged && !visibleColumnsChanged && !showSelectionChanged) {
       return;
@@ -783,9 +695,7 @@ const DataTable = (props: DataTableProps) => {
         columnIdsFromProps.forEach((column) => {
           if (updatedVisibility[column] === undefined) {
             updatedVisibility[column] =
-              props.visibleColumns[column] !== undefined
-                ? props.visibleColumns[column]
-                : true;
+              props.visibleColumns[column] !== undefined ? props.visibleColumns[column] : true;
             hasChanges = true;
           }
         });
@@ -803,22 +713,11 @@ const DataTable = (props: DataTableProps) => {
 
       return hasChanges ? updatedVisibility : currentVisibility;
     });
-  }, [
-    columnIdsFromProps,
-    props.visibleColumns,
-    props.showSelection,
-    columns,
-    getColumnId,
-    columnNames,
-  ]);
+  }, [columnIdsFromProps, props.visibleColumns, props.showSelection, columns, getColumnId, columnNames]);
 
   const visibleColumnsForSelect = useMemo(() => {
-    const visibleToggleable = columnNames.filter(
-      (column) => mergedColumnVisibility[column] === true,
-    );
-    const alwaysVisible = allColumnIds.filter((id) =>
-      ALWAYS_VISIBLE_COLUMNS.includes(id),
-    );
+    const visibleToggleable = columnNames.filter((column) => mergedColumnVisibility[column] === true);
+    const alwaysVisible = allColumnIds.filter((id) => ALWAYS_VISIBLE_COLUMNS.includes(id));
     return [...alwaysVisible, ...visibleToggleable];
   }, [columnNames, mergedColumnVisibility, allColumnIds]);
 
@@ -852,10 +751,7 @@ const DataTable = (props: DataTableProps) => {
   const rows = table.getRowModel().rows;
 
   const calculateTotalMinWidth = useCallback(() => {
-    const visibleHeaders =
-      headerGroups[0]?.headers.filter((header) =>
-        header.column.getIsVisible(),
-      ) || [];
+    const visibleHeaders = headerGroups[0]?.headers.filter((header) => header.column.getIsVisible()) || [];
 
     let totalMinWidth = 0;
     visibleHeaders.forEach((header) => {
@@ -867,8 +763,7 @@ const DataTable = (props: DataTableProps) => {
         if (meta?.fixedWidth) {
           totalMinWidth += meta.fixedWidth;
         } else {
-          totalMinWidth +=
-            columnWidths[id] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+          totalMinWidth += columnWidths[id] || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
         }
       }
     });
@@ -886,9 +781,7 @@ const DataTable = (props: DataTableProps) => {
       if (columnId === "select") {
         return SELECT_COLUMN_WIDTH;
       }
-      const meta = table.getColumn(columnId)?.columnDef.meta as
-        | ColumnMeta
-        | undefined;
+      const meta = table.getColumn(columnId)?.columnDef.meta as ColumnMeta | undefined;
 
       if (meta?.fixedWidth) {
         return meta.fixedWidth;
@@ -904,9 +797,7 @@ const DataTable = (props: DataTableProps) => {
       if (columnId === "select") {
         return `${SELECT_COLUMN_WIDTH}px`;
       }
-      const meta = table.getColumn(columnId)?.columnDef.meta as
-        | ColumnMeta
-        | undefined;
+      const meta = table.getColumn(columnId)?.columnDef.meta as ColumnMeta | undefined;
 
       if (meta?.fixedWidth) {
         return `${meta.fixedWidth}px`;
@@ -925,22 +816,14 @@ const DataTable = (props: DataTableProps) => {
 
   const getColumnAlign = useCallback(
     (columnId: string): "left" | "center" | "right" => {
-      const meta = table.getColumn(columnId)?.columnDef.meta as
-        | ColumnMeta
-        | undefined;
+      const meta = table.getColumn(columnId)?.columnDef.meta as ColumnMeta | undefined;
       return meta?.align || "left";
     },
     [table],
   );
 
   return (
-    <Box
-      w="100%"
-      maxW="100%"
-      display="flex"
-      flexDirection="column"
-      css={{ WebkitOverflowScrolling: "touch" }}
-    >
+    <Box w="100%" maxW="100%" display="flex" flexDirection="column" css={{ WebkitOverflowScrolling: "touch" }}>
       <Box
         ref={containerRef}
         w="100%"
@@ -976,8 +859,7 @@ const DataTable = (props: DataTableProps) => {
                 .filter((header) => header.column.getIsVisible())
                 .map((header, headerIndex, visibleHeaders) => {
                   const isSelectColumn = header.id === "select";
-                  const isLastColumn =
-                    headerIndex === visibleHeaders.length - 1;
+                  const isLastColumn = headerIndex === visibleHeaders.length - 1;
                   const columnWidth = getColumnWidth(header.id, isLastColumn);
                   const columnMinWidth = getColumnMinWidth(header.id);
                   const align = getColumnAlign(header.id);
@@ -1004,30 +886,13 @@ const DataTable = (props: DataTableProps) => {
                       flexShrink={0}
                     >
                       {isSelectColumn ? (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )
+                        flexRender(header.column.columnDef.header, header.getContext())
                       ) : (
-                        <Flex
-                          direction="row"
-                          align="center"
-                          gap={1}
-                          justify="space-between"
-                          w="100%"
-                        >
+                        <Flex direction="row" align="center" gap={1} justify="space-between" w="100%">
                           <Text textAlign={align}>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
+                            {flexRender(header.column.columnDef.header, header.getContext())}
                           </Text>
-                          <Flex
-                            direction="row"
-                            gap={1}
-                            align="center"
-                            justify="center"
-                          >
+                          <Flex direction="row" gap={1} align="center" justify="center">
                             {canSortColumn(header.id) && (
                               <Button
                                 size="xs"
@@ -1048,21 +913,13 @@ const DataTable = (props: DataTableProps) => {
                                         ? "sort_down"
                                         : "sort"
                                   }
-                                  color={
-                                    header.column.getIsSorted()
-                                      ? "blue.700"
-                                      : "gray.600"
-                                  }
+                                  color={header.column.getIsSorted() ? "blue.700" : "gray.600"}
                                   size="xs"
                                 />
                               </Button>
                             )}
                             {canSortColumn(header.id) && (
-                              <ColumnFilterMenu<RowData>
-                                columnId={header.id}
-                                data={props.data}
-                                table={table}
-                              />
+                              <ColumnFilterMenu<RowData> columnId={header.id} data={props.data} table={table} />
                             )}
                           </Flex>
                         </Flex>
@@ -1073,11 +930,7 @@ const DataTable = (props: DataTableProps) => {
             </Flex>
           )}
 
-          <Box
-            overflowY="auto"
-            overflowX="hidden"
-            w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
-          >
+          <Box overflowY="auto" overflowX="hidden" w={props.fill !== false ? "100%" : `${totalMinWidth}px`}>
             {rows.map((row, rowIndex) => {
               const isSelected = row.getIsSelected();
               const visibleCells = row.getVisibleCells();
@@ -1087,9 +940,7 @@ const DataTable = (props: DataTableProps) => {
                   id={row.id}
                   gap={0}
                   w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
-                  borderBottom={
-                    rowIndex < rows.length - 1 ? "1px solid" : "none"
-                  }
+                  borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
                   borderColor="gray.200"
                   _hover={{ bg: "gray.25" }}
                   overflow="hidden"
@@ -1097,10 +948,7 @@ const DataTable = (props: DataTableProps) => {
                 >
                   {visibleCells.map((cell, cellIndex) => {
                     const isLastCell = cellIndex === visibleCells.length - 1;
-                    const columnWidth = getColumnWidth(
-                      cell.column.id,
-                      isLastCell,
-                    );
+                    const columnWidth = getColumnWidth(cell.column.id, isLastCell);
                     const columnMinWidth = getColumnMinWidth(cell.column.id);
                     const align = getColumnAlign(cell.column.id);
                     return (
@@ -1119,20 +967,11 @@ const DataTable = (props: DataTableProps) => {
                         overflow="hidden"
                         display="flex"
                         alignItems="center"
-                        justifyContent={
-                          align === "center"
-                            ? "center"
-                            : align === "right"
-                              ? "flex-end"
-                              : "flex-start"
-                        }
+                        justifyContent={align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"}
                         bg={isSelected ? "blue.50" : "transparent"}
                         flexShrink={0}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </Box>
                     );
                   })}
@@ -1143,14 +982,7 @@ const DataTable = (props: DataTableProps) => {
         </Box>
       </Box>
 
-      <Flex
-        gap={1}
-        align="center"
-        justify="space-between"
-        w="100%"
-        mt={1}
-        flexShrink={0}
-      >
+      <Flex gap={1} align="center" justify="space-between" w="100%" mt={1} flexShrink={0}>
         <Flex direction="row" gap={1} align="center" flexShrink={0}>
           {props.showPagination && (
             <Flex direction="row" gap={1} align="center">
@@ -1244,11 +1076,7 @@ const DataTable = (props: DataTableProps) => {
                       );
                     })
                   ) : (
-                    <Menu.Item
-                      key="no-actions"
-                      disabled
-                      value="No actions available"
-                    >
+                    <Menu.Item key="no-actions" disabled value="No actions available">
                       <Flex direction="row" gap="1" align="center">
                         <Text fontSize="xs">No Actions available</Text>
                       </Flex>
@@ -1260,75 +1088,64 @@ const DataTable = (props: DataTableProps) => {
           )}
         </Flex>
 
-        {allColumnIds.length > 0 &&
-          props.showColumnSelect &&
-          showAdvancedControls && (
-            <Flex
-              direction="row"
-              gap={1}
-              align="center"
-              wrap="wrap"
-              justify="center"
-              grow={1}
+        {allColumnIds.length > 0 && props.showColumnSelect && showAdvancedControls && (
+          <Flex direction="row" gap={1} align="center" wrap="wrap" justify="center" grow={1}>
+            <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+              Show Columns:
+            </Text>
+            <Select.Root
+              key="select-columns"
+              size="xs"
+              w="200px"
+              collection={columnNamesCollection}
+              value={visibleColumnsForSelect}
+              onValueChange={(details) => {
+                const toggleableColumns = (details.value as string[]).filter(
+                  (col) => !ALWAYS_VISIBLE_COLUMNS.includes(col),
+                );
+                updateColumnVisibility(toggleableColumns);
+              }}
+              multiple
             >
-              <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
-                Show Columns:
-              </Text>
-              <Select.Root
-                key="select-columns"
-                size="xs"
-                w="200px"
-                collection={columnNamesCollection}
-                value={visibleColumnsForSelect}
-                onValueChange={(details) => {
-                  const toggleableColumns = (details.value as string[]).filter(
-                    (col) => !ALWAYS_VISIBLE_COLUMNS.includes(col),
-                  );
-                  updateColumnVisibility(toggleableColumns);
-                }}
-                multiple
-              >
-                <Select.HiddenSelect />
-                <Select.Control>
-                  <Select.Trigger rounded="md">
-                    <Select.ValueText placeholder="Visible Columns" />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content>
-                      {(columnNamesCollection.items || []).map((item) => {
-                        const isDisabled = ALWAYS_VISIBLE_COLUMNS.includes(
-                          item.value,
-                        );
-                        return (
-                          <Select.Item
-                            item={item}
-                            key={item.value}
-                            pointerEvents={isDisabled ? "none" : "auto"}
-                            opacity={isDisabled ? 0.5 : 1}
-                            cursor={isDisabled ? "not-allowed" : "pointer"}
-                            onClick={(e) => {
-                              if (isDisabled) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }
-                            }}
-                          >
-                            {item.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        );
-                      })}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
-            </Flex>
-          )}
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger rounded="md">
+                  <Select.ValueText placeholder="Visible Columns" />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    {(columnNamesCollection.items || []).map((item) => {
+                      const isDisabled = ALWAYS_VISIBLE_COLUMNS.includes(item.value);
+                      return (
+                        <Select.Item
+                          item={item}
+                          key={item.value}
+                          pointerEvents={isDisabled ? "none" : "auto"}
+                          opacity={isDisabled ? 0.5 : 1}
+                          cursor={isDisabled ? "not-allowed" : "pointer"}
+                          onClick={(e) => {
+                            if (isDisabled) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                          }}
+                        >
+                          {item.label}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      );
+                    })}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
+          </Flex>
+        )}
 
         {props.showPagination && showAdvancedControls && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">

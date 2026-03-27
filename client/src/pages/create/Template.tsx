@@ -121,8 +121,7 @@ const Template = () => {
 
     // Default blocker condition
     return (
-      (name !== "" || description !== "" || values.length > 0) &&
-      currentLocation.pathname !== nextLocation.pathname
+      (name !== "" || description !== "" || values.length > 0) && currentLocation.pathname !== nextLocation.pathname
     );
   });
   const { onClose: onBlockerClose } = useDisclosure();
@@ -144,10 +143,7 @@ const Template = () => {
       },
     });
 
-    if (
-      !response.data?.createTemplate ||
-      !response.data.createTemplate.success
-    ) {
+    if (!response.data?.createTemplate || !response.data.createTemplate.success) {
       toaster.create({
         title: "Error",
         description: "An error occurred when creating Template",
@@ -183,22 +179,12 @@ const Template = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex
-          direction={"row"}
-          p={"1"}
-          align={"center"}
-          justify={"space-between"}
-        >
+        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"template"} size={"xs"} />
             <Heading size={"sm"}>Create Template</Heading>
             <Spacer />
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              variant={"outline"}
-              onClick={() => setInformationOpen(true)}
-            >
+            <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
               Info
               <Icon name={"info"} size={"xs"} />
             </Button>
@@ -215,21 +201,11 @@ const Template = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
+            <Flex direction={"column"} p={"1"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"}>
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Template Name
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -242,9 +218,7 @@ const Template = () => {
                       required
                     />
                     {isNameError && (
-                      <Field.ErrorText fontSize={"xs"}>
-                        A name must be specified for the Template.
-                      </Field.ErrorText>
+                      <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
                     )}
                     <Field.HelperText fontSize={"xs"}>
                       Provide a concise and descriptive name for the Template.
@@ -265,22 +239,11 @@ const Template = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Template Description
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -321,16 +284,11 @@ const Template = () => {
                     <Field.RequiredIndicator />
                   </Field.Label>
                   <Text fontSize={"xs"}>
-                    Specify at least 1 Value for this Template. A name and type
-                    is required, however the actual value is optional.
+                    Specify at least 1 Value for this Template. A name and type is required, however the actual value is
+                    optional.
                   </Text>
                 </Flex>
-                <Values
-                  viewOnly={false}
-                  values={values}
-                  setValues={setValues}
-                  requireData={true}
-                />
+                <Values viewOnly={false} values={values} setValues={setValues} requireData={true} />
               </Field.Root>
             </Fieldset.Content>
           </Fieldset.Root>
@@ -351,19 +309,9 @@ const Template = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.CloseTrigger asChild>
-              <CloseButton
-                size={"2xs"}
-                top={"6px"}
-                onClick={() => setInformationOpen(false)}
-              />
+              <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
             </Dialog.CloseTrigger>
-            <Dialog.Header
-              p={"2"}
-              fontWeight={"semibold"}
-              fontSize={"xs"}
-              bg={"blue.300"}
-              roundedTop={"md"}
-            >
+            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Icon name={"template"} size={"xs"} />
                 Template Attributes
@@ -371,21 +319,13 @@ const Template = () => {
             </Dialog.Header>
             <Dialog.Body p={"1"}>
               <Flex gap={"1"} direction={"column"}>
-                <Flex
-                  direction={"column"}
-                  gap={"1"}
-                  bg={"gray.100"}
-                  p={"1"}
-                  rounded={"md"}
-                >
+                <Flex direction={"column"} gap={"1"} bg={"gray.100"} p={"1"} rounded={"md"}>
                   <Heading size={"xs"}>Overview</Heading>
                   <Text fontSize={"xs"}>
-                    Create a new template Attribute to be used to specify
-                    metadata associated with Entities. Using Values, predefined
-                    metadata fields can be associated with Entities. After
-                    creating a template Attribute, it can be used during the
-                    Entity creation process to pre-populate Attribute
-                    information and Entity metadata.
+                    Create a new template Attribute to be used to specify metadata associated with Entities. Using
+                    Values, predefined metadata fields can be associated with Entities. After creating a template
+                    Attribute, it can be used during the Entity creation process to pre-populate Attribute information
+                    and Entity metadata.
                   </Text>
                 </Flex>
 
@@ -394,9 +334,8 @@ const Template = () => {
                     Values
                   </Text>
                   <Text fontSize={"xs"}>
-                    Values can be added to the template Attribute by clicking
-                    "Add Value" and selecting the specific type of Value. There
-                    are six supported Value types:
+                    Values can be added to the template Attribute by clicking "Add Value" and selecting the specific
+                    type of Value. There are six supported Value types:
                   </Text>
                   <Box as={"ul"} listStyleType={"circle"}>
                     <Flex gap={"1"} align={"center"}>
@@ -404,27 +343,21 @@ const Template = () => {
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         Date:
                       </Text>
-                      <Text fontSize={"xs"}>
-                        Used to specify a point in time.
-                      </Text>
+                      <Text fontSize={"xs"}>Used to specify a point in time.</Text>
                     </Flex>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_text"} color={"blue.300"} />
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         Text:
                       </Text>
-                      <Text fontSize={"xs"}>
-                        Used to specify text of variable length.
-                      </Text>
+                      <Text fontSize={"xs"}>Used to specify text of variable length.</Text>
                     </Flex>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_number"} color={"green.300"} />
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         Number:
                       </Text>
-                      <Text fontSize={"xs"}>
-                        Used to specify a numerical value.
-                      </Text>
+                      <Text fontSize={"xs"}>Used to specify a numerical value.</Text>
                     </Flex>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_url"} color={"yellow.300"} />
@@ -438,18 +371,14 @@ const Template = () => {
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         Entity:
                       </Text>
-                      <Text fontSize={"xs"}>
-                        Used to specify a relation to another Entity.
-                      </Text>
+                      <Text fontSize={"xs"}>Used to specify a relation to another Entity.</Text>
                     </Flex>
                     <Flex gap={"1"} align={"center"}>
                       <Icon name={"v_select"} color={"teal.300"} />
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         Select:
                       </Text>
-                      <Text fontSize={"xs"}>
-                        Used to specify an option from a group of options.
-                      </Text>
+                      <Text fontSize={"xs"}>Used to specify an option from a group of options.</Text>
                     </Flex>
                   </Box>
                 </Flex>

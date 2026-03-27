@@ -34,8 +34,6 @@ export const Default: Story = {
 
 export const WithError: Story = {
   args: {
-    error: new Error(
-      "GraphQL error: Could not resolve entity with the given identifier",
-    ),
+    error: new Error("GraphQL error: Could not resolve entity with the given identifier"),
   },
 } satisfies Story;

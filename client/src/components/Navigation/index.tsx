@@ -2,15 +2,7 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import {
-  Flex,
-  IconButton,
-  Image,
-  Button,
-  Text,
-  Menu,
-  Spacer,
-} from "@chakra-ui/react";
+import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
 import ScanModal from "@components/ScanModal";
@@ -43,20 +35,9 @@ const Navigation = () => {
   return (
     <Flex w={"100%"} p={"2"} bg={"gray.100"}>
       {/* Desktop navigation group */}
-      <Flex
-        direction={"column"}
-        display={{ base: "none", lg: "flex" }}
-        gap={"2"}
-        w={"100%"}
-      >
+      <Flex direction={"column"} display={{ base: "none", lg: "flex" }} gap={"2"} w={"100%"}>
         {/* Heading */}
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          p={"1"}
-          align={"center"}
-          justify={"center"}
-        >
+        <Flex direction={"row"} gap={"2"} p={"1"} align={"center"} justify={"center"}>
           <Image src="/Favicon.png" boxSize={"20px"} />
           <Text fontWeight={"semibold"} fontSize={"lg"} color={"brand"}>
             Metadatify
@@ -98,11 +79,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/activity")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
+              bg={_.includes(location.pathname, "/activity") ? "#ffffff" : "gray.100"}
               _hover={{ bg: "gray.200" }}
               color={"black"}
               onClick={() => navigate("/activity")}
@@ -119,11 +96,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/search")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
+              bg={_.includes(location.pathname, "/search") ? "#ffffff" : "gray.100"}
               _hover={{ bg: "gray.200" }}
               color={"black"}
               onClick={() => navigate("/search")}
@@ -140,11 +113,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/create")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
+              bg={_.includes(location.pathname, "/create") ? "#ffffff" : "gray.100"}
               _hover={{ bg: "gray.200" }}
               color={"black"}
               onClick={() => navigate("/create")}
@@ -165,8 +134,7 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/entit") &&
-                !_.includes(location.pathname, "/create")
+                _.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create")
                   ? "#ffffff"
                   : "gray.100"
               }
@@ -188,8 +156,7 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/project") &&
-                !_.includes(location.pathname, "/create")
+                _.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create")
                   ? "#ffffff"
                   : "gray.100"
               }
@@ -211,8 +178,7 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/template") &&
-                !_.includes(location.pathname, "/create")
+                _.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create")
                   ? "#ffffff"
                   : "gray.100"
               }
@@ -403,17 +369,8 @@ const Navigation = () => {
               </Menu.ItemGroup>
 
               {/* Version number */}
-              <Flex
-                direction={"row"}
-                gap={"2"}
-                align={"center"}
-                justify={"center"}
-              >
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
+              <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                   v{process.env.VERSION}
                 </Text>
               </Flex>

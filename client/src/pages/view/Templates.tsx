@@ -47,9 +47,7 @@ const Templates = () => {
 
   // Page state
   const [templates, setTemplates] = useState([] as AttributeModel[]);
-  const [filteredTemplates, setFilteredTemplates] = useState(
-    [] as AttributeModel[],
-  );
+  const [filteredTemplates, setFilteredTemplates] = useState([] as AttributeModel[]);
 
   // Filter state (temporary values before applying)
   const [filterState, setFilterState] = useState({
@@ -110,24 +108,18 @@ const Templates = () => {
     // Filter by date range
     if (appliedFilters.startDate) {
       const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((template) =>
-        dayjs(template.timestamp).isSameOrAfter(startDate),
-      );
+      filtered = filtered.filter((template) => dayjs(template.timestamp).isSameOrAfter(startDate));
       activeFilterCount++;
     }
     if (appliedFilters.endDate) {
       const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((template) =>
-        dayjs(template.timestamp).isSameOrBefore(endDate),
-      );
+      filtered = filtered.filter((template) => dayjs(template.timestamp).isSameOrBefore(endDate));
       activeFilterCount++;
     }
 
     // Filter by owners
     if (appliedFilters.owners.length > 0) {
-      filtered = filtered.filter((template) =>
-        appliedFilters.owners.includes(template.owner),
-      );
+      filtered = filtered.filter((template) => appliedFilters.owners.includes(template.owner));
       activeFilterCount += appliedFilters.owners.length;
     }
 
@@ -186,11 +178,7 @@ const Templates = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 48}
-              showArrow
-            >
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -225,14 +213,8 @@ const Templates = () => {
         }
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 64}
-              showArrow
-            >
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 64 })}
-              </Text>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
             </Tooltip>
           </Flex>
         );
@@ -245,14 +227,7 @@ const Templates = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return (
-          <ActorTag
-            identifier={info.getValue()}
-            fallback={"Unknown User"}
-            size={"sm"}
-            inline
-          />
-        );
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "Owner",
       enableHiding: true,
@@ -282,30 +257,13 @@ const Templates = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex
-        direction={"row"}
-        p={"1"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"1"}
-      >
-        <Flex
-          w={"100%"}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-        >
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"}>
+        <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
             <Icon name={"template"} size={"sm"} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
-            <Button
-              colorPalette={"green"}
-              onClick={() => navigate("/create/template")}
-              size={"xs"}
-              rounded={"md"}
-            >
+            <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
               Create Template
               <Icon name={"add"} size={"xs"} />
             </Button>
@@ -313,29 +271,14 @@ const Templates = () => {
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"}>
           <Text fontSize={"xs"} ml={"0.5"}>
-            All Templates in the current Workspace are shown below. Sort the
-            Templates using the column headers or use the filters below.
+            All Templates in the current Workspace are shown below. Sort the Templates using the column headers or use
+            the filters below.
           </Text>
 
           {/* Filter Section */}
-          <Collapsible.Root
-            open={filtersOpen}
-            onOpenChange={(event) => setFiltersOpen(event.open)}
-          >
-            <Flex
-              direction={"column"}
-              gap={"1"}
-              p={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"space-between"}
-              >
+          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
+            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -352,20 +295,13 @@ const Templates = () => {
               <Collapsible.Content>
                 <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
                   {/* Date Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Created Between
                     </Text>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          Start (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -380,9 +316,7 @@ const Templates = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          End (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -400,21 +334,11 @@ const Templates = () => {
                   </Flex>
 
                   {/* Owner Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Owner
                     </Text>
-                    <Flex
-                      direction={"column"}
-                      gap={"1"}
-                      maxH={"200px"}
-                      overflowY={"auto"}
-                    >
+                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
                       {_.uniq(templates.map((t) => t.owner))
                         .filter((owner) => owner)
                         .map((owner) => (
@@ -433,9 +357,7 @@ const Templates = () => {
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  owners: filterState.owners.filter(
-                                    (o) => o !== owner,
-                                  ),
+                                  owners: filterState.owners.filter((o) => o !== owner),
                                 });
                               }
                             }}
@@ -443,12 +365,7 @@ const Templates = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag
-                                identifier={owner}
-                                fallback={"Unknown User"}
-                                size="sm"
-                                inline
-                              />
+                              <ActorTag identifier={owner} fallback={"Unknown User"} size="sm" inline />
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
@@ -456,12 +373,7 @@ const Templates = () => {
                   </Flex>
 
                   {/* Value Count Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Value Count
                     </Text>
@@ -477,18 +389,12 @@ const Templates = () => {
                             if (isChecked) {
                               setFilterState({
                                 ...filterState,
-                                valueCountRanges: [
-                                  ...filterState.valueCountRanges,
-                                  range,
-                                ],
+                                valueCountRanges: [...filterState.valueCountRanges, range],
                               });
                             } else {
                               setFilterState({
                                 ...filterState,
-                                valueCountRanges:
-                                  filterState.valueCountRanges.filter(
-                                    (r) => r !== range,
-                                  ),
+                                valueCountRanges: filterState.valueCountRanges.filter((r) => r !== range),
                               });
                             }
                           }}
@@ -496,11 +402,7 @@ const Templates = () => {
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
                           <Checkbox.Label fontSize={"xs"}>
-                            {range === "0"
-                              ? "0 values"
-                              : range === "11+"
-                                ? "11+ values"
-                                : `${range} values`}
+                            {range === "0" ? "0 values" : range === "11+" ? "11+ values" : `${range} values`}
                           </Checkbox.Label>
                         </Checkbox.Root>
                       ))}
@@ -512,12 +414,7 @@ const Templates = () => {
           </Collapsible.Root>
 
           {/* Buttons and Active Filter Count */}
-          <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"flex-end"}
-          >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
             <Text fontWeight={"semibold"} fontSize={"xs"}>
               {activeFilterCount} Active Filter
               {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
@@ -569,9 +466,7 @@ const Templates = () => {
                   <Icon name={"template"} size={"lg"} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0
-                    ? "No templates match the selected filters"
-                    : "No Templates"}
+                  {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>

@@ -33,10 +33,7 @@ export class Workspaces {
    * @returns Collection of all Workspace entries
    */
   static all = async (): Promise<WorkspaceModel[]> => {
-    return await getDatabase()
-      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
-      .find()
-      .toArray();
+    return await getDatabase().collection<WorkspaceModel>(WORKSPACES_COLLECTION).find().toArray();
   };
 
   /**
@@ -45,11 +42,9 @@ export class Workspaces {
    * @returns Workspace entry
    */
   static getOne = async (_id: string): Promise<WorkspaceModel | null> => {
-    return await getDatabase()
-      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
-      .findOne({
-        _id: _id,
-      });
+    return await getDatabase().collection<WorkspaceModel>(WORKSPACES_COLLECTION).findOne({
+      _id: _id,
+    });
   };
 
   /**
@@ -72,10 +67,7 @@ export class Workspaces {
    * @param entity Entity identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addEntity = async (
-    _id: string,
-    entity: string,
-  ): Promise<IResponseMessage> => {
+  static addEntity = async (_id: string, entity: string): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -107,10 +99,7 @@ export class Workspaces {
 
     return {
       success: response.modifiedCount === 1,
-      message:
-        response.modifiedCount === 1
-          ? "Added Entity to Workspace"
-          : "Unable to add Entity to Workspace",
+      message: response.modifiedCount === 1 ? "Added Entity to Workspace" : "Unable to add Entity to Workspace",
     };
   };
 
@@ -134,10 +123,7 @@ export class Workspaces {
    * @param project Project identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addProject = async (
-    _id: string,
-    project: string,
-  ): Promise<IResponseMessage> => {
+  static addProject = async (_id: string, project: string): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -171,10 +157,7 @@ export class Workspaces {
 
     return {
       success: response.modifiedCount === 1,
-      message:
-        response.modifiedCount === 1
-          ? "Added Project to Workspace"
-          : "Unable to add Project to Workspace",
+      message: response.modifiedCount === 1 ? "Added Project to Workspace" : "Unable to add Project to Workspace",
     };
   };
 
@@ -198,10 +181,7 @@ export class Workspaces {
    * @param activity Activity identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addActivity = async (
-    _id: string,
-    activity: string,
-  ): Promise<IResponseMessage> => {
+  static addActivity = async (_id: string, activity: string): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -235,10 +215,7 @@ export class Workspaces {
 
     return {
       success: response.modifiedCount === 1,
-      message:
-        response.modifiedCount === 1
-          ? "Added Activity to Workspace"
-          : "Unable to add Activity to Workspace",
+      message: response.modifiedCount === 1 ? "Added Activity to Workspace" : "Unable to add Activity to Workspace",
     };
   };
 
@@ -262,10 +239,7 @@ export class Workspaces {
    * @param template Template identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addTemplate = async (
-    _id: string,
-    template: string,
-  ): Promise<ResponseData<string>> => {
+  static addTemplate = async (_id: string, template: string): Promise<ResponseData<string>> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -301,10 +275,7 @@ export class Workspaces {
 
     return {
       success: response.modifiedCount === 1,
-      message:
-        response.modifiedCount === 1
-          ? "Added Template to Workspace"
-          : "Unable to add Template to Workspace",
+      message: response.modifiedCount === 1 ? "Added Template to Workspace" : "Unable to add Template to Workspace",
       data: workspace._id,
     };
   };
@@ -314,33 +285,25 @@ export class Workspaces {
    * @param workspace Workspace data
    * @return {IResponseMessage}
    */
-  static create = async (
-    workspace: IWorkspace,
-  ): Promise<ResponseData<string>> => {
+  static create = async (workspace: IWorkspace): Promise<ResponseData<string>> => {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
       ...workspace, // Unpack existing Workspace fields
     };
-    const response = await getDatabase()
-      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
-      .insertOne(joinedWorkspace);
+    const response = await getDatabase().collection<WorkspaceModel>(WORKSPACES_COLLECTION).insertOne(joinedWorkspace);
 
     // Bootstrap the Workspace with an example Entity and Project
     await User.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
 
     return {
       success: response.acknowledged,
-      message: response.acknowledged
-        ? "Created new Workspace"
-        : "Unable to create Workspace",
+      message: response.acknowledged ? "Created new Workspace" : "Unable to create Workspace",
       data: response.insertedId.toString(),
     };
   };
 
-  static update = async (
-    updated: WorkspaceModel,
-  ): Promise<IResponseMessage> => {
+  static update = async (updated: WorkspaceModel): Promise<IResponseMessage> => {
     // Check if the Workspace exists
     const workspace = await Workspaces.getOne(updated._id);
     if (_.isNull(workspace)) {
@@ -367,10 +330,7 @@ export class Workspaces {
 
     return {
       success: true,
-      message:
-        response.modifiedCount == 1
-          ? "Updated Workspace"
-          : "No changes made to Workspace",
+      message: response.modifiedCount == 1 ? "Updated Workspace" : "No changes made to Workspace",
     };
   };
 
@@ -380,10 +340,7 @@ export class Workspaces {
    * @param workspace Identifier of the target Workspace
    * @return {Promise<boolean>} `true` if the User has access, `false` if not
    */
-  static checkAccess = async (
-    user: string,
-    workspace: string,
-  ): Promise<boolean> => {
+  static checkAccess = async (user: string, workspace: string): Promise<boolean> => {
     // Special case where no Workspaces exist for the User, `workspace` will be `""`
     if (workspace === "") {
       return true;
@@ -394,9 +351,6 @@ export class Workspaces {
       return false;
     }
 
-    return (
-      workspaceResult.owner === user ||
-      _.includes(workspaceResult.collaborators, user)
-    );
+    return workspaceResult.owner === user || _.includes(workspaceResult.collaborators, user);
   };
 }

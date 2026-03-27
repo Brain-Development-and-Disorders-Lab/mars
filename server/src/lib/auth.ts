@@ -15,9 +15,7 @@ import { User } from "@models/User";
 const getOAuthConfig = () => {
   // Get ORCiD API application ID and secret
   const isDevelopment = process.env.NODE_ENV === "development";
-  const clientId = isDevelopment
-    ? process.env.ORCID_SANDBOX_CLIENT_ID
-    : process.env.ORCID_PRODUCTION_CLIENT_ID;
+  const clientId = isDevelopment ? process.env.ORCID_SANDBOX_CLIENT_ID : process.env.ORCID_PRODUCTION_CLIENT_ID;
   const clientSecret = isDevelopment
     ? process.env.ORCID_SANDBOX_CLIENT_SECRET
     : process.env.ORCID_PRODUCTION_CLIENT_SECRET;
@@ -30,9 +28,7 @@ const getOAuthConfig = () => {
   }
 
   // Use sandbox endpoints in development, production endpoints otherwise
-  const baseUrl = isDevelopment
-    ? "https://sandbox.orcid.org"
-    : "https://orcid.org";
+  const baseUrl = isDevelopment ? "https://sandbox.orcid.org" : "https://orcid.org";
 
   return {
     providerId: "orcid",
@@ -45,10 +41,8 @@ const getOAuthConfig = () => {
     mapProfileToUser: async (response: Record<string, unknown>) => {
       // ORCiD userinfo endpoint returns 'sub' as the ORCiD ID per OpenID Connect spec
       const sub = typeof response.sub === "string" ? response.sub : "";
-      const given_name =
-        typeof response.given_name === "string" ? response.given_name : "";
-      const family_name =
-        typeof response.family_name === "string" ? response.family_name : "";
+      const given_name = typeof response.given_name === "string" ? response.given_name : "";
+      const family_name = typeof response.family_name === "string" ? response.family_name : "";
 
       // Note: Returning ORCiD user, look up their real email so better-auth can
       // match the session correctly
@@ -94,10 +88,7 @@ export const auth = betterAuth({
     transaction: false,
   }),
   basePath: "/auth",
-  baseURL:
-    process.env.NODE_ENV === "production"
-      ? "https://api.metadatify.com"
-      : "http://127.0.0.1:8000",
+  baseURL: process.env.NODE_ENV === "production" ? "https://api.metadatify.com" : "http://127.0.0.1:8000",
   trustedOrigins: getTrustedOrigins(),
   emailAndPassword: {
     enabled: true,

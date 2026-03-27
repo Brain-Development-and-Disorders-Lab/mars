@@ -144,10 +144,7 @@ const Template = () => {
       },
     });
 
-    if (
-      !response.data?.archiveTemplate ||
-      !response.data.archiveTemplate.success
-    ) {
+    if (!response.data?.archiveTemplate || !response.data.archiveTemplate.success) {
       toaster.create({
         title: "Error",
         description: "An error occurred while archiving Template",
@@ -178,10 +175,7 @@ const Template = () => {
       },
     });
 
-    if (
-      !response.data?.archiveTemplate ||
-      !response.data.archiveTemplate.success
-    ) {
+    if (!response.data?.archiveTemplate || !response.data.archiveTemplate.success) {
       toaster.create({
         title: "Error",
         description: "An error occurred while restoring Template",
@@ -220,10 +214,7 @@ const Template = () => {
           },
         });
 
-        if (
-          !response.data?.updateTemplate ||
-          !response.data.updateTemplate.success
-        ) {
+        if (!response.data?.updateTemplate || !response.data.updateTemplate.success) {
           toaster.create({
             title: "Error",
             description: "An error occurred when saving Template updates",
@@ -303,10 +294,7 @@ const Template = () => {
   };
 
   return (
-    <Content
-      isError={!_.isUndefined(error)}
-      isLoaded={!loading && !updateLoading && !archiveLoading}
-    >
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading && !updateLoading && !archiveLoading}>
       <Flex direction={"column"}>
         <Flex
           gap={"1"}
@@ -317,13 +305,7 @@ const Template = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            rounded={"md"}
-          >
+          <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
             <Icon name={"template"} size={"sm"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
               {template.name}
@@ -335,12 +317,7 @@ const Template = () => {
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"yellow"}
-                  data-testid={"templateActionsButton"}
-                >
+                <Button size={"xs"} rounded={"md"} colorPalette={"yellow"} data-testid={"templateActionsButton"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -383,12 +360,7 @@ const Template = () => {
             ) : (
               <Flex gap={"1"}>
                 {editing && (
-                  <Button
-                    onClick={handleCancelClick}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                  >
+                  <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
                     Cancel
                     <Icon name={"cross"} size={"xs"} />
                   </Button>
@@ -403,11 +375,7 @@ const Template = () => {
                   loading={updateLoading}
                 >
                   {editing ? "Save" : "Edit"}
-                  {editing ? (
-                    <Icon name={"save"} size={"xs"} />
-                  ) : (
-                    <Icon name={"edit"} size={"xs"} />
-                  )}
+                  {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
                 </Button>
               </Flex>
             )}
@@ -421,8 +389,7 @@ const Template = () => {
               setOpen={setArchiveDialogOpen}
             >
               <Text fontSize={"xs"}>
-                Are you sure you want to archive this Template? It can be
-                restored any time from the Workspace archives.
+                Are you sure you want to archive this Template? It can be restored any time from the Workspace archives.
               </Text>
             </AlertDialog>
           </Flex>
@@ -432,15 +399,7 @@ const Template = () => {
           {/* Overview and "Description" field */}
           <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
             {/* Overview */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              h={"fit-content"}
-              gap={"1"}
-              bg={"gray.100"}
-              rounded={"md"}
-              grow={"1"}
-            >
+            <Flex direction={"column"} p={"1"} h={"fit-content"} gap={"1"} bg={"gray.100"} rounded={"md"} grow={"1"}>
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
@@ -461,10 +420,7 @@ const Template = () => {
                   />
                 </Flex>
 
-                <TimestampTag
-                  timestamp={template.timestamp}
-                  description={"Created"}
-                />
+                <TimestampTag timestamp={template.timestamp} description={"Created"} />
               </Flex>
 
               <Flex gap={"1"} direction={"row"}>
@@ -479,11 +435,7 @@ const Template = () => {
                   <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                     Template Owner
                   </Text>
-                  <ActorTag
-                    identifier={template.owner}
-                    fallback={"No Owner"}
-                    size={"sm"}
-                  />
+                  <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -518,22 +470,11 @@ const Template = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
-          >
+          <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
             <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
               Template Values
             </Text>
-            <Values
-              viewOnly={!editing}
-              values={templateValues}
-              setValues={setTemplateValues}
-            />
+            <Values viewOnly={!editing} values={templateValues} setValues={setTemplateValues} />
           </Flex>
         </Flex>
       </Flex>

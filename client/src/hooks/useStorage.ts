@@ -11,10 +11,7 @@ import { STORAGE_KEY } from "@variables";
 export const useStorage = (): {
   storage: ApplicationStorage;
   updateStorage: (storage: ApplicationStorage) => void;
-  updateStorageField: (
-    field: keyof ApplicationStorage,
-    value: string | boolean,
-  ) => void;
+  updateStorageField: (field: keyof ApplicationStorage, value: string | boolean) => void;
 } => {
   let initialStringValue = sessionStorage.getItem(STORAGE_KEY);
   if (_.isNull(initialStringValue)) {
@@ -45,10 +42,7 @@ export const useStorage = (): {
    * @param {keyof ApplicationStorage} field Specific storage field to update
    * @param {string | boolean} value Corresponding value
    */
-  const updateStorageField = (
-    field: keyof ApplicationStorage,
-    value: string | boolean,
-  ) => {
+  const updateStorageField = (field: keyof ApplicationStorage, value: string | boolean) => {
     const updatedStorage = _.cloneDeep(storage);
     if (field === "firstLogin" && typeof value === "boolean") {
       updatedStorage.firstLogin = value;

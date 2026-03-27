@@ -173,9 +173,7 @@ const Signup = () => {
     if (error) {
       toaster.create({
         title: "ORCiD Authentication Error",
-        description:
-          error.message ||
-          "Unable to authenticate with ORCiD. Please try again.",
+        description: error.message || "Unable to authenticate with ORCiD. Please try again.",
         type: "error",
         duration: 4000,
         closable: true,
@@ -280,9 +278,7 @@ const Signup = () => {
             toaster.create({
               title: "Create Account",
               type: "error",
-              description:
-                ctx.error.message ||
-                "An unknown error occurred. Please try again.",
+              description: ctx.error.message || "An unknown error occurred. Please try again.",
               duration: 4000,
               closable: true,
             });
@@ -351,9 +347,7 @@ const Signup = () => {
                           boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
                         }}
                         value={userFirstName}
-                        onChange={(event) =>
-                          setUserFirstName(event.target.value)
-                        }
+                        onChange={(event) => setUserFirstName(event.target.value)}
                       />
                     </Field.Root>
                   </Flex>
@@ -373,20 +367,14 @@ const Signup = () => {
                           boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
                         }}
                         value={userLastName}
-                        onChange={(event) =>
-                          setUserLastName(event.target.value)
-                        }
+                        onChange={(event) => setUserLastName(event.target.value)}
                       />
                     </Field.Root>
                   </Flex>
                 </Flex>
                 <Flex direction={"column"} gap={"4"}>
                   <Flex direction={"column"} gap={"1"}>
-                    <Field.Root
-                      gap={"0.5"}
-                      invalid={emailError !== ""}
-                      required
-                    >
+                    <Field.Root gap={"0.5"} invalid={emailError !== ""} required>
                       <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                         Email
                         <Field.RequiredIndicator />
@@ -407,11 +395,7 @@ const Signup = () => {
                           validateEmail(event.target.value);
                         }}
                       />
-                      <Field.ErrorText
-                        color={"red.500"}
-                        fontSize={"xs"}
-                        mt={"1"}
-                      >
+                      <Field.ErrorText color={"red.500"} fontSize={"xs"} mt={"1"}>
                         {emailError}
                       </Field.ErrorText>
                     </Field.Root>
@@ -428,16 +412,12 @@ const Signup = () => {
                         size={"xs"}
                         rounded={"md"}
                         value={userAffiliation ? [userAffiliation] : []}
-                        onValueChange={(details) =>
-                          setUserAffiliation(details.value[0] || "")
-                        }
+                        onValueChange={(details) => setUserAffiliation(details.value[0] || "")}
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
                           <Select.Trigger data-testid="affiliation-select-trigger">
-                            <Select.ValueText
-                              placeholder={"Select your affiliation"}
-                            />
+                            <Select.ValueText placeholder={"Select your affiliation"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>
                             <Select.Indicator />
@@ -446,10 +426,7 @@ const Signup = () => {
                         <Select.Positioner>
                           <Select.Content>
                             {affiliationCollection.items.map((affiliation) => (
-                              <Select.Item
-                                item={affiliation}
-                                key={affiliation.value}
-                              >
+                              <Select.Item item={affiliation} key={affiliation.value}>
                                 {affiliation.label}
                                 <Select.ItemIndicator />
                               </Select.Item>
@@ -477,9 +454,7 @@ const Signup = () => {
                       value={initialPassword}
                       placeholder={"Password"}
                       disabled={isAccountCreateLoading}
-                      onChange={(event) =>
-                        setInitialPassword(event.target.value)
-                      }
+                      onChange={(event) => setInitialPassword(event.target.value)}
                     />
                   </Field.Root>
                   <Field.Root gap={"0.5"} invalid={!isPasswordValid} required>
@@ -497,9 +472,7 @@ const Signup = () => {
                       disabled={isAccountCreateLoading}
                       onChange={(event) => validatePassword(event.target.value)}
                     />
-                    <Field.ErrorText fontSize={"xs"}>
-                      Passwords do not match
-                    </Field.ErrorText>
+                    <Field.ErrorText fontSize={"xs"}>Passwords do not match</Field.ErrorText>
                   </Field.Root>
                 </Flex>
               )}
@@ -516,11 +489,7 @@ const Signup = () => {
                   borderColor={"green.200"}
                 >
                   <Icon name={"check"} size={"xs"} color={"green.600"} />
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={"green.700"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"green.700"}>
                     ORCiD {orcidId} will be linked to your account
                   </Text>
                 </Flex>
@@ -547,11 +516,7 @@ const Signup = () => {
                     rounded={"md"}
                     colorPalette={"green"}
                   >
-                    <Image
-                      src={
-                        "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-                      }
-                    />
+                    <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
                     Sign up with ORCiD
                   </Button>
                 </>
@@ -581,11 +546,7 @@ const Signup = () => {
                   onClick={() => onDoneClick()}
                   disabled={!userComplete}
                   loading={isAccountCreateLoading || updateUserLoading}
-                  loadingText={
-                    isExistingUser
-                      ? "Completing Account..."
-                      : "Creating Account..."
-                  }
+                  loadingText={isExistingUser ? "Completing Account..." : "Creating Account..."}
                 >
                   {isExistingUser ? "Complete" : "Create"} Account
                   <Icon name={"check"} size={"xs"} />

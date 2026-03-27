@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Input,
-  Flex,
-  Select,
-  createListCollection,
-  Portal,
-} from "@chakra-ui/react";
+import { Input, Flex, Select, createListCollection, Portal } from "@chakra-ui/react";
 import { ValueEditorProps } from "react-querybuilder";
 
 // Custom components
@@ -17,11 +11,7 @@ import { IGenericItem, IValueType } from "@types";
 // Utility imports
 import _ from "lodash";
 
-const SearchQueryValue = ({
-  field,
-  value,
-  handleOnChange,
-}: ValueEditorProps) => {
+const SearchQueryValue = ({ field, value, handleOnChange }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
   const [selected, setSelected] = useState({} as IGenericItem);
   const [operatorsCollection, setOperatorsCollection] = useState(
@@ -30,36 +20,26 @@ const SearchQueryValue = ({
 
   // `Attribute` field state
   const [attributeValue, setAttributeValue] = useState("");
-  const [attributeValueType, setAttributeValueType] = useState(
-    "text" as IValueType,
-  );
-  const [attributeValueInputType, setAttributeValueInputType] =
-    useState("text");
-  const [attributeValueOperator, setAttributeValueOperator] =
-    useState("contains");
+  const [attributeValueType, setAttributeValueType] = useState("text" as IValueType);
+  const [attributeValueInputType, setAttributeValueInputType] = useState("text");
+  const [attributeValueOperator, setAttributeValueOperator] = useState("contains");
 
   const updateValueType = (updatedType: IValueType) => {
     switch (updatedType) {
       case "text":
       case "url":
         setAttributeValueInputType("text");
-        setOperatorsCollection(
-          createListCollection({ items: ["contains", "does not contain"] }),
-        );
+        setOperatorsCollection(createListCollection({ items: ["contains", "does not contain"] }));
         setAttributeValueOperator("contains");
         break;
       case "date":
         setAttributeValueInputType("date");
-        setOperatorsCollection(
-          createListCollection({ items: ["equals", ">", "<"] }),
-        );
+        setOperatorsCollection(createListCollection({ items: ["equals", ">", "<"] }));
         setAttributeValueOperator("equals");
         break;
       case "number":
         setAttributeValueInputType("number");
-        setOperatorsCollection(
-          createListCollection({ items: ["equals", ">", "<"] }),
-        );
+        setOperatorsCollection(createListCollection({ items: ["equals", ">", "<"] }));
         setAttributeValueOperator("equals");
         break;
     }
@@ -122,21 +102,11 @@ const SearchQueryValue = ({
 
       {/* Relationships */}
       {_.isEqual("relationships", field) && (
-        <SearchSelect
-          value={selected}
-          resultType={"entity"}
-          onChange={setSelected}
-        />
+        <SearchSelect value={selected} resultType={"entity"} onChange={setSelected} />
       )}
 
       {/* Projects */}
-      {_.isEqual("projects", field) && (
-        <SearchSelect
-          value={selected}
-          resultType={"project"}
-          onChange={setSelected}
-        />
-      )}
+      {_.isEqual("projects", field) && <SearchSelect value={selected} resultType={"project"} onChange={setSelected} />}
 
       {/* Attributes */}
       {_.isEqual("attributes", field) && (
@@ -160,9 +130,7 @@ const SearchQueryValue = ({
               collection={createListCollection({
                 items: ["Text", "URL", "Number", "Date"],
               })}
-              onValueChange={(details) =>
-                updateValueType(details.items[0].toLowerCase() as IValueType)
-              }
+              onValueChange={(details) => updateValueType(details.items[0].toLowerCase() as IValueType)}
             >
               <Select.HiddenSelect />
               <Select.Control
@@ -180,11 +148,7 @@ const SearchQueryValue = ({
                   style={{ justifyContent: "flex-start" }}
                   data-testid={"rule-value-type-trigger"}
                 >
-                  <Select.ValueText
-                    placeholder={"Type"}
-                    fontSize={"xs"}
-                    style={{ textAlign: "left" }}
-                  />
+                  <Select.ValueText placeholder={"Type"} fontSize={"xs"} style={{ textAlign: "left" }} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
                   <Select.Indicator />
@@ -215,9 +179,7 @@ const SearchQueryValue = ({
               id={"rule-value-operators"}
               size={"xs"}
               collection={operatorsCollection}
-              onValueChange={(details) =>
-                handleOperatorChange(details.items[0])
-              }
+              onValueChange={(details) => handleOperatorChange(details.items[0])}
             >
               <Select.HiddenSelect />
               <Select.Control
@@ -235,11 +197,7 @@ const SearchQueryValue = ({
                   style={{ justifyContent: "flex-start" }}
                   data-testid={"rule-value-operators-trigger"}
                 >
-                  <Select.ValueText
-                    placeholder={"Condition"}
-                    fontSize={"xs"}
-                    style={{ textAlign: "left" }}
-                  />
+                  <Select.ValueText placeholder={"Condition"} fontSize={"xs"} style={{ textAlign: "left" }} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
                   <Select.Indicator />

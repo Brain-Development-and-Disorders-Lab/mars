@@ -86,9 +86,7 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      unprioritizedResults = _.filter(projects, (project) =>
-        _.includes(intersected, project._id),
-      );
+      unprioritizedResults = _.filter(projects, (project) => _.includes(intersected, project._id));
     } else {
       // Construct search query
       const databaseQuery = {
@@ -129,20 +127,14 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      let filteredResults = _.filter(entities, (entity) =>
-        _.includes(intersected, entity._id),
-      );
+      let filteredResults = _.filter(entities, (entity) => _.includes(intersected, entity._id));
 
       // Apply optional Entity filters
       if (filters) {
         // Date range (created)
         if (filters.startDate || filters.endDate) {
-          const startDate = filters.startDate
-            ? new Date(filters.startDate)
-            : undefined;
-          const endDate = filters.endDate
-            ? new Date(filters.endDate)
-            : undefined;
+          const startDate = filters.startDate ? new Date(filters.startDate) : undefined;
+          const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
           if (endDate) {
             endDate.setHours(23, 59, 59, 999);
           }
@@ -158,23 +150,17 @@ export class Search {
 
         // Has attachments
         if (filters.hasAttachments === true) {
-          filteredResults = filteredResults.filter(
-            (entity) => entity.attachments && entity.attachments.length > 0,
-          );
+          filteredResults = filteredResults.filter((entity) => entity.attachments && entity.attachments.length > 0);
         }
 
         // Has attributes
         if (filters.hasAttributes === true) {
-          filteredResults = filteredResults.filter(
-            (entity) => entity.attributes && entity.attributes.length > 0,
-          );
+          filteredResults = filteredResults.filter((entity) => entity.attributes && entity.attributes.length > 0);
         }
 
         // Has relationships
         if (filters.hasRelationships === true) {
-          filteredResults = filteredResults.filter(
-            (entity) => entity.relationships && entity.relationships.length > 0,
-          );
+          filteredResults = filteredResults.filter((entity) => entity.relationships && entity.relationships.length > 0);
         }
       }
 
@@ -244,10 +230,7 @@ export class Search {
    * @param object Object to traverse
    * @param callback Callback function to call for each key
    */
-  private static traverseQueryObject = (
-    object: any,
-    callback: (key: any, value: any) => void,
-  ) => {
+  private static traverseQueryObject = (object: any, callback: (key: any, value: any) => void) => {
     const stack = [object];
 
     while (stack.length > 0) {
@@ -296,9 +279,7 @@ export class Search {
 
       // Handle case where key is `$regex`
       if (_.isString(key) && key === "$regex" && key !== value) {
-        const [pattern, flags] = value
-          .slice(value.startsWith("/") ? 1 : 0)
-          .split("/");
+        const [pattern, flags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
         value = new RegExp(pattern, flags);
       }
 
@@ -329,15 +310,11 @@ export class Search {
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Parse the query string into a MongoDB query object
     const parsedQuery = JSON.parse(query);
-    const mongoQuery: Record<string, any> =
-      Search.generateMongoQuery(parsedQuery);
+    const mongoQuery: Record<string, any> = Search.generateMongoQuery(parsedQuery);
 
     if (resultType === "project") {
       // Execute the search query with any specified options
-      const results = await getDatabase()
-        .collection<ProjectModel>(PROJECTS_COLLECTION)
-        .find(mongoQuery)
-        .toArray();
+      const results = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).find(mongoQuery).toArray();
 
       // Get the current Workspace context and retrieve all Entities
       const context = await Workspaces.getOne(workspace);
@@ -353,15 +330,10 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      return _.filter(projects, (project) =>
-        _.includes(intersected, project._id),
-      );
+      return _.filter(projects, (project) => _.includes(intersected, project._id));
     } else {
       // Execute the search query with any specified options
-      const results = await getDatabase()
-        .collection<EntityModel>(ENTITIES_COLLECTION)
-        .find(mongoQuery)
-        .toArray();
+      const results = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(mongoQuery).toArray();
 
       // Get the current Workspace context and retrieve all Entities
       const context = await Workspaces.getOne(workspace);
@@ -377,9 +349,7 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      return _.filter(entities, (entity) =>
-        _.includes(intersected, entity._id),
-      );
+      return _.filter(entities, (entity) => _.includes(intersected, entity._id));
     }
   };
 }

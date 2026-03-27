@@ -69,12 +69,8 @@ const SearchBox = (props: SearchBoxProps) => {
     if (!open) return;
 
     const updateWidth = () => {
-      const input = document.querySelector(
-        "[data-search-input]",
-      ) as HTMLInputElement;
-      const searchButton = document.querySelector(
-        "[data-search-button]",
-      ) as HTMLElement;
+      const input = document.querySelector("[data-search-input]") as HTMLInputElement;
+      const searchButton = document.querySelector("[data-search-button]") as HTMLElement;
       if (input && searchButton) {
         // Get the gap between elements (1 unit = 4px in Chakra)
         const gap = 4;
@@ -92,10 +88,7 @@ const SearchBox = (props: SearchBoxProps) => {
     if (!open) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
@@ -118,18 +111,8 @@ const SearchBox = (props: SearchBoxProps) => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search(
-      $query: String
-      $resultType: String
-      $isBuilder: Boolean
-      $showArchived: Boolean
-    ) {
-      search(
-        query: $query
-        resultType: $resultType
-        isBuilder: $isBuilder
-        showArchived: $showArchived
-      ) {
+    query Search($query: String, $resultType: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(query: $query, resultType: $resultType, isBuilder: $isBuilder, showArchived: $showArchived) {
         __typename
         ... on Entity {
           _id
@@ -149,9 +132,7 @@ const SearchBox = (props: SearchBoxProps) => {
   // Determine resultType based on selected filters
   const getResultType = (): string | undefined => {
     const selectedCount =
-      (selectedTypes.entities ? 1 : 0) +
-      (selectedTypes.projects ? 1 : 0) +
-      (selectedTypes.templates ? 1 : 0);
+      (selectedTypes.entities ? 1 : 0) + (selectedTypes.projects ? 1 : 0) + (selectedTypes.templates ? 1 : 0);
 
     // If all or none selected, search all types
     if (selectedCount === 0 || selectedCount === 3) {
@@ -284,10 +265,7 @@ const SearchBox = (props: SearchBoxProps) => {
               <Icon name={"search"} size={"xs"} />
             </Button>
 
-            <Collapsible.Root
-              open={filtersOpen}
-              onOpenChange={(event) => setFiltersOpen(event.open)}
-            >
+            <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
               <Collapsible.Trigger asChild>
                 <Button size={"xs"} rounded={"md"} variant={"outline"}>
                   <Icon name={"filter"} size={"xs"} />
@@ -313,15 +291,7 @@ const SearchBox = (props: SearchBoxProps) => {
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}
             >
-              <Flex
-                p={"1"}
-                bg={"gray.100"}
-                roundedTop={"md"}
-                direction={"row"}
-                gap={"1"}
-                w={"100%"}
-                align={"center"}
-              >
+              <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"row"} gap={"1"} w={"100%"} align={"center"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Search Results:{" "}
                 </Text>
@@ -340,54 +310,40 @@ const SearchBox = (props: SearchBoxProps) => {
                   !isError && (
                     <Stack gap={"1"} separator={<Separator />} w={"100%"}>
                       {results.length > 0 ? (
-                        results
-                          .slice(0, MAX_RESULTS)
-                          .map((result: IGenericItem) => {
-                            const resultType =
-                              (result as IGenericItem & { __typename?: string })
-                                .__typename || "Entity";
-                            return (
-                              <Flex
-                                key={result._id}
-                                direction={"row"}
-                                gap={"1"}
-                                w={"100%"}
-                                justify={"space-between"}
-                                align={"center"}
-                                p={"0"}
-                              >
-                                <Flex direction={"column"} gap={"0.5"}>
-                                  <Text
-                                    color={"black"}
-                                    fontWeight={"semibold"}
-                                    fontSize={"xs"}
-                                  >
-                                    {result.name}
-                                  </Text>
-                                  <Text fontSize={"2xs"} color={"gray.500"}>
-                                    {resultType}
-                                  </Text>
-                                </Flex>
-                                <Button
-                                  size="2xs"
-                                  mx={"1"}
-                                  variant="subtle"
-                                  colorPalette="gray"
-                                  aria-label={`View ${resultType}`}
-                                  onClick={() =>
-                                    handleResultClick(result._id, resultType)
-                                  }
-                                >
-                                  View
-                                  <Icon
-                                    name={"a_right"}
-                                    color={"black"}
-                                    size={"xs"}
-                                  />
-                                </Button>
+                        results.slice(0, MAX_RESULTS).map((result: IGenericItem) => {
+                          const resultType = (result as IGenericItem & { __typename?: string }).__typename || "Entity";
+                          return (
+                            <Flex
+                              key={result._id}
+                              direction={"row"}
+                              gap={"1"}
+                              w={"100%"}
+                              justify={"space-between"}
+                              align={"center"}
+                              p={"0"}
+                            >
+                              <Flex direction={"column"} gap={"0.5"}>
+                                <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
+                                  {result.name}
+                                </Text>
+                                <Text fontSize={"2xs"} color={"gray.500"}>
+                                  {resultType}
+                                </Text>
                               </Flex>
-                            );
-                          })
+                              <Button
+                                size="2xs"
+                                mx={"1"}
+                                variant="subtle"
+                                colorPalette="gray"
+                                aria-label={`View ${resultType}`}
+                                onClick={() => handleResultClick(result._id, resultType)}
+                              >
+                                View
+                                <Icon name={"a_right"} color={"black"} size={"xs"} />
+                              </Button>
+                            </Flex>
+                          );
+                        })
                       ) : (
                         <Flex m={"2"}>
                           <Text fontWeight={"semibold"} fontSize={"xs"}>
@@ -400,27 +356,18 @@ const SearchBox = (props: SearchBoxProps) => {
                 )}
               </Flex>
 
-              <Flex
-                p={"1"}
-                bg={"gray.100"}
-                roundedBottom={"md"}
-                direction={"column"}
-                gap={"1"}
-              >
+              <Flex p={"1"} bg={"gray.100"} roundedBottom={"md"} direction={"column"} gap={"1"}>
                 <Flex width={"100%"} direction={"row"} gap={"1"}>
                   {isSearching ? (
                     <Spinner size={"sm"} />
                   ) : (
                     <Text fontWeight={"bold"} fontSize={"xs"}>
-                      {results.length > MAX_RESULTS
-                        ? MAX_RESULTS
-                        : results.length}{" "}
+                      {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
                     </Text>
                   )}
                   <Text fontSize={"xs"}>
                     result
-                    {results.length > 1 || results.length === 0 ? "s" : ""},
-                    view more using{" "}
+                    {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
                   </Text>
                   <Link
                     className={"light"}
@@ -445,10 +392,7 @@ const SearchBox = (props: SearchBoxProps) => {
         </Box>
 
         {/* Collapsible Filters Content */}
-        <Collapsible.Root
-          open={filtersOpen}
-          onOpenChange={(event) => setFiltersOpen(event.open)}
-        >
+        <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
           <Collapsible.Content>
             <Flex direction={"row"} gap={"2"} wrap={"wrap"} ml={"0.5"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>

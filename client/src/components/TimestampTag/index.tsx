@@ -12,11 +12,7 @@ import _ from "lodash";
 const TimestampTag = (props: { timestamp: string; description?: string }) => {
   // Handle improperly formed timestamps
   let dateString = dayjs(props.timestamp).format("DD MMMM YYYY");
-  if (
-    _.isUndefined(props.timestamp) ||
-    _.isEqual(props.timestamp, "") ||
-    _.isEqual(dateString, "Invalid Date")
-  ) {
+  if (_.isUndefined(props.timestamp) || _.isEqual(props.timestamp, "") || _.isEqual(dateString, "Invalid Date")) {
     dateString = "No Timestamp";
   }
 

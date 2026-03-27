@@ -77,9 +77,7 @@ const Activity = () => {
   });
 
   // Filtered activity data
-  const [filteredActivityData, setFilteredActivityData] = useState(
-    [] as ActivityModel[],
-  );
+  const [filteredActivityData, setFilteredActivityData] = useState([] as ActivityModel[]);
 
   // Collapsible state for filters
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -138,32 +136,24 @@ const Activity = () => {
     // Filter by date range
     if (appliedFilters.startDate) {
       const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((activity) =>
-        dayjs(activity.timestamp).isSameOrAfter(startDate),
-      );
+      filtered = filtered.filter((activity) => dayjs(activity.timestamp).isSameOrAfter(startDate));
       activeFilterCount++;
     }
     if (appliedFilters.endDate) {
       const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((activity) =>
-        dayjs(activity.timestamp).isSameOrBefore(endDate),
-      );
+      filtered = filtered.filter((activity) => dayjs(activity.timestamp).isSameOrBefore(endDate));
       activeFilterCount++;
     }
 
     // Filter by activity types
     if (appliedFilters.activityTypes.length > 0) {
-      filtered = filtered.filter((activity) =>
-        appliedFilters.activityTypes.includes(activity.type),
-      );
+      filtered = filtered.filter((activity) => appliedFilters.activityTypes.includes(activity.type));
       activeFilterCount += appliedFilters.activityTypes.length;
     }
 
     // Filter by target types
     if (appliedFilters.targetTypes.length > 0) {
-      filtered = filtered.filter((activity) =>
-        appliedFilters.targetTypes.includes(activity.target.type),
-      );
+      filtered = filtered.filter((activity) => appliedFilters.targetTypes.includes(activity.target.type));
       activeFilterCount += appliedFilters.targetTypes.length;
     }
 
@@ -188,21 +178,9 @@ const Activity = () => {
       cell: (info) => {
         const type = info.getValue();
         const displayType =
-          type === "create"
-            ? "created"
-            : type === "update"
-              ? "update"
-              : type === "archived"
-                ? "archived"
-                : type;
+          type === "create" ? "created" : type === "update" ? "update" : type === "archived" ? "archived" : type;
         const colorPalette =
-          type === "create"
-            ? "green"
-            : type === "update"
-              ? "blue"
-              : type === "archived"
-                ? "red"
-                : "orange";
+          type === "create" ? "green" : type === "update" ? "blue" : type === "archived" ? "red" : "orange";
         return (
           <Flex align={"center"} justify={"center"} w={"100%"}>
             <Tag.Root colorPalette={colorPalette} size={"sm"}>
@@ -223,21 +201,13 @@ const Activity = () => {
         const target = info.getValue();
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Linky
-              id={target._id}
-              type={target.type}
-              fallback={target.name}
-              justify={"left"}
-              size={"xs"}
-            />
+            <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
             <Button
               size="2xs"
               variant="subtle"
               colorPalette="gray"
               aria-label={"View Target"}
-              onClick={() =>
-                navigate(`/${target.type.toLowerCase()}/${target._id}`)
-              }
+              onClick={() => navigate(`/${target.type.toLowerCase()}/${target._id}`)}
             >
               View
               <Icon name={"a_right"} size={"xs"} />
@@ -260,14 +230,7 @@ const Activity = () => {
             </Text>
           );
         }
-        return (
-          <ActorTag
-            identifier={actor}
-            fallback={"Unknown User"}
-            size={"sm"}
-            inline
-          />
-        );
+        return <ActorTag identifier={actor} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "User",
       enableHiding: true,
@@ -292,27 +255,9 @@ const Activity = () => {
   ];
 
   return (
-    <Content
-      isError={!_.isUndefined(error) && !initialLoaded}
-      isLoaded={initialLoaded || !loading}
-    >
-      <Flex
-        direction={"row"}
-        p={"1"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"1"}
-        minW="0"
-        maxW="100%"
-      >
-        <Flex
-          w={"100%"}
-          minW="0"
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-        >
+    <Content isError={!_.isUndefined(error) && !initialLoaded} isLoaded={initialLoaded || !loading}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"activity"} size={"sm"} />
             <Heading size={"md"}>Workspace Activity</Heading>
@@ -320,40 +265,25 @@ const Activity = () => {
         </Flex>
         <Flex direction={"column"} gap={"1"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
-            All activity in the current Workspace is shown below, sorted by most
-            recent. Sort the activity using the column headers or use the
-            filters below.
+            All activity in the current Workspace is shown below, sorted by most recent. Sort the activity using the
+            column headers or use the filters below.
           </Text>
 
           {/* Activity Charts Section */}
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            gap={"1"}
-            w={"100%"}
-            minW="0"
-            maxW="100%"
-          >
+          <Flex direction={{ base: "column", md: "row" }} gap={"1"} w={"100%"} minW="0" maxW="100%">
             <Flex direction={"column"} flex={"1"} minW="0">
-              <ActivityGraph
-                activities={activityData}
-                title="Overall Activity"
-                height="200px"
-              />
+              <ActivityGraph activities={activityData} title="Overall Activity" height="200px" />
             </Flex>
             <Flex direction={"column"} flex={"1"} minW="0">
               <ActivityGraph
-                activities={activityData.filter(
-                  (activity) => activity.target.type === "entities",
-                )}
+                activities={activityData.filter((activity) => activity.target.type === "entities")}
                 title="Entity Activity"
                 height="200px"
               />
             </Flex>
             <Flex direction={"column"} flex={"1"} minW="0">
               <ActivityGraph
-                activities={activityData.filter(
-                  (activity) => activity.target.type === "projects",
-                )}
+                activities={activityData.filter((activity) => activity.target.type === "projects")}
                 title="Project Activity"
                 height="200px"
               />
@@ -361,24 +291,9 @@ const Activity = () => {
           </Flex>
 
           {/* Filter Section */}
-          <Collapsible.Root
-            open={filtersOpen}
-            onOpenChange={(event) => setFiltersOpen(event.open)}
-          >
-            <Flex
-              direction={"column"}
-              gap={"1"}
-              p={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                justify={"space-between"}
-              >
+          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
+            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -395,20 +310,13 @@ const Activity = () => {
               <Collapsible.Content>
                 <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
                   {/* Date Range Filter */}
-                  <Flex
-                    direction={"column"}
-                    gap={"1"}
-                    minW={"200px"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Date Range
                     </Text>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          Start (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -423,9 +331,7 @@ const Activity = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>
-                          End (optional)
-                        </Field.Label>
+                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
                         <Input
                           type={"date"}
                           size={"xs"}
@@ -443,12 +349,7 @@ const Activity = () => {
                   </Flex>
 
                   {/* Checkbox Filters Group - Operation Type and Target Type */}
-                  <Flex
-                    direction={"row"}
-                    gap={"4"}
-                    wrap={"nowrap"}
-                    flexShrink={0}
-                  >
+                  <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
                     {/* Operation Type Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -466,28 +367,19 @@ const Activity = () => {
                               if (isChecked) {
                                 setFilterState({
                                   ...filterState,
-                                  activityTypes: [
-                                    ...filterState.activityTypes,
-                                    type,
-                                  ],
+                                  activityTypes: [...filterState.activityTypes, type],
                                 });
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  activityTypes:
-                                    filterState.activityTypes.filter(
-                                      (t) => t !== type,
-                                    ),
+                                  activityTypes: filterState.activityTypes.filter((t) => t !== type),
                                 });
                               }
                             }}
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label
-                              fontSize={"xs"}
-                              textTransform={"capitalize"}
-                            >
+                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
                               {type === "create" ? "Created" : type}
                             </Checkbox.Label>
                           </Checkbox.Root>
@@ -512,32 +404,20 @@ const Activity = () => {
                               if (isChecked) {
                                 setFilterState({
                                   ...filterState,
-                                  targetTypes: [
-                                    ...filterState.targetTypes,
-                                    type,
-                                  ],
+                                  targetTypes: [...filterState.targetTypes, type],
                                 });
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  targetTypes: filterState.targetTypes.filter(
-                                    (t) => t !== type,
-                                  ),
+                                  targetTypes: filterState.targetTypes.filter((t) => t !== type),
                                 });
                               }
                             }}
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label
-                              fontSize={"xs"}
-                              textTransform={"capitalize"}
-                            >
-                              {type === "entities"
-                                ? "Entity"
-                                : type === "projects"
-                                  ? "Project"
-                                  : "Template"}
+                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
+                              {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Template"}
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
@@ -559,13 +439,7 @@ const Activity = () => {
           >
             {/* Live Indicator - Far Left */}
             <Flex align={"center"} gap={"1"} ml={"0.5"}>
-              <Box
-                w={"8px"}
-                h={"8px"}
-                borderRadius={"full"}
-                bg={"green.500"}
-                className="live-indicator"
-              />
+              <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
               <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
                 Live
               </Text>

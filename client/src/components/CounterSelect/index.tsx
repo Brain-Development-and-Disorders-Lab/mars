@@ -19,13 +19,7 @@ import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import {
-  CounterModel,
-  CounterProps,
-  ICounter,
-  ISelectOption,
-  ResponseData,
-} from "@types";
+import { CounterModel, CounterProps, ICounter, ISelectOption, ResponseData } from "@types";
 
 // Custom hooks
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -48,9 +42,7 @@ const CounterSelect = (props: CounterProps) => {
   // Counter format state
   const [counterFormat, setCounterFormat] = useState("");
   const [isValidFormat, setIsValidFormat] = useState(false);
-  const [formatErrorMessage, setFormatErrorMessage] = useState(
-    "Invalid format string",
-  );
+  const [formatErrorMessage, setFormatErrorMessage] = useState("Invalid format string");
 
   // Counter numeric state
   const [counterIncrement, setCounterIncrement] = useState(1);
@@ -71,8 +63,7 @@ const CounterSelect = (props: CounterProps) => {
   }, [counters]);
 
   // Overall error state
-  const isValidInput =
-    counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
+  const isValidInput = counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
 
   // Create Counter modal disclosure
   const [open, setOpen] = useState(false);
@@ -105,15 +96,11 @@ const CounterSelect = (props: CounterProps) => {
       }
     }
   `;
-  const [
-    currentCounterValue,
-    { loading: currentValueLoading, error: currentValueError },
-  ] = useLazyQuery<{ currentCounterValue: ResponseData<string> }>(
-    GET_COUNTER_CURRENT,
-    {
-      fetchPolicy: "network-only",
-    },
-  );
+  const [currentCounterValue, { loading: currentValueLoading, error: currentValueError }] = useLazyQuery<{
+    currentCounterValue: ResponseData<string>;
+  }>(GET_COUNTER_CURRENT, {
+    fetchPolicy: "network-only",
+  });
 
   const CREATE_COUNTER = gql`
     mutation CreateCounter($counter: CounterInput) {
@@ -124,19 +111,16 @@ const CounterSelect = (props: CounterProps) => {
       }
     }
   `;
-  const [
-    createCounter,
-    { loading: createCounterLoading, error: createCounterError },
-  ] = useMutation<{ createCounter: ResponseData<string> }>(CREATE_COUNTER);
+  const [createCounter, { loading: createCounterLoading, error: createCounterError }] = useMutation<{
+    createCounter: ResponseData<string>;
+  }>(CREATE_COUNTER);
 
   /**
    * Update operation when a Counter is selected from the drop-down menu
    * @param _id Counter identifier
    */
   const updateSelectedCounter = (_id: string) => {
-    const selectedCounter = counters.filter(
-      (counter) => counter._id === _id,
-    )[0];
+    const selectedCounter = counters.filter((counter) => counter._id === _id)[0];
     setSelected(selectedCounter);
 
     // Propagate the selected Counter
@@ -147,10 +131,7 @@ const CounterSelect = (props: CounterProps) => {
    * Handle selection of a Counter
    * @param details
    */
-  const handleSelectCounter = (details: {
-    value: string[];
-    items: ISelectOption[];
-  }) => {
+  const handleSelectCounter = (details: { value: string[]; items: ISelectOption[] }) => {
     if (details.value.length > 0) {
       updateSelectedCounter(details.value[0]);
     }
@@ -230,13 +211,8 @@ const CounterSelect = (props: CounterProps) => {
       // Refetch the Counter data
       const { data: refetchedData } = await refetchCounterData();
 
-      const selectedCounter = (
-        refetchedData?.counters ||
-        counterData?.counters ||
-        []
-      ).find(
-        (counter: CounterModel) =>
-          counter._id === result.data?.createCounter.data,
+      const selectedCounter = (refetchedData?.counters || counterData?.counters || []).find(
+        (counter: CounterModel) => counter._id === result.data?.createCounter.data,
       );
 
       // Update the selected Counter
@@ -267,21 +243,13 @@ const CounterSelect = (props: CounterProps) => {
         if (c === "{") openingBraceCount++;
         if (c === "}") closingBraceCount++;
       }
-      if (
-        openingBraceCount !== 1 ||
-        closingBraceCount !== 1 ||
-        !counterFormat.includes("{}")
-      ) {
+      if (openingBraceCount !== 1 || closingBraceCount !== 1 || !counterFormat.includes("{}")) {
         _isValidFormat = false;
-        setFormatErrorMessage(
-          'Invalid braces, braces must appear as "{}" in one location',
-        );
+        setFormatErrorMessage('Invalid braces, braces must appear as "{}" in one location');
       }
     } else {
       _isValidFormat = false;
-      setFormatErrorMessage(
-        'Missing braces "{}" to specify position of numeric value',
-      );
+      setFormatErrorMessage('Missing braces "{}" to specify position of numeric value');
     }
 
     _isValidInitial = counterInitial >= 0 && !_.isNaN(counterInitial);
@@ -289,15 +257,8 @@ const CounterSelect = (props: CounterProps) => {
 
     // Update the Counter preview output
     if (_isValidFormat && _isValidInitial && _isValidIncrement) {
-      setCurrentCounterPreview(
-        counterFormat.replace("{}", counterInitial.toString()),
-      );
-      setNextCounterPreview(
-        counterFormat.replace(
-          "{}",
-          (counterInitial + counterIncrement).toString(),
-        ),
-      );
+      setCurrentCounterPreview(counterFormat.replace("{}", counterInitial.toString()));
+      setNextCounterPreview(counterFormat.replace("{}", (counterInitial + counterIncrement).toString()));
     } else if (!_isValidFormat) {
       setCurrentCounterPreview("Invalid format string");
       setNextCounterPreview("Invalid format string");
@@ -353,12 +314,7 @@ const CounterSelect = (props: CounterProps) => {
         {/* Button to create new Counter */}
         {props.showCreate && (
           <Flex>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              onClick={() => setOpen(true)}
-            >
+            <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setOpen(true)}>
               Create
               <Icon name={"add"} size={"xs"} />
             </Button>
@@ -373,10 +329,7 @@ const CounterSelect = (props: CounterProps) => {
             <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
               Next Value:
             </Text>
-            <Text
-              fontSize={"xs"}
-              color={currentValueLoading ? "gray.400" : "black"}
-            >
+            <Text fontSize={"xs"} color={currentValueLoading ? "gray.400" : "black"}>
               {currentValueLoading ? "Loading" : currentValue}
             </Text>
           </Flex>
@@ -401,36 +354,19 @@ const CounterSelect = (props: CounterProps) => {
 
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header
-              p={"2"}
-              fontWeight={"semibold"}
-              fontSize={"sm"}
-              roundedTop={"md"}
-              bg={"blue.300"}
-            >
+            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"blue.300"}>
               Create Counter
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  top={"6px"}
-                  onClick={() => setOpen(false)}
-                />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
             <Dialog.Body px={"1"} gap={"1"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text
-                  fontSize={"xs"}
-                  color={"gray.600"}
-                  lineHeight={"1.5"}
-                  ml={"0.5"}
-                >
-                  Counters are used to standardize name formats using letters
-                  and a number.
+                <Text fontSize={"xs"} color={"gray.600"} lineHeight={"1.5"} ml={"0.5"}>
+                  Counters are used to standardize name formats using letters and a number.
                   <br />
-                  The format string must contain one "{"{}"}" marking the
-                  position of the numeric value.
+                  The format string must contain one "{"{}"}" marking the position of the numeric value.
                 </Text>
 
                 <Flex>
@@ -441,12 +377,7 @@ const CounterSelect = (props: CounterProps) => {
                           Name
                           <Field.RequiredIndicator />
                         </Field.Label>
-                        <Input
-                          value={counterName}
-                          size={"xs"}
-                          rounded={"md"}
-                          onChange={onNameInputChange}
-                        />
+                        <Input value={counterName} size={"xs"} rounded={"md"} onChange={onNameInputChange} />
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -460,20 +391,14 @@ const CounterSelect = (props: CounterProps) => {
                           Format
                           <Field.RequiredIndicator />
                         </Field.Label>
-                        <Input
-                          value={counterFormat}
-                          size={"xs"}
-                          rounded={"md"}
-                          onChange={onFormatInputChange}
-                        />
+                        <Input value={counterFormat} size={"xs"} rounded={"md"} onChange={onFormatInputChange} />
                         {!isValidFormat && (
                           <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
                             {formatErrorMessage}
                           </Field.ErrorText>
                         )}
                         <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          Example: "Counter_{"{}"}" generates "Counter_1",
-                          "Counter_2", etc.
+                          Example: "Counter_{"{}"}" generates "Counter_1", "Counter_2", etc.
                         </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
@@ -524,13 +449,7 @@ const CounterSelect = (props: CounterProps) => {
                   </Fieldset.Root>
                 </Flex>
 
-                <Flex
-                  p={"1"}
-                  gap={"1"}
-                  direction={"column"}
-                  rounded={"md"}
-                  bg={"gray.100"}
-                >
+                <Flex p={"1"} gap={"1"} direction={"column"} rounded={"md"} bg={"gray.100"}>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Initial Counter Value:
@@ -570,12 +489,7 @@ const CounterSelect = (props: CounterProps) => {
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={"green"}
-                  disabled={
-                    !isValidFormat ||
-                    !isValidIncrement ||
-                    !isValidInput ||
-                    createCounterLoading
-                  }
+                  disabled={!isValidFormat || !isValidIncrement || !isValidInput || createCounterLoading}
                   loading={createCounterLoading}
                   onClick={onDoneClick}
                 >

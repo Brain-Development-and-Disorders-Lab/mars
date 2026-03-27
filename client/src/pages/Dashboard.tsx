@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Heading,
-  Text,
-  Tag,
-  Stat,
-  Badge,
-  EmptyState,
-} from "@chakra-ui/react";
+import { Button, Flex, Heading, Text, Tag, Stat, Badge, EmptyState } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -25,14 +16,7 @@ import SearchBox from "@components/SearchBox";
 import ActivityFeed from "@components/ActivityFeed";
 
 // Existing and custom types
-import {
-  ProjectModel,
-  EntityModel,
-  EntityMetrics,
-  ProjectMetrics,
-  TemplateMetrics,
-  WorkspaceMetrics,
-} from "@types";
+import { ProjectModel, EntityModel, EntityMetrics, ProjectMetrics, TemplateMetrics, WorkspaceMetrics } from "@types";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -136,9 +120,7 @@ const Dashboard = () => {
   const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
   const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
   const [templateMetrics, setTemplateMetrics] = useState({} as TemplateMetrics);
-  const [workspaceMetrics, setWorkspaceMetrics] = useState(
-    {} as WorkspaceMetrics,
-  );
+  const [workspaceMetrics, setWorkspaceMetrics] = useState({} as WorkspaceMetrics);
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -149,8 +131,7 @@ const Dashboard = () => {
   });
 
   // Column filters state for entity table
-  const [entityColumnFilters, setEntityColumnFilters] =
-    useState<ColumnFiltersState>([]);
+  const [entityColumnFilters, setEntityColumnFilters] = useState<ColumnFiltersState>([]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -231,11 +212,7 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip
-            content={info.getValue()}
-            disabled={info.getValue().length < 48}
-            showArrow
-          >
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Text fontSize={"xs"} fontWeight={"semibold"}>
               {_.truncate(info.getValue(), { length: 48 })}
             </Text>
@@ -269,14 +246,8 @@ const Dashboard = () => {
         }
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 64}
-              showArrow
-            >
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 64 })}
-              </Text>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
             </Tooltip>
           </Flex>
         );
@@ -319,19 +290,14 @@ const Dashboard = () => {
   ];
 
   // Configure Projects table
-  const projectTableData: { _id: string; name: string; description: string }[] =
-    projectData;
+  const projectTableData: { _id: string; name: string; description: string }[] = projectData;
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 48}
-              showArrow
-            >
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -366,14 +332,8 @@ const Dashboard = () => {
         }
         return (
           <Flex>
-            <Tooltip
-              content={info.getValue()}
-              disabled={info.getValue().length < 64}
-              showArrow
-            >
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), { length: 64 })}
-              </Text>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
             </Tooltip>
           </Flex>
         );
@@ -439,14 +399,12 @@ const Dashboard = () => {
     },
     {
       target: "#navTemplatesButtonDesktop",
-      content:
-        "Here you can view all Template Attributes in the current Workspace.",
+      content: "Here you can view all Template Attributes in the current Workspace.",
       title: "Templates",
     },
     {
       target: "#workspaceSwitcherDesktop",
-      content:
-        "This shows all Workspaces you have access to and allows you to edit Workspace and account information.",
+      content: "This shows all Workspaces you have access to and allows you to edit Workspace and account information.",
       title: "Workspace Switcher",
     },
     {
@@ -457,8 +415,7 @@ const Dashboard = () => {
     },
     {
       target: "#navCreateButtonDesktop",
-      content:
-        "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
+      content: "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
       title: "Create",
     },
     {
@@ -503,12 +460,7 @@ const Dashboard = () => {
           />
         )}
         <Flex direction={"column"} basis={"70%"} gap={"1"}>
-          <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"space-between"}
-          >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
             <Flex direction={"column"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"dashboard"} size={"sm"} />
@@ -517,11 +469,7 @@ const Dashboard = () => {
             </Flex>
 
             <Flex>
-              <ActorTag
-                identifier={user}
-                fallback={"Unknown User"}
-                size={"md"}
-              />
+              <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
             </Flex>
           </Flex>
 
@@ -539,14 +487,8 @@ const Dashboard = () => {
           >
             <Stat.Root>
               <Stat.Label fontSize={"xs"}>Total Workspace Entities</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>
-                {entityMetrics.all}
-              </Stat.ValueText>
-              <Badge
-                px={"0"}
-                variant={"plain"}
-                colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
-              >
+              <Stat.ValueText fontSize={"md"}>{entityMetrics.all}</Stat.ValueText>
+              <Badge px={"0"} variant={"plain"} colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}>
                 {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
                 {entityMetrics.addedDay} in last 24 hours
               </Badge>
@@ -554,14 +496,8 @@ const Dashboard = () => {
 
             <Stat.Root>
               <Stat.Label fontSize={"xs"}>Total Workspace Projects</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>
-                {projectMetrics.all}
-              </Stat.ValueText>
-              <Badge
-                px={"0"}
-                variant={"plain"}
-                colorPalette={projectMetrics.addedDay > 0 ? "green" : "gray"}
-              >
+              <Stat.ValueText fontSize={"md"}>{projectMetrics.all}</Stat.ValueText>
+              <Badge px={"0"} variant={"plain"} colorPalette={projectMetrics.addedDay > 0 ? "green" : "gray"}>
                 {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
                 {projectMetrics.addedDay} in last 24 hours
               </Badge>
@@ -569,14 +505,8 @@ const Dashboard = () => {
 
             <Stat.Root>
               <Stat.Label fontSize={"xs"}>Total Workspace Templates</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>
-                {templateMetrics.all}
-              </Stat.ValueText>
-              <Badge
-                px={"0"}
-                variant={"plain"}
-                colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}
-              >
+              <Stat.ValueText fontSize={"md"}>{templateMetrics.all}</Stat.ValueText>
+              <Badge px={"0"} variant={"plain"} colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}>
                 {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
                 {templateMetrics.addedDay} in last 24 hours
               </Badge>
@@ -584,12 +514,8 @@ const Dashboard = () => {
 
             {breakpoint !== "base" && breakpoint !== "sm" && (
               <Stat.Root>
-                <Stat.Label fontSize={"xs"}>
-                  Total Workspace Collaborators
-                </Stat.Label>
-                <Stat.ValueText fontSize={"md"}>
-                  {workspaceMetrics.collaborators}
-                </Stat.ValueText>
+                <Stat.Label fontSize={"xs"}>Total Workspace Collaborators</Stat.Label>
+                <Stat.ValueText fontSize={"md"}>{workspaceMetrics.collaborators}</Stat.ValueText>
                 <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
                   No change
                 </Badge>
@@ -598,18 +524,8 @@ const Dashboard = () => {
           </Flex>
         </Flex>
 
-        <Flex
-          direction={"row"}
-          wrap={{ base: "wrap", lg: "nowrap" }}
-          gap={"1"}
-          p={"0"}
-        >
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            flex={{ base: "1 1 100%", lg: "0 0 70%" }}
-            minW={"0"}
-          >
+        <Flex direction={"row"} wrap={{ base: "wrap", lg: "nowrap" }} gap={"1"} p={"0"}>
+          <Flex direction={"column"} gap={"1"} flex={{ base: "1 1 100%", lg: "0 0 70%" }} minW={"0"}>
             {/* Projects and Entities */}
             <Flex
               direction={"column"}
@@ -693,9 +609,7 @@ const Dashboard = () => {
                 <DataTable
                   columns={entityTableColumns}
                   data={entityTableData.filter(
-                    (entity) =>
-                      _.isEqual(entity.archived, false) ||
-                      _.isEqual(entity.archived, null),
+                    (entity) => _.isEqual(entity.archived, false) || _.isEqual(entity.archived, null),
                   )}
                   visibleColumns={visibleColumns}
                   selectedRows={{}}

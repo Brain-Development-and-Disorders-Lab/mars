@@ -1,12 +1,4 @@
-import {
-  Context,
-  EntityMetrics,
-  EntityModel,
-  IEntity,
-  IResolverParent,
-  IResponseMessage,
-  ResponseData,
-} from "@types";
+import { Context, EntityMetrics, EntityModel, IEntity, IResolverParent, IResponseMessage, ResponseData } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -44,10 +36,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -69,19 +58,14 @@ export const EntitiesResolvers = {
       // Determine archived filter value
       // If archived is explicitly true, show all (including archived)
       // If archived is false or undefined, show only non-archived
-      const archivedFilter: boolean | undefined =
-        args.archived === true ? undefined : false;
+      const archivedFilter: boolean | undefined = args.archived === true ? undefined : false;
 
       // Determine pagination parameters
       let page = 0;
       let pageSize = 20; // Default page size
 
       // If pagination parameters are explicitly provided, use them
-      if (
-        !_.isUndefined(args.page) &&
-        !_.isUndefined(args.pageSize) &&
-        args.pageSize > 0
-      ) {
+      if (!_.isUndefined(args.page) && !_.isUndefined(args.pageSize) && args.pageSize > 0) {
         page = Math.max(0, args.page);
         pageSize = Math.max(1, args.pageSize);
       } else if (!_.isUndefined(args.limit) && args.limit > 0) {
@@ -113,16 +97,9 @@ export const EntitiesResolvers = {
     },
 
     // Retrieve one Entity by _id
-    entity: async (
-      _parent: IResolverParent,
-      args: { _id: string },
-      context: Context,
-    ): Promise<EntityModel> => {
+    entity: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<EntityModel> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -155,28 +132,18 @@ export const EntitiesResolvers = {
       if (_.includes(workspace.entities, entity._id)) {
         return entity;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Entity",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Entity", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
     // Check if Entity exists by name
-    entityNameExists: async (
-      _parent: IResolverParent,
-      args: { name: string },
-      context: Context,
-    ) => {
+    entityNameExists: async (_parent: IResolverParent, args: { name: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -195,10 +162,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -231,14 +195,11 @@ export const EntitiesResolvers = {
       if (_.includes(workspace.entities, entity._id)) {
         return await Entities.export(args._id, args.format, args.fields);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to access this Entity",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to access this Entity", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -249,10 +210,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -291,10 +249,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<EntityMetrics> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -315,9 +270,7 @@ export const EntitiesResolvers = {
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const entities = await Entities.all();
-      const workspaceEntities = entities.filter((entity) =>
-        _.includes(workspace.entities, entity._id),
-      );
+      const workspaceEntities = entities.filter((entity) => _.includes(workspace.entities, entity._id));
       const entitiesAddedDay = workspaceEntities.filter((entity) =>
         dayjs(entity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
       );
@@ -336,10 +289,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -371,14 +321,11 @@ export const EntitiesResolvers = {
         // Update description if Entity is in Workspace
         return await Entities.setDescription(args._id, args.description);
       } else {
-        throw new GraphQLError(
-          "You do not have permission to modify this Entity",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify this Entity", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
@@ -389,10 +336,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -443,10 +387,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -509,28 +450,18 @@ export const EntitiesResolvers = {
 
         return result;
       } else {
-        throw new GraphQLError(
-          "You do not have permission to modify this Entity",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify this Entity", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
     },
 
     // Archive an Entity
-    archiveEntity: async (
-      _parent: IResolverParent,
-      args: { _id: string; state: boolean },
-      context: Context,
-    ) => {
+    archiveEntity: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -559,14 +490,11 @@ export const EntitiesResolvers = {
       }
 
       if (!_.includes(workspace.entities, args._id)) {
-        throw new GraphQLError(
-          "You do not have permission to modify the archive state of this Entity",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
+        throw new GraphQLError("You do not have permission to modify the archive state of this Entity", {
+          extensions: {
+            code: "UNAUTHORIZED",
           },
-        );
+        });
       }
 
       if (entity.archived === args.state) {
@@ -607,10 +535,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {

@@ -41,19 +41,9 @@ export const SearchResolvers = {
 
       // Use a single search query, but require specifying the type of `query`
       if (args.isBuilder) {
-        return await Search.getQuery(
-          args.query,
-          args.resultType,
-          context.workspace,
-        );
+        return await Search.getQuery(args.query, args.resultType, context.workspace);
       } else {
-        return await Search.getText(
-          args.query,
-          args.resultType,
-          args.showArchived,
-          args.filters,
-          context.workspace,
-        );
+        return await Search.getText(args.query, args.resultType, args.showArchived, args.filters, context.workspace);
       }
     },
   },

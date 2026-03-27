@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Dialog,
-  Flex,
-  Menu,
-  Spacer,
-  Spinner,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Button, Dialog, Flex, Menu, Spacer, Spinner, Text, useDisclosure } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -48,11 +39,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
 
   // Modal state for transition overlay
-  const {
-    open: transitionOpen,
-    onOpen: onTransitionOpen,
-    onClose: onTransitionClose,
-  } = useDisclosure();
+  const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
 
   // Store all Workspaces
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
@@ -67,8 +54,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Derived label from workspaces list
-  const label =
-    workspaces.find((w) => w._id === workspace)?.name ?? "Select Workspace";
+  const label = workspaces.find((w) => w._id === workspace)?.name ?? "Select Workspace";
 
   const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
@@ -196,13 +182,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
             variant={"surface"}
             onClick={() => setOpen(!open)}
           >
-            <Flex
-              direction={"row"}
-              gap={"2"}
-              align={"center"}
-              p={"1"}
-              w={"100%"}
-            >
+            <Flex direction={"row"} gap={"2"} align={"center"} p={"1"} w={"100%"}>
               <Icon name={"workspace"} size={"sm"} />
               <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"}>
                 {_.truncate(label, { length: 18 })}
@@ -225,12 +205,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                       onClick={() => handleWorkspaceClick(accessible)}
                       key={"w_" + accessible._id}
                     >
-                      <Flex
-                        direction={"row"}
-                        gap={"2"}
-                        w={"100%"}
-                        align={"center"}
-                      >
+                      <Flex direction={"row"} gap={"2"} w={"100%"} align={"center"}>
                         <Tooltip content={accessible.name} showArrow>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             {_.truncate(accessible.name, { length: 24 })}
@@ -253,12 +228,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 })
               ) : (
                 <Menu.Item value={"no-workspaces"} disabled>
-                  <Flex
-                    direction={"row"}
-                    gap={"2"}
-                    align={"center"}
-                    justify={"space-between"}
-                  >
+                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"space-between"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       No Workspaces
                     </Text>
@@ -271,11 +241,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
             <Menu.ItemGroup>
               {/* Option to create a new Workspace */}
-              <Menu.Item
-                value={"edit"}
-                onClick={() => handleUpdateClick()}
-                disabled={workspaces.length === 0}
-              >
+              <Menu.Item value={"edit"} onClick={() => handleUpdateClick()} disabled={workspaces.length === 0}>
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"edit"} size={"xs"} />
                   <Text fontSize={"xs"}>Edit workspace</Text>
@@ -293,23 +259,13 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
             <Menu.ItemGroup>
               <Menu.Item value={"account"} onClick={() => handleProfileClick()}>
-                <Flex
-                  id={"accountSettingsItem"}
-                  direction={"row"}
-                  gap={"2"}
-                  align={"center"}
-                >
+                <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"person"} size={"xs"} />
                   <Text fontSize={"xs"}>Account settings</Text>
                 </Flex>
               </Menu.Item>
               <Menu.Item value={"logout"} onClick={() => handleLogoutClick()}>
-                <Flex
-                  id={"accountLogoutItem"}
-                  direction={"row"}
-                  gap={"2"}
-                  align={"center"}
-                >
+                <Flex id={"accountLogoutItem"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"logout"} size={"xs"} />
                   <Text fontSize={"xs"}>Log out</Text>
                 </Flex>
@@ -319,29 +275,12 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         </Menu.Positioner>
       </Menu.Root>
 
-      <Dialog.Root
-        open={transitionOpen}
-        size={"full"}
-        onExitComplete={onTransitionClose}
-        motionPreset={"none"}
-      >
+      <Dialog.Root open={transitionOpen} size={"full"} onExitComplete={onTransitionClose} motionPreset={"none"}>
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content
-            w={"100%"}
-            h={"100%"}
-            backdropFilter={"blur(1px)"}
-            background={"rgba(255, 255, 255, 0.9)"}
-          >
-            <Flex
-              direction={"column"}
-              gap={"4"}
-              w={"100%"}
-              h={"100%"}
-              align={"center"}
-              justify={"center"}
-            >
+          <Dialog.Content w={"100%"} h={"100%"} backdropFilter={"blur(1px)"} background={"rgba(255, 255, 255, 0.9)"}>
+            <Flex direction={"column"} gap={"4"} w={"100%"} h={"100%"} align={"center"} justify={"center"}>
               <Text fontWeight={"semibold"} color={"gray.700"}>
                 Preparing Workspace...
               </Text>

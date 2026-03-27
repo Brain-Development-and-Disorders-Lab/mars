@@ -1,22 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  CloseButton,
-  Dialog,
-  Flex,
-  Input,
-  Spinner,
-  Text,
-} from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Flex, Input, Spinner, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // QR code scanner components
-import {
-  Html5Qrcode,
-  Html5QrcodeCameraScanConfig,
-  Html5QrcodeScannerState,
-} from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeScannerState } from "html5-qrcode";
 
 // Custom types
 import { IGenericItem, ScanModalProps, ScannerProps } from "@types";
@@ -276,10 +264,7 @@ const ScanModal = (props: ScanModalProps) => {
 
   // Start the scanner when the scanner is ready
   useEffect(() => {
-    if (
-      codeScanner &&
-      codeScanner.getState() === Html5QrcodeScannerState.NOT_STARTED
-    ) {
+    if (codeScanner && codeScanner.getState() === Html5QrcodeScannerState.NOT_STARTED) {
       startScanner();
     }
   }, [codeScanner]);
@@ -297,12 +282,7 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header
-            p={"2"}
-            fontWeight={"semibold"}
-            roundedTop={"md"}
-            bg={"green.300"}
-          >
+          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"green.300"}>
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"scan"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -331,15 +311,7 @@ const ScanModal = (props: ScanModalProps) => {
             </Flex>
 
             {!showCamera && (
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                minH={"200px"}
-                justify={"center"}
-                align={"center"}
-                p={"2"}
-                gap={"2"}
-              >
+              <Flex w={"100%"} h={"100%"} minH={"200px"} justify={"center"} align={"center"} p={"2"} gap={"2"}>
                 <Spinner />
                 <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Preparing camera...
@@ -348,21 +320,10 @@ const ScanModal = (props: ScanModalProps) => {
             )}
 
             {/* Manual entry field */}
-            <Flex
-              align={"center"}
-              mt={"1"}
-              w={"100%"}
-              justify={"center"}
-              gap={"1"}
-            >
+            <Flex align={"center"} mt={"1"} w={"100%"} justify={"center"} gap={"1"}>
               {!showInput && (
                 <Flex>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={handleManualInputSelect}
-                  >
+                  <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={handleManualInputSelect}>
                     Enter Identifier
                     <Icon name={"search"} size={"xs"} />
                   </Button>
@@ -376,20 +337,12 @@ const ScanModal = (props: ScanModalProps) => {
                       size={"xs"}
                       rounded={"md"}
                       value={manualInputValue}
-                      onChange={(event) =>
-                        setManualInputValue(event.target.value)
-                      }
+                      onChange={(event) => setManualInputValue(event.target.value)}
                       placeholder={"Identifier"}
                     />
                   </Flex>
 
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    loading={loading}
-                    onClick={runManualSearch}
-                  >
+                  <Button size={"xs"} rounded={"md"} colorPalette={"blue"} loading={loading} onClick={runManualSearch}>
                     Find
                     <Icon name={"search"} size={"xs"} />
                   </Button>

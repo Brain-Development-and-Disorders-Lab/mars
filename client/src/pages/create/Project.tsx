@@ -53,9 +53,7 @@ const Project = () => {
   const [informationOpen, setInformationOpen] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(
-    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
-  );
+  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
 
@@ -92,8 +90,7 @@ const Project = () => {
 
     // Default blocker condition
     return (
-      (name !== "" || description !== "" || entities.length > 0) &&
-      currentLocation.pathname !== nextLocation.pathname
+      (name !== "" || description !== "" || entities.length > 0) && currentLocation.pathname !== nextLocation.pathname
     );
   });
   const { onClose: onBlockerClose } = useDisclosure();
@@ -191,22 +188,12 @@ const Project = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex
-          direction={"row"}
-          p={"1"}
-          align={"center"}
-          justify={"space-between"}
-        >
+        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"2"} w={"100%"}>
             <Icon name={"project"} size={"xs"} />
             <Heading size={"sm"}>Create Project</Heading>
             <Spacer />
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              variant={"outline"}
-              onClick={() => setInformationOpen(true)}
-            >
+            <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
               Info
               <Icon name={"info"} size={"xs"} />
             </Button>
@@ -223,22 +210,11 @@ const Project = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
               <Fieldset.Root invalid={isNameError}>
                 <Fieldset.Content gap={"1"}>
                   <Field.Root required gap={"0"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Project Name
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -261,28 +237,16 @@ const Project = () => {
                   </Field.Root>
 
                   <Field.Root gap={"0"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Project Owner
                     </Field.Label>
                     <Flex>
-                      <ActorTag
-                        identifier={owner}
-                        fallback={"Unknown User"}
-                        size={"sm"}
-                      />
+                      <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
                     </Flex>
                   </Field.Root>
 
                   <Field.Root gap={"1"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Project Created
                     </Field.Label>
                     <Input
@@ -290,15 +254,9 @@ const Project = () => {
                       rounded={"md"}
                       type={"datetime-local"}
                       value={created}
-                      onChange={(event) =>
-                        setCreated(
-                          dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"),
-                        )
-                      }
+                      onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
                     />
-                    <Field.HelperText fontSize={"xs"}>
-                      Specify a timestamp for the Project.
-                    </Field.HelperText>
+                    <Field.HelperText fontSize={"xs"}>Specify a timestamp for the Project.</Field.HelperText>
                   </Field.Root>
                 </Fieldset.Content>
               </Fieldset.Root>
@@ -315,23 +273,12 @@ const Project = () => {
             basis={"50%"}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
               {/* Project description */}
               <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
-                    <Field.Label
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      ml={"0.5"}
-                    >
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Project Description
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -350,9 +297,7 @@ const Project = () => {
                       />
                     </Box>
                     {isDescriptionError && (
-                      <Field.ErrorText fontSize={"xs"}>
-                        A description must be provided.
-                      </Field.ErrorText>
+                      <Field.ErrorText fontSize={"xs"}>A description must be provided.</Field.ErrorText>
                     )}
                     <Field.HelperText fontSize={"xs"}>
                       Describe the purpose and contents of this Project.
@@ -369,12 +314,7 @@ const Project = () => {
             <Text fontWeight={"semibold"} fontSize={"xs"}>
               Project Entities
             </Text>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              onClick={() => setEntitiesOpen(true)}
-            >
+            <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setEntitiesOpen(true)}>
               Add Entity
               <Icon name={"add"} size={"xs"} />
             </Button>
@@ -390,12 +330,7 @@ const Project = () => {
             align={"center"}
             justify={"center"}
           >
-            <Flex
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-              minH={entities.length > 0 ? "fit-content" : "200px"}
-            >
+            <Flex w={"100%"} justify={"center"} align={"center"} minH={entities.length > 0 ? "fit-content" : "200px"}>
               {entities && entities.length > 0 ? (
                 <DataTable
                   data={entities}
@@ -425,14 +360,7 @@ const Project = () => {
       <Spacer />
 
       {/* Action buttons */}
-      <Flex
-        direction={"row"}
-        wrap={"wrap"}
-        gap={"1"}
-        justify={"space-between"}
-        w={"100%"}
-        p={"1"}
-      >
+      <Flex direction={"row"} wrap={"wrap"} gap={"1"} justify={"space-between"} w={"100%"} p={"1"}>
         <Button
           data-testid={"create-project-cancel"}
           size={"xs"}
@@ -507,18 +435,12 @@ const Project = () => {
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size={"2xs"}
-                  top={"6px"}
-                  onClick={() => setEntitiesOpen(false)}
-                />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => setEntitiesOpen(false)} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p={"1"} px={"2"}>
               <Flex direction={"column"} gap={"1"}>
-                <Text fontSize={"xs"}>
-                  Select an Entity to add to the Project.
-                </Text>
+                <Text fontSize={"xs"}>Select an Entity to add to the Project.</Text>
 
                 <SearchSelect
                   id={"entitySearchSelect"}
@@ -574,19 +496,9 @@ const Project = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.CloseTrigger asChild>
-              <CloseButton
-                size={"2xs"}
-                top={"6px"}
-                onClick={() => setInformationOpen(false)}
-              />
+              <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
             </Dialog.CloseTrigger>
-            <Dialog.Header
-              p={"2"}
-              fontWeight={"semibold"}
-              fontSize={"xs"}
-              bg={"blue.300"}
-              roundedTop={"md"}
-            >
+            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Icon name={"project"} size={"xs"} />
                 Projects
@@ -594,41 +506,29 @@ const Project = () => {
             </Dialog.Header>
             <Dialog.Body p={"1"}>
               <Flex direction={"column"} gap={"1"}>
-                <Flex
-                  direction={"column"}
-                  gap={"1"}
-                  bg={"gray.100"}
-                  p={"1"}
-                  rounded={"md"}
-                >
+                <Flex direction={"column"} gap={"1"} bg={"gray.100"} p={"1"} rounded={"md"}>
                   <Heading size={"xs"}>Overview</Heading>
                   <Text fontSize={"xs"}>
-                    Projects can be used to organize and share Entities. Any
-                    type of Entity can be included in a Project. Entities can be
-                    added and removed from a Project after it has been created.
+                    Projects can be used to organize and share Entities. Any type of Entity can be included in a
+                    Project. Entities can be added and removed from a Project after it has been created.
                   </Text>
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"} ml={"0.5"}>
                   <Heading size={"xs"}>Project Name</Heading>
                   <Text fontSize={"xs"}>
-                    Specify the name of a Project. This should be unique and
-                    will act as a searchable identifier.
+                    Specify the name of a Project. This should be unique and will act as a searchable identifier.
                   </Text>
 
                   <Heading size={"xs"}>Project Created</Heading>
                   <Text fontSize={"xs"}>
-                    A timestamp assigned to the Project. For example, if this is
-                    a set of Entities used in a specific experiment, this date
-                    could represent when work on the experiment commenced.
-                    Otherwise, this timestamp may simply represent when this
-                    Project was created in Metadatify.
+                    A timestamp assigned to the Project. For example, if this is a set of Entities used in a specific
+                    experiment, this date could represent when work on the experiment commenced. Otherwise, this
+                    timestamp may simply represent when this Project was created in Metadatify.
                   </Text>
 
                   <Heading size={"xs"}>Project Description</Heading>
-                  <Text fontSize={"xs"}>
-                    A brief description of the Project contents.
-                  </Text>
+                  <Text fontSize={"xs"}>A brief description of the Project contents.</Text>
                 </Flex>
               </Flex>
             </Dialog.Body>

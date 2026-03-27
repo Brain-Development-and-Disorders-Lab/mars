@@ -14,16 +14,9 @@ import { PostHogClient } from "src";
 export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
-    activity: async (
-      _parent: IResolverParent,
-      args: { limit: 100 },
-      context: Context,
-    ) => {
+    activity: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {
@@ -54,10 +47,7 @@ export const ActivityResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(
-        context.user,
-        context.workspace,
-      );
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
         throw new GraphQLError("User does not have access to this Workspace", {
           extensions: {

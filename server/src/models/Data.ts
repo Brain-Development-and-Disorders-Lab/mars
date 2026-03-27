@@ -38,10 +38,7 @@ export class Data {
    * @param filename File name, assuming that file exists
    * @return {Promise<string>}
    */
-  private static generateFile = (
-    _id: string,
-    filename: string,
-  ): Promise<string> => {
+  private static generateFile = (_id: string, filename: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       // Access bucket and create open stream to write to storage
       const bucket = getAttachments();
@@ -50,11 +47,9 @@ export class Data {
       const staticPath = `${_id}_${filename}`;
 
       // Create stream from buffer and write to `/public` path
-      const stream = bucket
-        .openDownloadStream(new ObjectId(_id))
-        .on("error", () => {
-          reject("Error while generating static file for download");
-        });
+      const stream = bucket.openDownloadStream(new ObjectId(_id)).on("error", () => {
+        reject("Error while generating static file for download");
+      });
       stream.pipe(fs.createWriteStream(__dirname + `/public/${staticPath}`));
 
       stream.on("close", () => {
@@ -78,10 +73,7 @@ export class Data {
     return await Data.generateFile(_id, result[0].filename);
   };
 
-  static uploadAttachment = async (
-    target: string,
-    file: IFile,
-  ): Promise<ResponseData<string>> => {
+  static uploadAttachment = async (target: string, file: IFile): Promise<ResponseData<string>> => {
     const { createReadStream, filename, mimetype } = await file;
 
     const bucket = getAttachments();
@@ -138,9 +130,7 @@ export class Data {
    * @param stream ReadableStream instance with file contents
    * @return {Promise<Buffer>}
    */
-  private static bufferHelper = async (
-    stream: fs.ReadStream,
-  ): Promise<Buffer> =>
+  private static bufferHelper = async (stream: fs.ReadStream): Promise<Buffer> =>
     new Promise((resolve) => {
       const buffers: Uint8Array[] = [];
       stream.on("data", (data: Uint8Array) => buffers.push(data));
@@ -156,10 +146,7 @@ export class Data {
    * @param sheet Target sheet of imported CSV file
    * @return {Promise<IEntity[]>}
    */
-  private static columnMappingHelper = async (
-    columnMapping: IColumnMapping,
-    sheet: IRow[],
-  ): Promise<IEntity[]> => {
+  private static columnMappingHelper = async (columnMapping: IColumnMapping, sheet: IRow[]): Promise<IEntity[]> => {
     // Create generic set of Entities
     const entities = [] as IEntity[];
 
@@ -285,10 +272,7 @@ export class Data {
       });
 
       // Generate collection of Entities to import
-      const entities = await Data.columnMappingHelper(
-        columnMapping,
-        parsedSheet,
-      );
+      const entities = await Data.columnMappingHelper(columnMapping, parsedSheet);
 
       return {
         success: true,
@@ -334,18 +318,13 @@ export class Data {
       });
 
       // Generate collection of Entities to import
-      const entities = await Data.columnMappingHelper(
-        columnMapping,
-        parsedSheet,
-      );
+      const entities = await Data.columnMappingHelper(columnMapping, parsedSheet);
 
       // Iterate over all Entities
       for await (const entity of entities) {
         // Apply specified options
         if (options.counters.length > 0) {
-          const currentCounterValue = await Counters.getCurrentValue(
-            options.counters[0]._id,
-          );
+          const currentCounterValue = await Counters.getCurrentValue(options.counters[0]._id);
           if (currentCounterValue.success) {
             entity.name = currentCounterValue.data;
             await Counters.incrementValue(options.counters[0]._id);
@@ -394,9 +373,7 @@ export class Data {
    * @param {IFile[]} file JSON file for import
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
-  static reviewEntityJSON = async (
-    file: IFile[],
-  ): Promise<ResponseData<EntityImportReview[]>> => {
+  static reviewEntityJSON = async (file: IFile[]): Promise<ResponseData<EntityImportReview[]>> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -444,9 +421,7 @@ export class Data {
    * @param {IFile[]} file JSON file for import
    * @return {Promise<ResponseData<TemplateImportReview[]>>}
    */
-  static reviewTemplateJSON = async (
-    file: IFile[],
-  ): Promise<ResponseData<TemplateImportReview[]>> => {
+  static reviewTemplateJSON = async (file: IFile[]): Promise<ResponseData<TemplateImportReview[]>> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -471,8 +446,7 @@ export class Data {
 
       const review: TemplateImportReview[] = [];
       // Check if Template exists and update or create as required
-      const exists =
-        !_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id));
+      const exists = !_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id));
 
       review.push({
         name: parsed.name,
@@ -615,10 +589,7 @@ export class Data {
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
-  static importTemplateJSON = async (
-    file: IFile[],
-    context: Context,
-  ): Promise<IResponseMessage> => {
+  static importTemplateJSON = async (file: IFile[], context: Context): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -640,10 +611,7 @@ export class Data {
         };
       }
 
-      if (
-        !_.isUndefined(parsed["_id"]) &&
-        (await Templates.exists(parsed._id))
-      ) {
+      if (!_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id))) {
         // Update an existing Template if it exists
         const result = await Templates.update(parsed);
         if (!result.success) {

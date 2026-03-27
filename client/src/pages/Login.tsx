@@ -112,9 +112,7 @@ const Login = () => {
     if (error) {
       toaster.create({
         title: "ORCiD Authentication Error",
-        description:
-          error.message ||
-          "Unable to authenticate with ORCiD. Please try again.",
+        description: error.message || "Unable to authenticate with ORCiD. Please try again.",
         type: "error",
         duration: 4000,
         closable: true,
@@ -249,11 +247,7 @@ const Login = () => {
                 colorPalette={"green"}
               >
                 Sign in with ORCiD
-                <Image
-                  src={
-                    "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-                  }
-                />
+                <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
               </Button>
             </Flex>
 
@@ -276,12 +270,7 @@ const Login = () => {
               </Button>
             </Flex>
 
-            <Flex
-              direction={"row"}
-              gap={"2"}
-              align={"center"}
-              justify={"center"}
-            >
+            <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                 v{process.env.VERSION}
               </Text>

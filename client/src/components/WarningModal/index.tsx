@@ -8,11 +8,7 @@ import { UnsavedChangesModalProps } from "@types";
 
 const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
   return (
-    <Dialog.Root
-      open={props.blocker.state === "blocked"}
-      placement={"center"}
-      size={"xs"}
-    >
+    <Dialog.Root open={props.blocker.state === "blocked"} placement={"center"} size={"xs"}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -26,10 +22,7 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
           </Dialog.Header>
 
           <Dialog.Body p={"1"}>
-            <Text fontSize={"xs"}>
-              Are you sure you want to leave this page? You will lose any
-              unsaved changes.
-            </Text>
+            <Text fontSize={"xs"}>Are you sure you want to leave this page? You will lose any unsaved changes.</Text>
           </Dialog.Body>
 
           <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
