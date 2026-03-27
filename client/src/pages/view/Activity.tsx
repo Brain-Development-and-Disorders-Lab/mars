@@ -45,6 +45,7 @@ dayjs.extend(isSameOrBefore);
 const Activity = () => {
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
+  const [initialLoaded, setInitialLoaded] = useState(false);
   // Timestamp update state to trigger re-renders for relative time display
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
@@ -123,10 +124,9 @@ const Activity = () => {
   // Manage data once retrieved
   useEffect(() => {
     if (data?.activity) {
-      // Unpack all the Activity data
       setActivityData(data.activity);
-      // Initialize filtered data with all activity
       setFilteredActivityData(data.activity);
+      setInitialLoaded(true);
     }
   }, [data]);
 
@@ -292,7 +292,10 @@ const Activity = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error) && !initialLoaded}
+      isLoaded={initialLoaded || !loading}
+    >
       <Flex
         direction={"row"}
         p={"1"}
