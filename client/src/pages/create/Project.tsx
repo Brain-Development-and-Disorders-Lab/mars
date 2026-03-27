@@ -277,7 +277,7 @@ const Project = () => {
                     </Flex>
                   </Field.Root>
 
-                  <Field.Root gap={"0"}>
+                  <Field.Root gap={"1"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
@@ -326,7 +326,7 @@ const Project = () => {
               {/* Project description */}
               <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
-                  <Field.Root required gap={"0"}>
+                  <Field.Root required gap={"1"}>
                     <Field.Label
                       fontSize={"xs"}
                       fontWeight={"semibold"}
@@ -334,7 +334,7 @@ const Project = () => {
                     >
                       Project Description
                     </Field.Label>
-                    <Box data-testid={"create-project-description"}>
+                    <Box data-testid={"create-project-description"} w={"100%"}>
                       <MDEditor
                         height={150}
                         minHeight={100}
@@ -353,6 +353,9 @@ const Project = () => {
                         A description must be provided.
                       </Field.ErrorText>
                     )}
+                    <Field.HelperText fontSize={"xs"}>
+                      Describe the purpose and contents of this Project.
+                    </Field.HelperText>
                   </Field.Root>
                 </Fieldset.Content>
               </Fieldset.Root>
