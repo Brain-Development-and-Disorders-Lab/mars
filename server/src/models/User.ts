@@ -209,9 +209,16 @@ export class User {
   };
 
   static findByKey = async (api_key: string): Promise<UserModel | null> => {
-    return await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({
-      "api_keys.value": api_key,
-    });
+    // `api_keys` is stored as a JSON string by better-auth, so dot-notation
+    // MongoDB queries don't work on it, parse and filter in application code.
+    const users = await getDatabase().collection<UserModel>(USERS_COLLECTION).find().toArray();
+    return (
+      users.find((user) => {
+        if (!user.api_keys) return false;
+        const keys: APIKey[] = JSON.parse(user.api_keys as unknown as string);
+        return keys.some((k) => k.value === api_key);
+      }) ?? null
+    );
   };
 
   static bootstrap = async (user: string, workspace: string): Promise<IResponseMessage> => {
