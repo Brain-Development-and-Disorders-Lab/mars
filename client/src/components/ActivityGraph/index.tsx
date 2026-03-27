@@ -150,7 +150,7 @@ const ActivityGraph = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
-          margin={{ top: 15, right: 10, bottom: 5, left: -30 }}
+          margin={{ top: 15, right: 10, bottom: 5, left: -20 }}
           width={"100%"}
           height={"100%"}
         >
