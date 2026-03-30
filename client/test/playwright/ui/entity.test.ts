@@ -15,14 +15,10 @@ import {
 
 async function createTestEntity(page: Page, entityName: string): Promise<void> {
   await page.goto("/create/entity");
-  await page
-    .locator("[data-testid='create-entity-name']")
-    .waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("[data-testid='create-entity-name']").waitFor({ state: "visible", timeout: 10000 });
   await page.locator("[data-testid='create-entity-name']").fill(entityName);
   await page.locator('input[type="date"]').fill("2023-10-01");
-  await page
-    .locator("[data-testid='create-entity-description'] textarea")
-    .fill("Test entity");
+  await page.locator("[data-testid='create-entity-description'] textarea").fill("Test entity");
   await page.click("[data-testid='create-entity-continue']");
   await page.click("[data-testid='create-entity-continue']");
   await page.click("[data-testid='create-entity-finish']");
@@ -50,17 +46,11 @@ test.describe("Entity", () => {
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
     });
 
-    test("should display the initial page with required fields", async ({
-      page,
-    }) => {
+    test("should display the initial page with required fields", async ({ page }) => {
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
-      await expect(
-        page.locator("[data-testid='create-entity-name']"),
-      ).toBeVisible();
+      await expect(page.locator("[data-testid='create-entity-name']")).toBeVisible();
       await expect(page.locator('input[type="date"]')).toBeVisible();
-      await expect(
-        page.locator("[data-testid='create-entity-description'] textarea"),
-      ).toBeVisible();
+      await expect(page.locator("[data-testid='create-entity-description'] textarea")).toBeVisible();
     });
 
     test("should navigate through the steps", async ({ page }) => {
@@ -82,9 +72,7 @@ test.describe("Entity", () => {
       // Go back
       await page.click("[data-testid='create-entity-back']");
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
-      await expect(
-        page.locator("[data-testid='create-entity-name']"),
-      ).toHaveValue(entityName);
+      await expect(page.locator("[data-testid='create-entity-name']")).toHaveValue(entityName);
 
       // Continue to relationships again
       await page.click("[data-testid='create-entity-continue']");
@@ -123,9 +111,7 @@ test.describe("Entity", () => {
         if ((await entityButton.count()) > 0) {
           await entityButton.first().click();
           await page.click("[data-testid='create-entity-add-relationship']");
-          await expect(
-            page.locator(".data-table-scroll-container"),
-          ).toBeVisible();
+          await expect(page.locator(".data-table-scroll-container")).toBeVisible();
         }
       }
     });
@@ -149,14 +135,10 @@ test.describe("Entity", () => {
 
       // Select template if available
       await page.click("[data-testid='select-template-trigger']");
-      const templateOption = page.locator(
-        '[role="option"]:has-text("Example Template")',
-      );
+      const templateOption = page.locator('[role="option"]:has-text("Example Template")');
       if ((await templateOption.count()) > 0) {
         await templateOption.click();
-        await expect(
-          page.locator("[data-testid='create-entity-attributes']"),
-        ).toBeVisible();
+        await expect(page.locator("[data-testid='create-entity-attributes']")).toBeVisible();
       }
     });
 
@@ -195,20 +177,14 @@ test.describe("Entity", () => {
       await page.locator("#entityNameInput").fill(`${entityName} (Updated)`);
       await saveAndWait(page);
 
-      await expect(page.locator("#entityNameTag")).toContainText(
-        `${entityName} (Updated)`,
-      );
+      await expect(page.locator("#entityNameTag")).toContainText(`${entityName} (Updated)`);
 
       // Verify persistence after reload
       await page.reload();
-      await expect(page.locator("#entityNameTag")).toContainText(
-        `${entityName} (Updated)`,
-      );
+      await expect(page.locator("#entityNameTag")).toContainText(`${entityName} (Updated)`);
     });
 
-    test("should be able to update the Entity description", async ({
-      page,
-    }) => {
+    test("should be able to update the Entity description", async ({ page }) => {
       const entityName = getUniqueName("Test Entity");
       await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
@@ -224,17 +200,13 @@ test.describe("Entity", () => {
       await saveAndWait(page);
 
       // Verify success toast appears (confirms mutation completed)
-      await page
-        .locator("text=Updated Successfully")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });
 
       // Wait for refetch to complete
       await page.waitForLoadState("networkidle");
 
       // Verify the description appears in view mode
-      await page
-        .locator(`text=${updatedDescription}`)
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator(`text=${updatedDescription}`).waitFor({ state: "visible", timeout: 10000 });
     });
   });
 
@@ -254,14 +226,10 @@ test.describe("Entity", () => {
       await page.click("#addAttributeModalButton");
 
       // Fill in attribute name (input is inside the field wrapper)
-      await page
-        .locator("[data-testid='create-attribute-name'] input")
-        .fill("Attribute Name");
+      await page.locator("[data-testid='create-attribute-name'] input").fill("Attribute Name");
 
       // Fill in attribute description (textarea is inside the field wrapper)
-      await page
-        .locator("[data-testid='create-attribute-description'] textarea")
-        .fill("Attribute Description");
+      await page.locator("[data-testid='create-attribute-description'] textarea").fill("Attribute Description");
 
       // Add new "Row" in Values area
       await page.click("#addValueRowButton");
@@ -275,17 +243,13 @@ test.describe("Entity", () => {
       await page.waitForTimeout(1000);
 
       // Ensure the save button is enabled before clicking
-      const saveButton = page.locator(
-        "[data-testid='save-add-attribute-button']",
-      );
+      const saveButton = page.locator("[data-testid='save-add-attribute-button']");
       await saveButton.waitFor({ state: "visible", timeout: 5000 });
 
       // Wait for button to be enabled (not disabled)
       await page.waitForFunction(
         () => {
-          const btn = document.querySelector(
-            '[data-testid="save-add-attribute-button"]',
-          ) as HTMLButtonElement;
+          const btn = document.querySelector('[data-testid="save-add-attribute-button"]') as HTMLButtonElement;
           return btn && !btn.disabled;
         },
         { timeout: 5000 },
@@ -295,14 +259,10 @@ test.describe("Entity", () => {
       await saveButton.click();
 
       // Wait for the modal to close
-      await page
-        .locator("#addAttributeModalButton")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("#addAttributeModalButton").waitFor({ state: "visible", timeout: 10000 });
 
       // Wait for the attribute name to appear in the Attributes table
-      await page
-        .locator("text=Attribute Name")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=Attribute Name").waitFor({ state: "visible", timeout: 10000 });
 
       // Verify "No Attributes" is no longer visible
       await expect(page.locator("text=No Attributes")).not.toBeVisible({
@@ -310,9 +270,7 @@ test.describe("Entity", () => {
       });
 
       await saveAndWait(page);
-      await page
-        .locator("text=Updated Successfully")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });
 
       // Wait for refetch to complete
       await page.waitForLoadState("networkidle");
@@ -327,17 +285,11 @@ test.describe("Entity", () => {
       });
 
       await page.click("#editEntityButton");
-      await page
-        .locator('button:has-text("Save")')
-        .waitFor({ state: "visible", timeout: 10000 });
-      await page
-        .locator("text=Attribute Name")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator('button:has-text("Save")').waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=Attribute Name").waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 
-      const deleteButton = page.locator(
-        'button[aria-label="Delete Attribute"]',
-      );
+      const deleteButton = page.locator('button[aria-label="Delete Attribute"]');
       await deleteButton.waitFor({ state: "attached", timeout: 10000 });
       await deleteButton.waitFor({ state: "visible", timeout: 10000 });
       await deleteButton.scrollIntoViewIfNeeded();

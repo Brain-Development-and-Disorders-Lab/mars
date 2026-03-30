@@ -96,28 +96,20 @@ describe("Entity model", () => {
     });
 
     // Refresh parent Entity
-    const parentEntity: EntityModel | null = await Entities.getOne(
-      parentResult.data,
-    );
+    const parentEntity: EntityModel | null = await Entities.getOne(parentResult.data);
     if (_.isNull(parentEntity)) throw new Error();
 
     // Confirm child Entity creation
-    const childEntity: EntityModel | null = await Entities.getOne(
-      childResult.data,
-    );
+    const childEntity: EntityModel | null = await Entities.getOne(childResult.data);
     if (_.isNull(childEntity)) throw new Error();
 
     // Check the parent of the child
     expect(childEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships[0].target._id).toStrictEqual(
-      parentEntity._id,
-    );
+    expect(childEntity.relationships[0].target._id).toStrictEqual(parentEntity._id);
 
     // Check the child of the parent
     expect(parentEntity.relationships.length).toBe(1);
-    expect(parentEntity.relationships[0].target._id).toStrictEqual(
-      childEntity._id,
-    );
+    expect(parentEntity.relationships[0].target._id).toStrictEqual(childEntity._id);
   });
 
   it("should create a child-parent relationship between two Entities", async () => {
@@ -155,27 +147,19 @@ describe("Entity model", () => {
       history: [],
     });
 
-    const childEntity: EntityModel | null = await Entities.getOne(
-      childResult.data,
-    );
+    const childEntity: EntityModel | null = await Entities.getOne(childResult.data);
     if (_.isNull(childEntity)) throw new Error();
 
-    const parentEntity: EntityModel | null = await Entities.getOne(
-      parentResult.data,
-    );
+    const parentEntity: EntityModel | null = await Entities.getOne(parentResult.data);
     if (_.isNull(parentEntity)) throw new Error();
 
     // Check the child of the parent
     expect(parentEntity.relationships.length).toBe(1);
-    expect(parentEntity.relationships[0].target._id).toStrictEqual(
-      childEntity._id,
-    );
+    expect(parentEntity.relationships[0].target._id).toStrictEqual(childEntity._id);
 
     // Check the parent of the child
     expect(childEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships[0].target._id).toStrictEqual(
-      parentEntity._id,
-    );
+    expect(childEntity.relationships[0].target._id).toStrictEqual(parentEntity._id);
   });
 
   it("should create an Attribute", async () => {
@@ -269,13 +253,9 @@ describe("Entity model", () => {
     await Entities.update(entity);
 
     // Retrieve updated Entity and Project models
-    const updatedEntity: EntityModel | null = await Entities.getOne(
-      entityResult.data,
-    );
+    const updatedEntity: EntityModel | null = await Entities.getOne(entityResult.data);
     if (_.isNull(updatedEntity)) throw new Error();
-    const updatedProject: ProjectModel | null = await Projects.getOne(
-      projectResult.data,
-    );
+    const updatedProject: ProjectModel | null = await Projects.getOne(projectResult.data);
     if (_.isNull(updatedProject)) throw new Error();
 
     // Validate the Entity has the Project
@@ -324,13 +304,9 @@ describe("Entity model", () => {
     await Entities.update(entity);
 
     // Retrieve updated Entity and Project models
-    const updatedEntity: EntityModel | null = await Entities.getOne(
-      entityResult.data,
-    );
+    const updatedEntity: EntityModel | null = await Entities.getOne(entityResult.data);
     if (_.isNull(updatedEntity)) throw new Error();
-    const updatedProject: ProjectModel | null = await Projects.getOne(
-      projectResult.data,
-    );
+    const updatedProject: ProjectModel | null = await Projects.getOne(projectResult.data);
     if (_.isNull(updatedProject)) throw new Error();
 
     // Validate the Entity does not have the Project
@@ -386,14 +362,10 @@ describe("Entity model", () => {
     await Entities.update(entity);
 
     // Get the updated parent Entity and child Entity
-    let parentEntity: EntityModel | null = await Entities.getOne(
-      parentResult.data,
-    );
+    let parentEntity: EntityModel | null = await Entities.getOne(parentResult.data);
     if (_.isNull(parentEntity)) throw new Error();
 
-    let childEntity: EntityModel | null = await Entities.getOne(
-      entityResult.data,
-    );
+    let childEntity: EntityModel | null = await Entities.getOne(entityResult.data);
     if (_.isNull(childEntity)) throw new Error();
 
     // Validate Entities
@@ -460,14 +432,10 @@ describe("Entity model", () => {
     await Entities.update(entity);
 
     // Get the updated child Entity and original parent Entity
-    let updatedEntity: EntityModel | null = await Entities.getOne(
-      entityResult.data,
-    );
+    let updatedEntity: EntityModel | null = await Entities.getOne(entityResult.data);
     if (_.isNull(updatedEntity)) throw new Error();
 
-    let childEntity: EntityModel | null = await Entities.getOne(
-      childResult.data,
-    );
+    let childEntity: EntityModel | null = await Entities.getOne(childResult.data);
     if (_.isNull(childEntity)) throw new Error();
 
     // Validate Entities
@@ -634,12 +602,10 @@ describe("Entity model", () => {
     // Assert: Raw data should include data for both Entities
     expect(entities.length).toBe(2);
     expect(
-      entities[0].name.toString() == "TestProductEntity" ||
-        entities[1].name.toString() == "TestProductEntity",
+      entities[0].name.toString() == "TestProductEntity" || entities[1].name.toString() == "TestProductEntity",
     ).toBeTruthy();
     expect(
-      entities[0].name.toString() == "TestOriginEntity" ||
-        entities[1].name.toString() == "TestOriginEntity",
+      entities[0].name.toString() == "TestOriginEntity" || entities[1].name.toString() == "TestOriginEntity",
     ).toBeTruthy();
   });
 

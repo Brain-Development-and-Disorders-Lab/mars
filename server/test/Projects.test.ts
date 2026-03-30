@@ -73,16 +73,12 @@ describe("Project model", () => {
     expect(result.length).toBe(NUM_PROJECTS);
 
     // Get half of all identifiers and request Projects with those identifiers
-    const identifiers: string[] = result
-      .slice(0, NUM_PROJECTS / 2)
-      .map((project) => project._id);
+    const identifiers: string[] = result.slice(0, NUM_PROJECTS / 2).map((project) => project._id);
     const resultMany = await Projects.getMany(identifiers);
 
     // Check result length and contents are matching what was requested
     expect(resultMany.length).toBe(NUM_PROJECTS / 2);
-    expect(resultMany.map((project) => project._id)).toEqual(
-      expect.arrayContaining(identifiers),
-    );
+    expect(resultMany.map((project) => project._id)).toEqual(expect.arrayContaining(identifiers));
   });
 
   it("should confirm a Project exists", async () => {

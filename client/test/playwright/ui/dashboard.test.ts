@@ -19,8 +19,6 @@ test.describe("Interface launches", () => {
   test("navigation menu items are visible", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("#navSearchButtonDesktop")).toHaveText("Search");
-    await expect(page.locator("#navProjectsButtonDesktop")).toHaveText(
-      "Projects",
-    );
+    await expect(page.locator("#navProjectsButtonDesktop")).toHaveText("Projects");
   });
 });

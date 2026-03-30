@@ -11,9 +11,7 @@ import { theme } from "../../src/styles/theme";
 // Target component
 import Tooltip from "../../src/components/Tooltip";
 
-const renderTooltip = (
-  props: Partial<React.ComponentProps<typeof Tooltip>> = {},
-) => {
+const renderTooltip = (props: Partial<React.ComponentProps<typeof Tooltip>> = {}) => {
   const defaultProps = {
     content: "Tooltip content",
     children: <button>Hover me</button>,

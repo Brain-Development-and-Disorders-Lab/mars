@@ -46,8 +46,8 @@ const Activity = () => {
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
   const [initialLoaded, setInitialLoaded] = useState(false);
+
   // Timestamp update state to trigger re-renders for relative time display
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
 
   const { breakpoint } = useBreakpoint();

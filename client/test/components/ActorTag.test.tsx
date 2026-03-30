@@ -73,9 +73,7 @@ const mockUserQuery = {
   },
 };
 
-const renderActorTag = (
-  props: Partial<React.ComponentProps<typeof ActorTag>> = {},
-) => {
+const renderActorTag = (props: Partial<React.ComponentProps<typeof ActorTag>> = {}) => {
   const defaultProps: React.ComponentProps<typeof ActorTag> = {
     identifier: "test-orcid",
     fallback: "Test User",

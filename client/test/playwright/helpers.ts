@@ -26,17 +26,10 @@ export async function performLogin(page: Page): Promise<void> {
  * Create a new Workspace for a specific test or test suite
  * @param page
  */
-export async function setupEnvironment(
-  page: Page,
-  testName: string,
-): Promise<void> {
+export async function setupEnvironment(page: Page, testName: string): Promise<void> {
   await page.goto("/create/workspace");
-  await page
-    .locator("[data-testid='create-workspace-name']")
-    .waitFor({ state: "visible", timeout: 10000 });
-  await page
-    .locator("[data-testid='create-workspace-name']")
-    .fill(`Test Workspace - ${testName}`);
+  await page.locator("[data-testid='create-workspace-name']").waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("[data-testid='create-workspace-name']").fill(`Test Workspace - ${testName}`);
   await page
     .locator("[data-testid='create-workspace-description'] textarea")
     .fill(`Test Workspace for test: ${testName}`);
@@ -63,29 +56,17 @@ export async function resetEnvironment(page: Page): Promise<void> {
   await page.waitForLoadState("domcontentloaded");
 
   // Create user account
-  await page
-    .locator("#createAccountButton")
-    .waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("#createAccountButton").waitFor({ state: "visible", timeout: 10000 });
   await page.click("#createAccountButton");
   await page.waitForLoadState("domcontentloaded");
 
   // Populate user information (use environment variables for specific details)
   await page.locator("#userFirstNameInput").fill("User");
   await page.locator("#userLastNameInput").fill("Test");
-  await page
-    .locator("#userEmailInput")
-    .fill(process.env.TEST_USER_EMAIL || "test@test.com");
-  await selectDropdownOption(
-    page,
-    '[data-testid="affiliation-select-trigger"]',
-    "No Affiliation",
-  );
-  await page
-    .locator("#userPasswordInputInitial")
-    .fill(process.env.TEST_USER_PASSWORD || "test_password123");
-  await page
-    .locator("#userPasswordInputConfirm")
-    .fill(process.env.TEST_USER_PASSWORD || "test_password123");
+  await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL || "test@test.com");
+  await selectDropdownOption(page, '[data-testid="affiliation-select-trigger"]', "No Affiliation");
+  await page.locator("#userPasswordInputInitial").fill(process.env.TEST_USER_PASSWORD || "test_password123");
+  await page.locator("#userPasswordInputConfirm").fill(process.env.TEST_USER_PASSWORD || "test_password123");
 
   // Finalize account creation
   await page.locator("#createAccountButton").click();
@@ -98,10 +79,7 @@ export async function resetEnvironment(page: Page): Promise<void> {
 /**
  * Navigate to a section (Entities, Projects, Templates)
  */
-export async function navigateToSection(
-  page: Page,
-  section: "Entities" | "Projects" | "Templates",
-): Promise<void> {
+export async function navigateToSection(page: Page, section: "Entities" | "Projects" | "Templates"): Promise<void> {
   await page.goto("/");
   await page.click(`button:has-text("${section}")`);
   await page.waitForLoadState("domcontentloaded");
@@ -132,9 +110,7 @@ export async function openItemFromTable(
   } catch {
     // If item not found, provide helpful error message
     const allItems = await table.locator("text").allTextContents();
-    throw new Error(
-      `Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`,
-    );
+    throw new Error(`Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`);
   }
   await textLocator.scrollIntoViewIfNeeded();
 
@@ -142,9 +118,7 @@ export async function openItemFromTable(
   const count = await buttons.count();
 
   if (count === 0) {
-    throw new Error(
-      `No button with aria-label "${viewButtonLabel}" found in table`,
-    );
+    throw new Error(`No button with aria-label "${viewButtonLabel}" found in table`);
   }
 
   // If multiple buttons, find the one closest to the text by Y coordinate
@@ -170,9 +144,7 @@ export async function openItemFromTable(
     }
 
     if (!closestBtn) {
-      throw new Error(
-        `Could not find button "${viewButtonLabel}" in row containing "${itemName}"`,
-      );
+      throw new Error(`Could not find button "${viewButtonLabel}" in row containing "${itemName}"`);
     }
 
     await closestBtn.scrollIntoViewIfNeeded();
@@ -186,11 +158,7 @@ export async function openItemFromTable(
 /**
  * Fill an MDEditor textarea
  */
-export async function fillMDEditor(
-  page: Page,
-  selector: string,
-  value: string,
-): Promise<void> {
+export async function fillMDEditor(page: Page, selector: string, value: string): Promise<void> {
   const textarea = page.locator(`${selector} textarea`);
   await textarea.waitFor({ state: "visible", timeout: 5000 });
   await textarea.click();
@@ -203,29 +171,18 @@ export async function fillMDEditor(
  */
 export async function saveAndWait(page: Page): Promise<void> {
   await clickButtonByText(page, "Save");
-  await page
-    .locator('button:has-text("Done")')
-    .waitFor({ state: "visible", timeout: 5000 });
+  await page.locator('button:has-text("Done")').waitFor({ state: "visible", timeout: 5000 });
   await clickButtonByText(page, "Done");
-  await page
-    .locator('button:has-text("Edit")')
-    .waitFor({ state: "visible", timeout: 10000 });
+  await page.locator('button:has-text("Edit")').waitFor({ state: "visible", timeout: 10000 });
   await page.waitForLoadState("networkidle");
 }
 
 /**
  * Select an option from a dropdown
  */
-export async function selectDropdownOption(
-  page: Page,
-  triggerSelector: string,
-  optionText: string,
-): Promise<void> {
+export async function selectDropdownOption(page: Page, triggerSelector: string, optionText: string): Promise<void> {
   await page.click(triggerSelector);
-  await page
-    .locator(`[role="option"]:has-text("${optionText}")`)
-    .first()
-    .click();
+  await page.locator(`[role="option"]:has-text("${optionText}")`).first().click();
 }
 
 /**
@@ -239,11 +196,7 @@ export function getUniqueName(baseName: string): string {
 /**
  * Wait for a button to be enabled (not disabled)
  */
-export async function waitForButtonEnabled(
-  page: Page,
-  selector: string,
-  timeout = 10000,
-): Promise<void> {
+export async function waitForButtonEnabled(page: Page, selector: string, timeout = 10000): Promise<void> {
   await page.waitForFunction(
     (sel) => {
       const btn = document.querySelector(sel);
@@ -257,11 +210,7 @@ export async function waitForButtonEnabled(
 /**
  * Click a button by text content
  */
-export async function clickButtonByText(
-  page: Page,
-  text: string,
-  timeout = 10000,
-): Promise<void> {
+export async function clickButtonByText(page: Page, text: string, timeout = 10000): Promise<void> {
   let button = page.locator(`button:has-text("${text}")`);
   const count = await button.count();
 
@@ -286,11 +235,7 @@ export async function clickButtonByText(
 /**
  * Wait for and click a button, ensuring it's enabled first
  */
-export async function clickButtonWhenEnabled(
-  page: Page,
-  selector: string,
-  timeout = 10000,
-): Promise<void> {
+export async function clickButtonWhenEnabled(page: Page, selector: string, timeout = 10000): Promise<void> {
   await waitForButtonEnabled(page, selector, timeout);
   await page.click(selector);
 }

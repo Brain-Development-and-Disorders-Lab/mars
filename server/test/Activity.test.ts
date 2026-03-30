@@ -76,15 +76,11 @@ describe("Activity model", () => {
     expect(result.length).toBe(NUM_ACTIVITY);
 
     // Get half of all identifiers and request Activity with those identifiers
-    const identifiers: string[] = result
-      .slice(0, NUM_ACTIVITY / 2)
-      .map((activity) => activity._id);
+    const identifiers: string[] = result.slice(0, NUM_ACTIVITY / 2).map((activity) => activity._id);
     const resultMany = await Activity.getMany(identifiers);
 
     // Check result length and contents are matching what was requested
     expect(resultMany.length).toBe(NUM_ACTIVITY / 2);
-    expect(resultMany.map((activity) => activity._id)).toEqual(
-      expect.arrayContaining(identifiers),
-    );
+    expect(resultMany.map((activity) => activity._id)).toEqual(expect.arrayContaining(identifiers));
   });
 });
