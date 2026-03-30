@@ -90,13 +90,7 @@ export type AttributeViewButtonProps = {
 };
 
 // Values
-export type IValueType =
-  | "number"
-  | "text"
-  | "url"
-  | "date"
-  | "entity"
-  | "select";
+export type IValueType = "number" | "text" | "url" | "date" | "entity" | "select";
 
 export type IValue = {
   _id: string;
@@ -354,6 +348,7 @@ export type IActivity = {
     name: string;
   };
   actor?: string;
+  medium?: "API" | "Web";
 };
 
 export type ActivityModel = IActivity & {

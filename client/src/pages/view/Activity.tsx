@@ -66,6 +66,7 @@ const Activity = () => {
     endDate: "",
     activityTypes: [] as string[],
     targetTypes: [] as string[],
+    mediums: [] as string[],
   });
 
   // Applied filters state
@@ -74,6 +75,7 @@ const Activity = () => {
     endDate: "",
     activityTypes: [] as string[],
     targetTypes: [] as string[],
+    mediums: [] as string[],
   });
 
   // Filtered activity data
@@ -101,6 +103,7 @@ const Activity = () => {
         type
         actor
         details
+        medium
         target {
           _id
           name
@@ -155,6 +158,23 @@ const Activity = () => {
     if (appliedFilters.targetTypes.length > 0) {
       filtered = filtered.filter((activity) => appliedFilters.targetTypes.includes(activity.target.type));
       activeFilterCount += appliedFilters.targetTypes.length;
+    }
+
+    // Filter by medium types
+    if (appliedFilters.mediums.length > 0) {
+      // Apply filters differently since not all `Activity` entries specify a medium
+      if (appliedFilters.mediums.length === 1 && appliedFilters.mediums.includes("web")) {
+        // Only "web" is selected
+        filtered = filtered.filter((activity) => _.isNull(activity.medium) || activity.medium === "Web");
+        activeFilterCount++;
+      } else if (appliedFilters.mediums.length === 1 && appliedFilters.mediums.includes("api")) {
+        // Only "api" is selected
+        filtered = filtered.filter((activity) => activity.medium && activity.medium === "API");
+        activeFilterCount++;
+      } else {
+        // Both are selected
+        activeFilterCount += appliedFilters.mediums.length;
+      }
     }
 
     setActiveFilterCount(activeFilterCount);
@@ -234,6 +254,23 @@ const Activity = () => {
       },
       header: "User",
       enableHiding: true,
+    }),
+    columnHelper.accessor("medium", {
+      cell: (info) => {
+        const medium = info.getValue() ?? "Web";
+        return (
+          <Flex align={"center"} justify={"center"} w={"100%"}>
+            <Tag.Root colorPalette={medium === "API" ? "purple" : "gray"} size={"sm"}>
+              <Tag.Label fontSize={"xs"}>{medium}</Tag.Label>
+            </Tag.Root>
+          </Flex>
+        );
+      },
+      header: "Medium",
+      enableHiding: true,
+      meta: {
+        minWidth: 100,
+      },
     }),
     columnHelper.accessor("timestamp", {
       cell: (info) => (
@@ -348,7 +385,7 @@ const Activity = () => {
                     </Flex>
                   </Flex>
 
-                  {/* Checkbox Filters Group - Operation Type and Target Type */}
+                  {/* Checkbox Filters Group - Operation Type, Target Type, Medium */}
                   <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
                     {/* Operation Type Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"}>
@@ -423,6 +460,43 @@ const Activity = () => {
                         ))}
                       </Flex>
                     </Flex>
+
+                    {/* Medium Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Medium
+                      </Text>
+                      <Flex direction={"column"} gap={"1"}>
+                        {["api", "web"].map((type) => (
+                          <Checkbox.Root
+                            key={type}
+                            size={"xs"}
+                            colorPalette={"blue"}
+                            checked={filterState.mediums.includes(type)}
+                            onCheckedChange={(details) => {
+                              const isChecked = details.checked as boolean;
+                              if (isChecked) {
+                                setFilterState({
+                                  ...filterState,
+                                  mediums: [...filterState.mediums, type],
+                                });
+                              } else {
+                                setFilterState({
+                                  ...filterState,
+                                  mediums: filterState.mediums.filter((t) => t !== type),
+                                });
+                              }
+                            }}
+                          >
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control />
+                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
+                              {type === "api" ? "API" : type}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        ))}
+                      </Flex>
+                    </Flex>
                   </Flex>
                 </Flex>
               </Collapsible.Content>
@@ -471,6 +545,7 @@ const Activity = () => {
                     endDate: "",
                     activityTypes: [],
                     targetTypes: [],
+                    mediums: [],
                   };
                   setFilterState(clearedState);
                   setAppliedFilters(clearedState);

@@ -393,6 +393,7 @@ export class API {
             type: "entities",
             name: entity.name,
           },
+          medium: "API",
         });
 
         // Add Activity to Workspace
