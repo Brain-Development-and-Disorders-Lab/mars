@@ -279,6 +279,7 @@ export const typedefs = `#graphql
     type: String
     details: String
     target: ActivityTarget
+    medium: String
   }
 
   # "ActivityCreateInput" input
@@ -288,6 +289,7 @@ export const typedefs = `#graphql
     type: String
     details: String
     target: ActivityTargetInput
+    medium: String
   }
 
   # "ColumnMappingInput" input

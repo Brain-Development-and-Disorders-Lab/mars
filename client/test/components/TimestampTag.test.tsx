@@ -11,9 +11,7 @@ import { theme } from "../../src/styles/theme";
 // Target component
 import TimestampTag from "../../src/components/TimestampTag";
 
-const renderTimestampTag = (
-  props: React.ComponentProps<typeof TimestampTag>,
-) => {
+const renderTimestampTag = (props: React.ComponentProps<typeof TimestampTag>) => {
   return render(
     <ChakraProvider value={theme}>
       <TimestampTag {...props} />

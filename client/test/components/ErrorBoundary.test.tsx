@@ -47,9 +47,7 @@ describe("ErrorBoundary Component", () => {
 
     it("renders Error component when error occurs", () => {
       // Suppress console.error for this test
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
       renderErrorBoundary(<ThrowError shouldThrow={true} />);
       expect(screen.getByText("Error Component")).toBeTruthy();
@@ -58,9 +56,7 @@ describe("ErrorBoundary Component", () => {
     });
 
     it("catches errors in child components", () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
       const ComponentWithError = () => {
         throw new Error("Child component error");
@@ -75,9 +71,7 @@ describe("ErrorBoundary Component", () => {
 
   describe("Edge Cases", () => {
     it("handles multiple errors", () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
       const ComponentWithError = () => {
         throw new Error("First error");

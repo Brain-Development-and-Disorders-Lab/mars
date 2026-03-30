@@ -54,9 +54,7 @@ const App = () => {
           opacity={"10%"}
           top={"5%"}
           left={"2%"}
-          animation={
-            "animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
-          }
+          animation={"animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
         ></Flex>
         <Flex
           position={"absolute"}
@@ -69,21 +67,12 @@ const App = () => {
           opacity={"10%"}
           top={"40%"}
           left={"70%"}
-          animation={
-            "animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
-          }
+          animation={"animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
         ></Flex>
       </Flex>
 
       {/* Main content */}
-      <Flex
-        direction={"column"}
-        minH={"100vh"}
-        w={"100%"}
-        p={"4"}
-        m={"0"}
-        gap={"0"}
-      >
+      <Flex direction={"column"} minH={"100vh"} w={"100%"} p={"4"} m={"0"} gap={"0"}>
         <Flex direction={"column"} p={"4"} zIndex={2}>
           {/* Header */}
           <Flex
@@ -95,14 +84,7 @@ const App = () => {
             px={["", "6"]}
             py={["", "2"]}
           >
-            <Flex
-              gap={"2"}
-              align={"center"}
-              rounded={"full"}
-              p={"4"}
-              border={"2px"}
-              borderColor={"#2E3192"}
-            >
+            <Flex gap={"2"} align={"center"} rounded={"full"} p={"4"} border={"2px"} borderColor={"#2E3192"}>
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
               <Heading size={"md"} color={"#2E3192"}>
                 Metadatify
@@ -126,20 +108,9 @@ const App = () => {
             overflow={"hidden"}
             align={"center"}
           >
-            <Flex
-              direction={"column"}
-              align={"center"}
-              justify={"center"}
-              gap={"8"}
-              minH={["60vh", "40vh"]}
-            >
+            <Flex direction={"column"} align={"center"} justify={"center"} gap={"8"} minH={["60vh", "40vh"]}>
               {/* Add some colour and gradients to this landing */}
-              <Flex
-                direction={"column"}
-                gap={"2"}
-                textAlign={"left"}
-                justify={"center"}
-              >
+              <Flex direction={"column"} gap={"2"} textAlign={"left"} justify={"center"}>
                 <Heading size={"xl"}>Streamline metadata management</Heading>
                 <Heading size={"xl"} fontStyle={"italic"} fontWeight={"normal"}>
                   and make your shared data FAIR
@@ -147,8 +118,7 @@ const App = () => {
               </Flex>
 
               <Text fontWeight={"semibold"} fontSize={"lg"}>
-                Metadatify makes reusing, sharing, and securely collaborating on
-                your scientific metadata easy.
+                Metadatify makes reusing, sharing, and securely collaborating on your scientific metadata easy.
               </Text>
 
               <Flex direction={"row"} gap={"6"} align={"center"}>
@@ -158,9 +128,7 @@ const App = () => {
                   boxShadow={"xs"}
                   colorScheme={"blue"}
                   as={Link}
-                  onClick={() =>
-                    featuresRef.current.scrollIntoView({ behavior: "smooth" })
-                  }
+                  onClick={() => featuresRef.current.scrollIntoView({ behavior: "smooth" })}
                 >
                   Features
                 </Button>
@@ -170,9 +138,7 @@ const App = () => {
                   boxShadow={"xs"}
                   colorScheme={"blue"}
                   as={Link}
-                  onClick={() =>
-                    getStartedRef.current.scrollIntoView({ behavior: "smooth" })
-                  }
+                  onClick={() => getStartedRef.current.scrollIntoView({ behavior: "smooth" })}
                 >
                   Get Started
                 </Button>
@@ -190,19 +156,8 @@ const App = () => {
               </Flex>
             </Flex>
 
-            <Flex
-              direction={"column"}
-              h={["30vh", "100%"]}
-              align={"center"}
-              justify={"center"}
-              gap={"2"}
-            >
-              <Image
-                src={"Dashboard.png"}
-                maxW={"80vw"}
-                rounded={"xl"}
-                boxShadow={"lg"}
-              />
+            <Flex direction={"column"} h={["30vh", "100%"]} align={"center"} justify={"center"} gap={"2"}>
+              <Image src={"Dashboard.png"} maxW={"80vw"} rounded={"xl"} boxShadow={"lg"} />
               <Text fontWeight={"semibold"} color={"gray.600"}>
                 Metadatify Dashboard
               </Text>
@@ -210,18 +165,9 @@ const App = () => {
           </Flex>
 
           {/* Features */}
-          <Flex
-            minH={"100vh"}
-            direction={"column"}
-            gap={"4"}
-            pt={"8"}
-            align={"center"}
-            ref={featuresRef}
-          >
+          <Flex minH={"100vh"} direction={"column"} gap={"4"} pt={"8"} align={"center"} ref={featuresRef}>
             <Heading>Features</Heading>
-            <Text color={"gray.600"}>
-              Powerful features to improve your metadata management workflow.
-            </Text>
+            <Text color={"gray.600"}>Powerful features to improve your metadata management workflow.</Text>
             <Flex
               w={"100%"}
               direction={"row"}
@@ -247,8 +193,8 @@ const App = () => {
                   Create
                 </Text>
                 <Text>
-                  Create and manage metadata Entities inside <b>Workspaces</b>,
-                  and use <b>Templates</b> for reusable metadata structures.
+                  Create and manage metadata Entities inside <b>Workspaces</b>, and use <b>Templates</b> for reusable
+                  metadata structures.
                 </Text>
               </Flex>
               <Flex
@@ -267,8 +213,7 @@ const App = () => {
                   Organize
                 </Text>
                 <Text>
-                  Within your Workspace, group and organize metadata Entities
-                  into <b>Projects</b>.
+                  Within your Workspace, group and organize metadata Entities into <b>Projects</b>.
                 </Text>
               </Flex>
               <Flex
@@ -287,9 +232,8 @@ const App = () => {
                   Link
                 </Text>
                 <Text>
-                  Your digital and physical assets are linked, so your metadata
-                  should be too. Visualize relationships between metadata{" "}
-                  <b>Entities</b>.
+                  Your digital and physical assets are linked, so your metadata should be too. Visualize relationships
+                  between metadata <b>Entities</b>.
                 </Text>
               </Flex>
               <Flex
@@ -308,9 +252,8 @@ const App = () => {
                   Search
                 </Text>
                 <Text>
-                  Use a simple <b>text search</b> or use the advanced{" "}
-                  <b>query builder</b> to perform deep searches on metadata
-                  Entities.
+                  Use a simple <b>text search</b> or use the advanced <b>query builder</b> to perform deep searches on
+                  metadata Entities.
                 </Text>
               </Flex>
               <Flex
@@ -329,9 +272,8 @@ const App = () => {
                   Export
                 </Text>
                 <Text>
-                  Export metadata into a variety of formats, including{" "}
-                  <b>CSV and JSON</b> files, and select the metadata fields to
-                  export.
+                  Export metadata into a variety of formats, including <b>CSV and JSON</b> files, and select the
+                  metadata fields to export.
                 </Text>
               </Flex>
               <Flex
@@ -350,8 +292,7 @@ const App = () => {
                   Collaborate
                 </Text>
                 <Text>
-                  Add users to your Workspace using their <b>ORCiD</b>, allowing
-                  them to view and manage your metadata.
+                  Add users to your Workspace using their <b>ORCiD</b>, allowing them to view and manage your metadata.
                 </Text>
               </Flex>
             </Flex>
@@ -375,18 +316,11 @@ const App = () => {
           </Flex>
 
           {/* Get Started */}
-          <Flex
-            direction={"column"}
-            gap={"8"}
-            pt={"8"}
-            align={"center"}
-            ref={getStartedRef}
-          >
+          <Flex direction={"column"} gap={"8"} pt={"8"} align={"center"} ref={getStartedRef}>
             <Heading>Get Started</Heading>
             <Text maxW={["", "50vw"]}>
-              There are multiple ways to get started with Metadatify. If you are
-              unsure where to start or want to know how Metadatify would best
-              suit your needs, please don't hesitate to contact{" "}
+              There are multiple ways to get started with Metadatify. If you are unsure where to start or want to know
+              how Metadatify would best suit your needs, please don't hesitate to contact{" "}
               <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
                 Henry Burgess
               </Link>
@@ -413,19 +347,12 @@ const App = () => {
               >
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
-                <Text>
-                  Does your team already have access? You can log in right away
-                  with your ORCiD.
-                </Text>
+                <Text>Does your team already have access? You can log in right away with your ORCiD.</Text>
                 <Spacer />
 
                 <Flex direction={"row"} justify={"space-between"}>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Link
-                      color={"blue.500"}
-                      href={"https://app.metadatify.com"}
-                      isExternal
-                    >
+                    <Link color={"blue.500"} href={"https://app.metadatify.com"} isExternal>
                       Log In
                     </Link>
                     <Icon name={"link"} color={"blue.500"} />
@@ -445,17 +372,10 @@ const App = () => {
               >
                 <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
-                <Text>
-                  Documentation on how to deploy your own instance of Metadatify
-                  will be available soon.
-                </Text>
+                <Text>Documentation on how to deploy your own instance of Metadatify will be available soon.</Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link
-                    color={"blue.500"}
-                    href={"https://metadatify.com/docs/"}
-                    isExternal
-                  >
+                  <Link color={"blue.500"} href={"https://metadatify.com/docs/"} isExternal>
                     Documentation (coming soon)
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
@@ -475,12 +395,8 @@ const App = () => {
                 <Icon name={"l_github"} size={"lg"} />
                 <Text fontWeight={"bold"}>GitHub</Text>
                 <Text>
-                  Metadatify is an open-source project, you can contribute to
-                  further development! Get in touch with{" "}
-                  <Link
-                    color={"blue.500"}
-                    href={"mailto:henry.burgess@wustl.edu"}
-                  >
+                  Metadatify is an open-source project, you can contribute to further development! Get in touch with{" "}
+                  <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
                     Henry Burgess
                   </Link>{" "}
                   to discuss ways to best make an impact on development.
@@ -489,9 +405,7 @@ const App = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
-                    href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars"
-                    }
+                    href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"}
                     isExternal
                   >
                     GitHub Repository
@@ -518,16 +432,11 @@ const App = () => {
                 <Icon name={"info"} size={"lg"} />
                 <Text fontWeight={"bold"}>Documentation</Text>
                 <Text>
-                  Further documentation on usage and development with Metadatify
-                  exists to aid users and developers.
+                  Further documentation on usage and development with Metadatify exists to aid users and developers.
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link
-                    color={"blue.500"}
-                    href={"https://metadatify.com/docs/"}
-                    isExternal
-                  >
+                  <Link color={"blue.500"} href={"https://metadatify.com/docs/"} isExternal>
                     Documentation
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
@@ -541,21 +450,15 @@ const App = () => {
               <Text fontWeight={"semibold"}>Organizations:</Text>
               <UnorderedList>
                 <ListItem>
-                  <Text>
-                    Department of Neuroscience, Washington University School of
-                    Medicine in St. Louis
-                  </Text>
+                  <Text>Department of Neuroscience, Washington University School of Medicine in St. Louis</Text>
                 </ListItem>
                 <ListItem>
                   <Text>
-                    Brain Development and Disorders Lab, Washington University
-                    School of Medicine in St. Louis
+                    Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis
                   </Text>
                 </ListItem>
                 <ListItem>
-                  <Text>
-                    Scientific Software Engineering Center, Georgia Tech
-                  </Text>
+                  <Text>Scientific Software Engineering Center, Georgia Tech</Text>
                 </ListItem>
               </UnorderedList>
 
@@ -576,15 +479,9 @@ const App = () => {
                   <Text fontWeight={"semibold"} color={"gray.400"}>
                     Lead Developer
                   </Text>
-                  <Avatar
-                    name={"Henry Burgess"}
-                    src={"https://avatars.githubusercontent.com/u/60735885"}
-                  />
+                  <Avatar name={"Henry Burgess"} src={"https://avatars.githubusercontent.com/u/60735885"} />
                   <Text fontWeight={"semibold"}>Henry Burgess</Text>
-                  <Link
-                    color={"blue.500"}
-                    href={"https://github.com/henryjburg"}
-                  >
+                  <Link color={"blue.500"} href={"https://github.com/henryjburg"}>
                     GitHub
                   </Link>
                 </Flex>
@@ -603,10 +500,7 @@ const App = () => {
                   <Text fontWeight={"semibold"} color={"gray.400"}>
                     Collaborator
                   </Text>
-                  <Avatar
-                    name={"Robin Fievet"}
-                    src={"https://avatars.githubusercontent.com/u/11888851"}
-                  />
+                  <Avatar name={"Robin Fievet"} src={"https://avatars.githubusercontent.com/u/11888851"} />
                   <Text fontWeight={"semibold"}>Robin Fievet</Text>
                   <Link color={"blue.500"} href={"https://github.com/rfievet"}>
                     GitHub

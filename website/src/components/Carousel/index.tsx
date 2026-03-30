@@ -53,13 +53,7 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
 
   return (
     <Flex w={"100%"} direction={"column"} gap={"2"} align={"center"}>
-      <Flex
-        w={"100%"}
-        direction={"row"}
-        gap={"4"}
-        align={"center"}
-        justify={"center"}
-      >
+      <Flex w={"100%"} direction={"row"} gap={"4"} align={"center"} justify={"center"}>
         <IconButton
           aria-label={"Previous image"}
           colorScheme={"blue"}

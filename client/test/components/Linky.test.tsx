@@ -80,9 +80,7 @@ const mockEntityQuery = {
   },
 };
 
-const renderLinky = (
-  props: Partial<React.ComponentProps<typeof Linky>> = {},
-) => {
+const renderLinky = (props: Partial<React.ComponentProps<typeof Linky>> = {}) => {
   const defaultProps = {
     id: "test-id",
     type: "entities" as const,

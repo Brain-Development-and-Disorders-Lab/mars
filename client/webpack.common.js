@@ -33,11 +33,7 @@ module.exports = {
             },
           },
         },
-        exclude: [
-          /node_modules/,
-          path.resolve(__dirname, "../server"),
-          path.resolve(__dirname, "../website"),
-        ],
+        exclude: [/node_modules/, path.resolve(__dirname, "../server"), path.resolve(__dirname, "../website")],
       },
       {
         test: /\.css$/i,
@@ -61,10 +57,7 @@ module.exports = {
     ],
   },
   resolve: {
-    modules: [
-      path.resolve(__dirname, "./"),
-      path.resolve(__dirname, "node_modules"),
-    ],
+    modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "node_modules")],
     alias: {
       "@components": path.resolve(__dirname, "./src/components/"),
       "@database": path.resolve(__dirname, "./src/database/"),
@@ -73,14 +66,8 @@ module.exports = {
       "@pages": path.resolve(__dirname, "./src/pages/"),
       "@types": path.resolve(__dirname, "../types"),
       "@variables": path.resolve(__dirname, "./src/variables"),
-      "entities/decode": path.resolve(
-        __dirname,
-        "./node_modules/parse5/node_modules/entities/dist/commonjs/decode.js",
-      ),
-      "entities/escape": path.resolve(
-        __dirname,
-        "./node_modules/parse5/node_modules/entities/dist/commonjs/escape.js",
-      ),
+      "entities/decode": path.resolve(__dirname, "./node_modules/parse5/node_modules/entities/dist/commonjs/decode.js"),
+      "entities/escape": path.resolve(__dirname, "./node_modules/parse5/node_modules/entities/dist/commonjs/escape.js"),
     },
     extensions: [".tsx", ".ts", ".js", ".mjs"],
   },

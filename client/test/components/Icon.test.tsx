@@ -94,16 +94,7 @@ describe("Icon Component", () => {
 
   describe("Edge Cases", () => {
     it("handles all icon types", () => {
-      const iconNames = [
-        "search",
-        "entity",
-        "project",
-        "dashboard",
-        "add",
-        "delete",
-        "edit",
-        "close",
-      ];
+      const iconNames = ["search", "entity", "project", "dashboard", "add", "delete", "edit", "close"];
 
       iconNames.forEach((name) => {
         const { container } = renderIcon({ name: name as any });

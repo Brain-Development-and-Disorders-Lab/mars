@@ -28,10 +28,7 @@ module.exports = {
     ],
   },
   resolve: {
-    modules: [
-      path.resolve(__dirname, "./"),
-      path.resolve(__dirname, "node_modules"),
-    ],
+    modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "node_modules")],
     alias: {},
     extensions: [".tsx", ".ts", ".js"],
   },

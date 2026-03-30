@@ -100,9 +100,7 @@ export const closeConnection = async (): Promise<void> => {
  * @param workspaceName Name for the workspace
  * @return {Promise<string>} Workspace ID
  */
-export const createTestWorkspace = async (
-  workspaceName: string,
-): Promise<string> => {
+export const createTestWorkspace = async (workspaceName: string): Promise<string> => {
   await ensureConnection();
 
   const workspaceResult: ResponseData<string> = await Workspaces.create({
@@ -134,8 +132,7 @@ export const createTestWorkspace = async (
     entities: [],
     history: [],
   });
-  if (projectResult.success === false)
-    throw new Error("Error creating Project");
+  if (projectResult.success === false) throw new Error("Error creating Project");
   await Workspaces.addProject(workspaceId, projectResult.data);
 
   // Create parent and child Entities

@@ -11,9 +11,7 @@ import { theme } from "../../src/styles/theme";
 // Target component
 import AlertDialog from "../../src/components/AlertDialog";
 
-const renderAlertDialog = (
-  props: Partial<React.ComponentProps<typeof AlertDialog>> = {},
-) => {
+const renderAlertDialog = (props: Partial<React.ComponentProps<typeof AlertDialog>> = {}) => {
   const defaultProps = {
     open: true,
     setOpen: jest.fn(),

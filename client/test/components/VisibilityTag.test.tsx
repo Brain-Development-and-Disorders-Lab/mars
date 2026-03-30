@@ -18,9 +18,7 @@ jest.mock("../../src/hooks/useBreakpoint", () => ({
   }),
 }));
 
-const renderVisibilityTag = (
-  props: Partial<React.ComponentProps<typeof VisibilityTag>> = {},
-) => {
+const renderVisibilityTag = (props: Partial<React.ComponentProps<typeof VisibilityTag>> = {}) => {
   const defaultProps = {
     isPublic: true,
     setIsPublic: jest.fn(),
@@ -69,11 +67,9 @@ describe("VisibilityTag Component", () => {
     });
 
     it("handles missing setIsPublic gracefully", () => {
-      const consoleSpy = jest
-        .spyOn(console, "warn")
-        .mockImplementation((message) => {
-          console.log(message);
-        });
+      const consoleSpy = jest.spyOn(console, "warn").mockImplementation((message) => {
+        console.log(message);
+      });
       renderVisibilityTag({ setIsPublic: undefined as any });
 
       const toggleButton = screen.getByLabelText("set-visibility");

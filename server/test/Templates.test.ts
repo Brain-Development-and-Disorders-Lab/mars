@@ -84,16 +84,12 @@ describe("Templates model", () => {
     expect(result.length).toBe(NUM_TEMPLATES);
 
     // Get half of all identifiers and request Templates with those identifiers
-    const identifiers: string[] = result
-      .slice(0, NUM_TEMPLATES / 2)
-      .map((template) => template._id);
+    const identifiers: string[] = result.slice(0, NUM_TEMPLATES / 2).map((template) => template._id);
     const resultMany = await Templates.getMany(identifiers);
 
     // Check result length and contents are matching what was requested
     expect(resultMany.length).toBe(NUM_TEMPLATES / 2);
-    expect(resultMany.map((template) => template._id)).toEqual(
-      expect.arrayContaining(identifiers),
-    );
+    expect(resultMany.map((template) => template._id)).toEqual(expect.arrayContaining(identifiers));
   });
 
   it("should confirm a Template exists", async () => {

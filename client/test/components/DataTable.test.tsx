@@ -102,9 +102,7 @@ const defaultVisibleColumns = {
   tags: true,
 };
 
-const renderDataTable = (
-  props: Partial<React.ComponentProps<typeof DataTable>> = {},
-) => {
+const renderDataTable = (props: Partial<React.ComponentProps<typeof DataTable>> = {}) => {
   const defaultProps = {
     columns: createTestColumns(),
     data: createTestData(),
@@ -164,9 +162,7 @@ describe("DataTable Component", () => {
       });
 
       // Find sort button (icon button next to header)
-      const sortButtons = container.querySelectorAll(
-        'button[aria-label*="sort"], button[aria-label*="Sort"]',
-      );
+      const sortButtons = container.querySelectorAll('button[aria-label*="sort"], button[aria-label*="Sort"]');
       if (sortButtons.length > 0) {
         fireEvent.click(sortButtons[0] as HTMLElement);
 

@@ -5,7 +5,6 @@ import { NextFunction, Request, Response, Router } from "express";
 import _ from "lodash";
 import dayjs from "dayjs";
 import crypto from "crypto";
-import { hash } from "bcryptjs";
 
 // Custom types
 import { APIData, APIKey, EntityModel, ResponseData } from "@types";
@@ -24,8 +23,7 @@ const API_VERSION = "v1";
 
 export class API {
   static generateKey = async (scope: "edit" | "view", workspaces: string[]): Promise<ResponseData<APIKey>> => {
-    const token = crypto.randomUUID();
-    const output = (await hash(token, 10)).slice(7);
+    const output = crypto.randomBytes(32).toString("hex");
 
     return {
       success: true,
@@ -71,9 +69,9 @@ export class API {
       return null;
     }
 
-    // Validate that the API key is current
-    // Get the `APIKey` instance
-    const apiKey = apiUser.api_keys.filter((key) => _.isEqual(key.value, providedKey)).pop();
+    // `api_keys` is stored as a JSON string by better-auth, parse before filtering
+    const parsedKeys: APIKey[] = JSON.parse(apiUser.api_keys as unknown as string);
+    const apiKey = parsedKeys.filter((key) => _.isEqual(key.value, providedKey)).pop();
     if (_.isUndefined(apiKey)) {
       const responseData: APIData<object> = {
         path: request.params.path,
@@ -85,6 +83,10 @@ export class API {
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
     }
+
+    // Attach to res.locals so downstream handlers don't need to re-validate
+    response.locals.apiKey = apiKey;
+    response.locals.apiUser = apiUser;
 
     return apiKey;
   };
@@ -105,6 +107,19 @@ export class API {
         data: {},
       };
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
+      return;
+    }
+
+    // Enforce scope: POST routes require an "edit" key
+    if (request.method === "POST" && apiKey.scope !== "edit") {
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API key does not have edit permissions",
+        data: {},
+      };
+      response.contentType("application/json").status(403).send(JSON.stringify(responseData)).end();
       return;
     }
 
@@ -138,22 +153,14 @@ export class API {
    * @return {Promise<void>}
    */
   static handler = async (request: Request, response: Response): Promise<void> => {
-    // Validate the API request
-    const apiKey = await API.validateRequest(request, response);
-    if (_.isNull(apiKey)) {
-      return;
-    }
-
-    // Get the `UserModel` associated with the API key
-    const user = await User.findByKey(apiKey.value);
-    if (_.isNull(user)) {
-      return;
-    }
+    // apiKey and apiUser are already resolved and validated by the authenticate middleware
+    const apiKey: APIKey = response.locals.apiKey;
+    const userId: string = response.locals.apiUser._id.toString();
 
     if (request.method === "GET") {
       switch (request.params.path) {
         case "entities": {
-          const responseData = await API.getEntities(user._id, request);
+          const responseData = await API.getEntities(userId, apiKey, request);
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
@@ -161,7 +168,7 @@ export class API {
           return;
         }
         case "entity": {
-          const responseData = await API.getEntity(user._id, request);
+          const responseData = await API.getEntity(userId, apiKey, request);
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
@@ -184,7 +191,7 @@ export class API {
     } else if (request.method === "POST") {
       switch (request.params.path) {
         case "entity": {
-          const responseData = await API.updateEntity(user._id, request);
+          const responseData = await API.updateEntity(userId, apiKey, request);
           let status = 200;
           if (responseData.status === "error") status = 400;
           if (responseData.status === "unauthorized") status = 401;
@@ -207,7 +214,7 @@ export class API {
     }
   };
 
-  static getEntities = async (orcid: string, request: Request): Promise<APIData<EntityModel[]>> => {
+  static getEntities = async (userId: string, apiKey: APIKey, request: Request): Promise<APIData<EntityModel[]>> => {
     // Extract the query parameters
     const workspaceIdentifier = request.query.workspace;
     if (_.isUndefined(workspaceIdentifier)) {
@@ -220,8 +227,22 @@ export class API {
       };
     }
 
+    const workspaceId = workspaceIdentifier.toString();
+
+    // Enforce workspace scoping: if the key is restricted to specific workspaces,
+    // the requested workspace must be in that list
+    if (apiKey.workspaces.length > 0 && !_.includes(apiKey.workspaces, workspaceId)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API key is not authorized for this Workspace",
+        data: [],
+      };
+    }
+
     // Retrieve the Workspace to determine which Entities to return
-    const workspace = await Workspaces.getOne(workspaceIdentifier.toString());
+    const workspace = await Workspaces.getOne(workspaceId);
     if (_.isNull(workspace)) {
       return {
         path: `/${request.params.path}`,
@@ -233,7 +254,7 @@ export class API {
     }
 
     // Ensure User is the owner or a collaborator
-    if (!_.isEqual(workspace.owner, orcid) && !_.includes(workspace.collaborators, orcid)) {
+    if (!_.isEqual(workspace.owner, userId) && !_.includes(workspace.collaborators, userId)) {
       return {
         path: `/${request.params.path}`,
         version: API_VERSION,
@@ -255,7 +276,7 @@ export class API {
     };
   };
 
-  static getEntity = async (orcid: string, request: Request): Promise<APIData<EntityModel>> => {
+  static getEntity = async (userId: string, apiKey: APIKey, request: Request): Promise<APIData<EntityModel>> => {
     // Extract query parameters
     const entityIdentifier = request.query.id;
     if (_.isUndefined(entityIdentifier)) {
@@ -268,32 +289,15 @@ export class API {
       };
     }
 
-    // Get all Entities that User has access to
-    const user = await User.getOne(orcid);
-    if (_.isNull(user)) {
-      return {
-        path: `/${request.params.path}`,
-        version: API_VERSION,
-        status: "error",
-        message: "Unable to get User",
-        data: {} as EntityModel,
-      };
-    }
+    // Get all Entities that User has access to, limited to key-scoped workspaces if applicable
+    const allWorkspaces = await Workspaces.all();
+    const userWorkspaces = allWorkspaces.filter(
+      (w) =>
+        (_.isEqual(w.owner, userId) || _.includes(w.collaborators, userId)) &&
+        (apiKey.workspaces.length === 0 || _.includes(apiKey.workspaces, w._id)),
+    );
 
-    const entitiesAccessible = [];
-    for await (const workspaceIdentifier of user.workspaces) {
-      const workspace = await Workspaces.getOne(workspaceIdentifier);
-      if (_.isNull(workspace)) {
-        return {
-          path: `/${request.params.path}`,
-          version: API_VERSION,
-          status: "error",
-          message: "Unable to get Workspace",
-          data: {} as EntityModel,
-        };
-      }
-      entitiesAccessible.push(...workspace.entities);
-    }
+    const entitiesAccessible = userWorkspaces.flatMap((w) => w.entities);
 
     // Check if Entity is included in total set of Entities accessible to User
     if (_.includes(entitiesAccessible, entityIdentifier.toString())) {
@@ -311,7 +315,7 @@ export class API {
         path: `/${request.params.path}`,
         version: API_VERSION,
         status: "success",
-        message: "Retreived Entity",
+        message: "Retrieved Entity",
         data: entity,
       };
     } else {
@@ -325,7 +329,7 @@ export class API {
     }
   };
 
-  static updateEntity = async (orcid: string, request: Request): Promise<APIData<object>> => {
+  static updateEntity = async (userId: string, apiKey: APIKey, request: Request): Promise<APIData<object>> => {
     // Extract query parameters
     const entityIdentifier = request.body._id;
     if (_.isUndefined(entityIdentifier)) {
@@ -338,32 +342,15 @@ export class API {
       };
     }
 
-    // Get all Entities that User has access to
-    const user = await User.getOne(orcid);
-    if (_.isNull(user)) {
-      return {
-        path: `/${request.params.path}`,
-        version: API_VERSION,
-        status: "error",
-        message: "Unable to get User",
-        data: {},
-      };
-    }
+    // Get all Workspaces accessible to this user, limited to key-scoped workspaces if applicable
+    const allWorkspaces = await Workspaces.all();
+    const userWorkspaces = allWorkspaces.filter(
+      (w) =>
+        (_.isEqual(w.owner, userId) || _.includes(w.collaborators, userId)) &&
+        (apiKey.workspaces.length === 0 || _.includes(apiKey.workspaces, w._id)),
+    );
 
-    const entitiesAccessible = [];
-    for await (const workspaceIdentifier of user.workspaces) {
-      const workspace = await Workspaces.getOne(workspaceIdentifier);
-      if (_.isNull(workspace)) {
-        return {
-          path: `/${request.params.path}`,
-          version: API_VERSION,
-          status: "error",
-          message: "Unable to get Workspace",
-          data: {},
-        };
-      }
-      entitiesAccessible.push(...workspace.entities);
-    }
+    const entitiesAccessible = userWorkspaces.flatMap((w) => w.entities);
 
     // Check if Entity is included in total set of Entities accessible to User
     if (_.includes(entitiesAccessible, entityIdentifier)) {
@@ -391,44 +378,26 @@ export class API {
       }
 
       // Add history to Entity
-      await Entities.addHistory(entity, orcid);
+      await Entities.addHistory(entity, userId, "Updated via API");
 
-      // Attempt to find the Workspace the Entity belongs to
-      let activeWorkspaceIdentifier = "";
-      for await (const workspaceIdentifier of user.workspaces) {
-        const workspace = await Workspaces.getOne(workspaceIdentifier);
-        if (_.isNull(workspace)) {
-          return {
-            path: `/${request.params.path}`,
-            version: API_VERSION,
-            status: "error",
-            message: "Unable to get Workspace",
-            data: {},
-          };
-        }
-
-        if (_.includes(workspace.entities, entityIdentifier)) {
-          activeWorkspaceIdentifier = workspaceIdentifier;
-          break;
-        }
-      }
-
-      // If a Workspace is found, create and add Activity entry
-      if (!_.isEqual(activeWorkspaceIdentifier, "")) {
+      // Find the Workspace the Entity belongs to and create an Activity entry
+      const activeWorkspace = userWorkspaces.find((w) => _.includes(w.entities, entityIdentifier));
+      if (activeWorkspace) {
         const activity = await Activity.create({
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
-          actor: orcid,
+          actor: userId,
           details: "Updated Entity",
           target: {
             _id: entity._id,
             type: "entities",
             name: entity.name,
           },
+          medium: "API",
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(activeWorkspaceIdentifier, activity.data);
+        await Workspaces.addActivity(activeWorkspace._id, activity.data);
       }
 
       return {

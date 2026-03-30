@@ -47,28 +47,14 @@ test.describe("Template", () => {
     await page.locator("#attributeNameInput").fill("New Template Name");
     await fillMDEditor(page, "#attributeDescriptionInput", "New Description");
     await page.click("#editTemplateButton");
-    await expect(
-      page
-        .locator(".chakra-toast__root")
-        .filter({ hasText: "Updated Successfully" })
-        .first(),
-    ).toBeVisible();
+    await expect(page.locator(".chakra-toast__root").filter({ hasText: "Updated Successfully" }).first()).toBeVisible();
 
     // Revert changes
     await page.click("#editTemplateButton");
     await page.locator("#attributeNameInput").fill(originalName || "");
-    await fillMDEditor(
-      page,
-      "#attributeDescriptionInput",
-      "Description for test Template",
-    );
+    await fillMDEditor(page, "#attributeDescriptionInput", "Description for test Template");
     await page.click("#editTemplateButton");
-    await expect(
-      page
-        .locator(".chakra-toast__root")
-        .filter({ hasText: "Updated Successfully" })
-        .first(),
-    ).toBeVisible();
+    await expect(page.locator(".chakra-toast__root").filter({ hasText: "Updated Successfully" }).first()).toBeVisible();
   });
 
   test("exports the Template", async ({ page }) => {
@@ -77,9 +63,7 @@ test.describe("Template", () => {
 
     await page.click('[data-testid="templateActionsButton"]');
     await page.click('[data-value="export"]');
-    await expect(page.locator(".chakra-toast__root")).toContainText(
-      "Generated JSON file",
-    );
+    await expect(page.locator(".chakra-toast__root")).toContainText("Generated JSON file");
   });
 
   test("archives the Template", async ({ page }) => {
@@ -90,18 +74,12 @@ test.describe("Template", () => {
     await page.click('[data-testid="templateActionsButton"]');
     await page.click('[data-value="archive"]');
     await clickButtonByText(page, "Confirm");
-    await expect(
-      page
-        .locator(".chakra-toast__root")
-        .filter({ hasText: "Archived Successfully" }),
-    ).toBeVisible();
+    await expect(page.locator(".chakra-toast__root").filter({ hasText: "Archived Successfully" })).toBeVisible();
 
     // Restore it to avoid interfering with other tests
     await page.click("#restoreTemplateButton");
     await expect(
-      page
-        .locator(".chakra-toast__root")
-        .filter({ hasText: "Restored Template successfully" }),
+      page.locator(".chakra-toast__root").filter({ hasText: "Restored Template successfully" }),
     ).toBeVisible();
   });
 });
