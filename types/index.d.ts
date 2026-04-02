@@ -62,6 +62,21 @@ export type IAttribute = {
 export type AttributeModel = IAttribute & {
   _id: string;
   timestamp: string;
+  history?: AttributeHistory[];
+};
+
+export type AttributeHistory = {
+  author: string;
+  message: string;
+  timestamp: string;
+  version: string;
+
+  _id: string;
+  name: string;
+  owner: string;
+  archived: boolean;
+  description: string;
+  values: IValue[];
 };
 
 // Database model of Attribute usage, includes Entity ID and status of modification

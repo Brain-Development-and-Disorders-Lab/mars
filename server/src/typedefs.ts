@@ -146,6 +146,22 @@ export const typedefs = `#graphql
     archived: Boolean
     description: String
     values: [Value]
+    history: [AttributeHistory]
+  }
+
+  # "AttributeHistory" type storing iterations of a Template (Attribute)
+  type AttributeHistory {
+    author: String
+    message: String
+    timestamp: String
+    version: String!
+
+    _id: String!
+    name: String
+    owner: String
+    archived: Boolean
+    description: String
+    values: [Value]
   }
 
   # "AttributeCreateInput" input
@@ -593,7 +609,7 @@ export const typedefs = `#graphql
 
     # Template mutations
     createTemplate(template: AttributeCreateInput): ResponseMessage
-    updateTemplate(template: AttributeInput): ResponseMessage
+    updateTemplate(template: AttributeInput, message: String): ResponseMessage
     archiveTemplate(_id: String, state: Boolean): ResponseMessage
     archiveTemplates(toArchive: [String], state: Boolean): ResponseMessage
 

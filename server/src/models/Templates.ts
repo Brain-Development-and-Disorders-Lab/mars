@@ -1,4 +1,4 @@
-import { AttributeModel, AttributeUsage, IAttribute, IResponseMessage, ResponseData } from "@types";
+import { AttributeHistory, AttributeModel, AttributeUsage, IAttribute, IResponseMessage, ResponseData } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -7,6 +7,10 @@ import { getIdentifier } from "@lib/util";
 import consola from "consola";
 import dayjs from "dayjs";
 import { Workspaces } from "./Workspaces";
+
+// Generate history version IDs
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 10);
 
 // Collection name
 const TEMPLATES_COLLECTION = "templates";
@@ -186,6 +190,59 @@ export class Templates {
     }
 
     return JSON.stringify(template, null, "  ");
+  };
+
+  /**
+   * Add a history entry to a Template based on provided Template state
+   * @param historyTemplate Existing Template state to add to Template history
+   * @param author Identifier of User who authored changes
+   * @param message Changelog message associated with changes
+   * @return {Promise<IResponseMessage>}
+   */
+  static addHistory = async (
+    historyTemplate: AttributeModel,
+    author?: string,
+    message?: string,
+  ): Promise<IResponseMessage> => {
+    const template = await Templates.getOne(historyTemplate._id);
+    if (_.isNull(template)) {
+      return {
+        success: false,
+        message: "Template not found",
+      };
+    }
+
+    const historyEntry: AttributeHistory = {
+      author: author || "",
+      message: message || "",
+      version: nanoid(),
+      timestamp: dayjs(Date.now()).toISOString(),
+
+      _id: historyTemplate._id,
+      name: historyTemplate.name,
+      owner: historyTemplate.owner,
+      archived: historyTemplate.archived,
+      description: historyTemplate.description,
+      values: historyTemplate.values,
+    };
+
+    const update: { $set: Partial<AttributeModel> } = {
+      $set: {
+        history: [historyEntry, ...(template.history || [])],
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<AttributeModel>(TEMPLATES_COLLECTION)
+      .updateOne({ _id: historyTemplate._id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Added history to Template:", historyTemplate._id);
+    }
+
+    return {
+      success: true,
+      message: response.modifiedCount === 1 ? "Added history to Template" : "No history added to Template",
+    };
   };
 
   /**

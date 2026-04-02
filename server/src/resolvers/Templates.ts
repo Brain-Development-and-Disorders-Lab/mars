@@ -196,7 +196,11 @@ export const TemplatesResolvers = {
     },
 
     // Update an existing Template
-    updateTemplate: async (_parent: IResolverParent, args: { template: AttributeModel }, context: Context) => {
+    updateTemplate: async (
+      _parent: IResolverParent,
+      args: { template: AttributeModel; message?: string },
+      context: Context,
+    ) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -223,6 +227,9 @@ export const TemplatesResolvers = {
           },
         });
       }
+
+      // Add history entry before executing the update
+      await Templates.addHistory(template, context.user, args.message);
 
       // Execute update operation
       const result = await Templates.update(args.template);
