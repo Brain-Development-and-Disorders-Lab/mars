@@ -1,5 +1,13 @@
 // Custom types
-import { AttributeModel, Context, IAttribute, IResolverParent, IResponseMessage, TemplateMetrics } from "@types";
+import {
+  AttributeModel,
+  AttributeUsage,
+  Context,
+  IAttribute,
+  IResolverParent,
+  IResponseMessage,
+  TemplateMetrics,
+} from "@types";
 
 // Models
 import { Activity } from "@models/Activity";
@@ -68,6 +76,24 @@ export const TemplatesResolvers = {
           },
         });
       }
+    },
+
+    templateUsage: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+      context: Context,
+    ): Promise<AttributeUsage[]> => {
+      // Retrieve the Workspace to confirm it exists
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      return await Templates.usage(workspace._id, args._id);
     },
 
     // Get collection of Template metrics

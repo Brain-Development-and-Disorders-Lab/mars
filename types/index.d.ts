@@ -64,6 +64,12 @@ export type AttributeModel = IAttribute & {
   timestamp: string;
 };
 
+// Database model of Attribute usage, includes Entity ID and status of modification
+export type AttributeUsage = {
+  entity: string;
+  modifications: ("name" | "description" | "values")[];
+};
+
 export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;

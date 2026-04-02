@@ -1,4 +1,4 @@
-import { AttributeModel, IAttribute, IResponseMessage, ResponseData } from "@types";
+import { AttributeModel, AttributeUsage, IAttribute, IResponseMessage, ResponseData } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -6,6 +6,7 @@ import { getDatabase } from "@connectors/database";
 import { getIdentifier } from "@lib/util";
 import consola from "consola";
 import dayjs from "dayjs";
+import { Workspaces } from "./Workspaces";
 
 // Collection name
 const TEMPLATES_COLLECTION = "templates";
@@ -115,6 +116,61 @@ export class Templates {
       success: true,
       message: response.modifiedCount === 1 ? "Updated Template" : "No changes made to Template",
     };
+  };
+
+  /**
+   * Get the collection of Entities currently utilizing the Template Attribute and whether it has
+   * been modified or not
+   * @param _id Attribute or Template identifier
+   * @return {Promise<ResponseData<AttributeUsage[]>>} Collection of `AttributeUsage` objects
+   */
+  static usage = async (workspace: string, _id: string): Promise<AttributeUsage[]> => {
+    // Get the Template itself
+    const template = await Templates.getOne(_id);
+
+    // Retrieve collection of Entities to examine
+    const entities = await Workspaces.getEntities(workspace);
+    const activeEntities = entities.filter((entity) =>
+      entity.attributes.map((attribute) => attribute._id).includes(_id),
+    );
+
+    // Run comparison check across all Entities using the Template
+    const usage: AttributeUsage[] = [];
+    activeEntities.map((entity) => {
+      const modifications: AttributeUsage["modifications"] = [];
+
+      // Get the instance of the Attribute from the Entity
+      const downstreamAttribute = entity.attributes.filter((attribute) => attribute._id === _id)[0];
+
+      // Run comparisons: name, description, values
+      if (downstreamAttribute.name !== template?.name) {
+        modifications.push("name");
+      }
+      if (downstreamAttribute.description !== template?.description) {
+        modifications.push("description");
+      }
+      if (downstreamAttribute.values.length !== template?.values.length) {
+        modifications.push("values");
+      } else {
+        // Iterate through values sequentially to check if Value names or types have been modified
+        for (let i = 0; i < downstreamAttribute.values.length; i++) {
+          const downstreamValue = downstreamAttribute.values[i];
+          const originalValue = template.values[i];
+          if (downstreamValue.name !== originalValue.name || downstreamValue.type !== originalValue.type) {
+            modifications.push("values");
+            break;
+          }
+        }
+      }
+
+      // Update usage information
+      usage.push({
+        entity: entity._id,
+        modifications: modifications,
+      });
+    });
+
+    return usage;
   };
 
   /**

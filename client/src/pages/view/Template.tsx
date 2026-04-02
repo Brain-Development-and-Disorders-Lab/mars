@@ -2,19 +2,22 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Input, Menu, Text } from "@chakra-ui/react";
+import { Button, Flex, Heading, Input, Menu, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
+import Linky from "@components/Linky";
 import TimestampTag from "@components/TimestampTag";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { AttributeModel, IValue, ResponseData } from "@types";
+import { AttributeModel, AttributeUsage, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -23,12 +26,14 @@ import slugify from "slugify";
 import FileSaver from "file-saver";
 
 // Routing and navigation
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import DataTable from "@components/DataTable";
 
 const Template = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
 
@@ -37,6 +42,7 @@ const Template = () => {
   const [templateDescription, setTemplateDescription] = useState("");
   const [templateArchived, setTemplateArchived] = useState(false);
   const [templateValues, setTemplateValues] = useState<IValue[]>([]);
+  const [templateUsage, setTemplateUsage] = useState<AttributeUsage[]>([]);
 
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -63,6 +69,27 @@ const Template = () => {
   const { loading, error, data } = useQuery<{
     template: AttributeModel;
   }>(GET_TEMPLATE, {
+    variables: {
+      _id: id,
+    },
+    fetchPolicy: "no-cache",
+  });
+
+  const GET_TEMPLATE_USAGE = gql`
+    query GetTemplateUsage($_id: String) {
+      templateUsage(_id: $_id) {
+        entity
+        modifications
+      }
+    }
+  `;
+  const {
+    loading: usageLoading,
+    error: usageError,
+    data: usageData,
+  } = useQuery<{
+    templateUsage: AttributeUsage[];
+  }>(GET_TEMPLATE_USAGE, {
     variables: {
       _id: id,
     },
@@ -121,10 +148,14 @@ const Template = () => {
       setTemplateDescription(data.template.description || "");
       setTemplateValues(data.template.values);
     }
-  }, [loading]);
+
+    if (usageData?.templateUsage) {
+      setTemplateUsage(usageData.templateUsage);
+    }
+  }, [loading, usageLoading]);
 
   useEffect(() => {
-    if (error) {
+    if (error || usageError) {
       toaster.create({
         title: "Error",
         type: "error",
@@ -292,6 +323,67 @@ const Template = () => {
       });
     }
   };
+
+  // Define the columns for Template usage
+  const usageColumnHelper = createColumnHelper<AttributeUsage>();
+  const usageColumns = [
+    usageColumnHelper.accessor("entity", {
+      cell: (info) => {
+        const entityId = info.cell.getValue();
+        return (
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip content={entityId} disabled={entityId.length < 20} showArrow>
+              <Linky id={entityId} type={"entities"} size={"xs"} />
+            </Tooltip>
+
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="subtle"
+              colorPalette="gray"
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${entityId}`)}
+            >
+              View
+              <Icon name={"a_right"} size={"xs"} />
+            </Button>
+          </Flex>
+        );
+      },
+      header: "Entity",
+      meta: {
+        minWidth: 400,
+      },
+    }),
+    usageColumnHelper.accessor("modifications", {
+      cell: (info) => {
+        const modifications = info.cell.getValue();
+        if (modifications.length > 0) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"}>
+                Modified:
+              </Text>
+              {modifications.map((modification) => {
+                return (
+                  <Tag.Root colorPalette={"orange"}>
+                    <Tag.Label fontSize={"xs"}>{modification}</Tag.Label>
+                  </Tag.Root>
+                );
+              })}
+            </Flex>
+          );
+        } else {
+          return (
+            <Tag.Root colorPalette={"green"}>
+              <Tag.Label fontSize={"xs"}>Original</Tag.Label>
+            </Tag.Root>
+          );
+        }
+      },
+      header: "Status",
+    }),
+  ];
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading && !updateLoading && !archiveLoading}>
@@ -475,6 +567,21 @@ const Template = () => {
               Template Values
             </Text>
             <Values viewOnly={!editing} values={templateValues} setValues={setTemplateValues} />
+          </Flex>
+
+          <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+              Template Usage
+            </Text>
+            <DataTable
+              data={templateUsage}
+              columns={usageColumns}
+              visibleColumns={{}}
+              selectedRows={{}}
+              viewOnly={true}
+              showSelection={true}
+              showPagination
+            />
           </Flex>
         </Flex>
       </Flex>

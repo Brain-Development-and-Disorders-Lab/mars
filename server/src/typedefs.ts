@@ -460,6 +460,12 @@ export const typedefs = `#graphql
     all: Int
     addedDay: Int
   }
+  
+  # "TemplateUsage" type
+  type TemplateUsage {
+    entity: String!
+    modifications: [String]
+  }
 
   # "TemplateMetrics" type
   type TemplateMetrics {
@@ -518,6 +524,7 @@ export const typedefs = `#graphql
     # Template queries
     templates(limit: Int): [Attribute]
     template(_id: String): Attribute
+    templateUsage(_id: String): [TemplateUsage]
     templateMetrics: TemplateMetrics
 
     # Activity queries
