@@ -2,11 +2,12 @@
 
 a {
   color: white;
-  text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
+  text-decoration-color: black;
+  transition: 0.5s;
 }
 
 /* Define default font size for MDEditor */
