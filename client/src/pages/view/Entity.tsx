@@ -159,9 +159,11 @@ const Entity = () => {
       items: items || [],
     });
   }, [templates]);
+  const [usingTemplate, setUsingTemplate] = useState(false);
 
   // Adding Templates to existing Entity
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
+  const [attributeId, setAttributeId] = useState("");
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState<IValue[]>([]);
@@ -793,6 +795,7 @@ const Entity = () => {
             <AttributeViewButton
               attribute={info.row.original}
               editing={editing}
+              isTemplate={templates.map((attribute) => attribute._id).includes(info.row.original._id)}
               onAttributeUpdate={onAttributeUpdate}
               cancelCallback={handleCancelAttribute}
               removeCallback={() => {
@@ -1227,12 +1230,12 @@ const Entity = () => {
     );
   };
 
-  // Add Attributes to the Entity state
+  // Add blank Attributes to the Entity state
   const addAttribute = () => {
     setEntityAttributes(() => [
       ...entityAttributes,
       {
-        _id: `a-${entity._id}-${nanoid(6)}`,
+        _id: usingTemplate ? attributeId : `a-${entity._id}-${nanoid(6)}`,
         name: attributeName,
         owner: entity.owner,
         timestamp: dayjs(Date.now()).toISOString(),
@@ -1247,6 +1250,16 @@ const Entity = () => {
     setAttributeName("");
     setAttributeDescription("");
     setAttributeValues([]);
+  };
+
+  // Add template Attributes to the Entity state
+  const addTemplateAttribute = (_id: string) => {
+    setUsingTemplate(true);
+    const template = templates.filter((template) => template._id === _id)[0];
+    setAttributeId(template._id);
+    setAttributeName(template.name);
+    setAttributeDescription(template.description);
+    setAttributeValues(template.values);
   };
 
   const onAttributeUpdate = (updated: AttributeModel) => {
@@ -2373,7 +2386,7 @@ const Entity = () => {
                     key={"select-template"}
                     size={"xs"}
                     collection={templatesCollection}
-                    disabled={templatesCollection.items.length === 0}
+                    disabled={templatesCollection.items.length === 0 || usingTemplate}
                     onValueChange={(details) => {
                       if (!_.isEqual(details.items[0], "")) {
                         for (const template of templates) {
@@ -2403,7 +2416,11 @@ const Entity = () => {
                       <Select.Positioner>
                         <Select.Content>
                           {templatesCollection.items.map((template) => (
-                            <Select.Item item={template} key={template.value}>
+                            <Select.Item
+                              item={template}
+                              key={template.value}
+                              onClick={() => addTemplateAttribute(template.value)}
+                            >
                               {template.label}
                               <Select.ItemIndicator />
                             </Select.Item>
@@ -2414,6 +2431,10 @@ const Entity = () => {
                   </Select.Root>
 
                   <Flex direction={"column"} gap={"1"} w={"100%"} justify={"center"}>
+                    <Flex p={"0"}>
+                      {usingTemplate && <Information text={`Using Template: ${attributeName} (${attributeId})`} />}
+                    </Flex>
+
                     <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
                       {/* Attribute name */}
                       <Flex
@@ -2529,7 +2550,7 @@ const Entity = () => {
                       rounded={"md"}
                       colorPalette={"green"}
                       onClick={onSaveAsTemplate}
-                      disabled={isAttributeError}
+                      disabled={isAttributeError || usingTemplate}
                       loading={loadingTemplateCreate}
                     >
                       Save as Template

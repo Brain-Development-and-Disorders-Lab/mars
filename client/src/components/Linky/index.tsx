@@ -158,6 +158,7 @@ const Linky = (props: LinkyProps) => {
         <Link
           onClick={onClickHandler}
           fontWeight={"semibold"}
+          variant={"underline"}
           color={showDeleted ? "gray.600" : "black"}
           fontSize={props.size ? props.size : ""}
         >

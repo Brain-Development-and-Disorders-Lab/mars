@@ -1,5 +1,13 @@
 // Custom types
-import { AttributeModel, Context, IAttribute, IResolverParent, IResponseMessage, TemplateMetrics } from "@types";
+import {
+  AttributeModel,
+  AttributeUsage,
+  Context,
+  IAttribute,
+  IResolverParent,
+  IResponseMessage,
+  TemplateMetrics,
+} from "@types";
 
 // Models
 import { Activity } from "@models/Activity";
@@ -68,6 +76,24 @@ export const TemplatesResolvers = {
           },
         });
       }
+    },
+
+    templateUsage: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+      context: Context,
+    ): Promise<AttributeUsage[]> => {
+      // Retrieve the Workspace to confirm it exists
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      return await Templates.usage(workspace._id, args._id);
     },
 
     // Get collection of Template metrics
@@ -170,7 +196,11 @@ export const TemplatesResolvers = {
     },
 
     // Update an existing Template
-    updateTemplate: async (_parent: IResolverParent, args: { template: AttributeModel }, context: Context) => {
+    updateTemplate: async (
+      _parent: IResolverParent,
+      args: { template: AttributeModel; message?: string },
+      context: Context,
+    ) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -197,6 +227,9 @@ export const TemplatesResolvers = {
           },
         });
       }
+
+      // Add history entry before executing the update
+      await Templates.addHistory(template, context.user, args.message);
 
       // Execute update operation
       const result = await Templates.update(args.template);

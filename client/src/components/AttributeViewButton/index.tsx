@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { Button, Flex, Input, Dialog, Text, CloseButton, EmptyState } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
+import Linky from "@components/Linky";
 import Values from "@components/Values";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -78,6 +79,16 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
             <Dialog.Body p={"0"} flex={"1"} overflow={"auto"}>
               <Flex direction={"column"} p={"1"} gap={"1"}>
+                {props.isTemplate && (
+                  <Flex direction={"row"} gap={"0.5"}>
+                    <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                      Created From:
+                    </Text>
+                    <Flex ml={"0.5"}>
+                      <Linky id={props.attribute._id} type={"templates"} size={"xs"} />
+                    </Flex>
+                  </Flex>
+                )}
                 <Flex gap={"1"} rounded={"md"} direction={"row"} wrap={"wrap"}>
                   <Flex
                     direction={"column"}

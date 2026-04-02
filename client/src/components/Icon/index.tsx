@@ -179,7 +179,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
 
 const Icon = (props: {
   name: IconNames;
-  size?: "xs" | "sm" | "md" | "lg" | "xl" | [number, number];
+  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | [number, number];
   color?: string;
   style?: React.CSSProperties;
 }) => {
@@ -197,6 +197,8 @@ const Icon = (props: {
   // Set the icon sizing if specified
   if (!_.isUndefined(props.size)) {
     switch (props.size) {
+      case "xxs":
+        return <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} style={props.style} />;
       case "xs":
         return <ChakraIcon as={iconComponent} w={"3"} h={"3"} color={iconColor} style={props.style} />;
       case "sm":

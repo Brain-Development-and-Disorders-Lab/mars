@@ -7,6 +7,7 @@ import {
   openItemFromTable,
   fillMDEditor,
   clickButtonByText,
+  saveAndWait,
   performLogin,
   setupEnvironment,
 } from "../helpers";
@@ -46,14 +47,14 @@ test.describe("Template", () => {
     await page.click("#editTemplateButton");
     await page.locator("#attributeNameInput").fill("New Template Name");
     await fillMDEditor(page, "#attributeDescriptionInput", "New Description");
-    await page.click("#editTemplateButton");
+    await saveAndWait(page);
     await expect(page.locator(".chakra-toast__root").filter({ hasText: "Updated Successfully" }).first()).toBeVisible();
 
     // Revert changes
     await page.click("#editTemplateButton");
     await page.locator("#attributeNameInput").fill(originalName || "");
     await fillMDEditor(page, "#attributeDescriptionInput", "Description for test Template");
-    await page.click("#editTemplateButton");
+    await saveAndWait(page);
     await expect(page.locator(".chakra-toast__root").filter({ hasText: "Updated Successfully" }).first()).toBeVisible();
   });
 
