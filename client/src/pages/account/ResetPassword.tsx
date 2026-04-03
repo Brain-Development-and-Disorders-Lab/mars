@@ -1,15 +1,37 @@
-import React, { useState } from "react";
+// React imports
+import React, { useState, useEffect } from "react";
+
+// Components
 import { Flex, Heading, Button, Image, Text, Input, Field, Fieldset } from "@chakra-ui/react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+
+// Navigation
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+// Authentication
 import { auth } from "@lib/auth";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
+
+  // Handle checking for the token or if user is already authenticated
+  useEffect(() => {
+    if (!token) {
+      navigate("/forgot-password", { replace: true });
+      return;
+    }
+
+    auth.getSession().then(({ data: session }) => {
+      if (session?.user) {
+        navigate("/", { replace: true });
+      }
+    });
+  }, []);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -24,15 +46,15 @@ const ResetPassword = () => {
     if (error) {
       toaster.create({
         title: "Error",
-        description: error.message || "Unable to reset password. The link may have expired.",
+        description: error.message || "Unable to reset password, link may have expired",
         type: "error",
         duration: 5000,
         closable: true,
       });
     } else {
       toaster.create({
-        title: "Password reset",
-        description: "Your password has been updated. Please log in.",
+        title: "Password Reset",
+        description: "Your password has been reset successfully, please log in",
         type: "success",
         duration: 4000,
         closable: true,
@@ -83,7 +105,7 @@ const ResetPassword = () => {
           <Flex direction={"column"} gap={"2"} align={"center"}>
             <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
             <Heading size={"2xl"} fontWeight={"semibold"}>
-              New password
+              New Password
             </Heading>
             <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"} textAlign={"center"}>
               Enter a new password for your account.
@@ -93,7 +115,7 @@ const ResetPassword = () => {
           <Fieldset.Root w={"100%"}>
             <Field.Root gap={"0.5"} required>
               <Field.Label fontSize={"xs"}>
-                New password
+                New Password
                 <Field.RequiredIndicator />
               </Field.Label>
               <Input
@@ -109,7 +131,7 @@ const ResetPassword = () => {
 
             <Field.Root gap={"0.5"} invalid={confirmPassword !== "" && !passwordsMatch} required>
               <Field.Label fontSize={"xs"}>
-                Confirm password
+                Confirm Password
                 <Field.RequiredIndicator />
               </Field.Label>
               <Input
@@ -135,8 +157,8 @@ const ResetPassword = () => {
               onClick={onSubmit}
               w={"100%"}
             >
-              Update password
-              <Icon size={"xs"} name={"check"} />
+              Update
+              <Icon size={"xs"} name={"c_right"} />
             </Button>
           </Fieldset.Root>
         </Flex>

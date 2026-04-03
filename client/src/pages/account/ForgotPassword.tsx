@@ -1,10 +1,19 @@
+// React imports
 import React, { useState } from "react";
+
+// Components
 import { Flex, Heading, Button, Image, Text, Input, Field, Fieldset } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+
+// Navigation
+import { useNavigate } from "react-router-dom";
+
+// Authentication
 import { auth } from "@lib/auth";
+
+// Variables
 import { APP_URL } from "@variables";
 
 const ForgotPassword = () => {
@@ -76,7 +85,7 @@ const ForgotPassword = () => {
           <Flex direction={"column"} gap={"2"} align={"center"}>
             <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
             <Heading size={"2xl"} fontWeight={"semibold"}>
-              Reset password
+              Reset Password
             </Heading>
             <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"} textAlign={"center"}>
               {submitted
@@ -88,7 +97,7 @@ const ForgotPassword = () => {
           {!submitted && (
             <Fieldset.Root w={"100%"}>
               <Field.Root gap={"0.5"} required>
-                <Field.Label fontSize={"xs"}>
+                <Field.Label fontSize={"xs"} ml={"0.5"}>
                   Email
                   <Field.RequiredIndicator />
                 </Field.Label>
@@ -114,7 +123,7 @@ const ForgotPassword = () => {
                 onClick={onSubmit}
                 w={"100%"}
               >
-                Send reset link
+                Send Link
                 <Icon size={"xs"} name={"c_right"} />
               </Button>
             </Fieldset.Root>
@@ -122,7 +131,7 @@ const ForgotPassword = () => {
 
           <Button size={"xs"} rounded={"md"} variant={"ghost"} colorPalette={"gray"} onClick={() => navigate("/login")}>
             <Icon size={"xs"} name={"c_left"} />
-            Back to login
+            Back to Login
           </Button>
         </Flex>
       </Flex>
