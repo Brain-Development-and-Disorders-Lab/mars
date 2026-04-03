@@ -14,6 +14,12 @@ import { GraphQLError } from "graphql/index";
 
 // Models
 import { Workspaces } from "@models/Workspaces";
+import { User } from "@models/User";
+
+// Email
+import { sendEmail, templates } from "@lib/email";
+
+const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 // Posthog
 import { PostHogClient } from "src";
@@ -218,6 +224,24 @@ export const WorkspacesResolvers = {
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);
+
+        // Notify any newly added collaborators
+        const newCollaborators = _.difference(args.workspace.collaborators, workspace.collaborators);
+        if (newCollaborators.length > 0) {
+          const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
+          await Promise.allSettled(
+            newCollaborators.map(async (collaboratorId) => {
+              const collaborator = await User.getOne(collaboratorId);
+              if (collaborator) {
+                await sendEmail({
+                  to: collaborator.email,
+                  subject: `You've been added to "${args.workspace.name}" on Metadatify`,
+                  html: templates.workspaceCollaboratorAdded(collaborator.name, args.workspace.name, workspaceUrl),
+                });
+              }
+            }),
+          );
+        }
 
         // Capture event
         if (process.env.DISABLE_CAPTURE !== "true") {

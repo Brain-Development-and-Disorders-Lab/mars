@@ -41,6 +41,8 @@ jobs:
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
           echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
+          echo "AZURE_COMMUNICATION_CONNECTION_STRING=${{ secrets.AZURE_COMMUNICATION_CONNECTION_STRING }}" >> .env
+          echo "EMAIL_FROM_ADDRESS=${{ secrets.EMAIL_FROM_ADDRESS }}" >> .env
 
       - name: Build server
         working-directory: server
@@ -106,6 +108,8 @@ jobs:
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
           echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
+          echo "AZURE_COMMUNICATION_CONNECTION_STRING=${{ secrets.AZURE_COMMUNICATION_CONNECTION_STRING }}" >> .env
+          echo "EMAIL_FROM_ADDRESS=${{ secrets.EMAIL_FROM_ADDRESS }}" >> .env
 
       - name: Test server
         working-directory: server
@@ -158,6 +162,8 @@ jobs:
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
           echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
+          echo "AZURE_COMMUNICATION_CONNECTION_STRING=${{ secrets.AZURE_COMMUNICATION_CONNECTION_STRING }}" >> .env
+          echo "EMAIL_FROM_ADDRESS=${{ secrets.EMAIL_FROM_ADDRESS }}" >> .env
 
       - name: Start server
         working-directory: server

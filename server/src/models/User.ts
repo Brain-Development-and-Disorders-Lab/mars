@@ -40,7 +40,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: result._id,
+        data: (result._id as ObjectId).toString(),
       };
     }
     return {
@@ -58,7 +58,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: result._id,
+        data: (result._id as ObjectId).toString(),
       };
     }
     return {
@@ -77,7 +77,7 @@ export class User {
   };
 
   static update = async (updated: UserModel): Promise<IResponseMessage> => {
-    const user = await this.getOne(updated._id);
+    const user = await this.getOne(updated._id.toString());
 
     if (_.isNull(user)) {
       return {

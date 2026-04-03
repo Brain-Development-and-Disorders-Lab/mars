@@ -6,8 +6,11 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
 
-// Modesl
+// Models
 import { User } from "@models/User";
+
+// Email
+import { sendEmail, templates } from "./email";
 
 /**
  * Get ORCiD OAuth configuration based on environment
@@ -92,6 +95,23 @@ export const auth = betterAuth({
   trustedOrigins: getTrustedOrigins(),
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your Metadatify password",
+        html: templates.resetPassword(user.name, url),
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: process.env.NODE_ENV === "production",
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your Metadatify email",
+        html: templates.verifyEmail(user.name, url),
+      });
+    },
   },
   account: {
     accountLinking: {

@@ -28,6 +28,9 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Authentication
+import { auth } from "@lib/auth";
+
 // Contexts and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -159,6 +162,15 @@ const Workspace = () => {
   const [selectedProjects, setSelectedProjects] = useState({});
   const [shownTemplates, setShownTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedTemplates, setSelectedTemplates] = useState({});
+
+  // State for current user
+  const [currentUser, setCurrentUser] = useState("");
+
+  useEffect(() => {
+    auth.getSession().then(({ data: session }) => {
+      if (session?.user) setCurrentUser(session.user.id);
+    });
+  }, []);
 
   // State for Workspace collaborators
   const [collaborators, setCollaborators] = useState([] as string[]);
@@ -768,6 +780,8 @@ const Workspace = () => {
           <Flex w={{ base: "100%", md: "50%" }}>
             <Collaborators
               editing={true}
+              currentUser={currentUser}
+              owner={owner}
               projectCollaborators={collaborators}
               setProjectCollaborators={setCollaborators}
             />

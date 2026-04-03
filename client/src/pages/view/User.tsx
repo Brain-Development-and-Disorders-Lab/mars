@@ -68,6 +68,7 @@ const User = () => {
         firstName
         lastName
         email
+        emailVerified
         affiliation
         api_keys
         account_orcid
@@ -144,6 +145,7 @@ const User = () => {
       setUserFirstName(data.user.firstName);
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
+      setEmailVerified(data.user.emailVerified);
       setUserAffiliation(data.user.affiliation);
       setUserKeys(JSON.parse(data.user.api_keys));
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
@@ -220,6 +222,11 @@ const User = () => {
   const [emailError, setEmailError] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [affiliationError, setAffiliationError] = useState("");
+
+  // Email verification state
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isVerificationSending, setIsVerificationSending] = useState(false);
+  const [sentVerification, setSentVerification] = useState(false);
 
   // ORCiD linking state
   const [isOrcidLinking, setIsOrcidLinking] = useState(false);
@@ -322,6 +329,31 @@ const User = () => {
     setEditing(false);
   };
 
+  const handleResendVerificationClick = async () => {
+    setIsVerificationSending(true);
+    const { error } = await auth.sendVerificationEmail({ email: userEmail, callbackURL: `${APP_URL}/profile` });
+    setIsVerificationSending(false);
+
+    if (error) {
+      toaster.create({
+        title: "Error",
+        description: "Unable to send verification email, please try again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      toaster.create({
+        title: "Verification email sent",
+        description: "Check your inbox for a link to verify your email",
+        type: "success",
+        duration: 4000,
+        closable: true,
+      });
+      setSentVerification(true);
+    }
+  };
+
   const handleLinkOrcidClick = async () => {
     setIsOrcidLinking(true);
     const { error, data } = await auth.linkSocial({
@@ -332,7 +364,7 @@ const User = () => {
     if (error) {
       toaster.create({
         title: "ORCiD Linking Error",
-        description: error.message || "Unable to link ORCiD account. Please try again.",
+        description: error.message || "Unable to link ORCiD account, please try again",
         type: "error",
         duration: 4000,
         closable: true,
@@ -697,7 +729,7 @@ const User = () => {
                 <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   Avatar
                 </Text>
-                <ActorTag identifier={userModel._id.toString()} fallback={"Unknown User"} size={"md"} avatarOnly />
+                <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
               </Flex>
 
               {/* Name */}
@@ -740,40 +772,27 @@ const User = () => {
                 </Fieldset.Content>
               </Fieldset.Root>
 
-              {/* ORCiD */}
-              <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
-                  ORCiD
-                </Text>
-                <Flex align={"center"} justify={"start"} gap={"2"} wrap={"wrap"}>
-                  <Tag.Root colorPalette={userOrcid ? "green" : "gray"}>
-                    <Tag.Label>{userOrcid || "Not Connected"}</Tag.Label>
-                  </Tag.Root>
-                  {!userOrcid && (
-                    <Button
-                      size={"2xs"}
-                      rounded={"md"}
-                      colorPalette={"green"}
-                      variant={"subtle"}
-                      onClick={handleLinkOrcidClick}
-                      loading={isOrcidLinking}
-                      loadingText={"Linking..."}
-                    >
-                      Connect ORCiD
-                      <Icon name={"add"} size={"xs"} />
-                    </Button>
-                  )}
-                </Flex>
-              </Flex>
-
               {/* Email */}
               <Fieldset.Root>
-                <Fieldset.Content>
+                <Fieldset.Content gap={"1"}>
                   <Field.Root invalid={emailError !== ""} required gap={"0"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Email
-                      <Field.RequiredIndicator />
-                    </Field.Label>
+                    <Flex direction={"row"} align={"center"} gap={"2"} justify={"start"} w={"100%"}>
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Email
+                        <Field.RequiredIndicator />
+                      </Field.Label>
+                      {emailVerified ? (
+                        <Tag.Root colorPalette={"green"} size={"sm"}>
+                          <Tag.Label>Verified</Tag.Label>
+                        </Tag.Root>
+                      ) : (
+                        <Flex align={"center"} gap={"1"}>
+                          <Tag.Root colorPalette={"orange"} size={"sm"}>
+                            <Tag.Label>Not Verified</Tag.Label>
+                          </Tag.Root>
+                        </Flex>
+                      )}
+                    </Flex>
                     <Input
                       id={"modalUserEmail"}
                       size={"xs"}
@@ -794,6 +813,37 @@ const User = () => {
                       </Field.ErrorText>
                     )}
                   </Field.Root>
+                  {!emailVerified && !sentVerification && (
+                    <Flex>
+                      <Button
+                        size={"2xs"}
+                        rounded={"md"}
+                        colorPalette={"orange"}
+                        variant={"subtle"}
+                        loading={isVerificationSending}
+                        loadingText={"Sending..."}
+                        onClick={handleResendVerificationClick}
+                      >
+                        Resend Verification Email
+                        <Icon name={"email"} size={"xs"} />
+                      </Button>
+                    </Flex>
+                  )}
+                  {!emailVerified && sentVerification && (
+                    <Flex>
+                      <Button
+                        size={"2xs"}
+                        rounded={"md"}
+                        colorPalette={"green"}
+                        variant={"subtle"}
+                        loading={isVerificationSending}
+                        disabled
+                      >
+                        Verification Email Sent
+                        <Icon name={"email"} size={"xs"} />
+                      </Button>
+                    </Flex>
+                  )}
                 </Fieldset.Content>
               </Fieldset.Root>
 
@@ -826,6 +876,32 @@ const User = () => {
                   </Field.Root>
                 </Fieldset.Content>
               </Fieldset.Root>
+
+              {/* ORCiD */}
+              <Flex direction={"column"} p={"0"} gap={"1"}>
+                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
+                  ORCiD
+                </Text>
+                <Flex align={"start"} direction={"column"} justify={"center"} gap={"1"} wrap={"wrap"}>
+                  <Tag.Root colorPalette={userOrcid ? "green" : "gray"}>
+                    <Tag.Label>{userOrcid || "Not Connected"}</Tag.Label>
+                  </Tag.Root>
+                  {!userOrcid && (
+                    <Button
+                      size={"2xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      variant={"subtle"}
+                      onClick={handleLinkOrcidClick}
+                      loading={isOrcidLinking}
+                      loadingText={"Linking..."}
+                    >
+                      Connect ORCiD
+                      <Icon name={"add"} size={"xs"} />
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
           </Flex>
 
