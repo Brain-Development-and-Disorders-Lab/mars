@@ -6,8 +6,11 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
 
-// Modesl
+// Models
 import { User } from "@models/User";
+
+// Email
+import { sendEmail } from "./email";
 
 /**
  * Get ORCiD OAuth configuration based on environment
@@ -92,6 +95,18 @@ export const auth = betterAuth({
   trustedOrigins: getTrustedOrigins(),
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your password",
+        html: `
+        <p>Hi ${user.name},</p>
+        <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+        <p><a href="${url}">Reset password</a></p>
+        <p>If you didn't request this, you can ignore this email.</p>
+      `,
+      });
+    },
   },
   account: {
     accountLinking: {

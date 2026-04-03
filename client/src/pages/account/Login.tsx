@@ -207,6 +207,17 @@ const Login = () => {
                       disabled={isEmailLoginLoading || isOrcidLoading}
                       onChange={(event) => setPassword(event.target.value)}
                     />
+                    <Text
+                      fontSize={"xs"}
+                      color={"gray.400"}
+                      fontWeight={"semibold"}
+                      cursor={"pointer"}
+                      _hover={{ color: "gray.600" }}
+                      alignSelf={"flex-end"}
+                      onClick={() => navigate("/forgot-password")}
+                    >
+                      Forgot password?
+                    </Text>
                   </Field.Root>
 
                   <Button

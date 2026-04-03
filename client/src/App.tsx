@@ -50,8 +50,10 @@ import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
 import Invalid from "@pages/Invalid";
 import Unauthorized from "@pages/Unauthorized";
-import Login from "@pages/Login";
-import Signup from "@pages/Signup";
+import Login from "@pages/account/Login";
+import Signup from "@pages/account/Signup";
+import ForgotPassword from "@pages/account/ForgotPassword";
+import ResetPassword from "@pages/account/ResetPassword";
 
 // Providers
 import { WorkspaceProvider } from "./hooks/useWorkspace";
@@ -89,6 +91,8 @@ const App = (): ReactElement => {
         {/* Authentication not required */}
         <Route path={"/signup"} element={<Signup />} />
         <Route path={"/login"} element={<Login />} />
+        <Route path={"/forgot-password"} element={<ForgotPassword />} />
+        <Route path={"/reset-password"} element={<ResetPassword />} />
 
         {/* Authentication required */}
         <Route element={<Page />}>
