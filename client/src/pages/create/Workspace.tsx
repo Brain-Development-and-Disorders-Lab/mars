@@ -292,6 +292,8 @@ const CreateWorkspace = () => {
           {/* Workspace collaborators */}
           <Collaborators
             editing={true}
+            currentUser={owner}
+            owner={owner}
             projectCollaborators={collaborators}
             setProjectCollaborators={setCollaborators}
           />

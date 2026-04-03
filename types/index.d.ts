@@ -133,6 +133,8 @@ export type IValueSelectData = {
 // "Collaborators" component props
 export type CollaboratorsProps = {
   editing: boolean;
+  currentUser: string;
+  owner: string;
   projectCollaborators: string[];
   setProjectCollaborators: (value: React.SetStateAction<string[]>) => void;
 };

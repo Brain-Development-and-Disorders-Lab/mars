@@ -92,6 +92,30 @@ export const templates = {
       ${divider()}
       <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't create a Metadatify account, you can safely ignore this email.</p>
     `),
+
+  workspaceCollaboratorAdded: (name: string, workspaceName: string, workspaceUrl: string): string =>
+    buildEmail(`
+      <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+        <tr>
+          <td style="background-color:#f4f4f5;border-radius:50%;width:48px;height:48px;text-align:center;vertical-align:middle;">
+            <span style="font-size:24px;line-height:48px;">&#128276;</span>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">You've been added to a Workspace</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, you have been added as a collaborator to a Metadatify Workspace.</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
+        <tr>
+          <td style="padding:12px 16px;">
+            <p style="margin:0 0 2px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Workspace</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:#18181b;">${workspaceName}</p>
+          </td>
+        </tr>
+      </table>
+      ${ctaButton("Open Workspace", workspaceUrl)}
+      ${divider()}
+      <p style="margin:0;font-size:12px;color:#a1a1aa;">You received this email because someone added you to a Metadatify Workspace. If this was unexpected, please contact your workspace administrator.</p>
+    `),
 };
 
 export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {

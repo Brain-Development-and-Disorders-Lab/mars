@@ -55,7 +55,8 @@ import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
-// Workspace context
+// Authentication
+import { auth } from "@lib/auth";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -74,6 +75,15 @@ const Project = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
+
+  // State for current user
+  const [currentUser, setCurrentUser] = useState("");
+
+  useEffect(() => {
+    auth.getSession().then(({ data: session }) => {
+      if (session?.user) setCurrentUser(session.user.id);
+    });
+  }, []);
 
   // Add Entities
   const [entitiesOpen, setEntitiesOpen] = useState(false);
@@ -1489,6 +1499,8 @@ const Project = () => {
             {/* Collaborators */}
             <Collaborators
               editing={editing && !previewVersion}
+              currentUser={currentUser}
+              owner={project.owner}
               projectCollaborators={displayProjectCollaborators}
               setProjectCollaborators={setProjectCollaborators}
             />

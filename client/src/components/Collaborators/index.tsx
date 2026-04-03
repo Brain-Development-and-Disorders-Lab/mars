@@ -177,23 +177,42 @@ const Collaborators = (props: CollaboratorsProps) => {
                       <Tag.Label fontSize={"xs"}>Collaborator</Tag.Label>
                     </Tag.Root>
                   </Flex>
-                  {props.editing && (
-                    <Button
-                      size={"2xs"}
-                      colorPalette={"red"}
-                      rounded={"md"}
-                      variant={"subtle"}
-                      aria-label="Remove collaborator"
-                      onClick={() =>
-                        props.setProjectCollaborators((collaborators) =>
-                          collaborators.filter((c) => c !== collaborator),
-                        )
-                      }
-                    >
-                      Remove
-                      <Icon name="delete" size={"xs"} />
-                    </Button>
-                  )}
+                  {props.editing &&
+                    (collaborator === props.currentUser && props.currentUser !== props.owner ? (
+                      <Button
+                        size={"2xs"}
+                        colorPalette={"orange"}
+                        rounded={"md"}
+                        variant={"subtle"}
+                        aria-label="Leave workspace"
+                        onClick={() =>
+                          props.setProjectCollaborators((collaborators) =>
+                            collaborators.filter((c) => c !== collaborator),
+                          )
+                        }
+                      >
+                        Leave
+                        <Icon name="logout" size={"xs"} />
+                      </Button>
+                    ) : (
+                      collaborator !== props.owner && (
+                        <Button
+                          size={"2xs"}
+                          colorPalette={"red"}
+                          rounded={"md"}
+                          variant={"subtle"}
+                          aria-label="Remove collaborator"
+                          onClick={() =>
+                            props.setProjectCollaborators((collaborators) =>
+                              collaborators.filter((c) => c !== collaborator),
+                            )
+                          }
+                        >
+                          Remove
+                          <Icon name="delete" size={"xs"} />
+                        </Button>
+                      )
+                    ))}
                 </Flex>
               ))}
             </Stack>
