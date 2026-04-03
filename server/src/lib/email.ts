@@ -74,11 +74,23 @@ export const templates = {
       <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">Reset your password</p>
       <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, we received a request to reset your password.</p>
       <p style="margin:0 0 24px;font-size:13px;color:#52525b;line-height:1.6;">Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
-      ${ctaButton("Reset password", url)}
+      ${ctaButton("Reset Password", url)}
       <p style="margin:0 0 4px;font-size:11px;color:#a1a1aa;">Or copy this link into your browser:</p>
       <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${url}</p>
       ${divider()}
       <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't request a password reset, you can safely ignore this email.</p>
+    `),
+
+  verifyEmail: (name: string, url: string): string =>
+    buildEmail(`
+      <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">Verify your Email</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, thank you for creating an account for Metadatify.</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#52525b;line-height:1.6;">Click the button below to verify your email address. This link expires in <strong>24 hours</strong>.</p>
+      ${ctaButton("Verify Email", url)}
+      <p style="margin:0 0 4px;font-size:11px;color:#a1a1aa;">Or copy this link into your browser:</p>
+      <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${url}</p>
+      ${divider()}
+      <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't create a Metadatify account, you can safely ignore this email.</p>
     `),
 };
 

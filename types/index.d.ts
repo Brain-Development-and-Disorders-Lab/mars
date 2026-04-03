@@ -517,6 +517,7 @@ export type IconNames =
   | "expand"
   | "delete"
   | "download"
+  | "email"
   | "filter"
   | "upload"
   | "cross"
@@ -687,7 +688,7 @@ export type IUser = {
 };
 
 export type UserModel = IUser & {
-  _id: ObjectId; // better-auth: Unique identifier
+  _id: string; // better-auth: Unique identifier
 };
 
 // Metrics

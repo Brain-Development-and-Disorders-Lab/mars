@@ -103,6 +103,16 @@ export const auth = betterAuth({
       });
     },
   },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your Metadatify email",
+        html: templates.verifyEmail(user.name, url),
+      });
+    },
+  },
   account: {
     accountLinking: {
       allowDifferentEmails: true,
