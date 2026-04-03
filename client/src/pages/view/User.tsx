@@ -729,7 +729,7 @@ const User = () => {
                 <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   Avatar
                 </Text>
-                <ActorTag identifier={userModel._id} fallback={"Unknown User"} size={"md"} avatarOnly />
+                <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
               </Flex>
 
               {/* Name */}

@@ -690,7 +690,7 @@ export type IUser = {
 };
 
 export type UserModel = IUser & {
-  _id: string; // better-auth: Unique identifier
+  _id: ObjectId; // better-auth: Unique identifier
 };
 
 // Metrics
