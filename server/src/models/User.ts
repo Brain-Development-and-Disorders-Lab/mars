@@ -40,7 +40,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: result._id.toString(),
+        data: (result._id as ObjectId).toString(),
       };
     }
     return {
@@ -58,7 +58,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: result._id.toString(),
+        data: (result._id as ObjectId).toString(),
       };
     }
     return {
