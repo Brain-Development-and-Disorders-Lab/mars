@@ -1,5 +1,5 @@
 // React
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, ReactElement } from "react";
 
 // Chakra UI components
 import {
@@ -20,6 +20,7 @@ import {
   Stack,
   Text,
   createListCollection,
+  Link,
 } from "@chakra-ui/react";
 
 import {
@@ -39,6 +40,7 @@ import {
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import Tooltip from "@components/Tooltip";
 
 // Types
 import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
@@ -1099,6 +1101,81 @@ const ValueRow = (props: {
   };
 
   /**
+   * Utility function to generate URL "tabs" representing links to known platforms
+   * @param {string} url The URL stored as `data` in the Value component
+   */
+  const generateUrlTab = (url: string): ReactElement => {
+    // Break the URL down by components
+    const urlObject = URL.parse(url);
+    const isValidUrl = !_.isNull(urlObject);
+
+    // Setup default display parameters
+    let iconColor = "orange.600";
+    let iconStyle: IconNames = "warning";
+    let urlMessage = "Invalid URL:";
+    let useIcon = true;
+    let useMessage = true;
+
+    if (isValidUrl) {
+      if (urlObject.host.endsWith(".box.com")) {
+        iconColor = "blue.600";
+        iconStyle = "l_box";
+        urlMessage = "";
+        useIcon = true;
+        useMessage = false;
+      } else if (urlObject.host.endsWith("github.com")) {
+        iconColor = "blue.600";
+        iconStyle = "l_github";
+        urlMessage = "";
+        useIcon = false;
+        useMessage = false;
+      }
+    }
+
+    return (
+      <Flex
+        direction={"row"}
+        align={"center"}
+        justify={"start"}
+        gap={"1"}
+        px={"2"}
+        // pt={"0.5"}
+        h={"100%"}
+        w={"100%"}
+        rounded={"md"}
+        border="1px solid transparent"
+        bg="transparent"
+        _hover={{
+          border: "1px solid",
+          borderColor: "blue.200",
+          boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+        }}
+      >
+        <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} bg={"blue.300"} rounded={"md"} p={"2"}>
+          {useIcon && <Icon name={iconStyle} size={"sm"} color={iconColor} />}
+          {useMessage && (
+            <Text fontSize={"xs"} color={iconColor} fontWeight={"semibold"}>
+              {urlMessage}
+            </Text>
+          )}
+          {isValidUrl ? (
+            <Tooltip content={url} showArrow>
+              <Link fontSize={"xs"} fontWeight={"semibold"} href={url} variant={"underline"} gap={"0.5"}>
+                {urlObject.host}
+                <Icon name={"link"} size={"xs"} />
+              </Link>
+            </Tooltip>
+          ) : (
+            <Text fontSize={"xs"} _hover={{ textDecoration: "underline", cursor: "not-allowed" }}>
+              {_.truncate(url, { length: 24 })}
+            </Text>
+          )}
+        </Flex>
+      </Flex>
+    );
+  };
+
+  /**
    * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
    * is `entity` or `select`
    * @param {IValueType} valueType The type of the value to be copied
@@ -1172,32 +1249,36 @@ const ValueRow = (props: {
         />
       );
     } else if (valueType === "url") {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
-          size="xs"
-          h={"100%"}
-          borderRadius="none"
-          fontSize="xs"
-          readOnly={props.viewOnly}
-          placeholder="Enter URL"
-          border="1px solid transparent"
-          bg="transparent"
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
+      if (!props.viewOnly) {
+        return (
+          <Input
+            value={valueData}
+            onChange={(e) => setValueData(e.target.value)}
+            size="xs"
+            h={"100%"}
+            borderRadius="none"
+            fontSize="xs"
+            readOnly={props.viewOnly}
+            placeholder="Enter URL"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+      } else {
+        return generateUrlTab(valueData);
+      }
     } else if (valueType === "date") {
       return (
         <Input
@@ -1283,7 +1364,7 @@ const ValueRow = (props: {
           <Flex
             w={"100%"}
             h={"100%"}
-            justify="center"
+            justify="start"
             pt={"0.5"}
             px={"2"}
             border="1px solid transparent"
