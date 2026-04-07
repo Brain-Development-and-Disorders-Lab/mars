@@ -46,6 +46,9 @@ import { auth } from "@lib/auth";
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Project = () => {
   const posthog = usePostHog();
 
@@ -190,7 +193,7 @@ const Project = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"xs"} />
+            <Icon name={"project"} size={"xs"} color={"blue.500"} />
             <Heading size={"sm"}>Create Project</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -210,7 +213,14 @@ const Project = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Fieldset.Root invalid={isNameError}>
                 <Fieldset.Content gap={"1"}>
                   <Field.Root required gap={"0"}>
@@ -273,7 +283,14 @@ const Project = () => {
             basis={"50%"}
             rounded={"md"}
           >
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               {/* Project description */}
               <Fieldset.Root invalid={isDescriptionError}>
                 <Fieldset.Content>
@@ -325,8 +342,8 @@ const Project = () => {
             gap={"1"}
             w={"100%"}
             rounded={"md"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             align={"center"}
             justify={"center"}
           >
@@ -345,7 +362,7 @@ const Project = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} />
+                      <Icon name={"entity"} size={"lg"} color={"purple.200"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -427,7 +444,7 @@ const Project = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header p={"2"} roundedTop={"md"} bg={"blue.300"}>
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"add"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -498,9 +515,15 @@ const Project = () => {
             <Dialog.CloseTrigger asChild>
               <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
             </Dialog.CloseTrigger>
-            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
+            <Dialog.Header
+              p={"2"}
+              fontWeight={"semibold"}
+              fontSize={"xs"}
+              bg={GLOBAL_STYLES.dialog.headerColor}
+              roundedTop={"md"}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"project"} size={"xs"} />
+                <Icon name={"project"} size={"xs"} color={"blue.500"} />
                 Projects
               </Flex>
             </Dialog.Header>

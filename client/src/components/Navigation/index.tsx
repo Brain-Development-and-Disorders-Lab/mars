@@ -143,7 +143,7 @@ const Navigation = () => {
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"entity"} size={"xs"} />
+              <Icon name={"entity"} size={"xs"} color={"purple.500"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -165,7 +165,7 @@ const Navigation = () => {
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"project"} size={"xs"} />
+              <Icon name={"project"} size={"xs"} color={"blue.500"} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -187,7 +187,7 @@ const Navigation = () => {
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"template"} size={"xs"} />
+              <Icon name={"template"} size={"xs"} color={"teal.500"} />
               Templates
             </Button>
           </Flex>
@@ -317,7 +317,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/projects")}
                 >
-                  <Icon name={"project"} size={"xs"} />
+                  <Icon name={"project"} size={"xs"} color={"blue.500"} />
                   Projects
                 </Menu.Item>
                 <Menu.Item
@@ -326,7 +326,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/entities")}
                 >
-                  <Icon name={"entity"} size={"xs"} />
+                  <Icon name={"entity"} size={"xs"} color={"purple.500"} />
                   Entities
                 </Menu.Item>
                 <Menu.Item
@@ -335,7 +335,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/templates")}
                 >
-                  <Icon name={"template"} size={"xs"} />
+                  <Icon name={"template"} size={"xs"} color={"teal.500"} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>

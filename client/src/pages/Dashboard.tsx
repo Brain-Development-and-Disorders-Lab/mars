@@ -39,6 +39,9 @@ import { useStorage } from "@hooks/useStorage";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 // Queries
 const GET_DASHBOARD = gql`
   query GetDashboard(
@@ -482,8 +485,8 @@ const Dashboard = () => {
             rounded={"md"}
             basis={"30%"}
             align={"center"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
           >
             <Stat.Root>
               <Stat.Label fontSize={"xs"}>Total Workspace Entities</Stat.Label>
@@ -533,14 +536,14 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"1"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} />
+                <Icon name={"project"} size={"xs"} color={"blue.500"} />
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Recent Projects
                 </Text>
@@ -563,7 +566,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} />
+                      <Icon name={"project"} size={"lg"} color={"blue.200"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -590,14 +593,14 @@ const Dashboard = () => {
               background={"white"}
               rounded={"md"}
               gap={"1"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"entity"} size={"xs"} />
+                <Icon name={"entity"} size={"xs"} color={"purple.500"} />
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Recent Entities
                 </Text>
@@ -624,7 +627,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} />
+                      <Icon name={"entity"} size={"lg"} color={"purple.200"} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -653,8 +656,8 @@ const Dashboard = () => {
             p={"1"}
             gap={"1"}
             rounded={"md"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             h={"fit-content"}
           >
             <ActivityFeed />

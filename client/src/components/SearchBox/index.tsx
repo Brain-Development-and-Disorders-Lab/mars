@@ -32,6 +32,9 @@ import { useLazyQuery } from "@apollo/client/react";
 // Utility imports
 import { ignoreAbort } from "@lib/util";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
@@ -285,8 +288,8 @@ const SearchBox = (props: SearchBoxProps) => {
               mt={"1"}
               zIndex={1000}
               rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               bg={"white"}
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}

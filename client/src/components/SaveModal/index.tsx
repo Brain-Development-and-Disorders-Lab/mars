@@ -9,6 +9,9 @@ import MDEditor from "@uiw/react-md-editor";
 // Existing and custom types
 import { SaveModalProps } from "@types";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const SaveModal = (props: SaveModalProps) => {
   const {
     open,
@@ -39,7 +42,7 @@ const SaveModal = (props: SaveModalProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={showCloseButton ? "xs" : "md"}
-            bg={"blue.300"}
+            bg={GLOBAL_STYLES.dialog.headerColor}
             roundedTop={"md"}
           >
             <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -81,7 +84,7 @@ const SaveModal = (props: SaveModalProps) => {
           </Dialog.Body>
           <Dialog.Footer
             p={"1"}
-            bg={showCloseButton ? "gray.100" : undefined}
+            bg={showCloseButton ? GLOBAL_STYLES.dialog.footerColor : undefined}
             roundedBottom={showCloseButton ? "md" : undefined}
           >
             <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>

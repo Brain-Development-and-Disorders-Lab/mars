@@ -63,6 +63,9 @@ import { auth } from "@lib/auth";
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Entity = () => {
   const posthog = usePostHog();
 
@@ -427,7 +430,7 @@ const Entity = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"entity"} size={"sm"} />
+            <Icon name={"entity"} size={"sm"} color={"purple.500"} />
             <Heading size={"sm"}>Create Entity</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -452,7 +455,9 @@ const Entity = () => {
             {pageSteps.map((step, index) => (
               <Steps.Item key={index} index={index} title={step.title}>
                 <Steps.Indicator />
-                <Steps.Title fontSize={"sm"}>{step.title}</Steps.Title>
+                <Steps.Title fontSize={"xs"} fontWeight={"semibold"}>
+                  {step.title}
+                </Steps.Title>
                 <Steps.Separator />
               </Steps.Item>
             ))}
@@ -463,7 +468,14 @@ const Entity = () => {
         {_.isEqual("start", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex direction={"column"} w={{ base: "100%", md: "50%" }} p={"1"} gap={"1"} grow={"1"} rounded={"md"}>
-              <Flex direction={"column"} p={"1"} gap={"1"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"}>
+              <Flex
+                direction={"column"}
+                p={"1"}
+                gap={"1"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+                rounded={"md"}
+              >
                 <Fieldset.Root invalid={isNameError} gap={"1"}>
                   <Fieldset.Content mt={"1"}>
                     <Field.Root required gap={"1"}>
@@ -548,7 +560,14 @@ const Entity = () => {
               basis={"50%"}
               rounded={"md"}
             >
-              <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex
+                direction={"column"}
+                p={"1"}
+                gap={"1"}
+                rounded={"md"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+              >
                 {/* Description */}
                 <Fieldset.Root gap={"0"}>
                   <Fieldset.Content gap={"0"}>
@@ -583,7 +602,14 @@ const Entity = () => {
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"} basis={"50%"} rounded={"md"}>
               {/* Relationships */}
-              <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex
+                direction={"column"}
+                p={"1"}
+                gap={"1"}
+                rounded={"md"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+              >
                 <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                   Entity Relationships
                 </Heading>
@@ -690,7 +716,14 @@ const Entity = () => {
               rounded={"md"}
             >
               {/* Projects */}
-              <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+              <Flex
+                direction={"column"}
+                p={"1"}
+                gap={"1"}
+                rounded={"md"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+              >
                 <Fieldset.Root>
                   <CheckboxGroup
                     value={selectedProjects}
@@ -727,7 +760,7 @@ const Entity = () => {
                           <EmptyState.Root>
                             <EmptyState.Content>
                               <EmptyState.Indicator>
-                                <Icon name={"project"} size={"lg"} />
+                                <Icon name={"project"} size={"lg"} color={"blue.200"} />
                               </EmptyState.Indicator>
                               <EmptyState.Description>No Projects</EmptyState.Description>
                             </EmptyState.Content>
@@ -760,8 +793,8 @@ const Entity = () => {
                 gap={"1"}
                 align={"end"}
                 rounded={"md"}
-                border={"1px solid"}
-                borderColor={"gray.300"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
                   {/* Drop-down to select Templates */}
@@ -906,9 +939,9 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
+              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"entity"} size={"xs"} />
+                  <Icon name={"entity"} size={"xs"} color={"purple.500"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Entities
                   </Text>

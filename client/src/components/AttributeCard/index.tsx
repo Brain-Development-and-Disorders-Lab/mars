@@ -14,6 +14,9 @@ import { AttributeCardProps } from "@types";
 // Utility functions and libraries
 import { isValidValues } from "@lib/util";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const AttributeCard = (props: AttributeCardProps) => {
   const [name, setName] = useState(props.name);
   const [description, setDescription] = useState(props.description);
@@ -43,7 +46,14 @@ const AttributeCard = (props: AttributeCardProps) => {
 
   return (
     <Collapsible.Root open={isOpen} onOpenChange={(event) => setIsOpen(event.open)}>
-      <Flex direction={"column"} gap={"1"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"} p={"1"}>
+      <Flex
+        direction={"column"}
+        gap={"1"}
+        border={GLOBAL_STYLES.border.style}
+        borderColor={GLOBAL_STYLES.border.color}
+        rounded={"md"}
+        p={"1"}
+      >
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"} gap={"1"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Collapsible.Trigger asChild>
@@ -58,7 +68,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               </IconButton>
             </Collapsible.Trigger>
             <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"} w={"fit-content"}>
-              <Icon name={"template"} size={"xs"} />
+              <Icon name={"template"} size={"xs"} color={"teal.500"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Attribute{name !== "" ? `: ${name}` : ""}
               </Text>
@@ -107,8 +117,8 @@ const AttributeCard = (props: AttributeCardProps) => {
                 w={{ base: "100%", md: "50%" }}
                 gap={"1"}
                 rounded={"md"}
-                border={"1px solid"}
-                borderColor={"gray.300"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
               >
                 <Flex direction={"row"} gap={"1"}>
                   <Flex grow={"1"}>
@@ -153,8 +163,8 @@ const AttributeCard = (props: AttributeCardProps) => {
                 p={"1"}
                 h={"fit-content"}
                 gap={"1"}
-                border={"1px solid"}
-                borderColor={"gray.300"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
                 grow={"1"}
               >

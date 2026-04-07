@@ -1,4 +1,7 @@
+// React
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+
+// Components
 import {
   Box,
   Flex,
@@ -27,9 +30,16 @@ import {
   Table,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
+
+// Custom types
 import { DataTableProps } from "@types";
+
+// Utility functions
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import _ from "lodash";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -839,8 +849,8 @@ const DataTable = (props: DataTableProps) => {
         <Box
           w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
           minW={`${totalMinWidth}px`}
-          border="1px solid"
-          borderColor="gray.200"
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           borderRadius="md"
           overflow="hidden"
           display="flex"

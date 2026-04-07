@@ -23,9 +23,6 @@ import Linky from "@components/Linky";
 import ActivityGraph from "@components/ActivityGraph";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
-// Routing and navigation
-import { useNavigate } from "react-router-dom";
-
 // Existing and custom types
 import { ActivityModel } from "@types";
 
@@ -42,8 +39,10 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Activity = () => {
-  const navigate = useNavigate();
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -222,16 +221,6 @@ const Activity = () => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
-            <Button
-              size="2xs"
-              variant="subtle"
-              colorPalette="gray"
-              aria-label={"View Target"}
-              onClick={() => navigate(`/${target.type.toLowerCase()}/${target._id}`)}
-            >
-              View
-              <Icon name={"a_right"} size={"xs"} />
-            </Button>
           </Flex>
         );
       },
@@ -329,7 +318,14 @@ const Activity = () => {
 
           {/* Filter Section */}
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              gap={"1"}
+              p={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />

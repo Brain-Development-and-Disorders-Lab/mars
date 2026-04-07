@@ -29,6 +29,9 @@ import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 import { isValidEmail, ignoreAbort } from "@lib/util";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const GET_USER_BY_EMAIL = gql`
   query GetUserByEmail($email: String) {
     userByEmail(email: $email) {
@@ -109,8 +112,8 @@ const Collaborators = (props: CollaboratorsProps) => {
       p={"1"}
       h={"fit-content"}
       rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       grow={"1"}
     >
       {/* Collaborators display */}

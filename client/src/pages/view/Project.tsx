@@ -64,6 +64,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
+import { GLOBAL_STYLES } from "@variables";
 
 const Project = () => {
   const { id } = useParams();
@@ -821,8 +822,17 @@ const Project = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex id={"projectNameTag"} align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
-            <Icon name={"project"} size={"sm"} />
+          <Flex
+            id={"projectNameTag"}
+            align={"center"}
+            gap={"1"}
+            p={"1"}
+            border={"2px solid"}
+            borderColor={"blue.500"}
+            rounded={"md"}
+            bg={"blue.50"}
+          >
+            <Icon name={"project"} size={"sm"} color={"blue.500"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
               {displayProjectData.name}
             </Heading>
@@ -1263,8 +1273,8 @@ const Project = () => {
                                             gap={"1"}
                                             p={"2"}
                                             rounded={"md"}
-                                            border={"1px solid"}
-                                            borderColor={"gray.300"}
+                                            border={GLOBAL_STYLES.border.style}
+                                            borderColor={GLOBAL_STYLES.border.color}
                                             bg={"white"}
                                             grow={"1"}
                                           >
@@ -1294,8 +1304,8 @@ const Project = () => {
                                             gap={"1"}
                                             p={"2"}
                                             rounded={"md"}
-                                            border={"1px solid"}
-                                            borderColor={"gray.300"}
+                                            border={GLOBAL_STYLES.border.style}
+                                            borderColor={GLOBAL_STYLES.border.color}
                                             bg={"white"}
                                             grow={"1"}
                                           >
@@ -1378,8 +1388,8 @@ const Project = () => {
                     }}
                     readOnly={!editing || !!previewVersion}
                     bg={"white"}
-                    border={"1px solid"}
-                    borderColor={"gray.300"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
                   />
                 </Flex>
 
@@ -1408,8 +1418,8 @@ const Project = () => {
               direction={"column"}
               p={"1"}
               gap={"1"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
               basis={"40%"}
               grow={"1"}
@@ -1442,14 +1452,14 @@ const Project = () => {
               p={"1"}
               gap={"1"}
               rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               w={{ base: "100%", md: "50%" }}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"entity"} size={"xs"} />
+                  <Icon name={"entity"} size={"xs"} color={"purple.500"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Project Entities
                   </Text>
@@ -1487,7 +1497,7 @@ const Project = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} />
+                        <Icon name={"entity"} size={"lg"} color={"purple.200"} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Entities</EmptyState.Description>
                     </EmptyState.Content>
@@ -1519,7 +1529,13 @@ const Project = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
+              <Dialog.Header
+                p={"2"}
+                fontWeight={"semibold"}
+                fontSize={"xs"}
+                bg={GLOBAL_STYLES.dialog.headerColor}
+                roundedTop={"md"}
+              >
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                   <Icon name={"add"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1545,7 +1561,7 @@ const Project = () => {
                 )}
               </Dialog.Body>
 
-              <Dialog.Footer p={"1"}>
+              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
                 <Button
                   colorPalette={"red"}
                   size={"xs"}
@@ -1593,10 +1609,18 @@ const Project = () => {
           <Dialog.Positioner>
             <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
+              <Dialog.Header
+                p={"2"}
+                fontWeight={"semibold"}
+                fontSize={"xs"}
+                bg={GLOBAL_STYLES.dialog.footerColor}
+                roundedTop={"md"}
+              >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"download"} size={"sm"} />
-                  Export Project
+                  <Icon name={"download"} size={"xs"} />
+                  <Text fontWeight={"semibold"} fontSize={"xs"}>
+                    Export Project
+                  </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton size={"2xs"} top={"6px"} onClick={() => setExportOpen(false)} />
@@ -1664,7 +1688,14 @@ const Project = () => {
                 </Flex>
 
                 {/* Selection content */}
-                <Flex direction={"row"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+                <Flex
+                  direction={"row"}
+                  p={"1"}
+                  gap={"1"}
+                  rounded={"md"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                >
                   <Fieldset.Root>
                     <Fieldset.Content gap={"1"}>
                       <Fieldset.Legend fontSize={"xs"}>Details</Fieldset.Legend>
@@ -1775,8 +1806,7 @@ const Project = () => {
                   </Fieldset.Root>
                 </Flex>
               </Dialog.Body>
-
-              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
                 <Flex direction={"column"} w={"30%"} gap={"1"}>
                   {/* "Download" button */}
                   <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>

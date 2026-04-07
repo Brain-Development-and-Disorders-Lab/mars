@@ -15,6 +15,9 @@ import { AttributeViewButtonProps } from "@types";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const AttributeViewButton = (props: AttributeViewButtonProps) => {
   const [open, setOpen] = useState(false);
   const isEditing = _.isBoolean(props.editing) ? props.editing : false;
@@ -63,7 +66,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content maxH={"90vh"} display={"flex"} flexDirection={"column"} p={"0"}>
-            <Dialog.Header p={"1"} flexShrink={0} bg={"blue.300"} borderBottom={"2px"} roundedTop={"md"}>
+            <Dialog.Header p={"1"} flexShrink={0} bg={"teal.400"} borderBottom={"2px"} roundedTop={"md"}>
               <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                 <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
                   <Icon name={"template"} size={"xs"} />
@@ -96,8 +99,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     gap={"1"}
                     w={{ base: "100%", md: "50%" }}
                     p={"1"}
-                    border={"1px solid"}
-                    borderColor={"gray.300"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
                     rounded={"md"}
                   >
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -125,8 +128,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     gap={"1"}
                     grow={"1"}
                     p={"1"}
-                    border={"1px solid"}
-                    borderColor={"gray.300"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
                     rounded={"md"}
                   >
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>

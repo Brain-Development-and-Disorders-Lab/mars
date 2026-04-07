@@ -66,6 +66,9 @@ import slugify from "slugify";
 import dayjs from "dayjs";
 import { JSONPath } from "jsonpath-plus";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Search = () => {
   const [query, setQuery] = useState("");
 
@@ -753,8 +756,8 @@ const Search = () => {
                   gap={"1"}
                   p={"1"}
                   rounded={"md"}
-                  border={"1px solid"}
-                  borderColor={"gray.300"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
                 >
                   <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -929,8 +932,8 @@ const Search = () => {
                 direction={"row"}
                 gap={"1"}
                 align={"center"}
-                border={"1px"}
-                borderColor={"gray.300"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
                 <Flex w={"100%"}>

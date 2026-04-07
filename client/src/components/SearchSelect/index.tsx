@@ -14,6 +14,9 @@ import { useLazyQuery } from "@apollo/client/react";
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const SearchSelect = (props: SearchSelectProps) => {
   const inputRef = React.useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = React.useState({
@@ -243,8 +246,8 @@ const SearchSelect = (props: SearchSelectProps) => {
           data-testid={"value-editor"}
           size={"xs"}
           rounded={props.isEmbedded ? "none" : "md"}
-          border={props.isEmbedded ? "none" : "1px solid"}
-          borderColor={props.isEmbedded ? "" : "gray.300"}
+          border={props.isEmbedded ? "none" : GLOBAL_STYLES.border.style}
+          borderColor={props.isEmbedded ? "" : GLOBAL_STYLES.border.color}
           disabled={props?.disabled || false}
           readOnly
         />
@@ -273,8 +276,8 @@ const SearchSelect = (props: SearchSelectProps) => {
             left={dropdownPosition.left}
             width={dropdownPosition.width}
             bg="white"
-            border="1px"
-            borderColor="gray.300"
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             borderRadius="sm"
             shadow="md"
             zIndex="9999"

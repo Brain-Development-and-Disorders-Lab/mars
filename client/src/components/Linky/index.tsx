@@ -12,10 +12,15 @@ import { IconNames, IGenericItem, LinkyProps } from "@types";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
-import _ from "lodash";
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
+
+// Utility functions and libraries
+import _ from "lodash";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
 
@@ -177,7 +182,7 @@ const Linky = (props: LinkyProps) => {
           align={"center"}
           h={"22px"}
           w={"fit-content"}
-          border={"1px solid"}
+          border={GLOBAL_STYLES.border.style}
           borderColor={"orange.200"}
           rounded={"md"}
           overflow={"hidden"}
@@ -209,8 +214,8 @@ const Linky = (props: LinkyProps) => {
           align={"center"}
           h={"22px"}
           w={"fit-content"}
-          border={"1px solid"}
-          borderColor={"gray.200"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           rounded={"md"}
           overflow={"hidden"}
           cursor={"pointer"}

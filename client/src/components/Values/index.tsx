@@ -49,6 +49,9 @@ import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
 import _ from "lodash";
 import dayjs from "dayjs";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 interface SelectOption extends OptionBase {
   label: string;
   value: string;
@@ -167,8 +170,8 @@ const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption
   return (
     <Flex
       direction={"column"}
-      border={"1px solid"}
-      borderColor={"gray.200"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -257,8 +260,8 @@ const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
     <Flex
       direction={"column"}
-      border={"1px solid"}
-      borderColor={"gray.200"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -476,7 +479,7 @@ const ValueDataSelect = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+            <Dialog.Header p={"0"} roundedTop="md" bg={GLOBAL_STYLES.dialog.headerColor}>
               <Flex direction="row" align="center" gap="1" p={"2"}>
                 <Icon name="v_select" />
                 <Text fontSize="xs" fontWeight="semibold">
@@ -548,8 +551,8 @@ const ValueDataSelect = (props: {
                         justify="center"
                         minH="60px"
                         rounded="md"
-                        border="1px"
-                        borderColor="gray.300"
+                        border={GLOBAL_STYLES.border.style}
+                        borderColor={GLOBAL_STYLES.border.color}
                       >
                         <Text fontSize="xs" fontWeight="semibold" color="gray.400">
                           No Options added
@@ -560,7 +563,7 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+            <Dialog.Footer p="1" bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom="md">
               <Button size="xs" rounded="md" colorPalette="red" onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name="cross" />
@@ -729,8 +732,8 @@ const Values = (props: {
           ref={tableRef}
           minW="800px"
           w="100%"
-          border="1px solid"
-          borderColor="gray.200"
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           borderRadius="md"
           overflow="hidden"
         >
@@ -1149,8 +1152,8 @@ const ValueRow = (props: {
                 direction={"row"}
                 align={"center"}
                 h={"22px"}
-                border={"1px solid"}
-                borderColor={"gray.200"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
                 overflow={"hidden"}
                 _hover={{
@@ -1185,7 +1188,7 @@ const ValueRow = (props: {
               direction={"row"}
               align={"center"}
               h={"22px"}
-              border={"1px solid"}
+              border={GLOBAL_STYLES.border.style}
               borderColor={"orange.200"}
               rounded={"md"}
               overflow={"hidden"}
@@ -1405,7 +1408,8 @@ const ValueRow = (props: {
           <Flex
             w={"100%"}
             h={"100%"}
-            justify="start"
+            justify={"start"}
+            align={"center"}
             pt={"0.5"}
             px={"2"}
             border="1px solid transparent"

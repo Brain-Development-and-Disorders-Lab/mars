@@ -15,6 +15,9 @@ import { VisibilityTagProps } from "@types";
 // Utility functions and libraries
 import consola from "consola";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
@@ -36,8 +39,8 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       gap={"2"}
       p={"1"}
       rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       minW={"120px"}
       h={"54px"}

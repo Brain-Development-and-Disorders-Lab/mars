@@ -9,6 +9,9 @@ import Icon from "@components/Icon";
 import dayjs from "dayjs";
 import _ from "lodash";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const TimestampTag = (props: { timestamp: string; description?: string }) => {
   // Handle improperly formed timestamps
   let dateString = dayjs(props.timestamp).format("DD MMMM YYYY");
@@ -22,8 +25,8 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
       gap={"2"}
       p={"1"}
       rounded={"md"}
-      border={"1px solid"}
-      borderColor={"gray.300"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       h={"54px"}
     >

@@ -21,7 +21,7 @@ import { TransformComponent, TransformWrapper, useControls, type ReactZoomPanPin
 // GraphQL
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { STATIC_URL } from "src/variables";
+import { GLOBAL_STYLES, STATIC_URL } from "src/variables";
 
 // Utility functions
 import _ from "lodash";
@@ -115,8 +115,8 @@ const DocumentPreview = (props: {
             position={"relative"}
             minH={0}
             rounded={"md"}
-            border={"2px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             boxSizing={"border-box"}
           >
             <TransformComponent
@@ -201,8 +201,8 @@ const ImagePreview = (props: { previewSource: string }) => {
           position={"relative"}
           minH={0}
           rounded={"md"}
-          border={"2px solid"}
-          borderColor={"gray.300"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           boxSizing={"border-box"}
         >
           <TransformComponent
@@ -396,8 +396,8 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
       flex={"1"}
       minH={0}
       rounded={"md"}
-      border={"2px solid"}
-      borderColor={"gray.300"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       overflow={"hidden"}
       position={"relative"}
       boxSizing={"border-box"}
@@ -565,8 +565,8 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
           <Flex
             minH={"400px"}
             rounded={"md"}
-            border={"2px"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             align={"center"}
             justify={"center"}
           >
@@ -612,7 +612,7 @@ const PreviewModal = (props: PreviewModalProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={"xs"}
-            bg={"blue.300"}
+            bg={GLOBAL_STYLES.dialog.headerColor}
             roundedTop={"md"}
             flexShrink={0}
           >

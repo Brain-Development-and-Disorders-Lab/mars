@@ -1,9 +1,12 @@
 import React from "react";
-import { Button, Dialog, Flex, Spacer } from "@chakra-ui/react";
+import { Button, Dialog, Flex, Spacer, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Types
 import { AlertDialogProps } from "@types";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 const AlertDialog = (props: AlertDialogProps) => {
   const header = props.header || "Alert";
@@ -36,11 +39,13 @@ const AlertDialog = (props: AlertDialogProps) => {
           <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"orange.300"}>
             <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />
-              {header}
+              <Text fontWeight={"semibold"} fontSize={"xs"}>
+                {header}
+              </Text>
             </Flex>
           </Dialog.Header>
           <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
-          <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Button
               size={"xs"}
               rounded={"md"}

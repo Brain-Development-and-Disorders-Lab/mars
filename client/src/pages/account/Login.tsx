@@ -23,7 +23,7 @@ import { toaster } from "@components/Toast";
 import { auth } from "@lib/auth";
 
 // Variables
-import { APP_URL } from "@variables";
+import { APP_URL, GLOBAL_STYLES } from "@variables";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -158,8 +158,8 @@ const Login = () => {
             bg={"white"}
             align={"center"}
             justify={"center"}
-            border={"1px solid"}
-            borderColor={"gray.200"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"lg"}
             shadow={"sm"}
           >
