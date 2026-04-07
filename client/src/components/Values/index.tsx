@@ -1105,30 +1105,26 @@ const ValueRow = (props: {
    * @param {string} url The URL stored as `data` in the Value component
    */
   const generateUrlTab = (url: string): ReactElement => {
-    // Break the URL down by components
     const urlObject = URL.parse(url);
     const isValidUrl = !_.isNull(urlObject);
 
-    // Setup default display parameters
-    let iconColor = "orange.600";
-    let iconStyle: IconNames = "warning";
-    let urlMessage = "Invalid URL:";
-    let useIcon = true;
-    let useMessage = true;
+    // Determine platform-specific icon and badge styling
+    let iconStyle: IconNames = "link";
+    let badgeBg = "blue.50";
+    let badgeBorder = "blue.100";
+    let iconColor = "blue.500";
 
     if (isValidUrl) {
-      if (urlObject.host.endsWith(".box.com")) {
-        iconColor = "blue.600";
+      if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
-        urlMessage = "";
-        useIcon = true;
-        useMessage = false;
-      } else if (urlObject.host.endsWith("github.com")) {
-        iconColor = "blue.600";
+        badgeBg = "blue.50";
+        badgeBorder = "blue.100";
+        iconColor = "blue.500";
+      } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
-        urlMessage = "";
-        useIcon = false;
-        useMessage = false;
+        badgeBg = "gray.100";
+        badgeBorder = "gray.200";
+        iconColor = "gray.600";
       }
     }
 
@@ -1136,41 +1132,86 @@ const ValueRow = (props: {
       <Flex
         direction={"row"}
         align={"center"}
-        justify={"start"}
-        gap={"1"}
-        px={"2"}
-        // pt={"0.5"}
         h={"100%"}
         w={"100%"}
-        rounded={"md"}
-        border="1px solid transparent"
-        bg="transparent"
+        px={"2"}
+        border={"1px solid transparent"}
         _hover={{
           border: "1px solid",
           borderColor: "blue.200",
           boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
         }}
       >
-        <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} bg={"blue.300"} rounded={"md"} p={"2"}>
-          {useIcon && <Icon name={iconStyle} size={"sm"} color={iconColor} />}
-          {useMessage && (
-            <Text fontSize={"xs"} color={iconColor} fontWeight={"semibold"}>
-              {urlMessage}
-            </Text>
-          )}
-          {isValidUrl ? (
-            <Tooltip content={url} showArrow>
-              <Link fontSize={"xs"} fontWeight={"semibold"} href={url} variant={"underline"} gap={"0.5"}>
-                {urlObject.host}
-                <Icon name={"link"} size={"xs"} />
-              </Link>
-            </Tooltip>
-          ) : (
-            <Text fontSize={"xs"} _hover={{ textDecoration: "underline", cursor: "not-allowed" }}>
-              {_.truncate(url, { length: 24 })}
-            </Text>
-          )}
-        </Flex>
+        {isValidUrl ? (
+          <Tooltip content={url} showArrow>
+            <Link href={url} _hover={{ textDecoration: "none" }}>
+              <Flex
+                direction={"row"}
+                align={"center"}
+                h={"22px"}
+                border={"1px solid"}
+                borderColor={"gray.200"}
+                rounded={"md"}
+                overflow={"hidden"}
+                _hover={{
+                  borderColor: "blue.300",
+                  boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                }}
+              >
+                {/* Platform icon badge */}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  bg={badgeBg}
+                  px={"1.5"}
+                  h={"100%"}
+                  borderRight={"1px solid"}
+                  borderColor={badgeBorder}
+                >
+                  <Icon name={iconStyle} size={"xs"} color={iconColor} />
+                </Flex>
+                {/* Hostname */}
+                <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                  <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
+                    {urlObject.host}
+                  </Text>
+                </Flex>
+              </Flex>
+            </Link>
+          </Tooltip>
+        ) : (
+          <Tooltip content={"Invalid URL"} showArrow>
+            <Flex
+              direction={"row"}
+              align={"center"}
+              h={"22px"}
+              border={"1px solid"}
+              borderColor={"orange.200"}
+              rounded={"md"}
+              overflow={"hidden"}
+              cursor={"not-allowed"}
+            >
+              {/* Warning badge */}
+              <Flex
+                align={"center"}
+                justify={"center"}
+                bg={"orange.50"}
+                px={"1.5"}
+                h={"100%"}
+                borderRight={"1px solid"}
+                borderColor={"orange.200"}
+              >
+                <Icon name={"warning"} size={"xs"} color={"orange.500"} />
+              </Flex>
+              {/* Truncated URL */}
+              <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+                  {_.truncate(url, { length: 28 })}
+                </Text>
+              </Flex>
+            </Flex>
+          </Tooltip>
+        )}
       </Flex>
     );
   };
