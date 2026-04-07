@@ -828,11 +828,11 @@ const Project = () => {
             gap={"1"}
             p={"1"}
             border={"2px solid"}
-            borderColor={"blue.500"}
+            borderColor={GLOBAL_STYLES.project.iconColor}
             rounded={"md"}
             bg={"blue.50"}
           >
-            <Icon name={"project"} size={"sm"} color={"blue.500"} />
+            <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
             <Heading fontWeight={"semibold"} size={"sm"}>
               {displayProjectData.name}
             </Heading>
@@ -1459,7 +1459,7 @@ const Project = () => {
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"entity"} size={"xs"} color={"purple.500"} />
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Project Entities
                   </Text>
@@ -1497,7 +1497,7 @@ const Project = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={"purple.200"} />
+                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Entities</EmptyState.Description>
                     </EmptyState.Content>

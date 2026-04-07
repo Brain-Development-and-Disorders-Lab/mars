@@ -265,7 +265,7 @@ const Templates = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"sm"} color={"teal.500"} />
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
@@ -475,7 +475,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={"teal.200"} />
+                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

@@ -193,7 +193,7 @@ const Project = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"xs"} color={"blue.500"} />
+            <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
             <Heading size={"sm"}>Create Project</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -362,7 +362,7 @@ const Project = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={"purple.200"} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -523,7 +523,7 @@ const Project = () => {
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"project"} size={"xs"} color={"blue.500"} />
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                 Projects
               </Flex>
             </Dialog.Header>

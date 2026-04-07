@@ -397,7 +397,7 @@ const Entities = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
-            <Icon name={"entity"} size={"sm"} color={"purple.500"} />
+            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
@@ -663,7 +663,7 @@ const Entities = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"entity"} size={"lg"} color={"purple.500"} />
+                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.iconColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}

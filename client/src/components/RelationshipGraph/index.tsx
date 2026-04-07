@@ -257,7 +257,7 @@ const RelationshipGraph = (props: { id: string; entityNavigateHook: (id: string)
     return (
       <Flex key={`label_${id}`} direction={"column"} align={"center"} w={"100%"} gap={"2"}>
         <Flex key={`label_inner_container_${id}`} w={"100%"} gap={"2"} direction={"row"} align={"center"}>
-          <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} color={"purple.500"} />
+          <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
           <Tooltip key={`tooltip_${id}`} content={name}>
             <Text key={`inner_label_text_${id}`} fontWeight={"semibold"} textAlign={"left"}>
               {_.truncate(name, { length: 16 })}

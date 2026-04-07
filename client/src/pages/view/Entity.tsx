@@ -1378,11 +1378,11 @@ const Entity = () => {
             gap={"1"}
             p={"1"}
             border={"2px solid"}
-            borderColor={"purple.500"}
+            borderColor={GLOBAL_STYLES.entity.iconColor}
             bg={"purple.50"}
             rounded={"md"}
           >
-            <Icon name={"entity"} size={"sm"} color={"purple.500"} />
+            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
             <Tooltip content={displayEntityData.name}>
               <Heading fontWeight={"semibold"} size={"sm"}>
                 {_.truncate(displayEntityData.name, { length: 30 })}
@@ -2128,7 +2128,7 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={"teal.500"} />
+                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
                     Entity Attributes
                   </Text>
@@ -2253,7 +2253,7 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"project"} size={"xs"} color={"blue.500"} />
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
                     Linked Projects
                   </Text>
@@ -2281,7 +2281,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={"blue.200"} />
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Projects</EmptyState.Description>
                     </EmptyState.Content>
@@ -2683,7 +2683,7 @@ const Entity = () => {
                                 <Tag.Root>
                                   <Tag.StartElement>
                                     <Flex h={"100%"} align={"center"} justify={"center"}>
-                                      <Icon name={"project"} size={"xs"} color={"blue.500"} />
+                                      <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                                     </Flex>
                                   </Tag.StartElement>
                                   <Tag.Label p={"1"} fontSize={"xs"}>

@@ -40,7 +40,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"entity"} size={"sm"} color={"purple.500"} />
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
                 <Heading size={"md"}>Entity</Heading>
               </Flex>
             </Card.Header>
@@ -117,7 +117,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"project"} size={"sm"} color={"blue.500"} />
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
                 <Heading size={"md"}>Project</Heading>
               </Flex>
             </Card.Header>
@@ -176,7 +176,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"template"} size={"sm"} color={"teal.500"} />
+                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
                 <Heading size={"md"}>Template</Heading>
               </Flex>
             </Card.Header>

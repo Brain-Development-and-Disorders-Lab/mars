@@ -184,7 +184,7 @@ const Template = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"xs"} color={"teal.500"} />
+            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading size={"sm"}>Create Template</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -335,7 +335,7 @@ const Template = () => {
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} color={"teal.500"} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                 Template Attributes
               </Flex>
             </Dialog.Header>

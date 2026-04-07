@@ -359,7 +359,13 @@ const CounterSelect = (props: CounterProps) => {
 
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"1"} flexShrink={0} bg={"teal.400"} borderBottom={"2px"} roundedTop={"md"}>
+            <Dialog.Header
+              p={"1"}
+              flexShrink={0}
+              bg={GLOBAL_STYLES.template.defaultColor}
+              borderBottom={"2px"}
+              roundedTop={"md"}
+            >
               <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                 <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
                   <Icon name={"counter"} />

@@ -607,11 +607,11 @@ const Template = () => {
             gap={"1"}
             p={"1"}
             border={"2px solid"}
-            borderColor={"teal.500"}
+            borderColor={GLOBAL_STYLES.template.iconColor}
             bg={"teal.50"}
             rounded={"md"}
           >
-            <Icon name={"template"} size={"sm"} color={"teal.500"} />
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading fontWeight={"semibold"} size={"sm"}>
               {displayTemplateName}
             </Heading>
@@ -1213,7 +1213,7 @@ const Template = () => {
               <EmptyState.Root>
                 <EmptyState.Content>
                   <EmptyState.Indicator>
-                    <Icon name={"template"} size={"lg"} color={"teal.200"} />
+                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
                   </EmptyState.Indicator>
                   <EmptyState.Description>No Usage</EmptyState.Description>
                 </EmptyState.Content>

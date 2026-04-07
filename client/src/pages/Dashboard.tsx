@@ -543,7 +543,7 @@ const Dashboard = () => {
             >
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} color={"blue.500"} />
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Recent Projects
                 </Text>
@@ -566,7 +566,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={"blue.200"} />
+                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -600,7 +600,7 @@ const Dashboard = () => {
             >
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"entity"} size={"xs"} color={"purple.500"} />
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Recent Entities
                 </Text>
@@ -627,7 +627,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={"purple.200"} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>

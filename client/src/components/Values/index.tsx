@@ -1115,14 +1115,14 @@ const ValueRow = (props: {
     let iconStyle: IconNames = "link";
     let badgeBg = "blue.50";
     let badgeBorder = "blue.100";
-    let iconColor = "blue.500";
+    let iconColor = GLOBAL_STYLES.project.iconColor;
 
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
         badgeBg = "blue.50";
         badgeBorder = "blue.100";
-        iconColor = "blue.500";
+        iconColor = GLOBAL_STYLES.project.iconColor;
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";

@@ -804,7 +804,7 @@ const Workspace = () => {
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"entity"} size={"xs"} color={"purple.500"} />
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Entities
                 </Text>
@@ -831,7 +831,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={"purple.200"} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -856,7 +856,7 @@ const Workspace = () => {
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} color={"blue.500"} />
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Projects
                 </Text>
@@ -883,7 +883,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={"blue.200"} />
+                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -906,7 +906,7 @@ const Workspace = () => {
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"template"} size={"xs"} color={"teal.500"} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Templates
                 </Text>
@@ -933,7 +933,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"template"} size={"lg"} color={"teal.200"} />
+                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Templates</EmptyState.Description>
                   </EmptyState.Content>

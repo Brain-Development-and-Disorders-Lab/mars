@@ -32,12 +32,17 @@ const getTypeStyle = (
   type: "entities" | "projects" | "templates",
 ): { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string } => {
   if (type === "projects") {
-    return { icon: "project", badgeBg: "blue.50", badgeBorder: "blue.100", iconColor: "blue.500" };
+    return { icon: "project", badgeBg: "blue.50", badgeBorder: "blue.100", iconColor: GLOBAL_STYLES.project.iconColor };
   } else if (type === "templates") {
-    return { icon: "template", badgeBg: "teal.50", badgeBorder: "teal.100", iconColor: "teal.500" };
+    return {
+      icon: "template",
+      badgeBg: "teal.50",
+      badgeBorder: "teal.100",
+      iconColor: GLOBAL_STYLES.template.iconColor,
+    };
   }
   // entities
-  return { icon: "entity", badgeBg: "purple.50", badgeBorder: "purple.100", iconColor: "purple.500" };
+  return { icon: "entity", badgeBg: "purple.50", badgeBorder: "purple.100", iconColor: GLOBAL_STYLES.entity.iconColor };
 };
 
 const Linky = (props: LinkyProps) => {

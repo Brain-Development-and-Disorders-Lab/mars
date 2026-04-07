@@ -430,7 +430,7 @@ const Entity = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"entity"} size={"sm"} color={"purple.500"} />
+            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
             <Heading size={"sm"}>Create Entity</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -760,7 +760,7 @@ const Entity = () => {
                           <EmptyState.Root>
                             <EmptyState.Content>
                               <EmptyState.Indicator>
-                                <Icon name={"project"} size={"lg"} color={"blue.200"} />
+                                <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
                               </EmptyState.Indicator>
                               <EmptyState.Description>No Projects</EmptyState.Description>
                             </EmptyState.Content>
@@ -941,7 +941,7 @@ const Entity = () => {
             <Dialog.Content>
               <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"entity"} size={"xs"} color={"purple.500"} />
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Entities
                   </Text>
