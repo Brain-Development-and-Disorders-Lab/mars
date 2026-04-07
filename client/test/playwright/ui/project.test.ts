@@ -200,7 +200,7 @@ test.describe("Project", () => {
 
       // Remove the entity
       await page.click("#editProjectButton");
-      const entityRow = table.locator(`text=${entityName}`).locator("..").locator("..").first();
+      const entityRow = table.locator(`text=${entityName}`).locator("..").locator("..").locator("..").first();
       await entityRow.locator('button[aria-label="Remove Entity"]').click();
       await saveAndWait(page);
 
@@ -222,13 +222,13 @@ test.describe("Project", () => {
 
       // Navigate to entity page
       const table = page.locator(".data-table-scroll-container");
-      const entityRow = table.locator(`text=${entityName}`).locator("..").locator("..").first();
+      const entityRow = table.locator(`text=${entityName}`).locator("..").locator("..").locator("..").first();
       await entityRow.locator('button[aria-label="View Entity"]').first().click();
 
       // Remove project from entity
       await page.click("#editEntityButton");
       const projectsTable = page.locator(".data-table-scroll-container").filter({ hasText: projectName });
-      const projectRow = projectsTable.locator(`text=${projectName}`).locator("..").locator("..").first();
+      const projectRow = projectsTable.locator(`text=${projectName}`).locator("..").locator("..").locator("..").first();
       await projectRow.locator('button[aria-label="Remove Project"]').first().click();
       await saveAndWait(page);
 

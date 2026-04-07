@@ -22,6 +22,9 @@ import { usePostHog } from "posthog-js/react";
 // Utility functions
 import _ from "lodash";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 // Constants
 const REGION_ID = "scanner-region";
 
@@ -282,7 +285,7 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"green.300"}>
+          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"scan"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -304,8 +307,8 @@ const ScanModal = (props: ScanModalProps) => {
                 h={"100%"}
                 justify={"center"}
                 align={"center"}
-                border={showCamera ? "2px" : "none"}
-                borderColor={showCamera ? "gray.400" : "transparent"}
+                border={showCamera ? GLOBAL_STYLES.border.style : "none"}
+                borderColor={showCamera ? GLOBAL_STYLES.border.color : "transparent"}
                 rounded={"md"}
               ></Flex>
             </Flex>

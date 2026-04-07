@@ -13,6 +13,9 @@ import { ActivityModel } from "@types";
 // Utility functions and libraries
 import dayjs from "dayjs";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 interface ActivityGraphProps {
   activities: ActivityModel[];
   title?: string;
@@ -64,7 +67,14 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <Box bg={"white"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"} p={"1"} boxShadow={"md"}>
+        <Box
+          bg={"white"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+          rounded={"md"}
+          p={"1"}
+          boxShadow={"md"}
+        >
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             {payload[0].payload.dateLabel}
           </Text>

@@ -100,9 +100,9 @@ const renderLinky = (props: Partial<React.ComponentProps<typeof Linky>> = {}) =>
 describe("Linky Component", () => {
   describe("Basic Rendering", () => {
     it("renders with loading state initially", () => {
-      renderLinky({ fallback: "Initial Fallback" });
-      // Component always starts with "Loading..." before query completes
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      const { container } = renderLinky({ fallback: "Initial Fallback" });
+      // Component shows a skeleton placeholder while the query is in flight
+      expect(container.querySelector(".chakra-skeleton")).toBeTruthy();
     });
 
     it("renders fallback when query fails", async () => {
@@ -126,27 +126,34 @@ describe("Linky Component", () => {
       });
     });
 
-    it("renders with custom size", () => {
+    it("renders with custom size", async () => {
       renderLinky({ size: "sm" });
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      await waitFor(() => {
+        expect(screen.getByText("Test Entity")).toBeTruthy();
+      });
     });
   });
 
   describe("Truncation", () => {
-    it("truncates by default", () => {
+    it("truncates by default", async () => {
       renderLinky();
-      // Should render with default truncation
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      await waitFor(() => {
+        expect(screen.getByText("Test Entity")).toBeTruthy();
+      });
     });
 
-    it("does not truncate when truncate is false", () => {
+    it("does not truncate when truncate is false", async () => {
       renderLinky({ truncate: false });
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      await waitFor(() => {
+        expect(screen.getByText("Test Entity")).toBeTruthy();
+      });
     });
 
-    it("truncates to custom length", () => {
+    it("truncates to custom length", async () => {
       renderLinky({ truncate: 10 });
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      await waitFor(() => {
+        expect(screen.getByText("Test En...")).toBeTruthy();
+      });
     });
   });
 
@@ -225,8 +232,9 @@ describe("Linky Component", () => {
     });
 
     it("handles loading state", () => {
-      renderLinky();
-      expect(screen.getByText("Loading...")).toBeTruthy();
+      const { container } = renderLinky();
+      // Component shows a skeleton placeholder while the query is in flight
+      expect(container.querySelector(".chakra-skeleton")).toBeTruthy();
     });
 
     it("handles missing id", async () => {

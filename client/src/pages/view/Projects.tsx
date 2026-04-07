@@ -42,6 +42,9 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 // Queries
 const GET_PROJECTS = gql`
   query GetProjects {
@@ -258,7 +261,7 @@ const Projects = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"project"} size={"sm"} />
+            <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
             <Heading fontWeight={"bold"} size={"md"}>
               Projects
             </Heading>
@@ -277,7 +280,14 @@ const Projects = () => {
 
           {/* Filter Section */}
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              gap={"1"}
+              p={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
@@ -470,7 +480,7 @@ const Projects = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"project"} size={"lg"} />
+                  <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}

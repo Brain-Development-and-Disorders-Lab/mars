@@ -29,7 +29,7 @@ import dayjs from "dayjs";
 import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
-import { APP_URL } from "@variables";
+import { APP_URL, GLOBAL_STYLES } from "@variables";
 import ActorTag from "@components/ActorTag";
 
 const User = () => {
@@ -676,7 +676,15 @@ const User = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"1"}
+          p={"1"}
+          border={"2px solid"}
+          borderColor={"gray.700"}
+          bg={"gray.100"}
+          rounded={"md"}
+        >
           <Icon name={"person"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"sm"}>
             {staticName}
@@ -723,7 +731,14 @@ const User = () => {
         <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
           <Flex direction={"column"} p={"0"} gap={"1"} w={{ base: "100%", md: "40%" }}>
             {/* User details */}
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               {/* Avatar */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
                 <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
@@ -906,7 +921,14 @@ const User = () => {
           </Flex>
 
           <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} w={{ base: "100%", md: "50%" }}>
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
                 <Icon name={"workspace"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -943,7 +965,14 @@ const User = () => {
         <Flex direction={"row"} gap={"1"}>
           <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} basis={"50%"}>
             {/* API options */}
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"column"} p={"0"} gap={"1"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>

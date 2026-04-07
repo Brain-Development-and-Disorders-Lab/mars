@@ -14,8 +14,8 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
         <Dialog.Content>
           <Dialog.Header p={"2"} roundedTop={"md"} bg={"orange.300"}>
             <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
-              <Icon name={"warning"} />
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
+              <Icon name={"warning"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Unsaved Changes
               </Text>
             </Flex>

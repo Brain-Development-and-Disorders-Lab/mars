@@ -24,11 +24,16 @@ import { CounterModel, CounterProps, ICounter, ISelectOption, ResponseData } fro
 // Custom hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 
-// Utility functions and libraries
-import _ from "lodash";
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+
+// Utility functions and libraries
+import _ from "lodash";
 import { createSelectOptions, ignoreAbort } from "@lib/util";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state
@@ -354,8 +359,21 @@ const CounterSelect = (props: CounterProps) => {
 
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"blue.300"}>
-              Create Counter
+            <Dialog.Header
+              p={"1"}
+              flexShrink={0}
+              bg={GLOBAL_STYLES.template.defaultColor}
+              borderBottom={"2px"}
+              roundedTop={"md"}
+            >
+              <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+                <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
+                  <Icon name={"counter"} />
+                  <Text fontWeight={"semibold"} fontSize={"xs"}>
+                    Create Counter
+                  </Text>
+                </Flex>
+              </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} />
               </Dialog.CloseTrigger>
@@ -372,7 +390,7 @@ const CounterSelect = (props: CounterProps) => {
                 <Flex>
                   <Fieldset.Root>
                     <Fieldset.Content>
-                      <Field.Root>
+                      <Field.Root gap={"0.5"} required>
                         <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Name
                           <Field.RequiredIndicator />
@@ -386,7 +404,7 @@ const CounterSelect = (props: CounterProps) => {
                 <Flex>
                   <Fieldset.Root invalid={!isValidFormat}>
                     <Fieldset.Content>
-                      <Field.Root>
+                      <Field.Root gap={"0.5"} required>
                         <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Format
                           <Field.RequiredIndicator />
@@ -408,7 +426,7 @@ const CounterSelect = (props: CounterProps) => {
                 <Flex direction={"row"} gap={"2"}>
                   <Fieldset.Root invalid={!isValidInitial}>
                     <Fieldset.Content>
-                      <Field.Root>
+                      <Field.Root gap={"0.5"} required>
                         <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Initial Value
                           <Field.RequiredIndicator />
@@ -429,7 +447,7 @@ const CounterSelect = (props: CounterProps) => {
 
                   <Fieldset.Root invalid={!isValidIncrement}>
                     <Fieldset.Content>
-                      <Field.Root>
+                      <Field.Root gap={"0.5"} required>
                         <Field.Label fontSize={"xs"} ml={"0.5"}>
                           Increment
                           <Field.RequiredIndicator />
@@ -449,19 +467,31 @@ const CounterSelect = (props: CounterProps) => {
                   </Fieldset.Root>
                 </Flex>
 
-                <Flex p={"1"} gap={"1"} direction={"column"} rounded={"md"} bg={"gray.100"}>
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Initial Counter Value:
-                    </Text>
-                    <Text fontSize={"xs"}>{currentCounterPreview}</Text>
-                  </Flex>
+                <Flex direction={"column"} gap={"0.5"}>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                    Counter Preview
+                  </Text>
+                  <Flex
+                    p={"1"}
+                    gap={"0.5"}
+                    direction={"column"}
+                    rounded={"md"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
+                  >
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Initial Counter Value:
+                      </Text>
+                      <Text fontSize={"xs"}>{currentCounterPreview}</Text>
+                    </Flex>
 
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Next Counter Value:
-                    </Text>
-                    <Text fontSize={"xs"}>{nextCounterPreview}</Text>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Next Counter Value:
+                      </Text>
+                      <Text fontSize={"xs"}>{nextCounterPreview}</Text>
+                    </Flex>
                   </Flex>
                 </Flex>
               </Flex>

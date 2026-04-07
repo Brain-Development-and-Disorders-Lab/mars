@@ -15,6 +15,9 @@ import { useMutation } from "@apollo/client/react";
 // Custom types
 import { ResponseData } from "@types";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const UploadDialog = (props: {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -213,9 +216,9 @@ const UploadDialog = (props: {
                           w={"100%"}
                           align={"center"}
                           justify={"center"}
-                          border={"2px"}
+                          border={"1px"}
                           borderStyle={"dashed"}
-                          borderColor={"gray.300"}
+                          borderColor={GLOBAL_STYLES.border.color}
                           bg={"gray.50"}
                           rounded={"md"}
                           cursor={"pointer"}

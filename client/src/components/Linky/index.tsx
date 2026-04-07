@@ -2,21 +2,48 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Link, SkeletonText } from "@chakra-ui/react";
+import { Flex, Skeleton, Text } from "@chakra-ui/react";
+import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { IGenericItem, LinkyProps } from "@types";
+import { IconNames, IGenericItem, LinkyProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
-import _ from "lodash";
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
+// Utility functions and libraries
+import _ from "lodash";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
+
+/**
+ * Utility to get the icon name, badge background, border, and icon color
+ * for each Linky type
+ */
+const getTypeStyle = (
+  type: "entities" | "projects" | "templates",
+): { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string } => {
+  if (type === "projects") {
+    return { icon: "project", badgeBg: "blue.50", badgeBorder: "blue.100", iconColor: GLOBAL_STYLES.project.iconColor };
+  } else if (type === "templates") {
+    return {
+      icon: "template",
+      badgeBg: "teal.50",
+      badgeBorder: "teal.100",
+      iconColor: GLOBAL_STYLES.template.iconColor,
+    };
+  }
+  // entities
+  return { icon: "entity", badgeBg: "purple.50", badgeBorder: "purple.100", iconColor: GLOBAL_STYLES.entity.iconColor };
+};
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
@@ -127,13 +154,10 @@ const Linky = (props: LinkyProps) => {
 
     // Set the label text and apply truncating where specified
     if (props.truncate === false) {
-      // Do not truncate the label text
       setLinkLabel(data.name);
     } else if (_.isNumber(props.truncate)) {
-      // Truncate the label text to the specified length
       setLinkLabel(_.truncate(data.name, { length: props.truncate }));
     } else {
-      // Truncate the label text to a default length
       setLinkLabel(_.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }));
     }
   };
@@ -148,22 +172,84 @@ const Linky = (props: LinkyProps) => {
     getLinkyData();
   }, [props.id]);
 
+  const isLoading = loadingTemplate || loadingEntity || loadingProject;
+  const { icon, badgeBg, badgeBorder, iconColor } = getTypeStyle(props.type);
+
+  if (isLoading) {
+    return <Skeleton h={"22px"} w={"80px"} rounded={"md"} />;
+  }
+
   return (
     <Tooltip showArrow content={tooltipLabel}>
-      {loadingTemplate || loadingEntity || loadingProject ? (
-        <SkeletonText noOfLines={1} loading={loadingTemplate || loadingEntity || loadingProject}>
-          {linkLabel}
-        </SkeletonText>
-      ) : (
-        <Link
-          onClick={onClickHandler}
-          fontWeight={"semibold"}
-          variant={"underline"}
-          color={showDeleted ? "gray.600" : "black"}
-          fontSize={props.size ? props.size : ""}
+      {showDeleted ? (
+        <Flex
+          direction={"row"}
+          align={"center"}
+          h={"22px"}
+          w={"fit-content"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={"orange.200"}
+          rounded={"md"}
+          overflow={"hidden"}
+          cursor={"not-allowed"}
+          flexShrink={0}
         >
-          {linkLabel}
-        </Link>
+          {/* Warning badge */}
+          <Flex
+            align={"center"}
+            justify={"center"}
+            bg={"orange.50"}
+            px={"1.5"}
+            h={"100%"}
+            borderRight={"1px solid"}
+            borderColor={"orange.200"}
+          >
+            <Icon name={"warning"} size={"xs"} color={"orange.500"} />
+          </Flex>
+          {/* Deleted label */}
+          <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+              {linkLabel}
+            </Text>
+          </Flex>
+        </Flex>
+      ) : (
+        <Flex
+          direction={"row"}
+          align={"center"}
+          h={"22px"}
+          w={"fit-content"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+          rounded={"md"}
+          overflow={"hidden"}
+          cursor={"pointer"}
+          onClick={onClickHandler}
+          flexShrink={0}
+          _hover={{
+            borderColor: "blue.300",
+            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+          }}
+        >
+          {/* Type icon badge */}
+          <Flex
+            align={"center"}
+            justify={"center"}
+            bg={badgeBg}
+            px={"1.5"}
+            h={"100%"}
+            borderRight={"1px solid"}
+            borderColor={badgeBorder}
+          >
+            <Icon name={icon} size={"xs"} color={iconColor} />
+          </Flex>
+          {/* Name */}
+          <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
+              {linkLabel}
+            </Text>
+          </Flex>
+        </Flex>
       )}
     </Tooltip>
   );

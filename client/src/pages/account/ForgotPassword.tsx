@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "@lib/auth";
 
 // Variables
-import { APP_URL } from "@variables";
+import { APP_URL, GLOBAL_STYLES } from "@variables";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -76,8 +76,8 @@ const ForgotPassword = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={"1px solid"}
-          borderColor={"gray.200"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
           w={"sm"}

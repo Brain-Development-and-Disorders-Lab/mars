@@ -1,5 +1,5 @@
 // React
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, ReactElement } from "react";
 
 // Chakra UI components
 import {
@@ -20,6 +20,7 @@ import {
   Stack,
   Text,
   createListCollection,
+  Link,
 } from "@chakra-ui/react";
 
 import {
@@ -39,6 +40,7 @@ import {
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import Tooltip from "@components/Tooltip";
 
 // Types
 import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
@@ -46,6 +48,9 @@ import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
 // Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 interface SelectOption extends OptionBase {
   label: string;
@@ -165,8 +170,8 @@ const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption
   return (
     <Flex
       direction={"column"}
-      border={"1px solid"}
-      borderColor={"gray.200"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -255,8 +260,8 @@ const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
     <Flex
       direction={"column"}
-      border={"1px solid"}
-      borderColor={"gray.200"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -474,7 +479,7 @@ const ValueDataSelect = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop="md" bg="blue.300">
+            <Dialog.Header p={"0"} roundedTop="md" bg={GLOBAL_STYLES.dialog.headerColor}>
               <Flex direction="row" align="center" gap="1" p={"2"}>
                 <Icon name="v_select" />
                 <Text fontSize="xs" fontWeight="semibold">
@@ -546,8 +551,8 @@ const ValueDataSelect = (props: {
                         justify="center"
                         minH="60px"
                         rounded="md"
-                        border="1px"
-                        borderColor="gray.300"
+                        border={GLOBAL_STYLES.border.style}
+                        borderColor={GLOBAL_STYLES.border.color}
                       >
                         <Text fontSize="xs" fontWeight="semibold" color="gray.400">
                           No Options added
@@ -558,7 +563,7 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p="1" bg="gray.100" roundedBottom="md">
+            <Dialog.Footer p="1" bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom="md">
               <Button size="xs" rounded="md" colorPalette="red" onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name="cross" />
@@ -727,8 +732,8 @@ const Values = (props: {
           ref={tableRef}
           minW="800px"
           w="100%"
-          border="1px solid"
-          borderColor="gray.200"
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           borderRadius="md"
           overflow="hidden"
         >
@@ -1099,6 +1104,122 @@ const ValueRow = (props: {
   };
 
   /**
+   * Utility function to generate URL "tabs" representing links to known platforms
+   * @param {string} url The URL stored as `data` in the Value component
+   */
+  const generateUrlTab = (url: string): ReactElement => {
+    const urlObject = URL.parse(url);
+    const isValidUrl = !_.isNull(urlObject);
+
+    // Determine platform-specific icon and badge styling
+    let iconStyle: IconNames = "link";
+    let badgeBg = "blue.50";
+    let badgeBorder = "blue.100";
+    let iconColor = GLOBAL_STYLES.project.iconColor;
+
+    if (isValidUrl) {
+      if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
+        iconStyle = "l_box";
+        badgeBg = "blue.50";
+        badgeBorder = "blue.100";
+        iconColor = GLOBAL_STYLES.project.iconColor;
+      } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
+        iconStyle = "l_github";
+        badgeBg = "gray.100";
+        badgeBorder = "gray.200";
+        iconColor = "gray.600";
+      }
+    }
+
+    return (
+      <Flex
+        direction={"row"}
+        align={"center"}
+        h={"100%"}
+        w={"100%"}
+        px={"2"}
+        border={"1px solid transparent"}
+        _hover={{
+          border: "1px solid",
+          borderColor: "blue.200",
+          boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+        }}
+      >
+        {isValidUrl ? (
+          <Tooltip content={url} showArrow>
+            <Link href={url} _hover={{ textDecoration: "none" }}>
+              <Flex
+                direction={"row"}
+                align={"center"}
+                h={"22px"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+                rounded={"md"}
+                overflow={"hidden"}
+                _hover={{
+                  borderColor: "blue.300",
+                  boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                }}
+              >
+                {/* Platform icon badge */}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  bg={badgeBg}
+                  px={"1.5"}
+                  h={"100%"}
+                  borderRight={"1px solid"}
+                  borderColor={badgeBorder}
+                >
+                  <Icon name={iconStyle} size={"xs"} color={iconColor} />
+                </Flex>
+                {/* Hostname */}
+                <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                  <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
+                    {urlObject.host}
+                  </Text>
+                </Flex>
+              </Flex>
+            </Link>
+          </Tooltip>
+        ) : (
+          <Tooltip content={"Invalid URL"} showArrow>
+            <Flex
+              direction={"row"}
+              align={"center"}
+              h={"22px"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={"orange.200"}
+              rounded={"md"}
+              overflow={"hidden"}
+              cursor={"not-allowed"}
+            >
+              {/* Warning badge */}
+              <Flex
+                align={"center"}
+                justify={"center"}
+                bg={"orange.50"}
+                px={"1.5"}
+                h={"100%"}
+                borderRight={"1px solid"}
+                borderColor={"orange.200"}
+              >
+                <Icon name={"warning"} size={"xs"} color={"orange.500"} />
+              </Flex>
+              {/* Truncated URL */}
+              <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+                  {_.truncate(url, { length: 28 })}
+                </Text>
+              </Flex>
+            </Flex>
+          </Tooltip>
+        )}
+      </Flex>
+    );
+  };
+
+  /**
    * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
    * is `entity` or `select`
    * @param {IValueType} valueType The type of the value to be copied
@@ -1172,32 +1293,36 @@ const ValueRow = (props: {
         />
       );
     } else if (valueType === "url") {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
-          size="xs"
-          h={"100%"}
-          borderRadius="none"
-          fontSize="xs"
-          readOnly={props.viewOnly}
-          placeholder="Enter URL"
-          border="1px solid transparent"
-          bg="transparent"
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
+      if (!props.viewOnly) {
+        return (
+          <Input
+            value={valueData}
+            onChange={(e) => setValueData(e.target.value)}
+            size="xs"
+            h={"100%"}
+            borderRadius="none"
+            fontSize="xs"
+            readOnly={props.viewOnly}
+            placeholder="Enter URL"
+            border="1px solid transparent"
+            bg="transparent"
+            cursor={props.viewOnly ? "default" : "text"}
+            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+            _focus={{
+              bg: "white",
+              border: "1px solid",
+              borderColor: "blue.300",
+            }}
+            _hover={{
+              border: "1px solid",
+              borderColor: "blue.200",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
+          />
+        );
+      } else {
+        return generateUrlTab(valueData);
+      }
     } else if (valueType === "date") {
       return (
         <Input
@@ -1283,7 +1408,8 @@ const ValueRow = (props: {
           <Flex
             w={"100%"}
             h={"100%"}
-            justify="center"
+            justify={"start"}
+            align={"center"}
             pt={"0.5"}
             px={"2"}
             border="1px solid transparent"

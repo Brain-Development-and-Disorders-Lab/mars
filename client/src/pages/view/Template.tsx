@@ -25,6 +25,7 @@ import Icon from "@components/Icon";
 import Values from "@components/Values";
 import AlertDialog from "@components/AlertDialog";
 import ActorTag from "@components/ActorTag";
+import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import TimestampTag from "@components/TimestampTag";
 import { toaster } from "@components/Toast";
@@ -46,9 +47,13 @@ import dayjs from "dayjs";
 
 // Routing and navigation
 import { useNavigate, useParams } from "react-router-dom";
+
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import DataTable from "@components/DataTable";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 const Template = () => {
   const { id } = useParams();
@@ -597,8 +602,16 @@ const Template = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
-            <Icon name={"template"} size={"sm"} />
+          <Flex
+            align={"center"}
+            gap={"1"}
+            p={"1"}
+            border={"2px solid"}
+            borderColor={GLOBAL_STYLES.template.iconColor}
+            bg={"teal.50"}
+            rounded={"md"}
+          >
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading fontWeight={"semibold"} size={"sm"}>
               {displayTemplateName}
             </Heading>
@@ -1011,8 +1024,8 @@ const Template = () => {
                                             gap={"1"}
                                             p={"2"}
                                             rounded={"md"}
-                                            border={"1px solid"}
-                                            borderColor={"gray.300"}
+                                            border={GLOBAL_STYLES.border.style}
+                                            borderColor={GLOBAL_STYLES.border.color}
                                             bg={"white"}
                                           >
                                             <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1101,8 +1114,8 @@ const Template = () => {
                     readOnly={!editing || !!previewVersion}
                     bg={"white"}
                     rounded={"md"}
-                    border={"1px solid"}
-                    borderColor={"gray.300"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
                   />
                 </Flex>
 
@@ -1131,8 +1144,8 @@ const Template = () => {
               direction={"column"}
               p={"1"}
               gap={"1"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
               basis={"40%"}
               grow={"1"}
@@ -1156,7 +1169,14 @@ const Template = () => {
             </Flex>
           </Flex>
 
-          <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+          <Flex
+            direction={"column"}
+            gap={"1"}
+            p={"1"}
+            rounded={"md"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+          >
             <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
               Template Values
             </Text>
@@ -1168,19 +1188,37 @@ const Template = () => {
             />
           </Flex>
 
-          <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+          <Flex
+            direction={"column"}
+            gap={"1"}
+            p={"1"}
+            rounded={"md"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+          >
             <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
               Template Usage
             </Text>
-            <DataTable
-              data={templateUsage}
-              columns={usageColumns}
-              visibleColumns={{}}
-              selectedRows={{}}
-              viewOnly={true}
-              showSelection={true}
-              showPagination
-            />
+            {templateUsage.length > 0 ? (
+              <DataTable
+                data={templateUsage}
+                columns={usageColumns}
+                visibleColumns={{}}
+                selectedRows={{}}
+                viewOnly={true}
+                showSelection={true}
+                showPagination
+              />
+            ) : (
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>No Usage</EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
+            )}
           </Flex>
         </Flex>
       </Flex>

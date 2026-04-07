@@ -33,7 +33,7 @@ import { isValidEmail } from "@lib/util";
 import dayjs from "dayjs";
 
 // Variables
-import { APP_URL } from "@variables";
+import { APP_URL, GLOBAL_STYLES } from "@variables";
 
 // Custom types
 import { IResponseMessage } from "@types";
@@ -315,8 +315,8 @@ const Signup = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={"1px solid"}
-          borderColor={"gray.200"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
         >
@@ -485,7 +485,7 @@ const Signup = () => {
                   p={"2"}
                   bg={"green.50"}
                   rounded={"md"}
-                  border={"1px solid"}
+                  border={GLOBAL_STYLES.border.style}
                   borderColor={"green.200"}
                 >
                   <Icon name={"check"} size={"xs"} color={"green.600"} />

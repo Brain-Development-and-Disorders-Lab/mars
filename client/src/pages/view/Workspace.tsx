@@ -35,6 +35,9 @@ import { auth } from "@lib/auth";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Workspace = () => {
   const navigate = useNavigate();
 
@@ -750,8 +753,8 @@ const Workspace = () => {
             p={"1"}
             h={"fit-content"}
             gap={"1"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
             grow={"1"}
           >
@@ -793,15 +796,15 @@ const Workspace = () => {
             p={"1"}
             h={"fit-content"}
             gap={"1"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
             grow={"1"}
             minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"entity"} size={"xs"} />
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Entities
                 </Text>
@@ -828,7 +831,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -845,15 +848,15 @@ const Workspace = () => {
             p={"1"}
             gap={"1"}
             h={"fit-content"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
             w={{ base: "100%", md: "50%" }}
             minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} />
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Projects
                 </Text>
@@ -880,7 +883,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} />
+                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -895,15 +898,15 @@ const Workspace = () => {
             p={"1"}
             h={"fit-content"}
             gap={"1"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
             grow={"1"}
             minW={"0"}
           >
             <Flex w={"100%"} align={"center"} justify={"space-between"}>
               <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"template"} size={"xs"} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Archived Workspace Templates
                 </Text>
@@ -930,7 +933,7 @@ const Workspace = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"template"} size={"lg"} />
+                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Archived Workspace Templates</EmptyState.Description>
                   </EmptyState.Content>
@@ -947,8 +950,8 @@ const Workspace = () => {
             p={"1"}
             gap={"1"}
             h={"fit-content"}
-            border={"1px solid"}
-            borderColor={"gray.300"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
             w={{ base: "100%", md: "50%" }}
             minW={"0"}

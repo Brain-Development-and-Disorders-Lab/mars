@@ -11,6 +11,9 @@ import { IGenericItem, IValueType } from "@types";
 // Utility imports
 import _ from "lodash";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const SearchQueryValue = ({ field, value, handleOnChange }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
   const [selected, setSelected] = useState({} as IGenericItem);
@@ -117,8 +120,8 @@ const SearchQueryValue = ({ field, value, handleOnChange }: ValueEditorProps) =>
           w={"100%"}
           p={"2"}
           rounded={"md"}
-          border={"1px solid"}
-          borderColor={"gray.300"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           backgroundColor={"white"}
         >
           {/* Value type, operator, and value grouped visually */}

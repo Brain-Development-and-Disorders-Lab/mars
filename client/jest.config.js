@@ -11,6 +11,8 @@ module.exports = {
     "^@lib/(.*)$": "<rootDir>/src/lib/$1",
     "^@pages/(.*)$": "<rootDir>/src/pages/$1",
     "^@types/(.*)$": "../types/$1",
+    "^@types$": "../types",
+    "^@variables$": "<rootDir>/src/variables",
     "src/variables": "<rootDir>/src/variables",
   },
   transform: {

@@ -2,7 +2,7 @@
 import React from "react";
 
 // Existing components and icons
-import { Icon as ChakraIcon } from "@chakra-ui/react";
+import { Icon as ChakraIcon, Flex } from "@chakra-ui/react";
 import {
   BsActivity,
   BsArchiveFill,
@@ -196,30 +196,42 @@ const Icon = (props: {
   // Set the icon color if specified
   const iconColor = !_.isUndefined(props.color) ? props.color : "";
 
+  let returned = <ChakraIcon as={iconComponent} color={iconColor} style={props.style} />;
+
   // Set the icon sizing if specified
   if (!_.isUndefined(props.size)) {
     switch (props.size) {
       case "xxs":
-        return <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} style={props.style} />;
+        break;
       case "xs":
-        return <ChakraIcon as={iconComponent} w={"3"} h={"3"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"3"} h={"3"} color={iconColor} style={props.style} />;
+        break;
       case "sm":
-        return <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} style={props.style} />;
+        break;
       case "md":
-        return <ChakraIcon as={iconComponent} w={"6"} h={"6"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"6"} h={"6"} color={iconColor} style={props.style} />;
+        break;
       case "lg":
-        return <ChakraIcon as={iconComponent} w={"8"} h={"8"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"8"} h={"8"} color={iconColor} style={props.style} />;
+        break;
       case "xl":
-        return <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} style={props.style} />;
+        break;
       default:
-        return (
+        returned = (
           <ChakraIcon as={iconComponent} w={props.size[0]} h={props.size[1]} color={iconColor} style={props.style} />
         );
     }
   }
 
   // Return icon with default size
-  return <ChakraIcon as={iconComponent} color={iconColor} style={props.style} />;
+  return (
+    <Flex p={"0"} m={"0"} align={"center"} justify={"center"}>
+      {returned}
+    </Flex>
+  );
 };
 
 export default Icon;

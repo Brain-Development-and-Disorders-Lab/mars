@@ -36,11 +36,16 @@ dayjs.extend(isSameOrBefore);
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// GraphQL imports
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -260,7 +265,7 @@ const Templates = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"sm"} />
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
@@ -277,7 +282,14 @@ const Templates = () => {
 
           {/* Filter Section */}
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              gap={"1"}
+              p={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
@@ -463,7 +475,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} />
+                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

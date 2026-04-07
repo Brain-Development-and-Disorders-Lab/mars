@@ -54,6 +54,9 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Entities = () => {
   const navigate = useNavigate();
 
@@ -394,7 +397,7 @@ const Entities = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
-            <Icon name={"entity"} size={"sm"} />
+            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
@@ -411,7 +414,14 @@ const Entities = () => {
 
           {/* Filter Section */}
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              gap={"1"}
+              p={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
@@ -653,7 +663,7 @@ const Entities = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"entity"} size={"lg"} />
+                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.iconColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}
@@ -677,8 +687,15 @@ const Entities = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
-              Export Entities
+            <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} borderColor={GLOBAL_STYLES.border.color}>
+              <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+                <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
+                  <Icon name={"download"} size={"xs"} />
+                  <Text fontWeight={"semibold"} fontSize={"xs"}>
+                    Export Entities
+                  </Text>
+                </Flex>
+              </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size={"2xs"} top={"6px"} onClick={onExportClose} />
               </Dialog.CloseTrigger>
@@ -733,7 +750,14 @@ const Entities = () => {
                   </Flex>
                 </Flex>
 
-                <Flex w={"100%"} direction={"column"} gap={"2"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  gap={"2"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                  rounded={"md"}
+                >
                   <DataTable
                     columns={exportTableColumns}
                     data={toExport}
@@ -744,7 +768,7 @@ const Entities = () => {
                 </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 {/* "Export" button */}
                 <Flex direction={"row"} w={"100%"} gap={"2"} justify={"right"} align={"center"}>

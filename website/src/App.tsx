@@ -208,7 +208,7 @@ const App = () => {
                 bg={"white"}
                 boxShadow={"sm"}
               >
-                <Icon name={"project"} size={"lg"} />
+                <Icon name={"project"} size={"lg"} color={"blue.500"} />
                 <Text fontWeight={"bold"} fontSize={"lg"}>
                   Organize
                 </Text>

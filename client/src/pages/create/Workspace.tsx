@@ -32,6 +32,9 @@ import { ignoreAbort } from "@lib/util";
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const CreateWorkspace = () => {
   const posthog = usePostHog();
 
@@ -229,8 +232,8 @@ const CreateWorkspace = () => {
               p={"1"}
               gap={"1"}
               rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
             >
               <Fieldset.Root>
                 <Fieldset.Content>
@@ -260,8 +263,8 @@ const CreateWorkspace = () => {
               p={"1"}
               gap={"1"}
               rounded={"md"}
-              border={"1px solid"}
-              borderColor={"gray.300"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
             >
               <Fieldset.Root>
                 <Fieldset.Content>

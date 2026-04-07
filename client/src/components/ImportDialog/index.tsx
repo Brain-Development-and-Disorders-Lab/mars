@@ -66,6 +66,9 @@ const MAX_DISPLAYED_COLUMNS = 10;
 // Events
 import { usePostHog } from "posthog-js/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const ImportDialog = (props: ImportDialogProps) => {
   // Posthog
   const posthog = usePostHog();
@@ -1004,10 +1007,20 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"upload"} size={"xs"} />
-              Import File
+          <Dialog.Header
+            p={"1"}
+            flexShrink={0}
+            bg={GLOBAL_STYLES.dialog.headerColor}
+            borderBottom={"2px"}
+            roundedTop={"md"}
+          >
+            <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+              <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
+                <Icon name={"upload"} size={"xs"} />
+                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                  Import File
+                </Text>
+              </Flex>
             </Flex>
             <Dialog.CloseTrigger asChild>
               <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} _hover={{ bg: "gray.200" }} />
@@ -1022,12 +1035,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                 onStepChange={(event) => setEntityStep(event.step)}
                 count={entitySteps.length}
                 p={"1"}
+                size={"sm"}
               >
                 <Steps.List>
                   {entitySteps.map((step, index) => (
                     <Steps.Item key={index} index={index} title={step.title}>
                       <Steps.Indicator />
-                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Title fontSize={"xs"} fontWeight={"semibold"}>
+                        {step.title}
+                      </Steps.Title>
                       <Steps.Separator />
                     </Steps.Item>
                   ))}
@@ -1042,12 +1058,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                 onStepChange={(event) => setTemplateStep(event.step)}
                 count={templateSteps.length}
                 p={"1"}
+                size={"sm"}
               >
                 <Steps.List>
                   {templateSteps.map((step, index) => (
                     <Steps.Item key={index} index={index} title={step.title}>
                       <Steps.Indicator />
-                      <Steps.Title>{step.title}</Steps.Title>
+                      <Steps.Title fontSize={"xs"} fontWeight={"semibold"}>
+                        {step.title}
+                      </Steps.Title>
                       <Steps.Separator />
                     </Steps.Item>
                   ))}
@@ -1057,7 +1076,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Select file type of import */}
             <Flex direction={"row"} gap={"1"} align={"center"} justify={"left"} w={"100%"} pb={"1"}>
-              <Text fontWeight={"semibold"} fontSize={"xs"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                 File Contents:
               </Text>
               <Select.Root
@@ -1170,9 +1189,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                         w={"100%"}
                         align={"center"}
                         justify={"center"}
-                        border={"2px"}
+                        border={"1px"}
                         borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={"gray.300"}
+                        borderColor={GLOBAL_STYLES.border.color}
                         rounded={"md"}
                         background={fileName === "" ? "gray.50" : "white"}
                       >
@@ -1240,8 +1259,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                 direction={"column"}
                 gap={"1"}
                 p={"1"}
-                border={"1px"}
-                borderColor={"gray.300"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
                 {fileType === CSV_MIME_TYPE && (
@@ -1402,7 +1421,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Entity Step 3: Advanced mapping */}
             {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"1"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+                rounded={"md"}
+              >
                 {_.isEqual(fileType, CSV_MIME_TYPE) ? (
                   <Text fontSize={"xs"}>
                     Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the
@@ -1551,7 +1577,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Entity Step 4: Review */}
             {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"1"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+                rounded={"md"}
+              >
                 <DataTable
                   columns={reviewTableColumns}
                   data={reviewEntities}
@@ -1574,9 +1607,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                         w={"100%"}
                         align={"center"}
                         justify={"center"}
-                        border={"2px"}
+                        border={"1px"}
                         borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={"gray.300"}
+                        borderColor={GLOBAL_STYLES.border.color}
                         rounded={"md"}
                         background={fileName === "" ? "gray.50" : "white"}
                       >
@@ -1639,7 +1672,14 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Template Step 2: Review */}
             {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} border={"1px"} borderColor={"gray.300"} rounded={"md"}>
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"1"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+                rounded={"md"}
+              >
                 <DataTable
                   columns={templateReviewTableColumns}
                   data={reviewTemplates}
@@ -1651,7 +1691,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             )}
           </Dialog.Body>
 
-          <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
               <Button
                 id={"importCancelButton"}

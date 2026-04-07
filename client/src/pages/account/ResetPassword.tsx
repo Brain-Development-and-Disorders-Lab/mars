@@ -13,6 +13,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -96,8 +99,8 @@ const ResetPassword = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={"1px solid"}
-          borderColor={"gray.200"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
           w={"sm"}

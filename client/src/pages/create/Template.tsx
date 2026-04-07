@@ -40,6 +40,9 @@ import { auth } from "@lib/auth";
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Template = () => {
   const posthog = usePostHog();
 
@@ -181,7 +184,7 @@ const Template = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"xs"} />
+            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
             <Heading size={"sm"}>Create Template</Heading>
             <Spacer />
             <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -201,7 +204,13 @@ const Template = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex direction={"column"} p={"1"} border={"1px solid"} borderColor={"gray.300"} rounded={"md"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+            >
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
@@ -239,7 +248,14 @@ const Template = () => {
             grow={"1"}
             rounded={"md"}
           >
-            <Flex direction={"column"} p={"1"} gap={"1"} rounded={"md"} border={"1px solid"} borderColor={"gray.300"}>
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
@@ -311,9 +327,15 @@ const Template = () => {
             <Dialog.CloseTrigger asChild>
               <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
             </Dialog.CloseTrigger>
-            <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"blue.300"} roundedTop={"md"}>
+            <Dialog.Header
+              p={"2"}
+              fontWeight={"semibold"}
+              fontSize={"xs"}
+              bg={GLOBAL_STYLES.dialog.headerColor}
+              roundedTop={"md"}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                 Template Attributes
               </Flex>
             </Dialog.Header>
