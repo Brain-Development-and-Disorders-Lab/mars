@@ -475,7 +475,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

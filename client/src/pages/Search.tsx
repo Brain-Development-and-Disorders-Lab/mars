@@ -927,15 +927,7 @@ const Search = () => {
               </Flex>
 
               {/* Search input and submit */}
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                gap={"1"}
-                align={"center"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-                rounded={"md"}
-              >
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} rounded={"md"}>
                 <Flex w={"100%"}>
                   <Input
                     size={"xs"}

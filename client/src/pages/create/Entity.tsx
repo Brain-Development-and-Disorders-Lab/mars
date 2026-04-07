@@ -575,6 +575,7 @@ const Entity = () => {
                       <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Entity Description
                       </Field.Label>
+                      <Information text={'Only describe the Entity, metadata is specified in the "Attributes" step.'} />
                       <Box data-testid={"create-entity-description"} w={"100%"}>
                         <MDEditor
                           height={150}
@@ -613,9 +614,7 @@ const Entity = () => {
                 <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                   Entity Relationships
                 </Heading>
-                <Text fontSize={"xs"} ml={"0.5"} fontWeight={"semibold"} color={"gray.500"}>
-                  Specify the relationships between this Entity and other Entities.
-                </Text>
+                <Information text={"Specify the relationships between this Entity and other Entities."} />
                 <Flex direction={"row"} gap={"1"} justify={"space-between"} align={"end"}>
                   <Flex direction={"column"} gap={"1"} w={"33%"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -736,10 +735,7 @@ const Entity = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Linked Projects
                     </Text>
-                    <Text fontSize={"xs"} ml={"0.5"} fontWeight={"semibold"} color={"gray.500"}>
-                      Specify the Projects that this new Entity should be included with. The Entity will then be
-                      contained within the specified Projects.
-                    </Text>
+                    <Information text={"Specify the Projects that this new Entity should be included in."} />
                     <Fieldset.Content gap={"1"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Available Projects
@@ -760,7 +756,7 @@ const Entity = () => {
                           <EmptyState.Root>
                             <EmptyState.Content>
                               <EmptyState.Indicator>
-                                <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
+                                <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
                               </EmptyState.Indicator>
                               <EmptyState.Description>No Projects</EmptyState.Description>
                             </EmptyState.Content>

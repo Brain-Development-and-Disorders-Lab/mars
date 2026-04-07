@@ -2281,7 +2281,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Projects</EmptyState.Description>
                     </EmptyState.Content>

@@ -676,7 +676,15 @@ const User = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
+        <Flex
+          align={"center"}
+          gap={"1"}
+          p={"1"}
+          border={"2px solid"}
+          borderColor={"gray.700"}
+          bg={"gray.100"}
+          rounded={"md"}
+        >
           <Icon name={"person"} size={"sm"} />
           <Heading fontWeight={"semibold"} size={"sm"}>
             {staticName}

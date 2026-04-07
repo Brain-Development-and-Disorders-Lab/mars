@@ -67,7 +67,16 @@ const AttributeCard = (props: AttributeCardProps) => {
                 <Icon name={isOpen ? "c_down" : "c_right"} size={"xs"} />
               </IconButton>
             </Collapsible.Trigger>
-            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"} w={"fit-content"}>
+            <Flex
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={GLOBAL_STYLES.template.iconColor}
+              bg={"teal.50"}
+              rounded={"md"}
+              w={"fit-content"}
+            >
               <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Attribute{name !== "" ? `: ${name}` : ""}

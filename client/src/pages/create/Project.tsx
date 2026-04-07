@@ -362,7 +362,7 @@ const Project = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>

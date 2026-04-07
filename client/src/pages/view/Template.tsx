@@ -1213,7 +1213,7 @@ const Template = () => {
               <EmptyState.Root>
                 <EmptyState.Content>
                   <EmptyState.Indicator>
-                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
                   </EmptyState.Indicator>
                   <EmptyState.Description>No Usage</EmptyState.Description>
                 </EmptyState.Content>

@@ -480,7 +480,7 @@ const Projects = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.lightColor} />
+                  <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}
