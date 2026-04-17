@@ -786,7 +786,7 @@ const Entity = () => {
   // Utility function to check if Attribute is an instance of a known Template
   const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
     for (const attribute of templates) {
-      if (attribute._id.startsWith(_id)) {
+      if (_.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id)) {
         // Template / Attribute ID matches
         return true;
       }

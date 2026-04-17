@@ -94,7 +94,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       Created From:
                     </Text>
                     <Flex ml={"0.5"}>
-                      <Linky id={props.attribute._id} type={"templates"} size={"xs"} />
+                      {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
+                      <Linky id={props.attribute._id.slice(0, 10)} type={"templates"} size={"xs"} />
                     </Flex>
                   </Flex>
                 )}

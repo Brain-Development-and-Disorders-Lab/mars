@@ -100,7 +100,7 @@ const Linky = (props: LinkyProps) => {
   const getLinkyData = async () => {
     // If id is empty or missing, just use fallback without making a query
     if (!props.id || props.id.trim() === "") {
-      const fallbackName = props.fallback || "Invalid Name";
+      const fallbackName = props.fallback || "Invalid Link";
       setTooltipLabel(fallbackName);
       setShowDeleted(true);
 
@@ -117,7 +117,7 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem = {
       _id: props.id,
-      name: props.fallback || "Invalid Name",
+      name: props.fallback || "Invalid Link",
     };
 
     try {
@@ -125,7 +125,7 @@ const Linky = (props: LinkyProps) => {
         const response = await getTemplate({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Template");
         } else {
           data.name = response.data.template.name;
           setTooltipLabel(data.name);
@@ -135,7 +135,7 @@ const Linky = (props: LinkyProps) => {
         const response = await getEntity({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Entity");
         } else {
           data.name = response.data.entity.name;
           setTooltipLabel(data.name);
@@ -145,7 +145,7 @@ const Linky = (props: LinkyProps) => {
         const response = await getProject({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Project");
         } else {
           data.name = response.data.project.name;
           setTooltipLabel(data.name);
@@ -155,7 +155,7 @@ const Linky = (props: LinkyProps) => {
     } catch (error) {
       // If query fails completely, use fallback
       setShowDeleted(true);
-      setTooltipLabel("Deleted or Private");
+      setTooltipLabel("Invalid Link");
     }
 
     // Set the label text and apply truncating where specified
