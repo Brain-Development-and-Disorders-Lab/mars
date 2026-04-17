@@ -7,6 +7,7 @@ import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 // Models
 import { Search } from "@models/Search";
 import { Workspaces } from "@models/Workspaces";
+import { AI } from "@models/AI";
 
 export const SearchResolvers = {
   Query: {
@@ -45,6 +46,15 @@ export const SearchResolvers = {
       } else {
         return await Search.getText(args.query, args.resultType, args.showArchived, args.filters, context.workspace);
       }
+    },
+
+    translateSearch: async (_parent: IResolverParent, args: { query: string }): Promise<string> => {
+      if (!process.env.AI_PROVIDER && !process.env.OPENAI_BASE_URL) {
+        throw new GraphQLError("AI search is not configured", {
+          extensions: { code: "NOT_CONFIGURED" },
+        });
+      }
+      return await AI.translateSearch(args.query);
     },
   },
 };
