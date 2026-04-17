@@ -749,88 +749,18 @@ const Template = () => {
                     </Drawer.Header>
 
                     <Drawer.Body pt={"0"} p={"1"} px={"2"}>
-                      <Flex direction={"column"} gap={"1"} align={"start"} rounded={"md"} bg={"gray.100"} p={"1"}>
-                        <Flex
-                          direction={"row"}
-                          gap={"1"}
-                          align={"center"}
-                          justify={"space-between"}
-                          w={"full"}
-                          mx={"0.5"}
-                        >
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Date filter:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            {dateFilterApplied ? 1 : 0} Active Filter
-                            {!dateFilterApplied ? "s" : ""}
-                          </Text>
-                        </Flex>
-
-                        <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"}>Start date</Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                              />
-                            </Field.Root>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"}>End date</Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                              />
-                            </Field.Root>
-                          </Flex>
-                          <Button
-                            size={"xs"}
-                            rounded={"md"}
-                            variant={"solid"}
-                            colorPalette={"blue"}
-                            alignSelf={"end"}
-                            onClick={() => {
-                              if (startDate || endDate) {
-                                setAppliedStartDate(startDate);
-                                setAppliedEndDate(endDate);
-                                setDateFilterApplied(true);
-                              }
-                            }}
-                          >
-                            Apply
-                          </Button>
-                          <Button
-                            size={"xs"}
-                            rounded={"md"}
-                            variant={"outline"}
-                            alignSelf={"end"}
-                            bg={"white"}
-                            _hover={{ bg: "gray.50" }}
-                            onClick={() => {
-                              setStartDate("");
-                              setEndDate("");
-                              setAppliedStartDate("");
-                              setAppliedEndDate("");
-                              setDateFilterApplied(false);
-                            }}
-                          >
-                            Clear
-                          </Button>
-                        </Flex>
-
-                        <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      <Flex
+                        direction={"row"}
+                        gap={"1"}
+                        align={"start"}
+                        rounded={"md"}
+                        bg={"gray.100"}
+                        p={"1"}
+                        justify={"space-between"}
+                        wrap={"wrap"}
+                      >
+                        <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
                             Sort by:
                           </Text>
                           <Select.Root
@@ -841,8 +771,14 @@ const Template = () => {
                             bg={"white"}
                             collection={createListCollection({
                               items: [
-                                { value: "newest-first", label: "Newest → Oldest" },
-                                { value: "oldest-first", label: "Oldest → Newest" },
+                                {
+                                  value: "newest-first",
+                                  label: "Newest → Oldest",
+                                },
+                                {
+                                  value: "oldest-first",
+                                  label: "Oldest → Newest",
+                                },
                               ],
                             })}
                             onValueChange={(details) =>
@@ -862,8 +798,14 @@ const Template = () => {
                               <Select.Content>
                                 {createListCollection({
                                   items: [
-                                    { value: "newest-first", label: "Newest → Oldest" },
-                                    { value: "oldest-first", label: "Oldest → Newest" },
+                                    {
+                                      value: "newest-first",
+                                      label: "Newest → Oldest",
+                                    },
+                                    {
+                                      value: "oldest-first",
+                                      label: "Oldest → Newest",
+                                    },
                                   ],
                                 }).items.map((item) => (
                                   <Select.Item item={item} key={item.value}>
@@ -874,6 +816,78 @@ const Template = () => {
                               </Select.Content>
                             </Select.Positioner>
                           </Select.Root>
+                        </Flex>
+
+                        <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
+                            Date filter:
+                          </Text>
+
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Field.Root gap={"0"}>
+                              <Field.Label fontSize={"xs"} ml={"0.5"}>
+                                Start date
+                              </Field.Label>
+                              <Input
+                                type={"date"}
+                                size={"xs"}
+                                rounded={"md"}
+                                w={"140px"}
+                                bg={"white"}
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                              />
+                            </Field.Root>
+                            <Field.Root gap={"0"}>
+                              <Field.Label fontSize={"xs"} ml={"0.5"}>
+                                End date
+                              </Field.Label>
+                              <Input
+                                type={"date"}
+                                size={"xs"}
+                                rounded={"md"}
+                                w={"140px"}
+                                bg={"white"}
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                              />
+                            </Field.Root>
+                          </Flex>
+                          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"} w={"100%"}>
+                            <Button
+                              size={"xs"}
+                              rounded={"md"}
+                              variant={"solid"}
+                              colorPalette={"blue"}
+                              alignSelf={"end"}
+                              onClick={() => {
+                                if (startDate || endDate) {
+                                  setAppliedStartDate(startDate);
+                                  setAppliedEndDate(endDate);
+                                  setDateFilterApplied(true);
+                                }
+                              }}
+                            >
+                              Apply Filter
+                            </Button>
+                            <Button
+                              size={"xs"}
+                              rounded={"md"}
+                              variant={"outline"}
+                              alignSelf={"end"}
+                              bg={"white"}
+                              _hover={{ bg: "gray.50" }}
+                              onClick={() => {
+                                setStartDate("");
+                                setEndDate("");
+                                setAppliedStartDate("");
+                                setAppliedEndDate("");
+                                setDateFilterApplied(false);
+                              }}
+                            >
+                              Reset Filter
+                            </Button>
+                          </Flex>
                         </Flex>
                       </Flex>
 

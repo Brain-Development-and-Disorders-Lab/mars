@@ -8,7 +8,6 @@ import {
   Flex,
   Heading,
   Input,
-  Spacer,
   Spinner,
   Tabs,
   Tag,
@@ -84,7 +83,6 @@ const Search = () => {
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
   const [visibleColumns, setVisibleColumns] = useState({});
 
-  // AI search mode
   const [isAISearch, setIsAISearch] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -271,7 +269,6 @@ const Search = () => {
   };
 
   const onTabChange = () => {
-    // Reset search state
     setResults([]);
     setHasSearched(false);
   };
@@ -790,383 +787,394 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"column"} p={"1"} gap={"1"}>
-        {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"1"} w={"100%"}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
+          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"search"} size={"sm"} />
-            <Text fontSize={"md"} fontWeight={"semibold"}>
-              Search
-            </Text>
+            <Heading size={"md"}>Search</Heading>
           </Flex>
         </Flex>
+        <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
+          <Text fontSize={"xs"} ml={"0.5"}>
+            Search across Entities in the current Workspace
+          </Text>
 
-        {/* Search components */}
-        <Tabs.Root w={"100%"} size={"sm"} defaultValue={"text"} variant={"subtle"} onValueChange={onTabChange}>
-          <Tabs.List p={"1"} gap={"1"} pb={"0"}>
-            <Flex gap={"1"} align={"center"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Search Using:
-              </Text>
-              <Tabs.Trigger value={"text"} disabled={isSearching} fontSize={"xs"} gap={"1"}>
-                <Icon name={"text"} size={"xs"} />
-                Text
-              </Tabs.Trigger>
-              <Tabs.Trigger value={"advanced"} disabled={isSearching} fontSize={"xs"} gap={"1"}>
-                <Icon name={"search_query"} size={"xs"} />
-                Query Builder
-              </Tabs.Trigger>
-            </Flex>
-          </Tabs.List>
-
-          {/* Text search */}
-          <Tabs.Content value={"text"} p={"1"}>
-            <Flex direction={"column"} gap={"1"}>
-              {/* Filter section */}
-              <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-                <Flex
-                  direction={"column"}
-                  gap={"1"}
-                  p={"1"}
-                  rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
-                >
-                  <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Icon name={"filter"} size={"sm"} />
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Search Filters
-                      </Text>
-                    </Flex>
-                    <Collapsible.Trigger asChild>
-                      <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
-                        {filtersOpen ? "Hide" : "Show"} Filters
-                        <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
-                      </Button>
-                    </Collapsible.Trigger>
+          {/* Search components */}
+          <Tabs.Root w={"100%"} size={"sm"} defaultValue={"text"} variant={"subtle"} onValueChange={onTabChange}>
+            <Tabs.List
+              p={"1"}
+              gap={"2"}
+              pb={"1"}
+              borderBottom={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
+              <Tabs.Trigger value={"text"} disabled={isSearching} px={"3"} py={"1.5"} rounded={"md"}>
+                <Flex direction={"column"} align={"flex-start"} gap={"0"}>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"text"} size={"xs"} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Text
+                    </Text>
                   </Flex>
-                  <Collapsible.Content>
-                    <Flex direction={"column"} gap={"2"} p={"1"}>
-                      <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
-                        {/* Search options section */}
-                        <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                            Search Options
-                          </Text>
-                          <Checkbox.Root
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={showArchived}
-                            onCheckedChange={(details) => setShowArchived(details.checked as boolean)}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>Show Archived Entities</Checkbox.Label>
-                          </Checkbox.Root>
-                        </Flex>
+                  <Text fontSize={"2xs"} color={"gray.500"}>
+                    Keyword search
+                  </Text>
+                </Flex>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={"advanced"} disabled={isSearching} px={"3"} py={"1.5"} rounded={"md"}>
+                <Flex direction={"column"} align={"flex-start"} gap={"0"}>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"search_query"} size={"xs"} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Query Builder
+                    </Text>
+                  </Flex>
+                  <Text fontSize={"2xs"} color={"gray.500"}>
+                    Advanced rules
+                  </Text>
+                </Flex>
+              </Tabs.Trigger>
+            </Tabs.List>
 
-                        {/* Entity filters section */}
-                        <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                            Entity Filters
-                          </Text>
+            {/* Text search */}
+            <Tabs.Content value={"text"} p={"1"}>
+              <Flex direction={"column"} gap={"1"}>
+                {/* Filter section */}
+                <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    p={"1"}
+                    rounded={"md"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
+                  >
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Icon name={"filter"} size={"sm"} />
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Search Filters:
+                        </Text>
+                        <Text
+                          fontWeight={"semibold"}
+                          fontSize={"xs"}
+                          color={activeFilterCount >= 1 ? "green.700" : "black"}
+                        >
+                          {activeFilterCount} Active
+                        </Text>
+                      </Flex>
+                      <Collapsible.Trigger asChild>
+                        <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
+                          {filtersOpen ? "Hide" : "Show"} Filters
+                          <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
+                        </Button>
+                      </Collapsible.Trigger>
+                    </Flex>
+                    <Collapsible.Content>
+                      <Flex direction={"column"} gap={"2"} p={"1"}>
+                        <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
+                          {/* Search options section */}
+                          <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                              Search Options
+                            </Text>
+                            <Checkbox.Root
+                              size={"xs"}
+                              colorPalette={"blue"}
+                              checked={showArchived}
+                              onCheckedChange={(details) => setShowArchived(details.checked as boolean)}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label fontSize={"xs"}>Show Archived Entities</Checkbox.Label>
+                            </Checkbox.Root>
+                          </Flex>
 
-                          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-                            {/* Date range */}
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Flex direction={"column"} gap={"0.5"}>
-                                <Text fontSize={"2xs"} color={"gray.600"}>
-                                  Created Start
-                                </Text>
-                                <Input
-                                  type={"date"}
+                          {/* Entity filters section */}
+                          <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                              Entity Filters
+                            </Text>
+
+                            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                              {/* Date range */}
+                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Flex direction={"column"} gap={"0.5"}>
+                                  <Text fontSize={"2xs"} color={"gray.600"}>
+                                    Created Start
+                                  </Text>
+                                  <Input
+                                    type={"date"}
+                                    size={"xs"}
+                                    bg={"white"}
+                                    value={textSearchFilters.startDate}
+                                    onChange={(e) =>
+                                      setTextSearchFilters((prev) => ({
+                                        ...prev,
+                                        startDate: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Flex>
+                                <Flex direction={"column"} gap={"0.5"}>
+                                  <Text fontSize={"2xs"} color={"gray.600"}>
+                                    Created End
+                                  </Text>
+                                  <Input
+                                    type={"date"}
+                                    size={"xs"}
+                                    bg={"white"}
+                                    value={textSearchFilters.endDate}
+                                    onChange={(e) =>
+                                      setTextSearchFilters((prev) => ({
+                                        ...prev,
+                                        endDate: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Flex>
+                              </Flex>
+
+                              {/* Boolean filters */}
+                              <Flex direction={"column"} gap={"1"} mt={"1"}>
+                                <Checkbox.Root
                                   size={"xs"}
-                                  bg={"white"}
-                                  value={textSearchFilters.startDate}
-                                  onChange={(e) =>
+                                  colorPalette={"blue"}
+                                  checked={textSearchFilters.hasAttachments}
+                                  onCheckedChange={(details) =>
                                     setTextSearchFilters((prev) => ({
                                       ...prev,
-                                      startDate: e.target.value,
+                                      hasAttachments: details.checked as boolean,
                                     }))
                                   }
-                                />
-                              </Flex>
-                              <Flex direction={"column"} gap={"0.5"}>
-                                <Text fontSize={"2xs"} color={"gray.600"}>
-                                  Created End
-                                </Text>
-                                <Input
-                                  type={"date"}
+                                >
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
+                                </Checkbox.Root>
+                                <Checkbox.Root
                                   size={"xs"}
-                                  bg={"white"}
-                                  value={textSearchFilters.endDate}
-                                  onChange={(e) =>
+                                  colorPalette={"blue"}
+                                  checked={textSearchFilters.hasAttributes}
+                                  onCheckedChange={(details) =>
                                     setTextSearchFilters((prev) => ({
                                       ...prev,
-                                      endDate: e.target.value,
+                                      hasAttributes: details.checked as boolean,
                                     }))
                                   }
-                                />
+                                >
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label fontSize={"xs"}>Has Attributes</Checkbox.Label>
+                                </Checkbox.Root>
+                                <Checkbox.Root
+                                  size={"xs"}
+                                  colorPalette={"blue"}
+                                  checked={textSearchFilters.hasRelationships}
+                                  onCheckedChange={(details) =>
+                                    setTextSearchFilters((prev) => ({
+                                      ...prev,
+                                      hasRelationships: details.checked as boolean,
+                                    }))
+                                  }
+                                >
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label fontSize={"xs"}>Has Relationships</Checkbox.Label>
+                                </Checkbox.Root>
                               </Flex>
-                            </Flex>
-
-                            {/* Boolean filters */}
-                            <Flex direction={"column"} gap={"1"} mt={"1"}>
-                              <Checkbox.Root
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={textSearchFilters.hasAttachments}
-                                onCheckedChange={(details) =>
-                                  setTextSearchFilters((prev) => ({
-                                    ...prev,
-                                    hasAttachments: details.checked as boolean,
-                                  }))
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
-                              </Checkbox.Root>
-                              <Checkbox.Root
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={textSearchFilters.hasAttributes}
-                                onCheckedChange={(details) =>
-                                  setTextSearchFilters((prev) => ({
-                                    ...prev,
-                                    hasAttributes: details.checked as boolean,
-                                  }))
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>Has Attributes</Checkbox.Label>
-                              </Checkbox.Root>
-                              <Checkbox.Root
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={textSearchFilters.hasRelationships}
-                                onCheckedChange={(details) =>
-                                  setTextSearchFilters((prev) => ({
-                                    ...prev,
-                                    hasRelationships: details.checked as boolean,
-                                  }))
-                                }
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>Has Relationships</Checkbox.Label>
-                              </Checkbox.Root>
                             </Flex>
                           </Flex>
                         </Flex>
                       </Flex>
-                    </Flex>
-                  </Collapsible.Content>
-                </Flex>
-              </Collapsible.Root>
 
-              {/* Active filter count and controls */}
-              <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-                <Text fontWeight={"semibold"} fontSize={"xs"}>
-                  {activeFilterCount} Active Filter
-                  {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-                </Text>
-                <Button
-                  size={"xs"}
-                  variant={"outline"}
-                  rounded={"md"}
-                  colorPalette={"gray"}
-                  bg={"white"}
-                  _hover={{ bg: "gray.50" }}
-                  disabled={activeFilterCount === 0}
-                  onClick={() => {
-                    setShowArchived(false);
-                    setTextSearchFilters({
-                      startDate: "",
-                      endDate: "",
-                      hasAttachments: false,
-                      hasAttributes: false,
-                      hasRelationships: false,
-                    });
-                    setResults([]);
-                    setHasSearched(false);
-                    setIsSearching(false);
-                  }}
-                >
-                  Clear
-                </Button>
-              </Flex>
+                      {/* Filter control buttons */}
+                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                        <Button
+                          size={"xs"}
+                          variant={"outline"}
+                          rounded={"md"}
+                          colorPalette={"gray"}
+                          bg={"white"}
+                          _hover={{ bg: "gray.50" }}
+                          disabled={activeFilterCount === 0}
+                          onClick={() => {
+                            setShowArchived(false);
+                            setTextSearchFilters({
+                              startDate: "",
+                              endDate: "",
+                              hasAttachments: false,
+                              hasAttributes: false,
+                              hasRelationships: false,
+                            });
+                            setResults([]);
+                            setHasSearched(false);
+                            setIsSearching(false);
+                          }}
+                        >
+                          Reset Filters
+                        </Button>
+                      </Flex>
+                    </Collapsible.Content>
+                  </Flex>
+                </Collapsible.Root>
 
-              {/* Search input and submit */}
-              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} rounded={"md"}>
-                <Flex w={"100%"}>
+                {/* Search input and submit */}
+                <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
                   <Input
                     size={"xs"}
                     rounded={"md"}
                     value={query}
                     placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
-                    border={isAISearch ? "2px solid" : ""}
-                    borderColor={isAISearch ? "purple.500" : ""}
+                    borderColor={isAISearch ? "purple.400" : undefined}
+                    outlineColor={isAISearch ? "purple.400" : undefined}
                     onChange={(event) => setQuery(event.target.value)}
                     onKeyUp={(event) => {
-                      // Listen for "Enter" key when entering a query
-                      if (event.key === "Enter" && query !== "") {
-                        runSearch();
-                      }
+                      if (event.key === "Enter" && query !== "") runSearch();
                     }}
                   />
-                </Flex>
-
-                <Spacer />
-
-                <Tooltip
-                  content={isAISearch ? "AI search enabled" : "Click to use AI and describe what you're looking for"}
-                  showArrow
-                >
+                  <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={isAISearch ? "purple" : "gray"}
+                      variant={isAISearch ? "solid" : "outline"}
+                      disabled={isSearching}
+                      onClick={() => setIsAISearch((prev) => !prev)}
+                    >
+                      <Icon name={"lightning"} size={"xs"} />
+                      AI
+                    </Button>
+                  </Tooltip>
                   <Button
+                    aria-label={"Search"}
                     size={"xs"}
                     rounded={"md"}
-                    colorPalette={isAISearch ? "purple" : "gray"}
-                    variant={isAISearch ? "solid" : "outline"}
-                    disabled={isSearching}
-                    onClick={() => setIsAISearch((prev) => !prev)}
+                    colorPalette={isAISearch ? "purple" : "green"}
+                    disabled={query === "" || isTranslating}
+                    loading={isTranslating || isSearching}
+                    loadingText={"Searching..."}
+                    onClick={() => runSearch()}
                   >
-                    <Icon name={"lightning"} size={"xs"} />
-                    AI
+                    Search
+                    <Icon name={"search"} size={"xs"} />
                   </Button>
-                </Tooltip>
-
-                <Button
-                  aria-label={"Search"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  disabled={query === "" || isTranslating}
-                  loading={isTranslating || isSearching}
-                  loadingText={"Searching..."}
-                  onClick={() => runSearch()}
-                >
-                  Search
-                  <Icon name={"search"} size={"xs"} />
-                </Button>
-
-                <Button
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"gray"}
-                  variant={"outline"}
-                  disabled={query === ""}
-                  onClick={() => {
-                    setQuery("");
-                    setHasSearched(false);
-                    setResults([]);
-                    setIsSearching(false);
-                  }}
-                >
-                  Clear
-                </Button>
-              </Flex>
-            </Flex>
-          </Tabs.Content>
-
-          {/* Query builder */}
-          <Tabs.Content value={"advanced"} p={"1"}>
-            <Flex direction={"column"} gap={"1"}>
-              <Flex direction={"column"} gap={"1"}>
-                <QueryBuilderChakra>
-                  <QueryBuilderDnD dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}>
-                    <QueryBuilder
-                      controlClassnames={{
-                        queryBuilder: "queryBuilder-branches",
-                      }}
-                      fields={advancedQueryFields}
-                      query={advancedQuery}
-                      onQueryChange={setAdvancedQuery}
-                      controlElements={{ valueEditor: SearchQueryValue }}
-                      enableDragAndDrop
-                    />
-                  </QueryBuilderDnD>
-                </QueryBuilderChakra>
-                <Flex justify={"right"} gap={"1"}>
                   <Button
                     size={"xs"}
                     rounded={"md"}
                     colorPalette={"gray"}
                     variant={"outline"}
-                    disabled={advancedQuery.rules.length === 0}
+                    disabled={query === ""}
                     onClick={() => {
-                      setAdvancedQuery(initialAdvancedQuery);
+                      setQuery("");
                       setHasSearched(false);
                       setResults([]);
+                      setIsSearching(false);
                     }}
                   >
                     Clear
                   </Button>
-                  <Button
-                    aria-label={"Run Query"}
-                    colorPalette={"green"}
-                    size={"xs"}
-                    rounded={"md"}
-                    onClick={() => onSearchBuiltQuery()}
-                    disabled={!isValid}
-                  >
-                    Search
-                    <Icon name={"search"} size={"xs"} />
-                  </Button>
                 </Flex>
               </Flex>
-            </Flex>
-          </Tabs.Content>
-        </Tabs.Root>
+            </Tabs.Content>
 
-        {/* Search Results */}
-        <Flex gap={"1"} p={"1"} w={"100%"}>
-          {isSearching && (
-            <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
-              <Spinner size={"lg"} color={"gray.600"} />
-            </Flex>
-          )}
-
-          {hasSearched && !isSearching && (
-            <Flex id={"resultsContainer"} direction={"column"} w={"100%"} gap={"1"}>
-              {results.length > 0 ? (
-                <>
-                  <Heading id={"resultsHeading"} size={"sm"} fontWeight={"semibold"}>
-                    {results.length} result
-                    {results.length > 1 ? "s" : ""}
-                  </Heading>
-                  <DataTable
-                    columns={searchResultColumns}
-                    visibleColumns={visibleColumns}
-                    selectedRows={{}}
-                    data={results}
-                    showPagination
-                    showSelection
-                    actions={searchResultActions}
-                  />
-                </>
-              ) : (
-                <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
-                  <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
-                    No results found
-                  </Text>
+            {/* Query builder */}
+            <Tabs.Content value={"advanced"} p={"1"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <QueryBuilderChakra>
+                    <QueryBuilderDnD dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}>
+                      <QueryBuilder
+                        controlClassnames={{
+                          queryBuilder: "queryBuilder-branches",
+                        }}
+                        fields={advancedQueryFields}
+                        query={advancedQuery}
+                        onQueryChange={setAdvancedQuery}
+                        controlElements={{ valueEditor: SearchQueryValue }}
+                        enableDragAndDrop
+                      />
+                    </QueryBuilderDnD>
+                  </QueryBuilderChakra>
+                  <Flex justify={"right"} gap={"1"}>
+                    <Button
+                      aria-label={"Run Query"}
+                      colorPalette={"green"}
+                      size={"xs"}
+                      rounded={"md"}
+                      onClick={() => onSearchBuiltQuery()}
+                      disabled={!isValid}
+                    >
+                      Search
+                      <Icon name={"search"} size={"xs"} />
+                    </Button>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"gray"}
+                      variant={"outline"}
+                      disabled={advancedQuery.rules.length === 0}
+                      onClick={() => {
+                        setAdvancedQuery(initialAdvancedQuery);
+                        setHasSearched(false);
+                        setResults([]);
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  </Flex>
                 </Flex>
-              )}
-            </Flex>
-          )}
+              </Flex>
+            </Tabs.Content>
+          </Tabs.Root>
 
-          {!hasSearched && !isSearching && (
-            <EmptyState.Root>
-              <EmptyState.Content>
-                <EmptyState.Indicator>
-                  <Icon name={"search"} size={"lg"} />
-                </EmptyState.Indicator>
-                <EmptyState.Description>Enter a search query to find Entities</EmptyState.Description>
-              </EmptyState.Content>
-            </EmptyState.Root>
-          )}
+          {/* Search Results */}
+          <Flex gap={"1"} p={"1"} w={"100%"}>
+            {isSearching && (
+              <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
+                <Spinner size={"lg"} color={"gray.600"} />
+              </Flex>
+            )}
+
+            {hasSearched && !isSearching && (
+              <Flex id={"resultsContainer"} direction={"column"} w={"100%"} gap={"1"}>
+                {results.length > 0 ? (
+                  <>
+                    <Heading id={"resultsHeading"} size={"sm"} fontWeight={"semibold"}>
+                      {results.length} result
+                      {results.length > 1 ? "s" : ""}
+                    </Heading>
+                    <DataTable
+                      columns={searchResultColumns}
+                      visibleColumns={visibleColumns}
+                      selectedRows={{}}
+                      data={results}
+                      showPagination
+                      showSelection
+                      actions={searchResultActions}
+                    />
+                  </>
+                ) : (
+                  <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                      No results found
+                    </Text>
+                  </Flex>
+                )}
+              </Flex>
+            )}
+
+            {!hasSearched && !isSearching && (
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"search"} size={"lg"} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>Enter a search query to find Entities</EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Content>

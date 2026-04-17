@@ -426,7 +426,10 @@ const Entities = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Entity Filters
+                    Entity Filters:
+                  </Text>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
+                    {activeFilterCount} Active
                   </Text>
                 </Flex>
                 <Collapsible.Trigger asChild>
@@ -579,47 +582,43 @@ const Entities = () => {
                     </Flex>
                   </Flex>
                 </Flex>
+
+                {/* Filter control buttons */}
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setAppliedFilters({ ...filterState });
+                      setPage(0); // Reset to first page when filters change
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    rounded={"md"}
+                    onClick={() => {
+                      const clearedState = {
+                        startDate: "",
+                        endDate: "",
+                        owners: [],
+                        hasAttachments: false,
+                        attributeCountRanges: [],
+                      };
+                      setFilterState(clearedState);
+                      setAppliedFilters(clearedState);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Reset Filters
+                  </Button>
+                </Flex>
               </Collapsible.Content>
             </Flex>
           </Collapsible.Root>
-
-          {/* Buttons and Active Filter Count */}
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"}>
-              {activeFilterCount} Active Filter
-              {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-            </Text>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              onClick={() => {
-                setAppliedFilters({ ...filterState });
-                setPage(0); // Reset to first page when filters change
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              size={"xs"}
-              variant={"outline"}
-              rounded={"md"}
-              onClick={() => {
-                const clearedState = {
-                  startDate: "",
-                  endDate: "",
-                  owners: [],
-                  hasAttachments: false,
-                  attributeCountRanges: [],
-                };
-                setFilterState(clearedState);
-                setAppliedFilters(clearedState);
-              }}
-              disabled={activeFilterCount === 0}
-            >
-              Clear
-            </Button>
-          </Flex>
 
           {entityData.filter((entity) => _.isEqual(entity.archived, false)).length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">
