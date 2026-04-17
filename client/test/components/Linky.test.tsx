@@ -58,6 +58,7 @@ const GET_PROJECT = gql`
     project(_id: $_id) {
       _id
       name
+      archived
     }
   }
 `;
@@ -208,6 +209,7 @@ describe("Linky Component", () => {
               __typename: "Project",
               _id: "project-id",
               name: "Test Project",
+              archived: false,
             },
           },
         },

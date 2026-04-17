@@ -81,6 +81,7 @@ const Templates = () => {
         _id
         name
         owner
+        archived
         timestamp
         description
         values {
@@ -461,10 +462,10 @@ const Templates = () => {
             </Button>
           </Flex>
 
-          {filteredTemplates.length > 0 ? (
+          {filteredTemplates.filter((template) => _.isEqual(template.archived, false)).length > 0 ? (
             <DataTable
               columns={columns}
-              data={filteredTemplates}
+              data={filteredTemplates.filter((template) => _.isEqual(template.archived, false))}
               visibleColumns={visibleColumns}
               selectedRows={{}}
               showColumnSelect

@@ -1,4 +1,12 @@
-import { AttributeHistory, AttributeModel, AttributeUsage, IAttribute, IResponseMessage, ResponseData } from "@types";
+import {
+  AttributeHistory,
+  AttributeModel,
+  AttributeUsage,
+  EntityModel,
+  IAttribute,
+  IResponseMessage,
+  ResponseData,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -134,9 +142,18 @@ export class Templates {
 
     // Retrieve collection of Entities to examine
     const entities = await Workspaces.getEntities(workspace);
-    const activeEntities = entities.filter((entity) =>
-      entity.attributes.map((attribute) => attribute._id).includes(_id),
-    );
+
+    // Iterate through all Workspace Entities, extracting Attribute IDs and checking if they match known Templates
+    const activeEntities: EntityModel[] = [];
+    for (const entity of entities) {
+      const attributeIds = entity.attributes.map((attribute) => attribute._id);
+      for (const id of attributeIds) {
+        if (_.startsWith(id, _id) || _.isEqual(id, _id)) {
+          activeEntities.push(entity);
+          break;
+        }
+      }
+    }
 
     // Run comparison check across all Entities using the Template
     const usage: AttributeUsage[] = [];
@@ -144,7 +161,9 @@ export class Templates {
       const modifications: AttributeUsage["modifications"] = [];
 
       // Get the instance of the Attribute from the Entity
-      const downstreamAttribute = entity.attributes.filter((attribute) => attribute._id === _id)[0];
+      const downstreamAttribute = entity.attributes.filter((attribute) => {
+        return _.startsWith(attribute._id, _id) || _.isEqual(attribute._id, _id);
+      })[0];
 
       // Run comparisons: name, description, values
       if (downstreamAttribute.name !== template?.name) {

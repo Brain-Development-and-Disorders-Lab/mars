@@ -783,6 +783,18 @@ const Entity = () => {
     },
   ];
 
+  // Utility function to check if Attribute is an instance of a known Template
+  const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
+    for (const attribute of templates) {
+      if (_.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id)) {
+        // Template / Attribute ID matches
+        return true;
+      }
+    }
+    // No matches
+    return false;
+  };
+
   // Configure attribute table columns and data
   const attributeTableColumnHelper = createColumnHelper<AttributeModel>();
   const attributeTableColumns = [
@@ -798,7 +810,7 @@ const Entity = () => {
             <AttributeViewButton
               attribute={info.row.original}
               editing={editing}
-              isTemplate={templates.map((attribute) => attribute._id).includes(info.row.original._id)}
+              isTemplate={isKnownTemplate(info.row.original._id, templates)}
               onAttributeUpdate={onAttributeUpdate}
               cancelCallback={handleCancelAttribute}
               removeCallback={() => {
@@ -1238,7 +1250,7 @@ const Entity = () => {
     setEntityAttributes(() => [
       ...entityAttributes,
       {
-        _id: usingTemplate ? attributeId : `a-${entity._id}-${nanoid(6)}`,
+        _id: usingTemplate ? `${attributeId}-${nanoid(6)}` : `a-${entity._id}-${nanoid(6)}`, // Use existing ID with unique identifier appended
         name: attributeName,
         owner: entity.owner,
         timestamp: dayjs(Date.now()).toISOString(),
@@ -1372,23 +1384,44 @@ const Entity = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            id={"entityNameTag"}
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={GLOBAL_STYLES.entity.iconColor}
-            bg={"purple.50"}
-            rounded={"md"}
-          >
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-            <Tooltip content={displayEntityData.name}>
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {_.truncate(displayEntityData.name, { length: 30 })}
-              </Heading>
-            </Tooltip>
-            {displayEntityArchived && <Icon name={"archive"} size={"sm"} />}
+          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+            <Flex
+              id={"entityNameTag"}
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={GLOBAL_STYLES.entity.iconColor}
+              bg={"purple.50"}
+              rounded={"md"}
+            >
+              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Tooltip content={displayEntityData.name}>
+                <Heading fontWeight={"semibold"} size={"sm"}>
+                  {_.truncate(displayEntityData.name, { length: 30 })}
+                </Heading>
+              </Tooltip>
+            </Flex>
+
+            {displayEntityArchived && (
+              <Flex
+                id={"entityArchiveTag"}
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"gray.500"}
+                bg={"gray.50"}
+                rounded={"md"}
+              >
+                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
+                <Tooltip content={"This Entity has been archived"}>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Archived
+                  </Heading>
+                </Tooltip>
+              </Flex>
+            )}
           </Flex>
 
           {/* Buttons */}

@@ -51,6 +51,7 @@ const Linky = (props: LinkyProps) => {
   // Component state
   const [linkLabel, setLinkLabel] = useState("Loading...");
   const [tooltipLabel, setTooltipLabel] = useState("Default");
+  const [showArchived, setShowArchived] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
 
   // GraphQL operations
@@ -64,7 +65,7 @@ const Linky = (props: LinkyProps) => {
     }
   `;
   const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
-    entity: IGenericItem;
+    entity: IGenericItem & { archived: boolean };
   }>(GET_ENTITY);
 
   const GET_PROJECT = gql`
@@ -72,11 +73,12 @@ const Linky = (props: LinkyProps) => {
       project(_id: $_id) {
         _id
         name
+        archived
       }
     }
   `;
   const [getProject, { loading: loadingProject }] = useLazyQuery<{
-    project: IGenericItem;
+    project: IGenericItem & { archived: boolean };
   }>(GET_PROJECT);
 
   const GET_TEMPLATE = gql`
@@ -84,11 +86,12 @@ const Linky = (props: LinkyProps) => {
       template(_id: $_id) {
         _id
         name
+        archived
       }
     }
   `;
   const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
-    template: IGenericItem;
+    template: IGenericItem & { archived: boolean };
   }>(GET_TEMPLATE);
 
   /**
@@ -97,7 +100,7 @@ const Linky = (props: LinkyProps) => {
   const getLinkyData = async () => {
     // If id is empty or missing, just use fallback without making a query
     if (!props.id || props.id.trim() === "") {
-      const fallbackName = props.fallback || "Invalid Name";
+      const fallbackName = props.fallback || "Invalid Link";
       setTooltipLabel(fallbackName);
       setShowDeleted(true);
 
@@ -114,7 +117,7 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem = {
       _id: props.id,
-      name: props.fallback || "Invalid Name",
+      name: props.fallback || "Invalid Link",
     };
 
     try {
@@ -122,34 +125,37 @@ const Linky = (props: LinkyProps) => {
         const response = await getTemplate({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Template");
         } else {
           data.name = response.data.template.name;
           setTooltipLabel(data.name);
+          setShowArchived(response.data.template.archived);
         }
       } else if (props.type === "entities") {
         const response = await getEntity({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Entity");
         } else {
           data.name = response.data.entity.name;
           setTooltipLabel(data.name);
+          setShowArchived(response.data.entity.archived);
         }
       } else if (props.type === "projects") {
         const response = await getProject({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Deleted or Private");
+          setTooltipLabel("Error accessing Project");
         } else {
           data.name = response.data.project.name;
           setTooltipLabel(data.name);
+          setShowArchived(response.data.project.archived);
         }
       }
     } catch (error) {
       // If query fails completely, use fallback
       setShowDeleted(true);
-      setTooltipLabel("Deleted or Private");
+      setTooltipLabel("Invalid Link");
     }
 
     // Set the label text and apply truncating where specified
@@ -249,6 +255,20 @@ const Linky = (props: LinkyProps) => {
               {linkLabel}
             </Text>
           </Flex>
+          {/* Status icon badge */}
+          {showArchived && (
+            <Flex
+              align={"center"}
+              justify={"center"}
+              bg={"gray.50"}
+              px={"1.5"}
+              h={"100%"}
+              borderLeft={"1px solid"}
+              borderColor={"gray.100"}
+            >
+              <Icon name={"archive"} size={"xs"} color={"gray.500"} />
+            </Flex>
+          )}
         </Flex>
       )}
     </Tooltip>
