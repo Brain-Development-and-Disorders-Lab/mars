@@ -822,21 +822,42 @@ const Project = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            id={"projectNameTag"}
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={GLOBAL_STYLES.project.iconColor}
-            rounded={"md"}
-            bg={"blue.50"}
-          >
-            <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
-            <Heading fontWeight={"semibold"} size={"sm"}>
-              {displayProjectData.name}
-            </Heading>
-            {displayProjectArchived && <Icon name={"archive"} size={"sm"} />}
+          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+            <Flex
+              id={"projectNameTag"}
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={GLOBAL_STYLES.project.iconColor}
+              rounded={"md"}
+              bg={"blue.50"}
+            >
+              <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
+              <Heading fontWeight={"semibold"} size={"sm"}>
+                {displayProjectData.name}
+              </Heading>
+            </Flex>
+
+            {displayProjectArchived && (
+              <Flex
+                id={"projectArchiveTag"}
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"gray.500"}
+                bg={"gray.50"}
+                rounded={"md"}
+              >
+                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
+                <Tooltip content={"This Project has been archived"}>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Archived
+                  </Heading>
+                </Tooltip>
+              </Flex>
+            )}
           </Flex>
 
           {/* Buttons */}

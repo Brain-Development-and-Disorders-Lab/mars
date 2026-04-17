@@ -1384,23 +1384,44 @@ const Entity = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            id={"entityNameTag"}
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={GLOBAL_STYLES.entity.iconColor}
-            bg={"purple.50"}
-            rounded={"md"}
-          >
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-            <Tooltip content={displayEntityData.name}>
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {_.truncate(displayEntityData.name, { length: 30 })}
-              </Heading>
-            </Tooltip>
-            {displayEntityArchived && <Icon name={"archive"} size={"sm"} />}
+          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+            <Flex
+              id={"entityNameTag"}
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={GLOBAL_STYLES.entity.iconColor}
+              bg={"purple.50"}
+              rounded={"md"}
+            >
+              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Tooltip content={displayEntityData.name}>
+                <Heading fontWeight={"semibold"} size={"sm"}>
+                  {_.truncate(displayEntityData.name, { length: 30 })}
+                </Heading>
+              </Tooltip>
+            </Flex>
+
+            {displayEntityArchived && (
+              <Flex
+                id={"entityArchiveTag"}
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"gray.500"}
+                bg={"gray.50"}
+                rounded={"md"}
+              >
+                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
+                <Tooltip content={"This Entity has been archived"}>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Archived
+                  </Heading>
+                </Tooltip>
+              </Flex>
+            )}
           </Flex>
 
           {/* Buttons */}

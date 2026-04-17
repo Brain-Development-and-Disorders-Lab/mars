@@ -119,6 +119,10 @@ const Template = () => {
   }, [templateHistory, historySortOrder, dateFilterApplied, appliedStartDate, appliedEndDate]);
 
   // Computed values that use preview data when in preview mode
+  const displayTemplateArchived = useMemo(() => {
+    return previewVersion ? previewVersion.archived : templateArchived;
+  }, [previewVersion, templateArchived]);
+
   const displayTemplateName = useMemo(() => {
     return previewVersion ? previewVersion.name : templateName;
   }, [previewVersion, templateName]);
@@ -602,19 +606,41 @@ const Template = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={GLOBAL_STYLES.template.iconColor}
-            bg={"teal.50"}
-            rounded={"md"}
-          >
-            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
-            <Heading fontWeight={"semibold"} size={"sm"}>
-              {displayTemplateName}
-            </Heading>
+          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+            <Flex
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={GLOBAL_STYLES.template.iconColor}
+              bg={"teal.50"}
+              rounded={"md"}
+            >
+              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+              <Heading fontWeight={"semibold"} size={"sm"}>
+                {displayTemplateName}
+              </Heading>
+            </Flex>
+
+            {displayTemplateArchived && (
+              <Flex
+                id={"templateArchiveTag"}
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"gray.500"}
+                bg={"gray.50"}
+                rounded={"md"}
+              >
+                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
+                <Tooltip content={"This Template has been archived"}>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Archived
+                  </Heading>
+                </Tooltip>
+              </Flex>
+            )}
           </Flex>
 
           {/* Buttons */}
