@@ -84,6 +84,10 @@ const Search = () => {
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
   const [visibleColumns, setVisibleColumns] = useState({});
 
+  // AI search mode
+  const [isAISearch, setIsAISearch] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
 
@@ -143,11 +147,80 @@ const Search = () => {
   `;
   const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
 
+  // Query to translate the natural language to MongoDB JSON search
+  const TRANSLATE_SEARCH = gql`
+    query TranslateSearch($query: String!) {
+      translateSearch(query: $query)
+    }
+  `;
+  const [runTranslateSearch] = useLazyQuery<{ translateSearch: string }>(TRANSLATE_SEARCH, {
+    fetchPolicy: "network-only",
+  });
+
   const runSearch = async () => {
-    // Initial check if a specific ID search was not found
     setIsSearching(true);
     setHasSearched(true);
     setResults([]);
+
+    // Translate natural language to a MongoDB query, then run as a builder query
+    if (isAISearch) {
+      setIsTranslating(true);
+      // useLazyQuery resolves (not rejects) on GraphQL errors — check .error on the result
+      const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
+      setIsTranslating(false);
+
+      if (!translation) {
+        setIsSearching(false);
+        return;
+      }
+
+      if (translation.error) {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: "Unable to translate query, please try again",
+          duration: 2000,
+          closable: true,
+        });
+        setIsSearching(false);
+        return;
+      }
+
+      if (!translation.data?.translateSearch) {
+        setIsSearching(false);
+        return;
+      }
+
+      const results = await searchText({
+        variables: {
+          query: translation.data.translateSearch,
+          resultType: "entity",
+          isBuilder: true,
+          showArchived,
+        },
+      }).catch(ignoreAbort);
+
+      if (!results) {
+        setIsSearching(false);
+        return;
+      }
+
+      if (!results.data?.search) {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: "Unable to retrieve search results",
+          duration: 4000,
+          closable: true,
+        });
+        setIsError(true);
+      } else {
+        setResults(results.data.search);
+      }
+
+      setIsSearching(false);
+      return;
+    }
 
     const hasFilters =
       textSearchFilters.startDate ||
@@ -933,7 +1006,9 @@ const Search = () => {
                     size={"xs"}
                     rounded={"md"}
                     value={query}
-                    placeholder={"Search..."}
+                    placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
+                    border={isAISearch ? "2px solid" : ""}
+                    borderColor={isAISearch ? "purple.500" : ""}
                     onChange={(event) => setQuery(event.target.value)}
                     onKeyUp={(event) => {
                       // Listen for "Enter" key when entering a query
@@ -945,6 +1020,37 @@ const Search = () => {
                 </Flex>
 
                 <Spacer />
+
+                <Tooltip
+                  content={isAISearch ? "AI search enabled" : "Click to use AI and describe what you're looking for"}
+                  showArrow
+                >
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={isAISearch ? "purple" : "gray"}
+                    variant={isAISearch ? "solid" : "outline"}
+                    disabled={isSearching}
+                    onClick={() => setIsAISearch((prev) => !prev)}
+                  >
+                    <Icon name={"lightning"} size={"xs"} />
+                    AI
+                  </Button>
+                </Tooltip>
+
+                <Button
+                  aria-label={"Search"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  disabled={query === "" || isTranslating}
+                  loading={isTranslating || isSearching}
+                  loadingText={"Searching..."}
+                  onClick={() => runSearch()}
+                >
+                  Search
+                  <Icon name={"search"} size={"xs"} />
+                </Button>
 
                 <Button
                   size={"xs"}
@@ -960,18 +1066,6 @@ const Search = () => {
                   }}
                 >
                   Clear
-                </Button>
-
-                <Button
-                  aria-label={"Search"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  disabled={query === ""}
-                  onClick={() => runSearch()}
-                >
-                  Search
-                  <Icon name={"search"} size={"xs"} />
                 </Button>
               </Flex>
             </Flex>
