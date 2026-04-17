@@ -928,7 +928,7 @@ const DataTable = (props: DataTableProps) => {
                                 />
                               </Button>
                             )}
-                            {canSortColumn(header.id) && (
+                            {canSortColumn(header.id) && props.showColumnFilters && (
                               <ColumnFilterMenu<RowData> columnId={header.id} data={props.data} table={table} />
                             )}
                           </Flex>

@@ -428,6 +428,7 @@ export type DataTableProps = {
 
   // Interface visibility
   showColumnSelect?: boolean;
+  showColumnFilters?: boolean;
   showPagination?: boolean;
   showSelection?: boolean;
   actions?: DataTableAction[];
