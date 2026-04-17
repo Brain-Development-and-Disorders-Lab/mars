@@ -531,7 +531,7 @@ const Template = () => {
           );
         }
       },
-      header: "Status",
+      header: "Modifications",
     }),
   ];
 

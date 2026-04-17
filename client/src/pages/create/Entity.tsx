@@ -812,7 +812,7 @@ const Entity = () => {
                                   setSelectedAttributes([
                                     ...selectedAttributes,
                                     {
-                                      _id: `a-${nanoid(6)}`,
+                                      _id: `${template._id}-${nanoid(6)}`, // Use existing ID with unique identifier appended
                                       name: template.name,
                                       timestamp: template.timestamp,
                                       owner: template.owner,

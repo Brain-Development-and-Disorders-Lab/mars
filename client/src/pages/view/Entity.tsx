@@ -783,6 +783,18 @@ const Entity = () => {
     },
   ];
 
+  // Utility function to check if Attribute is an instance of a known Template
+  const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
+    for (const attribute of templates) {
+      if (attribute._id.startsWith(_id)) {
+        // Template / Attribute ID matches
+        return true;
+      }
+    }
+    // No matches
+    return false;
+  };
+
   // Configure attribute table columns and data
   const attributeTableColumnHelper = createColumnHelper<AttributeModel>();
   const attributeTableColumns = [
@@ -798,7 +810,7 @@ const Entity = () => {
             <AttributeViewButton
               attribute={info.row.original}
               editing={editing}
-              isTemplate={templates.map((attribute) => attribute._id).includes(info.row.original._id)}
+              isTemplate={isKnownTemplate(info.row.original._id, templates)}
               onAttributeUpdate={onAttributeUpdate}
               cancelCallback={handleCancelAttribute}
               removeCallback={() => {
@@ -1238,7 +1250,7 @@ const Entity = () => {
     setEntityAttributes(() => [
       ...entityAttributes,
       {
-        _id: usingTemplate ? attributeId : `a-${entity._id}-${nanoid(6)}`,
+        _id: usingTemplate ? `${attributeId}-${nanoid(6)}` : `a-${entity._id}-${nanoid(6)}`, // Use existing ID with unique identifier appended
         name: attributeName,
         owner: entity.owner,
         timestamp: dayjs(Date.now()).toISOString(),
