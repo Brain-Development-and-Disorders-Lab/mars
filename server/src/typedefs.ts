@@ -570,6 +570,7 @@ export const typedefs = `#graphql
 
     # Search queries
     search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean, filters: EntityFilterInput): [SearchResult]
+    translateSearch(query: String!): String
 
     # Counters queries
     counter(_id: String): Counter

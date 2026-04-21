@@ -428,6 +428,7 @@ export type DataTableProps = {
 
   // Interface visibility
   showColumnSelect?: boolean;
+  showColumnFilters?: boolean;
   showPagination?: boolean;
   showSelection?: boolean;
   actions?: DataTableAction[];
@@ -601,11 +602,6 @@ export type SearchSelectProps = {
   onChange?: (value: any) => void;
   disabled?: boolean;
   isEmbedded?: boolean;
-};
-
-// SearchBox props
-export type SearchBoxProps = {
-  resultType?: "entity" | "project" | "template";
 };
 
 // SaveModal props

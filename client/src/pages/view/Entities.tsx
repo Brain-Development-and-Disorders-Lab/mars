@@ -303,12 +303,31 @@ const Entities = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
-      header: "Owner",
+    columnHelper.accessor("attributes", {
+      cell: (info) => (
+        <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attributes",
       enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
+    }),
+    columnHelper.accessor("attachments", {
+      cell: (info) => (
+        <Tag.Root colorPalette={info.getValue().length > 0 ? "purple" : "orange"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attachments",
+      enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("created", {
       cell: (info) => (
@@ -318,23 +337,16 @@ const Entities = () => {
       ),
       header: "Created",
       enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
-    columnHelper.accessor("attributes", {
-      cell: (info) => (
-        <Tag.Root colorPalette={"green"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-        </Tag.Root>
-      ),
-      header: "Attributes",
-      enableHiding: true,
-    }),
-    columnHelper.accessor("attachments", {
-      cell: (info) => (
-        <Tag.Root colorPalette={"purple"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-        </Tag.Root>
-      ),
-      header: "Attachments",
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
       enableHiding: true,
     }),
   ];
@@ -426,7 +438,10 @@ const Entities = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Entity Filters
+                    Entity Filters:
+                  </Text>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
+                    {activeFilterCount} Active
                   </Text>
                 </Flex>
                 <Collapsible.Trigger asChild>
@@ -579,47 +594,43 @@ const Entities = () => {
                     </Flex>
                   </Flex>
                 </Flex>
+
+                {/* Filter control buttons */}
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setAppliedFilters({ ...filterState });
+                      setPage(0); // Reset to first page when filters change
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    rounded={"md"}
+                    onClick={() => {
+                      const clearedState = {
+                        startDate: "",
+                        endDate: "",
+                        owners: [],
+                        hasAttachments: false,
+                        attributeCountRanges: [],
+                      };
+                      setFilterState(clearedState);
+                      setAppliedFilters(clearedState);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Reset Filters
+                  </Button>
+                </Flex>
               </Collapsible.Content>
             </Flex>
           </Collapsible.Root>
-
-          {/* Buttons and Active Filter Count */}
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"}>
-              {activeFilterCount} Active Filter
-              {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-            </Text>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              onClick={() => {
-                setAppliedFilters({ ...filterState });
-                setPage(0); // Reset to first page when filters change
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              size={"xs"}
-              variant={"outline"}
-              rounded={"md"}
-              onClick={() => {
-                const clearedState = {
-                  startDate: "",
-                  endDate: "",
-                  owners: [],
-                  hasAttachments: false,
-                  attributeCountRanges: [],
-                };
-                setFilterState(clearedState);
-                setAppliedFilters(clearedState);
-              }}
-              disabled={activeFilterCount === 0}
-            >
-              Clear
-            </Button>
-          </Flex>
 
           {entityData.filter((entity) => _.isEqual(entity.archived, false)).length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">

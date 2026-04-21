@@ -560,9 +560,9 @@ export class Data {
 
             const activity = await Activity.create({
               timestamp: dayjs(Date.now()).toISOString(),
-              type: "update",
+              type: "create",
               actor: context.user,
-              details: "Updated Entity",
+              details: "Created new Entity",
               target: {
                 _id: result.data,
                 type: "entities",

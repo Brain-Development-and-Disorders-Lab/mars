@@ -227,11 +227,19 @@ const Projects = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
+    columnHelper.accessor("entities", {
       cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        return (
+          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+          </Tag.Root>
+        );
       },
-      header: "Owner",
+      header: "Entities",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("created", {
       cell: (info) => {
@@ -243,16 +251,16 @@ const Projects = () => {
       },
       header: "Created",
       enableHiding: true,
-    }),
-    columnHelper.accessor("entities", {
-      cell: (info) => {
-        return (
-          <Tag.Root colorPalette={"green"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
-      header: "Entities",
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
     }),
   ];
 
@@ -292,7 +300,10 @@ const Projects = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Project Filters
+                    Project Filters:
+                  </Text>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
+                    {activeFilterCount} Active
                   </Text>
                 </Flex>
                 <Collapsible.Trigger asChild>
@@ -425,46 +436,42 @@ const Projects = () => {
                     </Flex>
                   </Flex>
                 </Flex>
+
+                {/* Filter control buttons */}
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setAppliedFilters({ ...filterState });
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    rounded={"md"}
+                    onClick={() => {
+                      const clearedState = {
+                        startDate: "",
+                        endDate: "",
+                        owners: [],
+                        entityCountMin: "",
+                        entityCountMax: "",
+                      };
+                      setFilterState(clearedState);
+                      setAppliedFilters(clearedState);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Reset Filters
+                  </Button>
+                </Flex>
               </Collapsible.Content>
             </Flex>
           </Collapsible.Root>
-
-          {/* Buttons and Active Filter Count */}
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"}>
-              {activeFilterCount} Active Filter
-              {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-            </Text>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              onClick={() => {
-                setAppliedFilters({ ...filterState });
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              size={"xs"}
-              variant={"outline"}
-              rounded={"md"}
-              onClick={() => {
-                const clearedState = {
-                  startDate: "",
-                  endDate: "",
-                  owners: [],
-                  entityCountMin: "",
-                  entityCountMax: "",
-                };
-                setFilterState(clearedState);
-                setAppliedFilters(clearedState);
-              }}
-              disabled={activeFilterCount === 0}
-            >
-              Clear
-            </Button>
-          </Flex>
 
           {filteredProjects.length > 0 ? (
             <DataTable

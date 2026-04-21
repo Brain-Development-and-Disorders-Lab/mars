@@ -73,7 +73,7 @@ test.describe("Import", () => {
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
       await page
-        .locator("text=Existing attributes defined in JSON will be preserved")
+        .locator("text=Attributes defined in JSON will be preserved")
         .waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 

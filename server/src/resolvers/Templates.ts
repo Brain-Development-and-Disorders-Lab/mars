@@ -115,13 +115,21 @@ export const TemplatesResolvers = {
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const templates = await Templates.all();
       const workspaceTemplates = templates.filter((template) => _.includes(workspace.templates, template._id));
-      const templatesAddedDay = workspaceTemplates.filter((template) =>
-        dayjs(template.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
-      );
+
+      // Filter Activity by Workspace and then timestamps (within last 24 hours)
+      const activity = await Activity.all();
+      const workspaceActivity = activity.filter((activity) => {
+        return (
+          _.includes(workspace.activity, activity._id) && // Activity in Workspace
+          activity.target.type === "templates" && // Activity on Templates
+          activity.type === "create" && // Activity is Template creation
+          dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
+        );
+      });
 
       return {
         all: workspaceTemplates.length,
-        addedDay: templatesAddedDay.length,
+        addedDay: workspaceActivity.length,
       };
     },
 

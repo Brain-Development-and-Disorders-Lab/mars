@@ -231,12 +231,19 @@ const Templates = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
+    columnHelper.accessor("values", {
       cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        return (
+          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+          </Tag.Root>
+        );
       },
-      header: "Owner",
-      enableHiding: true,
+      header: "Values",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("timestamp", {
       cell: (info) => {
@@ -248,16 +255,17 @@ const Templates = () => {
       },
       header: "Created",
       enableHiding: true,
-    }),
-    columnHelper.accessor("values", {
-      cell: (info) => {
-        return (
-          <Tag.Root colorPalette={"green"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
-      header: "Values",
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
+      enableHiding: true,
     }),
   ];
 
@@ -295,7 +303,10 @@ const Templates = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Template Filters
+                    Template Filters:
+                  </Text>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
+                    {activeFilterCount} Active
                   </Text>
                 </Flex>
                 <Collapsible.Trigger asChild>
@@ -422,45 +433,41 @@ const Templates = () => {
                     </Flex>
                   </Flex>
                 </Flex>
+
+                {/* Filter control buttons */}
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setAppliedFilters({ ...filterState });
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    rounded={"md"}
+                    onClick={() => {
+                      const clearedState = {
+                        startDate: "",
+                        endDate: "",
+                        owners: [],
+                        valueCountRanges: [],
+                      };
+                      setFilterState(clearedState);
+                      setAppliedFilters(clearedState);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Reset Filters
+                  </Button>
+                </Flex>
               </Collapsible.Content>
             </Flex>
           </Collapsible.Root>
-
-          {/* Buttons and Active Filter Count */}
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"}>
-              {activeFilterCount} Active Filter
-              {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-            </Text>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"blue"}
-              onClick={() => {
-                setAppliedFilters({ ...filterState });
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              size={"xs"}
-              variant={"outline"}
-              rounded={"md"}
-              onClick={() => {
-                const clearedState = {
-                  startDate: "",
-                  endDate: "",
-                  owners: [],
-                  valueCountRanges: [],
-                };
-                setFilterState(clearedState);
-                setAppliedFilters(clearedState);
-              }}
-              disabled={activeFilterCount === 0}
-            >
-              Clear
-            </Button>
-          </Flex>
 
           {filteredTemplates.filter((template) => _.isEqual(template.archived, false)).length > 0 ? (
             <DataTable

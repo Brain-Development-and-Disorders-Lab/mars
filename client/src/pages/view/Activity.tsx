@@ -330,7 +330,10 @@ const Activity = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"filter"} size={"sm"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Activity Filters
+                    Activity Filters:
+                  </Text>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
+                    {activeFilterCount} Active
                   </Text>
                 </Flex>
                 <Collapsible.Trigger asChild>
@@ -495,6 +498,39 @@ const Activity = () => {
                     </Flex>
                   </Flex>
                 </Flex>
+
+                {/* Filter control buttons */}
+                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setAppliedFilters({ ...filterState });
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    rounded={"md"}
+                    onClick={() => {
+                      const clearedState = {
+                        startDate: "",
+                        endDate: "",
+                        activityTypes: [],
+                        targetTypes: [],
+                        mediums: [],
+                      };
+                      setFilterState(clearedState);
+                      setAppliedFilters(clearedState);
+                    }}
+                    disabled={activeFilterCount === 0}
+                  >
+                    Reset Filters
+                  </Button>
+                </Flex>
               </Collapsible.Content>
             </Flex>
           </Collapsible.Root>
@@ -513,43 +549,6 @@ const Activity = () => {
               <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
                 Live
               </Text>
-            </Flex>
-
-            {/* Apply and Clear Buttons - Right */}
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Text fontWeight={"semibold"} fontSize={"xs"}>
-                {activeFilterCount} Active Filter
-                {activeFilterCount > 1 || activeFilterCount === 0 ? "s" : ""}
-              </Text>
-              <Button
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"blue"}
-                onClick={() => {
-                  setAppliedFilters({ ...filterState });
-                }}
-              >
-                Apply
-              </Button>
-              <Button
-                size={"xs"}
-                variant={"outline"}
-                rounded={"md"}
-                onClick={() => {
-                  const clearedState = {
-                    startDate: "",
-                    endDate: "",
-                    activityTypes: [],
-                    targetTypes: [],
-                    mediums: [],
-                  };
-                  setFilterState(clearedState);
-                  setAppliedFilters(clearedState);
-                }}
-                disabled={activeFilterCount === 0}
-              >
-                Clear
-              </Button>
             </Flex>
           </Flex>
 

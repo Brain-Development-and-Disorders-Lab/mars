@@ -5,6 +5,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 // Models
+import { Activity } from "./Activity";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
@@ -264,6 +265,18 @@ export class User {
       history: [],
     });
     await Workspaces.addEntity(workspace, entity.data);
+    const entityActivity = await Activity.create({
+      timestamp: dayjs(Date.now()).toISOString(),
+      type: "create",
+      actor: user,
+      details: "Created new Entity",
+      target: {
+        _id: entity.data,
+        type: "entities",
+        name: "Example Entity",
+      },
+    });
+    await Workspaces.addActivity(workspace, entityActivity.data);
 
     const project = await Projects.create({
       name: "Example Project",
@@ -276,6 +289,18 @@ export class User {
       history: [],
     });
     await Workspaces.addProject(workspace, project.data);
+    const projectActivity = await Activity.create({
+      timestamp: dayjs(Date.now()).toISOString(),
+      type: "create",
+      actor: user,
+      details: "Created new Project",
+      target: {
+        _id: project.data,
+        type: "projects",
+        name: "Example Project",
+      },
+    });
+    await Workspaces.addActivity(workspace, projectActivity.data);
 
     // Add the example Entity to the Project
     await Projects.addEntity(workspace, entity.data);
@@ -302,6 +327,18 @@ export class User {
       ],
     });
     await Workspaces.addTemplate(workspace, template.data);
+    const templateActivity = await Activity.create({
+      timestamp: dayjs(Date.now()).toISOString(),
+      type: "create",
+      actor: user,
+      details: "Created new Template",
+      target: {
+        _id: template.data,
+        type: "templates",
+        name: "Example Template",
+      },
+    });
+    await Workspaces.addActivity(workspace, templateActivity.data);
 
     return {
       success: true,
