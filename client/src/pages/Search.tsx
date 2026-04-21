@@ -23,7 +23,7 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // `react-querybuilder` imports
-import QueryBuilder, {
+import {
   defaultOperators,
   defaultRuleProcessorMongoDB,
   Field,
@@ -32,13 +32,6 @@ import QueryBuilder, {
   RuleProcessor,
   RuleType,
 } from "react-querybuilder";
-import { QueryBuilderDnD } from "@react-querybuilder/dnd";
-import * as ReactDnD from "react-dnd";
-import * as ReactDndHtml5Backend from "react-dnd-html5-backend";
-import { QueryBuilderChakra } from "@react-querybuilder/chakra";
-
-// SearchQueryValue component for searching Entity fields
-import SearchQueryValue from "@components/SearchQueryValue";
 
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
@@ -68,6 +61,8 @@ import { JSONPath } from "jsonpath-plus";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+import SearchQueryBuilder from "@components/SearchQueryBuilder";
+
 const Search = () => {
   const [query, setQuery] = useState("");
 
@@ -83,6 +78,7 @@ const Search = () => {
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
   const [visibleColumns, setVisibleColumns] = useState({});
 
+  const [activeTab, setActiveTab] = useState<"text" | "advanced">("text");
   const [isAISearch, setIsAISearch] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -268,7 +264,8 @@ const Search = () => {
     setIsSearching(false);
   };
 
-  const onTabChange = () => {
+  const onTabChange = (tab: "text" | "advanced") => {
+    setActiveTab(tab);
     setResults([]);
     setHasSearched(false);
   };
@@ -795,49 +792,52 @@ const Search = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
-          <Text fontSize={"xs"} ml={"0.5"}>
-            Search across Entities in the current Workspace
-          </Text>
+          <Flex direction={"column"} ml={"0.5"} gap={"1"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              Search across Entities in the current Workspace
+            </Text>
+            <Text fontSize={"xs"}>
+              Use "Text" to search by keyword or with AI, build structured search queries using "Query Builder"
+            </Text>
+          </Flex>
 
           {/* Search components */}
-          <Tabs.Root w={"100%"} size={"sm"} defaultValue={"text"} variant={"subtle"} onValueChange={onTabChange}>
-            <Tabs.List
-              p={"1"}
-              gap={"2"}
-              pb={"1"}
-              borderBottom={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Tabs.Trigger value={"text"} disabled={isSearching} px={"3"} py={"1.5"} rounded={"md"}>
-                <Flex direction={"column"} align={"flex-start"} gap={"0"}>
-                  <Flex align={"center"} gap={"1"}>
-                    <Icon name={"text"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Text
-                    </Text>
-                  </Flex>
-                  <Text fontSize={"2xs"} color={"gray.500"}>
-                    Keyword search
-                  </Text>
-                </Flex>
-              </Tabs.Trigger>
-              <Tabs.Trigger value={"advanced"} disabled={isSearching} px={"3"} py={"1.5"} rounded={"md"}>
-                <Flex direction={"column"} align={"flex-start"} gap={"0"}>
-                  <Flex align={"center"} gap={"1"}>
-                    <Icon name={"search_query"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Query Builder
-                    </Text>
-                  </Flex>
-                  <Text fontSize={"2xs"} color={"gray.500"}>
-                    Advanced rules
-                  </Text>
-                </Flex>
-              </Tabs.Trigger>
-            </Tabs.List>
+          <Tabs.Root
+            w={"100%"}
+            value={activeTab}
+            onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
+          >
+            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"}>
+              <Button
+                size={"xs"}
+                rounded={"sm"}
+                variant={"ghost"}
+                colorPalette={"gray"}
+                bg={activeTab === "text" ? "white" : "transparent"}
+                shadow={activeTab === "text" ? "xs" : "none"}
+                disabled={isSearching}
+                onClick={() => onTabChange("text")}
+              >
+                <Icon name={"text"} size={"xs"} />
+                Text
+              </Button>
+              <Button
+                size={"xs"}
+                rounded={"sm"}
+                variant={"ghost"}
+                colorPalette={"gray"}
+                bg={activeTab === "advanced" ? "white" : "transparent"}
+                shadow={activeTab === "advanced" ? "xs" : "none"}
+                disabled={isSearching}
+                onClick={() => onTabChange("advanced")}
+              >
+                <Icon name={"search_query"} size={"xs"} />
+                Query Builder
+              </Button>
+            </Flex>
 
             {/* Text search */}
-            <Tabs.Content value={"text"} p={"1"}>
+            <Tabs.Content value={"text"} p={"0"} pt={"1"}>
               <Flex direction={"column"} gap={"1"}>
                 {/* Filter section */}
                 <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
@@ -1079,57 +1079,24 @@ const Search = () => {
             </Tabs.Content>
 
             {/* Query builder */}
-            <Tabs.Content value={"advanced"} p={"1"}>
-              <Flex direction={"column"} gap={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <QueryBuilderChakra>
-                    <QueryBuilderDnD dnd={{ ...ReactDnD, ...ReactDndHtml5Backend }}>
-                      <QueryBuilder
-                        controlClassnames={{
-                          queryBuilder: "queryBuilder-branches",
-                        }}
-                        fields={advancedQueryFields}
-                        query={advancedQuery}
-                        onQueryChange={setAdvancedQuery}
-                        controlElements={{ valueEditor: SearchQueryValue }}
-                        enableDragAndDrop
-                      />
-                    </QueryBuilderDnD>
-                  </QueryBuilderChakra>
-                  <Flex justify={"right"} gap={"1"}>
-                    <Button
-                      aria-label={"Run Query"}
-                      colorPalette={"green"}
-                      size={"xs"}
-                      rounded={"md"}
-                      onClick={() => onSearchBuiltQuery()}
-                      disabled={!isValid}
-                    >
-                      Search
-                      <Icon name={"search"} size={"xs"} />
-                    </Button>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"gray"}
-                      variant={"outline"}
-                      disabled={advancedQuery.rules.length === 0}
-                      onClick={() => {
-                        setAdvancedQuery(initialAdvancedQuery);
-                        setHasSearched(false);
-                        setResults([]);
-                      }}
-                    >
-                      Clear
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Flex>
+            <Tabs.Content value={"advanced"} p={"0"} pt={"1"}>
+              <SearchQueryBuilder
+                query={advancedQuery}
+                onQueryChange={setAdvancedQuery}
+                fields={advancedQueryFields}
+                isValid={isValid}
+                onSearch={onSearchBuiltQuery}
+                onClear={() => {
+                  setAdvancedQuery(initialAdvancedQuery);
+                  setHasSearched(false);
+                  setResults([]);
+                }}
+              />
             </Tabs.Content>
           </Tabs.Root>
 
           {/* Search Results */}
-          <Flex gap={"1"} p={"1"} w={"100%"}>
+          <Flex gap={"1"} p={"0"} w={"100%"}>
             {isSearching && (
               <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
                 <Spinner size={"lg"} color={"gray.600"} />
