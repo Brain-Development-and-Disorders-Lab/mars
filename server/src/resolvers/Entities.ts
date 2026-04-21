@@ -271,13 +271,21 @@ export const EntitiesResolvers = {
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const entities = await Entities.all();
       const workspaceEntities = entities.filter((entity) => _.includes(workspace.entities, entity._id));
-      const entitiesAddedDay = workspaceEntities.filter((entity) =>
-        dayjs(entity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
-      );
+
+      // Filter Activity by Workspace and then timestamps (within last 24 hours)
+      const activity = await Activity.all();
+      const workspaceActivity = activity.filter((activity) => {
+        return (
+          _.includes(workspace.activity, activity._id) && // Activity in Workspace
+          activity.target.type === "entities" && // Activity on Entities
+          activity.type === "create" && // Activity is Entity creation
+          dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
+        );
+      });
 
       return {
         all: workspaceEntities.length,
-        addedDay: entitiesAddedDay.length,
+        addedDay: workspaceActivity.length,
       };
     },
   },

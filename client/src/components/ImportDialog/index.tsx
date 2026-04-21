@@ -1425,6 +1425,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 w={"100%"}
                 direction={"column"}
                 gap={"1"}
+                p={"1"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
@@ -1437,8 +1438,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Text>
                 ) : (
                   <Text fontSize={"xs"}>
-                    Existing attributes defined in JSON will be preserved. Use an existing Template Attribute from the
-                    drop-down or create a new Attribute to be added to all Entities.
+                    Attributes defined in JSON will be preserved. Use an existing Template Attribute from the drop-down
+                    or create a new Attribute to be added to all Entities.
                   </Text>
                 )}
 
@@ -1447,66 +1448,57 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Fieldset.Root maxW={"sm"}>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Tooltip
-                          content={
-                            templatesCollection.items?.length > 0
-                              ? "Select an existing Template"
-                              : "No Templates exist yet"
-                          }
-                          showArrow
-                        >
-                          <Select.Root
-                            key={"select-template"}
-                            size={"xs"}
-                            rounded={"md"}
-                            collection={templatesCollection}
-                            onValueChange={(details) => {
-                              const selectedTemplate = details.items[0];
-                              if (!_.isEqual(selectedTemplate._id, "")) {
-                                for (const template of templatesCollection.items || []) {
-                                  if (_.isEqual(selectedTemplate._id, template._id)) {
-                                    setAttributesField([
-                                      ...attributesField,
-                                      {
-                                        _id: `a-${nanoid(6)}`,
-                                        name: template.name,
-                                        timestamp: template.timestamp,
-                                        owner: template.owner,
-                                        archived: false,
-                                        description: template.description,
-                                        values: template.values,
-                                      },
-                                    ]);
-                                    break;
-                                  }
+                        <Select.Root
+                          key={"select-template"}
+                          size={"xs"}
+                          rounded={"md"}
+                          collection={templatesCollection}
+                          onValueChange={(details) => {
+                            const selectedTemplate = details.items[0];
+                            if (!_.isEqual(selectedTemplate._id, "")) {
+                              for (const template of templatesCollection.items || []) {
+                                if (_.isEqual(selectedTemplate._id, template._id)) {
+                                  setAttributesField([
+                                    ...attributesField,
+                                    {
+                                      _id: `a-${nanoid(6)}`,
+                                      name: template.name,
+                                      timestamp: template.timestamp,
+                                      owner: template.owner,
+                                      archived: false,
+                                      description: template.description,
+                                      values: template.values,
+                                    },
+                                  ]);
+                                  break;
                                 }
                               }
-                            }}
-                            disabled={templatesCollection.items?.length === 0}
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger>
-                                <Select.ValueText placeholder={"Select Template"} />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Portal>
-                              <Select.Positioner>
-                                <Select.Content>
-                                  {templatesCollection.items?.map((template: AttributeModel) => (
-                                    <Select.Item item={template} key={template._id}>
-                                      {template.name}
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  )) || []}
-                                </Select.Content>
-                              </Select.Positioner>
-                            </Portal>
-                          </Select.Root>
-                        </Tooltip>
+                            }
+                          }}
+                          disabled={templatesCollection.items?.length === 0}
+                        >
+                          <Select.HiddenSelect />
+                          <Select.Control>
+                            <Select.Trigger>
+                              <Select.ValueText placeholder={"Select Template"} />
+                            </Select.Trigger>
+                            <Select.IndicatorGroup>
+                              <Select.Indicator />
+                            </Select.IndicatorGroup>
+                          </Select.Control>
+                          <Portal>
+                            <Select.Positioner>
+                              <Select.Content>
+                                {templatesCollection.items?.map((template: AttributeModel) => (
+                                  <Select.Item item={template} key={template._id}>
+                                    {template.name}
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                )) || []}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Portal>
+                        </Select.Root>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -1577,14 +1569,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Entity Step 4: Review */}
             {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
-              <Flex
-                w={"100%"}
-                direction={"column"}
-                gap={"1"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-                rounded={"md"}
-              >
+              <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
                 <DataTable
                   columns={reviewTableColumns}
                   data={reviewEntities}

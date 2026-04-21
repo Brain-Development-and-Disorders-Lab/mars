@@ -360,11 +360,6 @@ export class Entities {
     const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).insertOne(joinedEntity);
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
 
-    // Apply updated statistics
-    if (successStatus) {
-      // Entity counter removed - was Prometheus-specific
-    }
-
     return {
       success: successStatus,
       message: successStatus ? "Created new Entity" : "Unable to create Entity",

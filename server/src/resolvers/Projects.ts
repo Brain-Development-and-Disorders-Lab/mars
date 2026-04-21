@@ -170,13 +170,21 @@ export const ProjectsResolvers = {
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const projects = await Projects.all();
       const workspaceProjects = projects.filter((project) => _.includes(workspace.projects, project._id));
-      const projectsAddedDay = workspaceProjects.filter((project) =>
-        dayjs(project.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
-      );
+
+      // Filter Activity by Workspace and then timestamps (within last 24 hours)
+      const activity = await Activity.all();
+      const workspaceActivity = activity.filter((activity) => {
+        return (
+          _.includes(workspace.activity, activity._id) && // Activity in Workspace
+          activity.target.type === "projects" && // Activity on Projects
+          activity.type === "create" && // Activity is Project creation
+          dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
+        );
+      });
 
       return {
         all: workspaceProjects.length,
-        addedDay: projectsAddedDay.length,
+        addedDay: workspaceActivity.length,
       };
     },
   },
