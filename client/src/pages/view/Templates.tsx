@@ -231,12 +231,19 @@ const Templates = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
+    columnHelper.accessor("values", {
       cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        return (
+          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+          </Tag.Root>
+        );
       },
-      header: "Owner",
-      enableHiding: true,
+      header: "Values",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("timestamp", {
       cell: (info) => {
@@ -248,16 +255,17 @@ const Templates = () => {
       },
       header: "Created",
       enableHiding: true,
-    }),
-    columnHelper.accessor("values", {
-      cell: (info) => {
-        return (
-          <Tag.Root colorPalette={"green"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
-      header: "Values",
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
+      enableHiding: true,
     }),
   ];
 

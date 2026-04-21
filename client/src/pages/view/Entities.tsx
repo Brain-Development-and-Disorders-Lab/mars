@@ -303,12 +303,31 @@ const Entities = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
-      header: "Owner",
+    columnHelper.accessor("attributes", {
+      cell: (info) => (
+        <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attributes",
       enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
+    }),
+    columnHelper.accessor("attachments", {
+      cell: (info) => (
+        <Tag.Root colorPalette={info.getValue().length > 0 ? "purple" : "orange"} size={"sm"}>
+          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+        </Tag.Root>
+      ),
+      header: "Attachments",
+      enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("created", {
       cell: (info) => (
@@ -318,23 +337,16 @@ const Entities = () => {
       ),
       header: "Created",
       enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
-    columnHelper.accessor("attributes", {
-      cell: (info) => (
-        <Tag.Root colorPalette={"green"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-        </Tag.Root>
-      ),
-      header: "Attributes",
-      enableHiding: true,
-    }),
-    columnHelper.accessor("attachments", {
-      cell: (info) => (
-        <Tag.Root colorPalette={"purple"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-        </Tag.Root>
-      ),
-      header: "Attachments",
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
       enableHiding: true,
     }),
   ];

@@ -604,11 +604,6 @@ export type SearchSelectProps = {
   isEmbedded?: boolean;
 };
 
-// SearchBox props
-export type SearchBoxProps = {
-  resultType?: "entity" | "project" | "template";
-};
-
 // SaveModal props
 export type SaveModalProps = {
   open: boolean;

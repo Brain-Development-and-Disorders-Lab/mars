@@ -12,15 +12,15 @@ import {
   Skeleton,
   Separator,
   Button,
-  Checkbox,
   Collapsible,
   Box,
+  InputGroup,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { IGenericItem, SearchBoxProps } from "@types";
+import { EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -38,26 +38,14 @@ import { GLOBAL_STYLES } from "@variables";
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
-const SearchBox = (props: SearchBoxProps) => {
+const SearchBox = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [inputWidth, setInputWidth] = useState<number | undefined>(undefined);
 
-  // Default resultType to "entity" if not provided (so it's never undefined)
-  const resultType = props.resultType || "entity";
-
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<{
-    entities: boolean;
-    projects: boolean;
-    templates: boolean;
-  }>({
-    entities: resultType === "entity",
-    projects: resultType === "project",
-    templates: resultType === "template",
-  });
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -114,82 +102,107 @@ const SearchBox = (props: SearchBoxProps) => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $resultType: String, $isBuilder: Boolean, $showArchived: Boolean) {
-      search(query: $query, resultType: $resultType, isBuilder: $isBuilder, showArchived: $showArchived) {
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+      $filters: EntityFilterInput
+    ) {
+      search(
+        query: $query
+        resultType: $resultType
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+        filters: $filters
+      ) {
         __typename
         ... on Entity {
           _id
           name
-        }
-        ... on Project {
-          _id
-          name
+          owner
+          archived
+          description
+          projects
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
         }
       }
     }
   `;
-  const [searchText, { loading, error }] = useLazyQuery<{
-    search: IGenericItem[];
-  }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
+  const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
 
-  // Determine resultType based on selected filters
-  const getResultType = (): string | undefined => {
-    const selectedCount =
-      (selectedTypes.entities ? 1 : 0) + (selectedTypes.projects ? 1 : 0) + (selectedTypes.templates ? 1 : 0);
-
-    // If all or none selected, search all types
-    if (selectedCount === 0 || selectedCount === 3) {
-      return undefined;
+  // Query to translate the natural language to MongoDB JSON search
+  const TRANSLATE_SEARCH = gql`
+    query TranslateSearch($query: String!) {
+      translateSearch(query: $query)
     }
-
-    // If only one type selected, use that
-    if (selectedCount === 1) {
-      if (selectedTypes.entities) return "entity";
-      if (selectedTypes.projects) return "project";
-      if (selectedTypes.templates) return "template";
-      // Fallback (shouldn't happen, but satisfies TypeScript)
-      return undefined;
-    }
-
-    // Multiple types selected - search all (undefined means all)
-    return undefined;
-  };
+  `;
+  const [runTranslateSearch] = useLazyQuery<{ translateSearch: string }>(TRANSLATE_SEARCH, {
+    fetchPolicy: "network-only",
+  });
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
-    setIsSearching(loading);
+    setIsSearching(true);
     setHasSearched(true);
     setResults([]);
 
-    // Use filter selection if no explicit resultType prop was provided
-    const searchResultType = props.resultType || getResultType();
+    const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
 
-    const results = await searchText({
-      variables: {
-        query: query,
-        resultType: searchResultType,
-        isBuilder: false,
-        showArchived: false,
-      },
-    }).catch(ignoreAbort);
-    if (!results) return;
-
-    if (results.data?.search) {
-      setResults(results.data.search);
-    }
-
-    if (error || !results.data?.search) {
-      setIsError(true);
+    if (!translation || !translation.data?.translateSearch) {
+      setIsSearching(false);
+      return;
+    } else if (translation.error) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: error || "Unable to retrieve search results",
+        description: "Unable to translate query, please try again",
+        duration: 2000,
+        closable: true,
+      });
+      setIsSearching(false);
+      return;
+    }
+
+    const results = await searchText({
+      variables: {
+        query: translation.data.translateSearch,
+        resultType: "entity",
+        isBuilder: true,
+        showArchived: false,
+      },
+    }).catch(ignoreAbort);
+
+    if (!results) {
+      setIsSearching(false);
+      return;
+    }
+
+    if (error || !results.data?.search) {
+      toaster.create({
+        title: "Error",
+        type: "error",
+        description: "Unable to retrieve search results",
         duration: 4000,
         closable: true,
       });
+      setIsError(true);
+    } else {
+      setResults(results.data.search);
     }
 
-    setIsSearching(loading);
+    setIsSearching(false);
+    return;
   };
 
   const onCloseWrapper = () => {
@@ -228,36 +241,41 @@ const SearchBox = (props: SearchBoxProps) => {
         {/* Input row with dropdown - wrapped in relative container */}
         <Box position={"relative"} w={"100%"}>
           <Flex gap={"1"} align={"center"} w={"100%"}>
-            <Input
-              data-search-input
-              value={query}
-              size={"xs"}
-              rounded={"md"}
-              placeholder={"Quick Search"}
-              background={"white"}
-              w={"100%"}
-              borderColor={"gray.300"}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setOpen(false);
-                setHasSearched(false);
-                setIsError(false);
-                setResults([]);
-              }}
-              onKeyUp={(event) => {
-                // Listen for "Enter" key when entering a query
-                if (event.key === "Enter" && query !== "") {
-                  handleClick();
-                }
-              }}
-            />
+            <InputGroup startElement={<Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
+              <Input
+                data-search-input
+                value={query}
+                rounded={"md"}
+                size={"xs"}
+                placeholder={"Describe what you're looking for..."}
+                background={"white"}
+                w={"100%"}
+                borderColor={"purple.400"}
+                outlineColor={"purple.400"}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setOpen(false);
+                  setHasSearched(false);
+                  setIsError(false);
+                  setResults([]);
+                }}
+                onKeyUp={(event) => {
+                  // Listen for "Enter" key when entering a query
+                  if (event.key === "Enter" && query !== "") {
+                    handleClick();
+                  }
+                }}
+              />
+            </InputGroup>
 
             <Button
               data-search-button
               size={"xs"}
               rounded={"md"}
-              colorPalette={"green"}
+              colorPalette={"purple"}
               disabled={query === ""}
+              loading={isSearching}
+              loadingText={"Searching..."}
               onClick={() => {
                 if (query !== "") {
                   handleClick();
@@ -279,7 +297,7 @@ const SearchBox = (props: SearchBoxProps) => {
             </Collapsible.Root>
           </Flex>
 
-          {/* Results dropdown - width matches input */}
+          {/* Results dropdown */}
           {open && (
             <Box
               position={"absolute"}
@@ -294,14 +312,39 @@ const SearchBox = (props: SearchBoxProps) => {
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}
             >
-              <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"row"} gap={"1"} w={"100%"} align={"center"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Search Results:{" "}
-                </Text>
-                <Text fontSize={"xs"}>"{query}"</Text>
+              <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"column"} gap={"1"}>
+                <Flex width={"100%"} direction={"row"} gap={"1"} align={"center"}>
+                  {isSearching ? (
+                    <Spinner size={"xs"} />
+                  ) : (
+                    <Text fontWeight={"bold"} fontSize={"xs"}>
+                      {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
+                    </Text>
+                  )}
+                  <Text fontSize={"xs"}>
+                    result
+                    {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
+                  </Text>
+                  <Link
+                    className={"light"}
+                    color={"black"}
+                    variant={"underline"}
+                    fontWeight={"semibold"}
+                    gap={"1"}
+                    fontSize={"xs"}
+                    onClick={() => {
+                      // Close the dropdown and navigate to the `/search` route
+                      onCloseWrapper();
+                      navigate("/search");
+                    }}
+                  >
+                    Search
+                    <Icon name={"a_right"} color={"black"} size={"xs"} />
+                  </Link>
+                </Flex>
               </Flex>
 
-              <Flex p={"1"} gap={"1"} py={"1"}>
+              <Flex p={"1"} gap={"1"} py={"1"} roundedTop={"md"}>
                 {isSearching ? (
                   <Stack w={"100%"}>
                     <Skeleton height={"30px"} />
@@ -358,102 +401,9 @@ const SearchBox = (props: SearchBoxProps) => {
                   )
                 )}
               </Flex>
-
-              <Flex p={"1"} bg={"gray.100"} roundedBottom={"md"} direction={"column"} gap={"1"}>
-                <Flex width={"100%"} direction={"row"} gap={"1"}>
-                  {isSearching ? (
-                    <Spinner size={"sm"} />
-                  ) : (
-                    <Text fontWeight={"bold"} fontSize={"xs"}>
-                      {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
-                    </Text>
-                  )}
-                  <Text fontSize={"xs"}>
-                    result
-                    {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
-                  </Text>
-                  <Link
-                    className={"light"}
-                    color={"black"}
-                    variant={"underline"}
-                    fontWeight={"semibold"}
-                    gap={"1"}
-                    fontSize={"xs"}
-                    onClick={() => {
-                      // Close the dropdown and navigate to the `/search` route
-                      onCloseWrapper();
-                      navigate("/search");
-                    }}
-                  >
-                    Search
-                    <Icon name={"a_right"} color={"black"} size={"xs"} />
-                  </Link>
-                </Flex>
-              </Flex>
             </Box>
           )}
         </Box>
-
-        {/* Collapsible Filters Content */}
-        <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-          <Collapsible.Content>
-            <Flex direction={"row"} gap={"2"} wrap={"wrap"} ml={"0.5"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Include:
-              </Text>
-              <Checkbox.Root
-                size={"xs"}
-                colorPalette={"blue"}
-                checked={selectedTypes.entities}
-                onCheckedChange={(details) => {
-                  setSelectedTypes({
-                    ...selectedTypes,
-                    entities: details.checked as boolean,
-                  });
-                }}
-                disabled
-              >
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label fontSize={"xs"}>Entities</Checkbox.Label>
-              </Checkbox.Root>
-
-              <Checkbox.Root
-                size={"xs"}
-                colorPalette={"blue"}
-                checked={selectedTypes.projects}
-                onCheckedChange={(details) => {
-                  setSelectedTypes({
-                    ...selectedTypes,
-                    projects: details.checked as boolean,
-                  });
-                }}
-                disabled
-              >
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label fontSize={"xs"}>Projects</Checkbox.Label>
-              </Checkbox.Root>
-
-              <Checkbox.Root
-                size={"xs"}
-                colorPalette={"blue"}
-                checked={selectedTypes.templates}
-                onCheckedChange={(details) => {
-                  setSelectedTypes({
-                    ...selectedTypes,
-                    templates: details.checked as boolean,
-                  });
-                }}
-                disabled
-              >
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label fontSize={"xs"}>Templates</Checkbox.Label>
-              </Checkbox.Root>
-            </Flex>
-          </Collapsible.Content>
-        </Collapsible.Root>
       </Flex>
     </Box>
   );

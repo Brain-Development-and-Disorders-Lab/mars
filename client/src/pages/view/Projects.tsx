@@ -227,11 +227,19 @@ const Projects = () => {
         minWidth: 400,
       },
     }),
-    columnHelper.accessor("owner", {
+    columnHelper.accessor("entities", {
       cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        return (
+          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+          </Tag.Root>
+        );
       },
-      header: "Owner",
+      header: "Entities",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     columnHelper.accessor("created", {
       cell: (info) => {
@@ -243,16 +251,16 @@ const Projects = () => {
       },
       header: "Created",
       enableHiding: true,
-    }),
-    columnHelper.accessor("entities", {
-      cell: (info) => {
-        return (
-          <Tag.Root colorPalette={"green"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
-      header: "Entities",
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
     }),
   ];
 
