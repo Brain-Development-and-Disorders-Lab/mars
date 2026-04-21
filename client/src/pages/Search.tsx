@@ -331,21 +331,33 @@ const Search = () => {
         minWidth: 400,
       },
     }),
-    searchResultColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
-      header: "Owner",
-    }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
         return (
-          <Tag.Root colorPalette={"green"}>
-            <Tag.Label fontSize={"xs"}>{_.isUndefined(info.getValue()) ? 0 : info.getValue().length}</Tag.Label>
+          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
           </Tag.Root>
         );
       },
       header: "Attributes",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
+    }),
+    searchResultColumnHelper.accessor("created", {
+      cell: (info) => {
+        return (
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
+      header: "Created",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
     }),
     searchResultColumnHelper.accessor("archived", {
       cell: (info) => {
@@ -359,6 +371,16 @@ const Search = () => {
         );
       },
       header: "Status",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
+    }),
+    searchResultColumnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
     }),
   ];
   const searchResultActions: DataTableAction[] = [
