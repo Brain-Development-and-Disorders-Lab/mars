@@ -2475,10 +2475,10 @@
   resolved "https://registry.yarnpkg.com/@react-dnd/shallowequal/-/shallowequal-4.0.2.tgz#d1b4befa423f692fa4abf1c79209702e7d8ae4b4"
   integrity sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==
 
-"@react-querybuilder/chakra@^8.5.0":
-  version "8.14.0"
-  resolved "https://registry.yarnpkg.com/@react-querybuilder/chakra/-/chakra-8.14.0.tgz#c8738174afce4e5af80d8086a1b2009a1f3c4baf"
-  integrity sha512-Cngp/8Mc9dHS7DC5kkeKv2rPzJajkV1qmPF+GkQ8uy4QJHRn7KeRXDQfsz0Lbk773ABmFcOEyEGkkDKhQzZoPg==
+"@react-querybuilder/chakra@^8.15.0":
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/@react-querybuilder/chakra/-/chakra-8.15.0.tgz#c76202faf5679b515e1b0bdbf64ecccf2a8e9158"
+  integrity sha512-NeXHlGJKJ2g3HbLiO8VJ7lztbU5seG9o5YOKK9AnCBJst+xlyCoBw2pf4V5nT+q3td842sAo41AAyyZdRwk39w==
 
 "@react-querybuilder/core@^8.14.0":
   version "8.14.0"

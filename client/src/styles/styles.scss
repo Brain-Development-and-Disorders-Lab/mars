@@ -41,6 +41,7 @@ body .w-md-editor-text {
   select,
   input {
     height: var(--input-height);
+    font-weight: 500;
     background: var(--chakra-colors-white);
     border-radius: var(--chakra-radii-md);
     --input-font-size: var(--chakra-fontSizes-xs);
@@ -60,6 +61,7 @@ body .w-md-editor-text {
     display: flex;
     width: 100%;
     gap: var(--chakra-spacing-2);
+    padding: var(--chakra-spacing-1);
     flex-direction: column;
     background: white;
     border-radius: var(--chakra-radii-md);
@@ -74,22 +76,22 @@ body .w-md-editor-text {
   .ruleGroup-body {
     .rule::before {
       border-color: var(--chakra-colors-gray-500);
-      border-width: 0px 0px 2px 2px;
+      border-width: 0px 0px 2px 2px !important;
     }
     .rule::after {
       border-color: var(--chakra-colors-gray-500);
-      border-width: 0px 0px 0px 2px;
+      border-width: 0px 0px 0px 2px !important;
     }
     .ruleGroup {
       background-color: var(--chakra-colors-gray-200);
     }
     .ruleGroup::before {
       border-color: var(--chakra-colors-gray-500);
-      border-width: 0px 0px 2px 2px;
+      border-width: 0px 0px 2px 2px !important;
     }
     .ruleGroup::after {
       border-color: var(--chakra-colors-gray-500);
-      border-width: 0px 0px 0px 2px;
+      border-width: 0px 0px 0px 2px !important;
     }
   }
 }
@@ -98,7 +100,7 @@ body .w-md-editor-text {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: var(--chakra-spacing-1);
+  gap: var(--chakra-spacing-1) !important;
   flex-wrap: wrap;
 
   .ruleGroup-notToggle {
@@ -133,8 +135,8 @@ body .w-md-editor-text {
     min-width: 33px;
     svg {
       color: var(--chakra-colors-white);
-      width: var(--chakra-sizes-4);
-      height: var(--chakra-sizes-4);
+      width: var(--chakra-sizes-3);
+      height: var(--chakra-sizes-3);
     }
   }
   .ruleGroup-remove:hover {
@@ -176,8 +178,8 @@ body .w-md-editor-text {
     min-width: 33px;
     svg {
       color: var(--chakra-colors-white);
-      width: var(--chakra-sizes-4);
-      height: var(--chakra-sizes-4);
+      width: var(--chakra-sizes-3);
+      height: var(--chakra-sizes-3);
     }
   }
   .rule-remove:hover {
@@ -202,8 +204,8 @@ body .w-md-editor-text {
       background: var(--chakra-colors-red-500);
       svg {
         color: var(--chakra-colors-white);
-        width: var(--chakra-sizes-4);
-        height: var(--chakra-sizes-4);
+        width: var(--chakra-sizes-3);
+        height: var(--chakra-sizes-3);
       }
     }
     .rule-remove:hover {
