@@ -14,6 +14,7 @@ import {
   Text,
   Checkbox,
   Collapsible,
+  InputGroup,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -1043,18 +1044,20 @@ const Search = () => {
 
                 {/* Search input and submit */}
                 <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
-                  <Input
-                    size={"xs"}
-                    rounded={"md"}
-                    value={query}
-                    placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
-                    borderColor={isAISearch ? "purple.400" : undefined}
-                    outlineColor={isAISearch ? "purple.400" : undefined}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyUp={(event) => {
-                      if (event.key === "Enter" && query !== "") runSearch();
-                    }}
-                  />
+                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
+                    <Input
+                      size={"xs"}
+                      rounded={"md"}
+                      value={query}
+                      placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
+                      borderColor={isAISearch ? "purple.400" : undefined}
+                      outlineColor={isAISearch ? "purple.400" : undefined}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyUp={(event) => {
+                        if (event.key === "Enter" && query !== "") runSearch();
+                      }}
+                    />
+                  </InputGroup>
                   <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
                     <Button
                       size={"xs"}

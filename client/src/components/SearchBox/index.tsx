@@ -12,7 +12,6 @@ import {
   Skeleton,
   Separator,
   Button,
-  Collapsible,
   Box,
   InputGroup,
 } from "@chakra-ui/react";
@@ -45,7 +44,6 @@ const SearchBox = () => {
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -237,7 +235,7 @@ const SearchBox = () => {
 
   return (
     <Box ref={containerRef} w={"100%"}>
-      <Flex direction={"column"} gap={filtersOpen ? "1" : "0"} w={"100%"}>
+      <Flex direction={"column"} gap={"0"} w={"100%"}>
         {/* Input row with dropdown - wrapped in relative container */}
         <Box position={"relative"} w={"100%"}>
           <Flex gap={"1"} align={"center"} w={"100%"}>
@@ -285,16 +283,6 @@ const SearchBox = () => {
               Search
               <Icon name={"search"} size={"xs"} />
             </Button>
-
-            <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-              <Collapsible.Trigger asChild>
-                <Button size={"xs"} rounded={"md"} variant={"outline"}>
-                  <Icon name={"filter"} size={"xs"} />
-                  Search Filters
-                  <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
-                </Button>
-              </Collapsible.Trigger>
-            </Collapsible.Root>
           </Flex>
 
           {/* Results dropdown */}
@@ -315,32 +303,42 @@ const SearchBox = () => {
               <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"column"} gap={"1"}>
                 <Flex width={"100%"} direction={"row"} gap={"1"} align={"center"}>
                   {isSearching ? (
-                    <Spinner size={"xs"} />
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                      <Spinner size={"xs"} />
+                      <Text fontSize={"xs"}>Searching...</Text>
+                    </Flex>
                   ) : (
-                    <Text fontWeight={"bold"} fontSize={"xs"}>
-                      {results.length > MAX_RESULTS ? MAX_RESULTS : results.length}{" "}
-                    </Text>
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                      <Text fontSize={"xs"}>Showing</Text>
+                      <Text fontWeight={"semibold"} fontSize={"xs"}>
+                        {Math.min(results.length, MAX_RESULTS)}
+                      </Text>
+                      <Text fontSize={"xs"}>of</Text>
+                      <Text fontWeight={"semibold"} fontSize={"xs"}>
+                        {results.length}
+                      </Text>
+                      <Text fontSize={"xs"}>
+                        result
+                        {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
+                      </Text>
+                      <Link
+                        className={"light"}
+                        color={"black"}
+                        variant={"underline"}
+                        fontWeight={"semibold"}
+                        gap={"1"}
+                        fontSize={"xs"}
+                        onClick={() => {
+                          // Close the dropdown and navigate to the `/search` route
+                          onCloseWrapper();
+                          navigate("/search");
+                        }}
+                      >
+                        Search
+                        <Icon name={"a_right"} color={"black"} size={"xs"} />
+                      </Link>
+                    </Flex>
                   )}
-                  <Text fontSize={"xs"}>
-                    result
-                    {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
-                  </Text>
-                  <Link
-                    className={"light"}
-                    color={"black"}
-                    variant={"underline"}
-                    fontWeight={"semibold"}
-                    gap={"1"}
-                    fontSize={"xs"}
-                    onClick={() => {
-                      // Close the dropdown and navigate to the `/search` route
-                      onCloseWrapper();
-                      navigate("/search");
-                    }}
-                  >
-                    Search
-                    <Icon name={"a_right"} color={"black"} size={"xs"} />
-                  </Link>
                 </Flex>
               </Flex>
 
@@ -372,9 +370,12 @@ const SearchBox = () => {
                                 <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
                                   {result.name}
                                 </Text>
-                                <Text fontSize={"2xs"} color={"gray.500"}>
-                                  {resultType}
-                                </Text>
+                                <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.iconColor} />
+                                  <Text fontSize={"2xs"} color={"gray.500"}>
+                                    {resultType}
+                                  </Text>
+                                </Flex>
                               </Flex>
                               <Button
                                 size="2xs"
