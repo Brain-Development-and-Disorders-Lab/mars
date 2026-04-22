@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   CloseButton,
   Dialog,
@@ -339,70 +338,169 @@ const Template = () => {
                 Template Attributes
               </Flex>
             </Dialog.Header>
-            <Dialog.Body p={"1"}>
-              <Flex gap={"1"} direction={"column"}>
-                <Flex direction={"column"} gap={"1"} bg={"gray.100"} p={"1"} rounded={"md"}>
-                  <Heading size={"xs"}>Overview</Heading>
-                  <Text fontSize={"xs"}>
-                    Create a new template Attribute to be used to specify metadata associated with Entities. Using
-                    Values, predefined metadata fields can be associated with Entities. After creating a template
-                    Attribute, it can be used during the Entity creation process to pre-populate Attribute information
-                    and Entity metadata.
+            <Dialog.Body p={"2"}>
+              <Flex gap={"2"} direction={"column"}>
+                {/* Overview */}
+                <Flex
+                  direction={"column"}
+                  gap={"1"}
+                  bg={"gray.50"}
+                  p={"2"}
+                  rounded={"md"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                >
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                      What is a Template?
+                    </Text>
+                  </Flex>
+                  <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                    Templates define a set of metadata fields that can be applied to Entities during creation. Use them
+                    to pre-populate Attributes and keep metadata consistent across similar Entities.
                   </Text>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1"} ml={"0.5"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Values
+                {/* Value Types */}
+                <Flex direction={"column"} gap={"1.5"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                    Supported Value Types
                   </Text>
-                  <Text fontSize={"xs"}>
-                    Values can be added to the template Attribute by clicking "Add Value" and selecting the specific
-                    type of Value. There are six supported Value types:
-                  </Text>
-                  <Box as={"ul"} listStyleType={"circle"}>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"v_date"} color={"orange.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Date:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify a point in time.</Text>
+                  <Flex direction={"row"} wrap={"wrap"} gap={"1.5"}>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"orange.50"}
+                      border={"1px solid"}
+                      borderColor={"orange.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"v_date"} color={"orange.400"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Date
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          A point in time.
+                        </Text>
+                      </Flex>
                     </Flex>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"v_text"} color={"blue.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Text:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify text of variable length.</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"blue.50"}
+                      border={"1px solid"}
+                      borderColor={"blue.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"v_text"} color={"blue.400"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Text
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          Free-form text content.
+                        </Text>
+                      </Flex>
                     </Flex>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"v_number"} color={"green.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Number:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify a numerical value.</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"green.50"}
+                      border={"1px solid"}
+                      borderColor={"green.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"v_number"} color={"green.400"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Number
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          A numerical measurement.
+                        </Text>
+                      </Flex>
                     </Flex>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"v_url"} color={"yellow.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        URL:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify a link.</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"yellow.50"}
+                      border={"1px solid"}
+                      borderColor={"yellow.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"v_url"} color={"yellow.500"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          URL
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          A link to a web resource.
+                        </Text>
+                      </Flex>
                     </Flex>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"entity"} color={"purple.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Entity:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify a relation to another Entity.</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"purple.50"}
+                      border={"1px solid"}
+                      borderColor={"purple.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"entity"} color={"purple.400"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Entity
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          A reference to another Entity.
+                        </Text>
+                      </Flex>
                     </Flex>
-                    <Flex gap={"1"} align={"center"}>
-                      <Icon name={"v_select"} color={"teal.300"} />
-                      <Text fontWeight={"semibold"} fontSize={"xs"}>
-                        Select:
-                      </Text>
-                      <Text fontSize={"xs"}>Used to specify an option from a group of options.</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"teal.50"}
+                      border={"1px solid"}
+                      borderColor={"teal.100"}
+                      flex={"1"}
+                      minW={"200px"}
+                    >
+                      <Icon name={"v_select"} color={"teal.400"} size={"sm"} />
+                      <Flex direction={"column"} gap={"0"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Select
+                        </Text>
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          A choice from a defined set of options.
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Box>
+                  </Flex>
                 </Flex>
               </Flex>
             </Dialog.Body>

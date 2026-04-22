@@ -856,7 +856,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       >
         <Select.HiddenSelect />
         <Select.Control>
-          <Select.Trigger data-testid={`import-column-select-trigger-${key}`}>
+          <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
             <Select.ValueText placeholder={"Select Column"} />
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -1160,7 +1160,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger data-testid={"import-type-select-trigger"}>
+                      <Select.Trigger data-testid={"import-type-select-trigger"} rounded={"md"}>
                         <Select.ValueText placeholder={"Select file contents"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
@@ -1536,7 +1536,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger data-testid={"import-column-select-trigger-project"}>
+                              <Select.Trigger data-testid={"import-column-select-trigger-project"} rounded={"md"}>
                                 <Select.ValueText placeholder={"Select Project"} />
                               </Select.Trigger>
                               <Select.IndicatorGroup>
@@ -1646,7 +1646,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         >
                           <Select.HiddenSelect />
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger rounded={"md"}>
                               <Select.ValueText placeholder={"Select Template"} />
                             </Select.Trigger>
                             <Select.IndicatorGroup>

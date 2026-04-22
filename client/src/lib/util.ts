@@ -154,7 +154,7 @@ export const isAbortError = (errorOrMessage: unknown | string, name?: string): b
     message = errorOrMessage;
     errorName = name || "";
   } else {
-    // Called with (error) - parse it
+    // Called with (error)
     const parsed = parseError(errorOrMessage);
     message = parsed.message;
     errorName = parsed.name;

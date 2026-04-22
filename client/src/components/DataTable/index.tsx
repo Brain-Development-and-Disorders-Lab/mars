@@ -261,7 +261,7 @@ const customSortingFn = (
   const a = rowA.getValue(columnId);
   const b = rowB.getValue(columnId);
 
-  // Handle null/undefined - sort to the end
+  // Handle null/undefined, sort to the end
   if (a === null || a === undefined) {
     if (b === null || b === undefined) return 0;
     return 1; // a is null/undefined, b is not, so a comes after
@@ -372,7 +372,7 @@ const DataTable = (props: DataTableProps) => {
       if (typeof column.id === "string") {
         return column.id;
       }
-      // Handle id as function - convert to string or use fallback
+      // Handle id as function, convert to string or use fallback
       if (typeof column.id === "function") {
         // For function-based ids, we can't reliably extract a string id
         // Use accessorKey as fallback, or generate a stable id
@@ -1059,7 +1059,7 @@ const DataTable = (props: DataTableProps) => {
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
-                <Menu.Content p={1}>
+                <Menu.Content p={1} rounded={"md"}>
                   {props.actions && props.actions.length > 0 ? (
                     props.actions.map((action) => {
                       const isDisabled =

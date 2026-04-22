@@ -177,6 +177,54 @@ export class AI {
     };
   };
 
+  /**
+   * Suggest the best-fitting template for a new entity based on its name and description
+   * @param name Entity name
+   * @param description Entity description
+   * @param templates Available templates (id, name, description only)
+   * @return Matched template _id, or null if none fit
+   */
+  static suggestTemplate = async (
+    name: string,
+    description: string,
+    templates: { _id: string; name: string; description: string }[],
+  ): Promise<string | null> => {
+    if (templates.length === 0) return null;
+
+    const client = AI.createClient();
+    const model =
+      process.env.AI_PROVIDER === "azure"
+        ? process.env.AZURE_OPENAI_DEPLOYMENT!
+        : process.env.OPENAI_MODEL || "openai/gpt-oss-20b";
+
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a metadata assistant. Given an entity name and description, pick the best-fitting template from the list. Return ONLY the template _id string exactly as given, or null if none fit well.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
+            entity: { name, description },
+            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+          }),
+        },
+      ],
+      max_tokens: 64,
+      temperature: 0,
+    });
+
+    const content = response.choices[0]?.message?.content?.trim();
+    if (!content || content === "null") return null;
+
+    // Validate the returned ID is actually one of the provided templates
+    const match = templates.find((t) => t._id === content);
+    return match ? match._id : null;
+  };
+
   static translateSearch = async (query: string): Promise<string> => {
     if (!AI.isPlausibleQuery(query)) {
       throw new GraphQLError("Query does not appear to be a valid search", {

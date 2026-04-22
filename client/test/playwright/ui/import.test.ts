@@ -27,7 +27,7 @@ test.describe("Import", () => {
       await page.goto("/");
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
-      // Upload CSV file - relative to project root
+      // Upload CSV file
       const csvPath = path.resolve(process.cwd(), "test/playwright/fixtures/export_entities.csv");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(csvPath);
@@ -58,7 +58,7 @@ test.describe("Import", () => {
       await page.goto("/");
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
-      // Upload JSON file - relative to project root
+      // Upload JSON file
       const jsonPath = path.resolve(process.cwd(), "test/playwright/fixtures/export_entities.json");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(jsonPath);

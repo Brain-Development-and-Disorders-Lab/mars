@@ -164,6 +164,10 @@ const Entity = () => {
   }, [templates]);
   const [usingTemplate, setUsingTemplate] = useState(false);
 
+  // AI Template suggestions, `undefined`: not yet run, `null`: ran with no match, `string`: matched Template ID
+  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
+  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
+
   // Adding Templates to existing Entity
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
   const [attributeId, setAttributeId] = useState("");
@@ -324,6 +328,15 @@ const Entity = () => {
   const [exportEntity, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportEntity: string }>(
     EXPORT_ENTITY,
   );
+
+  const SUGGEST_TEMPLATE = gql`
+    query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
+      suggestTemplate(name: $name, description: $description, templates: $templates)
+    }
+  `;
+  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
+    fetchPolicy: "network-only",
+  });
 
   // Query to create a new Entity
   const CREATE_ENTITY = gql`
@@ -511,6 +524,29 @@ const Entity = () => {
   useEffect(() => {
     setIsAttributeValueError(attributeValues.length === 0 || attributeValues.some((value) => value.name === ""));
   }, [attributeValues]);
+
+  useEffect(() => {
+    if (!addAttributesOpen || templates.length === 0) return;
+    setSuggestedTemplateId(undefined);
+    setIsSuggestingTemplate(true);
+    const fetchTemplateSuggestion = async () => {
+      try {
+        const result = await runSuggestTemplate({
+          variables: {
+            name: entityName,
+            description: entityDescription,
+            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+          },
+        });
+        setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
+      } catch {
+        // Silently ignore, AI may not be configured
+      } finally {
+        setIsSuggestingTemplate(false);
+      }
+    };
+    fetchTemplateSuggestion();
+  }, [addAttributesOpen]);
 
   // Break up entity data into editable fields
   const [entity, setEntity] = useState<EntityModel>({} as EntityModel);
@@ -1603,7 +1639,7 @@ const Entity = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger rounded={"md"}>
                                 <Select.ValueText />
                               </Select.Trigger>
                               <Select.IndicatorGroup>
@@ -2429,57 +2465,104 @@ const Entity = () => {
               <Dialog.Body p={"1"}>
                 {/* Attribute creation */}
                 <Flex direction={"column"} gap={"1"} justify={"center"}>
-                  <Select.Root
-                    key={"select-template"}
-                    size={"xs"}
-                    collection={templatesCollection}
-                    disabled={templatesCollection.items.length === 0 || usingTemplate}
-                    onValueChange={(details) => {
-                      if (!_.isEqual(details.items[0], "")) {
-                        for (const template of templates) {
-                          if (_.isEqual(details.items[0], template._id)) {
-                            setAttributeName(template.name);
-                            setAttributeDescription(template.description);
-                            setAttributeValues(() => [...template.values]);
-                            break;
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Select.Root
+                      key={"select-template"}
+                      size={"xs"}
+                      rounded={"md"}
+                      collection={templatesCollection}
+                      disabled={templatesCollection.items.length === 0 || usingTemplate}
+                      onValueChange={(details) => {
+                        if (!_.isEqual(details.items[0], "")) {
+                          for (const template of templates) {
+                            if (_.isEqual(details.items[0], template._id)) {
+                              setAttributeName(template.name);
+                              setAttributeDescription(template.description);
+                              setAttributeValues(() => [...template.values]);
+                              break;
+                            }
                           }
                         }
-                      }
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Label fontSize={"xs"} ml={"0.5"}>
-                      Create from Template ({templatesCollection.items.length} available)
-                    </Select.Label>
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder={"Select Template"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal container={addAttributesContainerRef}>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {templatesCollection.items.map((template) => (
-                            <Select.Item
-                              item={template}
-                              key={template.value}
-                              onClick={() => addTemplateAttribute(template.value)}
-                            >
-                              {template.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Label fontSize={"xs"} ml={"0.5"}>
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Use Template ({templatesCollection.items.length} available)
+                          </Text>
+                          {isSuggestingTemplate && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                              <Text fontSize={"xs"} color={"purple.300"}>
+                                Suggesting...
+                              </Text>
+                            </Flex>
+                          )}
+                          {!isSuggestingTemplate && suggestedTemplateId && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                              <Text
+                                fontSize={"xs"}
+                                color={"purple.600"}
+                                cursor={"pointer"}
+                                _hover={{ textDecoration: "underline" }}
+                                onClick={() => addTemplateAttribute(suggestedTemplateId)}
+                              >
+                                Suggested: {templates.find((t) => t._id === suggestedTemplateId)?.name}
+                              </Text>
+                            </Flex>
+                          )}
+                          {!isSuggestingTemplate && suggestedTemplateId === null && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
+                              <Text fontSize={"xs"} color={"gray.400"}>
+                                No Suggestions
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+                      </Select.Label>
+                      <Select.Control>
+                        <Select.Trigger rounded={"md"}>
+                          <Select.ValueText placeholder={"Select Template"} />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal container={addAttributesContainerRef}>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {templatesCollection.items.map((template) => (
+                              <Select.Item
+                                item={template}
+                                key={template.value}
+                                onClick={() => addTemplateAttribute(template.value)}
+                              >
+                                {template.label}
+                                <Select.ItemIndicator />
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  </Flex>
 
                   <Flex direction={"column"} gap={"1"} w={"100%"} justify={"center"}>
                     <Flex p={"0"}>
-                      {usingTemplate && <Information text={`Using Template: ${attributeName} (${attributeId})`} />}
+                      {usingTemplate && (
+                        <Flex direction={"row"} gap={"0.5"}>
+                          <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                            Base Template:
+                          </Text>
+                          <Flex ml={"0.5"}>
+                            {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
+                            <Linky id={attributeId.slice(0, 10)} type={"templates"} size={"xs"} />
+                          </Flex>
+                        </Flex>
+                      )}
                     </Flex>
 
                     <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
@@ -2676,7 +2759,7 @@ const Entity = () => {
                     >
                       <Select.HiddenSelect />
                       <Select.Control>
-                        <Select.Trigger>
+                        <Select.Trigger rounded={"md"}>
                           <Select.ValueText placeholder={"Select Project"} />
                         </Select.Trigger>
                         <Select.IndicatorGroup>
@@ -2863,7 +2946,7 @@ const Entity = () => {
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
-                          <Select.Trigger>
+                          <Select.Trigger rounded={"md"}>
                             <Select.ValueText placeholder={"Select Relationship Type"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>
@@ -3009,7 +3092,7 @@ const Entity = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger rounded={"md"}>
                                 <Select.ValueText placeholder={"Select Export Format"} />
                               </Select.Trigger>
                               <Select.IndicatorGroup>

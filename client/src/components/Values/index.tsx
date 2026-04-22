@@ -739,7 +739,7 @@ const Values = (props: {
         >
           {/* Header Row */}
           <Flex gap={0} bg="gray.100" borderBottom="1px solid" borderColor="gray.200" direction="row">
-            {/* Drag Handle Column Header - only show in edit mode */}
+            {/* Drag Handle Column Header */}
             {!props.viewOnly && (
               <Box
                 w="40px"
@@ -1467,7 +1467,7 @@ const ValueRow = (props: {
       overflow="hidden"
       bg={props.isSelected ? "blue.50" : "transparent"}
     >
-      {/* Drag Handle Column - only show in edit mode */}
+      {/* Drag Handle Column */}
       {!props.viewOnly && (
         <Box
           w="40px"

@@ -1017,7 +1017,7 @@ const Project = () => {
                         >
                           <Select.HiddenSelect />
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger rounded={"md"}>
                               <Select.ValueText />
                             </Select.Trigger>
                             <Select.IndicatorGroup>
@@ -1673,7 +1673,7 @@ const Project = () => {
                             >
                               <Select.HiddenSelect />
                               <Select.Control>
-                                <Select.Trigger>
+                                <Select.Trigger rounded={"md"}>
                                   <Select.ValueText placeholder={"Select Export Format"} />
                                 </Select.Trigger>
                                 <Select.IndicatorGroup>

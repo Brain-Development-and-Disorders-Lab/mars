@@ -504,6 +504,7 @@ const Project = () => {
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}
+        size={"lg"}
         placement={"center"}
         closeOnEscape
         closeOnInteractOutside
@@ -527,31 +528,86 @@ const Project = () => {
                 Projects
               </Flex>
             </Dialog.Header>
-            <Dialog.Body p={"1"}>
-              <Flex direction={"column"} gap={"1"}>
-                <Flex direction={"column"} gap={"1"} bg={"gray.100"} p={"1"} rounded={"md"}>
-                  <Heading size={"xs"}>Overview</Heading>
-                  <Text fontSize={"xs"}>
-                    Projects can be used to organize and share Entities. Any type of Entity can be included in a
-                    Project. Entities can be added and removed from a Project after it has been created.
+            <Dialog.Body p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                {/* Overview */}
+                <Flex
+                  direction={"column"}
+                  gap={"1"}
+                  bg={"gray.50"}
+                  p={"2"}
+                  rounded={"md"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                >
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                      What is a Project?
+                    </Text>
+                  </Flex>
+                  <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                    Projects group Entities together. Use them to represent an experiment, study, or any collection of
+                    related work. Entities can be added or removed from a Project at any time.
                   </Text>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1"} ml={"0.5"}>
-                  <Heading size={"xs"}>Project Name</Heading>
-                  <Text fontSize={"xs"}>
-                    Specify the name of a Project. This should be unique and will act as a searchable identifier.
+                {/* Fields */}
+                <Flex direction={"column"} gap={"1.5"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                    Fields
                   </Text>
-
-                  <Heading size={"xs"}>Project Created</Heading>
-                  <Text fontSize={"xs"}>
-                    A timestamp assigned to the Project. For example, if this is a set of Entities used in a specific
-                    experiment, this date could represent when work on the experiment commenced. Otherwise, this
-                    timestamp may simply represent when this Project was created in Metadatify.
-                  </Text>
-
-                  <Heading size={"xs"}>Project Description</Heading>
-                  <Text fontSize={"xs"}>A brief description of the Project contents.</Text>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Flex
+                      direction={"column"}
+                      gap={"0.5"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"blue.50"}
+                      border={"1px solid"}
+                      borderColor={"blue.100"}
+                    >
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Name
+                      </Text>
+                      <Text fontSize={"xs"} color={"gray.600"}>
+                        A unique, searchable identifier for this Project. Choose something descriptive and memorable.
+                      </Text>
+                    </Flex>
+                    <Flex
+                      direction={"column"}
+                      gap={"0.5"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"orange.50"}
+                      border={"1px solid"}
+                      borderColor={"orange.100"}
+                    >
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Created
+                      </Text>
+                      <Text fontSize={"xs"} color={"gray.600"}>
+                        A timestamp for the Project. This could mark when an experiment started, or simply when the
+                        Project was added to Metadatify.
+                      </Text>
+                    </Flex>
+                    <Flex
+                      direction={"column"}
+                      gap={"0.5"}
+                      p={"2"}
+                      rounded={"md"}
+                      bg={"gray.50"}
+                      border={GLOBAL_STYLES.border.style}
+                      borderColor={GLOBAL_STYLES.border.color}
+                    >
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Description
+                      </Text>
+                      <Text fontSize={"xs"} color={"gray.600"}>
+                        A brief summary of what this Project contains or represents.
+                      </Text>
+                    </Flex>
+                  </Flex>
                 </Flex>
               </Flex>
             </Dialog.Body>

@@ -82,7 +82,7 @@ const authLink = new SetContextLink(async (previousContext, _operation) => {
  * Error handling for GraphQL errors that occur throughout the application
  */
 const errorLink = new ErrorLink(({ error, operation }) => {
-  // Suppress AbortErrors - expected when Apollo Client cancels queries
+  // Suppress AbortErrors, expected when Apollo Client cancels queries
   if (isAbortError(error)) {
     return;
   }
@@ -126,8 +126,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
         return;
       }
 
-      // Suppress "Workspace does not exist" errors - these are handled gracefully
-      // in activateWorkspace when checking if a stored workspace exists
+      // Suppress "Workspace does not exist" errors
       if (errorMessage === "Workspace does not exist") {
         return;
       }
@@ -136,7 +135,6 @@ const errorLink = new ErrorLink(({ error, operation }) => {
     // Network or other errors that aren't AbortErrors
     consola.error("Network or other error:", error);
   }
-  // All code paths handled - implicit void return
 });
 
 const client = new ApolloClient({

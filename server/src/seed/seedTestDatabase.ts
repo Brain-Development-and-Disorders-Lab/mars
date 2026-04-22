@@ -183,7 +183,7 @@ export const seedTestDatabase = async (): Promise<void> => {
 };
 
 /**
- * Main seeding function - can be run standalone or imported
+ * Main seeding function
  */
 async function seedDatabase(): Promise<void> {
   try {

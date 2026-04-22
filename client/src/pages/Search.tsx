@@ -160,7 +160,7 @@ const Search = () => {
     // Translate natural language to a MongoDB query, then run as a builder query
     if (isAISearch) {
       setIsTranslating(true);
-      // useLazyQuery resolves (not rejects) on GraphQL errors — check .error on the result
+      // useLazyQuery resolves (not rejects) on GraphQL errors
       const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
       setIsTranslating(false);
 

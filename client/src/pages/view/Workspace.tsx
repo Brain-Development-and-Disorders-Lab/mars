@@ -245,7 +245,7 @@ const Workspace = () => {
     refreshWorkspace();
   }, [workspace]);
 
-  // Effect to manage what contents are shown - only show archived items
+  // Effect to manage what contents are shown
   useEffect(() => {
     setShownEntities([...entities]);
     setSelectedEntities({});
