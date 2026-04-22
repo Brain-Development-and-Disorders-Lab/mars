@@ -56,9 +56,8 @@ export const EntitiesResolvers = {
       }
 
       // Determine archived filter value
-      // If archived is explicitly true, show all (including archived)
-      // If archived is false or undefined, show only non-archived
-      const archivedFilter: boolean | undefined = args.archived === true ? undefined : false;
+      // If archived is explicitly true, show only archived; false or undefined shows only non-archived
+      const archivedFilter: boolean = args.archived === true ? true : false;
 
       // Determine pagination parameters
       let page = 0;

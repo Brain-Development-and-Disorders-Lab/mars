@@ -64,7 +64,6 @@ const SearchSelect = (props: SearchSelectProps) => {
       const result = await getEntities({
         variables: {
           limit: 20,
-          archived: true,
         },
       });
 
