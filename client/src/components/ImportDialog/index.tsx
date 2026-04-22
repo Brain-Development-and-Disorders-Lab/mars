@@ -112,6 +112,10 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [columns, setColumns] = useState([] as string[]);
   const [columnsCollection, setColumnsCollection] = useState(createListCollection({ items: [] as string[] }));
 
+  // AI column mapping suggestions
+  const [suggestions, setSuggestions] = useState<{ name: string | null; description: string | null } | null>(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
   // Projects
   const [projectsCollection, setProjectsCollection] = useState(createListCollection({ items: [] as IGenericItem[] }));
 
@@ -219,6 +223,18 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
     nextCounterValues: ResponseData<string[]>;
   }>(GET_COUNTER_VALUES);
+
+  const SUGGEST_COLUMN_MAPPING = gql`
+    query SuggestColumnMapping($columns: [String]!) {
+      suggestColumnMapping(columns: $columns) {
+        name
+        description
+      }
+    }
+  `;
+  const [runSuggestColumnMapping] = useLazyQuery<{
+    suggestColumnMapping: { name: string | null; description: string | null };
+  }>(SUGGEST_COLUMN_MAPPING, { fetchPolicy: "network-only" });
 
   const IMPORT_ENTITY_CSV = gql`
     mutation ImportEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
@@ -786,19 +802,44 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  // Fetch AI column mapping suggestions when columns become available
+  useEffect(() => {
+    if (columns.length === 0 || fileType !== CSV_MIME_TYPE) return;
+
+    const fetchSuggestions = async () => {
+      setIsSuggesting(true);
+      try {
+        const result = await runSuggestColumnMapping({ variables: { columns } });
+        if (result.data?.suggestColumnMapping) {
+          setSuggestions(result.data.suggestColumnMapping);
+        }
+      } finally {
+        setIsSuggesting(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [columns]);
+
   /**
    * Factory-like pattern to generate general `Select` components
-   * @param {any} value Component value
-   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
+   * @param {string} key Unique key and test ID suffix
+   * @param {string} currentValue Currently selected value (controlled)
+   * @param {React.SetStateAction<string>} onValueChange State setter
    * @returns {ReactElement}
    */
-  const getSelectComponent = (key: string, onValueChange: React.Dispatch<React.SetStateAction<string>>) => {
+  const getSelectComponent = (
+    key: string,
+    currentValue: string,
+    onValueChange: React.Dispatch<React.SetStateAction<string>>,
+  ) => {
     return (
       <Select.Root
         key={key}
         size={"xs"}
         rounded={"md"}
         collection={columnsCollection}
+        value={currentValue ? [currentValue] : []}
         onValueChange={(details) => onValueChange(details.items[0])}
       >
         <Select.HiddenSelect />
@@ -976,6 +1017,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     // Reset import and mapping state
     setColumns([]);
     setColumnsCollection(createListCollection({ items: [] as string[] }));
+    setSuggestions(null);
+    setIsSuggesting(false);
     setNameField("");
     setNameUseCounter(false);
     setCounter("");
@@ -1326,7 +1369,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             <Field.RequiredIndicator />
                           </Field.Label>
                           <Flex direction={"row"} gap={"1"} w={"100%"}>
-                            {!nameUseCounter && getSelectComponent("name", setNameField)}
+                            {!nameUseCounter && getSelectComponent("name", nameField, setNameField)}
                             {nameUseCounter && <CounterSelect counter={counter} setCounter={setCounter} showCreate />}
                             <Button
                               size={"xs"}
@@ -1346,9 +1389,31 @@ const ImportDialog = (props: ImportDialogProps) => {
                             </Button>
                           </Flex>
                           {!nameUseCounter && (
-                            <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                              Column containing Entity name
-                            </Field.HelperText>
+                            <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                              <Field.HelperText fontSize={"xs"}>Column containing Entity name</Field.HelperText>
+                              {isSuggesting && (
+                                <>
+                                  <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                                  <Text fontSize={"xs"} color={"purple.300"}>
+                                    Suggesting...
+                                  </Text>
+                                </>
+                              )}
+                              {!isSuggesting && suggestions?.name && suggestions.name !== nameField && (
+                                <>
+                                  <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                                  <Text
+                                    fontSize={"xs"}
+                                    color={"purple.600"}
+                                    cursor={"pointer"}
+                                    _hover={{ textDecoration: "underline" }}
+                                    onClick={() => setNameField(suggestions.name!)}
+                                  >
+                                    Suggested: {suggestions.name}
+                                  </Text>
+                                </>
+                              )}
+                            </Flex>
                           )}
                         </Field.Root>
                       </Flex>
@@ -1400,15 +1465,42 @@ const ImportDialog = (props: ImportDialogProps) => {
                             Description
                           </Field.Label>
                           {fileType === CSV_MIME_TYPE ? (
-                            getSelectComponent("description", setDescriptionField)
+                            getSelectComponent("description", descriptionField, setDescriptionField)
                           ) : (
                             <Input size={"xs"} rounded={"md"} placeholder={'"description"'} disabled readOnly />
                           )}
-                          <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            {fileType === CSV_MIME_TYPE
-                              ? "Column containing Entity description"
-                              : "JSON field containing Entity description"}
-                          </Field.HelperText>
+                          <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                            <Field.HelperText fontSize={"xs"}>
+                              {fileType === CSV_MIME_TYPE
+                                ? "Column containing Entity description"
+                                : "JSON field containing Entity description"}
+                            </Field.HelperText>
+                            {fileType === CSV_MIME_TYPE && isSuggesting && (
+                              <>
+                                <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                                <Text fontSize={"xs"} color={"purple.300"}>
+                                  Suggesting...
+                                </Text>
+                              </>
+                            )}
+                            {fileType === CSV_MIME_TYPE &&
+                              !isSuggesting &&
+                              suggestions?.description &&
+                              suggestions.description !== descriptionField && (
+                                <Flex direction={"row"} align={"center"} gap={"1"} py={"0"}>
+                                  <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                                  <Text
+                                    fontSize={"xs"}
+                                    color={"purple.600"}
+                                    cursor={"pointer"}
+                                    _hover={{ textDecoration: "underline" }}
+                                    onClick={() => setDescriptionField(suggestions.description!)}
+                                  >
+                                    Suggested: {suggestions.description}
+                                  </Text>
+                                </Flex>
+                              )}
+                          </Flex>
                         </Field.Root>
 
                         {/* Project */}

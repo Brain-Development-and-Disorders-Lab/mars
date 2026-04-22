@@ -494,6 +494,12 @@ export const typedefs = `#graphql
     collaborators: Int
   }
 
+  # "ColumnMappingSuggestion" type for AI-suggested column mappings
+  type ColumnMappingSuggestion {
+    name: String
+    description: String
+  }
+
   # "SearchResult" union type
   union SearchResult = Entity | Project
 
@@ -571,6 +577,7 @@ export const typedefs = `#graphql
     # Search queries
     search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean, filters: EntityFilterInput): [SearchResult]
     translateSearch(query: String!): String
+    suggestColumnMapping(columns: [String]!): ColumnMappingSuggestion
 
     # Counters queries
     counter(_id: String): Counter

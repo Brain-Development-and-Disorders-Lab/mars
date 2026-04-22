@@ -113,7 +113,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
           title: "Authentication Error",
           description: "Unable to authenticate user. Please log in again.",
           type: "error",
-          closable: false,
+          closable: true,
           action: {
             label: "Login",
             onClick: () => {

@@ -104,6 +104,61 @@ export class AI {
     return /[a-zA-Z]{2,}/.test(query.trim());
   };
 
+  /**
+   * Suggest CSV column mappings for entity "name" and "description" fields
+   * @param columns CSV column names from the uploaded file
+   * @return Suggested column names, or null if no confident match
+   */
+  static suggestColumnMapping = async (
+    columns: string[],
+  ): Promise<{ name: string | null; description: string | null }> => {
+    const client = AI.createClient();
+    const model =
+      process.env.AI_PROVIDER === "azure"
+        ? process.env.AZURE_OPENAI_DEPLOYMENT!
+        : process.env.OPENAI_MODEL || "openai/gpt-oss-20b";
+
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "user",
+          content: `From these CSV column headers, pick which one best represents an entity name (title/identifier) and which best represents a description. Return ONLY a JSON object — use the exact column string or JSON null:\n{"name":"exact_column_or_null","description":"exact_column_or_null"}\nColumns: ${columns.join(", ")}`,
+        },
+      ],
+      max_tokens: 64,
+      temperature: 0,
+    });
+
+    const content = response.choices[0]?.message?.content?.trim();
+    if (!content) return { name: null, description: null };
+
+    // Strip markdown code fences if present
+    const cleaned = content
+      .replace(/^```[a-z]*\n?/i, "")
+      .replace(/\n?```$/, "")
+      .trim();
+
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return { name: null, description: null };
+    }
+
+    // Case-insensitive match against actual column names so the model's
+    // casing variations ("Name" vs "name") still resolve correctly.
+    const findColumn = (suggestion: unknown): string | null => {
+      if (!suggestion || typeof suggestion !== "string") return null;
+      return columns.find((c) => c.toLowerCase() === suggestion.toLowerCase()) ?? null;
+    };
+
+    return {
+      name: findColumn(parsed.name),
+      description: findColumn(parsed.description),
+    };
+  };
+
   static translateSearch = async (query: string): Promise<string> => {
     if (!AI.isPlausibleQuery(query)) {
       throw new GraphQLError("Query does not appear to be a valid search", {

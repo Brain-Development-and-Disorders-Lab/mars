@@ -698,7 +698,13 @@ const Entities = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             {/* Heading and close button */}
-            <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} borderColor={GLOBAL_STYLES.border.color}>
+            <Dialog.Header
+              p={"2"}
+              fontWeight={"semibold"}
+              roundedTop={"md"}
+              borderColor={GLOBAL_STYLES.border.color}
+              bg={GLOBAL_STYLES.dialog.headerColor}
+            >
               <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                 <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
                   <Icon name={"download"} size={"xs"} />
@@ -761,14 +767,7 @@ const Entities = () => {
                   </Flex>
                 </Flex>
 
-                <Flex
-                  w={"100%"}
-                  direction={"column"}
-                  gap={"2"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
-                  rounded={"md"}
-                >
+                <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"}>
                   <DataTable
                     columns={exportTableColumns}
                     data={toExport}
