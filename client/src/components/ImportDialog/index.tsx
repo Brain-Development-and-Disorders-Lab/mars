@@ -176,6 +176,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         _id
         name
         description
+        owner
         values {
           _id
           data
@@ -1346,7 +1347,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           </Flex>
                           {!nameUseCounter && (
                             <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                              Column containing Entity names
+                              Column containing Entity name
                             </Field.HelperText>
                           )}
                         </Field.Root>
@@ -1371,7 +1372,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             onChange={(event) => setNamePrefixField(event.target.value)}
                           />
                           <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Add a prefix to each Entity name
+                            Append a prefix to each Entity name
                           </Field.HelperText>
                         </Field.Root>
 
@@ -1379,9 +1380,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Field.Label fontSize={"xs"} ml={"0.5"}>
                             Name
                           </Field.Label>
-                          <Input size={"xs"} rounded={"md"} placeholder={"Defined in JSON"} disabled readOnly />
+                          <Input size={"xs"} rounded={"md"} placeholder={'"name"'} disabled readOnly />
                           <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Field containing Entity names
+                            JSON field containing Entity name
                           </Field.HelperText>
                         </Field.Root>
                       </Flex>
@@ -1401,12 +1402,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                           {fileType === CSV_MIME_TYPE ? (
                             getSelectComponent("description", setDescriptionField)
                           ) : (
-                            <Input size={"xs"} rounded={"md"} placeholder={"Defined in JSON"} disabled readOnly />
+                            <Input size={"xs"} rounded={"md"} placeholder={'"description"'} disabled readOnly />
                           )}
                           <Field.HelperText fontSize={"xs"} ml={"0.5"}>
                             {fileType === CSV_MIME_TYPE
-                              ? "Column containing Entity descriptions"
-                              : "Field containing Entity descriptions"}
+                              ? "Column containing Entity description"
+                              : "JSON field containing Entity description"}
                           </Field.HelperText>
                         </Field.Root>
 
@@ -1493,8 +1494,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Text>
                 ) : (
                   <Text fontSize={"xs"} ml={"0.5"}>
-                    Attributes defined in JSON will be preserved. Use an existing Template Attribute from the drop-down
-                    or create a new Attribute to be added to all Entities.
+                    Existing Attributes defined in JSON will be preserved. Use an existing Template Attribute from the
+                    drop-down or create a new Attribute to be added to all imported Entities.
                   </Text>
                 )}
 
@@ -1516,7 +1517,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   setAttributesField([
                                     ...attributesField,
                                     {
-                                      _id: `a-${nanoid(6)}`,
+                                      _id: `${template._id}-${nanoid(6)}`,
                                       name: template.name,
                                       timestamp: template.timestamp,
                                       owner: template.owner,

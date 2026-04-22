@@ -91,7 +91,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 {props.isTemplate && (
                   <Flex direction={"row"} gap={"0.5"}>
                     <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                      Created From:
+                      Base Template:
                     </Text>
                     <Flex ml={"0.5"}>
                       {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}

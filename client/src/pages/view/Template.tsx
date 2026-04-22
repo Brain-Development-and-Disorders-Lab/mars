@@ -515,9 +515,6 @@ const Template = () => {
         if (modifications.length > 0) {
           return (
             <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Text fontWeight={"semibold"} fontSize={"xs"}>
-                Modified:
-              </Text>
               {modifications.map((modification) => {
                 return (
                   <Tag.Root colorPalette={"orange"}>
@@ -530,7 +527,7 @@ const Template = () => {
         } else {
           return (
             <Tag.Root colorPalette={"green"}>
-              <Tag.Label fontSize={"xs"}>Original</Tag.Label>
+              <Tag.Label fontSize={"xs"}>None</Tag.Label>
             </Tag.Root>
           );
         }
