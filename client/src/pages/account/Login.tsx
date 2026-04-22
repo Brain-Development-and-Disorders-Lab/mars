@@ -95,7 +95,7 @@ const Login = () => {
         description: "Unable to authenticate user. Please log in again.",
         type: "error",
         duration: 4000,
-        closable: false,
+        closable: true,
       });
     } else {
       navigate("/");

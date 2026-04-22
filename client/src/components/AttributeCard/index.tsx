@@ -21,18 +21,20 @@ const AttributeCard = (props: AttributeCardProps) => {
   const [name, setName] = useState(props.name);
   const [description, setDescription] = useState(props.description);
   const [values, setValues] = useState(props.values);
-  const [finished, setFinished] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
 
+  // Attribute Validation
   const isNameError = name === "";
   const isDescriptionError = description === "";
   const [validValues, setValidValues] = useState(false);
-
-  const validAttributes = !isNameError && !isDescriptionError && validValues && values.length > 0;
+  const validAttribute = !isNameError && !isDescriptionError && validValues && values.length > 0;
 
   useEffect(() => {
     setValidValues(isValidValues(values));
-  }, [values]);
+    if (validAttribute && props.onUpdate) {
+      props.onUpdate(attributeCardData);
+    }
+  }, [name, description, values]);
 
   const attributeCardData: AttributeCardProps = {
     _id: props._id,
@@ -98,21 +100,6 @@ const AttributeCard = (props: AttributeCardProps) => {
               Remove
               <Icon name={"delete"} size={"xs"} />
             </Button>
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              onClick={() => {
-                setFinished(true);
-                if (props.onUpdate) {
-                  props.onUpdate(attributeCardData);
-                }
-              }}
-              disabled={finished || !validAttributes}
-            >
-              Save
-              <Icon name={"save"} size={"xs"} />
-            </Button>
           </Flex>
         </Flex>
         <Collapsible.Content>
@@ -145,7 +132,6 @@ const AttributeCard = (props: AttributeCardProps) => {
                             placeholder={"Name"}
                             value={name}
                             onChange={(event) => setName(event.target.value)}
-                            disabled={finished}
                           />
                         </Field.Root>
                       </Fieldset.Content>
@@ -189,7 +175,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         maxHeight={400}
                         style={{ width: "100%" }}
                         value={description}
-                        preview={finished ? "preview" : "edit"}
+                        preview={"edit"}
                         extraCommands={[]}
                         onChange={(value) => {
                           setDescription(value || "");
@@ -203,15 +189,9 @@ const AttributeCard = (props: AttributeCardProps) => {
 
             {attributeCardData.restrictDataValues ? (
               // Restrict the data to options from a drop-down
-              <Values
-                viewOnly={finished}
-                values={values}
-                setValues={setValues}
-                permittedValues={props.permittedDataValues}
-                requireData
-              />
+              <Values values={values} setValues={setValues} permittedValues={props.permittedDataValues} requireData />
             ) : (
-              <Values viewOnly={finished} values={values} setValues={setValues} requireData />
+              <Values values={values} setValues={setValues} requireData />
             )}
           </Flex>
         </Collapsible.Content>
