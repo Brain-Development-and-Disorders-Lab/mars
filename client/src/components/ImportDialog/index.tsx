@@ -117,7 +117,13 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   // Projects
-  const [projectsCollection, setProjectsCollection] = useState(createListCollection({ items: [] as IGenericItem[] }));
+  const [projectsCollection, setProjectsCollection] = useState(
+    createListCollection({
+      items: [] as IGenericItem[],
+      itemToValue: (item: IGenericItem) => item._id,
+      itemToString: (item: IGenericItem) => item.name,
+    }),
+  );
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
@@ -558,7 +564,13 @@ const ImportDialog = (props: ImportDialogProps) => {
       setTemplatesCollection(createListCollection({ items: response.data.templates }));
     }
     if (response.data?.projects) {
-      setProjectsCollection(createListCollection({ items: response.data.projects }));
+      setProjectsCollection(
+        createListCollection({
+          items: response.data.projects,
+          itemToValue: (item: IGenericItem) => item._id,
+          itemToString: (item: IGenericItem) => item.name,
+        }),
+      );
     }
 
     if (mappingDataError) {
@@ -1024,7 +1036,13 @@ const ImportDialog = (props: ImportDialogProps) => {
     setCounter("");
     setDescriptionField("");
     setProjectField("");
-    setProjectsCollection(createListCollection({ items: [] as IGenericItem[] }));
+    setProjectsCollection(
+      createListCollection({
+        items: [] as IGenericItem[],
+        itemToValue: (item: IGenericItem) => item._id,
+        itemToString: (item: IGenericItem) => item.name,
+      }),
+    );
     setTemplatesCollection(createListCollection({ items: [] as AttributeModel[] }));
     setAttributesField([]);
     setReviewEntities([]);
@@ -1513,6 +1531,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             size={"xs"}
                             rounded={"md"}
                             collection={projectsCollection}
+                            value={[projectField]}
                             onValueChange={(details) => setProjectField(details.items[0]._id)}
                           >
                             <Select.HiddenSelect />
