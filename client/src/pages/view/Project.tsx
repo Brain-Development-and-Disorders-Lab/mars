@@ -1570,7 +1570,9 @@ const Project = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"} gap={"1"}>
-                <Text fontSize={"xs"}>Select an Entity to add to the Project.</Text>
+                <Text fontSize={"xs"} ml={"0.5"}>
+                  Select an Entity to add to the Project.
+                </Text>
                 <SearchSelect
                   id={"entitySearchSelect"}
                   resultType={"entity"}
@@ -1579,7 +1581,7 @@ const Project = () => {
                 />
                 {project.entities && project.entities.includes(selectedEntity._id) && (
                   <Text fontSize={"xs"} color={"red"} ml={"0.5"}>
-                    Entity is already linked to this Project
+                    Entity is already in this Project
                   </Text>
                 )}
               </Dialog.Body>

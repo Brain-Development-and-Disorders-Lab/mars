@@ -1,6 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import { Flex, Input, Button, Text, Heading, IconButton, Tag, Fieldset, Field } from "@chakra-ui/react";
+import { Flex, Input, Button, Text, Heading, IconButton, Tag, Fieldset, Field, EmptyState } from "@chakra-ui/react";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -1001,9 +1001,14 @@ const User = () => {
                     showPagination
                   />
                 ) : (
-                  <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.400"} ml={"0.5"}>
-                    No API keys
-                  </Text>
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"key"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No API keys</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
                 )}
               </Flex>
             </Flex>

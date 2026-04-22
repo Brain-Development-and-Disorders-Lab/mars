@@ -2725,7 +2725,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                     <Icon name={"project"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Link Entity to Project
+                      Add Entity to Project
                     </Text>
                   </Flex>
                   <Dialog.CloseTrigger asChild>
@@ -2856,7 +2856,7 @@ const Entity = () => {
                       }}
                       disabled={selectedProjects.length === 0}
                     >
-                      Link Entity to {selectedProjects.length} Project
+                      Add Entity to {selectedProjects.length} Project
                       {selectedProjects.length === 1 ? "" : "s"}
                       <Icon name={"check"} size={"xs"} />
                     </Button>

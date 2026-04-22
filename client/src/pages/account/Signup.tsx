@@ -416,7 +416,7 @@ const Signup = () => {
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
-                          <Select.Trigger data-testid="affiliation-select-trigger">
+                          <Select.Trigger data-testid="affiliation-select-trigger" rounded={"md"}>
                             <Select.ValueText placeholder={"Select your affiliation"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>

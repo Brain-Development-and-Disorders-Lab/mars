@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Input, Button, Flex, InputGroup, Text, Spinner, Box } from "@chakra-ui/react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Input, Button, Flex, InputGroup, Text, Spinner, Box, Stack, Separator } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
@@ -56,7 +56,13 @@ const SearchSelect = (props: SearchSelectProps) => {
   }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
   const [placeholder, setPlaceholder] = useState("Select Result");
+  const [inputValue, setInputValue] = useState(props.value?.name || "");
   const [options, setOptions] = useState([] as IGenericItem[]);
+
+  // Sync input display value when the selected value changes externally
+  useEffect(() => {
+    setInputValue(props.value?.name || "");
+  }, [props.value]);
 
   const getSelectOptions = async () => {
     if (props.resultType == "entity") {
@@ -102,9 +108,9 @@ const SearchSelect = (props: SearchSelectProps) => {
     if (props.placeholder) {
       setPlaceholder(props.placeholder);
     } else if (props.resultType === "entity") {
-      setPlaceholder("Select Entity");
+      setPlaceholder("Search Entities...");
     } else if (props.resultType === "project") {
-      setPlaceholder("Select Project");
+      setPlaceholder("Search Projects...");
     }
   }, []);
 
@@ -145,39 +151,43 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [showResults, setShowResults] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Function to fetch results based on the search term
-  const fetchResults = debounce(async (query) => {
-    const results = await searchText({
-      variables: {
-        query: query,
-        resultType: props.resultType,
-        isBuilder: false,
-        showArchived: false,
-      },
-    }).catch(ignoreAbort);
-    if (!results) return;
+  // First result whose name starts with the current input, used for inline ghost text
+  const topSuggestion = useMemo(() => {
+    if (!inputValue) return null;
+    const list = hasSearched ? results : options;
+    return list.find((item) => item.name.toLowerCase().startsWith(inputValue.toLowerCase())) || null;
+  }, [inputValue, hasSearched, results, options]);
 
-    if (results.data?.search) {
-      setResults(results.data.search);
+  // Stable debounced fetch, useMemo ensures the debounce timer isn't reset on every render
+  const fetchResults = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        const results = await searchText({
+          variables: { query, resultType: props.resultType, isBuilder: false, showArchived: false },
+        }).catch(ignoreAbort);
+        if (!results) return;
 
-      // Once results have been updated, set `hasSearched` state
-      setHasSearched(true);
-    } else {
-      setResults([]);
-    }
+        if (results.data?.search) {
+          setResults(results.data.search);
+          setHasSearched(true);
+        } else {
+          setResults([]);
+        }
 
-    if (searchError || !results.data?.search) {
-      toaster.create({
-        title: "Error",
-        type: "error",
-        description: searchError || "Unable to retrieve search results",
-        duration: 4000,
-        closable: true,
-      });
-    } else {
-      setShowResults(true);
-    }
-  }, 200);
+        if (searchError || !results.data?.search) {
+          toaster.create({
+            title: "Error",
+            type: "error",
+            description: searchError || "Unable to retrieve search results",
+            duration: 4000,
+            closable: true,
+          });
+        } else {
+          setShowResults(true);
+        }
+      }, 300),
+    [searchText],
+  );
 
   /**
    * Handle clicking the `Input` component dropdown
@@ -201,56 +211,90 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   };
 
-  /**
-   * Handle search text input
-   * @param event Input event
-   */
-  const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.value === "") {
-      // Case where search input is empty, reset `hasSearched` state
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInputValue(value);
+
+    if (value === "") {
       setHasSearched(false);
+      return;
     }
 
-    if (event.target.value.length > 0) {
-      await fetchResults(event.target.value);
+    if (!showResults && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+      setShowResults(true);
+      setTimeout(() => setIsAnimating(true), 10);
     }
+
+    fetchResults(value);
   };
 
-  /**
-   * Handle selecting an result from the collection of search results
-   * @param {IGenericItem} result Selected result
-   */
   const handleSelectResult = (result: IGenericItem) => {
-    // Reset state
     setResults([]);
     setShowResults(false);
     setHasSearched(false);
-
-    // Invoke the `onChange` callback if specified
+    setInputValue(result.name);
     props.onChange?.(result);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Tab" && topSuggestion) {
+      e.preventDefault();
+      handleSelectResult(topSuggestion);
+    }
   };
 
   return (
     <Box id={props.id || "searchSelect"} position="relative" w="100%">
-      <InputGroup
-        ref={inputRef}
-        data-testid={"search-select"}
-        onClick={onInputClick}
-        endElement={showResults ? <Icon name={"c_up"} size={"xs"} /> : <Icon name={"c_down"} size={"xs"} />}
-      >
-        <Input
-          placeholder={placeholder}
-          value={props.value?.name || ""}
-          backgroundColor={"white"}
-          data-testid={"value-editor"}
-          size={"xs"}
-          rounded={props.isEmbedded ? "none" : "md"}
-          border={props.isEmbedded ? "none" : GLOBAL_STYLES.border.style}
-          borderColor={props.isEmbedded ? "" : GLOBAL_STYLES.border.color}
-          disabled={props?.disabled || false}
-          readOnly
-        />
-      </InputGroup>
+      <Box position="relative">
+        <InputGroup
+          ref={inputRef}
+          data-testid={"search-select"}
+          onClick={onInputClick}
+          endElement={showResults ? <Icon name={"c_up"} size={"xs"} /> : <Icon name={"c_down"} size={"xs"} />}
+        >
+          <Input
+            placeholder={placeholder}
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            backgroundColor={"transparent"}
+            data-testid={"value-editor"}
+            size={"xs"}
+            rounded={props.isEmbedded ? "none" : "md"}
+            border={props.isEmbedded ? "none" : GLOBAL_STYLES.border.style}
+            borderColor={props.isEmbedded ? "" : GLOBAL_STYLES.border.color}
+            disabled={props?.disabled || false}
+          />
+        </InputGroup>
+        {topSuggestion && (
+          <Box
+            position="absolute"
+            inset="0"
+            display="flex"
+            alignItems="center"
+            px="2"
+            fontSize="xs"
+            pointerEvents="none"
+            overflow="hidden"
+            whiteSpace="nowrap"
+            bg="white"
+            zIndex={-1}
+          >
+            <Text as="span" opacity={0} whiteSpace="pre">
+              {inputValue}
+            </Text>
+            <Text as="span" color="gray.400" whiteSpace="pre">
+              {topSuggestion.name.slice(inputValue.length)}
+            </Text>
+          </Box>
+        )}
+      </Box>
       {showResults && (
         <>
           {/* Capture external clicks */}
@@ -285,35 +329,25 @@ const SearchSelect = (props: SearchSelectProps) => {
             transform={isAnimating ? "translateY(0)" : "translateY(-8px)"}
             transition="all 0.15s ease-in-out"
           >
-            <Input
-              className={"search-select-input"}
-              size={"xs"}
-              rounded={"md"}
-              placeholder={"Search"}
-              onChange={handleInputChange}
-              autoFocus
-              mb={"2"}
-            />
-
             <Box maxH="200px" overflowY="auto" className={"search-select-results"}>
               {/* Has searched, search operation complete, multiple results */}
-              {hasSearched &&
-                searchLoading === false &&
-                results.length > 0 &&
-                results.map((result: IGenericItem) => (
-                  <Button
-                    key={result._id}
-                    variant="ghost"
-                    onClick={() => handleSelectResult(result)}
-                    width="full"
-                    disabled={searchLoading}
-                    size="xs"
-                    justifyContent="flex-start"
-                    mb="1"
-                  >
-                    {result.name}
-                  </Button>
-                ))}
+              {hasSearched && searchLoading === false && results.length > 0 && (
+                <Stack gap="1" separator={<Separator />} w="100%">
+                  {results.map((result: IGenericItem) => (
+                    <Button
+                      key={result._id}
+                      variant="ghost"
+                      onClick={() => handleSelectResult(result)}
+                      width="full"
+                      disabled={searchLoading}
+                      size="xs"
+                      justifyContent="flex-start"
+                    >
+                      {result.name}
+                    </Button>
+                  ))}
+                </Stack>
+              )}
 
               {/* Has searched, search operation complete, no results */}
               {hasSearched && searchLoading === false && results.length === 0 && (
@@ -324,28 +358,27 @@ const SearchSelect = (props: SearchSelectProps) => {
                 </Flex>
               )}
 
-              {/* Has not yet searched, search operation complete */}
-              {!hasSearched &&
-                searchLoading === false &&
-                options &&
-                options.length > 0 &&
-                options.map((option: IGenericItem) => (
-                  <Button
-                    key={option._id}
-                    variant="ghost"
-                    onClick={() => handleSelectResult(option)}
-                    width="full"
-                    disabled={entitiesLoading || projectsLoading}
-                    size="xs"
-                    justifyContent="flex-start"
-                    mb="1"
-                  >
-                    {_.truncate(option.name, { length: 24 })}
-                  </Button>
-                ))}
+              {/* Has not yet searched, show pre-loaded options */}
+              {!hasSearched && inputValue === "" && searchLoading === false && options && options.length > 0 && (
+                <Stack gap="1" separator={<Separator />} w="100%">
+                  {options.map((option: IGenericItem) => (
+                    <Button
+                      key={option._id}
+                      variant="ghost"
+                      onClick={() => handleSelectResult(option)}
+                      width="full"
+                      disabled={entitiesLoading || projectsLoading}
+                      size="xs"
+                      justifyContent="flex-start"
+                    >
+                      {_.truncate(option.name, { length: 24 })}
+                    </Button>
+                  ))}
+                </Stack>
+              )}
 
-              {/* Search operation in-progress */}
-              {searchLoading === true && (
+              {/* Search pending or in-progress */}
+              {(searchLoading === true || (inputValue.length > 0 && !hasSearched)) && (
                 <Flex w="100%" minH="100px" align="center" justify="center">
                   <Spinner />
                 </Flex>
