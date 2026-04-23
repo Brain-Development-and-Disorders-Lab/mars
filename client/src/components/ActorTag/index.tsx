@@ -87,11 +87,13 @@ const ActorTag = (props: ActorTagProps) => {
     );
   }
 
-  return props.inline ? (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={loading ? "gray" : pickPalette(actorLabel)}>
-        <Avatar.Fallback name={loading ? "" : actorLabel} />
-      </Avatar.Root>
+  return props.inline || props.inlineNoAvatar ? (
+    <Flex direction={"row"} gap={"0.5"} align={"center"} w={"fit-content"}>
+      {(_.isUndefined(props.inlineNoAvatar) || props.inlineNoAvatar === false) && (
+        <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={loading ? "gray" : pickPalette(actorLabel)}>
+          <Avatar.Fallback name={loading ? "" : actorLabel} />
+        </Avatar.Root>
+      )}
       <Skeleton asChild loading={loading} w={"120px"}>
         <Badge fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
           {!loading && actorLabel}
