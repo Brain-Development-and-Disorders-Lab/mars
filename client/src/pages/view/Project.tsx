@@ -190,8 +190,9 @@ const Project = () => {
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Entities that can be added
+  // Entities staged for adding
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
+  const [selectedEntities, setSelectedEntities] = useState<IGenericItem[]>([]);
 
   // Export modal state and data
   const selectExportFormatRef = useRef(null);
@@ -337,8 +338,10 @@ const Project = () => {
    * Callback function to add Entities to a Project
    * @param {IGenericItem} entity Entity to add
    */
-  const addEntities = (entity: IGenericItem): void => {
-    setProjectEntities([...projectEntities, entity._id]);
+  const addEntities = (): void => {
+    setProjectEntities([...projectEntities, ...selectedEntities.map((e) => e._id)]);
+    setSelectedEntities([]);
+    setSelectedEntity({} as IGenericItem);
     setEntitiesOpen(false);
   };
 
@@ -1560,9 +1563,9 @@ const Project = () => {
                 roundedTop={"md"}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"add"} size={"xs"} />
+                  <Icon name={"entity"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Add Entity
+                    Add Entities to Project
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
@@ -1570,20 +1573,73 @@ const Project = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"} gap={"1"}>
-                <Text fontSize={"xs"} ml={"0.5"}>
-                  Select an Entity to add to the Project.
-                </Text>
-                <SearchSelect
-                  id={"entitySearchSelect"}
-                  resultType={"entity"}
-                  value={selectedEntity}
-                  onChange={setSelectedEntity}
-                />
-                {project.entities && project.entities.includes(selectedEntity._id) && (
-                  <Text fontSize={"xs"} color={"red"} ml={"0.5"}>
-                    Entity is already in this Project
-                  </Text>
-                )}
+                <Flex direction={"column"} gap={"1"}>
+                  <SearchSelect
+                    id={"entitySearchSelect"}
+                    resultType={"entity"}
+                    value={selectedEntity}
+                    onChange={(selection) => {
+                      let invalidSelection = false;
+                      setSelectedEntities((previousEntities) => {
+                        const alreadyStaged = previousEntities.some((entity) => entity._id === selection._id);
+                        const alreadyInProject = projectEntities.includes(selection._id);
+                        invalidSelection = alreadyStaged || alreadyInProject;
+
+                        return alreadyStaged || alreadyInProject ? previousEntities : [...previousEntities, selection];
+                      });
+
+                      // Show warning if invalid Entity selection
+                      if (invalidSelection) {
+                        toaster.create({
+                          title: "Cannot add Entity",
+                          description: "Entity already staged or in Project already",
+                          type: "warning",
+                          duration: 2000,
+                          closable: true,
+                        });
+                      }
+
+                      setSelectedEntity({} as IGenericItem);
+                    }}
+                    placeholder={"Search entities..."}
+                  />
+                  <Flex
+                    direction={"row"}
+                    gap={"1"}
+                    p={"1"}
+                    align={"center"}
+                    justify={"center"}
+                    rounded={"md"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
+                    minH={"60px"}
+                    wrap={"wrap"}
+                  >
+                    {selectedEntities.length > 0 ? (
+                      selectedEntities.map((entity) => (
+                        <Tag.Root key={entity._id} bg={"white"} rounded={"md"} pl={"0"}>
+                          <Tag.Label p={"0"} fontSize={"xs"}>
+                            <Flex w={"100%"} justify={"left"}>
+                              <Linky id={entity._id} type={"entities"} size={"xs"} />
+                            </Flex>
+                          </Tag.Label>
+                          <Tag.EndElement mr={"0"}>
+                            <Tag.CloseTrigger
+                              onClick={() => setSelectedEntities(selectedEntities.filter((e) => e._id !== entity._id))}
+                            />
+                          </Tag.EndElement>
+                        </Tag.Root>
+                      ))
+                    ) : (
+                      <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
+                        <Icon name={"entity"} size={"md"} color={GLOBAL_STYLES.entity.lightColor} />
+                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                          No Entities selected
+                        </Text>
+                      </Flex>
+                    )}
+                  </Flex>
+                </Flex>
               </Dialog.Body>
 
               <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
@@ -1592,28 +1648,25 @@ const Project = () => {
                   size={"xs"}
                   rounded={"md"}
                   variant={"solid"}
-                  onClick={() => setEntitiesOpen(false)}
+                  onClick={() => {
+                    setSelectedEntities([]);
+                    setSelectedEntity({} as IGenericItem);
+                    setEntitiesOpen(false);
+                  }}
                 >
                   Cancel
                   <Icon name={"cross"} size={"xs"} />
                 </Button>
-
                 <Spacer />
-
                 <Button
                   id={"addEntityDoneButton"}
                   colorPalette={"green"}
                   size={"xs"}
                   rounded={"md"}
-                  disabled={(project.entities && project.entities.includes(selectedEntity._id)) || !selectedEntity._id}
-                  onClick={() => {
-                    if (id) {
-                      // Add the Origin to the Entity
-                      addEntities(selectedEntity);
-                    }
-                  }}
+                  disabled={selectedEntities.length === 0}
+                  onClick={addEntities}
                 >
-                  Done
+                  Add {selectedEntities.length} {selectedEntities.length === 1 ? "Entity" : "Entities"}
                   <Icon name={"check"} size={"xs"} />
                 </Button>
               </Dialog.Footer>
