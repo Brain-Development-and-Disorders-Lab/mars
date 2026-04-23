@@ -44,6 +44,7 @@ import { useStorage } from "@hooks/useStorage";
 // Utilities
 import { isAbortError } from "@lib/util";
 import consola from "consola";
+import "@lib/errors";
 
 // Application
 import App from "./App";
