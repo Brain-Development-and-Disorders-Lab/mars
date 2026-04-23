@@ -130,6 +130,10 @@ const Entity = () => {
   // Selected template value for the Select component
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
 
+  // AI Template suggestions, `undefined`: not yet run, `null`: ran with no match, `string`: matched Template ID
+  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
+  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
+
   // Authentication and user
   /**
    * Helper function to get user information
@@ -228,6 +232,15 @@ const Entity = () => {
     createEntity: ResponseData<string>;
   }>(CREATE_ENTITY);
 
+  const SUGGEST_TEMPLATE = gql`
+    query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
+      suggestTemplate(name: $name, description: $description, templates: $templates)
+    }
+  `;
+  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
+    fetchPolicy: "network-only",
+  });
+
   // Assign data
   useEffect(() => {
     if (data?.projects) {
@@ -284,6 +297,29 @@ const Entity = () => {
 
       setPageState("attributes");
       setPageStep(2);
+
+      // Fire AI template suggestion in the background if templates are available
+      if (templates.length > 0) {
+        setIsSuggestingTemplate(true);
+        setSuggestedTemplateId(null);
+        const fetchTemplateSuggestion = async () => {
+          try {
+            const result = await runSuggestTemplate({
+              variables: {
+                name,
+                description,
+                templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+              },
+            });
+            setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
+          } catch {
+            // Silently ignore, error could be related to AI configuration
+          } finally {
+            setIsSuggestingTemplate(false);
+          }
+        };
+        fetchTemplateSuggestion();
+      }
     } else if (_.isEqual("attributes", pageState)) {
       // Capture event
       posthog.capture("create_entity_finished");
@@ -638,7 +674,7 @@ const Entity = () => {
                     >
                       <Select.HiddenSelect />
                       <Select.Control>
-                        <Select.Trigger data-testid={"select-relationship-type"}>
+                        <Select.Trigger data-testid={"select-relationship-type"} rounded={"md"}>
                           <Select.ValueText placeholder={"Select Relationship Type"} />
                         </Select.Trigger>
                         <Select.IndicatorGroup>
@@ -830,11 +866,61 @@ const Entity = () => {
                           }}
                         >
                           <Select.HiddenSelect />
-                          <Select.Label fontSize={"xs"} ml={"0.5"}>
-                            Use Template ({templatesCollection.items.length} available)
+                          <Select.Label>
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                Use Template ({templatesCollection.items.length} available)
+                              </Text>
+                              {isSuggestingTemplate && (
+                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                  <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                                  <Text fontSize={"xs"} color={"purple.300"}>
+                                    Suggesting Template...
+                                  </Text>
+                                </Flex>
+                              )}
+                              {!isSuggestingTemplate && suggestedTemplateId && (
+                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                  <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                                  <Text
+                                    fontSize={"xs"}
+                                    color={"purple.600"}
+                                    cursor={"pointer"}
+                                    _hover={{ textDecoration: "underline" }}
+                                    onClick={() => {
+                                      const template = templates.find((t) => t._id === suggestedTemplateId);
+                                      if (template) {
+                                        setSelectedAttributes([
+                                          ...selectedAttributes,
+                                          {
+                                            _id: `${template._id}-${nanoid(6)}`,
+                                            name: template.name,
+                                            timestamp: template.timestamp,
+                                            owner: template.owner,
+                                            archived: false,
+                                            description: template.description,
+                                            values: template.values,
+                                          },
+                                        ]);
+                                      }
+                                    }}
+                                  >
+                                    Suggested Template: {templates.find((t) => t._id === suggestedTemplateId)?.name}
+                                  </Text>
+                                </Flex>
+                              )}
+                              {!isSuggestingTemplate && suggestedTemplateId === null && (
+                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                  <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
+                                  <Text fontSize={"xs"} color={"gray.400"}>
+                                    No Suggested Templates
+                                  </Text>
+                                </Flex>
+                              )}
+                            </Flex>
                           </Select.Label>
                           <Select.Control>
-                            <Select.Trigger data-testid={"select-template-trigger"}>
+                            <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"}>
                               <Select.ValueText placeholder={"Select Template"} />
                             </Select.Trigger>
                             <Select.IndicatorGroup>
@@ -927,6 +1013,7 @@ const Entity = () => {
         <Dialog.Root
           open={informationOpen}
           onOpenChange={(event) => setInformationOpen(event.open)}
+          size={"lg"}
           placement={"center"}
           closeOnEscape
           closeOnInteractOutside
@@ -946,31 +1033,137 @@ const Entity = () => {
                   <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"1"} gap={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Flex direction={"column"} gap={"1"} bg={"gray.100"} p={"1"} rounded={"md"}>
-                    <Heading size={"xs"}>Overview</Heading>
-                    <Text fontSize={"xs"}>
-                      Entities are the core objects in Metadatify. They can be used to represent any type of object,
-                      such as a dataset, a sample, a protocol, or a software tool.
+              <Dialog.Body p={"2"} gap={"0"}>
+                <Flex direction={"column"} gap={"2"}>
+                  {/* Overview */}
+                  <Flex
+                    direction={"column"}
+                    gap={"1"}
+                    bg={"gray.50"}
+                    p={"2"}
+                    rounded={"md"}
+                    border={GLOBAL_STYLES.border.style}
+                    borderColor={GLOBAL_STYLES.border.color}
+                  >
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                        What is an Entity?
+                      </Text>
+                    </Flex>
+                    <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                      Entities represent the things you want to track: samples, datasets, protocols, instruments, and so
+                      on. Each Entity stores structured metadata through Attributes, and can be linked to other Entities
+                      or organised into Projects.
                     </Text>
                   </Flex>
-                  <Flex direction={"column"} gap={"1"} ml={"0.5"}>
-                    <Heading size={"xs"}>Page 1: Start</Heading>
-                    <Text fontSize={"xs"}>
-                      Specify some basic details about this Entity. Relations between Entities and membership to
-                      Projects can be specified on the following page. Finally, the metadata associated with this Entity
-                      should be specified using Attributes and corresponding Values.
+
+                  {/* Steps */}
+                  <Flex direction={"column"} gap={"1.5"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                      Creation Steps
                     </Text>
-                    <Heading size={"xs"}>Page 2: Relationships</Heading>
-                    <Text fontSize={"xs"}>
-                      Relations between Entities and membership to Projects can be specified using Relationships.
-                    </Text>
-                    <Heading size={"xs"}>Page 3: Attributes</Heading>
-                    <Text fontSize={"xs"}>
-                      The metadata associated with this Entity should be specified using Attributes and corresponding
-                      Values.
-                    </Text>
+                    <Flex direction={"column"} gap={"1"}>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        align={"start"}
+                        p={"2"}
+                        rounded={"md"}
+                        bg={"blue.50"}
+                        border={"1px solid"}
+                        borderColor={"blue.100"}
+                      >
+                        <Flex
+                          w={"18px"}
+                          h={"18px"}
+                          rounded={"full"}
+                          bg={"blue.500"}
+                          align={"center"}
+                          justify={"center"}
+                          shrink={"0"}
+                          mt={"0.5"}
+                        >
+                          <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
+                            1
+                          </Text>
+                        </Flex>
+                        <Flex direction={"column"} gap={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Start — Basic Details
+                          </Text>
+                          <Text fontSize={"xs"} color={"gray.600"}>
+                            Set the Entity's name, description, and visibility.
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        align={"start"}
+                        p={"2"}
+                        rounded={"md"}
+                        bg={"orange.50"}
+                        border={"1px solid"}
+                        borderColor={"orange.100"}
+                      >
+                        <Flex
+                          w={"18px"}
+                          h={"18px"}
+                          rounded={"full"}
+                          bg={"orange.400"}
+                          align={"center"}
+                          justify={"center"}
+                          shrink={"0"}
+                          mt={"0.5"}
+                        >
+                          <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
+                            2
+                          </Text>
+                        </Flex>
+                        <Flex direction={"column"} gap={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Relationships — Link to Other Entities
+                          </Text>
+                          <Text fontSize={"xs"} color={"gray.600"}>
+                            Define how this Entity relates to others (e.g. origin, product) and assign it to Projects.
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        align={"start"}
+                        p={"2"}
+                        rounded={"md"}
+                        bg={"green.50"}
+                        border={"1px solid"}
+                        borderColor={"green.100"}
+                      >
+                        <Flex
+                          w={"18px"}
+                          h={"18px"}
+                          rounded={"full"}
+                          bg={"green.500"}
+                          align={"center"}
+                          justify={"center"}
+                          shrink={"0"}
+                          mt={"0.5"}
+                        >
+                          <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
+                            3
+                          </Text>
+                        </Flex>
+                        <Flex direction={"column"} gap={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Attributes — Attach Metadata
+                          </Text>
+                          <Text fontSize={"xs"} color={"gray.600"}>
+                            Select Attribute Templates and add Values to describe this Entity's metadata.
+                          </Text>
+                        </Flex>
+                      </Flex>
+                    </Flex>
                   </Flex>
                 </Flex>
               </Dialog.Body>

@@ -262,7 +262,7 @@ body .w-md-editor-text {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 
-  /* Minimize spacing - remove any default margins/padding on scrollbar */
+  /* Minimize spacing, remove any default margins/padding on scrollbar */
   &::-webkit-scrollbar-corner {
     background: transparent;
   }

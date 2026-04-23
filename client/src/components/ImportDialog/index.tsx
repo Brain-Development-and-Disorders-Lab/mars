@@ -117,7 +117,13 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   // Projects
-  const [projectsCollection, setProjectsCollection] = useState(createListCollection({ items: [] as IGenericItem[] }));
+  const [projectsCollection, setProjectsCollection] = useState(
+    createListCollection({
+      items: [] as IGenericItem[],
+      itemToValue: (item: IGenericItem) => item._id,
+      itemToString: (item: IGenericItem) => item.name,
+    }),
+  );
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
@@ -558,7 +564,13 @@ const ImportDialog = (props: ImportDialogProps) => {
       setTemplatesCollection(createListCollection({ items: response.data.templates }));
     }
     if (response.data?.projects) {
-      setProjectsCollection(createListCollection({ items: response.data.projects }));
+      setProjectsCollection(
+        createListCollection({
+          items: response.data.projects,
+          itemToValue: (item: IGenericItem) => item._id,
+          itemToString: (item: IGenericItem) => item.name,
+        }),
+      );
     }
 
     if (mappingDataError) {
@@ -844,7 +856,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       >
         <Select.HiddenSelect />
         <Select.Control>
-          <Select.Trigger data-testid={`import-column-select-trigger-${key}`}>
+          <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
             <Select.ValueText placeholder={"Select Column"} />
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -1024,7 +1036,13 @@ const ImportDialog = (props: ImportDialogProps) => {
     setCounter("");
     setDescriptionField("");
     setProjectField("");
-    setProjectsCollection(createListCollection({ items: [] as IGenericItem[] }));
+    setProjectsCollection(
+      createListCollection({
+        items: [] as IGenericItem[],
+        itemToValue: (item: IGenericItem) => item._id,
+        itemToString: (item: IGenericItem) => item.name,
+      }),
+    );
     setTemplatesCollection(createListCollection({ items: [] as AttributeModel[] }));
     setAttributesField([]);
     setReviewEntities([]);
@@ -1142,7 +1160,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger data-testid={"import-type-select-trigger"}>
+                      <Select.Trigger data-testid={"import-type-select-trigger"} rounded={"md"}>
                         <Select.ValueText placeholder={"Select file contents"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
@@ -1513,11 +1531,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                             size={"xs"}
                             rounded={"md"}
                             collection={projectsCollection}
+                            value={[projectField]}
                             onValueChange={(details) => setProjectField(details.items[0]._id)}
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger data-testid={"import-column-select-trigger-project"}>
+                              <Select.Trigger data-testid={"import-column-select-trigger-project"} rounded={"md"}>
                                 <Select.ValueText placeholder={"Select Project"} />
                               </Select.Trigger>
                               <Select.IndicatorGroup>
@@ -1627,7 +1646,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         >
                           <Select.HiddenSelect />
                           <Select.Control>
-                            <Select.Trigger>
+                            <Select.Trigger rounded={"md"}>
                               <Select.ValueText placeholder={"Select Template"} />
                             </Select.Trigger>
                             <Select.IndicatorGroup>

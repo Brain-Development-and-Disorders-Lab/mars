@@ -23,7 +23,6 @@ import {
   createListCollection,
   Portal,
   CloseButton,
-  Spinner,
   HStack,
   EmptyState,
   Timeline,
@@ -111,16 +110,9 @@ const Entity = () => {
   // Share dialog
   const [shareOpen, setShareOpen] = useState(false);
 
-  const [projects, setProjects] = useState<IGenericItem[]>([]);
-  const projectsCollection = useMemo(() => {
-    const items = createSelectOptions<IGenericItem>(projects, "_id", "name");
-    return createListCollection<ISelectOption>({
-      items: items || [],
-    });
-  }, [projects]);
-  const selectProjectsContainerRef = useRef(null);
   const [addProjectsOpen, setAddProjectsOpen] = useState(false);
-  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [selectedProject, setSelectedProject] = useState({} as IGenericItem);
+  const [selectedProjects, setSelectedProjects] = useState<IGenericItem[]>([]);
 
   const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
   const selectRelationshipTypeRef = useRef(null);
@@ -163,6 +155,10 @@ const Entity = () => {
     });
   }, [templates]);
   const [usingTemplate, setUsingTemplate] = useState(false);
+
+  // AI Template suggestions, `undefined`: not yet run, `null`: ran with no match, `string`: matched Template ID
+  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
+  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
 
   // Adding Templates to existing Entity
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
@@ -325,6 +321,15 @@ const Entity = () => {
     EXPORT_ENTITY,
   );
 
+  const SUGGEST_TEMPLATE = gql`
+    query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
+      suggestTemplate(name: $name, description: $description, templates: $templates)
+    }
+  `;
+  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
+    fetchPolicy: "network-only",
+  });
+
   // Query to create a new Entity
   const CREATE_ENTITY = gql`
     mutation CreateEntity($entity: EntityCreateInput) {
@@ -402,15 +407,6 @@ const Entity = () => {
 
       // Set the cloned Entity name
       setClonedEntityName(`${data.entity.name} (cloned)`);
-    }
-    // Unpack Project data
-    if (data?.projects) {
-      // Filter out existing Project membership or selected Projects
-      setProjects(
-        data.projects.filter((project: IGenericItem) => {
-          return !_.includes(selectedProjects, project._id) && !_.includes(entityProjects, project._id);
-        }),
-      );
     }
     // Unpack Template data
     if (data?.templates) {
@@ -511,6 +507,29 @@ const Entity = () => {
   useEffect(() => {
     setIsAttributeValueError(attributeValues.length === 0 || attributeValues.some((value) => value.name === ""));
   }, [attributeValues]);
+
+  useEffect(() => {
+    if (!addAttributesOpen || templates.length === 0) return;
+    setSuggestedTemplateId(undefined);
+    setIsSuggestingTemplate(true);
+    const fetchTemplateSuggestion = async () => {
+      try {
+        const result = await runSuggestTemplate({
+          variables: {
+            name: entityName,
+            description: entityDescription,
+            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+          },
+        });
+        setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
+      } catch {
+        // Silently ignore, AI may not be configured
+      } finally {
+        setIsSuggestingTemplate(false);
+      }
+    };
+    fetchTemplateSuggestion();
+  }, [addAttributesOpen]);
 
   // Break up entity data into editable fields
   const [entity, setEntity] = useState<EntityModel>({} as EntityModel);
@@ -1303,17 +1322,16 @@ const Entity = () => {
    * Callback function to the Entity to Projects
    * @param {string[]} projects List of Projects to add the Entities to
    */
-  const addProjects = (projects: string[]): void => {
-    setEntityProjects([...entityProjects, ...projects.filter((project) => !_.isEqual("", project))]);
+  const addProjects = (): void => {
+    setEntityProjects([...entityProjects, ...selectedProjects.map((p) => p._id)]);
     setSelectedProjects([]);
+    setSelectedProject({} as IGenericItem);
     setAddProjectsOpen(false);
   };
 
-  /**
-   * Click handler for "Cancel" button when adding Entities to a Project
-   */
   const onCancelAddProjectsClick = () => {
     setSelectedProjects([]);
+    setSelectedProject({} as IGenericItem);
     setAddProjectsOpen(false);
   };
 
@@ -1603,7 +1621,7 @@ const Entity = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger rounded={"md"}>
                                 <Select.ValueText />
                               </Select.Trigger>
                               <Select.IndicatorGroup>
@@ -2429,57 +2447,104 @@ const Entity = () => {
               <Dialog.Body p={"1"}>
                 {/* Attribute creation */}
                 <Flex direction={"column"} gap={"1"} justify={"center"}>
-                  <Select.Root
-                    key={"select-template"}
-                    size={"xs"}
-                    collection={templatesCollection}
-                    disabled={templatesCollection.items.length === 0 || usingTemplate}
-                    onValueChange={(details) => {
-                      if (!_.isEqual(details.items[0], "")) {
-                        for (const template of templates) {
-                          if (_.isEqual(details.items[0], template._id)) {
-                            setAttributeName(template.name);
-                            setAttributeDescription(template.description);
-                            setAttributeValues(() => [...template.values]);
-                            break;
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Select.Root
+                      key={"select-template"}
+                      size={"xs"}
+                      rounded={"md"}
+                      collection={templatesCollection}
+                      disabled={templatesCollection.items.length === 0 || usingTemplate}
+                      onValueChange={(details) => {
+                        if (!_.isEqual(details.items[0], "")) {
+                          for (const template of templates) {
+                            if (_.isEqual(details.items[0], template._id)) {
+                              setAttributeName(template.name);
+                              setAttributeDescription(template.description);
+                              setAttributeValues(() => [...template.values]);
+                              break;
+                            }
                           }
                         }
-                      }
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Label fontSize={"xs"} ml={"0.5"}>
-                      Create from Template ({templatesCollection.items.length} available)
-                    </Select.Label>
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder={"Select Template"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal container={addAttributesContainerRef}>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {templatesCollection.items.map((template) => (
-                            <Select.Item
-                              item={template}
-                              key={template.value}
-                              onClick={() => addTemplateAttribute(template.value)}
-                            >
-                              {template.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Label fontSize={"xs"} ml={"0.5"}>
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Use Template ({templatesCollection.items.length} available)
+                          </Text>
+                          {isSuggestingTemplate && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                              <Text fontSize={"xs"} color={"purple.300"}>
+                                Suggesting...
+                              </Text>
+                            </Flex>
+                          )}
+                          {!isSuggestingTemplate && suggestedTemplateId && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                              <Text
+                                fontSize={"xs"}
+                                color={"purple.600"}
+                                cursor={"pointer"}
+                                _hover={{ textDecoration: "underline" }}
+                                onClick={() => addTemplateAttribute(suggestedTemplateId)}
+                              >
+                                Suggested: {templates.find((t) => t._id === suggestedTemplateId)?.name}
+                              </Text>
+                            </Flex>
+                          )}
+                          {!isSuggestingTemplate && suggestedTemplateId === null && (
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
+                              <Text fontSize={"xs"} color={"gray.400"}>
+                                No Suggestions
+                              </Text>
+                            </Flex>
+                          )}
+                        </Flex>
+                      </Select.Label>
+                      <Select.Control>
+                        <Select.Trigger rounded={"md"}>
+                          <Select.ValueText placeholder={"Select Template"} />
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal container={addAttributesContainerRef}>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {templatesCollection.items.map((template) => (
+                              <Select.Item
+                                item={template}
+                                key={template.value}
+                                onClick={() => addTemplateAttribute(template.value)}
+                              >
+                                {template.label}
+                                <Select.ItemIndicator />
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  </Flex>
 
                   <Flex direction={"column"} gap={"1"} w={"100%"} justify={"center"}>
                     <Flex p={"0"}>
-                      {usingTemplate && <Information text={`Using Template: ${attributeName} (${attributeId})`} />}
+                      {usingTemplate && (
+                        <Flex direction={"row"} gap={"0.5"}>
+                          <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                            Base Template:
+                          </Text>
+                          <Flex ml={"0.5"}>
+                            {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
+                            <Linky id={attributeId.slice(0, 10)} type={"templates"} size={"xs"} />
+                          </Flex>
+                        </Flex>
+                      )}
                     </Flex>
 
                     <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
@@ -2636,70 +2701,51 @@ const Entity = () => {
           <Portal>
             <Dialog.Backdrop />
             <Dialog.Positioner>
-              <Dialog.Content w={["lg", "xl", "2xl"]} ref={selectProjectsContainerRef}>
-                {/* Heading and close button */}
-                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.project.defaultColor} roundedTop={"md"}>
+              <Dialog.Content w={["lg", "xl", "2xl"]}>
+                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                     <Icon name={"project"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Link Entity to Project
+                      Add Entity to Projects
                     </Text>
                   </Flex>
                   <Dialog.CloseTrigger asChild>
-                    <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddProjectsOpen(false)} />
+                    <CloseButton size={"2xs"} top={"6px"} onClick={onCancelAddProjectsClick} />
                   </Dialog.CloseTrigger>
                 </Dialog.Header>
-                <Dialog.Body p={"1"}>
-                  {/* Select component for Projects */}
+                <Dialog.Body p={"1"} gap={"1"}>
                   <Flex direction={"column"} gap={"1"}>
-                    <Select.Root
-                      id={"select-project"}
-                      size={"xs"}
-                      rounded={"md"}
-                      collection={projectsCollection}
-                      onValueChange={(details) => {
-                        const selectedItem = details.items[0];
-                        if (selectedProjects.includes(selectedItem.value)) {
-                          // Check that the selected Project has not already been selected
+                    <SearchSelect
+                      id={"projectSearchSelect"}
+                      resultType={"project"}
+                      value={selectedProject}
+                      onChange={(selection) => {
+                        let invalidSelection = false;
+                        setSelectedProjects((previousProjects) => {
+                          const alreadyStaged = previousProjects.some((project) => project._id === selection._id);
+                          const alreadyInProject = entityProjects.includes(selection._id);
+                          invalidSelection = alreadyStaged || alreadyInProject;
+
+                          return alreadyStaged || alreadyInProject
+                            ? previousProjects
+                            : [...previousProjects, selection];
+                        });
+
+                        // Show warning if invalid Project selection
+                        if (invalidSelection) {
                           toaster.create({
-                            title: "Warning",
-                            description: "Project has already been selected.",
+                            title: "Cannot add Project",
+                            description: "Project already staged or Entity in Project already",
                             type: "warning",
                             duration: 2000,
                             closable: true,
                           });
-                        } else if (!_.isEqual(selectedItem.value, "")) {
-                          // Add the selected Project if not the default option
-                          setSelectedProjects([...selectedProjects, selectedItem.value]);
                         }
-                      }}
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger>
-                          <Select.ValueText placeholder={"Select Project"} />
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          {loading && <Spinner size={"xs"} borderWidth={"1.5px"} color={"fg.muted"} />}
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal container={selectProjectsContainerRef}>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {projectsCollection.items.map((item: ISelectOption) => {
-                              return (
-                                <Select.Item item={item} key={item.value}>
-                                  {item.label}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              );
-                            })}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
 
+                        setSelectedProject({} as IGenericItem);
+                      }}
+                      placeholder={"Search projects..."}
+                    />
                     <HStack
                       gap={"1"}
                       p={"1"}
@@ -2708,50 +2754,38 @@ const Entity = () => {
                       rounded={"md"}
                       border={GLOBAL_STYLES.border.style}
                       borderColor={GLOBAL_STYLES.border.color}
-                      minH={"100px"}
+                      minH={"60px"}
+                      wrap={"wrap"}
                     >
                       {selectedProjects.length > 0 ? (
-                        selectedProjects.map((project) => {
-                          if (!_.isEqual(project, "")) {
-                            return (
-                              <Flex key={`tag-${project}`}>
-                                <Tag.Root>
-                                  <Tag.StartElement>
-                                    <Flex h={"100%"} align={"center"} justify={"center"}>
-                                      <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                                    </Flex>
-                                  </Tag.StartElement>
-                                  <Tag.Label p={"1"} fontSize={"xs"}>
-                                    <Linky id={project} type={"projects"} size={"xs"} />
-                                  </Tag.Label>
-                                  <Tag.EndElement>
-                                    <Tag.CloseTrigger
-                                      onClick={() => {
-                                        setSelectedProjects([
-                                          ...selectedProjects.filter((selected) => {
-                                            return !_.isEqual(project, selected);
-                                          }),
-                                        ]);
-                                      }}
-                                    />
-                                  </Tag.EndElement>
-                                </Tag.Root>
+                        selectedProjects.map((project) => (
+                          <Tag.Root key={project._id} bg={"white"} rounded={"md"} pl={"0"}>
+                            <Tag.Label p={"0"} fontSize={"xs"}>
+                              <Flex w={"100%"} justify={"left"}>
+                                <Linky id={project._id} type={"projects"} size={"xs"} />
                               </Flex>
-                            );
-                          } else {
-                            return null;
-                          }
-                        })
+                            </Tag.Label>
+                            <Tag.EndElement mr={"0"}>
+                              <Tag.CloseTrigger
+                                onClick={() =>
+                                  setSelectedProjects(selectedProjects.filter((p) => p._id !== project._id))
+                                }
+                              />
+                            </Tag.EndElement>
+                          </Tag.Root>
+                        ))
                       ) : (
-                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                          No Projects selected
-                        </Text>
+                        <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
+                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.lightColor} />
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                            No Projects selected
+                          </Text>
+                        </Flex>
                       )}
                     </HStack>
                   </Flex>
                 </Dialog.Body>
                 <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                  {/* "Cancel" button */}
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
                       variant={"solid"}
@@ -2768,13 +2802,10 @@ const Entity = () => {
                       size={"xs"}
                       rounded={"md"}
                       colorPalette={"green"}
-                      onClick={() => {
-                        addProjects(selectedProjects);
-                      }}
+                      onClick={addProjects}
                       disabled={selectedProjects.length === 0}
                     >
-                      Link Entity to {selectedProjects.length} Project
-                      {selectedProjects.length === 1 ? "" : "s"}
+                      Add to {selectedProjects.length} {selectedProjects.length === 1 ? "Project" : "Projects"}
                       <Icon name={"check"} size={"xs"} />
                     </Button>
                   </Flex>
@@ -2863,7 +2894,7 @@ const Entity = () => {
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
-                          <Select.Trigger>
+                          <Select.Trigger rounded={"md"}>
                             <Select.ValueText placeholder={"Select Relationship Type"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>
@@ -3009,7 +3040,7 @@ const Entity = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger rounded={"md"}>
                                 <Select.ValueText placeholder={"Select Export Format"} />
                               </Select.Trigger>
                               <Select.IndicatorGroup>

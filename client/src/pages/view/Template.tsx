@@ -784,7 +784,7 @@ const Template = () => {
                           >
                             <Select.HiddenSelect />
                             <Select.Control>
-                              <Select.Trigger>
+                              <Select.Trigger rounded={"md"}>
                                 <Select.ValueText />
                               </Select.Trigger>
                               <Select.IndicatorGroup>

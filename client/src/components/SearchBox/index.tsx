@@ -236,7 +236,7 @@ const SearchBox = () => {
   return (
     <Box ref={containerRef} w={"100%"}>
       <Flex direction={"column"} gap={"0"} w={"100%"}>
-        {/* Input row with dropdown - wrapped in relative container */}
+        {/* Input row with dropdown */}
         <Box position={"relative"} w={"100%"}>
           <Flex gap={"1"} align={"center"} w={"100%"}>
             <InputGroup startElement={<Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>

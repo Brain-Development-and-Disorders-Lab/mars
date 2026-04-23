@@ -18,7 +18,7 @@ export const Toaster = () => {
               {toast.description && <Toast.Description fontSize={"xs"}>{toast.description}</Toast.Description>}
             </Stack>
             {toast.action && <Toast.ActionTrigger fontSize={"xs"}>{toast.action.label}</Toast.ActionTrigger>}
-            {toast.meta?.closable && <Toast.CloseTrigger />}
+            {toast.closable && <Toast.CloseTrigger />}
           </Toast.Root>
         )}
       </ChakraToaster>

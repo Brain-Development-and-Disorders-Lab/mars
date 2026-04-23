@@ -68,5 +68,17 @@ export const SearchResolvers = {
       }
       return await AI.suggestColumnMapping(args.columns);
     },
+
+    suggestTemplate: async (
+      _parent: IResolverParent,
+      args: { name: string; description?: string; templates: { _id: string; name: string; description: string }[] },
+    ): Promise<string | null> => {
+      if (!process.env.AI_PROVIDER && !process.env.OPENAI_BASE_URL) {
+        throw new GraphQLError("AI features are not configured", {
+          extensions: { code: "NOT_CONFIGURED" },
+        });
+      }
+      return await AI.suggestTemplate(args.name, args.description ?? "", args.templates);
+    },
   },
 };

@@ -500,6 +500,13 @@ export const typedefs = `#graphql
     description: String
   }
 
+  # Input type for template suggestion queries
+  input TemplateSuggestionInput {
+    _id: String!
+    name: String!
+    description: String!
+  }
+
   # "SearchResult" union type
   union SearchResult = Entity | Project
 
@@ -578,6 +585,7 @@ export const typedefs = `#graphql
     search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean, filters: EntityFilterInput): [SearchResult]
     translateSearch(query: String!): String
     suggestColumnMapping(columns: [String]!): ColumnMappingSuggestion
+    suggestTemplate(name: String!, description: String, templates: [TemplateSuggestionInput!]!): String
 
     # Counters queries
     counter(_id: String): Counter

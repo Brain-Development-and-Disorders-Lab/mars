@@ -69,7 +69,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [isLoading]);
 
-  // Fetch workspace list once on mount (silently — no loading overlay)
+  // Fetch Workspace list once on mount
   useEffect(() => {
     getWorkspaces()
       .then((result) => {

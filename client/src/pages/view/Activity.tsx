@@ -51,9 +51,7 @@ const Activity = () => {
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
-    target: true,
-    user: true,
-    timestamp: true,
+    medium: true,
   });
 
   // Column filters state for activity table
@@ -184,9 +182,7 @@ const Activity = () => {
   useEffect(() => {
     const isMobile = breakpoint === "base" || breakpoint === "sm";
     setVisibleColumns({
-      target: !isMobile,
-      user: !isMobile,
-      timestamp: !isMobile,
+      medium: !isMobile,
     });
   }, [breakpoint]);
 
@@ -384,7 +380,7 @@ const Activity = () => {
                     </Flex>
                   </Flex>
 
-                  {/* Checkbox Filters Group - Operation Type, Target Type, Medium */}
+                  {/* Checkbox Filters Group */}
                   <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
                     {/* Operation Type Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"}>
@@ -543,7 +539,7 @@ const Activity = () => {
             justify={"space-between"}
             data-timestamp-update={timestampUpdate}
           >
-            {/* Live Indicator - Far Left */}
+            {/* Live Indicator */}
             <Flex align={"center"} gap={"1"} ml={"0.5"}>
               <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
               <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>

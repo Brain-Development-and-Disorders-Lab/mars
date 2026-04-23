@@ -67,7 +67,7 @@ const Workspace = () => {
         name
         archived
       }
-      entities(archived: $entitiesArchived) {
+      entities(archived: $entitiesArchived, limit: 10000) {
         entities {
           _id
           name
@@ -211,8 +211,7 @@ const Workspace = () => {
       });
       if (workspaceData.data?.entities?.entities) {
         setEntities(workspaceData.data.entities.entities);
-        // Filter to only show archived entities
-        setShownEntities([...workspaceData.data.entities.entities.filter((entity) => entity.archived === true)]);
+        setShownEntities([...workspaceData.data.entities.entities]);
         setSelectedEntities({});
       }
       if (workspaceData.data?.projects) {
@@ -246,9 +245,9 @@ const Workspace = () => {
     refreshWorkspace();
   }, [workspace]);
 
-  // Effect to manage what contents are shown - only show archived items
+  // Effect to manage what contents are shown
   useEffect(() => {
-    setShownEntities([...entities.filter((entity) => entity.archived === true)]);
+    setShownEntities([...entities]);
     setSelectedEntities({});
     setShownProjects([...projects.filter((project) => project.archived === true)]);
     setSelectedProjects({});

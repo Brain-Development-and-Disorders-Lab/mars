@@ -32,19 +32,37 @@ If the input is not a recognizable search query (e.g. gibberish, random characte
 
 Entity schema:
 - name: string (entity name)
+- created: string (ISO 8601 timestamp, e.g. "2024-03-15T00:00:00Z")
 - description: string
+- archived: boolean (true if the entity has been archived)
+- projects: string[] (array of project IDs the entity belongs to)
 - relationships[].target.name: string (names of related entities)
+- attributes[].name: string (attribute name)
+- attributes[].values[].type: string (value type: "text", "number", "entity", "select", "date", "url")
 - attributes[].values[].data: string (attribute values)
 
 Use regex for text matching: {"field":{"$regex":"/term/gi"}}
-Combine with: {"$and":[cond1,cond2]}
+Use comparison operators for dates: {"created":{"$gt":"2024-01-01T00:00:00Z"}}
+Check that an array has at least N+1 elements using index existence: {"attributes.1":{"$exists":true}} means ≥2 attributes
+Combine conditions with: {"$and":[cond1,cond2]}
 
 Examples:
 "named cancer" → {"name":{"$regex":"/cancer/gi"}}
 "description mentions climate" → {"description":{"$regex":"/climate/gi"}}
 "related to John Smith" → {"relationships.target.name":{"$regex":"/John Smith/gi"}}
 "has attribute value 42" → {"attributes.values.data":{"$regex":"/42/gi"}}
-"named cancer related to mouse" → {"$and":[{"name":{"$regex":"/cancer/gi"}},{"relationships.target.name":{"$regex":"/mouse/gi"}}]}`;
+"named cancer related to mouse" → {"$and":[{"name":{"$regex":"/cancer/gi"}},{"relationships.target.name":{"$regex":"/mouse/gi"}}]}
+"created after January 2024" → {"created":{"$gt":"2024-01-01T00:00:00Z"}}
+"created before 2023" → {"created":{"$lt":"2023-01-01T00:00:00Z"}}
+"created between 2022 and 2024" → {"$and":[{"created":{"$gte":"2022-01-01T00:00:00Z"}},{"created":{"$lt":"2024-01-01T00:00:00Z"}}]}
+"archived entities" → {"archived":true}
+"not archived" → {"archived":false}
+"archived with multiple attributes" → {"$and":[{"archived":true},{"attributes.1":{"$exists":true}}]}
+"has attribute named temperature" → {"attributes.name":{"$regex":"/temperature/gi"}}
+"attribute name includes pressure" → {"attributes.name":{"$regex":"/pressure/gi"}}
+"has a numeric attribute" → {"attributes.values.type":{"$regex":"/number/gi"}}
+"has attribute of type date" → {"attributes.values.type":{"$regex":"/date/gi"}}
+"archived named virus with attribute value positive" → {"$and":[{"archived":true},{"name":{"$regex":"/virus/gi"}},{"attributes.values.data":{"$regex":"/positive/gi"}}]}`;
 
 export class AI {
   /**
@@ -157,6 +175,54 @@ export class AI {
       name: findColumn(parsed.name),
       description: findColumn(parsed.description),
     };
+  };
+
+  /**
+   * Suggest the best-fitting template for a new entity based on its name and description
+   * @param name Entity name
+   * @param description Entity description
+   * @param templates Available templates (id, name, description only)
+   * @return Matched template _id, or null if none fit
+   */
+  static suggestTemplate = async (
+    name: string,
+    description: string,
+    templates: { _id: string; name: string; description: string }[],
+  ): Promise<string | null> => {
+    if (templates.length === 0) return null;
+
+    const client = AI.createClient();
+    const model =
+      process.env.AI_PROVIDER === "azure"
+        ? process.env.AZURE_OPENAI_DEPLOYMENT!
+        : process.env.OPENAI_MODEL || "openai/gpt-oss-20b";
+
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a metadata assistant. Given an entity name and description, pick the best-fitting template from the list. Return ONLY the template _id string exactly as given, or null if none fit well.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
+            entity: { name, description },
+            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+          }),
+        },
+      ],
+      max_tokens: 64,
+      temperature: 0,
+    });
+
+    const content = response.choices[0]?.message?.content?.trim();
+    if (!content || content === "null") return null;
+
+    // Validate the returned ID is actually one of the provided templates
+    const match = templates.find((t) => t._id === content);
+    return match ? match._id : null;
   };
 
   static translateSearch = async (query: string): Promise<string> => {

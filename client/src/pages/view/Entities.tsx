@@ -741,7 +741,7 @@ const Entities = () => {
                       >
                         <Select.HiddenSelect />
                         <Select.Control>
-                          <Select.Trigger>
+                          <Select.Trigger rounded={"md"}>
                             <Select.ValueText placeholder={"Select export format"} />
                           </Select.Trigger>
                           <Select.IndicatorGroup>
