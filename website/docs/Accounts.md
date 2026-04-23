@@ -2,22 +2,20 @@
 
 ## User Login
 
-Currently, Metadatify only support authentication via ORCiD. Additional authentication options will be added in the future.
+Metadatify supports creating accounts via username and password. After an account has been created, it can be linked with the user's ORCiD to streamline future logins and aid collaboration.
 
 ![Login Screen](../img/login_screen.png)
 
-### First Login
+### Create Account
 
-On first login, the user will be prompted to login to their ORCiD account and give Metadatify permission to access their ORCiD profile. User are redirected back to Metadatify and prompted to add details to their account.
+Users must provide basic information and specify an affiliation before creating an account. The **Email** should be a valid email address and will be used for collaboration and other notifications. The **Affiliation** field is used to identify the user's institution.
 
-![Account Details](../img/account_details.png)
-
-The **email** should be a valid email address and will be used for collaboration and other notifications. The **affiliation** field is used to identify the user's institution.
+![Account Details](../img/account_create.png)
 
 ## User Account Settings
 
-Using the Workspace Switcher, click the "Account settings" action to navigate to the Account settings page.
+Using the Workspace Switcher, click the "Account settings" action to navigate to the Account page.
 
 ![Account Settings](../img/account_settings.png)
 
-The account settings page allows the user to edit their email or affiliation, leave a Workspace they are a member of, and generate API keys (documentation coming soon).
+The account settings page allows the user to verify their email, connect their ORCiD, manage Workspaces they own or are a member of, and generate API keys for usage with other applications or workflows.

@@ -1,6 +1,6 @@
 # Tracking Entities
 
-Metadatify has functionality to track phsyical Entities via unique identifiers and a barcode or QR code scanner.
+Metadatify has functionality to track physical Entities via unique identifiers and a barcode or QR code scanner.
 
 ## Entity Identifiers
 
@@ -12,11 +12,13 @@ The sidebar of Metadatify has a "Scan" button, under the "Tools" section. Clicki
 
 ![Scan Modal](../img/scan_modal.png)
 
-The scan modal listens for input from the scanner module, and it provides the option "Enter manually" for manual input of an identifier.
+To function correctly, you will need to grant Metadatify access to your camera through the browser. It will only access the camera when the scan modal is open.
 
-A scanner module can be connected to a computer via a USB cable. When connected, a successful read of a barcode or QR code will emit text input to the browser, as if the scanner were a keyboard.
+To scan QR codes, place the QR code in view of the camera, align with the corners of the central region, and the corners will change color to green upon a successful scan. Metadatify will then navigate to the corresponding Entity.
 
-Upon receiving input from either the scanner or manual input, the modal will close and Metadatify will search for the Entity with the identifier. If an Entity is found, the modal will close and the Entity will be displayed.
+Alternatively, the unique identifier can be entered after clicking the "Enter Identifier" button.
+
+If a barcode scanner is available and configured to send keyboard input, it can be connected to computer accessing Metadatify via a USB cable. When connected, a successful read of a barcode or QR code will emit text input to the browser.
 
 ## Generating Labels
 

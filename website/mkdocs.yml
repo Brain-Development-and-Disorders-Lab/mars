@@ -15,13 +15,9 @@ nav:
   - Workspaces: Workspaces.md
   - Users and Sharing:
       - User Login and Accounts: Accounts.md
-      - Sharing and Collaboration (coming soon): ""
   - Data Management:
       - Importing Data: data_management/Importing-Data.md
       - Exporting Data: data_management/Exporting-Data.md
-  - Developers:
-      - API Usage (coming soon): ""
-      - Self-Hosting (coming soon): ""
 theme:
   name: readthedocs
   favicon: /img/Favicon.png

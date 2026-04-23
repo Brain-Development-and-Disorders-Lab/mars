@@ -18,7 +18,7 @@ Entities have the following metadata components:
 - **Owner**: The owner or creator of the Entity.
 - **Date**: The date that the Entity came into existence.
 - **Description**: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
-- **Collections**: Specify any existing Collections that the Entity belongs to.
+- **Projects**: Specify any existing Projects that the Entity belongs to.
 - **Relationships**: Relationships are used to create links between Entities. An Entity can be a _parent_ of another Entity, a _child_ of another Entity, or express a _general_ relationship with another Entity.
 - **Attributes**: This is a specific metadata component and is explained below.
 
