@@ -622,6 +622,7 @@ export const typedefs = `#graphql
     # User mutations
     createUser(user: UserInput): ResponseMessage
     updateUser(user: UserInput): ResponseMessage
+    reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 
     # Template mutations
     createTemplate(template: AttributeCreateInput): ResponseMessage

@@ -6,6 +6,7 @@ import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/
 import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
 import ScanModal from "@components/ScanModal";
+import ReportModal from "@components/ReportModal";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -34,6 +35,7 @@ const Navigation = () => {
   // Modal open states
   const [importOpen, setImportOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   return (
     <Flex w={"100%"} p={"2"} bg={"gray.100"}>
@@ -242,6 +244,25 @@ const Navigation = () => {
                 </Button>
               </Flex>
             </Flex>
+            <Flex>
+              <Button
+                id={"navBugButtonDesktop"}
+                w={"100%"}
+                key={"bug"}
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"red"}
+                onClick={() => {
+                  // Capture event
+                  posthog.capture("bug_modal_open");
+
+                  setReportOpen(true);
+                }}
+              >
+                <Icon name={"bug"} size={"xs"} />
+                Report Issue
+              </Button>
+            </Flex>
           </Flex>
         </Flex>
 
@@ -390,6 +411,9 @@ const Navigation = () => {
 
       {/* `ScanModal` component */}
       <ScanModal open={scanOpen} setOpen={setScanOpen} />
+
+      {/* `ReportModal` component */}
+      <ReportModal open={reportOpen} setOpen={setReportOpen} />
     </Flex>
   );
 };

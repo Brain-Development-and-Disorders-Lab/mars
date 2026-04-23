@@ -1,5 +1,8 @@
 import { EmailClient } from "@azure/communication-email";
 
+// Utility functions
+import consola from "consola";
+
 // Email configuration
 const client = new EmailClient(process.env.AZURE_COMMUNICATION_CONNECTION_STRING!);
 const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS!;
@@ -93,6 +96,65 @@ export const templates = {
       <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't create a Metadatify account, you can safely ignore this email.</p>
     `),
 
+  reportIssue: ({
+    description,
+    path,
+    userName,
+    userId,
+    userEmail,
+    consoleErrors,
+    timestamp,
+  }: {
+    description: string;
+    path: string;
+    userName: string;
+    userId: string;
+    userEmail: string;
+    consoleErrors: string[];
+    timestamp: string;
+  }): string =>
+    buildEmail(`
+      <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">New Issue Reported</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">A user submitted an issue report.</p>
+
+      <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Description</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
+        <tr><td style="padding:12px 16px;">
+          <p style="margin:0;font-size:14px;color:#18181b;white-space:pre-wrap;">${description}</p>
+        </td></tr>
+      </table>
+
+      <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">User</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
+        <tr><td style="padding:12px 16px;">
+          <p style="margin:0 0 4px;font-size:13px;color:#18181b;"><strong>${userName}</strong></p>
+          <p style="margin:0 0 4px;font-size:13px;color:#52525b;">${userEmail}</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">${userId}</p>
+        </td></tr>
+      </table>
+
+      <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Page</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
+        <tr><td style="padding:12px 16px;">
+          <p style="margin:0;font-size:13px;color:#18181b;font-family:monospace;">${path}</p>
+        </td></tr>
+      </table>
+
+      ${
+        consoleErrors.length > 0
+          ? `<p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Console Errors</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+        <tr><td style="padding:12px 16px;">
+          ${consoleErrors.map((e) => `<p style="margin:0 0 6px;font-size:12px;color:#b91c1c;font-family:monospace;white-space:pre-wrap;">${e}</p>`).join("")}
+        </td></tr>
+      </table>`
+          : ""
+      }
+
+      ${divider()}
+      <p style="margin:0;font-size:12px;color:#a1a1aa;">Submitted ${timestamp} via Metadatify.</p>
+    `),
+
   workspaceCollaboratorAdded: (name: string, workspaceName: string, workspaceUrl: string): string =>
     buildEmail(`
       <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
@@ -125,6 +187,14 @@ export const sendEmail = async ({ to, subject, html }: { to: string; subject: st
     content: { subject, html },
   };
 
+  consola.start(`Email sending: <${to}> "${subject}"`);
   const poller = await client.beginSend(message);
-  await poller.pollUntilDone();
+  const pollerResponse = await poller.pollUntilDone();
+
+  // Output status
+  if (pollerResponse.error) {
+    consola.error(`Email error: "${subject}"\nDetails: ${pollerResponse.error.details}`);
+  } else {
+    consola.success(`Email sent: "${subject}"`);
+  }
 };

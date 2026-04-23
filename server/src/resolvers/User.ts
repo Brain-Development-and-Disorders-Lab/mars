@@ -3,6 +3,9 @@ import { IResolverParent, IResponseMessage, ResponseData, UserModel } from "@typ
 // Models
 import { User } from "@models/User";
 
+// Email
+import { sendEmail, templates } from "@lib/email";
+
 export const UserResolvers = {
   Query: {
     // Retrieve all Users
@@ -34,6 +37,39 @@ export const UserResolvers = {
     // Update a User
     updateUser: async (_parent: IResolverParent, args: { user: UserModel }): Promise<IResponseMessage> => {
       return await User.update(args.user);
+    },
+
+    // Send a report issue email to the admin
+    reportIssue: async (
+      _parent: IResolverParent,
+      args: {
+        description: string;
+        path: string;
+        userName: string;
+        userId: string;
+        userEmail: string;
+        consoleErrors: string[];
+      },
+    ): Promise<IResponseMessage> => {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        return { success: false, message: "ADMIN_EMAIL is not configured" };
+      }
+      const timestamp = new Date().toUTCString();
+      await sendEmail({
+        to: adminEmail,
+        subject: "Issue Report — Metadatify",
+        html: templates.reportIssue({
+          description: args.description,
+          path: args.path,
+          userName: args.userName,
+          userId: args.userId,
+          userEmail: args.userEmail,
+          consoleErrors: args.consoleErrors ?? [],
+          timestamp,
+        }),
+      });
+      return { success: true, message: "Report submitted" };
     },
   },
 };

@@ -41,7 +41,7 @@ const Error = ({ error }: ErrorProps) => {
           </Text>
           <Text fontSize={"xs"}>
             This may be caused by a network error, insufficient permissions, or the requested resource may have been
-            moved.
+            moved. If this has occurred repeatedly, please notify us using the "Report Issue" button.
           </Text>
         </Flex>
 
