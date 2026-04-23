@@ -63,9 +63,11 @@ import { JSONPath } from "jsonpath-plus";
 import { GLOBAL_STYLES } from "@variables";
 
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import { usePostHog } from "posthog-js/react";
 
 const Search = () => {
   const [query, setQuery] = useState("");
+  const posthog = usePostHog();
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -210,6 +212,11 @@ const Search = () => {
         });
         setIsError(true);
       } else {
+        posthog.capture("search_performed", {
+          search_type: "ai",
+          result_count: results.data.search.length,
+          show_archived: showArchived,
+        });
         setResults(results.data.search);
       }
 
@@ -259,6 +266,11 @@ const Search = () => {
       });
       setIsError(true);
     } else if (results.data.search) {
+      posthog.capture("search_performed", {
+        search_type: "text",
+        result_count: results.data.search.length,
+        show_archived: showArchived,
+      });
       setResults(results.data.search);
     }
 
@@ -729,6 +741,11 @@ const Search = () => {
       });
       setIsError(true);
     } else if (results.data.search) {
+      posthog.capture("search_performed", {
+        search_type: "builder",
+        result_count: results.data.search.length,
+        show_archived: false,
+      });
       setResults(results.data.search);
     }
 

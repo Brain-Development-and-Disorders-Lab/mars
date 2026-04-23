@@ -22,6 +22,9 @@ import { Navigate, Outlet } from "react-router-dom";
 import { auth } from "@lib/auth";
 import { Session } from "better-auth";
 
+// Analytics
+import posthog from "posthog-js";
+
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
   // Check values and set defaults if required
@@ -82,6 +85,10 @@ const Page: FC = () => {
     } else {
       // Successfully obtained session
       setSession(sessionResponse.data.session);
+      posthog.identify(sessionResponse.data.user.id, {
+        email: sessionResponse.data.user.email,
+        name: sessionResponse.data.user.name,
+      });
     }
   };
 

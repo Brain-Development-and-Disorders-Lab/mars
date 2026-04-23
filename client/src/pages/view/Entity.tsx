@@ -92,9 +92,13 @@ import { auth } from "@lib/auth";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Analytics
+import { usePostHog } from "posthog-js/react";
+
 const Entity = () => {
   const { id } = useParams();
   const { breakpoint } = useBreakpoint();
+  const posthog = usePostHog();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -413,6 +417,10 @@ const Entity = () => {
       setTemplates(data.templates);
     }
   }, [data, editing]);
+
+  useEffect(() => {
+    posthog.capture("entity_viewed");
+  }, [id]);
 
   // Display any GraphQL errors
   useEffect(() => {
@@ -1072,6 +1080,7 @@ const Entity = () => {
       }
 
       FileSaver.saveAs(new Blob([exportData]), slugify(`${entityName.replace(" ", "")}_export.${format}`));
+      posthog.capture("entity_exported", { format });
 
       // Close the "Export" modal
       setExportOpen(false);
@@ -1147,6 +1156,7 @@ const Entity = () => {
         closable: true,
       });
     } else if (response.data.createEntity.success) {
+      posthog.capture("entity_cloned");
       setCloneOpen(false);
 
       toaster.create({
@@ -1179,6 +1189,7 @@ const Entity = () => {
         closable: true,
       });
     } else if (response.data.archiveEntity.success) {
+      posthog.capture("entity_archived");
       toaster.create({
         title: "Archived Successfully",
         type: "success",

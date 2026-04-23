@@ -32,6 +32,9 @@ import { isValidEmail, ignoreAbort } from "@lib/util";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Analytics
+import { usePostHog } from "posthog-js/react";
+
 const GET_USER_BY_EMAIL = gql`
   query GetUserByEmail($email: String) {
     userByEmail(email: $email) {
@@ -43,6 +46,7 @@ const GET_USER_BY_EMAIL = gql`
 `;
 
 const Collaborators = (props: CollaboratorsProps) => {
+  const posthog = usePostHog();
   const [newCollaborator, setNewCollaborator] = useState("");
   const [validEmail, setValidEmail] = useState(false);
 
@@ -83,6 +87,7 @@ const Collaborators = (props: CollaboratorsProps) => {
       } else if (result.data) {
         const collaborator = result.data.userByEmail.data;
         if (!_.includes(props.projectCollaborators, collaborator)) {
+          posthog.capture("collaborator_added");
           props.setProjectCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
           toaster.create({
@@ -104,6 +109,11 @@ const Collaborators = (props: CollaboratorsProps) => {
   useEffect(() => {
     setValidEmail(isValidEmail(newCollaborator));
   }, [newCollaborator]);
+
+  const handleRemoveCollaborator = (collaborator: string) => {
+    posthog.capture("collaborator_removed");
+    props.setProjectCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator));
+  };
 
   return (
     <Flex
@@ -188,11 +198,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                         rounded={"md"}
                         variant={"subtle"}
                         aria-label="Leave workspace"
-                        onClick={() =>
-                          props.setProjectCollaborators((collaborators) =>
-                            collaborators.filter((c) => c !== collaborator),
-                          )
-                        }
+                        onClick={() => handleRemoveCollaborator(collaborator)}
                       >
                         Leave
                         <Icon name="logout" size={"xs"} />
@@ -205,11 +211,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                           rounded={"md"}
                           variant={"subtle"}
                           aria-label="Remove collaborator"
-                          onClick={() =>
-                            props.setProjectCollaborators((collaborators) =>
-                              collaborators.filter((c) => c !== collaborator),
-                            )
-                          }
+                          onClick={() => handleRemoveCollaborator(collaborator)}
                         >
                           Remove
                           <Icon name="delete" size={"xs"} />
