@@ -23,6 +23,4 @@ To update the Workspace, click the "Edit workspace" action in the Workspace Swit
 
 ![Edit Workspace](../img/workspace_page.png)
 
-This page displays the Workspace's name, description, collaborators, Entities, and Projects. The name and description can be updated, and collaborators can be added or removed. Active Entities and Projects can be viewed, and any archived Entities and Projects can be restored.
-
-To restore archived Entities or Projects, click the gray "Show Archived" button in the top right. The displayed Entities and Projects are currently archived and can be restored by clicking the orange "Restore" button next to the name of that Entity or Project.
+This page displays the Workspace's name, description, collaborators, archived metadata, and active Counters. The name and description can be updated, and collaborators can be added or removed. Archived Entities, Projects, and Templates can be viewed or restored. To restore archived metadata, click the corresponding orange "Restore" button.

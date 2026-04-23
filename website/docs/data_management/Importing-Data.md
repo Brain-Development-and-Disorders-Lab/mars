@@ -178,6 +178,8 @@ The list of all columns in the CSV file are displayed above the Entity fields. T
 
 The _Name_ and _Description_ of each Entity can be mapped to columns within the CSV file. To map a column to an Entity field, click the column name from the drop-down associated with that field.
 
+If an AI model is configured, an AI suggestion button will appear above the mapping fields. Clicking it will analyse the column headers and pre-populate the Name and Description mappings based on what the AI determines is the most likely match.
+
 Each data row in the CSV file will correspond to a new Entity. By default, the _Owner_ is set to the user who is currently importing the CSV file.
 
 The _Project_ drop-down menu presents a list of all Projects in the current Workspace. If a Project is selected, every Entity being imported will also be added to the selected Project.

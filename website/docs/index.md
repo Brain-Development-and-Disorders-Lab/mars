@@ -2,7 +2,7 @@
 
 [Metadatify](https://metadatify.com) is an open-source web-based platform to create, manage, and search scientific metadata.
 
-This documentation provides an in-depth guide to Metadatify's primary features, API usage, and self-hosting options.
+This documentation provides an in-depth guide to Metadatify's primary features, including search, data import and export, entity tracking, and workspace management.
 
 ## Documentation Contents
 
@@ -20,13 +20,9 @@ This documentation provides an in-depth guide to Metadatify's primary features, 
 - [Workspaces](Workspaces)
 - Users and Sharing:
   - [User Login and Accounts](Accounts)
-  - Sharing and Collaboration (coming soon)
-- Data Management
+- Data Management:
   - [Importing Data](../data_management/Importing-Data)
   - [Exporting Data](../data_management/Exporting-Data)
-- Developers:
-  - API Usage (coming soon)
-  - Self-Hosting (coming soon)
 
 ## Questions or Enquiries
 
