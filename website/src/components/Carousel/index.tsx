@@ -6,7 +6,7 @@ import { Flex, IconButton, Image, Text } from "@chakra-ui/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import consola from "consola";
+import { consola } from "consola";
 import Icon from "../Icon";
 
 const Carousel = (props: { images: { path: string; caption: string }[] }) => {

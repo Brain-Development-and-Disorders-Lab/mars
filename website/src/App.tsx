@@ -2,19 +2,7 @@
 import React, { useRef } from "react";
 
 // Chakra provider component
-import {
-  Avatar,
-  Button,
-  ChakraProvider,
-  Flex,
-  Heading,
-  Image,
-  Link,
-  ListItem,
-  Spacer,
-  Text,
-  UnorderedList,
-} from "@chakra-ui/react";
+import { Avatar, Button, ChakraProvider, Flex, Heading, Image, Link, Spacer, Text } from "@chakra-ui/react";
 
 // Custom components
 import Carousel from "./components/Carousel";
@@ -32,7 +20,7 @@ const App = () => {
 
   return (
     <ChakraProvider>
-      {/* Background motion and colour effects */}
+      {/* Background gradient animation */}
       <Flex
         position={"absolute"}
         filter={"blur(10px);"}
@@ -55,7 +43,7 @@ const App = () => {
           top={"5%"}
           left={"2%"}
           animation={"animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
-        ></Flex>
+        />
         <Flex
           position={"absolute"}
           rounded={"full"}
@@ -68,11 +56,11 @@ const App = () => {
           top={"40%"}
           left={"70%"}
           animation={"animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
-        ></Flex>
+        />
       </Flex>
 
       {/* Main content */}
-      <Flex direction={"column"} minH={"100vh"} w={"100%"} p={"4"} m={"0"} gap={"0"}>
+      <Flex direction={"column"} minH={"100vh"} w={"100%"} p={"4"} m={"0"}>
         <Flex direction={"column"} p={"4"} zIndex={2}>
           {/* Header */}
           <Flex
@@ -84,7 +72,7 @@ const App = () => {
             px={["", "6"]}
             py={["", "2"]}
           >
-            <Flex gap={"2"} align={"center"} rounded={"full"} p={"4"} border={"2px"} borderColor={"#2E3192"}>
+            <Flex gap={"2"} align={"center"} rounded={"full"} p={"4"}>
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
               <Heading size={"md"} color={"#2E3192"}>
                 Metadatify
@@ -98,55 +86,45 @@ const App = () => {
             </Flex>
           </Flex>
 
-          {/* Home */}
+          {/* Hero */}
           <Flex
             id={"home"}
-            h={"100vh"}
-            maxH={["", "100vh"]}
-            direction={"column"}
-            gap={["2", "8"]}
-            overflow={"hidden"}
+            direction={["column", "row"]}
+            gap={["8", "16"]}
             align={"center"}
+            justify={"center"}
+            minH={"90vh"}
+            px={["2", "12"]}
+            py={"8"}
           >
-            <Flex direction={"column"} align={"center"} justify={"center"} gap={"8"} minH={["60vh", "40vh"]}>
-              {/* Add some colour and gradients to this landing */}
-              <Flex direction={"column"} gap={"2"} textAlign={"left"} justify={"center"}>
-                <Heading size={"xl"}>Streamline metadata management</Heading>
-                <Heading size={"xl"} fontStyle={"italic"} fontWeight={"normal"}>
-                  and make your shared data FAIR
-                </Heading>
-              </Flex>
-
-              <Text fontWeight={"semibold"} fontSize={"lg"}>
-                Metadatify makes reusing, sharing, and securely collaborating on your scientific metadata easy.
+            <Flex direction={"column"} gap={"6"} maxW={["100%", "48%"]}>
+              <Heading size={"2xl"} lineHeight={"shorter"}>
+                Your lab's metadata, organized and always within reach.
+              </Heading>
+              <Text fontSize={"lg"} color={"gray.600"}>
+                Metadatify helps research teams create structured records for samples, specimens, and experiments.
+                Search in plain language or with a visual query builder, and keep your whole lab in sync using ORCiD.
               </Text>
-
-              <Flex direction={"row"} gap={"6"} align={"center"}>
+              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
                 <Button
                   rounded={"full"}
-                  p={"4"}
-                  boxShadow={"xs"}
                   colorScheme={"blue"}
-                  as={Link}
                   onClick={() => featuresRef.current.scrollIntoView({ behavior: "smooth" })}
                 >
-                  Features
+                  See Features
                 </Button>
                 <Button
                   rounded={"full"}
-                  p={"4"}
-                  boxShadow={"xs"}
                   colorScheme={"blue"}
-                  as={Link}
+                  variant={"outline"}
                   onClick={() => getStartedRef.current.scrollIntoView({ behavior: "smooth" })}
                 >
                   Get Started
                 </Button>
                 <Button
                   rounded={"full"}
-                  p={"4"}
-                  boxShadow={"xs"}
                   colorScheme={"blue"}
+                  variant={"ghost"}
                   as={Link}
                   href={"https://metadatify.com/docs/"}
                   isExternal
@@ -155,46 +133,124 @@ const App = () => {
                 </Button>
               </Flex>
             </Flex>
-
-            <Flex direction={"column"} h={["30vh", "100%"]} align={"center"} justify={"center"} gap={"2"}>
-              <Image src={"Dashboard.png"} maxW={"80vw"} rounded={"xl"} boxShadow={"lg"} />
-              <Text fontWeight={"semibold"} color={"gray.600"}>
+            <Flex direction={"column"} flex={["none", 1]} align={"center"} gap={"2"}>
+              <Image src={"Dashboard.png"} maxW={["90vw", "100%"]} rounded={"xl"} boxShadow={"lg"} />
+              <Text fontWeight={"semibold"} color={"gray.500"} fontSize={"sm"}>
                 Metadatify Dashboard
               </Text>
             </Flex>
           </Flex>
 
-          {/* Features */}
-          <Flex minH={"100vh"} direction={"column"} gap={"4"} pt={"8"} align={"center"} ref={featuresRef}>
-            <Heading>Features</Heading>
-            <Text color={"gray.600"}>Powerful features to improve your metadata management workflow.</Text>
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              justify={"center"}
-              wrap={"wrap"}
-              pb={"8"}
-              gap={["4", "8"]}
-              maxW={["", "80vw"]}
-            >
+          {/* AI Features */}
+          <Flex
+            direction={"column"}
+            gap={"8"}
+            py={"12"}
+            px={["4", "16"]}
+            my={"8"}
+            align={"center"}
+            bg={"purple.50"}
+            rounded={"2xl"}
+            ref={featuresRef}
+          >
+            <Flex direction={"column"} align={"center"} gap={"2"} textAlign={"center"}>
+              <Flex align={"center"} gap={"2"}>
+                <Icon name={"lightning"} size={"md"} color={"purple.500"} />
+                <Heading color={"purple.800"}>AI features built in</Heading>
+              </Flex>
+              <Text color={"purple.700"} maxW={"55ch"}>
+                Three AI features built directly into the platform to reduce the time you spend on metadata management.
+              </Text>
+            </Flex>
+            <Flex direction={["column", "row"]} gap={"6"} justify={"center"} wrap={"wrap"} w={"100%"}>
+              <Flex
+                direction={"column"}
+                rounded={"lg"}
+                border={"1px"}
+                borderColor={"purple.100"}
+                bg={"white"}
+                p={"6"}
+                gap={"3"}
+                maxW={"sm"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"search"} size={"lg"} color={"purple.500"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Natural Language Search
+                </Text>
+                <Text color={"gray.600"}>
+                  Describe what you need in plain English. Metadatify translates your query into a precise search
+                  against your metadata, without needing to configure filters manually.
+                </Text>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"lg"}
+                border={"1px"}
+                borderColor={"purple.100"}
+                bg={"white"}
+                p={"6"}
+                gap={"3"}
+                maxW={"sm"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"upload"} size={"lg"} color={"purple.500"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Smart Import Mapping
+                </Text>
+                <Text color={"gray.600"}>
+                  Importing a legacy spreadsheet? Metadatify reads your column headers and suggests the right field
+                  mapping automatically, getting your data in cleanly without manual guesswork.
+                </Text>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"lg"}
+                border={"1px"}
+                borderColor={"purple.100"}
+                bg={"white"}
+                p={"6"}
+                gap={"3"}
+                maxW={"sm"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"lightning"} size={"lg"} color={"purple.500"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Template Matching
+                </Text>
+                <Text color={"gray.600"}>
+                  Name and describe a new entity and Metadatify will suggest the best-fit metadata template from your
+                  library, keeping attribute structures consistent across similar entities.
+                </Text>
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {/* Core Features */}
+          <Flex direction={"column"} gap={"8"} py={"8"} align={"center"}>
+            <Flex direction={"column"} align={"center"} gap={"2"} textAlign={"center"}>
+              <Heading>Built for research teams</Heading>
+              <Text color={"gray.600"}>Core tools for creating, organizing, and tracking scientific metadata.</Text>
+            </Flex>
+            <Flex direction={"row"} justify={"center"} wrap={"wrap"} gap={["4", "6"]} w={"100%"} maxW={"5xl"}>
               <Flex
                 direction={"column"}
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
+                p={"5"}
+                gap={"3"}
                 maxW={"sm"}
                 bg={"white"}
                 boxShadow={"sm"}
               >
                 <Icon name={"create"} size={"lg"} />
                 <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Create
+                  Structured Metadata
                 </Text>
-                <Text>
-                  Create and manage metadata Entities inside <b>Workspaces</b>, and use <b>Templates</b> for reusable
-                  metadata structures.
+                <Text color={"gray.600"}>
+                  Define reusable Templates once and apply consistent attribute structures across every entity in your
+                  workspace.
                 </Text>
               </Flex>
               <Flex
@@ -202,18 +258,19 @@ const App = () => {
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
+                p={"5"}
+                gap={"3"}
                 maxW={"sm"}
                 bg={"white"}
                 boxShadow={"sm"}
               >
-                <Icon name={"project"} size={"lg"} color={"blue.500"} />
+                <Icon name={"project"} size={"lg"} />
                 <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Organize
+                  Projects
                 </Text>
-                <Text>
-                  Within your Workspace, group and organize metadata Entities into <b>Projects</b>.
+                <Text color={"gray.600"}>
+                  Group entities into Projects to track experimental cohorts, sample batches, or any collection your lab
+                  workflow requires.
                 </Text>
               </Flex>
               <Flex
@@ -221,78 +278,78 @@ const App = () => {
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
-                maxW={"sm"}
-                bg={"white"}
-                boxShadow={"sm"}
-              >
-                <Icon name={"graph"} size={"lg"} />
-                <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Link
-                </Text>
-                <Text>
-                  Your digital and physical assets are linked, so your metadata should be too. Visualize relationships
-                  between metadata <b>Entities</b>.
-                </Text>
-              </Flex>
-              <Flex
-                direction={"column"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
-                maxW={"sm"}
-                bg={"white"}
-                boxShadow={"sm"}
-              >
-                <Icon name={"search"} size={"lg"} />
-                <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Search
-                </Text>
-                <Text>
-                  Use a simple <b>text search</b> or use the advanced <b>query builder</b> to perform deep searches on
-                  metadata Entities.
-                </Text>
-              </Flex>
-              <Flex
-                direction={"column"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
-                maxW={"sm"}
-                bg={"white"}
-                boxShadow={"sm"}
-              >
-                <Icon name={"download"} size={"lg"} />
-                <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Export
-                </Text>
-                <Text>
-                  Export metadata into a variety of formats, including <b>CSV and JSON</b> files, and select the
-                  metadata fields to export.
-                </Text>
-              </Flex>
-              <Flex
-                direction={"column"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.200"}
-                p={"4"}
-                gap={"4"}
+                p={"5"}
+                gap={"3"}
                 maxW={"sm"}
                 bg={"white"}
                 boxShadow={"sm"}
               >
                 <Icon name={"person"} size={"lg"} />
                 <Text fontWeight={"bold"} fontSize={"lg"}>
-                  Collaborate
+                  Collaboration
                 </Text>
-                <Text>
-                  Add users to your Workspace using their <b>ORCiD</b>, allowing them to view and manage your metadata.
+                <Text color={"gray.600"}>
+                  Add lab members by their ORCiD. Everyone in a shared Workspace sees the same metadata, always current.
+                </Text>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                p={"5"}
+                gap={"3"}
+                maxW={"sm"}
+                bg={"white"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"scan"} size={"lg"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Physical Tracking
+                </Text>
+                <Text color={"gray.600"}>
+                  Every entity has a unique identifier compatible with USB barcode and QR code scanners. Point a scanner
+                  at a specimen label and jump straight to its metadata record.
+                </Text>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                p={"5"}
+                gap={"3"}
+                maxW={"sm"}
+                bg={"white"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"clock"} size={"lg"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Version History
+                </Text>
+                <Text color={"gray.600"}>
+                  Every change is tracked. Browse the full edit history of any entity and restore earlier versions
+                  whenever needed.
+                </Text>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                p={"5"}
+                gap={"3"}
+                maxW={"sm"}
+                bg={"white"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"download"} size={"lg"} />
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Multi-Format Export
+                </Text>
+                <Text color={"gray.600"}>
+                  Export metadata as CSV or JSON from individual entities, hand-picked selections, or entire projects at
+                  any time.
                 </Text>
               </Flex>
             </Flex>
@@ -301,15 +358,15 @@ const App = () => {
               images={[
                 {
                   path: "Attribute.png",
-                  caption: "Editing Entity metadata attributes",
+                  caption: "Editing entity metadata attributes",
                 },
                 {
                   path: "Entity.png",
-                  caption: "Viewing Entity metadata",
+                  caption: "Viewing entity metadata",
                 },
                 {
                   path: "Search.png",
-                  caption: "Creating an advanced query",
+                  caption: "Natural language and advanced query search",
                 },
               ]}
             />
@@ -318,13 +375,13 @@ const App = () => {
           {/* Get Started */}
           <Flex direction={"column"} gap={"8"} pt={"8"} align={"center"} ref={getStartedRef}>
             <Heading>Get Started</Heading>
-            <Text maxW={["", "50vw"]}>
-              There are multiple ways to get started with Metadatify. If you are unsure where to start or want to know
-              how Metadatify would best suit your needs, please don't hesitate to contact{" "}
+            <Text maxW={"55ch"} textAlign={"center"} color={"gray.600"}>
+              Metadatify is available as a managed cloud service or can be self-hosted on your own infrastructure. Not
+              sure which fits your lab? Reach out to{" "}
               <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
                 Henry Burgess
               </Link>
-              !
+              .
             </Text>
             <Flex
               w={"100%"}
@@ -347,16 +404,13 @@ const App = () => {
               >
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
-                <Text>Does your team already have access? You can log in right away with your ORCiD.</Text>
+                <Text>Sign in and start building your metadata library right away. No setup required.</Text>
                 <Spacer />
-
-                <Flex direction={"row"} justify={"space-between"}>
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Link color={"blue.500"} href={"https://app.metadatify.com"} isExternal>
-                      Log In
-                    </Link>
-                    <Icon name={"link"} color={"blue.500"} />
-                  </Flex>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link color={"blue.500"} href={"https://app.metadatify.com"} isExternal>
+                    Log In
+                  </Link>
+                  <Icon name={"a_right"} color={"blue.500"} />
                 </Flex>
               </Flex>
               <Flex
@@ -372,13 +426,13 @@ const App = () => {
               >
                 <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
-                <Text>Documentation on how to deploy your own instance of Metadatify will be available soon.</Text>
+                <Text>Run Metadatify on your own hardware for full control over your data and infrastructure.</Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link color={"blue.500"} href={"https://metadatify.com/docs/"} isExternal>
-                    Documentation (coming soon)
+                    Documentation
                   </Link>
-                  <Icon name={"link"} color={"blue.500"} />
+                  <Icon name={"a_right"} color={"blue.500"} />
                 </Flex>
               </Flex>
               <Flex
@@ -393,16 +447,10 @@ const App = () => {
                 boxShadow={"sm"}
               >
                 <Icon name={"l_github"} size={"lg"} />
-                <Text fontWeight={"bold"}>GitHub</Text>
-                <Text>
-                  Metadatify is an open-source project, you can contribute to further development! Get in touch with{" "}
-                  <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
-                    Henry Burgess
-                  </Link>{" "}
-                  to discuss ways to best make an impact on development.
-                </Text>
+                <Text fontWeight={"bold"}>Open Source</Text>
+                <Text>Metadatify is open source. Browse the code, file issues, or contribute on GitHub.</Text>
                 <Spacer />
-                <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
                   <Link
                     color={"blue.500"}
                     href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"}
@@ -410,7 +458,7 @@ const App = () => {
                   >
                     GitHub Repository
                   </Link>
-                  <Icon name={"link"} color={"blue.500"} />
+                  <Icon name={"a_right"} color={"blue.500"} />
                   <Spacer />
                   <Image
                     alt="GitHub Repo stars"
@@ -432,79 +480,82 @@ const App = () => {
                 <Icon name={"info"} size={"lg"} />
                 <Text fontWeight={"bold"}>Documentation</Text>
                 <Text>
-                  Further documentation on usage and development with Metadatify exists to aid users and developers.
+                  In-depth guides covering every feature, import and export workflows, and self-hosting setup.
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link color={"blue.500"} href={"https://metadatify.com/docs/"} isExternal>
                     Documentation
                   </Link>
-                  <Icon name={"link"} color={"blue.500"} />
+                  <Icon name={"a_right"} color={"blue.500"} />
                 </Flex>
               </Flex>
             </Flex>
-            <Flex direction={"column"} gap={"2"}>
-              <Flex justify={"center"} pb={"4"}>
-                <Heading size={"lg"}>Acknowledgements</Heading>
-              </Flex>
-              <Text fontWeight={"semibold"}>Organizations:</Text>
-              <UnorderedList>
-                <ListItem>
-                  <Text>Department of Neuroscience, Washington University School of Medicine in St. Louis</Text>
-                </ListItem>
-                <ListItem>
-                  <Text>
-                    Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text>Scientific Software Engineering Center, Georgia Tech</Text>
-                </ListItem>
-              </UnorderedList>
 
-              <Text fontWeight={"semibold"}>People:</Text>
-              <Flex direction={"row"} gap={"2"}>
-                <Flex
-                  direction={"column"}
-                  gap={"2"}
-                  p={"4"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.200"}
-                  bg={"white"}
-                  align={"center"}
-                  justify={"center"}
-                  w={"160px"}
-                >
-                  <Text fontWeight={"semibold"} color={"gray.400"}>
-                    Lead Developer
-                  </Text>
-                  <Avatar name={"Henry Burgess"} src={"https://avatars.githubusercontent.com/u/60735885"} />
-                  <Text fontWeight={"semibold"}>Henry Burgess</Text>
-                  <Link color={"blue.500"} href={"https://github.com/henryjburg"}>
-                    GitHub
-                  </Link>
-                </Flex>
-                <Flex
-                  direction={"column"}
-                  gap={"2"}
-                  p={"4"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.200"}
-                  bg={"white"}
-                  align={"center"}
-                  justify={"center"}
-                  w={"160px"}
-                >
-                  <Text fontWeight={"semibold"} color={"gray.400"}>
-                    Collaborator
-                  </Text>
-                  <Avatar name={"Robin Fievet"} src={"https://avatars.githubusercontent.com/u/11888851"} />
-                  <Text fontWeight={"semibold"}>Robin Fievet</Text>
-                  <Link color={"blue.500"} href={"https://github.com/rfievet"}>
-                    GitHub
-                  </Link>
+            {/* Acknowledgements */}
+            <Flex direction={"column"} gap={"6"} w={"100%"} pt={"8"} pb={"8"} align={"center"}>
+              <Heading size={"lg"}>Acknowledgements</Heading>
+              <Flex direction={"column"} align={"center"} gap={"1"}>
+                <Text fontWeight={"semibold"} color={"gray.500"} pb={"1"}>
+                  Organizations
+                </Text>
+                <Text color={"gray.600"} textAlign={"center"}>
+                  Department of Neuroscience, Washington University School of Medicine in St. Louis
+                </Text>
+                <Text color={"gray.600"} textAlign={"center"}>
+                  Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis
+                </Text>
+                <Text color={"gray.600"} textAlign={"center"}>
+                  Scientific Software Engineering Center, Georgia Tech
+                </Text>
+              </Flex>
+              <Flex direction={"column"} align={"center"} gap={"3"}>
+                <Text fontWeight={"semibold"} color={"gray.500"}>
+                  People
+                </Text>
+                <Flex direction={"row"} gap={"4"} justify={"center"} wrap={"wrap"}>
+                  <Flex
+                    direction={"column"}
+                    gap={"2"}
+                    p={"4"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                    bg={"white"}
+                    align={"center"}
+                    justify={"center"}
+                    w={"160px"}
+                  >
+                    <Text fontWeight={"semibold"} color={"gray.400"}>
+                      Lead Developer
+                    </Text>
+                    <Avatar name={"Henry Burgess"} src={"https://avatars.githubusercontent.com/u/60735885"} />
+                    <Text fontWeight={"semibold"}>Henry Burgess</Text>
+                    <Link color={"blue.500"} href={"https://github.com/henryjburg"}>
+                      GitHub
+                    </Link>
+                  </Flex>
+                  <Flex
+                    direction={"column"}
+                    gap={"2"}
+                    p={"4"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                    bg={"white"}
+                    align={"center"}
+                    justify={"center"}
+                    w={"160px"}
+                  >
+                    <Text fontWeight={"semibold"} color={"gray.400"}>
+                      Collaborator
+                    </Text>
+                    <Avatar name={"Robin Fievet"} src={"https://avatars.githubusercontent.com/u/11888851"} />
+                    <Text fontWeight={"semibold"}>Robin Fievet</Text>
+                    <Link color={"blue.500"} href={"https://github.com/rfievet"}>
+                      GitHub
+                    </Link>
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
