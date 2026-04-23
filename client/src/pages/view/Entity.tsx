@@ -3098,11 +3098,16 @@ const Entity = () => {
                           Entity Details
                         </Fieldset.Legend>
                         {!loading ? (
-                          <Stack gap={1} direction={"column"}>
+                          <Stack gap={"1"} direction={"column"}>
                             <Checkbox.Root disabled defaultChecked fontSize={"xs"} size={"xs"}>
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
-                              <Checkbox.Label>Name: {entityName}</Checkbox.Label>
+                              <Checkbox.Label>
+                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                  <Text fontWeight={"semibold"}>Name:</Text>
+                                  <Text>{entityName}</Text>
+                                </Flex>
+                              </Checkbox.Label>
                             </Checkbox.Root>
                             <Checkbox.Root
                               checked={_.includes(exportFields, "created")}
@@ -3112,12 +3117,22 @@ const Entity = () => {
                             >
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
-                              <Checkbox.Label>Created: {dayjs(entity.created).format("DD MMM YYYY")}</Checkbox.Label>
+                              <Checkbox.Label>
+                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                  <Text fontWeight={"semibold"}>Created:</Text>
+                                  <Text>{dayjs(entity.created).format("DD MMM YYYY")}</Text>
+                                </Flex>
+                              </Checkbox.Label>
                             </Checkbox.Root>
                             <Checkbox.Root checked={true} disabled fontSize={"xs"} size={"xs"}>
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
-                              <Checkbox.Label>Owner: {entity.owner}</Checkbox.Label>
+                              <Checkbox.Label>
+                                <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                                  Owner:
+                                  <ActorTag identifier={entity.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                                </Flex>
+                              </Checkbox.Label>
                             </Checkbox.Root>
                             <Checkbox.Root
                               checked={_.includes(exportFields, "description")}
@@ -3130,14 +3145,16 @@ const Entity = () => {
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
                               <Checkbox.Label>
-                                <Text lineClamp={1} fontSize={"xs"}>
-                                  Description:{" "}
-                                  {_.isEqual(entityDescription, "")
-                                    ? "No Description"
-                                    : _.truncate(entityDescription, {
-                                        length: 32,
-                                      })}
-                                </Text>
+                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                  <Text fontWeight={"semibold"}>Description:</Text>
+                                  <Text lineClamp={1}>
+                                    {_.isEqual(entityDescription, "")
+                                      ? "No Description"
+                                      : _.truncate(entityDescription, {
+                                          length: 32,
+                                        })}
+                                  </Text>
+                                </Flex>
                               </Checkbox.Label>
                             </Checkbox.Root>
                           </Stack>
@@ -3211,7 +3228,14 @@ const Entity = () => {
                                   <Checkbox.HiddenInput />
                                   <Checkbox.Control />
                                   <Checkbox.Label>
-                                    <Linky id={relationship.target._id} type={"entities"} size={"xs"} />
+                                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                                      {relationship.type === "general" ? (
+                                        <Text fontWeight={"semibold"}>Related to:</Text>
+                                      ) : (
+                                        <Text fontWeight={"semibold"}>{_.capitalize(relationship.type)} of:</Text>
+                                      )}
+                                      <Linky id={relationship.target._id} type={"entities"} size={"xs"} />
+                                    </Flex>
                                   </Checkbox.Label>
                                 </Checkbox.Root>
                               );
@@ -3248,7 +3272,12 @@ const Entity = () => {
                                 >
                                   <Checkbox.HiddenInput />
                                   <Checkbox.Control />
-                                  <Checkbox.Label>{attribute.name}</Checkbox.Label>
+                                  <Checkbox.Label>
+                                    <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                                      <Text fontWeight={"semibold"}>Attribute:</Text>
+                                      <Text>{attribute.name}</Text>
+                                    </Flex>
+                                  </Checkbox.Label>
                                 </Checkbox.Root>
                               );
                             })}

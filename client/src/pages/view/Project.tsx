@@ -1782,7 +1782,12 @@ const Project = () => {
                           <Checkbox.Root disabled defaultChecked size={"xs"} rounded={"md"} fontSize={"xs"}>
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>Name: {projectName}</Checkbox.Label>
+                            <Checkbox.Label>
+                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                <Text fontWeight={"semibold"}>Name:</Text>
+                                <Text>{projectName}</Text>
+                              </Flex>
+                            </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
                             size={"xs"}
@@ -1794,7 +1799,10 @@ const Project = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              Created: {dayjs(project.created).format("DD MMM YYYY")}
+                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                <Text fontWeight={"semibold"}>Created:</Text>
+                                <Text>{dayjs(project.created).format("DD MMM YYYY")}</Text>
+                              </Flex>
                             </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
@@ -1805,7 +1813,12 @@ const Project = () => {
                           >
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>Owner: {project.owner}</Checkbox.Label>
+                            <Checkbox.Label>
+                              <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                                Owner:
+                                <ActorTag identifier={project.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                              </Flex>
+                            </Checkbox.Label>
                           </Checkbox.Root>
                           <Checkbox.Root
                             size={"xs"}
@@ -1817,14 +1830,16 @@ const Project = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <Text lineClamp={1} fontSize={"xs"}>
-                                Description:{" "}
-                                {_.isEqual(projectDescription, "")
-                                  ? "No Description"
-                                  : _.truncate(projectDescription, {
-                                      length: 32,
-                                    })}
-                              </Text>
+                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                                <Text fontWeight={"semibold"}>Description:</Text>
+                                <Text lineClamp={1}>
+                                  {_.isEqual(projectDescription, "")
+                                    ? "No Description"
+                                    : _.truncate(projectDescription, {
+                                        length: 32,
+                                      })}
+                                </Text>
+                              </Flex>
                             </Checkbox.Label>
                           </Checkbox.Root>
                         </Stack>
@@ -1853,7 +1868,7 @@ const Project = () => {
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
                               <Text lineClamp={1} fontSize={"xs"}>
-                                Export Entities
+                                Export all Entities
                               </Text>
                             </Checkbox.Label>
                           </Checkbox.Root>
@@ -1865,17 +1880,18 @@ const Project = () => {
                         <RadioGroup.Root
                           value={exportEntityDetails}
                           onValueChange={(event) => setExportEntityDetails(event.value)}
+                          size={"xs"}
                         >
                           <Stack direction={"row"} gap={"1"}>
                             <RadioGroup.Item value={"name"}>
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"xs"}>Names</RadioGroup.Label>
+                              <RadioGroup.Label fontSize={"xs"}>Names Only</RadioGroup.Label>
                             </RadioGroup.Item>
                             <RadioGroup.Item value={"_id"}>
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"xs"}>Identifiers</RadioGroup.Label>
+                              <RadioGroup.Label fontSize={"xs"}>Identifiers Only</RadioGroup.Label>
                             </RadioGroup.Item>
                           </Stack>
                         </RadioGroup.Root>
