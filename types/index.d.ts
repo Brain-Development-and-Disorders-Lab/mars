@@ -478,6 +478,12 @@ export type ScanModalProps = {
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
+// `ReportModal` props
+export type ReportModalProps = {
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+};
+
 // `UnsavedChangesModal` props
 export type UnsavedChangesModalProps = {
   blocker: Blocker;
@@ -507,6 +513,7 @@ export type IconNames =
   | "activity"
   | "archive"
   | "attachment"
+  | "bug"
   | "check"
   | "close"
   | "counter"
