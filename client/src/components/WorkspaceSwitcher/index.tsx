@@ -24,6 +24,9 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Analytics
+import { usePostHog } from "posthog-js/react";
+
 const GET_WORKSPACES = gql`
   query GetWorkspaces {
     workspaces {
@@ -37,6 +40,7 @@ const GET_WORKSPACES = gql`
 
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
+  const posthog = usePostHog();
 
   // Modal state for transition overlay
   const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
@@ -159,6 +163,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Logout` button
    */
   const handleLogoutClick = async () => {
+    posthog.capture("logout");
+    posthog.reset();
     await auth.signOut();
     navigate("/login");
   };

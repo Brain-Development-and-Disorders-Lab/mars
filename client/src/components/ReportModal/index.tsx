@@ -16,6 +16,9 @@ import { auth } from "@lib/auth";
 // Error capture
 import { getRecentErrors } from "@lib/errors";
 
+// Analytics
+import { usePostHog } from "posthog-js/react";
+
 // Custom types
 import { ReportModalProps } from "@types";
 
@@ -47,6 +50,7 @@ const REPORT_ISSUE = gql`
 
 const ReportModal = (props: ReportModalProps) => {
   const { open, setOpen } = props;
+  const posthog = usePostHog();
 
   const [description, setDescription] = useState("");
 
@@ -70,6 +74,7 @@ const ReportModal = (props: ReportModalProps) => {
         consoleErrors: getRecentErrors(),
       },
     });
+    posthog.capture("bug_report_submitted");
     setDescription("");
     setOpen(false);
     toaster.create({

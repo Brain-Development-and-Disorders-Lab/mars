@@ -35,6 +35,9 @@ import dayjs from "dayjs";
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
 
+// Analytics
+import posthog from "posthog-js";
+
 // Custom types
 import { IResponseMessage } from "@types";
 
@@ -216,6 +219,7 @@ const Signup = () => {
         setIsAccountCreateLoading(false);
 
         if (result.data?.updateUser) {
+          posthog.capture("signup_complete", { method: "orcid" });
           toaster.create({
             title: "User Created",
             type: "success",
@@ -264,6 +268,7 @@ const Signup = () => {
           },
           onSuccess: () => {
             setIsAccountCreateLoading(false);
+            posthog.capture("signup_complete", { method: "email" });
             toaster.create({
               title: "Create Account",
               type: "success",

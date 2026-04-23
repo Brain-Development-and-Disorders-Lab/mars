@@ -192,7 +192,15 @@ export const EntitiesResolvers = {
 
       // Check that Entity is owned by the user and exists in the Workspace
       if (_.includes(workspace.entities, entity._id)) {
-        return await Entities.export(args._id, args.format, args.fields);
+        const exportResult = await Entities.export(args._id, args.format, args.fields);
+        if (process.env.DISABLE_CAPTURE !== "true") {
+          PostHogClient?.capture({
+            distinctId: context.user,
+            event: "server_export_entity",
+            properties: { format: args.format },
+          });
+        }
+        return exportResult;
       } else {
         throw new GraphQLError("You do not have permission to access this Entity", {
           extensions: {
@@ -238,7 +246,15 @@ export const EntitiesResolvers = {
         }
       }
 
-      return await Entities.exportMany(authorizedEntities, args.format);
+      const exportResult = await Entities.exportMany(authorizedEntities, args.format);
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_export_entities",
+          properties: { format: args.format, count: authorizedEntities.length },
+        });
+      }
+      return exportResult;
     },
 
     // Get collection of Entity metrics
