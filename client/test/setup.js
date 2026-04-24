@@ -9,6 +9,15 @@ if (typeof window.structuredClone === "undefined") {
   };
 }
 
+// Polyfill for ResizeObserver, used by floating UI / Zag popper internals
+if (typeof window.ResizeObserver === "undefined") {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 // Configure React testing environment
 // This tells React we're in a testing environment and enables proper act() handling
 global.IS_REACT_ACT_ENVIRONMENT = true;
