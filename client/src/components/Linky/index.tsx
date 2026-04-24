@@ -313,6 +313,12 @@ const Linky = (props: LinkyProps) => {
                       <Tag.Label fontSize={"2xs"}>Archived</Tag.Label>
                     </Tag.Root>
                   )}
+                  <Flex justify={"flex-end"}>
+                    <Button size={"xs"} rounded={"md"} onClick={onClickHandler} colorPalette={"blue"}>
+                      View
+                      <Icon name={"a_right"} size={"xs"} />
+                    </Button>
+                  </Flex>
                 </Flex>
 
                 <Separator />
@@ -342,13 +348,6 @@ const Linky = (props: LinkyProps) => {
                       <Tag.Label fontSize={"xs"}>{navigatorCount}</Tag.Label>
                     </Tag.Root>
                   </Flex>
-                </Flex>
-
-                <Flex justify={"flex-end"}>
-                  <Button size={"xs"} rounded={"md"} onClick={onClickHandler} colorPalette={"blue"}>
-                    View
-                    <Icon name={"a_right"} size={"xs"} />
-                  </Button>
                 </Flex>
               </HoverCard.Content>
             </HoverCard.Positioner>

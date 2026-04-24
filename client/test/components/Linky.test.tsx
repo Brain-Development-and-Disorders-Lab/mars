@@ -49,6 +49,10 @@ const GET_ENTITY = gql`
       _id
       name
       archived
+      description
+      attributes {
+        _id
+      }
     }
   }
 `;
@@ -59,6 +63,8 @@ const GET_PROJECT = gql`
       _id
       name
       archived
+      description
+      entities
     }
   }
 `;
@@ -75,6 +81,12 @@ const mockEntityQuery = {
         __typename: "Entity",
         _id: "test-id",
         name: "Test Entity",
+        description: "Test Description",
+        attributes: [
+          {
+            _id: "test-attribute-id",
+          },
+        ],
         archived: false,
       },
     },
@@ -130,7 +142,7 @@ describe("Linky Component", () => {
     it("renders with custom size", async () => {
       renderLinky({ size: "sm" });
       await waitFor(() => {
-        expect(screen.getByText("Test Entity")).toBeTruthy();
+        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
       });
     });
   });
@@ -139,14 +151,14 @@ describe("Linky Component", () => {
     it("truncates by default", async () => {
       renderLinky();
       await waitFor(() => {
-        expect(screen.getByText("Test Entity")).toBeTruthy();
+        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
       });
     });
 
     it("does not truncate when truncate is false", async () => {
       renderLinky({ truncate: false });
       await waitFor(() => {
-        expect(screen.getByText("Test Entity")).toBeTruthy();
+        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
       });
     });
 
@@ -159,18 +171,18 @@ describe("Linky Component", () => {
   });
 
   describe("Navigation", () => {
-    it("navigates on click when data is loaded", async () => {
+    it("opens hover card on click when data is loaded", async () => {
       renderLinky();
 
       await waitFor(() => {
-        const link = screen.getByText("Test Entity");
-        expect(link).toBeTruthy();
+        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
       });
 
-      const link = screen.getByText("Test Entity");
-      fireEvent.click(link);
+      fireEvent.click(screen.getAllByText("Test Entity")[0]);
 
-      expect(mockNavigate).toHaveBeenCalledWith("/entities/test-id");
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /view/i })).toBeTruthy();
+      });
     });
 
     it("does not navigate when deleted", async () => {
@@ -210,6 +222,8 @@ describe("Linky Component", () => {
               _id: "project-id",
               name: "Test Project",
               archived: false,
+              description: "Test Project Description",
+              entities: [],
             },
           },
         },
@@ -227,7 +241,7 @@ describe("Linky Component", () => {
       // Wait for the query to complete and data to load
       await waitFor(
         () => {
-          expect(screen.getByText("Test Project")).toBeTruthy();
+          expect(screen.getAllByText("Test Project")[0]).toBeTruthy();
         },
         { timeout: 3000 },
       );
