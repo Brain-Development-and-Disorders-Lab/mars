@@ -68,9 +68,13 @@ import { usePostHog } from "posthog-js/react";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Hooks
+import { useFeatures } from "@hooks/useFeatures";
+
 const ImportDialog = (props: ImportDialogProps) => {
   // Posthog
   const posthog = usePostHog();
+  const { features } = useFeatures();
 
   // File states
   const [file, setFile] = useState({} as File);
@@ -816,7 +820,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fetch AI column mapping suggestions when columns become available
   useEffect(() => {
-    if (columns.length === 0 || fileType !== CSV_MIME_TYPE) return;
+    if (!features.ai || columns.length === 0 || fileType !== CSV_MIME_TYPE) return;
 
     const fetchSuggestions = async () => {
       setIsSuggesting(true);

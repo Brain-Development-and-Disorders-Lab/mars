@@ -109,6 +109,15 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [open]);
 
+  // Admin visibility
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    auth.getSession().then(({ data }) => {
+      setIsAdmin(data?.user?.role === "admin");
+    });
+  }, []);
+
   /**
    * Handle selecting a Workspace from the drop-down
    * @param selectedWorkspace Identifier and name of selected Workspace
@@ -270,6 +279,19 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   <Text fontSize={"xs"}>Account settings</Text>
                 </Flex>
               </Menu.Item>
+              {isAdmin && (
+                <Menu.Item
+                  id={"navAdminButtonMobile"}
+                  value={"admin"}
+                  fontSize={"xs"}
+                  onClick={() => navigate("/admin")}
+                >
+                  <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
+                    <Icon name={"settings"} size={"xs"} />
+                    <Text fontSize={"xs"}>Management</Text>
+                  </Flex>
+                </Menu.Item>
+              )}
               <Menu.Item value={"logout"} onClick={() => handleLogoutClick()}>
                 <Flex id={"accountLogoutItem"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"logout"} size={"xs"} />

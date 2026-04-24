@@ -48,6 +48,7 @@ import CreateProject from "@pages/create/Project";
 // Page type - Other
 import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
+import Admin from "@pages/Admin";
 import Invalid from "@pages/Invalid";
 import Unauthorized from "@pages/Unauthorized";
 import Login from "@pages/account/Login";
@@ -57,6 +58,7 @@ import ResetPassword from "@pages/account/ResetPassword";
 
 // Providers
 import { WorkspaceProvider } from "./hooks/useWorkspace";
+import { FeaturesProvider } from "./hooks/useFeatures";
 
 // Theme extension
 import { theme } from "./styles/theme";
@@ -69,9 +71,11 @@ import { theme } from "./styles/theme";
 const Providers = (): React.JSX.Element => {
   return (
     <ChakraProvider value={theme}>
-      <WorkspaceProvider>
-        <Outlet />
-      </WorkspaceProvider>
+      <FeaturesProvider>
+        <WorkspaceProvider>
+          <Outlet />
+        </WorkspaceProvider>
+      </FeaturesProvider>
     </ChakraProvider>
   );
 };
@@ -132,6 +136,7 @@ const App = (): ReactElement => {
           <Route path={"/profile"} element={<User />} />
           <Route path={"/search"} element={<Search />} />
           <Route path={"/activity"} element={<Activity />} />
+          <Route path={"/admin"} element={<Admin />} />
           <Route path={"/invalid"} element={<Invalid />} />
           <Route path={"/unauthorized"} element={<Unauthorized />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />

@@ -1,6 +1,6 @@
 // better-auth imports
 import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import { inferAdditionalFields, adminClient } from "better-auth/client/plugins";
 import { genericOAuthClient } from "better-auth/client/plugins";
 import { API_URL } from "@variables";
 
@@ -9,6 +9,7 @@ export const auth = createAuthClient({
   basePath: "/auth",
   plugins: [
     genericOAuthClient(),
+    adminClient(),
     inferAdditionalFields({
       user: {
         firstName: {

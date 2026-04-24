@@ -34,10 +34,14 @@ import { ignoreAbort } from "@lib/util";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Hooks
+import { useFeatures } from "@hooks/useFeatures";
+
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
 const SearchBox = () => {
+  const { features } = useFeatures();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [inputWidth, setInputWidth] = useState<number | undefined>(undefined);
@@ -150,33 +154,42 @@ const SearchBox = () => {
   });
 
   const runSearch = async () => {
-    // Initial check if a specific ID search was not found
     setIsSearching(true);
     setHasSearched(true);
     setResults([]);
 
-    const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
+    let searchQuery = query;
+    let isBuilder = false;
 
-    if (!translation || !translation.data?.translateSearch) {
-      setIsSearching(false);
-      return;
-    } else if (translation.error) {
-      toaster.create({
-        title: "Error",
-        type: "error",
-        description: "Unable to translate query, please try again",
-        duration: 2000,
-        closable: true,
-      });
-      setIsSearching(false);
-      return;
+    if (features.ai) {
+      const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
+
+      if (!translation) {
+        setIsSearching(false);
+        return;
+      } else if (translation.error) {
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: "Unable to translate query, please try again",
+          duration: 2000,
+          closable: true,
+        });
+        setIsSearching(false);
+        return;
+      }
+
+      if (translation.data?.translateSearch) {
+        searchQuery = translation.data.translateSearch;
+        isBuilder = true;
+      }
     }
 
     const results = await searchText({
       variables: {
-        query: translation.data.translateSearch,
+        query: searchQuery,
         resultType: "entity",
-        isBuilder: true,
+        isBuilder,
         showArchived: false,
       },
     }).catch(ignoreAbort);
@@ -200,7 +213,6 @@ const SearchBox = () => {
     }
 
     setIsSearching(false);
-    return;
   };
 
   const onCloseWrapper = () => {
@@ -239,17 +251,19 @@ const SearchBox = () => {
         {/* Input row with dropdown */}
         <Box position={"relative"} w={"100%"}>
           <Flex gap={"1"} align={"center"} w={"100%"}>
-            <InputGroup startElement={<Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
+            <InputGroup
+              startElement={features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined}
+            >
               <Input
                 data-search-input
                 value={query}
                 rounded={"md"}
                 size={"xs"}
-                placeholder={"Describe what you're looking for..."}
+                placeholder={features.ai ? "Describe what you're looking for..." : "Search..."}
                 background={"white"}
                 w={"100%"}
-                borderColor={"purple.400"}
-                outlineColor={"purple.400"}
+                borderColor={features.ai ? "purple.400" : undefined}
+                outlineColor={features.ai ? "purple.400" : undefined}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setOpen(false);
@@ -270,7 +284,7 @@ const SearchBox = () => {
               data-search-button
               size={"xs"}
               rounded={"md"}
-              colorPalette={"purple"}
+              colorPalette={features.ai ? "purple" : "green"}
               disabled={query === ""}
               loading={isSearching}
               loadingText={"Searching..."}
