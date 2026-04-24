@@ -150,7 +150,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
           <Flex justify={"right"} pr={"0.5"} pb={"0.5"}>
             <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={() => navigate("/activity")}>
               View All
-              <Icon name={"c_right"} size={"xs"} />
+              <Icon name={"a_right"} size={"xs"} />
             </Button>
           </Flex>
         </Flex>

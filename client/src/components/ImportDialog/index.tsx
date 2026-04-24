@@ -1820,14 +1820,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                   loading={importLoading}
                   loadingText={"Processing"}
                 >
+                  {/* Default button text */}
+                  {entityStep === 0 && templateStep === 0 && "Continue"}
+
                   {/* Entities import type */}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "upload") && "Continue"}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && "Continue"}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && "Continue"}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
                   {/* Template import type */}
-                  {_.isEqual(importType, "template") && _.isEqual(entityInterfacePage, "upload") && "Continue"}
                   {_.isEqual(importType, "template") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
                   {/* Icon */}

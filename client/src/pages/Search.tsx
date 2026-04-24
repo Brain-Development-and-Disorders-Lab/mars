@@ -125,6 +125,7 @@ const Search = () => {
           name
           owner
           archived
+          created
           description
           projects
           attributes {
@@ -376,8 +377,12 @@ const Search = () => {
       cell: (info) => {
         return (
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Icon name={info.getValue() ? "archive" : "check"} color={info.getValue() ? "orange" : "green"} />
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "orange" : "green"}>
+            <Icon
+              name={info.getValue() ? "archive" : "check"}
+              color={info.getValue() ? "gray.500" : "green.600"}
+              size={"xs"}
+            />
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green.600"}>
               {info.getValue() ? "Archived" : "Active"}
             </Text>
           </Flex>
