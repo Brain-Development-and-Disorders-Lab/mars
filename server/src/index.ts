@@ -18,6 +18,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { typedefs } from "./typedefs";
 
 // Resolvers
+import { AdminResolvers } from "@resolvers/Admin";
 import { APIResolvers } from "@resolvers/API";
 import { ActivityResolvers } from "@resolvers/Activity";
 import { CountersResolvers } from "@resolvers/Counters";
@@ -115,6 +116,7 @@ const start = async () => {
       {
         Upload: GraphQLUpload,
       },
+      AdminResolvers,
       ActivityResolvers,
       APIResolvers,
       CountersResolvers,
@@ -194,6 +196,7 @@ const start = async () => {
         return {
           user: res.locals.session?.user?.id || "",
           workspace: (req.headers.workspace as string) || "",
+          userRole: ((res.locals.session?.user as Record<string, unknown>)?.role as string) || "user",
         };
       },
     }),

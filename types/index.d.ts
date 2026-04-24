@@ -658,6 +658,7 @@ export type IResolverParent = Record<string, any>;
 export type Context = {
   user: string;
   workspace: string;
+  userRole: string;
 };
 
 // API key data
@@ -691,6 +692,7 @@ export type IUser = {
   lastLogin: string;
   api_keys: string; // better-auth: Stored as a JSON string
   account_orcid: string;
+  role: string; // better-auth admin: "user" or "admin"
 };
 
 export type UserModel = IUser & {
@@ -711,6 +713,27 @@ export type TemplateMetrics = IContentMetrics;
 
 export type WorkspaceMetrics = {
   collaborators: number;
+};
+
+export type AdminMetrics = {
+  users: number;
+  workspaces: number;
+  entities: number;
+  projects: number;
+  templates: number;
+};
+
+export type UserFeatures = {
+  ai: boolean;
+};
+
+export type AdminUser = {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  workspaces: number;
+  features: UserFeatures;
 };
 
 export interface Html5QrcodeScannerConfig {
