@@ -582,7 +582,7 @@ const Dashboard = () => {
                   onClick={() => navigate(`/projects`)}
                 >
                   All Projects
-                  <Icon name={"c_right"} size={"xs"} />
+                  <Icon name={"a_right"} size={"xs"} />
                 </Button>
               </Flex>
             </Flex>
