@@ -1,5 +1,5 @@
 // Custom types
-import { AdminMetrics, AdminUser, IResponseMessage, UserFeatures } from "@types";
+import { AdminMetrics, AdminUser, AdminWorkspace, IResponseMessage, UserFeatures } from "@types";
 
 // Database
 import { getDatabase } from "@connectors/database";
@@ -37,7 +37,9 @@ export class Admin {
     return users.map((user) => {
       const userId = (user._id as ObjectId).toString();
       const workspaceCount = workspaces.filter(
-        (w) => w.owner === userId || (Array.isArray(w.collaborators) && w.collaborators.includes(userId)),
+        (workspace) =>
+          workspace.owner === userId ||
+          (Array.isArray(workspace.collaborators) && workspace.collaborators.includes(userId)),
       ).length;
 
       const features: UserFeatures = {
@@ -51,6 +53,35 @@ export class Admin {
         role: user.role || "user",
         workspaces: workspaceCount,
         features,
+      };
+    });
+  };
+
+  static getWorkspaces = async (): Promise<AdminWorkspace[]> => {
+    const [workspaces, entityAttrCounts] = await Promise.all([
+      getDatabase().collection(WORKSPACES_COLLECTION).find().toArray(),
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .aggregate([{ $project: { attrCount: { $size: { $ifNull: ["$attributes", []] } } } }])
+        .toArray(),
+    ]);
+
+    const attrributeCountMap = new Map(
+      entityAttrCounts.map((entity) => [entity._id as string, entity.attrCount as number]),
+    );
+
+    return workspaces.map((workspace) => {
+      const entityIds: string[] = workspace.entities || [];
+      const attributeCount = entityIds.reduce((sum, id) => sum + (attrributeCountMap.get(id) ?? 0), 0);
+
+      return {
+        _id: workspace._id as string,
+        name: workspace.name || "",
+        description: workspace.description || "",
+        owner: workspace.owner || "",
+        entities: entityIds.length,
+        templates: (workspace.templates || []).length,
+        attributes: attributeCount,
       };
     });
   };

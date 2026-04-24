@@ -1,4 +1,12 @@
-import { AdminMetrics, AdminUser, Context, IResolverParent, IResponseMessage, UserFeatures } from "@types";
+import {
+  AdminMetrics,
+  AdminUser,
+  AdminWorkspace,
+  Context,
+  IResolverParent,
+  IResponseMessage,
+  UserFeatures,
+} from "@types";
 import { GraphQLError } from "graphql/index";
 
 // Models
@@ -38,6 +46,15 @@ export const AdminResolvers = {
     ): Promise<AdminUser[]> => {
       requireAdmin(context);
       return await Admin.getUsers();
+    },
+
+    adminWorkspaces: async (
+      _parent: IResolverParent,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<AdminWorkspace[]> => {
+      requireAdmin(context);
+      return await Admin.getWorkspaces();
     },
   },
 

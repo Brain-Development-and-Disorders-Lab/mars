@@ -715,6 +715,16 @@ export type WorkspaceMetrics = {
   collaborators: number;
 };
 
+export type AdminWorkspace = {
+  _id: string;
+  name: string;
+  description: string;
+  owner: string;
+  entities: number;
+  templates: number;
+  attributes: number;
+};
+
 export type AdminMetrics = {
   users: number;
   workspaces: number;

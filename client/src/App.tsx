@@ -48,7 +48,7 @@ import CreateProject from "@pages/create/Project";
 // Page type - Other
 import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
-import Admin from "@pages/Admin";
+import Admin from "@pages/account/Admin";
 import Invalid from "@pages/Invalid";
 import Unauthorized from "@pages/Unauthorized";
 import Login from "@pages/account/Login";

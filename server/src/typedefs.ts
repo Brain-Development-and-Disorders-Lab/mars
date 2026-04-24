@@ -66,6 +66,17 @@ export const typedefs = `#graphql
     ai: Boolean
   }
 
+  # "AdminWorkspace" type
+  type AdminWorkspace {
+    _id: String!
+    name: String
+    description: String
+    owner: String
+    entities: Int
+    templates: Int
+    attributes: Int
+  }
+
   # "AdminUser" type
   type AdminUser {
     _id: String!
@@ -561,6 +572,7 @@ export const typedefs = `#graphql
     # Admin queries
     adminMetrics: AdminMetrics
     adminUsers: [AdminUser]
+    adminWorkspaces: [AdminWorkspace]
     currentUserFeatures: UserFeatures
 
     # User queries

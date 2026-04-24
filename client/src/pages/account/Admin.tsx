@@ -3,11 +3,13 @@ import React from "react";
 // Existing and custom components
 import { Flex, Heading, Text, Stat, Button, Tag, Switch } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import ActorTag from "@components/ActorTag";
 import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Custom types
-import { AdminMetrics, AdminUser, IconNames, IResponseMessage } from "@types";
+import { AdminMetrics, AdminUser, AdminWorkspace, IconNames, IResponseMessage } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -16,6 +18,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 // Utility imports
 import { createColumnHelper } from "@tanstack/react-table";
 import dayjs from "dayjs";
+import _ from "lodash";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -38,6 +41,15 @@ const GET_ADMIN_DATA = gql`
       features {
         ai
       }
+    }
+    adminWorkspaces {
+      _id
+      name
+      description
+      owner
+      entities
+      templates
+      attributes
     }
   }
 `;
@@ -85,20 +97,22 @@ const StatCard = ({
   </Flex>
 );
 
-const columnHelper = createColumnHelper<AdminUser>();
+const userColumnHelper = createColumnHelper<AdminUser>();
+const workspaceColumnHelper = createColumnHelper<AdminWorkspace>();
 
 const Admin = () => {
-  const { data, loading, error, refetch } = useQuery<{ adminMetrics: AdminMetrics; adminUsers: AdminUser[] }>(
-    GET_ADMIN_DATA,
-    { fetchPolicy: "network-only" },
-  );
+  const { data, loading, error, refetch } = useQuery<{
+    adminMetrics: AdminMetrics;
+    adminUsers: AdminUser[];
+    adminWorkspaces: AdminWorkspace[];
+  }>(GET_ADMIN_DATA, { fetchPolicy: "network-only" });
 
   const [setUserFeatures] = useMutation<{ setUserFeatures: IResponseMessage }>(SET_USER_FEATURES, {
     onCompleted: () => refetch(),
   });
 
   const usersTableColumns = [
-    columnHelper.accessor("name", {
+    userColumnHelper.accessor("name", {
       cell: (info) => (
         <Text fontSize={"xs"} fontWeight={"semibold"}>
           {info.getValue() || "—"}
@@ -107,7 +121,7 @@ const Admin = () => {
       header: "Name",
       meta: { minWidth: 180 } as ColumnMeta,
     }),
-    columnHelper.accessor("email", {
+    userColumnHelper.accessor("email", {
       cell: (info) => (
         <Text fontSize={"xs"} color={"gray.600"}>
           {info.getValue() || "—"}
@@ -116,7 +130,7 @@ const Admin = () => {
       header: "Email",
       meta: { minWidth: 220 } as ColumnMeta,
     }),
-    columnHelper.accessor("role", {
+    userColumnHelper.accessor("role", {
       cell: (info) => (
         <Tag.Root colorPalette={info.getValue() === "admin" ? "orange" : "blue"} size={"sm"}>
           <Tag.Label>{info.getValue() || "user"}</Tag.Label>
@@ -125,7 +139,7 @@ const Admin = () => {
       header: "Role",
       meta: { fixedWidth: 100 } as ColumnMeta,
     }),
-    columnHelper.accessor("workspaces", {
+    userColumnHelper.accessor("workspaces", {
       cell: (info) => (
         <Text fontSize={"xs"} color={"gray.600"}>
           {info.getValue()}
@@ -134,7 +148,7 @@ const Admin = () => {
       header: "Workspaces",
       meta: { fixedWidth: 120 } as ColumnMeta,
     }),
-    columnHelper.display({
+    userColumnHelper.display({
       id: "features",
       cell: (info) => (
         <Flex direction={"row"} align={"center"} gap={"2"}>
@@ -156,6 +170,64 @@ const Admin = () => {
       ),
       header: "Additional Features",
       meta: { minWidth: 120 } as ColumnMeta,
+    }),
+  ];
+
+  const workspacesTableColumns = [
+    workspaceColumnHelper.accessor("name", {
+      cell: (info) => (
+        <Text fontSize={"xs"} fontWeight={"semibold"}>
+          {info.getValue() || "—"}
+        </Text>
+      ),
+      header: "Name",
+      meta: { minWidth: 180 } as ColumnMeta,
+    }),
+    workspaceColumnHelper.accessor("description", {
+      cell: (info) => {
+        const value = info.getValue();
+        return (
+          <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
+            <Text fontSize={"xs"} color={"gray.600"}>
+              {value ? _.truncate(value, { length: 48 }) : "—"}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Description",
+      meta: { minWidth: 220 } as ColumnMeta,
+    }),
+    workspaceColumnHelper.accessor("owner", {
+      cell: (info) => <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,
+      header: "Owner",
+      meta: { minWidth: 160 } as ColumnMeta,
+    }),
+    workspaceColumnHelper.accessor("entities", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={"gray.600"}>
+          {info.getValue()}
+        </Text>
+      ),
+      header: "Entities",
+      meta: { fixedWidth: 90 } as ColumnMeta,
+    }),
+    workspaceColumnHelper.accessor("templates", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={"gray.600"}>
+          {info.getValue()}
+        </Text>
+      ),
+      header: "Templates",
+      meta: { fixedWidth: 100 } as ColumnMeta,
+    }),
+    workspaceColumnHelper.accessor("attributes", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={"gray.600"}>
+          {info.getValue()}
+        </Text>
+      ),
+      header: "Attributes",
+      meta: { fixedWidth: 100 } as ColumnMeta,
     }),
   ];
 
@@ -245,12 +317,35 @@ const Admin = () => {
           <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
             <Icon name={"person"} size={"xs"} />
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
-              Users
+              All Users
             </Text>
           </Flex>
           <DataTable
             data={data?.adminUsers ?? []}
             columns={usersTableColumns}
+            visibleColumns={{}}
+            selectedRows={{}}
+            showPagination
+          />
+        </Flex>
+
+        <Flex
+          direction={"column"}
+          gap={"1"}
+          p={"1"}
+          rounded={"md"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+        >
+          <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
+            <Icon name={"workspace"} size={"xs"} />
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              All Workspaces
+            </Text>
+          </Flex>
+          <DataTable
+            data={data?.adminWorkspaces ?? []}
+            columns={workspacesTableColumns}
             visibleColumns={{}}
             selectedRows={{}}
             showPagination
