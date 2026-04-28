@@ -40,6 +40,7 @@ import {
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
+import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Types
@@ -1233,6 +1234,12 @@ const ValueRow = (props: {
       valueData = JSON.parse(valueData).selected;
     }
     navigator.clipboard.writeText(valueData.toString() || "");
+    toaster.create({
+      title: "Copied to clipboard",
+      type: "success",
+      duration: 2000,
+      closable: true,
+    });
   };
 
   // Render data input based on type

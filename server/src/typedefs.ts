@@ -92,6 +92,8 @@ export const typedefs = `#graphql
     role: String
     workspaces: Int
     features: UserFeatures
+    banned: Boolean
+    lastLogin: String
   }
 
   # "UserInput" type
@@ -671,6 +673,7 @@ export const typedefs = `#graphql
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
     setUserFeatures(_id: String, features: UserFeaturesInput): ResponseMessage
+    setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations
     createUser(user: UserInput): ResponseMessage

@@ -1,11 +1,12 @@
 import React from "react";
 
 // Existing and custom components
-import { Flex, Heading, Text, Stat, Button, Tag, Switch } from "@chakra-ui/react";
+import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
 import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
+import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Custom types
@@ -42,6 +43,8 @@ const GET_ADMIN_DATA = gql`
         ai
         api
       }
+      banned
+      lastLogin
     }
     adminWorkspaces {
       _id
@@ -58,6 +61,15 @@ const GET_ADMIN_DATA = gql`
 const SET_USER_FEATURES = gql`
   mutation SetUserFeatures($_id: String, $features: UserFeaturesInput) {
     setUserFeatures(_id: $_id, features: $features) {
+      success
+      message
+    }
+  }
+`;
+
+const SET_BAN_STATUS = gql`
+  mutation SetBanStatus($_id: String, $banned: Boolean) {
+    setBanStatus(_id: $_id, banned: $banned) {
       success
       message
     }
@@ -112,24 +124,50 @@ const Admin = () => {
     onCompleted: () => refetch(),
   });
 
+  const [setBanStatus] = useMutation<{ setBanStatus: IResponseMessage }>(SET_BAN_STATUS, {
+    onCompleted: () => refetch(),
+  });
+
   const usersTableColumns = [
+    userColumnHelper.accessor("email", {
+      cell: (info) => (
+        <Flex direction={"row"} gap={"2"} justify={"space-between"} w={"100%"} align={"center"}>
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 24}>
+            <Text fontSize={"xs"} color={"gray.600"}>
+              {_.truncate(info.getValue(), { length: 24 })}
+            </Text>
+          </Tooltip>
+          <IconButton
+            aria-label="Copy value"
+            size="2xs"
+            mx={"1"}
+            variant="outline"
+            colorPalette="gray"
+            onClick={() => {
+              navigator.clipboard.writeText(info.getValue());
+              toaster.create({
+                title: "Copied to clipboard",
+                type: "success",
+                duration: 2000,
+                closable: true,
+              });
+            }}
+          >
+            <Icon name="copy" size="xs" />
+          </IconButton>
+        </Flex>
+      ),
+      header: "Email",
+      meta: { minWidth: 220 } as ColumnMeta,
+    }),
     userColumnHelper.accessor("name", {
       cell: (info) => (
         <Text fontSize={"xs"} fontWeight={"semibold"}>
-          {info.getValue() || "—"}
+          {info.getValue()}
         </Text>
       ),
       header: "Name",
       meta: { minWidth: 180 } as ColumnMeta,
-    }),
-    userColumnHelper.accessor("email", {
-      cell: (info) => (
-        <Text fontSize={"xs"} color={"gray.600"}>
-          {info.getValue() || "—"}
-        </Text>
-      ),
-      header: "Email",
-      meta: { minWidth: 220 } as ColumnMeta,
     }),
     userColumnHelper.accessor("role", {
       cell: (info) => (
@@ -148,6 +186,40 @@ const Admin = () => {
       ),
       header: "Workspaces",
       meta: { fixedWidth: 120 } as ColumnMeta,
+    }),
+    userColumnHelper.accessor("lastLogin", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={"gray.600"}>
+          {info.getValue() ? dayjs(info.getValue()).format("D MMM YYYY[ at ]h:mm A") : "Never"}
+        </Text>
+      ),
+      header: "Last Login",
+      meta: { minWidth: 180 } as ColumnMeta,
+    }),
+    userColumnHelper.display({
+      id: "banned",
+      cell: (info) => (
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Switch.Root
+            size={"sm"}
+            colorPalette={"green"}
+            checked={!info.row.original.banned}
+            onCheckedChange={(event) =>
+              setBanStatus({ variables: { _id: info.row.original._id, banned: !event.checked } })
+            }
+          >
+            <Switch.HiddenInput />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+          <Text fontSize={"xs"} color={"gray.600"}>
+            {info.row.original.banned ? "Inactive" : "Active"}
+          </Text>
+        </Flex>
+      ),
+      header: "Status",
+      meta: { fixedWidth: 100 } as ColumnMeta,
     }),
     userColumnHelper.display({
       id: "features",

@@ -54,6 +54,8 @@ export class Admin {
         role: user.role || "user",
         workspaces: workspaceCount,
         features,
+        banned: user.banned ?? false,
+        lastLogin: user.lastLogin || "",
       };
     });
   };
@@ -109,6 +111,17 @@ export class Admin {
     return {
       success: result.modifiedCount === 1,
       message: result.modifiedCount === 1 ? "User features updated" : "Unable to update user features",
+    };
+  };
+
+  static setBanStatus = async (_id: string, banned: boolean): Promise<IResponseMessage> => {
+    const result = await getDatabase()
+      .collection(USERS_COLLECTION)
+      .updateOne({ _id: new ObjectId(_id) }, { $set: { banned } });
+
+    return {
+      success: result.modifiedCount === 1,
+      message: result.modifiedCount === 1 ? "User status updated" : "Unable to update user status",
     };
   };
 

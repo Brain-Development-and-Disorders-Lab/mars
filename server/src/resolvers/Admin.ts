@@ -81,5 +81,19 @@ export const AdminResolvers = {
       requireAdmin(context);
       return await Admin.setUserFeatures(args._id, args.features);
     },
+
+    setBanStatus: async (
+      _parent: IResolverParent,
+      args: { _id: string; banned: boolean },
+      context: Context,
+    ): Promise<IResponseMessage> => {
+      requireAdmin(context);
+
+      if (context.user === args._id) {
+        return { success: false, message: "You cannot ban your own account" };
+      }
+
+      return await Admin.setBanStatus(args._id, args.banned);
+    },
   },
 };

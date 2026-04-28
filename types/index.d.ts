@@ -746,6 +746,8 @@ export type AdminUser = {
   role: string;
   workspaces: number;
   features: UserFeatures;
+  banned: boolean;
+  lastLogin: string;
 };
 
 export interface Html5QrcodeScannerConfig {
