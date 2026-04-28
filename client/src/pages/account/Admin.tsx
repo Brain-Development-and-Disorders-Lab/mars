@@ -40,6 +40,7 @@ const GET_ADMIN_DATA = gql`
       workspaces
       features {
         ai
+        api
       }
     }
     adminWorkspaces {
@@ -55,8 +56,8 @@ const GET_ADMIN_DATA = gql`
 `;
 
 const SET_USER_FEATURES = gql`
-  mutation SetUserFeatures($_id: String, $ai: Boolean) {
-    setUserFeatures(_id: $_id, ai: $ai) {
+  mutation SetUserFeatures($_id: String, $features: UserFeaturesInput) {
+    setUserFeatures(_id: $_id, features: $features) {
       success
       message
     }
@@ -132,7 +133,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("role", {
       cell: (info) => (
-        <Tag.Root colorPalette={info.getValue() === "admin" ? "orange" : "blue"} size={"sm"}>
+        <Tag.Root colorPalette={info.getValue() === "admin" ? "red" : "blue"} size={"sm"}>
           <Tag.Label>{info.getValue() || "user"}</Tag.Label>
         </Tag.Root>
       ),
@@ -152,23 +153,45 @@ const Admin = () => {
       id: "features",
       cell: (info) => (
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Switch.Root
-            size={"sm"}
-            colorPalette={"green"}
-            checked={info.row.original.features?.ai ?? false}
-            onCheckedChange={(e) => setUserFeatures({ variables: { _id: info.row.original._id, ai: e.checked } })}
-          >
-            <Switch.HiddenInput />
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-          </Switch.Root>
-          <Text fontSize={"xs"} color={"gray.600"}>
-            AI
-          </Text>
+          <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Switch.Root
+              size={"sm"}
+              colorPalette={"green"}
+              checked={info.row.original.features?.ai ?? false}
+              onCheckedChange={(event) =>
+                setUserFeatures({ variables: { _id: info.row.original._id, features: { ai: event.checked } } })
+              }
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+            <Text fontSize={"xs"} color={"gray.600"}>
+              AI features
+            </Text>
+          </Flex>
+          <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Switch.Root
+              size={"sm"}
+              colorPalette={"green"}
+              checked={info.row.original.features?.api ?? false}
+              onCheckedChange={(event) =>
+                setUserFeatures({ variables: { _id: info.row.original._id, features: { api: event.checked } } })
+              }
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+            <Text fontSize={"xs"} color={"gray.600"}>
+              API access
+            </Text>
+          </Flex>
         </Flex>
       ),
-      header: "Additional Features",
+      header: "Permissions",
       meta: { minWidth: 120 } as ColumnMeta,
     }),
   ];
@@ -186,13 +209,21 @@ const Admin = () => {
     workspaceColumnHelper.accessor("description", {
       cell: (info) => {
         const value = info.getValue();
-        return (
-          <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
-            <Text fontSize={"xs"} color={"gray.600"}>
-              {value ? _.truncate(value, { length: 48 }) : "—"}
-            </Text>
-          </Tooltip>
-        );
+        if (value) {
+          return (
+            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
+              <Text fontSize={"xs"} color={"gray.600"}>
+                {_.truncate(value, { length: 48 })}
+              </Text>
+            </Tooltip>
+          );
+        } else {
+          return (
+            <Tag.Root colorPalette={"orange"} size={"sm"}>
+              <Tag.Label>None</Tag.Label>
+            </Tag.Root>
+          );
+        }
       },
       header: "Description",
       meta: { minWidth: 220 } as ColumnMeta,
@@ -233,7 +264,7 @@ const Admin = () => {
 
   return (
     <Content isError={!!error} isLoaded={!loading}>
-      <Flex direction={"column"} gap={"2"} p={"1"}>
+      <Flex direction={"column"} gap={"1"} p={"1"}>
         <Flex direction={"row"} align={"left"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Flex
             align={"center"}
@@ -251,12 +282,12 @@ const Admin = () => {
             </Heading>
           </Flex>
 
-          <Flex direction={"row"} gap={"1"} align={"center"}>
+          <Flex direction={"row"} gap={"2"} align={"center"}>
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
               Last Updated:
             </Text>
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-              {dayjs(Date.now()).fromNow()}
+              {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
             </Text>
             <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={() => refetch()}>
               Refresh

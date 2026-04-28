@@ -693,6 +693,7 @@ export type IUser = {
   api_keys: string; // better-auth: Stored as a JSON string
   account_orcid: string;
   role: string; // better-auth admin: "user" or "admin"
+  features: UserFeatures;
 };
 
 export type UserModel = IUser & {
@@ -735,6 +736,7 @@ export type AdminMetrics = {
 
 export type UserFeatures = {
   ai: boolean;
+  api: boolean;
 };
 
 export type AdminUser = {

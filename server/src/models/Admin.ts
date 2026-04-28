@@ -44,6 +44,7 @@ export class Admin {
 
       const features: UserFeatures = {
         ai: user.features?.ai ?? false,
+        api: user.features?.api ?? false,
       };
 
       return {
@@ -90,12 +91,16 @@ export class Admin {
     const user = await getDatabase()
       .collection(USERS_COLLECTION)
       .findOne({ _id: new ObjectId(_id) });
-    return { ai: user?.features?.ai ?? false };
+    return {
+      ai: user?.features?.ai ?? false,
+      api: user?.features?.api ?? false,
+    };
   };
 
   static setUserFeatures = async (_id: string, features: Partial<UserFeatures>): Promise<IResponseMessage> => {
     const update: Record<string, unknown> = {};
     if (features.ai !== undefined) update["features.ai"] = features.ai;
+    if (features.api !== undefined) update["features.api"] = features.api;
 
     const result = await getDatabase()
       .collection(USERS_COLLECTION)

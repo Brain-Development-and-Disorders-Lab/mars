@@ -11,6 +11,7 @@ const GET_CURRENT_USER_FEATURES = gql`
   query GetCurrentUserFeatures {
     currentUserFeatures {
       ai
+      api
     }
   }
 `;
@@ -19,7 +20,7 @@ type FeaturesContextValue = {
   features: UserFeatures;
 };
 
-const defaultFeatures: UserFeatures = { ai: false };
+const defaultFeatures: UserFeatures = { ai: false, api: false };
 
 const FeaturesContext = createContext<FeaturesContextValue>({ features: defaultFeatures });
 

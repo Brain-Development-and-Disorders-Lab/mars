@@ -64,6 +64,13 @@ export const typedefs = `#graphql
   # "UserFeatures" type
   type UserFeatures {
     ai: Boolean
+    api: Boolean
+  }
+  
+  # "UserFeaturesInput" type
+  input UserFeaturesInput {
+    ai: Boolean
+    api: Boolean
   }
 
   # "AdminWorkspace" type
@@ -663,7 +670,7 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
-    setUserFeatures(_id: String, ai: Boolean): ResponseMessage
+    setUserFeatures(_id: String, features: UserFeaturesInput): ResponseMessage
 
     # User mutations
     createUser(user: UserInput): ResponseMessage

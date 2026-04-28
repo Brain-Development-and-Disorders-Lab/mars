@@ -75,11 +75,11 @@ export const AdminResolvers = {
 
     setUserFeatures: async (
       _parent: IResolverParent,
-      args: { _id: string; ai?: boolean },
+      args: { _id: string; features: Partial<UserFeatures> },
       context: Context,
     ): Promise<IResponseMessage> => {
       requireAdmin(context);
-      return await Admin.setUserFeatures(args._id, { ai: args.ai });
+      return await Admin.setUserFeatures(args._id, args.features);
     },
   },
 };
