@@ -264,7 +264,7 @@ const Admin = () => {
         </Flex>
       ),
       header: "Permissions",
-      meta: { minWidth: 120 } as ColumnMeta,
+      meta: { minWidth: 300 } as ColumnMeta,
     }),
   ];
 
