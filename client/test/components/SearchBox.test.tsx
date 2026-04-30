@@ -18,6 +18,10 @@ jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(() => jest.fn()),
 }));
 
+jest.mock("@hooks/useFeatures", () => ({
+  useFeatures: jest.fn(() => ({ features: { ai: true, api: false } })),
+}));
+
 const createTestCache = () => {
   return new InMemoryCache({
     typePolicies: {

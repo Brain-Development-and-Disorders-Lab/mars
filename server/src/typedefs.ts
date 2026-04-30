@@ -49,6 +49,51 @@ export const typedefs = `#graphql
     updatedAt: String
     api_keys: String
     account_orcid: String
+    role: String
+  }
+
+  # "AdminMetrics" type
+  type AdminMetrics {
+    users: Int
+    workspaces: Int
+    entities: Int
+    projects: Int
+    templates: Int
+  }
+
+  # "UserFeatures" type
+  type UserFeatures {
+    ai: Boolean
+    api: Boolean
+  }
+  
+  # "UserFeaturesInput" type
+  input UserFeaturesInput {
+    ai: Boolean
+    api: Boolean
+  }
+
+  # "AdminWorkspace" type
+  type AdminWorkspace {
+    _id: String!
+    name: String
+    description: String
+    owner: String
+    entities: Int
+    templates: Int
+    attributes: Int
+  }
+
+  # "AdminUser" type
+  type AdminUser {
+    _id: String!
+    name: String
+    email: String
+    role: String
+    workspaces: Int
+    features: UserFeatures
+    banned: Boolean
+    lastLogin: String
   }
 
   # "UserInput" type
@@ -65,6 +110,7 @@ export const typedefs = `#graphql
     updatedAt: String
     api_keys: String
     account_orcid: String
+    hasSeenWalkthrough: Boolean
   }
 
   # "Project" type
@@ -533,6 +579,12 @@ export const typedefs = `#graphql
 
   # Define query types
   type Query {
+    # Admin queries
+    adminMetrics: AdminMetrics
+    adminUsers: [AdminUser]
+    adminWorkspaces: [AdminWorkspace]
+    currentUserFeatures: UserFeatures
+
     # User queries
     users: [User]
     user(_id: String): User
@@ -618,6 +670,11 @@ export const typedefs = `#graphql
     # Workspace mutations
     createWorkspace(workspace: WorkspaceCreateInput): ResponseMessage
     updateWorkspace(workspace: WorkspaceUpdateInput): ResponseMessage
+
+    # Admin mutations
+    setUserRole(_id: String, role: String): ResponseMessage
+    setUserFeatures(_id: String, features: UserFeaturesInput): ResponseMessage
+    setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations
     createUser(user: UserInput): ResponseMessage

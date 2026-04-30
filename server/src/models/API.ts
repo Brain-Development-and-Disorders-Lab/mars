@@ -55,7 +55,7 @@ export class API {
     // Extract the key from the request headers
     const providedKey = request.headers["api_key"].toString();
 
-    // Validate that the API key exists
+    // Validate that the API key exists and that the User has API permissions
     const apiUser = await User.findByKey(providedKey);
     if (_.isNull(apiUser)) {
       const responseData: APIData<object> = {
@@ -63,6 +63,16 @@ export class API {
         version: API_VERSION,
         status: "unauthorized",
         message: "Invalid API key",
+        data: {},
+      };
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
+      return null;
+    } else if (_.isUndefined(apiUser.features.api) || apiUser.features.api === false) {
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API access not permitted",
         data: {},
       };
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();

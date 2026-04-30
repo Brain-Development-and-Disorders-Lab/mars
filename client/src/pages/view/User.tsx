@@ -19,6 +19,7 @@ import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useFeatures } from "@hooks/useFeatures";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -34,6 +35,7 @@ import ActorTag from "@components/ActorTag";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
+  const { features } = useFeatures();
 
   // Authentication and user
   const [user, setUser] = useState("");
@@ -962,58 +964,60 @@ const User = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"1"}>
-          <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} basis={"50%"}>
-            {/* API options */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
-                    <Icon name={"key"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      API Access
-                    </Text>
+        {features.api && (
+          <Flex direction={"row"} gap={"1"}>
+            <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} basis={"50%"}>
+              {/* API options */}
+              <Flex
+                direction={"column"}
+                p={"1"}
+                gap={"1"}
+                rounded={"md"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+              >
+                <Flex direction={"column"} p={"0"} gap={"1"}>
+                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                    <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
+                      <Icon name={"key"} size={"xs"} />
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        API Access
+                      </Text>
+                    </Flex>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      onClick={() => handleGenerateKeyClick()}
+                      loading={generateKeyLoading}
+                    >
+                      Add API Key
+                      <Icon name={"add"} size={"xs"} />
+                    </Button>
                   </Flex>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => handleGenerateKeyClick()}
-                    loading={generateKeyLoading}
-                  >
-                    Add API Key
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
+                  {userKeys.length > 0 ? (
+                    <DataTable
+                      columns={apiKeysTableColumns}
+                      data={userKeys}
+                      visibleColumns={{}}
+                      selectedRows={{}}
+                      showPagination
+                    />
+                  ) : (
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"key"} size={"lg"} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>No API keys</EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
+                  )}
                 </Flex>
-                {userKeys.length > 0 ? (
-                  <DataTable
-                    columns={apiKeysTableColumns}
-                    data={userKeys}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    showPagination
-                  />
-                ) : (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"key"} size={"lg"} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No API keys</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                )}
               </Flex>
             </Flex>
           </Flex>
-        </Flex>
+        )}
       </Flex>
     </Content>
   );

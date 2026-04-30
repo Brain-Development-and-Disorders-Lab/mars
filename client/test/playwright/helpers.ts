@@ -11,6 +11,37 @@ const TABLE_CONTAINER = ".data-table-scroll-container";
 import { setupDatabase, teardownDatabase } from "../../../server/test/util";
 
 /**
+ * Create a basic Entity via the create wizard
+ */
+export async function createTestEntity(page: Page, entityName: string): Promise<void> {
+  await page.goto("/create/entity");
+  await page.locator("[data-testid='create-entity-name']").waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("[data-testid='create-entity-name']").fill(entityName);
+  await page.locator('input[type="date"]').fill("2023-10-01");
+  await page.locator("[data-testid='create-entity-description'] textarea").fill("Test entity");
+  await page.click("[data-testid='create-entity-continue']");
+  await page.click("[data-testid='create-entity-continue']");
+  await page.click("[data-testid='create-entity-finish']");
+  await page.waitForURL(/\/entities/, { timeout: 10000 });
+}
+
+/**
+ * Create a basic Template via the create form with one text value
+ */
+export async function createTestTemplate(page: Page, templateName: string): Promise<void> {
+  await page.goto("/create/template");
+  await page.locator('input[placeholder="Name"]').waitFor({ state: "visible", timeout: 10000 });
+  await page.locator('input[placeholder="Name"]').fill(templateName);
+  await page.locator(".w-md-editor textarea").first().click();
+  await page.locator(".w-md-editor textarea").first().fill("Test template description");
+  await page.click("#addValueRowButton");
+  await page.locator('input[placeholder="Enter name"]').fill("Test Value");
+  await page.waitForTimeout(500);
+  await clickButtonByText(page, "Finish");
+  await page.waitForURL(/\/templates/, { timeout: 10000 });
+}
+
+/**
  * Perform login using information stored in environment variables
  * @param page
  */

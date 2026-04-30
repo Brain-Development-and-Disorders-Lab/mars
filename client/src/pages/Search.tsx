@@ -64,10 +64,12 @@ import { GLOBAL_STYLES } from "@variables";
 
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import { usePostHog } from "posthog-js/react";
+import { useFeatures } from "@hooks/useFeatures";
 
 const Search = () => {
   const [query, setQuery] = useState("");
   const posthog = usePostHog();
+  const { features } = useFeatures();
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -84,6 +86,10 @@ const Search = () => {
   const [activeTab, setActiveTab] = useState<"text" | "advanced">("text");
   const [isAISearch, setIsAISearch] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  useEffect(() => {
+    if (!features.ai) setIsAISearch(false);
+  }, [features.ai]);
 
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
@@ -1080,19 +1086,21 @@ const Search = () => {
                       }}
                     />
                   </InputGroup>
-                  <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={isAISearch ? "purple" : "gray"}
-                      variant={isAISearch ? "solid" : "outline"}
-                      disabled={isSearching}
-                      onClick={() => setIsAISearch((prev) => !prev)}
-                    >
-                      <Icon name={"lightning"} size={"xs"} />
-                      AI
-                    </Button>
-                  </Tooltip>
+                  {features.ai && (
+                    <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
+                      <Button
+                        size={"xs"}
+                        rounded={"md"}
+                        colorPalette={isAISearch ? "purple" : "gray"}
+                        variant={isAISearch ? "solid" : "outline"}
+                        disabled={isSearching}
+                        onClick={() => setIsAISearch((prev) => !prev)}
+                      >
+                        <Icon name={"lightning"} size={"xs"} />
+                        AI
+                      </Button>
+                    </Tooltip>
+                  )}
                   <Button
                     aria-label={"Search"}
                     size={"xs"}

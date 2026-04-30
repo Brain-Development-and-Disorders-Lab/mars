@@ -121,6 +121,10 @@ export class User {
       update.$set.account_orcid = updated.account_orcid;
     }
 
+    if (!_.isUndefined(updated.hasSeenWalkthrough)) {
+      update.$set.hasSeenWalkthrough = updated.hasSeenWalkthrough;
+    }
+
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .updateOne({ _id: new ObjectId(updated._id) }, update);

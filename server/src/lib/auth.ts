@@ -5,6 +5,7 @@ import { getDatabase, getClient } from "@connectors/database";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
+import { admin } from "better-auth/plugins/admin";
 
 // Models
 import { User } from "@models/User";
@@ -128,6 +129,7 @@ export const auth = betterAuth({
     genericOAuth({
       config: [getOAuthConfig()],
     }),
+    admin(),
   ],
   user: {
     modelName: "user",
@@ -146,6 +148,10 @@ export const auth = betterAuth({
       },
       lastLogin: {
         type: "string",
+      },
+      hasSeenWalkthrough: {
+        type: "boolean",
+        defaultValue: false,
       },
       api_keys: {
         type: "string[]",
