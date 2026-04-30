@@ -7,7 +7,7 @@ const WalkthroughTooltip = (props: TooltipRenderProps) => {
   const { backProps, closeProps, continuous, index, primaryProps, skipProps, step, tooltipProps } = props;
 
   return (
-    <Flex w={"sm"} bg={"white"} rounded={"md"} p={"1"} direction={"column"}>
+    <Flex w={"sm"} bg={"white"} rounded={"md"} p={"2"} direction={"column"}>
       <Flex w={"100%"} justify={"space-between"} align={"center"}>
         {/* Tooltip header, with a close button */}
         {step.title && (

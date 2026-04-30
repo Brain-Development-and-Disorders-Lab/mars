@@ -261,6 +261,7 @@ const Signup = () => {
           api_keys: [],
           account_orcid: orcidId,
           callbackURL: "/login",
+          hasSeenWalkthrough: false,
         },
         {
           onRequest: () => {

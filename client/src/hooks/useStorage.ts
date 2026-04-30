@@ -18,7 +18,6 @@ export const useStorage = (): {
     initialStringValue = JSON.stringify({
       setup: false,
       workspace: "",
-      firstLogin: true,
     } as ApplicationStorage);
   }
 
@@ -44,10 +43,7 @@ export const useStorage = (): {
    */
   const updateStorageField = (field: keyof ApplicationStorage, value: string | boolean) => {
     const updatedStorage = _.cloneDeep(storage);
-    if (field === "firstLogin" && typeof value === "boolean") {
-      updatedStorage.firstLogin = value;
-      updateStorage(updatedStorage);
-    } else if (field === "setup" && typeof value === "boolean") {
+    if (field === "setup" && typeof value === "boolean") {
       updatedStorage.setup = value;
       updateStorage(updatedStorage);
     } else if (field === "workspace" && typeof value === "string") {

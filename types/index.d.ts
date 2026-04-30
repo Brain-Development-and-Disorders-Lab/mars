@@ -640,7 +640,6 @@ export type ResponseData<D> = IResponseMessage & {
 export type ApplicationStorage = {
   setup: boolean; // Flag if application setup is complete
   workspace: string; // ID of active Workspace
-  firstLogin?: boolean; // (Optional) Flag if this is the first login
 };
 
 // File type
@@ -690,6 +689,7 @@ export type IUser = {
   createdAt: string; // better-auth: Created
   updatedAt: string; // better-auth: Last updated
   lastLogin: string;
+  hasSeenWalkthrough?: boolean;
   api_keys: string; // better-auth: Stored as a JSON string
   account_orcid: string;
   role: string; // better-auth admin: "user" or "admin"

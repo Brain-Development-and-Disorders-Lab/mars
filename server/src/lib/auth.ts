@@ -149,6 +149,10 @@ export const auth = betterAuth({
       lastLogin: {
         type: "string",
       },
+      hasSeenWalkthrough: {
+        type: "boolean",
+        defaultValue: false,
+      },
       api_keys: {
         type: "string[]",
       },

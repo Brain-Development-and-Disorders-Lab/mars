@@ -29,12 +29,21 @@ import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useStorage } from "@hooks/useStorage";
+
+// GraphQL mutation to mark walkthrough as seen
+const UPDATE_USER = gql`
+  mutation UpdateUser($user: UserInput) {
+    updateUser(user: $user) {
+      success
+      message
+    }
+  }
+`;
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -95,7 +104,9 @@ const Dashboard = () => {
 
   // Workspace context
   const { workspace } = useWorkspace();
-  const { storage, updateStorageField } = useStorage();
+
+  // Mutation to persist walkthrough completion
+  const [updateUser] = useMutation(UPDATE_USER);
 
   // Authentication
   const { data: session, isPending: isSessionPending } = auth.useSession();
@@ -443,16 +454,15 @@ const Dashboard = () => {
    */
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { action, type } = data;
-    if (action === ACTIONS.SKIP || type === EVENTS.TOUR_END) {
-      // Update the token and set the `firstLogin` flag to `false`
-      updateStorageField("firstLogin", false);
+    if ((action === ACTIONS.SKIP || type === EVENTS.TOUR_END) && session?.user) {
+      updateUser({ variables: { user: { _id: session.user.id, hasSeenWalkthrough: true } } });
     }
   };
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!!workspace && !loading}>
       <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
-        {storage.firstLogin === true && breakpoint !== "base" && (
+        {session?.user?.hasSeenWalkthrough !== true && !isSessionPending && breakpoint !== "base" && (
           <Joyride
             continuous
             showProgress

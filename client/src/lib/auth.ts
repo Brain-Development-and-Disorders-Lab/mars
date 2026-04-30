@@ -24,6 +24,9 @@ export const auth = createAuthClient({
         lastLogin: {
           type: "string",
         },
+        hasSeenWalkthrough: {
+          type: "boolean",
+        },
         api_keys: {
           type: "string[]",
         },
