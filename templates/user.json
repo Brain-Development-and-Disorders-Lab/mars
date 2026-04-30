@@ -1,5 +1,23 @@
 {
   "_id": "xxxx-xxxx-0000-1234",
-  "name": "Henry Burgess",
-  "email": "email@email.com"
+  "firstName": "<User first name>",
+  "lastName": "<User last name>",
+  "name": "<User full name>",
+  "affiliation": "<User affiliation>",
+  "email": "<User email>",
+  "emailVerified": false,
+  "image": "<unused>",
+  "createdAt": "2022-05-19T22:34:29.501Z",
+  "updatedAt": "2022-05-19T22:34:29.501Z",
+  "lastLogin": "2022-05-19T22:34:29.501Z",
+  "hasSeenWalkthrough": false,
+  "api_keys": [
+    "<API key>"
+  ],
+  "account_orcid": "<User ORCiD>",
+  "role": "user",
+  "features": {
+    "ai": false,
+    "api": false
+  }
 }

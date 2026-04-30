@@ -172,7 +172,7 @@ const Admin = () => {
     userColumnHelper.accessor("role", {
       cell: (info) => (
         <Tag.Root colorPalette={info.getValue() === "admin" ? "red" : "blue"} size={"sm"}>
-          <Tag.Label>{info.getValue() || "user"}</Tag.Label>
+          <Tag.Label>{_.capitalize(info.getValue()) || "User"}</Tag.Label>
         </Tag.Root>
       ),
       header: "Role",

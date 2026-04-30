@@ -1,15 +1,25 @@
 {
-  "_id": "abcd1234",
-  "name": "Example Project",
-  "owner": "",
-  "shared": [],
-  "description": "This is an example Project that is used as a template for testing.",
-  "entities": [],
+  "_id": "<Project ID>",
+  "name": "Project name",
+  "owner": "<User ID>",
+  "archived": false,
+  "created": "2022-05-19T22:34:29.501Z",
+  "timestamp": "2022-05-19T22:34:29.501Z",
+  "collaborators": [
+    "<User ID>"
+  ],
+  "description": "Project description",
+  "entities": [
+    "<Entity ID>"
+  ],
   "history": [
     {
+      "author": "<User ID>",
+      "message": "History message",
       "timestamp": "2022-05-19T22:34:29.501Z",
-      "description": "This is an example Project.",
-      "entities": []
+      "version": "History version",
+      
+      "_comment": "The omitted fields contain Project data from the specific version"
     }
   ]
 }

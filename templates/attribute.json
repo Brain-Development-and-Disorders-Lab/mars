@@ -1,0 +1,26 @@
+{
+  "_id": "<Attribute ID>",
+  "name": "Attribute name",
+  "owner": "<User ID>",
+  "archived": false,
+  "timestamp": "2022-05-19T22:34:29.501Z",
+  "description": "Attribute description.",
+  "values": [
+    {
+      "_id": "<Value ID>",
+      "name": "Value name",
+      "type": "<type:IValueType>",
+      "data": "<type:string>"
+    }
+  ],
+  "history": [
+    {
+      "author": "<User ID>",
+      "message": "History message",
+      "timestamp": "2022-05-19T22:34:29.501Z",
+      "version": "History version",
+
+      "_comment": "The omitted fields contain Attribute data from the specific version"
+    }
+  ]
+}

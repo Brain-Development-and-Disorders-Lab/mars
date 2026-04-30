@@ -1,9 +1,9 @@
 {
   "name": "mars",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "repository": "https://github.com/Brain-Development-and-Disorders-Lab/mars.git",
-  "author": "Henry Burgess <henryjburg@gmail.com>",
+  "author": "Henry Burgess <henry.burgess@wustl.edu>",
   "license": "",
   "scripts": {
     "lint:check": "prettier . --check",
