@@ -12,15 +12,15 @@
 
 - Rich metadata entry and management, including support for file imports (CSV, JSON files)
 - Export partial or complete metadata into multiple different file types (CSV, JSON files)
-- Text-based search and advanced query system for searching deeply through metadata
+- AI-assisted search, text-based search, and advanced query system for searching deeply through metadata
 - Manage metadata across projects and share with external users using Workspaces
 - Establish relationships between metadata entries, visualize these relationships
 - Edit history and version restore for metadata entries
-- User accounts handled via [ORCiD](https://orcid.org) sign-in
+- User accounts supporting [ORCiD](https://orcid.org) sign-in
 
 ## Documentation
 
-The [wiki](https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki) is actively maintained that covers the concepts introduced by Metadatify and how to use the platform. Documentation for API usage and self-hosting is coming soon.
+[Documentation](https://metadatify.com/docs/) is actively maintained that covers the concepts introduced by Metadatify and how to use the platform. Documentation for API usage and self-hosting is coming soon.
 
 ## Development
 
@@ -34,16 +34,48 @@ The [wiki](https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki) is 
 
 Metadatify uses Docker to containerize the server components. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory.
 
-The `.env` file must have the following variables:
+The `.env` file must have the following variables, organized into categories:
+
+#### Connectivity variables
 
 - `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
 - `GRAPHQL_PORT`: The port value for the GraphQL endpoint
 - `NODE_ENV`: Specify the Node environment
 
+#### ORCiD integration variables
+
 The following variables are only required if deploying with ORCiD authentication, see [ORCiD Developer Tools](https://orcid.org/developer-tools):
 
-- `ORCID_PRODUCTION_CLIENT_ID`: Client application ID
-- `ORCID_PRODUCTION_CLIENT_SECRET`: Client application secret
+- `ORCID_SANDBOX_CLIENT_ID`: Sandbox client application ID
+- `ORCID_SANDBOX_CLIENT_SECRET`: Sandbox client application secret
+- `ORCID_PRODUCTION_CLIENT_ID`: Production client application ID
+- `ORCID_PRODUCTION_CLIENT_SECRET`: Production client application secret
+
+#### `better-auth` variables
+
+Metadatify uses `better-auth` for account management, and the following variables are required:
+
+- `BETTER_AUTH_SECRET`: Secret for `better-auth`
+- `BETTER_AUTH_URL`: URL for server endpoint
+
+#### Email infrastructure variables
+
+Metadatify is configured to send notification emails for events such as password reset requests, new account verification, and error reports:
+
+- `AZURE_COMMUNICATION_CONNECTION_STRING`: Azure communication connection string
+- `EMAIL_FROM_ADDRESS`: Address that all email will appear from
+- `ADMIN_EMAIL`: Address of existing user holding "admin" privileges on Metadatify
+
+#### AI feature variables
+
+To enable the AI-assisted features, Metadatify requires the following variables:
+
+- `AI_PROVIDER`: The provider, either "openai" (development use) or "azure" (production use)
+- `OPENAI_BASE_URL`: URL of LLM server endpoint
+- `OPENAI_MODEL`: Specify the exact model being used
+- `OPENAI_API_KEY`: API key for the LLM
+
+#### Example server `.env` file
 
 An example `.env` file is shown below:
 
@@ -58,6 +90,21 @@ NODE_ENV=development
 # ORCiD ID API variables
 ORCID_PRODUCTION_CLIENT_ID=<ORCiD client ID>
 ORCID_PRODUCTION_CLIENT_SECRET=<ORCiD client secret>
+
+# Configure better-auth
+BETTER_AUTH_SECRET=<better-auth secret>
+BETTER_AUTH_URL=http://127.0.0.1:8080
+
+# Configure Azure Communication Services
+AZURE_COMMUNICATION_CONNECTION_STRING=endpoint=<Azure communication connection string>
+EMAIL_FROM_ADDRESS=<Address that all email will appear from>
+ADMIN_EMAIL=<Address of existing user holding "admin" privileges on Metadatify>
+
+# AI Search (set AI_PROVIDER to "openai" for LMStudio/OpenAI-compatible, "azure" for Azure OpenAI)
+AI_PROVIDER=openai
+OPENAI_BASE_URL=<URL of LLM>
+OPENAI_MODEL=openai/gpt-oss-20b
+OPENAI_API_KEY=<API key for LLM>
 ```
 
 ### Starting Docker containers
