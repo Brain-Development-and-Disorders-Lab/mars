@@ -447,7 +447,7 @@ export type DataTableProps = {
 };
 
 export type DataTableAction = {
-  label: string; // Action label
+  label: string | ((selectedCount: number) => string); // Action label, or a function receiving the selected row count
   icon: IconNames; // Icon
   action: (table: any, rows: any) => void; // Action function acting on the provided the table and rows
   disabled?: boolean; // Disable the action

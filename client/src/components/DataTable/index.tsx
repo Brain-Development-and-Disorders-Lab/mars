@@ -445,7 +445,7 @@ const DataTable = (props: DataTableProps) => {
                     ? "indeterminate"
                     : false
               }
-              onChange={tableInstance.getToggleAllRowsSelectedHandler()}
+              onCheckedChange={() => tableInstance.toggleAllRowsSelected(!tableInstance.getIsAllRowsSelected())}
             >
               <Checkbox.HiddenInput />
               <Checkbox.Control />
@@ -459,7 +459,7 @@ const DataTable = (props: DataTableProps) => {
             getIsSelected: () => boolean;
             getIsSomeSelected: () => boolean;
             getCanSelect: () => boolean;
-            getToggleSelectedHandler: () => (event: unknown) => void;
+            toggleSelected: (value?: boolean) => void;
           };
         }) => (
           <Flex align="center" justify="center" w="100%" h="100%">
@@ -468,7 +468,7 @@ const DataTable = (props: DataTableProps) => {
               colorPalette="blue"
               checked={row.getIsSelected() ? true : row.getIsSomeSelected() ? "indeterminate" : false}
               disabled={!row.getCanSelect() || props.viewOnly}
-              onChange={row.getToggleSelectedHandler()}
+              onCheckedChange={() => row.toggleSelected(!row.getIsSelected())}
             >
               <Checkbox.HiddenInput />
               <Checkbox.Control />
@@ -759,6 +759,7 @@ const DataTable = (props: DataTableProps) => {
 
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
+  const selectedCount = Object.values(selectedRows).filter(Boolean).length;
 
   const calculateTotalMinWidth = useCallback(() => {
     const visibleHeaders = headerGroups[0]?.headers.filter((header) => header.column.getIsVisible()) || [];
@@ -1067,6 +1068,8 @@ const DataTable = (props: DataTableProps) => {
                           _.isUndefined(props.actions) ||
                           props.actions?.length === 0) &&
                         !action.alwaysEnabled;
+                      const resolvedLabel =
+                        typeof action.label === "function" ? action.label(selectedCount) : action.label;
                       return (
                         <Menu.Item
                           onClick={() => {
@@ -1074,13 +1077,13 @@ const DataTable = (props: DataTableProps) => {
                               action.action(table, selectedRows);
                             }
                           }}
-                          key={action.label}
+                          key={resolvedLabel}
                           disabled={isDisabled || action.disabled}
-                          value={action.label}
+                          value={resolvedLabel}
                         >
                           <Flex direction="row" gap="1" align="center">
                             <Icon name={action.icon} size="xs" />
-                            <Text fontSize="xs">{action.label}</Text>
+                            <Text fontSize="xs">{resolvedLabel}</Text>
                           </Flex>
                         </Menu.Item>
                       );
@@ -1160,7 +1163,7 @@ const DataTable = (props: DataTableProps) => {
         {props.showPagination && showAdvancedControls && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
-              Show Items:
+              Show:
             </Text>
             <Fieldset.Root w="fit-content">
               <Fieldset.Content>

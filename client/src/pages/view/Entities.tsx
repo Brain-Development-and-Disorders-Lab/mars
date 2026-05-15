@@ -353,7 +353,7 @@ const Entities = () => {
 
   const actions: DataTableAction[] = [
     {
-      label: `Export Selected`,
+      label: (count: number) => `Export Selected (${count})`,
       icon: "download",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, rows: any) => {

@@ -13,6 +13,7 @@ import {
   Flex,
   IconButton,
   Input,
+  Menu,
   Portal,
   Select,
   Separator,
@@ -621,6 +622,29 @@ const Values = (props: {
   // State for row selection and manipulation
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
+  const allSelected = props.values.length > 0 && props.values.every((v) => selectedRows.has(v._id));
+  const someSelected = !allSelected && props.values.some((v) => selectedRows.has(v._id));
+
+  const toggleSelectRow = (id: string) => {
+    setSelectedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(props.values.map((v) => v._id)));
+    }
+  };
+
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -740,21 +764,32 @@ const Values = (props: {
         >
           {/* Header Row */}
           <Flex gap={0} bg="gray.100" borderBottom="1px solid" borderColor="gray.200" direction="row">
-            {/* Drag Handle Column Header */}
+            {/* Select Column Header */}
             {!props.viewOnly && (
-              <Box
+              <Flex
                 w="40px"
                 flex={"0 0 auto"}
                 minW="40px"
                 px={1}
                 py={1}
-                textAlign="center"
+                align="center"
+                justify="center"
                 bg="gray.100"
                 borderRight="1px solid"
                 borderColor="gray.200"
                 overflow="hidden"
                 flexShrink={0}
-              />
+              >
+                <Checkbox.Root
+                  checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                  onCheckedChange={toggleSelectAll}
+                  size="xs"
+                  colorPalette="blue"
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
+              </Flex>
             )}
 
             {/* Name Column Header */}
@@ -873,6 +908,7 @@ const Values = (props: {
                 key={value._id}
                 value={value}
                 onValueChange={onValueChange}
+                onToggleSelect={() => toggleSelectRow(value._id)}
                 columnWidths={columnWidths}
                 isSelected={selectedRows.has(value._id)}
                 hideBorder={index >= paginatedValues.length - 1}
@@ -881,43 +917,25 @@ const Values = (props: {
             ))}
           </Box>
 
-          {/* Add or Delete Selected Rows Button */}
+          {/* Add Row Button */}
           {!props.viewOnly && (
             <Flex borderTop="1px solid" borderColor="gray.200" p={0} justify="center" align="center" bg="gray.100">
-              {selectedRows.size > 0 ? (
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  colorPalette="red"
-                  onClick={removeSelectedRows}
-                  aria-label="Delete selected values"
-                  w="100%"
-                  h={"fit-content"}
-                  p={"0.5"}
-                >
-                  <Icon name="delete" size="xs" />
-                  <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Delete {selectedRows.size === 1 ? "Value" : "Values"} ({selectedRows.size})
-                  </Text>
-                </Button>
-              ) : (
-                <Button
-                  id="addValueRowButton"
-                  size="xs"
-                  variant="ghost"
-                  colorPalette="green"
-                  onClick={addRow}
-                  aria-label="Add value"
-                  w="100%"
-                  h={"fit-content"}
-                  p={"0.5"}
-                >
-                  <Icon name="add" size="xs" />
-                  <Text ml={1} fontSize="xs" fontWeight="semibold">
-                    Add Value
-                  </Text>
-                </Button>
-              )}
+              <Button
+                id="addValueRowButton"
+                size="xs"
+                variant="ghost"
+                colorPalette="green"
+                onClick={addRow}
+                aria-label="Add value"
+                w="100%"
+                h={"fit-content"}
+                p={"0.5"}
+              >
+                <Icon name="add" size="xs" />
+                <Text ml={1} fontSize="xs" fontWeight="semibold">
+                  Add Value
+                </Text>
+              </Button>
             </Flex>
           )}
         </Box>
@@ -985,6 +1003,32 @@ const Values = (props: {
           >
             <Icon name="c_double_right" />
           </IconButton>
+          {!props.viewOnly && (
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button colorPalette="yellow" size="xs" rounded="md">
+                  Actions
+                  <Icon name="lightning" size="xs" />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content p={1} rounded="md">
+                  <Menu.Item
+                    value="remove"
+                    disabled={selectedRows.size === 0}
+                    onClick={() => {
+                      if (selectedRows.size > 0) removeSelectedRows();
+                    }}
+                  >
+                    <Flex direction="row" gap="1" align="center">
+                      <Icon name="delete" size="xs" />
+                      <Text fontSize="xs">Remove Values ({selectedRows.size})</Text>
+                    </Flex>
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
+          )}
         </Flex>
 
         <Flex direction="row" gap={1} align="center" wrap="wrap">
@@ -1050,6 +1094,7 @@ const ValueRow = (props: {
   key: string;
   value: IValue;
   onValueChange: (_id: string, name: string, type: IValueType, data: string) => void;
+  onToggleSelect: () => void;
   columnWidths: { type: number; name: number; value: number };
   isSelected: boolean;
   hideBorder?: boolean;
@@ -1072,7 +1117,6 @@ const ValueRow = (props: {
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
   const [valueData, setValueData] = useState<string>(props.value.data);
-  const [valueChecked, setValueChecked] = useState(false);
 
   useEffect(() => {
     // Propagate changes to overall `Value` state
@@ -1490,8 +1534,8 @@ const ValueRow = (props: {
           cursor={props.viewOnly ? "default" : "pointer"}
         >
           <Checkbox.Root
-            checked={valueChecked}
-            onChange={() => setValueChecked(!valueChecked)}
+            checked={props.isSelected}
+            onCheckedChange={() => props.onToggleSelect()}
             size="xs"
             colorPalette="blue"
             disabled={props.viewOnly}
