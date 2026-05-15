@@ -115,7 +115,7 @@ const Linky = (props: LinkyProps) => {
   const getLinkyData = async () => {
     // If id is empty or missing, just use fallback without making a query
     if (!props.id || props.id.trim() === "") {
-      const fallbackName = props.fallback || "Invalid Link";
+      const fallbackName = props.fallback || `Invalid ${_.capitalize(props.type).slice(0, -1)}`;
       setTooltipLabel(fallbackName);
       setShowDeleted(true);
 
@@ -132,7 +132,7 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem & { description: string } = {
       _id: props.id,
-      name: props.fallback || "Invalid Link",
+      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(-1))}`,
       description: "",
     };
 
@@ -141,7 +141,8 @@ const Linky = (props: LinkyProps) => {
         const response = await getTemplate({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Error accessing Template");
+          data.name = "Invalid Template";
+          setTooltipLabel(`The Template (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.template.name;
           setTooltipLabel(data.name);
@@ -153,7 +154,8 @@ const Linky = (props: LinkyProps) => {
         const response = await getEntity({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Error accessing Entity");
+          data.name = "Invalid Entity";
+          setTooltipLabel(`The Entity (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.entity.name;
           setTooltipLabel(data.name);
@@ -165,7 +167,8 @@ const Linky = (props: LinkyProps) => {
         const response = await getProject({ variables: { _id: props.id } });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
-          setTooltipLabel("Error accessing Project");
+          data.name = "Invalid Project";
+          setTooltipLabel(`The Project (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.project.name;
           setTooltipLabel(data.name);
@@ -177,7 +180,8 @@ const Linky = (props: LinkyProps) => {
     } catch (error) {
       // If query fails completely, use fallback
       setShowDeleted(true);
-      setTooltipLabel("Invalid Link");
+      const tooltipLabel = `The ${_.capitalize(props.type.slice(0, -1))} (ID: ${props.id}) is either inaccessible or does not exist.`;
+      setTooltipLabel(tooltipLabel);
     }
 
     // Set the label text and apply truncating where specified
@@ -265,13 +269,13 @@ const Linky = (props: LinkyProps) => {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={badgeBg}
+                bg={showArchived ? "gray.50" : badgeBg}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
                 borderColor={badgeBorder}
               >
-                <Icon name={icon} size={"xs"} color={iconColor} />
+                <Icon name={icon} size={"xs"} color={showArchived ? "gray.500" : iconColor} />
               </Flex>
               {/* Name */}
               <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
