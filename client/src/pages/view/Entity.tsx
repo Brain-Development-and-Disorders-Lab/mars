@@ -2221,7 +2221,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"attribute"} size={"lg"} />
+                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Attributes</EmptyState.Description>
                     </EmptyState.Content>
