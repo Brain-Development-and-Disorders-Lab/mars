@@ -295,7 +295,7 @@ const Template = () => {
               <Field.Root required gap={"1"}>
                 <Flex direction={"column"} gap={"0.5"} ml={"0.5"}>
                   <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                    Template Value
+                    Template Values
                     <Field.RequiredIndicator />
                   </Field.Label>
                   <Text fontSize={"xs"}>

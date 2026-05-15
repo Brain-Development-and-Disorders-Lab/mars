@@ -1163,7 +1163,7 @@ const DataTable = (props: DataTableProps) => {
         {props.showPagination && showAdvancedControls && (
           <Flex direction="row" gap={1} align="center" wrap="wrap">
             <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
-              Show Items:
+              Show:
             </Text>
             <Fieldset.Root w="fit-content">
               <Fieldset.Content>
