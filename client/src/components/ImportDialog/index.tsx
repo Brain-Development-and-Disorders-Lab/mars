@@ -133,6 +133,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [templatesCollection, setTemplatesCollection] = useState(
     createListCollection({ items: [] as AttributeModel[] }),
   );
+  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
@@ -861,7 +862,10 @@ const ImportDialog = (props: ImportDialogProps) => {
         <Select.HiddenSelect />
         <Select.Control>
           <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
-            <Select.ValueText placeholder={"Select Column"} />
+            <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Icon name={"grid"} size={"xs"} />
+              <Text fontSize={"xs"}>{currentValue || "Select Column"}</Text>
+            </Flex>
           </Select.Trigger>
           <Select.IndicatorGroup>
             <Select.Indicator />
@@ -872,7 +876,10 @@ const ImportDialog = (props: ImportDialogProps) => {
             <Select.Content>
               {columnsCollection.items?.map((column: string) => (
                 <Select.Item item={column} key={column}>
-                  {column}
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Icon name={"grid"} size={"xs"} />
+                    {column}
+                  </Flex>
                   <Select.ItemIndicator />
                 </Select.Item>
               )) || []}
@@ -1048,6 +1055,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       }),
     );
     setTemplatesCollection(createListCollection({ items: [] as AttributeModel[] }));
+    setSelectedTemplateValue([]);
     setAttributesField([]);
     setReviewEntities([]);
     setReviewTemplates([]);
@@ -1541,7 +1549,18 @@ const ImportDialog = (props: ImportDialogProps) => {
                             <Select.HiddenSelect />
                             <Select.Control>
                               <Select.Trigger data-testid={"import-column-select-trigger-project"} rounded={"md"}>
-                                <Select.ValueText placeholder={"Select Project"} />
+                                <Flex direction={"row"} gap={"2"} align={"center"}>
+                                  <Icon
+                                    name={"project"}
+                                    size={"xs"}
+                                    color={
+                                      projectField ? GLOBAL_STYLES.project.iconColor : GLOBAL_STYLES.project.lightColor
+                                    }
+                                  />
+                                  <Text fontSize={"xs"} color={projectField ? "black" : "gray.500"}>
+                                    {projectField || "Select Project"}
+                                  </Text>
+                                </Flex>
                               </Select.Trigger>
                               <Select.IndicatorGroup>
                                 <Select.Indicator />
@@ -1552,7 +1571,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                                 <Select.Content>
                                   {projectsCollection.items?.map((project: IGenericItem) => (
                                     <Select.Item item={project} key={project._id}>
-                                      {project.name}
+                                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                                        <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+                                        {project.name}
+                                      </Flex>
                                       <Select.ItemIndicator />
                                     </Select.Item>
                                   )) || []}
@@ -1624,6 +1646,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           size={"xs"}
                           rounded={"md"}
                           collection={templatesCollection}
+                          value={selectedTemplateValue}
                           onValueChange={(details) => {
                             const selectedTemplate = details.items[0];
                             if (!_.isEqual(selectedTemplate._id, "")) {
@@ -1641,6 +1664,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                       values: template.values,
                                     },
                                   ]);
+                                  setSelectedTemplateValue([]);
                                   break;
                                 }
                               }
@@ -1651,7 +1675,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Select.HiddenSelect />
                           <Select.Control>
                             <Select.Trigger rounded={"md"}>
-                              <Select.ValueText placeholder={"Select Template"} />
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  {"Select Template"}
+                                </Text>
+                              </Flex>
                             </Select.Trigger>
                             <Select.IndicatorGroup>
                               <Select.Indicator />
@@ -1662,7 +1691,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                               <Select.Content>
                                 {templatesCollection.items?.map((template: AttributeModel) => (
                                   <Select.Item item={template} key={template._id}>
-                                    {template.name}
+                                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                                      <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                                      {template.name}
+                                    </Flex>
                                     <Select.ItemIndicator />
                                   </Select.Item>
                                 )) || []}

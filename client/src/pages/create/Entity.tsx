@@ -921,7 +921,12 @@ const Entity = () => {
                           </Select.Label>
                           <Select.Control>
                             <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"}>
-                              <Select.ValueText placeholder={"Select Template"} />
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  {"Select Template"}
+                                </Text>
+                              </Flex>
                             </Select.Trigger>
                             <Select.IndicatorGroup>
                               <Select.Indicator />
@@ -934,7 +939,10 @@ const Entity = () => {
                                   templatesCollection.items.length > 0 &&
                                   templatesCollection.items.map((template: ISelectOption) => (
                                     <Select.Item item={template} key={template.value} fontSize={"xs"}>
-                                      {template.label}
+                                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                                        {template.label}
+                                      </Flex>
                                       <Select.ItemIndicator />
                                     </Select.Item>
                                   ))}

@@ -26,12 +26,10 @@ const AttributeCard = (props: AttributeCardProps) => {
   // Attribute Validation
   const isNameError = name === "";
   const isDescriptionError = description === "";
-  const [validValues, setValidValues] = useState(false);
-  const validAttribute = !isNameError && !isDescriptionError && validValues && values.length > 0;
 
   useEffect(() => {
-    setValidValues(isValidValues(values));
-    if (validAttribute && props.onUpdate) {
+    const isValid = !isNameError && !isDescriptionError && isValidValues(values) && values.length > 0;
+    if (isValid && props.onUpdate) {
       props.onUpdate(attributeCardData);
     }
   }, [name, description, values]);
