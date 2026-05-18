@@ -530,6 +530,7 @@ export type IconNames =
   | "download"
   | "email"
   | "filter"
+  | "grid"
   | "upload"
   | "cross"
   | "list"

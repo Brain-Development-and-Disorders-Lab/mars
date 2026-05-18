@@ -35,6 +35,7 @@ import {
   SingleValueProps,
   MenuListProps,
   ControlProps,
+  PlaceholderProps,
 } from "chakra-react-select";
 
 // Custom components
@@ -256,7 +257,7 @@ const ValueDataSingleValue = ({ children, ...props }: SingleValueProps<SelectOpt
 };
 
 /**
- * Custom styling for Value `type` `MenuList` component containing all menu options
+ * Custom styling for Value `data` `MenuList` component containing all menu options
  */
 const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
@@ -590,6 +591,67 @@ const ValueDataSelect = (props: {
 };
 
 /**
+ * Custom styling for column picker `Control` component
+ */
+const ColumnPickerControl = (props: ControlProps<SelectOption, false>) => (
+  <Box pl={"1"} pr={"3"} border={"1px solid transparent"} _hover={{ borderColor: "blue.300" }}>
+    <components.Control {...props} />
+  </Box>
+);
+
+/**
+ * Custom styling for column picker `ValueContainer` component
+ */
+const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<SelectOption>) => (
+  <components.ValueContainer {...props}>
+    <Flex w={"100%"} h={"34px"} align={"center"} fontSize={"xs"}>
+      {children}
+    </Flex>
+  </components.ValueContainer>
+);
+
+/**
+ * Custom styling for column picker `Placeholder` component
+ */
+const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
+  <components.Placeholder {...props}>
+    <Text fontSize={"xs"} color={"gray.400"}>
+      {props.children}
+    </Text>
+  </components.Placeholder>
+);
+
+/**
+ * Custom styling for each column picker `Option` component, displaying icon
+ */
+const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
+  return (
+    <components.Option {...props}>
+      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
+        <Icon name={"grid"} size={"xs"} />
+        <Text fontSize={"xs"}>{props.data.label}</Text>
+      </Flex>
+    </components.Option>
+  );
+};
+
+/**
+ * Custom styling for column picker `SingleValue` component
+ */
+const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
+  return (
+    <Flex direction={"row"} align={"center"}>
+      <components.SingleValue {...props}>
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Icon name={"grid"} size={"xs"} />
+          <Text fontSize={"xs"}>{props.data.label}</Text>
+        </Flex>
+      </components.SingleValue>
+    </Flex>
+  );
+};
+
+/**
  * A spreadsheet-like interface for editing key-value data with type selection,
  * name, and value columns
  */
@@ -913,6 +975,7 @@ const Values = (props: {
                 isSelected={selectedRows.has(value._id)}
                 hideBorder={index >= paginatedValues.length - 1}
                 viewOnly={props.viewOnly}
+                permittedValues={props.permittedValues}
               />
             ))}
           </Box>
@@ -1099,6 +1162,7 @@ const ValueRow = (props: {
   isSelected: boolean;
   hideBorder?: boolean;
   viewOnly?: boolean;
+  permittedValues?: string[];
 }) => {
   const valueTypeOptions: ValueTypeOption[] = [
     { label: "Number", value: "number" },
@@ -1116,7 +1180,8 @@ const ValueRow = (props: {
   const [valueName, setValueName] = useState(props.value.name);
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
-  const [valueData, setValueData] = useState<string>(props.value.data);
+  const initialData = props.permittedValues?.includes(props.value.data) ? props.value.data : "";
+  const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
   useEffect(() => {
     // Propagate changes to overall `Value` state
@@ -1657,8 +1722,48 @@ const ValueRow = (props: {
         justify="space-between"
         align="center"
       >
-        {renderDataInput(valueType)}
-        {props.viewOnly && valueType !== "entity" && (
+        {props.permittedValues && props.permittedValues.length > 0 ? (
+          props.viewOnly ? (
+            <Flex w="100%" h="100%" align="center" px="2">
+              <Text fontSize="xs" color={valueData ? "gray.700" : "gray.400"}>
+                {valueData || "No column selected"}
+              </Text>
+            </Flex>
+          ) : (
+            <ReactSelect
+              options={props.permittedValues.map((col) => ({ label: col, value: col }))}
+              size={"sm"}
+              placeholder={"Select Column"}
+              value={valueData ? { label: valueData, value: valueData } : null}
+              isSearchable={false}
+              onChange={(event) => {
+                if (event) setValueData(event.value);
+              }}
+              components={{
+                Control: ColumnPickerControl,
+                Placeholder: ColumnPickerPlaceholder,
+                SelectContainer: ValueDataSelectContainer,
+                ValueContainer: ColumnPickerValueContainer,
+                SingleValue: ColumnPickerSingleValue,
+                DropdownIndicator: ValueDataDropdownIndicator,
+                MenuList: ValueDataMenuList,
+                Option: ColumnPickerOption,
+              }}
+              menuPortalTarget={document.body}
+              menuPosition={"fixed"}
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
+                menu: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
+                menuList: (base) => ({ ...base, pointerEvents: "auto" }),
+                option: (base) => ({ ...base, pointerEvents: "auto" }),
+              }}
+              closeMenuOnScroll={false}
+            />
+          )
+        ) : (
+          renderDataInput(valueType)
+        )}
+        {props.viewOnly && valueType !== "entity" && !props.permittedValues && (
           <IconButton
             aria-label="Copy value"
             size="2xs"
