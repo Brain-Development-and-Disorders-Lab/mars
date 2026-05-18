@@ -30,6 +30,7 @@ import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
+import Linky from "@components/Linky";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
@@ -784,7 +785,9 @@ const Entity = () => {
                               <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label>{project.name}</Checkbox.Label>
+                                <Checkbox.Label>
+                                  <Linky id={project._id} type={"projects"} />
+                                </Checkbox.Label>
                               </Checkbox.Root>
                             );
                           })}
