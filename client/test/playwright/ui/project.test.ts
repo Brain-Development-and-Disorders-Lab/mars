@@ -128,8 +128,8 @@ test.describe("Project", () => {
       // Fill the input directly to trigger the debounced search query rather than clicking the outer container
       await page.locator("#entitySearchSelect input").fill(entityName);
       // Results load after a 300ms debounce plus network round-trip
-      await page.locator(".search-select-results button").first().waitFor({ state: "visible", timeout: 10000 });
-      await page.locator(".search-select-results").locator(`button:has-text("${entityName}")`).first().click();
+      await page.locator("[data-testid='search-select-result']").first().waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("[data-testid='search-select-result']").filter({ hasText: entityName }).first().click();
       // The Done button enables once an entity is staged
       await page.locator("#addEntityDoneButton:not([disabled])").waitFor({ state: "visible", timeout: 5000 });
       await page.click("#addEntityDoneButton");

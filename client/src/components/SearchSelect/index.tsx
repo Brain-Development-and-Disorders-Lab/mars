@@ -226,6 +226,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       {items.map((item) => (
         <Flex
           key={item._id}
+          data-testid={"search-select-result"}
           direction={"row"}
           gap={"2"}
           p={"1"}
