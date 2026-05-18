@@ -613,6 +613,13 @@ export type SearchSelectProps = {
   isEmbedded?: boolean;
 };
 
+// MultiEntitySelect props
+export type MultiEntitySelectProps = {
+  projectEntities: string[];
+  selectedEntities: IGenericItem[];
+  setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
+};
+
 // SaveModal props
 export type SaveModalProps = {
   open: boolean;
