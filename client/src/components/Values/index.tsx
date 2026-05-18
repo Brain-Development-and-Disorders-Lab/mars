@@ -102,7 +102,7 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
   const { icon, color } = getIconConfiguration(props.data.value);
   return (
     <components.Option {...props}>
-      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
+      <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
         <Icon name={icon} size={"xs"} color={color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
@@ -191,7 +191,7 @@ const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption
 const ValueDataOption = (props: OptionProps<SelectOption>) => {
   return (
     <components.Option {...props}>
-      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
+      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -420,13 +420,11 @@ const ValueDataSelect = (props: {
           }}
           menuPortalTarget={document.body}
           menuPosition={"fixed"}
+          chakraStyles={{
+            menu: (provided) => ({ ...provided, marginY: 0 }),
+          }}
           styles={{
             menuPortal: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menu: (base) => ({
               ...base,
               zIndex: 15000,
               pointerEvents: "auto",
@@ -438,9 +436,6 @@ const ValueDataSelect = (props: {
             option: (base) => ({
               ...base,
               pointerEvents: "auto",
-            }),
-            control: (base) => ({
-              ...base,
             }),
           }}
           closeMenuOnScroll={false}
@@ -615,9 +610,12 @@ const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<
  */
 const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
   <components.Placeholder {...props}>
-    <Text fontSize={"xs"} color={"gray.400"}>
-      {props.children}
-    </Text>
+    <Flex direction={"row"} align={"center"} gap={"1"}>
+      <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+      <Text fontSize={"xs"} color={"gray.400"}>
+        {props.children}
+      </Text>
+    </Flex>
   </components.Placeholder>
 );
 
@@ -627,7 +625,7 @@ const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
 const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
   return (
     <components.Option {...props}>
-      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "blue.100" }}>
+      <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
         <Icon name={"grid"} size={"xs"} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
@@ -1686,13 +1684,11 @@ const ValueRow = (props: {
           }}
           menuPortalTarget={document.body}
           menuPosition={"fixed"}
+          chakraStyles={{
+            menu: (provided) => ({ ...provided, marginY: 0 }),
+          }}
           styles={{
             menuPortal: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menu: (base) => ({
               ...base,
               zIndex: 15000,
               pointerEvents: "auto",
@@ -1704,9 +1700,6 @@ const ValueRow = (props: {
             option: (base) => ({
               ...base,
               pointerEvents: "auto",
-            }),
-            control: (base) => ({
-              ...base,
             }),
           }}
           closeMenuOnScroll={false}
@@ -1751,9 +1744,11 @@ const ValueRow = (props: {
               }}
               menuPortalTarget={document.body}
               menuPosition={"fixed"}
+              chakraStyles={{
+                menu: (provided) => ({ ...provided, marginY: 0 }),
+              }}
               styles={{
                 menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
-                menu: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
                 menuList: (base) => ({ ...base, pointerEvents: "auto" }),
                 option: (base) => ({ ...base, pointerEvents: "auto" }),
               }}

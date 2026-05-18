@@ -83,11 +83,12 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [results, setResults] = useState<EntityModel[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const placeholder =
     props.placeholder ?? (props.resultType === "entity" ? "Search Entities..." : "Search Projects...");
 
-  const isLoading = entitiesLoading || projectsLoading || searchLoading || (inputValue.length > 0 && !hasSearched);
+  const isLoading = entitiesLoading || projectsLoading || searchLoading || (isTyping && !hasSearched);
 
   const iconName = props.resultType === "entity" ? "entity" : "project";
   const iconColor = props.resultType === "entity" ? GLOBAL_STYLES.entity.iconColor : GLOBAL_STYLES.project.iconColor;
@@ -179,6 +180,7 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   const closeDropdown = () => {
     setIsAnimating(false);
+    setIsTyping(false);
     setTimeout(() => setShowResults(false), 150);
   };
 
@@ -194,9 +196,11 @@ const SearchSelect = (props: SearchSelectProps) => {
 
     if (value === "") {
       setHasSearched(false);
+      setIsTyping(false);
       return;
     }
 
+    setIsTyping(true);
     if (!showResults) openDropdown();
     fetchResults(value);
   };
@@ -205,6 +209,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     setResults([]);
     setShowResults(false);
     setHasSearched(false);
+    setIsTyping(false);
     setInputValue(result.name);
     props.onChange?.(result);
   };
@@ -255,9 +260,26 @@ const SearchSelect = (props: SearchSelectProps) => {
             rounded={props.isEmbedded ? "none" : "md"}
             border={props.isEmbedded ? "none" : GLOBAL_STYLES.border.style}
             borderColor={props.isEmbedded ? "" : GLOBAL_STYLES.border.color}
+            _focusVisible={props.isEmbedded ? { boxShadow: "none", outline: "none" } : undefined}
+            ps={props.value?._id && !showResults ? "6" : undefined}
+            autoComplete="off"
             disabled={props?.disabled || false}
           />
         </InputGroup>
+        {props.value?._id && !showResults && (
+          <Box
+            position="absolute"
+            left="2"
+            top="0"
+            bottom="0"
+            display="flex"
+            alignItems="center"
+            pointerEvents="none"
+            zIndex={1}
+          >
+            <Icon name={iconName} size={"xs"} color={iconColor} />
+          </Box>
+        )}
         {topSuggestion && (
           <Box
             position="absolute"
@@ -324,7 +346,7 @@ const SearchSelect = (props: SearchSelectProps) => {
                   </Text>
                 </Flex>
               )}
-              {!isLoading && !hasSearched && inputValue === "" && options.length > 0 && renderItems(options)}
+              {!isLoading && !hasSearched && !isTyping && options.length > 0 && renderItems(options)}
             </Box>
           </Box>
         </>
