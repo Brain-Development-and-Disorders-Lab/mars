@@ -2,14 +2,12 @@ import React, { useMemo, useEffect, useState } from "react";
 import { Flex, Text, Tag, Button } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import Linky from "@components/Linky";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
 import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps } from "@types";
-
-// Navigation
-import { useNavigate } from "react-router-dom";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -20,8 +18,6 @@ import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
 const Relationships = (props: RelationshipsProps) => {
-  const navigate = useNavigate();
-
   // GraphQL query to fetch entity name by ID
   const GET_ENTITY_NAME = gql`
     query GetEntityName($_id: String) {
@@ -179,41 +175,21 @@ const Relationships = (props: RelationshipsProps) => {
       cell: (info) => {
         const targetEntity = info.getValue();
         // Use fetched name if available, otherwise fall back to relationship data name
-        const displayName = entityNames[targetEntity._id] || targetEntity.name;
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"}>
-            <Flex align={"center"} gap={"1"} w={"100%"}>
-              <Tooltip content={displayName} disabled={displayName.length < 32} showArrow>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(displayName, { length: 32 })}
-                </Text>
-              </Tooltip>
-            </Flex>
-            {props.viewOnly ? (
-              <Button
-                size="2xs"
-                variant="subtle"
-                colorPalette="gray"
-                aria-label={"View Target Entity"}
-                onClick={() => navigate(`/entities/${info.getValue()._id}`)}
-              >
-                View
-                <Icon name={"a_right"} size={"xs"} />
-              </Button>
-            ) : (
-              <Button
-                size="2xs"
-                variant="subtle"
-                colorPalette="red"
-                aria-label={"Remove relationship"}
-                onClick={() => {
-                  removeRelationship(info.row.original);
-                }}
-              >
-                Remove
-                <Icon name={"delete"} size={"xs"} />
-              </Button>
-            )}
+            <Linky id={targetEntity._id} type={"entities"} />
+            <Button
+              size="2xs"
+              variant="subtle"
+              colorPalette="red"
+              aria-label={"Remove relationship"}
+              onClick={() => {
+                removeRelationship(info.row.original);
+              }}
+            >
+              Remove
+              <Icon name={"delete"} size={"xs"} />
+            </Button>
           </Flex>
         );
       },

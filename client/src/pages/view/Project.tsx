@@ -34,7 +34,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
 import DataTable from "@components/DataTable";
-import SearchSelect from "@components/SearchSelect";
+import MultiEntitySelect from "@components/MultiEntitySelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Tooltip from "@components/Tooltip";
@@ -191,7 +191,6 @@ const Project = () => {
   const [saveMessage, setSaveMessage] = useState("");
 
   // Entities staged for adding
-  const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
   const [selectedEntities, setSelectedEntities] = useState<IGenericItem[]>([]);
 
   // Export modal state and data
@@ -334,14 +333,9 @@ const Project = () => {
     }
   }, [loading, error]);
 
-  /**
-   * Callback function to add Entities to a Project
-   * @param {IGenericItem} entity Entity to add
-   */
   const addEntities = (): void => {
     setProjectEntities([...projectEntities, ...selectedEntities.map((e) => e._id)]);
     setSelectedEntities([]);
-    setSelectedEntity({} as IGenericItem);
     setEntitiesOpen(false);
   };
 
@@ -1546,7 +1540,10 @@ const Project = () => {
         {/* Modal to add Entities */}
         <Dialog.Root
           open={entitiesOpen}
-          onOpenChange={(details) => setEntitiesOpen(details.open)}
+          onOpenChange={(details) => {
+            if (!details.open) setSelectedEntities([]);
+            setEntitiesOpen(details.open);
+          }}
           placement={"center"}
           closeOnEscape
           closeOnInteractOutside
@@ -1554,7 +1551,6 @@ const Project = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
-              {/* Heading and close button */}
               <Dialog.Header
                 p={"2"}
                 fontWeight={"semibold"}
@@ -1569,77 +1565,22 @@ const Project = () => {
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setEntitiesOpen(false)} />
+                  <CloseButton
+                    size={"2xs"}
+                    top={"6px"}
+                    onClick={() => {
+                      setSelectedEntities([]);
+                      setEntitiesOpen(false);
+                    }}
+                  />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"} gap={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <SearchSelect
-                    id={"entitySearchSelect"}
-                    resultType={"entity"}
-                    value={selectedEntity}
-                    onChange={(selection) => {
-                      let invalidSelection = false;
-                      setSelectedEntities((previousEntities) => {
-                        const alreadyStaged = previousEntities.some((entity) => entity._id === selection._id);
-                        const alreadyInProject = projectEntities.includes(selection._id);
-                        invalidSelection = alreadyStaged || alreadyInProject;
-
-                        return alreadyStaged || alreadyInProject ? previousEntities : [...previousEntities, selection];
-                      });
-
-                      // Show warning if invalid Entity selection
-                      if (invalidSelection) {
-                        toaster.create({
-                          title: "Cannot add Entity",
-                          description: "Entity already staged or in Project already",
-                          type: "warning",
-                          duration: 2000,
-                          closable: true,
-                        });
-                      }
-
-                      setSelectedEntity({} as IGenericItem);
-                    }}
-                    placeholder={"Search entities..."}
-                  />
-                  <Flex
-                    direction={"row"}
-                    gap={"1"}
-                    p={"1"}
-                    align={"center"}
-                    justify={"center"}
-                    rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
-                    minH={"60px"}
-                    wrap={"wrap"}
-                  >
-                    {selectedEntities.length > 0 ? (
-                      selectedEntities.map((entity) => (
-                        <Tag.Root key={entity._id} bg={"white"} rounded={"md"} pl={"0"}>
-                          <Tag.Label p={"0"} fontSize={"xs"}>
-                            <Flex w={"100%"} justify={"left"}>
-                              <Linky id={entity._id} type={"entities"} size={"xs"} />
-                            </Flex>
-                          </Tag.Label>
-                          <Tag.EndElement mr={"0"}>
-                            <Tag.CloseTrigger
-                              onClick={() => setSelectedEntities(selectedEntities.filter((e) => e._id !== entity._id))}
-                            />
-                          </Tag.EndElement>
-                        </Tag.Root>
-                      ))
-                    ) : (
-                      <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-                        <Icon name={"entity"} size={"md"} color={GLOBAL_STYLES.entity.lightColor} />
-                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                          No Entities selected
-                        </Text>
-                      </Flex>
-                    )}
-                  </Flex>
-                </Flex>
+                <MultiEntitySelect
+                  projectEntities={projectEntities}
+                  selectedEntities={selectedEntities}
+                  setSelectedEntities={setSelectedEntities}
+                />
               </Dialog.Body>
 
               <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
@@ -1650,7 +1591,6 @@ const Project = () => {
                   variant={"solid"}
                   onClick={() => {
                     setSelectedEntities([]);
-                    setSelectedEntity({} as IGenericItem);
                     setEntitiesOpen(false);
                   }}
                 >

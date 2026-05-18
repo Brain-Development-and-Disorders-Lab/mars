@@ -22,7 +22,7 @@ import Icon from "@components/Icon";
 import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
-import SearchSelect from "@components/SearchSelect";
+import MultiEntitySelect from "@components/MultiEntitySelect";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
@@ -100,7 +100,7 @@ const Project = () => {
   const cancelBlockerRef = useRef(null);
 
   const [entitiesOpen, setEntitiesOpen] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
+  const [selectedEntities, setSelectedEntities] = useState([] as IGenericItem[]);
   const [entities, setEntities] = useState([] as string[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -166,14 +166,10 @@ const Project = () => {
     },
   ];
 
-  /**
-   * Callback function to add Entities to a Project
-   * @param {IGenericItem} entity Entity to add
-   */
-  const addEntities = (entity: IGenericItem): void => {
-    if (!_.includes(entities, entity._id)) {
-      setEntities([...entities, entity._id]);
-    }
+  const addEntities = (): void => {
+    const newIds = selectedEntities.map((e) => e._id).filter((id) => !entities.includes(id));
+    setEntities([...entities, ...newIds]);
+    setSelectedEntities([]);
     setEntitiesOpen(false);
   };
 
@@ -434,7 +430,10 @@ const Project = () => {
       {/* Modal to add Entities */}
       <Dialog.Root
         open={entitiesOpen}
-        onOpenChange={(event) => setEntitiesOpen(event.open)}
+        onOpenChange={(event) => {
+          if (!event.open) setSelectedEntities([]);
+          setEntitiesOpen(event.open);
+        }}
         placement={"center"}
         closeOnEscape
         closeOnInteractOutside
@@ -442,39 +441,43 @@ const Project = () => {
         <Dialog.Trigger />
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content>
-            {/* Heading and close button */}
+          <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
             <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"add"} size={"xs"} />
+                <Icon name={"entity"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Add Entity
+                  Add Entities to Project
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => setEntitiesOpen(false)} />
+                <CloseButton
+                  size={"2xs"}
+                  top={"6px"}
+                  onClick={() => {
+                    setSelectedEntities([]);
+                    setEntitiesOpen(false);
+                  }}
+                />
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p={"1"} px={"2"}>
-              <Flex direction={"column"} gap={"1"}>
-                <Text fontSize={"xs"}>Select an Entity to add to the Project.</Text>
-
-                <SearchSelect
-                  id={"entitySearchSelect"}
-                  resultType={"entity"}
-                  value={selectedEntity}
-                  onChange={setSelectedEntity}
-                />
-              </Flex>
+              <MultiEntitySelect
+                projectEntities={entities}
+                selectedEntities={selectedEntities}
+                setSelectedEntities={setSelectedEntities}
+              />
             </Dialog.Body>
 
-            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
               <Button
                 colorPalette={"red"}
                 size={"xs"}
                 rounded={"md"}
                 variant={"solid"}
-                onClick={() => setEntitiesOpen(false)}
+                onClick={() => {
+                  setSelectedEntities([]);
+                  setEntitiesOpen(false);
+                }}
               >
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
@@ -487,12 +490,10 @@ const Project = () => {
                 colorPalette={"green"}
                 size={"xs"}
                 rounded={"md"}
-                onClick={() => {
-                  // Add the Origin to the Entity
-                  addEntities(selectedEntity);
-                }}
+                disabled={selectedEntities.length === 0}
+                onClick={addEntities}
               >
-                Done
+                Add {selectedEntities.length} {selectedEntities.length === 1 ? "Entity" : "Entities"}
                 <Icon name={"check"} size={"xs"} />
               </Button>
             </Dialog.Footer>

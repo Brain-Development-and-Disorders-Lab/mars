@@ -530,6 +530,7 @@ export type IconNames =
   | "download"
   | "email"
   | "filter"
+  | "grid"
   | "upload"
   | "cross"
   | "list"
@@ -610,6 +611,13 @@ export type SearchSelectProps = {
   onChange?: (value: any) => void;
   disabled?: boolean;
   isEmbedded?: boolean;
+};
+
+// MultiEntitySelect props
+export type MultiEntitySelectProps = {
+  projectEntities: string[];
+  selectedEntities: IGenericItem[];
+  setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
 // SaveModal props

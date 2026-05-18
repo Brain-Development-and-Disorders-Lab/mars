@@ -2518,7 +2518,12 @@ const Entity = () => {
                       </Select.Label>
                       <Select.Control>
                         <Select.Trigger rounded={"md"}>
-                          <Select.ValueText placeholder={"Select Template"} />
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
+                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                            <Text fontSize={"xs"} color={"gray.500"}>
+                              {"Select Template"}
+                            </Text>
+                          </Flex>
                         </Select.Trigger>
                         <Select.IndicatorGroup>
                           <Select.Indicator />
@@ -2533,6 +2538,7 @@ const Entity = () => {
                                 key={template.value}
                                 onClick={() => addTemplateAttribute(template.value)}
                               >
+                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                                 {template.label}
                                 <Select.ItemIndicator />
                               </Select.Item>

@@ -30,6 +30,7 @@ import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
+import Linky from "@components/Linky";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
@@ -784,7 +785,9 @@ const Entity = () => {
                               <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label>{project.name}</Checkbox.Label>
+                                <Checkbox.Label>
+                                  <Linky id={project._id} type={"projects"} />
+                                </Checkbox.Label>
                               </Checkbox.Root>
                             );
                           })}
@@ -921,7 +924,12 @@ const Entity = () => {
                           </Select.Label>
                           <Select.Control>
                             <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"}>
-                              <Select.ValueText placeholder={"Select Template"} />
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  {"Select Template"}
+                                </Text>
+                              </Flex>
                             </Select.Trigger>
                             <Select.IndicatorGroup>
                               <Select.Indicator />
@@ -934,7 +942,10 @@ const Entity = () => {
                                   templatesCollection.items.length > 0 &&
                                   templatesCollection.items.map((template: ISelectOption) => (
                                     <Select.Item item={template} key={template.value} fontSize={"xs"}>
-                                      {template.label}
+                                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                                        {template.label}
+                                      </Flex>
                                       <Select.ItemIndicator />
                                     </Select.Item>
                                   ))}
