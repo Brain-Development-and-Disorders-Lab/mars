@@ -1162,14 +1162,15 @@ const ValueRow = (props: {
   viewOnly?: boolean;
   permittedValues?: string[];
 }) => {
-  const valueTypeOptions: ValueTypeOption[] = [
+  const baseTypeOptions: ValueTypeOption[] = [
     { label: "Number", value: "number" },
     { label: "Text", value: "text" },
     { label: "URL", value: "url" },
     { label: "Date", value: "date" },
-    { label: "Entity", value: "entity" },
-    { label: "Select", value: "select" },
   ];
+  const valueTypeOptions: ValueTypeOption[] = props.permittedValues
+    ? baseTypeOptions
+    : [...baseTypeOptions, { label: "Entity", value: "entity" }, { label: "Select", value: "select" }];
 
   // Get the initial `ValueTypeOption` based on the `IValue` type
   const initialValueType = valueTypeOptions.filter((value) => value.value === props.value.type)[0];
@@ -1674,12 +1675,15 @@ const ValueRow = (props: {
           }}
           onChange={(event) => {
             if (event) {
-              // Update React state
               setValueType(event.value);
               setValueTypeOption({ label: event.label, value: event.value });
-
-              // Handle the updated data component
-              setValueData(generateDefaultData(event.value));
+              if (props.permittedValues) {
+                if (!props.permittedValues.includes(valueData)) {
+                  setValueData("");
+                }
+              } else {
+                setValueData(generateDefaultData(event.value));
+              }
             }
           }}
           menuPortalTarget={document.body}

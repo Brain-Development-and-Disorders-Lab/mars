@@ -131,7 +131,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Templates
   const [templatesCollection, setTemplatesCollection] = useState(
-    createListCollection({ items: [] as AttributeModel[] }),
+    createListCollection({
+      items: [] as AttributeModel[],
+      itemToValue: (item: AttributeModel) => item._id,
+      itemToString: (item: AttributeModel) => item.name,
+    }),
   );
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
 
@@ -566,7 +570,16 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
 
     if (response.data?.templates) {
-      setTemplatesCollection(createListCollection({ items: response.data.templates }));
+      const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
+        t.values.every((v) => !["entity", "select"].includes(v.type)),
+      );
+      setTemplatesCollection(
+        createListCollection({
+          items: supportedTemplates,
+          itemToValue: (item: AttributeModel) => item._id,
+          itemToString: (item: AttributeModel) => item.name,
+        }),
+      );
     }
     if (response.data?.projects) {
       setProjectsCollection(
@@ -1054,7 +1067,13 @@ const ImportDialog = (props: ImportDialogProps) => {
         itemToString: (item: IGenericItem) => item.name,
       }),
     );
-    setTemplatesCollection(createListCollection({ items: [] as AttributeModel[] }));
+    setTemplatesCollection(
+      createListCollection({
+        items: [] as AttributeModel[],
+        itemToValue: (item: AttributeModel) => item._id,
+        itemToString: (item: AttributeModel) => item.name,
+      }),
+    );
     setSelectedTemplateValue([]);
     setAttributesField([]);
     setReviewEntities([]);
