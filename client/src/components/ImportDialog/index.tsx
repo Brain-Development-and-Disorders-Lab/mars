@@ -50,7 +50,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { removeTypename, isValidValues } from "@lib/util";
+import { removeTypename, isValidValues, getValueTypeIconProps } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -236,7 +236,13 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as ColumnInfo[]);
-  const [columnsCollection, setColumnsCollection] = useState(createListCollection({ items: [] as string[] }));
+  const [columnsCollection, setColumnsCollection] = useState(
+    createListCollection<ColumnInfo>({
+      items: [] as ColumnInfo[],
+      itemToValue: (item) => item.name,
+      itemToString: (item) => item.name,
+    }),
+  );
 
   // AI column mapping suggestions
   const [suggestions, setSuggestions] = useState<{ name: string | null; description: string | null } | null>(null);
@@ -263,10 +269,10 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
-  const [nameField, setNameField] = useState("");
+  const [nameField, setNameField] = useState<ColumnInfo | undefined>(undefined);
   const [nameUseCounter, setNameUseCounter] = useState(false);
   const [counter, setCounter] = useState("");
-  const [descriptionField, setDescriptionField] = useState("");
+  const [descriptionField, setDescriptionField] = useState<ColumnInfo | undefined>(undefined);
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
@@ -443,9 +449,9 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Effect to manipulate 'Continue' button state when mapping fields from a spreadsheet file
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && nameField !== "" && isSpreadsheetFile(fileType)) {
+    if (_.isEqual(entityInterfacePage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
       setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "details") && !_.isEqual(counter, "") && nameUseCounter) {
+    } else if (_.isEqual(entityInterfacePage, "details") && counter !== "" && nameUseCounter) {
       setContinueDisabled(false);
     }
   }, [nameField, counter]);
@@ -487,8 +493,7 @@ const ImportDialog = (props: ImportDialogProps) => {
   };
 
   const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
-    // Check that "entities" field exists
-    if (_.isUndefined(parsed["entities"])) {
+    if (parsed.entities === undefined) {
       toaster.create({
         title: "JSON Import Error",
         type: "error",
@@ -515,8 +520,9 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
+  /** Returns true if `columnName` is already assigned to a field or an Attribute value. */
   const columnSelected = (columnName: string) => {
-    if (_.includes([nameField, descriptionField], columnName)) return true;
+    if (_.includes([nameField?.name, descriptionField?.name], columnName)) return true;
 
     for (const attribute of attributesField) {
       for (const value of attribute.values) {
@@ -527,15 +533,9 @@ const ImportDialog = (props: ImportDialogProps) => {
     return false;
   };
 
+  /** Parses and validates the uploaded file. Populates `columns` for spreadsheet files. */
   const setupImport = async (): Promise<boolean> => {
-    // Update state of continue button
     setContinueDisabled(true);
-
-    // Extract data from the form
-    const formData = new FormData();
-    formData.append("name", file.name);
-    formData.append("file", file);
-    formData.append("type", fileType);
 
     if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
@@ -555,7 +555,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       });
       setImportLoading(false);
 
-      if (prepareEntityCSVError || _.isUndefined(response.data)) {
+      if (prepareEntityCSVError || !response.data) {
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -566,14 +566,21 @@ const ImportDialog = (props: ImportDialogProps) => {
         return false;
       }
 
-      if (response.data && response.data.prepareEntityCSV.length > 0) {
+      if (response.data.prepareEntityCSV.length > 0) {
+        // Strip Excel placeholder columns for genuinely empty cells
         const filteredColumnSet = response.data.prepareEntityCSV.filter(
           (col: ColumnInfo) => !_.startsWith(col.name, "__EMPTY"),
         );
         setColumns(filteredColumnSet);
-        setColumnsCollection(createListCollection({ items: filteredColumnSet.map((c: ColumnInfo) => c.name) }));
+        setColumnsCollection(
+          createListCollection<ColumnInfo>({
+            items: filteredColumnSet,
+            itemToValue: (item) => item.name,
+            itemToString: (item) => item.name,
+          }),
+        );
         return true;
-      } else if (response.data.prepareEntityCSV.length === 0) {
+      } else {
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -589,12 +596,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
+  /** Fetches projects and templates to populate the mapping step dropdowns. */
   const setupMapping = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await getMappingData();
     setImportLoading(false);
 
     if (response.data?.templates) {
+      // Templates containing entity or select values can't be mapped to CSV columns
       const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
         t.values.every((v) => !["entity", "select"].includes(v.type)),
       );
@@ -630,6 +639,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
+  /** Runs the server-side review for a JSON entity import and populates `reviewEntities`. */
   const setupReviewEntityJSON = async () => {
     setImportLoading(true);
     const response = await reviewEntityJSON({
@@ -657,14 +667,15 @@ const ImportDialog = (props: ImportDialogProps) => {
   /** Builds the column mapping object from current form state. */
   const buildColumnMapping = (): IColumnMapping => ({
     namePrefix: namePrefixField,
-    name: nameField,
-    description: descriptionField,
+    name: nameField?.name,
+    description: descriptionField?.name,
     created: dayjs(Date.now()).toISOString(),
     owner: ownerField,
     project: projectField,
     attributes: removeTypename(attributesField),
   });
 
+  /** Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable. */
   const setupReviewEntityCSV = async () => {
     const columnMapping = buildColumnMapping();
 
@@ -724,6 +735,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  /** Runs the server-side review for a JSON template import and populates `reviewTemplates`. */
   const setupReviewTemplateJSON = async () => {
     setImportLoading(true);
     const response = await reviewTemplateJSON({
@@ -748,6 +760,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  /** Executes the final JSON entity import and resets state on success. */
   const finishImportEntityJSON = async () => {
     setImportLoading(true);
     const response = await importEntityJSON({
@@ -776,6 +789,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  /** Executes the final CSV/XLSX entity import and resets state on success. */
   const finishImportEntityCSV = async () => {
     const columnMapping = buildColumnMapping();
     const options = { counters: nameUseCounter ? [{ field: "name", _id: counter }] : [] };
@@ -804,6 +818,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  /** Executes the final JSON template import and resets state on success. */
   const finishImportTemplateJSON = async () => {
     setImportLoading(true);
     await importTemplateJSON({
@@ -846,33 +861,32 @@ const ImportDialog = (props: ImportDialogProps) => {
     fetchSuggestions();
   }, [columns]);
 
-  /**
-   * Factory-like pattern to generate general `Select` components
-   * @param {string} key Unique key and test ID suffix
-   * @param {string} currentValue Currently selected value (controlled)
-   * @param {React.SetStateAction<string>} onValueChange State setter
-   * @returns {ReactElement}
-   */
+  /** Renders a column-picker `Select` bound to a `ColumnInfo` value, showing the inferred type icon. */
   const getSelectComponent = (
     key: string,
-    currentValue: string,
-    onValueChange: React.Dispatch<React.SetStateAction<string>>,
+    currentValue: ColumnInfo | undefined,
+    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
   ) => {
+    const triggerIcon = getValueTypeIconProps(currentValue?.inferredType);
     return (
       <Select.Root
         key={key}
         size={"xs"}
         rounded={"md"}
         collection={columnsCollection}
-        value={currentValue ? [currentValue] : []}
+        value={currentValue ? [currentValue.name] : []}
         onValueChange={(details) => onValueChange(details.items[0])}
       >
         <Select.HiddenSelect />
         <Select.Control>
           <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
             <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Icon name={"grid"} size={"xs"} />
-              <Text fontSize={"xs"}>{currentValue || "Select Column"}</Text>
+              {currentValue ? (
+                <Icon name={triggerIcon.name} size={"xs"} color={triggerIcon.color} />
+              ) : (
+                <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+              )}
+              <Text fontSize={"xs"}>{currentValue?.name || "Select Column"}</Text>
             </Flex>
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -882,15 +896,18 @@ const ImportDialog = (props: ImportDialogProps) => {
         <Portal>
           <Select.Positioner>
             <Select.Content>
-              {columnsCollection.items?.map((column: string) => (
-                <Select.Item item={column} key={column}>
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Icon name={"grid"} size={"xs"} />
-                    {column}
-                  </Flex>
-                  <Select.ItemIndicator />
-                </Select.Item>
-              )) || []}
+              {columnsCollection.items?.map((column: ColumnInfo) => {
+                const iconProps = getValueTypeIconProps(column.inferredType);
+                return (
+                  <Select.Item item={column} key={column.name}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
+                      {column.name}
+                    </Flex>
+                    <Select.ItemIndicator />
+                  </Select.Item>
+                );
+              }) || []}
             </Select.Content>
           </Select.Positioner>
         </Portal>
@@ -930,6 +947,23 @@ const ImportDialog = (props: ImportDialogProps) => {
     ]);
   };
 
+  /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
+  const onBackClick = () => {
+    if (_.isEqual(entityInterfacePage, "details")) {
+      setEntityStep(0);
+      setEntityInterfacePage("upload");
+      setIsTypeSelectDisabled(false);
+      setContinueDisabled(false);
+    } else if (_.isEqual(entityInterfacePage, "mapping")) {
+      setEntityStep(1);
+      setEntityInterfacePage("details");
+    } else if (_.isEqual(entityInterfacePage, "review")) {
+      setEntityStep(2);
+      setEntityInterfacePage("mapping");
+    }
+  };
+
+  /** Advances the import flow one step, running any required setup or validation before proceeding. */
   const onContinueClick = async () => {
     // Disable changing the type of import unless import canceled
     setIsTypeSelectDisabled(true);
@@ -1070,13 +1104,19 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     // Reset import and mapping state
     setColumns([]);
-    setColumnsCollection(createListCollection({ items: [] as string[] }));
+    setColumnsCollection(
+      createListCollection<ColumnInfo>({
+        items: [] as ColumnInfo[],
+        itemToValue: (item) => item.name,
+        itemToString: (item) => item.name,
+      }),
+    );
     setSuggestions(null);
     setIsSuggesting(false);
-    setNameField("");
+    setNameField(undefined);
     setNameUseCounter(false);
     setCounter("");
-    setDescriptionField("");
+    setDescriptionField(undefined);
     setProjectField("");
     setProjectsCollection(
       createListCollection({
@@ -1105,7 +1145,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     props.setOpen(false);
   };
 
-  const warningCount = reviewEntities.filter((e) => e.warnings && e.warnings.length > 0).length;
+  const warningCount = reviewEntities.filter((entity) => entity.warnings && entity.warnings.length > 0).length;
 
   return (
     <Dialog.Root
@@ -1325,21 +1365,16 @@ const ImportDialog = (props: ImportDialogProps) => {
                       Columns:
                     </Text>
                     {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
+                      const iconProps = getValueTypeIconProps(column.inferredType);
+                      const used = columnSelected(column.name);
                       return (
                         <Tag.Root
                           key={column.name}
-                          bg={columnSelected(column.name) ? "green.100" : "white"}
-                          colorPalette={columnSelected(column.name) ? "green" : "gray"}
+                          bg={used ? "green.100" : "white"}
+                          colorPalette={used ? "green" : "gray"}
                         >
                           <Tag.StartElement>
-                            {column.inferredType === "date" && (
-                              <Icon name={"v_date"} size={"xs"} color={"orange.400"} />
-                            )}
-                            {column.inferredType === "text" && <Icon name={"v_text"} size={"xs"} color={"blue.400"} />}
-                            {column.inferredType === "number" && (
-                              <Icon name={"v_number"} size={"xs"} color={"green.400"} />
-                            )}
-                            {column.inferredType === "url" && <Icon name={"v_url"} size={"xs"} color={"yellow.400"} />}
+                            <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
                           </Tag.StartElement>
                           <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
                         </Tag.Root>
@@ -1505,7 +1540,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         <Field.Root
                           gap={"0.5"}
                           invalid={
-                            (!nameUseCounter && _.isEqual(nameField, "")) || (nameUseCounter && _.isEqual(counter, ""))
+                            (!nameUseCounter && nameField === undefined) || (nameUseCounter && _.isEqual(counter, ""))
                           }
                           required
                         >
@@ -1523,7 +1558,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               onClick={() => {
                                 setNameUseCounter(!nameUseCounter);
                                 // Reset state of name and counter fields
-                                setNameField("");
+                                setNameField(undefined);
                                 setCounter("");
                                 // Disable 'Continue' button
                                 setContinueDisabled(true);
@@ -1544,7 +1579,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   </Text>
                                 </>
                               )}
-                              {!isSuggesting && suggestions?.name && suggestions.name !== nameField && (
+                              {!isSuggesting && suggestions?.name && suggestions.name !== nameField?.name && (
                                 <>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
                                   <Text
@@ -1552,7 +1587,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     color={"purple.600"}
                                     cursor={"pointer"}
                                     _hover={{ textDecoration: "underline" }}
-                                    onClick={() => setNameField(suggestions.name!)}
+                                    onClick={() => setNameField(columns.find((c) => c.name === suggestions.name))}
                                   >
                                     Suggested: {suggestions.name}
                                   </Text>
@@ -1631,7 +1666,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             {isSpreadsheetFile(fileType) &&
                               !isSuggesting &&
                               suggestions?.description &&
-                              suggestions.description !== descriptionField && (
+                              suggestions.description !== descriptionField?.name && (
                                 <Flex direction={"row"} align={"center"} gap={"1"} py={"0"}>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
                                   <Text
@@ -1639,7 +1674,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     color={"purple.600"}
                                     cursor={"pointer"}
                                     _hover={{ textDecoration: "underline" }}
-                                    onClick={() => setDescriptionField(suggestions.description!)}
+                                    onClick={() =>
+                                      setDescriptionField(columns.find((c) => c.name === suggestions.description))
+                                    }
                                   >
                                     Suggested: {suggestions.description}
                                   </Text>
@@ -1879,10 +1916,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     Reviewing:
                   </Text>
                   <Text fontSize={"xs"}>
-                    {reviewEntities.length} {reviewEntities.length > 1 ? "Entities" : "Entity"},
-                  </Text>
-                  <Text fontSize={"xs"}>
-                    {warningCount} {warningCount > 1 ? "Warnings" : "Warning"}
+                    {reviewEntities.length} {reviewEntities.length > 1 ? "Entities" : "Entity"}
                   </Text>
                 </Flex>
                 <DataTable
@@ -1919,25 +1953,40 @@ const ImportDialog = (props: ImportDialogProps) => {
 
           <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-              <Button
-                id={"importCancelButton"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"red"}
-                variant={"solid"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("import_cancelled", {
-                    importType: importType,
-                  });
+              <Flex align={"center"} justify={"center"} gap={"2"}>
+                <Button
+                  id={"importCancelButton"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"red"}
+                  variant={"solid"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("import_cancelled", {
+                      importType: importType,
+                    });
 
-                  // Close the `ImportDialog`
-                  handleOnClose();
-                }}
-              >
-                Cancel
-                <Icon name="cross" size={"xs"} />
-              </Button>
+                    // Close the `ImportDialog`
+                    handleOnClose();
+                  }}
+                >
+                  Cancel
+                  <Icon name="cross" size={"xs"} />
+                </Button>
+                {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"orange"}
+                    variant={"solid"}
+                    onClick={onBackClick}
+                    disabled={importLoading}
+                  >
+                    <Icon name={"c_left"} size={"xs"} />
+                    Back
+                  </Button>
+                )}
+              </Flex>
 
               <Flex align={"center"} justify={"center"} gap={"1"}>
                 <Button

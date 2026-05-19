@@ -51,6 +51,7 @@ import { ColumnInfo, IconNames, IValue, IValueSelectData, IValueType } from "@ty
 // Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
+import { getValueTypeIconProps } from "@lib/util";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -58,6 +59,7 @@ import { GLOBAL_STYLES } from "@variables";
 interface SelectOption extends OptionBase {
   label: string;
   value: string;
+  inferredType?: IValueType;
 }
 
 interface ValueTypeOption extends OptionBase {
@@ -66,44 +68,14 @@ interface ValueTypeOption extends OptionBase {
 }
 
 /**
- * Utility function to generate the corresponding `IconName` and color
- * for each `IValueType`
- * @param type `IValueType` representing the icon and color scheme
- * @return {{ icon: IconNames, color: string }}
- */
-const getIconConfiguration = (type: IValueType): { icon: IconNames; color: string } => {
-  let icon: IconNames = "v_text";
-  let color: string = "blue.300";
-
-  // Customize `Icon` color according to Value `type`
-  if (type === "date") {
-    icon = "v_date";
-    color = "orange.300";
-  } else if (type === "number") {
-    icon = "v_number";
-    color = "green.300";
-  } else if (type === "url") {
-    icon = "v_url";
-    color = "yellow.300";
-  } else if (type === "entity") {
-    icon = "entity";
-    color = "purple.300";
-  } else if (type === "select") {
-    icon = "v_select";
-    color = "teal.300";
-  }
-  return { icon, color };
-};
-
-/**
  * Custom styling for each Value `type`, displaying colored icons
  */
 const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
-  const { icon, color } = getIconConfiguration(props.data.value);
+  const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <components.Option {...props}>
       <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={icon} size={"xs"} color={color} />
+        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -153,12 +125,12 @@ const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
  * Custom styling for Value `type` single value
  */
 const ValueTypeSingleValue = ({ ...props }: SingleValueProps<ValueTypeOption>) => {
-  const { icon, color } = getIconConfiguration(props.data.value);
+  const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Icon name={icon} size={"xs"} color={color} />
+          <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
       </components.SingleValue>
@@ -623,10 +595,11 @@ const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
  * Custom styling for each column picker `Option` component, displaying icon
  */
 const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
+  const iconProps = getValueTypeIconProps(props.data.inferredType);
   return (
     <components.Option {...props}>
       <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={"grid"} size={"xs"} />
+        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -637,11 +610,16 @@ const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
  * Custom styling for column picker `SingleValue` component
  */
 const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
+  const iconProps = getValueTypeIconProps(props.data.inferredType);
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Icon name={"grid"} size={"xs"} />
+          {iconProps ? (
+            <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
+          ) : (
+            <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+          )}
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
       </components.SingleValue>
@@ -1737,18 +1715,21 @@ const ValueRow = (props: {
               {/* Column picker or free-form input depending on source mode */}
               <Flex flex="1 1 auto" h="100%" overflow="visible">
                 {inColumnMode ? (
-                  <ReactSelect
+                  <ReactSelect<SelectOption>
                     options={props.permittedValues.map((col) => ({
-                      label: `${col.name} (${col.inferredType})`,
+                      label: col.name,
                       value: col.name,
+                      inferredType: col.inferredType,
                     }))}
                     size={"sm"}
                     placeholder={"Select Column"}
                     value={
                       valueData
                         ? {
-                            label: `${valueData} (${props.permittedValues.find((c) => c.name === valueData)?.inferredType ?? ""})`,
+                            label: valueData,
                             value: valueData,
+                            inferredType: props.permittedValues?.find((column) => column.name === valueData)
+                              ?.inferredType,
                           }
                         : null
                     }

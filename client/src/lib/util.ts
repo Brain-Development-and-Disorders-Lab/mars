@@ -2,7 +2,7 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, ISelectOption, IValue, UserModel } from "@types";
+import { IAttribute, ISelectOption, IValue, IValueType, IconNames, UserModel } from "@types";
 
 export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
@@ -182,6 +182,31 @@ export const isAbortError = (errorOrMessage: unknown | string, name?: string): b
  */
 export const ignoreAbort = (e: unknown): void => {
   if (!isAbortError(e)) throw e;
+};
+
+/**
+ * Utility function to generate the corresponding `IconName` and color
+ * for each `IValueType`
+ * @param type `IValueType` representing the icon and color scheme
+ * @return {{ icon: IconNames, color: string }}
+ */
+export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
+  switch (type) {
+    case "date":
+      return { name: "v_date", color: "orange.400" };
+    case "text":
+      return { name: "v_text", color: "blue.400" };
+    case "number":
+      return { name: "v_number", color: "green.400" };
+    case "url":
+      return { name: "v_url", color: "yellow.400" };
+    case "select":
+      return { name: "v_select", color: "teal.400" };
+    case "entity":
+      return { name: "entity", color: "purple.400" };
+    default:
+      return { name: "unknown", color: "red.400" };
+  }
 };
 
 /**
