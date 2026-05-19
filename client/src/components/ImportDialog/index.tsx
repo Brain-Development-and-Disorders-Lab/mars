@@ -369,24 +369,28 @@ const ImportDialog = (props: ImportDialogProps) => {
             <Flex direction={"row"} gap={"1"} align={"center"} p={"1"}>
               <Icon name={"check"} color={"green"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"green"}>
-                None
+                No Warnings
               </Text>
             </Flex>
           );
         }
         return (
-          <Flex direction={"column"} gap={"0.5"} p={"1"}>
-            {warnings.map((warning, i) => {
+          <Flex direction={"row"} gap={"1"} p={"1"}>
+            {warnings.map((warning) => {
               const location = warning.split(", ")[0];
               return (
-                <Flex key={i} direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"warning"} color={"orange.400"} size={"xs"} />
-                  <Tooltip content={warning} showArrow>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
-                      {location}
-                    </Text>
-                  </Tooltip>
-                </Flex>
+                <Tag.Root colorPalette={"orange"}>
+                  <Tag.StartElement>
+                    <Icon name={"warning"} color={"orange.400"} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label>
+                    <Tooltip content={warning} showArrow>
+                      <Text fontSize={"xs"} color={"orange.600"}>
+                        {location}
+                      </Text>
+                    </Tooltip>
+                  </Tag.Label>
+                </Tag.Root>
               );
             })}
           </Flex>
@@ -1322,10 +1326,22 @@ const ImportDialog = (props: ImportDialogProps) => {
                     </Text>
                     {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
                       return (
-                        <Tag.Root key={column.name} colorPalette={columnSelected(column.name) ? "green" : "blue"}>
-                          <Tag.Label fontSize={"xs"}>
-                            {column.name} ({column.inferredType})
-                          </Tag.Label>
+                        <Tag.Root
+                          key={column.name}
+                          bg={columnSelected(column.name) ? "green.100" : "white"}
+                          colorPalette={columnSelected(column.name) ? "green" : "gray"}
+                        >
+                          <Tag.StartElement>
+                            {column.inferredType === "date" && (
+                              <Icon name={"v_date"} size={"xs"} color={"orange.400"} />
+                            )}
+                            {column.inferredType === "text" && <Icon name={"v_text"} size={"xs"} color={"blue.400"} />}
+                            {column.inferredType === "number" && (
+                              <Icon name={"v_number"} size={"xs"} color={"green.400"} />
+                            )}
+                            {column.inferredType === "url" && <Icon name={"v_url"} size={"xs"} color={"yellow.400"} />}
+                          </Tag.StartElement>
+                          <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
                         </Tag.Root>
                       );
                     })}

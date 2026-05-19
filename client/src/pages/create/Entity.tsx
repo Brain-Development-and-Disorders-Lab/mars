@@ -1101,7 +1101,7 @@ const Entity = () => {
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Start — Basic Details
+                            Start - Basic Details
                           </Text>
                           <Text fontSize={"xs"} color={"gray.600"}>
                             Set the Entity's name, description, and visibility.
@@ -1134,7 +1134,7 @@ const Entity = () => {
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Relationships — Link to Other Entities
+                            Relationships - Link to Other Entities
                           </Text>
                           <Text fontSize={"xs"} color={"gray.600"}>
                             Define how this Entity relates to others (e.g. origin, product) and assign it to Projects.
@@ -1167,7 +1167,7 @@ const Entity = () => {
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Attributes — Attach Metadata
+                            Attributes - Attach Metadata
                           </Text>
                           <Text fontSize={"xs"} color={"gray.600"}>
                             Select Attribute Templates and add Values to describe this Entity's metadata.
