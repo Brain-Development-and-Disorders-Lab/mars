@@ -49,7 +49,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { removeTypename } from "@lib/util";
+import { removeTypename, isValidValues } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -148,14 +148,12 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
+  const [attributeValidity, setAttributeValidity] = useState<Record<string, boolean>>({});
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
   const [reviewTemplates, setReviewTemplates] = useState([] as TemplateImportReview[]);
 
-  /**
-   * Helper function to get user information
-   */
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
@@ -408,10 +406,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   }, [entityInterfacePage]);
 
-  /**
-   * Read a JSON file and update `Importer` state, raising errors if invalid
-   * @param {File} file JSON file instance
-   */
+  // Effect to disable 'Continue' on the mapping page when any attribute is incomplete
+  useEffect(() => {
+    if (!_.isEqual(entityInterfacePage, "mapping")) return;
+    const allValid =
+      attributesField.length === 0 || attributesField.every((attr) => attributeValidity[attr._id] === true);
+    setContinueDisabled(!allValid);
+  }, [entityInterfacePage, attributeValidity, attributesField]);
+
   const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
     setImportLoading(true);
@@ -433,10 +435,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Read a parsed JSON file and determine if it has valid file contents or not
-   * @param parsed The parsed JSON file contents, received from `parseJSONFile`
-   */
   const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
     // Check that "entities" field exists
     if (_.isUndefined(parsed["entities"])) {
@@ -466,11 +464,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Utility function to determine if a column is selected for mapping
-   * @param {string} column The column to check
-   * @returns {boolean} True if the column is selected for mapping, false otherwise
-   */
   const columnSelected = (column: string) => {
     if (_.includes([nameField, descriptionField], column)) return true;
 
@@ -483,13 +476,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     return false;
   };
 
-  /**
-   * Utility function to perform the initial import operations. For CSV files, execute
-   * `prepareEntityCSV` query to defer the data extraction to the server.
-   * For JSON files, trigger the `validJSONFile` method to handle the file
-   * locally instead.
-   * @return {Promise<boolean>}
-   */
   const setupImport = async (): Promise<boolean> => {
     // Update state of continue button
     setContinueDisabled(true);
@@ -530,21 +516,13 @@ const ImportDialog = (props: ImportDialogProps) => {
       }
 
       if (response.data && response.data.prepareEntityCSV.length > 0) {
-        // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet: string[] = response.data.prepareEntityCSV.filter((column: string) => {
-          return !_.startsWith(column, "__EMPTY");
-        });
+        const filteredColumnSet: string[] = response.data.prepareEntityCSV.filter(
+          (column: string) => !_.startsWith(column, "__EMPTY"),
+        );
         setColumns(filteredColumnSet);
         setColumnsCollection(createListCollection({ items: filteredColumnSet }));
-
-        setImportLoading(true);
-        const mappingResult = await setupMapping();
-        setImportLoading(false);
-
-        // Setup the next stage of CSV import
-        return mappingResult;
+        return true;
       } else if (response.data.prepareEntityCSV.length === 0) {
-        // If the CSV file is empty, display an error message
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -560,10 +538,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
-   * and Attributes.
-   */
   const setupMapping = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await getMappingData();
@@ -605,10 +579,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Submit the pre-imported JSON structure and changes to the server
-   * to generate a summary of the changes
-   */
   const setupReviewEntityJSON = async () => {
     setImportLoading(true);
     const response = await reviewEntityJSON({
@@ -633,10 +603,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Submit the pre-imported CSV structure and changes to the server
-   * to generate a summary of the changes
-   */
   const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
     const columnMapping: IColumnMapping = {
@@ -705,10 +671,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Submit the pre-imported Template JSON structure and changes to the server
-   * to generate a summary of the changes
-   */
   const setupReviewTemplateJSON = async () => {
     setImportLoading(true);
     const response = await reviewTemplateJSON({
@@ -733,9 +695,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Finish importing a JSON file
-   */
   const finishImportEntityJSON = async () => {
     setImportLoading(true);
     const response = await importEntityJSON({
@@ -764,9 +723,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Finish importing a CSV file
-   */
   const finishImportEntityCSV = async () => {
     // Collate data to be mapped
     const importData: CSVImportData = {
@@ -903,13 +859,19 @@ const ImportDialog = (props: ImportDialogProps) => {
     );
   };
 
-  // Removal callback
   const onRemoveAttribute = (identifier: string) => {
-    // We need to filter the removed attribute
     setAttributesField(attributesField.filter((attribute) => attribute._id !== identifier));
+    setAttributeValidity((prev) => {
+      const next = { ...prev };
+      delete next[identifier];
+      return next;
+    });
   };
 
-  // Used to receive data from a Attribute component
+  const onAttributeValidityChange = (id: string, isValid: boolean) => {
+    setAttributeValidity((prev) => ({ ...prev, [id]: isValid }));
+  };
+
   const onUpdateAttribute = (data: AttributeCardProps) => {
     setAttributesField([
       ...attributesField.map((attribute) => {
@@ -929,9 +891,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     ]);
   };
 
-  /**
-   * Callback function to handle any click events on the Continue button
-   */
   const onContinueClick = async () => {
     // Disable changing the type of import unless import canceled
     setIsTypeSelectDisabled(true);
@@ -968,6 +927,21 @@ const ImportDialog = (props: ImportDialogProps) => {
         setEntityStep(2);
         setEntityInterfacePage("mapping");
       } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        // Validate all attributes are complete before proceeding
+        const incompleteAttribute = attributesField.find(
+          (attr) => attr.name === "" || attr.description === "" || !isValidValues(attr.values),
+        );
+        if (incompleteAttribute) {
+          toaster.create({
+            title: "Incomplete Attributes",
+            type: "warning",
+            description: "Please complete all Attributes before continuing",
+            duration: 4000,
+            closable: true,
+          });
+          return;
+        }
+
         // Capture event
         posthog.capture("import_continue", {
           importType: "entities",
@@ -1029,9 +1003,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Utility function to reset the entire `Importer` component state
-   */
   const resetState = () => {
     // Reset UI state
     setImportType(undefined);
@@ -1076,13 +1047,11 @@ const ImportDialog = (props: ImportDialogProps) => {
     );
     setSelectedTemplateValue([]);
     setAttributesField([]);
+    setAttributeValidity({});
     setReviewEntities([]);
     setReviewTemplates([]);
   };
 
-  /**
-   * Handle closing the `Dialog` before the import process is complete
-   */
   const handleOnClose = () => {
     resetState();
     props.setOpen(false);
@@ -1232,6 +1201,16 @@ const ImportDialog = (props: ImportDialogProps) => {
                       </Select.Positioner>
                     </Portal>
                   </Select.Root>
+                  <Field.HelperText>
+                    <Flex direction={"row"} gap={"1"} ml={"0.5"} align={"center"} w={"100%"}>
+                      <Text fontWeight={"semibold"} fontSize={"xs"}>
+                        Supported Formats:
+                      </Text>
+                      {importType && importType === "template" && <Text fontSize={"xs"}>JSON</Text>}
+                      {importType && importType === "entities" && <Text fontSize={"xs"}>JSON, CSV</Text>}
+                      {!importType && <Text fontSize={"xs"}>Select File Contents</Text>}
+                    </Flex>
+                  </Field.HelperText>
                 </Field.Root>
               </Flex>
             )}
@@ -1596,7 +1575,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     }
                                   />
                                   <Text fontSize={"xs"} color={projectField ? "black" : "gray.500"}>
-                                    {projectField || "Select Project"}
+                                    {(projectField &&
+                                      projectsCollection.items.filter((project) => project._id === projectField)[0]
+                                        .name) ||
+                                      "Select Project"}
                                   </Text>
                                 </Flex>
                               </Select.Trigger>
@@ -1749,7 +1731,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => {
-                      // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                       setAttributesField([
                         ...attributesField,
                         {
@@ -1769,42 +1750,22 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Button>
                 </Flex>
 
-                {fileType === CSV_MIME_TYPE
-                  ? // If importing from CSV, use column-mapping
-                    attributesField.map((attribute) => {
-                      return (
-                        <Attribute
-                          _id={attribute._id}
-                          key={attribute._id}
-                          name={attribute.name}
-                          owner={attribute.owner}
-                          archived={attribute.archived}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={true}
-                          permittedDataValues={columns}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
-                      );
-                    })
-                  : // If importing from JSON, allow new Attributes
-                    attributesField.map((attribute) => {
-                      return (
-                        <Attribute
-                          _id={attribute._id}
-                          key={attribute._id}
-                          name={attribute.name}
-                          owner={attribute.owner}
-                          archived={attribute.archived}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={true}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
-                      );
-                    })}
+                {attributesField.map((attribute) => (
+                  <Attribute
+                    _id={attribute._id}
+                    key={attribute._id}
+                    name={attribute.name}
+                    owner={attribute.owner}
+                    archived={attribute.archived}
+                    description={attribute.description}
+                    values={attribute.values}
+                    restrictDataValues={true}
+                    permittedDataValues={fileType === CSV_MIME_TYPE ? columns : undefined}
+                    onRemove={onRemoveAttribute}
+                    onUpdate={onUpdateAttribute}
+                    onValidityChange={onAttributeValidityChange}
+                  />
+                ))}
               </Flex>
             )}
 
@@ -1820,8 +1781,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     Reviewing:
                   </Text>
                   <Text fontSize={"xs"}>
-                    {reviewEntities.length}{" "}
-                    {reviewEntities.length !== 0 && reviewEntities.length > 1 ? "Entities" : "Entity"}
+                    {reviewEntities.length} {reviewEntities.length > 1 ? "Entities" : "Entity"}
                   </Text>
                 </Flex>
                 <DataTable

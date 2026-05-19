@@ -657,7 +657,6 @@ const Values = (props: {
   values: IValue[];
   setValues: (values: React.SetStateAction<IValue[]>) => void;
   viewOnly?: boolean;
-  requireData?: boolean;
   permittedValues?: string[];
 }) => {
   // Local type for tracking column names

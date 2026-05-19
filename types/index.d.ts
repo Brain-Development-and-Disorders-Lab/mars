@@ -89,6 +89,7 @@ export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
   onRemove?: (id: string) => void;
+  onValidityChange?: (id: string, isValid: boolean) => void;
 };
 
 export type AttributeCardProps = IAttribute &

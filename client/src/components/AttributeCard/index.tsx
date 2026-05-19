@@ -32,6 +32,9 @@ const AttributeCard = (props: AttributeCardProps) => {
     if (isValid && props.onUpdate) {
       props.onUpdate(attributeCardData);
     }
+    if (props.onValidityChange) {
+      props.onValidityChange(props._id, isValid);
+    }
   }, [name, description, values]);
 
   const attributeCardData: AttributeCardProps = {
@@ -163,9 +166,10 @@ const AttributeCard = (props: AttributeCardProps) => {
               >
                 <Fieldset.Root>
                   <Fieldset.Content>
-                    <Field.Root gap={"1"}>
-                      <Field.Label fontSize={"xs"} ml={"0.5"}>
+                    <Field.Root gap={"1"} required>
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Description
+                        <Field.RequiredIndicator />
                       </Field.Label>
                       <MDEditor
                         height={150}
@@ -185,12 +189,25 @@ const AttributeCard = (props: AttributeCardProps) => {
               </Flex>
             </Flex>
 
-            {attributeCardData.restrictDataValues ? (
-              // Restrict the data to options from a drop-down
-              <Values values={values} setValues={setValues} permittedValues={props.permittedDataValues} requireData />
-            ) : (
-              <Values values={values} setValues={setValues} requireData />
-            )}
+            {/* Attribute Values */}
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root gap={"1"} required>
+                  <Flex direction={"column"} gap={"0.5"} ml={"0.5"}>
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                      Template Values
+                      <Field.RequiredIndicator />
+                    </Field.Label>
+                  </Flex>
+                  {attributeCardData.restrictDataValues ? (
+                    // Restrict the data to options from a drop-down
+                    <Values values={values} setValues={setValues} permittedValues={props.permittedDataValues} />
+                  ) : (
+                    <Values values={values} setValues={setValues} />
+                  )}
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Flex>
         </Collapsible.Content>
       </Flex>
