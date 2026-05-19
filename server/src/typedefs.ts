@@ -173,6 +173,7 @@ export const typedefs = `#graphql
     name: String
     type: String
     data: String
+    source: String
   }
 
   # "ValueInput" input
@@ -181,6 +182,7 @@ export const typedefs = `#graphql
     name: String
     type: String
     data: String
+    source: String
   }
 
   # "Attribute" type
@@ -307,10 +309,17 @@ export const typedefs = `#graphql
     attributes: [Attribute]
   }
 
+  # "ColumnInfo" type describing a spreadsheet column and its inferred data type
+  type ColumnInfo {
+    name: String
+    inferredType: String
+  }
+
   # "EntityReview" type storing the review state of an Entity to be imported
   type EntityReview {
     name: String
     state: String
+    warnings: [String]
   }
 
   # "TemplateReview" type storing the review state of a Template to be imported
@@ -691,7 +700,7 @@ export const typedefs = `#graphql
     uploadAttachment(target: String, file: Upload!): ResponseDataString
 
     # Data import CSV mutations
-    prepareEntityCSV(file: [Upload]!): [String]
+    prepareEntityCSV(file: [Upload]!): [ColumnInfo]
     reviewEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
     importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!, options: OptionsInput): ResponseMessage
 
