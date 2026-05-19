@@ -273,10 +273,11 @@ export class Data {
     const nonEmpty = values.filter((v) => v !== "" && v !== undefined && v !== null);
     if (nonEmpty.length === 0) return "text";
 
+    // Check for `Date` objects
     if (nonEmpty.every((v) => v instanceof Date)) return "date";
 
+    // Check for specific cases
     const strings = nonEmpty.map((v) => String(v));
-
     if (strings.every((v) => !isNaN(Number(v)) && v.trim() !== "")) return "number";
     if (strings.every((v) => dayjs(v).isValid())) return "date";
     if (
@@ -291,6 +292,7 @@ export class Data {
     )
       return "url";
 
+    // Default case is "text"
     return "text";
   };
 

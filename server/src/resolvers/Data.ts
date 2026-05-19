@@ -10,6 +10,7 @@ import {
   IResolverParent,
   IResponseMessage,
   ResponseData,
+  ColumnInfo,
 } from "@types";
 
 // Utility functions and libraries
@@ -71,7 +72,7 @@ export const DataResolvers = {
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
-    ): Promise<string[]> => {
+    ): Promise<ColumnInfo[]> => {
       // Verify access to the Workspace
       const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {

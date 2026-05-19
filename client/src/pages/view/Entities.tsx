@@ -385,18 +385,13 @@ const Entities = () => {
       },
     },
     {
-      label: (count: number) => `Export All (${count})`,
+      label: () => `Export All (${data?.entities?.total ?? 0})`,
       icon: "download",
       alwaysEnabled: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, _rows: any) => {
-        // Specify this export action
         setExportAll(true);
-        setToExport(entityData);
-
-        // Open the Entity export modal
         onExportOpen();
-
         table.resetRowSelection();
       },
     },
@@ -405,14 +400,10 @@ const Entities = () => {
   const onExportClick = async () => {
     if (exportAll) {
       const response = await exportEntitiesAll({
-        variables: {
-          // Only pass the Entity identifiers
-          entities: toExport.map((entity) => entity._id),
-          format: exportFormat,
-        },
+        variables: { format: exportFormat },
       }).catch(ignoreAbort);
 
-      if (!response?.data?.exportEntitiesAll) {
+      if (!response?.data?.exportEntitiesAll || exportAllError) {
         toaster.create({
           title: "Error",
           description: "Unable to export all Entities",
@@ -435,7 +426,7 @@ const Entities = () => {
         },
       }).catch(ignoreAbort);
 
-      if (!response?.data?.exportEntities) {
+      if (!response?.data?.exportEntities || exportError) {
         toaster.create({
           title: "Error",
           description: "Unable to export selected Entities",
@@ -458,10 +449,7 @@ const Entities = () => {
   };
 
   return (
-    <Content
-      isError={!_.isUndefined(error) || !_.isUndefined(exportError) || !_.isUndefined(exportAllError)}
-      isLoaded={!loading && !exportLoading && !exportAllLoading}
-    >
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
@@ -743,7 +731,7 @@ const Entities = () => {
 
       <Dialog.Root
         open={isExportOpen}
-        size={"xl"}
+        size={exportAll ? "md" : "xl"}
         placement={"center"}
         scrollBehavior={"inside"}
         onEscapeKeyDown={onExportClose}
@@ -824,13 +812,22 @@ const Entities = () => {
                 </Flex>
 
                 <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"}>
-                  <DataTable
-                    columns={exportTableColumns}
-                    data={toExport}
-                    visibleColumns={exportTableVisibleColumns}
-                    selectedRows={{}}
-                    showPagination
-                  />
+                  {exportAll ? (
+                    <Flex align={"center"} gap={"1"} p={"2"}>
+                      <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        {`All ${data?.entities?.total ?? 0} Entities will be exported`}
+                      </Text>
+                    </Flex>
+                  ) : (
+                    <DataTable
+                      columns={exportTableColumns}
+                      data={toExport}
+                      visibleColumns={exportTableVisibleColumns}
+                      selectedRows={{}}
+                      showPagination
+                    />
+                  )}
                 </Flex>
               </Flex>
             </Dialog.Body>
@@ -843,6 +840,7 @@ const Entities = () => {
                     size={"xs"}
                     onClick={() => onExportClick()}
                     loading={exportLoading || exportAllLoading}
+                    loadingText={"Exporting..."}
                     rounded={"md"}
                     disabled={!exportFormatSelected}
                   >
