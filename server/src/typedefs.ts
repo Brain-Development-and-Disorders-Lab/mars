@@ -631,6 +631,7 @@ export const typedefs = `#graphql
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
     exportEntities(entities: [String], format: String): String
+    exportEntitiesAll(format: String): String
     exportProject(_id: String, format: String, fields: [String]): String
     exportProjectEntities(_id: String, format: String): String
     exportTemplate(_id: String): String

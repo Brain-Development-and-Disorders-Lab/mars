@@ -101,6 +101,7 @@ const Entities = () => {
   const [exportFormat, setExportFormat] = useState("json" as "json" | "csv");
   const exportEntitiesRef = useRef<HTMLDivElement>(null);
   const [exportFormatSelected, setExportFormatSelected] = useState(false);
+  const [exportAll, setExportAll] = useState(false);
 
   // Add state for export table columns
   const [exportTableVisibleColumns] = useState({
@@ -210,7 +211,7 @@ const Entities = () => {
     },
   });
 
-  // Query to generate exported data
+  // Query to generate exported data for selected Entities
   const GET_ENTITIES_EXPORT = gql`
     query GetEntitiesExport($entities: [String], $format: String) {
       exportEntities(entities: $entities, format: $format)
@@ -219,6 +220,16 @@ const Entities = () => {
   const [exportEntities, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportEntities: string }>(
     GET_ENTITIES_EXPORT,
   );
+
+  // Query to generate exported data for all Entities
+  const GET_ENTITIES_EXPORT_ALL = gql`
+    query GetEntitiesExportAll($format: String) {
+      exportEntitiesAll(format: $format)
+    }
+  `;
+  const [exportEntitiesAll, { loading: exportAllLoading, error: exportAllError }] = useLazyQuery<{
+    exportEntitiesAll: string;
+  }>(GET_ENTITIES_EXPORT_ALL);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -373,39 +384,84 @@ const Entities = () => {
         table.resetRowSelection();
       },
     },
+    {
+      label: (count: number) => `Export All (${count})`,
+      icon: "download",
+      alwaysEnabled: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      action: async (table, _rows: any) => {
+        // Specify this export action
+        setExportAll(true);
+        setToExport(entityData);
+
+        // Open the Entity export modal
+        onExportOpen();
+
+        table.resetRowSelection();
+      },
+    },
   ];
 
   const onExportClick = async () => {
-    const response = await exportEntities({
-      variables: {
-        // Only pass the Entity identifiers
-        entities: toExport.map((entity) => entity._id),
-        format: exportFormat,
-      },
-    }).catch(ignoreAbort);
+    if (exportAll) {
+      const response = await exportEntitiesAll({
+        variables: {
+          // Only pass the Entity identifiers
+          entities: toExport.map((entity) => entity._id),
+          format: exportFormat,
+        },
+      }).catch(ignoreAbort);
 
-    if (!response?.data?.exportEntities) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to export entities",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    } else if (response?.data?.exportEntities) {
-      FileSaver.saveAs(
-        new Blob([response.data.exportEntities]),
-        slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
-      );
+      if (!response?.data?.exportEntitiesAll) {
+        toaster.create({
+          title: "Error",
+          description: "Unable to export all Entities",
+          type: "error",
+          duration: 2000,
+          closable: true,
+        });
+      } else if (response?.data?.exportEntitiesAll) {
+        FileSaver.saveAs(
+          new Blob([response.data.exportEntitiesAll]),
+          slugify(`export_entities_all_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
+        );
+      }
+    } else {
+      const response = await exportEntities({
+        variables: {
+          // Only pass the Entity identifiers
+          entities: toExport.map((entity) => entity._id),
+          format: exportFormat,
+        },
+      }).catch(ignoreAbort);
+
+      if (!response?.data?.exportEntities) {
+        toaster.create({
+          title: "Error",
+          description: "Unable to export selected Entities",
+          type: "error",
+          duration: 2000,
+          closable: true,
+        });
+      } else if (response?.data?.exportEntities) {
+        FileSaver.saveAs(
+          new Blob([response.data.exportEntities]),
+          slugify(`export_entities_selected_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
+        );
+      }
     }
 
     // Reset the Entity export collection and close the modal
     setToExport([]);
+    setExportAll(false);
     onExportClose();
   };
 
   return (
-    <Content isError={!_.isUndefined(error) || !_.isUndefined(exportError)} isLoaded={!loading && !exportLoading}>
+    <Content
+      isError={!_.isUndefined(error) || !_.isUndefined(exportError) || !_.isUndefined(exportAllError)}
+      isLoaded={!loading && !exportLoading && !exportAllLoading}
+    >
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
@@ -786,7 +842,7 @@ const Entities = () => {
                     colorPalette={"blue"}
                     size={"xs"}
                     onClick={() => onExportClick()}
-                    loading={exportLoading}
+                    loading={exportLoading || exportAllLoading}
                     rounded={"md"}
                     disabled={!exportFormatSelected}
                   >
