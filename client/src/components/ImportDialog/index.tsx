@@ -1192,7 +1192,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Select.HiddenSelect />
                     <Select.Control>
                       <Select.Trigger data-testid={"import-type-select-trigger"} rounded={"md"}>
-                        <Select.ValueText placeholder={"Select file contents"} />
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
+                          {importType === "entities" && (
+                            <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+                          )}
+                          {importType === "template" && (
+                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                          )}
+                          <Text fontSize={"xs"}>{_.capitalize(importType) || "Select File Contents"}</Text>
+                        </Flex>
                       </Select.Trigger>
                       <Select.IndicatorGroup>
                         <Select.Indicator />
@@ -1205,7 +1213,18 @@ const ImportDialog = (props: ImportDialogProps) => {
                             items: ["Entities", "Template"],
                           }).items.map((importType: string) => (
                             <Select.Item item={importType} key={importType.toLowerCase()}>
-                              {importType}
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Icon
+                                  name={importType === "Entities" ? "entity" : "template"}
+                                  size={"xs"}
+                                  color={
+                                    importType === "Entities"
+                                      ? GLOBAL_STYLES.entity.iconColor
+                                      : GLOBAL_STYLES.template.iconColor
+                                  }
+                                />
+                                {importType}
+                              </Flex>
                               <Select.ItemIndicator />
                             </Select.Item>
                           ))}
