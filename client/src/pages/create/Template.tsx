@@ -303,7 +303,7 @@ const Template = () => {
                     optional.
                   </Text>
                 </Flex>
-                <Values viewOnly={false} values={values} setValues={setValues} requireData={true} />
+                <Values viewOnly={false} values={values} setValues={setValues} />
               </Field.Root>
             </Fieldset.Content>
           </Fieldset.Root>

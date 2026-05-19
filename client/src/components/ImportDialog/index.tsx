@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
+import AlertDialog from "@components/AlertDialog";
 import Attribute from "@components/AttributeCard";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
@@ -30,13 +31,13 @@ import { toaster } from "@components/Toast";
 import {
   AttributeModel,
   AttributeCardProps,
+  ColumnInfo,
   IGenericItem,
   EntityImportReview,
   TemplateImportReview,
   ImportDialogProps,
   IColumnMapping,
   EntityModel,
-  CSVImportData,
   IResponseMessage,
   ResponseData,
 } from "@types";
@@ -49,7 +50,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { removeTypename } from "@lib/util";
+import { removeTypename, isValidValues, getValueTypeIconProps } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -60,7 +61,128 @@ import { auth } from "@lib/auth";
 // Variables
 const JSON_MIME_TYPE = "application/json";
 const CSV_MIME_TYPE = "text/csv";
+const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const MAX_DISPLAYED_COLUMNS = 10;
+
+/** Returns true for CSV and XLSX file types, which share the same import flow. */
+const isSpreadsheetFile = (type: string) => type === CSV_MIME_TYPE || type === XLSX_MIME_TYPE;
+
+// GraphQL documents hoisted to module scope so they are not recreated on each render
+const PREPARE_ENTITY_CSV = gql`
+  mutation PrepareEntityCSV($file: [Upload]!) {
+    prepareEntityCSV(file: $file) {
+      name
+      inferredType
+    }
+  }
+`;
+
+const GET_MAPPING_DATA = gql`
+  query GetMappingData {
+    projects {
+      _id
+      name
+    }
+    templates {
+      _id
+      name
+      description
+      owner
+      values {
+        _id
+        data
+        name
+        type
+      }
+    }
+  }
+`;
+
+const REVIEW_ENTITY_CSV = gql`
+  mutation ReviewEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
+    reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
+      success
+      message
+      data {
+        name
+        state
+        warnings
+      }
+    }
+  }
+`;
+
+const GET_COUNTER_VALUES = gql`
+  query GetCounterValues($_id: String!, $count: Int!) {
+    nextCounterValues(_id: $_id, count: $count) {
+      success
+      message
+      data
+    }
+  }
+`;
+
+const SUGGEST_COLUMN_MAPPING = gql`
+  query SuggestColumnMapping($columns: [String]!) {
+    suggestColumnMapping(columns: $columns) {
+      name
+      description
+    }
+  }
+`;
+
+const IMPORT_ENTITY_CSV = gql`
+  mutation ImportEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
+    importEntityCSV(columnMapping: $columnMapping, file: $file, options: $options) {
+      success
+      message
+    }
+  }
+`;
+
+const REVIEW_ENTITY_JSON = gql`
+  mutation ReviewEntityJSON($file: [Upload]!) {
+    reviewEntityJSON(file: $file) {
+      success
+      message
+      data {
+        name
+        state
+      }
+    }
+  }
+`;
+
+const IMPORT_ENTITY_JSON = gql`
+  mutation ImportEntityJSON($file: [Upload]!, $project: String, $attributes: [AttributeInput]) {
+    importEntityJSON(file: $file, project: $project, attributes: $attributes) {
+      success
+      message
+    }
+  }
+`;
+
+const REVIEW_TEMPLATE_JSON = gql`
+  mutation ReviewTemplateJSON($file: [Upload]!) {
+    reviewTemplateJSON(file: $file) {
+      success
+      message
+      data {
+        name
+        state
+      }
+    }
+  }
+`;
+
+const IMPORT_TEMPLATE_JSON = gql`
+  mutation ImportTemplateJSON($file: [Upload]!) {
+    importTemplateJSON(file: $file) {
+      success
+      message
+    }
+  }
+`;
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -113,8 +235,14 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [templateStep, setTemplateStep] = useState(0);
 
   // Spreadsheet column state
-  const [columns, setColumns] = useState([] as string[]);
-  const [columnsCollection, setColumnsCollection] = useState(createListCollection({ items: [] as string[] }));
+  const [columns, setColumns] = useState([] as ColumnInfo[]);
+  const [columnsCollection, setColumnsCollection] = useState(
+    createListCollection<ColumnInfo>({
+      items: [] as ColumnInfo[],
+      itemToValue: (item) => item.name,
+      itemToString: (item) => item.name,
+    }),
+  );
 
   // AI column mapping suggestions
   const [suggestions, setSuggestions] = useState<{ name: string | null; description: string | null } | null>(null);
@@ -141,21 +269,22 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
-  const [nameField, setNameField] = useState("");
+  const [nameField, setNameField] = useState<ColumnInfo | undefined>(undefined);
   const [nameUseCounter, setNameUseCounter] = useState(false);
   const [counter, setCounter] = useState("");
-  const [descriptionField, setDescriptionField] = useState("");
+  const [descriptionField, setDescriptionField] = useState<ColumnInfo | undefined>(undefined);
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
+  const [attributeValidity, setAttributeValidity] = useState<Record<string, boolean>>({});
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
   const [reviewTemplates, setReviewTemplates] = useState([] as TemplateImportReview[]);
 
-  /**
-   * Helper function to get user information
-   */
+  // Confirmation dialog shown when the user clicks Finish and warnings are present
+  const [confirmWarningsOpen, setConfirmWarningsOpen] = useState(false);
+
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
@@ -175,144 +304,33 @@ const ImportDialog = (props: ImportDialogProps) => {
     getUser();
   }, []);
 
-  // Queries
-  const PREPARE_ENTITY_CSV = gql`
-    mutation PrepareEntityCSV($file: [Upload]!) {
-      prepareEntityCSV(file: $file)
-    }
-  `;
+  // Apollo hooks
   const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{
-    prepareEntityCSV: string[];
+    prepareEntityCSV: ColumnInfo[];
   }>(PREPARE_ENTITY_CSV);
-
-  const GET_MAPPING_DATA = gql`
-    query GetMappingData {
-      projects {
-        _id
-        name
-      }
-      templates {
-        _id
-        name
-        description
-        owner
-        values {
-          _id
-          data
-          name
-          type
-        }
-      }
-    }
-  `;
   const [getMappingData, { error: mappingDataError }] = useLazyQuery<{
     projects: IGenericItem[];
     templates: AttributeModel[];
   }>(GET_MAPPING_DATA);
-
-  const REVIEW_ENTITY_CSV = gql`
-    mutation ReviewEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
-        success
-        message
-        data {
-          name
-          state
-        }
-      }
-    }
-  `;
   const [reviewEntityCSV, { error: reviewEntityCSVError }] = useMutation<{
     reviewEntityCSV: ResponseData<EntityImportReview[]>;
   }>(REVIEW_ENTITY_CSV);
-
-  const GET_COUNTER_VALUES = gql`
-    query GetCounterValues($_id: String!, $count: Int!) {
-      nextCounterValues(_id: $_id, count: $count) {
-        success
-        message
-        data
-      }
-    }
-  `;
   const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
     nextCounterValues: ResponseData<string[]>;
   }>(GET_COUNTER_VALUES);
-
-  const SUGGEST_COLUMN_MAPPING = gql`
-    query SuggestColumnMapping($columns: [String]!) {
-      suggestColumnMapping(columns: $columns) {
-        name
-        description
-      }
-    }
-  `;
   const [runSuggestColumnMapping] = useLazyQuery<{
     suggestColumnMapping: { name: string | null; description: string | null };
   }>(SUGGEST_COLUMN_MAPPING, { fetchPolicy: "network-only" });
-
-  const IMPORT_ENTITY_CSV = gql`
-    mutation ImportEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
-      importEntityCSV(columnMapping: $columnMapping, file: $file, options: $options) {
-        success
-        message
-      }
-    }
-  `;
   const [importEntityCSV, { error: importEntityCSVError }] = useMutation(IMPORT_ENTITY_CSV);
-
-  const REVIEW_ENTITY_JSON = gql`
-    mutation ReviewEntityJSON($file: [Upload]!) {
-      reviewEntityJSON(file: $file) {
-        success
-        message
-        data {
-          name
-          state
-        }
-      }
-    }
-  `;
   const [reviewEntityJSON, { error: reviewEntityJSONError }] = useMutation<{
     reviewEntityJSON: ResponseData<EntityImportReview[]>;
   }>(REVIEW_ENTITY_JSON);
-
-  const IMPORT_ENTITY_JSON = gql`
-    mutation ImportEntityJSON($file: [Upload]!, $project: String, $attributes: [AttributeInput]) {
-      importEntityJSON(file: $file, project: $project, attributes: $attributes) {
-        success
-        message
-      }
-    }
-  `;
   const [importEntityJSON, { error: importEntityJSONError }] = useMutation<{
     importEntityJSON: IResponseMessage;
   }>(IMPORT_ENTITY_JSON);
-
-  const REVIEW_TEMPLATE_JSON = gql`
-    mutation ReviewTemplateJSON($file: [Upload]!) {
-      reviewTemplateJSON(file: $file) {
-        success
-        message
-        data {
-          name
-          state
-        }
-      }
-    }
-  `;
   const [reviewTemplateJSON, { error: reviewTemplateJSONError }] = useMutation<{
     reviewTemplateJSON: ResponseData<TemplateImportReview[]>;
   }>(REVIEW_TEMPLATE_JSON);
-
-  const IMPORT_TEMPLATE_JSON = gql`
-    mutation ImportTemplateJSON($file: [Upload]!) {
-      importTemplateJSON(file: $file) {
-        success
-        message
-      }
-    }
-  `;
   const [importTemplateJSON, { error: importTemplateJSONError }] = useMutation<{
     importTemplateJSON: IResponseMessage;
   }>(IMPORT_TEMPLATE_JSON);
@@ -348,6 +366,43 @@ const ImportDialog = (props: ImportDialogProps) => {
         </Flex>
       ),
       header: "Action",
+    }),
+    reviewTableColumnHelper.accessor("warnings", {
+      cell: (info) => {
+        const warnings = info.getValue();
+        if (!warnings || warnings.length === 0) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"} p={"1"}>
+              <Icon name={"check"} color={"green"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"green"}>
+                No Warnings
+              </Text>
+            </Flex>
+          );
+        }
+        return (
+          <Flex direction={"row"} gap={"1"} p={"1"}>
+            {warnings.map((warning) => {
+              const location = warning.split(", ")[0];
+              return (
+                <Tag.Root colorPalette={"orange"}>
+                  <Tag.StartElement>
+                    <Icon name={"warning"} color={"orange.400"} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label>
+                    <Tooltip content={warning} showArrow>
+                      <Text fontSize={"xs"} color={"orange.600"}>
+                        {location}
+                      </Text>
+                    </Tooltip>
+                  </Tag.Label>
+                </Tag.Root>
+              );
+            })}
+          </Flex>
+        );
+      },
+      header: "Warnings",
     }),
   ];
 
@@ -392,11 +447,11 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   }, [fileName, importTypeSelected]);
 
-  // Effect to manipulate 'Continue' button state when mapping fields from CSV file
+  // Effect to manipulate 'Continue' button state when mapping fields from a spreadsheet file
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && nameField !== "" && fileType === CSV_MIME_TYPE) {
+    if (_.isEqual(entityInterfacePage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
       setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "details") && !_.isEqual(counter, "") && nameUseCounter) {
+    } else if (_.isEqual(entityInterfacePage, "details") && counter !== "" && nameUseCounter) {
       setContinueDisabled(false);
     }
   }, [nameField, counter]);
@@ -408,10 +463,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   }, [entityInterfacePage]);
 
-  /**
-   * Read a JSON file and update `Importer` state, raising errors if invalid
-   * @param {File} file JSON file instance
-   */
+  // Effect to disable 'Continue' on the mapping page when any attribute is incomplete
+  useEffect(() => {
+    if (!_.isEqual(entityInterfacePage, "mapping")) return;
+    const allValid =
+      attributesField.length === 0 || attributesField.every((attr) => attributeValidity[attr._id] === true);
+    setContinueDisabled(!allValid);
+  }, [entityInterfacePage, attributeValidity, attributesField]);
+
   const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
     setImportLoading(true);
@@ -433,13 +492,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Read a parsed JSON file and determine if it has valid file contents or not
-   * @param parsed The parsed JSON file contents, received from `parseJSONFile`
-   */
   const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
-    // Check that "entities" field exists
-    if (_.isUndefined(parsed["entities"])) {
+    if (parsed.entities === undefined) {
       toaster.create({
         title: "JSON Import Error",
         type: "error",
@@ -466,39 +520,22 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Utility function to determine if a column is selected for mapping
-   * @param {string} column The column to check
-   * @returns {boolean} True if the column is selected for mapping, false otherwise
-   */
-  const columnSelected = (column: string) => {
-    if (_.includes([nameField, descriptionField], column)) return true;
+  /** Returns true if `columnName` is already assigned to a field or an Attribute value. */
+  const columnSelected = (columnName: string) => {
+    if (_.includes([nameField?.name, descriptionField?.name], columnName)) return true;
 
     for (const attribute of attributesField) {
       for (const value of attribute.values) {
-        if (_.includes(value.data, column)) return true;
+        if (_.includes(value.data, columnName)) return true;
       }
     }
 
     return false;
   };
 
-  /**
-   * Utility function to perform the initial import operations. For CSV files, execute
-   * `prepareEntityCSV` query to defer the data extraction to the server.
-   * For JSON files, trigger the `validJSONFile` method to handle the file
-   * locally instead.
-   * @return {Promise<boolean>}
-   */
+  /** Parses and validates the uploaded file. Populates `columns` for spreadsheet files. */
   const setupImport = async (): Promise<boolean> => {
-    // Update state of continue button
     setContinueDisabled(true);
-
-    // Extract data from the form
-    const formData = new FormData();
-    formData.append("name", file.name);
-    formData.append("file", file);
-    formData.append("type", fileType);
 
     if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
@@ -508,8 +545,8 @@ const ImportDialog = (props: ImportDialogProps) => {
 
       // Validate the JSON data
       return validJSONFile(data);
-    } else if (fileType === CSV_MIME_TYPE) {
-      // Mutation query with CSV file
+    } else if (isSpreadsheetFile(fileType)) {
+      // Mutation query with CSV or XLSX file
       setImportLoading(true);
       const response = await prepareEntityCSV({
         variables: {
@@ -518,7 +555,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       });
       setImportLoading(false);
 
-      if (prepareEntityCSVError || _.isUndefined(response.data)) {
+      if (prepareEntityCSVError || !response.data) {
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -529,22 +566,21 @@ const ImportDialog = (props: ImportDialogProps) => {
         return false;
       }
 
-      if (response.data && response.data.prepareEntityCSV.length > 0) {
-        // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet: string[] = response.data.prepareEntityCSV.filter((column: string) => {
-          return !_.startsWith(column, "__EMPTY");
-        });
+      if (response.data.prepareEntityCSV.length > 0) {
+        // Strip Excel placeholder columns for genuinely empty cells
+        const filteredColumnSet = response.data.prepareEntityCSV.filter(
+          (col: ColumnInfo) => !_.startsWith(col.name, "__EMPTY"),
+        );
         setColumns(filteredColumnSet);
-        setColumnsCollection(createListCollection({ items: filteredColumnSet }));
-
-        setImportLoading(true);
-        const mappingResult = await setupMapping();
-        setImportLoading(false);
-
-        // Setup the next stage of CSV import
-        return mappingResult;
-      } else if (response.data.prepareEntityCSV.length === 0) {
-        // If the CSV file is empty, display an error message
+        setColumnsCollection(
+          createListCollection<ColumnInfo>({
+            items: filteredColumnSet,
+            itemToValue: (item) => item.name,
+            itemToString: (item) => item.name,
+          }),
+        );
+        return true;
+      } else {
         toaster.create({
           title: "CSV Import Error",
           type: "error",
@@ -560,16 +596,14 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
-   * and Attributes.
-   */
+  /** Fetches projects and templates to populate the mapping step dropdowns. */
   const setupMapping = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await getMappingData();
     setImportLoading(false);
 
     if (response.data?.templates) {
+      // Templates containing entity or select values can't be mapped to CSV columns
       const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
         t.values.every((v) => !["entity", "select"].includes(v.type)),
       );
@@ -605,10 +639,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     return true;
   };
 
-  /**
-   * Submit the pre-imported JSON structure and changes to the server
-   * to generate a summary of the changes
-   */
+  /** Runs the server-side review for a JSON entity import and populates `reviewEntities`. */
   const setupReviewEntityJSON = async () => {
     setImportLoading(true);
     const response = await reviewEntityJSON({
@@ -633,21 +664,20 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Submit the pre-imported CSV structure and changes to the server
-   * to generate a summary of the changes
-   */
+  /** Builds the column mapping object from current form state. */
+  const buildColumnMapping = (): IColumnMapping => ({
+    namePrefix: namePrefixField,
+    name: nameField?.name,
+    description: descriptionField?.name,
+    created: dayjs(Date.now()).toISOString(),
+    owner: ownerField,
+    project: projectField,
+    attributes: removeTypename(attributesField),
+  });
+
+  /** Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable. */
   const setupReviewEntityCSV = async () => {
-    // Collate data to be mapped
-    const columnMapping: IColumnMapping = {
-      namePrefix: namePrefixField,
-      name: nameField,
-      description: descriptionField,
-      created: dayjs(Date.now()).toISOString(),
-      owner: ownerField,
-      project: projectField,
-      attributes: removeTypename(attributesField),
-    };
+    const columnMapping = buildColumnMapping();
 
     setImportLoading(true);
     const reviewResponse = await reviewEntityCSV({
@@ -705,10 +735,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Submit the pre-imported Template JSON structure and changes to the server
-   * to generate a summary of the changes
-   */
+  /** Runs the server-side review for a JSON template import and populates `reviewTemplates`. */
   const setupReviewTemplateJSON = async () => {
     setImportLoading(true);
     const response = await reviewTemplateJSON({
@@ -733,9 +760,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Finish importing a JSON file
-   */
+  /** Executes the final JSON entity import and resets state on success. */
   const finishImportEntityJSON = async () => {
     setImportLoading(true);
     const response = await importEntityJSON({
@@ -764,33 +789,17 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Finish importing a CSV file
-   */
+  /** Executes the final CSV/XLSX entity import and resets state on success. */
   const finishImportEntityCSV = async () => {
-    // Collate data to be mapped
-    const importData: CSVImportData = {
-      columnMapping: {
-        namePrefix: namePrefixField,
-        name: nameField,
-        description: descriptionField,
-        created: dayjs(Date.now()).toISOString(),
-        owner: ownerField,
-        project: projectField,
-        attributes: removeTypename(attributesField),
-      },
-      options: {
-        counters: nameUseCounter ? [{ field: "name", _id: counter }] : [],
-      },
-      file: file,
-    };
+    const columnMapping = buildColumnMapping();
+    const options = { counters: nameUseCounter ? [{ field: "name", _id: counter }] : [] };
 
     setImportLoading(true);
     await importEntityCSV({
       variables: {
-        columnMapping: removeTypename(importData.columnMapping),
-        options: removeTypename(importData.options),
-        file: importData.file,
+        columnMapping: removeTypename(columnMapping),
+        options: removeTypename(options),
+        file: file,
       },
     });
     setImportLoading(false);
@@ -809,6 +818,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
+  /** Executes the final JSON template import and resets state on success. */
   const finishImportTemplateJSON = async () => {
     setImportLoading(true);
     await importTemplateJSON({
@@ -834,12 +844,12 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fetch AI column mapping suggestions when columns become available
   useEffect(() => {
-    if (!features.ai || columns.length === 0 || fileType !== CSV_MIME_TYPE) return;
+    if (!features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
 
     const fetchSuggestions = async () => {
       setIsSuggesting(true);
       try {
-        const result = await runSuggestColumnMapping({ variables: { columns } });
+        const result = await runSuggestColumnMapping({ variables: { columns: columns.map((c) => c.name) } });
         if (result.data?.suggestColumnMapping) {
           setSuggestions(result.data.suggestColumnMapping);
         }
@@ -851,33 +861,32 @@ const ImportDialog = (props: ImportDialogProps) => {
     fetchSuggestions();
   }, [columns]);
 
-  /**
-   * Factory-like pattern to generate general `Select` components
-   * @param {string} key Unique key and test ID suffix
-   * @param {string} currentValue Currently selected value (controlled)
-   * @param {React.SetStateAction<string>} onValueChange State setter
-   * @returns {ReactElement}
-   */
+  /** Renders a column-picker `Select` bound to a `ColumnInfo` value, showing the inferred type icon. */
   const getSelectComponent = (
     key: string,
-    currentValue: string,
-    onValueChange: React.Dispatch<React.SetStateAction<string>>,
+    currentValue: ColumnInfo | undefined,
+    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
   ) => {
+    const triggerIcon = getValueTypeIconProps(currentValue?.inferredType);
     return (
       <Select.Root
         key={key}
         size={"xs"}
         rounded={"md"}
         collection={columnsCollection}
-        value={currentValue ? [currentValue] : []}
+        value={currentValue ? [currentValue.name] : []}
         onValueChange={(details) => onValueChange(details.items[0])}
       >
         <Select.HiddenSelect />
         <Select.Control>
           <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
             <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Icon name={"grid"} size={"xs"} />
-              <Text fontSize={"xs"}>{currentValue || "Select Column"}</Text>
+              {currentValue ? (
+                <Icon name={triggerIcon.name} size={"xs"} color={triggerIcon.color} />
+              ) : (
+                <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+              )}
+              <Text fontSize={"xs"}>{currentValue?.name || "Select Column"}</Text>
             </Flex>
           </Select.Trigger>
           <Select.IndicatorGroup>
@@ -887,15 +896,18 @@ const ImportDialog = (props: ImportDialogProps) => {
         <Portal>
           <Select.Positioner>
             <Select.Content>
-              {columnsCollection.items?.map((column: string) => (
-                <Select.Item item={column} key={column}>
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Icon name={"grid"} size={"xs"} />
-                    {column}
-                  </Flex>
-                  <Select.ItemIndicator />
-                </Select.Item>
-              )) || []}
+              {columnsCollection.items?.map((column: ColumnInfo) => {
+                const iconProps = getValueTypeIconProps(column.inferredType);
+                return (
+                  <Select.Item item={column} key={column.name}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
+                      {column.name}
+                    </Flex>
+                    <Select.ItemIndicator />
+                  </Select.Item>
+                );
+              }) || []}
             </Select.Content>
           </Select.Positioner>
         </Portal>
@@ -903,13 +915,19 @@ const ImportDialog = (props: ImportDialogProps) => {
     );
   };
 
-  // Removal callback
   const onRemoveAttribute = (identifier: string) => {
-    // We need to filter the removed attribute
     setAttributesField(attributesField.filter((attribute) => attribute._id !== identifier));
+    setAttributeValidity((prev) => {
+      const next = { ...prev };
+      delete next[identifier];
+      return next;
+    });
   };
 
-  // Used to receive data from a Attribute component
+  const onAttributeValidityChange = (id: string, isValid: boolean) => {
+    setAttributeValidity((prev) => ({ ...prev, [id]: isValid }));
+  };
+
   const onUpdateAttribute = (data: AttributeCardProps) => {
     setAttributesField([
       ...attributesField.map((attribute) => {
@@ -929,9 +947,23 @@ const ImportDialog = (props: ImportDialogProps) => {
     ]);
   };
 
-  /**
-   * Callback function to handle any click events on the Continue button
-   */
+  /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
+  const onBackClick = () => {
+    if (_.isEqual(entityInterfacePage, "details")) {
+      setEntityStep(0);
+      setEntityInterfacePage("upload");
+      setIsTypeSelectDisabled(false);
+      setContinueDisabled(false);
+    } else if (_.isEqual(entityInterfacePage, "mapping")) {
+      setEntityStep(1);
+      setEntityInterfacePage("details");
+    } else if (_.isEqual(entityInterfacePage, "review")) {
+      setEntityStep(2);
+      setEntityInterfacePage("mapping");
+    }
+  };
+
+  /** Advances the import flow one step, running any required setup or validation before proceeding. */
   const onContinueClick = async () => {
     // Disable changing the type of import unless import canceled
     setIsTypeSelectDisabled(true);
@@ -968,6 +1000,21 @@ const ImportDialog = (props: ImportDialogProps) => {
         setEntityStep(2);
         setEntityInterfacePage("mapping");
       } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        // Validate all attributes are complete before proceeding
+        const incompleteAttribute = attributesField.find(
+          (attr) => attr.name === "" || attr.description === "" || !isValidValues(attr.values),
+        );
+        if (incompleteAttribute) {
+          toaster.create({
+            title: "Incomplete Attributes",
+            type: "warning",
+            description: "Please complete all Attributes before continuing",
+            duration: 4000,
+            closable: true,
+          });
+          return;
+        }
+
         // Capture event
         posthog.capture("import_continue", {
           importType: "entities",
@@ -978,7 +1025,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         // Run the review setup function depending on file type
         if (fileType === JSON_MIME_TYPE) {
           await setupReviewEntityJSON();
-        } else if (fileType === CSV_MIME_TYPE) {
+        } else if (isSpreadsheetFile(fileType)) {
           await setupReviewEntityCSV();
         }
 
@@ -986,6 +1033,14 @@ const ImportDialog = (props: ImportDialogProps) => {
         setEntityStep(3);
         setEntityInterfacePage("review");
       } else if (_.isEqual(entityInterfacePage, "review")) {
+        // If any rows have validation warnings, require explicit confirmation before importing
+        const hasWarnings =
+          isSpreadsheetFile(fileType) && reviewEntities.some((e) => e.warnings && e.warnings.length > 0);
+        if (hasWarnings) {
+          setConfirmWarningsOpen(true);
+          return;
+        }
+
         // Capture event
         posthog.capture("import_finish", {
           importType: "entities",
@@ -995,7 +1050,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         setImportLoading(true);
         if (fileType === JSON_MIME_TYPE) {
           await finishImportEntityJSON();
-        } else if (fileType === CSV_MIME_TYPE) {
+        } else if (isSpreadsheetFile(fileType)) {
           await finishImportEntityCSV();
         }
         setImportLoading(false);
@@ -1029,9 +1084,6 @@ const ImportDialog = (props: ImportDialogProps) => {
     }
   };
 
-  /**
-   * Utility function to reset the entire `Importer` component state
-   */
   const resetState = () => {
     // Reset UI state
     setImportType(undefined);
@@ -1052,13 +1104,19 @@ const ImportDialog = (props: ImportDialogProps) => {
 
     // Reset import and mapping state
     setColumns([]);
-    setColumnsCollection(createListCollection({ items: [] as string[] }));
+    setColumnsCollection(
+      createListCollection<ColumnInfo>({
+        items: [] as ColumnInfo[],
+        itemToValue: (item) => item.name,
+        itemToString: (item) => item.name,
+      }),
+    );
     setSuggestions(null);
     setIsSuggesting(false);
-    setNameField("");
+    setNameField(undefined);
     setNameUseCounter(false);
     setCounter("");
-    setDescriptionField("");
+    setDescriptionField(undefined);
     setProjectField("");
     setProjectsCollection(
       createListCollection({
@@ -1076,17 +1134,18 @@ const ImportDialog = (props: ImportDialogProps) => {
     );
     setSelectedTemplateValue([]);
     setAttributesField([]);
+    setAttributeValidity({});
     setReviewEntities([]);
     setReviewTemplates([]);
+    setConfirmWarningsOpen(false);
   };
 
-  /**
-   * Handle closing the `Dialog` before the import process is complete
-   */
   const handleOnClose = () => {
     resetState();
     props.setOpen(false);
   };
+
+  const warningCount = reviewEntities.filter((entity) => entity.warnings && entity.warnings.length > 0).length;
 
   return (
     <Dialog.Root
@@ -1096,6 +1155,38 @@ const ImportDialog = (props: ImportDialogProps) => {
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
     >
+      <AlertDialog
+        open={confirmWarningsOpen}
+        setOpen={setConfirmWarningsOpen}
+        header="Import with Warnings"
+        leftButtonLabel="Cancel"
+        leftButtonColor="red"
+        leftButtonAction={() => setConfirmWarningsOpen(false)}
+        rightButtonLabel="Import Anyway"
+        rightButtonColor="green"
+        rightButtonAction={async () => {
+          setConfirmWarningsOpen(false);
+          posthog.capture("import_finish", { importType: "entities" });
+          setImportLoading(true);
+          if (fileType === JSON_MIME_TYPE) {
+            await finishImportEntityJSON();
+          } else if (isSpreadsheetFile(fileType)) {
+            await finishImportEntityCSV();
+          }
+          setImportLoading(false);
+        }}
+      >
+        <Flex direction={"column"} gap={"2"}>
+          <Text fontSize={"xs"}>
+            <Text as={"span"} fontWeight={"semibold"}>
+              {warningCount} {warningCount === 1 ? "row has" : "rows have"}
+            </Text>{" "}
+            data validation warnings. Blank or default values will be substituted for any unresolvable data.
+          </Text>
+          <Text fontSize={"xs"}>Do you want to continue with the import?</Text>
+        </Flex>
+      </AlertDialog>
+
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -1192,7 +1283,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Select.HiddenSelect />
                     <Select.Control>
                       <Select.Trigger data-testid={"import-type-select-trigger"} rounded={"md"}>
-                        <Select.ValueText placeholder={"Select file contents"} />
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
+                          {importType === "entities" && (
+                            <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+                          )}
+                          {importType === "template" && (
+                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                          )}
+                          <Text fontSize={"xs"}>{_.capitalize(importType) || "Select File Contents"}</Text>
+                        </Flex>
                       </Select.Trigger>
                       <Select.IndicatorGroup>
                         <Select.Indicator />
@@ -1205,7 +1304,18 @@ const ImportDialog = (props: ImportDialogProps) => {
                             items: ["Entities", "Template"],
                           }).items.map((importType: string) => (
                             <Select.Item item={importType} key={importType.toLowerCase()}>
-                              {importType}
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Icon
+                                  name={importType === "Entities" ? "entity" : "template"}
+                                  size={"xs"}
+                                  color={
+                                    importType === "Entities"
+                                      ? GLOBAL_STYLES.entity.iconColor
+                                      : GLOBAL_STYLES.template.iconColor
+                                  }
+                                />
+                                {importType}
+                              </Flex>
                               <Select.ItemIndicator />
                             </Select.Item>
                           ))}
@@ -1213,6 +1323,16 @@ const ImportDialog = (props: ImportDialogProps) => {
                       </Select.Positioner>
                     </Portal>
                   </Select.Root>
+                  <Field.HelperText>
+                    <Flex direction={"row"} gap={"1"} ml={"0.5"} align={"center"} w={"100%"}>
+                      <Text fontWeight={"semibold"} fontSize={"xs"}>
+                        Supported Formats:
+                      </Text>
+                      {importType && importType === "template" && <Text fontSize={"xs"}>JSON</Text>}
+                      {importType && importType === "entities" && <Text fontSize={"xs"}>JSON, CSV, XLSX</Text>}
+                      {!importType && <Text fontSize={"xs"}>Select File Contents</Text>}
+                    </Flex>
+                  </Field.HelperText>
                 </Field.Root>
               </Flex>
             )}
@@ -1239,15 +1359,24 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Text>
                 </Flex>
 
-                {fileType === CSV_MIME_TYPE && (
+                {isSpreadsheetFile(fileType) && (
                   <Flex w={"100%"} gap={"1"} align={"center"} justify={"left"} wrap={"wrap"}>
                     <Text fontWeight={"semibold"} fontSize={"xs"}>
                       Columns:
                     </Text>
                     {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
+                      const iconProps = getValueTypeIconProps(column.inferredType);
+                      const used = columnSelected(column.name);
                       return (
-                        <Tag.Root key={column} colorPalette={columnSelected(column) ? "green" : "blue"}>
-                          <Tag.Label fontSize={"xs"}>{column}</Tag.Label>
+                        <Tag.Root
+                          key={column.name}
+                          bg={used ? "green.100" : "white"}
+                          colorPalette={used ? "green" : "gray"}
+                        >
+                          <Tag.StartElement>
+                            <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
+                          </Tag.StartElement>
+                          <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
                         </Tag.Root>
                       );
                     })}
@@ -1346,7 +1475,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {
                           if (event.target.files && event.target.files.length > 0) {
                             // Only accept defined file types
-                            if (_.includes([CSV_MIME_TYPE, JSON_MIME_TYPE], event.target.files[0].type)) {
+                            if (
+                              _.includes([CSV_MIME_TYPE, XLSX_MIME_TYPE, JSON_MIME_TYPE], event.target.files[0].type)
+                            ) {
                               // Capture event
                               posthog.capture("import_upload_file", {
                                 importType: importType,
@@ -1360,7 +1491,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               toaster.create({
                                 title: "Warning",
                                 type: "warning",
-                                description: "Please upload a JSON or CSV file",
+                                description: "Please upload a JSON, CSV, or XLSX file",
                                 duration: 2000,
                                 closable: true,
                               });
@@ -1386,7 +1517,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                {fileType === CSV_MIME_TYPE && (
+                {isSpreadsheetFile(fileType) && (
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
@@ -1409,7 +1540,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         <Field.Root
                           gap={"0.5"}
                           invalid={
-                            (!nameUseCounter && _.isEqual(nameField, "")) || (nameUseCounter && _.isEqual(counter, ""))
+                            (!nameUseCounter && nameField === undefined) || (nameUseCounter && _.isEqual(counter, ""))
                           }
                           required
                         >
@@ -1427,7 +1558,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               onClick={() => {
                                 setNameUseCounter(!nameUseCounter);
                                 // Reset state of name and counter fields
-                                setNameField("");
+                                setNameField(undefined);
                                 setCounter("");
                                 // Disable 'Continue' button
                                 setContinueDisabled(true);
@@ -1448,7 +1579,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   </Text>
                                 </>
                               )}
-                              {!isSuggesting && suggestions?.name && suggestions.name !== nameField && (
+                              {!isSuggesting && suggestions?.name && suggestions.name !== nameField?.name && (
                                 <>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
                                   <Text
@@ -1456,7 +1587,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     color={"purple.600"}
                                     cursor={"pointer"}
                                     _hover={{ textDecoration: "underline" }}
-                                    onClick={() => setNameField(suggestions.name!)}
+                                    onClick={() => setNameField(columns.find((c) => c.name === suggestions.name))}
                                   >
                                     Suggested: {suggestions.name}
                                   </Text>
@@ -1513,18 +1644,18 @@ const ImportDialog = (props: ImportDialogProps) => {
                           <Field.Label fontSize={"xs"} ml={"0.5"}>
                             Description
                           </Field.Label>
-                          {fileType === CSV_MIME_TYPE ? (
+                          {isSpreadsheetFile(fileType) ? (
                             getSelectComponent("description", descriptionField, setDescriptionField)
                           ) : (
                             <Input size={"xs"} rounded={"md"} placeholder={'"description"'} disabled readOnly />
                           )}
                           <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                             <Field.HelperText fontSize={"xs"}>
-                              {fileType === CSV_MIME_TYPE
+                              {isSpreadsheetFile(fileType)
                                 ? "Column containing Entity description"
                                 : "JSON field containing Entity description"}
                             </Field.HelperText>
-                            {fileType === CSV_MIME_TYPE && isSuggesting && (
+                            {isSpreadsheetFile(fileType) && isSuggesting && (
                               <>
                                 <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
                                 <Text fontSize={"xs"} color={"purple.300"}>
@@ -1532,10 +1663,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                                 </Text>
                               </>
                             )}
-                            {fileType === CSV_MIME_TYPE &&
+                            {isSpreadsheetFile(fileType) &&
                               !isSuggesting &&
                               suggestions?.description &&
-                              suggestions.description !== descriptionField && (
+                              suggestions.description !== descriptionField?.name && (
                                 <Flex direction={"row"} align={"center"} gap={"1"} py={"0"}>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
                                   <Text
@@ -1543,7 +1674,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     color={"purple.600"}
                                     cursor={"pointer"}
                                     _hover={{ textDecoration: "underline" }}
-                                    onClick={() => setDescriptionField(suggestions.description!)}
+                                    onClick={() =>
+                                      setDescriptionField(columns.find((c) => c.name === suggestions.description))
+                                    }
                                   >
                                     Suggested: {suggestions.description}
                                   </Text>
@@ -1577,7 +1710,10 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     }
                                   />
                                   <Text fontSize={"xs"} color={projectField ? "black" : "gray.500"}>
-                                    {projectField || "Select Project"}
+                                    {(projectField &&
+                                      projectsCollection.items.filter((project) => project._id === projectField)[0]
+                                        .name) ||
+                                      "Select Project"}
                                   </Text>
                                 </Flex>
                               </Select.Trigger>
@@ -1642,11 +1778,11 @@ const ImportDialog = (props: ImportDialogProps) => {
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                {_.isEqual(fileType, CSV_MIME_TYPE) ? (
+                {isSpreadsheetFile(fileType) ? (
                   <Text fontSize={"xs"} ml={"0.5"}>
                     Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the
-                    column containing the data for each Value. Use an existing Template Attribute from the drop-down or
-                    create a new Attribute.
+                    column containing the data for each Value, or toggle to specify a fixed value. Use an existing
+                    Template Attribute from the drop-down or create a new Attribute.
                   </Text>
                 ) : (
                   <Text fontSize={"xs"} ml={"0.5"}>
@@ -1730,7 +1866,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                     rounded={"md"}
                     colorPalette={"green"}
                     onClick={() => {
-                      // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                       setAttributesField([
                         ...attributesField,
                         {
@@ -1750,42 +1885,22 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Button>
                 </Flex>
 
-                {fileType === CSV_MIME_TYPE
-                  ? // If importing from CSV, use column-mapping
-                    attributesField.map((attribute) => {
-                      return (
-                        <Attribute
-                          _id={attribute._id}
-                          key={attribute._id}
-                          name={attribute.name}
-                          owner={attribute.owner}
-                          archived={attribute.archived}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={true}
-                          permittedDataValues={columns}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
-                      );
-                    })
-                  : // If importing from JSON, allow new Attributes
-                    attributesField.map((attribute) => {
-                      return (
-                        <Attribute
-                          _id={attribute._id}
-                          key={attribute._id}
-                          name={attribute.name}
-                          owner={attribute.owner}
-                          archived={attribute.archived}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={true}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
-                      );
-                    })}
+                {attributesField.map((attribute) => (
+                  <Attribute
+                    _id={attribute._id}
+                    key={attribute._id}
+                    name={attribute.name}
+                    owner={attribute.owner}
+                    archived={attribute.archived}
+                    description={attribute.description}
+                    values={attribute.values}
+                    restrictDataValues={true}
+                    permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+                    onRemove={onRemoveAttribute}
+                    onUpdate={onUpdateAttribute}
+                    onValidityChange={onAttributeValidityChange}
+                  />
+                ))}
               </Flex>
             )}
 
@@ -1801,8 +1916,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     Reviewing:
                   </Text>
                   <Text fontSize={"xs"}>
-                    {reviewEntities.length}{" "}
-                    {reviewEntities.length !== 0 && reviewEntities.length > 1 ? "Entities" : "Entity"}
+                    {reviewEntities.length} {reviewEntities.length > 1 ? "Entities" : "Entity"}
                   </Text>
                 </Flex>
                 <DataTable
@@ -1839,25 +1953,40 @@ const ImportDialog = (props: ImportDialogProps) => {
 
           <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-              <Button
-                id={"importCancelButton"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"red"}
-                variant={"solid"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("import_cancelled", {
-                    importType: importType,
-                  });
+              <Flex align={"center"} justify={"center"} gap={"2"}>
+                <Button
+                  id={"importCancelButton"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"red"}
+                  variant={"solid"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("import_cancelled", {
+                      importType: importType,
+                    });
 
-                  // Close the `ImportDialog`
-                  handleOnClose();
-                }}
-              >
-                Cancel
-                <Icon name="cross" size={"xs"} />
-              </Button>
+                    // Close the `ImportDialog`
+                    handleOnClose();
+                  }}
+                >
+                  Cancel
+                  <Icon name="cross" size={"xs"} />
+                </Button>
+                {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"orange"}
+                    variant={"solid"}
+                    onClick={onBackClick}
+                    disabled={importLoading}
+                  >
+                    <Icon name={"c_left"} size={"xs"} />
+                    Back
+                  </Button>
+                )}
+              </Flex>
 
               <Flex align={"center"} justify={"center"} gap={"1"}>
                 <Button

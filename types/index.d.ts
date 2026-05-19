@@ -89,13 +89,14 @@ export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
   onRemove?: (id: string) => void;
+  onValidityChange?: (id: string, isValid: boolean) => void;
 };
 
 export type AttributeCardProps = IAttribute &
   AttributeCardActions & {
     _id: string;
     restrictDataValues: boolean;
-    permittedDataValues?: string[];
+    permittedDataValues?: ColumnInfo[];
   };
 
 export type AttributeGroupProps = AttributeCardActions & {
@@ -111,6 +112,12 @@ export type AttributeViewButtonProps = {
   cancelCallback?: () => void;
 };
 
+// Column descriptor returned by prepareEntityCSV
+export type ColumnInfo = {
+  name: string;
+  inferredType: IValueType;
+};
+
 // Values
 export type IValueType = "number" | "text" | "url" | "date" | "entity" | "select";
 
@@ -119,6 +126,7 @@ export type IValue = {
   name: string;
   type: IValueType;
   data: string;
+  source?: "column" | "value";
   disabled?: boolean;
   showRemove?: boolean;
   onRemove?: (id: string) => void;
@@ -303,6 +311,7 @@ export type EntityImport = {
 export type EntityImportReview = {
   name: string;
   state: "create" | "update";
+  warnings?: string[];
 };
 
 // Import review summary for Templates being imported

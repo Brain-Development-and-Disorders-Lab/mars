@@ -58,7 +58,7 @@ export const UserResolvers = {
       const timestamp = new Date().toUTCString();
       await sendEmail({
         to: adminEmail,
-        subject: "Issue Report — Metadatify",
+        subject: "Issue Report - Metadatify",
         html: templates.reportIssue({
           description: args.description,
           path: args.path,

@@ -1,5 +1,5 @@
 // React
-import React, { useState, useEffect, useRef, ReactElement } from "react";
+import React, { useState, useEffect, useRef, useCallback, ReactElement } from "react";
 
 // Chakra UI components
 import {
@@ -46,11 +46,12 @@ import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Types
-import { IconNames, IValue, IValueSelectData, IValueType } from "@types";
+import { ColumnInfo, IconNames, IValue, IValueSelectData, IValueType } from "@types";
 
 // Utility functions
 import _ from "lodash";
 import dayjs from "dayjs";
+import { getValueTypeIconProps } from "@lib/util";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -58,6 +59,7 @@ import { GLOBAL_STYLES } from "@variables";
 interface SelectOption extends OptionBase {
   label: string;
   value: string;
+  inferredType?: IValueType;
 }
 
 interface ValueTypeOption extends OptionBase {
@@ -66,44 +68,14 @@ interface ValueTypeOption extends OptionBase {
 }
 
 /**
- * Utility function to generate the corresponding `IconName` and color
- * for each `IValueType`
- * @param type `IValueType` representing the icon and color scheme
- * @return {{ icon: IconNames, color: string }}
- */
-const getIconConfiguration = (type: IValueType): { icon: IconNames; color: string } => {
-  let icon: IconNames = "v_text";
-  let color: string = "blue.300";
-
-  // Customize `Icon` color according to Value `type`
-  if (type === "date") {
-    icon = "v_date";
-    color = "orange.300";
-  } else if (type === "number") {
-    icon = "v_number";
-    color = "green.300";
-  } else if (type === "url") {
-    icon = "v_url";
-    color = "yellow.300";
-  } else if (type === "entity") {
-    icon = "entity";
-    color = "purple.300";
-  } else if (type === "select") {
-    icon = "v_select";
-    color = "teal.300";
-  }
-  return { icon, color };
-};
-
-/**
  * Custom styling for each Value `type`, displaying colored icons
  */
 const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
-  const { icon, color } = getIconConfiguration(props.data.value);
+  const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <components.Option {...props}>
       <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={icon} size={"xs"} color={color} />
+        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -153,12 +125,12 @@ const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
  * Custom styling for Value `type` single value
  */
 const ValueTypeSingleValue = ({ ...props }: SingleValueProps<ValueTypeOption>) => {
-  const { icon, color } = getIconConfiguration(props.data.value);
+  const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Icon name={icon} size={"xs"} color={color} />
+          <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
       </components.SingleValue>
@@ -623,10 +595,11 @@ const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
  * Custom styling for each column picker `Option` component, displaying icon
  */
 const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
+  const iconProps = getValueTypeIconProps(props.data.inferredType);
   return (
     <components.Option {...props}>
       <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={"grid"} size={"xs"} />
+        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
     </components.Option>
@@ -637,17 +610,30 @@ const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
  * Custom styling for column picker `SingleValue` component
  */
 const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
+  const iconProps = getValueTypeIconProps(props.data.inferredType);
   return (
     <Flex direction={"row"} align={"center"}>
       <components.SingleValue {...props}>
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Icon name={"grid"} size={"xs"} />
+          {iconProps ? (
+            <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
+          ) : (
+            <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+          )}
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
       </components.SingleValue>
     </Flex>
   );
 };
+
+const PAGE_SIZE_OPTIONS = [
+  { label: "5", value: "5" },
+  { label: "10", value: "10" },
+  { label: "20", value: "20" },
+  { label: "50", value: "50" },
+  { label: "100", value: "100" },
+];
 
 /**
  * A spreadsheet-like interface for editing key-value data with type selection,
@@ -657,8 +643,7 @@ const Values = (props: {
   values: IValue[];
   setValues: (values: React.SetStateAction<IValue[]>) => void;
   viewOnly?: boolean;
-  requireData?: boolean;
-  permittedValues?: string[];
+  permittedValues?: ColumnInfo[];
 }) => {
   // Local type for tracking column names
   type ValuesColumn = "name" | "type" | "value";
@@ -729,8 +714,35 @@ const Values = (props: {
   }, [rowsPerPage]);
 
   /**
-   * Handle a resize event on a column in the `Values` component
-   * @param {ValuesColumn} column Specific column being resized
+   * Handles mouse movement during a column resize. Stable reference via useCallback prevents
+   * stale closures in the document listener registered by handleResizeStart.
+   * @param event Mouse event
+   */
+  const handleResizeMove = useCallback((event: MouseEvent) => {
+    if (!resizeRef.current) return;
+    const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
+    const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
+    // For name and type, reserve space for the value column's minimum width
+    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? minColumnWidths.value : 0);
+    const newWidth = Math.min(maxWidth, Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)));
+    setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
+  }, []);
+
+  /**
+   * Cleans up after a column resize by removing document-level listeners.
+   * Stable reference via useCallback ensures the correct listener is removed.
+   */
+  const handleResizeEnd = useCallback(() => {
+    resizeRef.current = null;
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    document.removeEventListener("mousemove", handleResizeMove);
+    document.removeEventListener("mouseup", handleResizeEnd);
+  }, [handleResizeMove]);
+
+  /**
+   * Initiates a column resize drag, recording the start state and attaching document listeners.
+   * @param {ValuesColumn} column Column being resized
    * @param {React.MouseEvent} event Mouse event
    */
   const handleResizeStart = (column: ValuesColumn, event: React.MouseEvent) => {
@@ -747,33 +759,6 @@ const Values = (props: {
     document.body.style.userSelect = "none";
     document.addEventListener("mousemove", handleResizeMove);
     document.addEventListener("mouseup", handleResizeEnd);
-  };
-
-  /**
-   * Handle movement within a column resize event in the `Values` component
-   * @param event Mouse event
-   * @return
-   */
-  const handleResizeMove = (event: MouseEvent) => {
-    if (!resizeRef.current) return;
-    const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
-    const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
-    // Note: For `name` and `type`, leave room for the value column's minimum width
-    // Note: For `value`, the column itself is flexible, so only other fixed columns constrain it
-    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? minColumnWidths.value : 0);
-    const newWidth = Math.min(maxWidth, Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)));
-    setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
-  };
-
-  /**
-   * Handle the end of a column resize event in the `Values` component
-   */
-  const handleResizeEnd = () => {
-    resizeRef.current = null;
-    document.body.style.cursor = "";
-    document.body.style.userSelect = "";
-    document.removeEventListener("mousemove", handleResizeMove);
-    document.removeEventListener("mouseup", handleResizeEnd);
   };
 
   // Row manipulation functions
@@ -796,13 +781,15 @@ const Values = (props: {
    * @param name Updated name of the `IValue`
    * @param type Updated `IValueType` of the `IValue`
    * @param data Updated data of the `IValue`
+   * @param source Optional source mode used in import context
    */
-  const onValueChange = (_id: string, name: string, type: IValueType, data: string) => {
+  const onValueChange = (_id: string, name: string, type: IValueType, data: string, source?: "column" | "value") => {
     const updatedValues = _.cloneDeep(props.values).map((value) => {
       if (value._id === _id) {
         value.name = name;
         value.type = type;
         value.data = data;
+        value.source = source;
       }
       return value;
     });
@@ -1102,15 +1089,7 @@ const Values = (props: {
                 <Select.Root
                   size="xs"
                   w="80px"
-                  collection={createListCollection({
-                    items: [
-                      { label: "5", value: "5" },
-                      { label: "10", value: "10" },
-                      { label: "20", value: "20" },
-                      { label: "50", value: "50" },
-                      { label: "100", value: "100" },
-                    ],
-                  })}
+                  collection={createListCollection({ items: PAGE_SIZE_OPTIONS })}
                   value={[rowsPerPage.toString()]}
                   onValueChange={(details) => setRowsPerPage(parseInt(details.value[0]))}
                 >
@@ -1126,13 +1105,7 @@ const Values = (props: {
                   <Portal>
                     <Select.Positioner>
                       <Select.Content>
-                        {[
-                          { label: "5", value: "5" },
-                          { label: "10", value: "10" },
-                          { label: "20", value: "20" },
-                          { label: "50", value: "50" },
-                          { label: "100", value: "100" },
-                        ].map((count) => (
+                        {PAGE_SIZE_OPTIONS.map((count) => (
                           <Select.Item item={count} key={count.value}>
                             {count.label}
                             <Select.ItemIndicator />
@@ -1152,40 +1125,46 @@ const Values = (props: {
 };
 
 const ValueRow = (props: {
-  key: string;
   value: IValue;
-  onValueChange: (_id: string, name: string, type: IValueType, data: string) => void;
+  onValueChange: (_id: string, name: string, type: IValueType, data: string, source?: "column" | "value") => void;
   onToggleSelect: () => void;
   columnWidths: { type: number; name: number; value: number };
   isSelected: boolean;
   hideBorder?: boolean;
   viewOnly?: boolean;
-  permittedValues?: string[];
+  permittedValues?: ColumnInfo[];
 }) => {
+  // In import mode (permittedValues present), the source toggles between column reference and fixed value
+  const [source, setSource] = useState<"column" | "value">(props.value.source ?? "column");
+
+  const inColumnMode = props.permittedValues !== undefined && source === "column";
+
   const baseTypeOptions: ValueTypeOption[] = [
     { label: "Number", value: "number" },
     { label: "Text", value: "text" },
     { label: "URL", value: "url" },
     { label: "Date", value: "date" },
   ];
-  const valueTypeOptions: ValueTypeOption[] = props.permittedValues
+  // In column mode, entity and select are not meaningful since they cannot be round-tripped from raw cell data
+  const valueTypeOptions: ValueTypeOption[] = inColumnMode
     ? baseTypeOptions
     : [...baseTypeOptions, { label: "Entity", value: "entity" }, { label: "Select", value: "select" }];
 
   // Get the initial `ValueTypeOption` based on the `IValue` type
-  const initialValueType = valueTypeOptions.filter((value) => value.value === props.value.type)[0];
+  const initialValueType = valueTypeOptions.find((v) => v.value === props.value.type) ?? baseTypeOptions[1];
 
   // React state for value display
   const [valueName, setValueName] = useState(props.value.name);
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
-  const initialData = props.permittedValues?.includes(props.value.data) ? props.value.data : "";
+  const initialData =
+    inColumnMode && props.permittedValues?.some((c) => c.name === props.value.data) ? props.value.data : "";
   const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
   useEffect(() => {
-    // Propagate changes to overall `Value` state
-    props.onValueChange(props.value._id, valueName, valueType, valueData);
-  }, [valueName, valueType, valueData]);
+    // Propagate changes to overall `Value` state, including source in import mode
+    props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
+  }, [valueName, valueType, valueData, source]);
 
   /**
    * Utility function to generate default data when the `type` changes
@@ -1678,8 +1657,13 @@ const ValueRow = (props: {
               setValueType(event.value);
               setValueTypeOption({ label: event.label, value: event.value });
               if (props.permittedValues) {
-                if (!props.permittedValues.includes(valueData)) {
-                  setValueData("");
+                if (inColumnMode) {
+                  // In column mode, keep the selected column only if it is still valid
+                  if (!props.permittedValues.some((c) => c.name === valueData)) {
+                    setValueData("");
+                  }
+                } else {
+                  setValueData(generateDefaultData(event.value));
                 }
               } else {
                 setValueData(generateDefaultData(event.value));
@@ -1719,45 +1703,84 @@ const ValueRow = (props: {
         justify="space-between"
         align="center"
       >
-        {props.permittedValues && props.permittedValues.length > 0 ? (
+        {props.permittedValues !== undefined ? (
           props.viewOnly ? (
             <Flex w="100%" h="100%" align="center" px="2">
               <Text fontSize="xs" color={valueData ? "gray.700" : "gray.400"}>
-                {valueData || "No column selected"}
+                {valueData || (inColumnMode ? "No column selected" : "No value set")}
               </Text>
             </Flex>
           ) : (
-            <ReactSelect
-              options={props.permittedValues.map((col) => ({ label: col, value: col }))}
-              size={"sm"}
-              placeholder={"Select Column"}
-              value={valueData ? { label: valueData, value: valueData } : null}
-              isSearchable={false}
-              onChange={(event) => {
-                if (event) setValueData(event.value);
-              }}
-              components={{
-                Control: ColumnPickerControl,
-                Placeholder: ColumnPickerPlaceholder,
-                SelectContainer: ValueDataSelectContainer,
-                ValueContainer: ColumnPickerValueContainer,
-                SingleValue: ColumnPickerSingleValue,
-                DropdownIndicator: ValueDataDropdownIndicator,
-                MenuList: ValueDataMenuList,
-                Option: ColumnPickerOption,
-              }}
-              menuPortalTarget={document.body}
-              menuPosition={"fixed"}
-              chakraStyles={{
-                menu: (provided) => ({ ...provided, marginY: 0 }),
-              }}
-              styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
-                menuList: (base) => ({ ...base, pointerEvents: "auto" }),
-                option: (base) => ({ ...base, pointerEvents: "auto" }),
-              }}
-              closeMenuOnScroll={false}
-            />
+            <Flex w="100%" h="100%" align="center" overflow="visible">
+              {/* Column picker or free-form input depending on source mode */}
+              <Flex flex="1 1 auto" h="100%" overflow="visible">
+                {inColumnMode ? (
+                  <ReactSelect<SelectOption>
+                    options={props.permittedValues.map((col) => ({
+                      label: col.name,
+                      value: col.name,
+                      inferredType: col.inferredType,
+                    }))}
+                    size={"sm"}
+                    placeholder={"Select Column"}
+                    value={
+                      valueData
+                        ? {
+                            label: valueData,
+                            value: valueData,
+                            inferredType: props.permittedValues?.find((column) => column.name === valueData)
+                              ?.inferredType,
+                          }
+                        : null
+                    }
+                    isSearchable={false}
+                    onChange={(event) => {
+                      if (event) setValueData(event.value);
+                    }}
+                    components={{
+                      Control: ColumnPickerControl,
+                      Placeholder: ColumnPickerPlaceholder,
+                      SelectContainer: ValueDataSelectContainer,
+                      ValueContainer: ColumnPickerValueContainer,
+                      SingleValue: ColumnPickerSingleValue,
+                      DropdownIndicator: ValueDataDropdownIndicator,
+                      MenuList: ValueDataMenuList,
+                      Option: ColumnPickerOption,
+                    }}
+                    menuPortalTarget={document.body}
+                    menuPosition={"fixed"}
+                    chakraStyles={{
+                      menu: (provided) => ({ ...provided, marginY: 0 }),
+                    }}
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
+                      menuList: (base) => ({ ...base, pointerEvents: "auto" }),
+                      option: (base) => ({ ...base, pointerEvents: "auto" }),
+                    }}
+                    closeMenuOnScroll={false}
+                  />
+                ) : (
+                  renderDataInput(valueType)
+                )}
+              </Flex>
+              {/* Source toggle */}
+              <Button
+                aria-label={inColumnMode ? "switch-to-value" : "switch-to-column"}
+                size="2xs"
+                mx={"1"}
+                variant="outline"
+                colorPalette="gray"
+                flexShrink={0}
+                onClick={() => {
+                  const newSource = source === "column" ? "value" : "column";
+                  setSource(newSource);
+                  setValueData(newSource === "value" ? generateDefaultData(valueType) : "");
+                }}
+              >
+                <Icon name={inColumnMode ? "grid" : "edit"} size="xs" />
+                {inColumnMode ? "Column" : "Value"}
+              </Button>
+            </Flex>
           )
         ) : (
           renderDataInput(valueType)
