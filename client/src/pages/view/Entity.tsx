@@ -59,7 +59,6 @@ import {
   IRelationship,
   ISelectOption,
   IValue,
-  RelationshipType,
   ResponseData,
 } from "@types";
 
@@ -114,11 +113,6 @@ const Entity = () => {
   const [addProjectsOpen, setAddProjectsOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState({} as IGenericItem);
   const [selectedProjects, setSelectedProjects] = useState<IGenericItem[]>([]);
-
-  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
-  const selectRelationshipTypeRef = useRef(null);
-  const [selectedRelationshipType, setSelectedRelationshipType] = useState("general" as RelationshipType);
-  const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState({} as IGenericItem);
 
   // Save message modal
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -1126,30 +1120,6 @@ const Entity = () => {
     navigate(`/entities/${id}`);
   };
 
-  // Add Relationships to the Entity state
-  const addRelationship = (): void => {
-    // Create the `IRelationship` data structure
-    const relationship: IRelationship = {
-      source: {
-        _id: entity._id,
-        name: entityName,
-      },
-      target: {
-        _id: selectedRelationshipTarget._id,
-        name: selectedRelationshipTarget.name,
-      },
-      type: selectedRelationshipType,
-    };
-
-    setEntityRelationships([...entityRelationships, relationship]);
-
-    // Reset the relationship modal state
-    setSelectedRelationshipType("general");
-    setSelectedRelationshipTarget({} as IGenericItem);
-
-    setAddRelationshipsOpen(false);
-  };
-
   // Remove a Project from the Entity state
   const removeProject = (id: string) => {
     setEntityProjects(
@@ -2093,7 +2063,7 @@ const Entity = () => {
             </Flex>
           </Flex>
 
-          {/* Attributes and Relationships */}
+          {/* Attributes and Projects */}
           <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Attributes */}
             <Flex
@@ -2158,68 +2128,6 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            {/* Relationships */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              h={"fit-content"}
-              gap={"1"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex gap={"1"} direction={"column"}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"graph"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                      Entity Relationships
-                    </Text>
-                  </Flex>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
-                    disabled={!editing || !!previewVersion}
-                  >
-                    Add
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
-                </Flex>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={displayEntityRelationships.length > 0 ? "" : "center"}
-                  minH={displayEntityRelationships.length > 0 ? "fit-content" : "120px"}
-                >
-                  {displayEntityRelationships.length > 0 ? (
-                    <Relationships
-                      relationships={displayEntityRelationships}
-                      setRelationships={setEntityRelationships}
-                      viewOnly={!editing || !!previewVersion}
-                    />
-                  ) : (
-                    <EmptyState.Root>
-                      <EmptyState.Content>
-                        <EmptyState.Indicator>
-                          <Icon name={"graph"} size={"lg"} />
-                        </EmptyState.Indicator>
-                        <EmptyState.Description>No Relationships</EmptyState.Description>
-                      </EmptyState.Content>
-                    </EmptyState.Root>
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-
-          {/* Projects and Attachments */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Projects */}
             <Flex
               direction={"column"}
@@ -2280,6 +2188,39 @@ const Entity = () => {
                     showSelection
                   />
                 )}
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {/* Relationships and Attachments */}
+          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Relationships */}
+            <Flex
+              direction={"column"}
+              p={"1"}
+              h={"fit-content"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Flex gap={"1"} direction={"column"}>
+                <Flex direction={"row"} gap={"0.5"} h={"8"} align={"center"}>
+                  <Icon name={"graph"} size={"xs"} />
+                  <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
+                    Entity Relationships
+                  </Text>
+                </Flex>
+                <Relationships
+                  relationships={displayEntityRelationships}
+                  setRelationships={setEntityRelationships}
+                  viewOnly={!editing || !!previewVersion}
+                  sourceName={displayEntityName}
+                  sourceId={entity._id}
+                />
               </Flex>
             </Flex>
 
@@ -2750,150 +2691,6 @@ const Entity = () => {
           </Portal>
         </Dialog.Root>
 
-        {/* Add Relationships modal */}
-        <Dialog.Root
-          open={addRelationshipsOpen}
-          size={"lg"}
-          placement={"center"}
-          onOpenChange={(event) => setAddRelationshipsOpen(event.open)}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content ref={selectRelationshipTypeRef}>
-              {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
-                <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
-                  <Icon name={"graph"} size={"xs"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Add Relationship
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddRelationshipsOpen(false)} />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Description:
-                    </Text>
-                    <Text fontSize={"xs"}>{displayEntityName} is</Text>
-                    <Tag.Root fontSize={"xs"} fontWeight={"semibold"} colorPalette={"yellow"}>
-                      <Tag.Label>
-                        {selectedRelationshipType === "general" && "related"}
-                        {selectedRelationshipType === "child" && "a child"}
-                        {selectedRelationshipType === "parent" && "a parent"}
-                      </Tag.Label>
-                    </Tag.Root>
-                    <Text fontSize={"xs"}>{selectedRelationshipType === "general" ? "to" : "of"}</Text>
-                    <Tag.Root fontSize={"xs"} fontWeight={"semibold"} colorPalette={"blue"}>
-                      <Tag.Label>
-                        {_.isUndefined(selectedRelationshipTarget.name)
-                          ? "Select Entity"
-                          : selectedRelationshipTarget.name}
-                      </Tag.Label>
-                    </Tag.Root>
-                  </Flex>
-                  <Flex
-                    direction={"row"}
-                    gap={"1"}
-                    justify={"space-between"}
-                    p={"1"}
-                    rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
-                  >
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Source
-                      </Text>
-                      <Input size={"xs"} rounded={"md"} value={displayEntityName} readOnly disabled />
-                    </Flex>
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Type
-                      </Text>
-                      <Select.Root
-                        key={"select-relationship-type"}
-                        size={"xs"}
-                        rounded={"md"}
-                        collection={createListCollection({
-                          items: ["General", "Parent", "Child"],
-                        })}
-                        onValueChange={(details) => {
-                          setSelectedRelationshipType(details.items[0].toLowerCase() as RelationshipType);
-                        }}
-                      >
-                        <Select.HiddenSelect />
-                        <Select.Control>
-                          <Select.Trigger rounded={"md"}>
-                            <Select.ValueText placeholder={"Select Relationship Type"} />
-                          </Select.Trigger>
-                          <Select.IndicatorGroup>
-                            <Select.Indicator />
-                          </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Portal container={selectRelationshipTypeRef}>
-                          <Select.Positioner>
-                            <Select.Content>
-                              {createListCollection({
-                                items: ["General", "Parent", "Child"],
-                              }).items.map((relationship) => (
-                                <Select.Item item={relationship} key={relationship}>
-                                  {relationship}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ))}
-                            </Select.Content>
-                          </Select.Positioner>
-                        </Portal>
-                      </Select.Root>
-                    </Flex>
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Target
-                      </Text>
-                      <SearchSelect
-                        resultType={"entity"}
-                        value={selectedRelationshipTarget}
-                        onChange={setSelectedRelationshipTarget}
-                      />
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setAddRelationshipsOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} size={"xs"} />
-                  </Button>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
-                    onClick={() => addRelationship()}
-                  >
-                    Done
-                    <Icon name={"check"} size={"xs"} />
-                  </Button>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
-
         {/* Upload dialog */}
         <UploadDialog
           open={uploadOpen}
@@ -2930,7 +2727,7 @@ const Entity = () => {
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddRelationshipsOpen(false)} />
+                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setGraphOpen(false)} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"0"}>

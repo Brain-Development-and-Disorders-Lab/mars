@@ -235,6 +235,8 @@ export type RelationshipsProps = {
   relationships: IRelationship[];
   setRelationships: (value: React.SetStateAction<IRelationship[]>) => void;
   viewOnly?: boolean;
+  sourceName?: string;
+  sourceId?: string;
 };
 
 // Workspace types
@@ -598,6 +600,7 @@ export type IconNames =
 
   // Arrows
   | "a_right"
+  | "a_right_fill"
 
   // Chevrons
   | "c_left"

@@ -1,13 +1,14 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { Flex, Text, Tag, Button } from "@chakra-ui/react";
+import { Button, EmptyState, Flex, Input, Spacer, Text, Tag } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
-import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps } from "@types";
+import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps, RelationshipType } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -17,8 +18,10 @@ import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const Relationships = (props: RelationshipsProps) => {
-  // GraphQL query to fetch entity name by ID
   const GET_ENTITY_NAME = gql`
     query GetEntityName($_id: String) {
       entity(_id: $_id) {
@@ -29,7 +32,6 @@ const Relationships = (props: RelationshipsProps) => {
   `;
   const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, { fetchPolicy: "network-only" });
 
-  // Extract all unique entity IDs from relationships
   const uniqueEntityIds = useMemo(() => {
     const ids = new Set<string>();
     props.relationships.forEach((rel) => {
@@ -39,153 +41,111 @@ const Relationships = (props: RelationshipsProps) => {
     return Array.from(ids);
   }, [props.relationships]);
 
-  // State to store fetched entity names
   const [entityNames, setEntityNames] = useState<Record<string, string>>({});
 
-  // Fetch entity names for all unique IDs
   useEffect(() => {
     let isMounted = true;
 
     const fetchEntityNames = async () => {
       const nameMap: Record<string, string> = {};
-
-      // Fetch names for all unique entity IDs
       await Promise.all(
         uniqueEntityIds.map(async (entityId) => {
           try {
-            const { data } = await getEntityName({
-              variables: { _id: entityId },
-            });
+            const { data } = await getEntityName({ variables: { _id: entityId } });
             if (data?.entity && isMounted) {
               nameMap[entityId] = data.entity.name;
             }
-          } catch (error: any) {
-            // If fetch fails, fall back to the name from relationship data
+          } catch {
             if (isMounted) {
-              const relationship = props.relationships.find(
-                (rel) => rel.source._id === entityId || rel.target._id === entityId,
-              );
-              if (relationship) {
-                nameMap[entityId] =
-                  relationship.source._id === entityId ? relationship.source.name : relationship.target.name;
+              const rel = props.relationships.find((r) => r.source._id === entityId || r.target._id === entityId);
+              if (rel) {
+                nameMap[entityId] = rel.source._id === entityId ? rel.source.name : rel.target.name;
               }
             }
           }
         }),
       );
-
-      if (isMounted) {
-        setEntityNames(nameMap);
-      }
+      if (isMounted) setEntityNames(nameMap);
     };
 
-    if (uniqueEntityIds.length > 0) {
-      fetchEntityNames().catch(ignoreAbort);
-    }
-
+    if (uniqueEntityIds.length > 0) fetchEntityNames().catch(ignoreAbort);
     return () => {
       isMounted = false;
     };
   }, [uniqueEntityIds, getEntityName, props.relationships]);
 
-  /**
-   * Compare two `IRelationship` structures and determine if they are describing
-   * the same relationship or not
-   * @param a Relationship
-   * @param b Relationship
-   * @return {boolean}
-   */
-  const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean => {
-    return _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
-  };
+  const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean =>
+    _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
 
-  /**
-   * Search a collection of existing `IRelationship` structures to find if another
-   * `IRelationship` already exists in the collection or not
-   * @param relationship Relationship structure to search for
-   * @param relationships Collection of existing Relationships
-   * @return {boolean}
-   */
-  const relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean => {
-    for (const r of relationships) {
-      if (relationshipIsEqual(r, relationship)) {
-        return true;
-      }
-    }
-    return false;
-  };
+  const relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean =>
+    relationships.some((r) => relationshipIsEqual(r, relationship));
 
-  // Remove Relationship from the Entity state
   const removeRelationship = (relationship: IRelationship) => {
-    props.setRelationships([
-      ...props.relationships.filter((r) => {
-        return !relationshipIsEqual(r, relationship);
-      }),
-    ]);
+    props.setRelationships(props.relationships.filter((r) => !relationshipIsEqual(r, relationship)));
   };
 
-  // Remove multiple Relationships from the Entity state
   const removeRelationships = (toRemove: IRelationship[]) => {
-    props.setRelationships(
-      props.relationships.filter((r) => {
-        return !relationshipExists(r, toRemove);
-      }),
-    );
+    props.setRelationships(props.relationships.filter((r) => !relationshipExists(r, toRemove)));
   };
 
-  // Configure relationships table columns and data
-  const relationshipTableColumnHelper = createColumnHelper<IRelationship>();
-  const relationshipTableColumns = [
-    relationshipTableColumnHelper.accessor("source", {
+  // Add form state
+  const [selectedType, setSelectedType] = useState<RelationshipType>("general");
+  const [selectedTarget, setSelectedTarget] = useState<IGenericItem>({} as IGenericItem);
+
+  const addRelationship = () => {
+    props.setRelationships([
+      ...props.relationships,
+      {
+        source: { _id: props.sourceId || "no_id", name: props.sourceName || "" },
+        target: { _id: selectedTarget._id, name: selectedTarget.name },
+        type: selectedType,
+      },
+    ]);
+    setSelectedType("general");
+    setSelectedTarget({} as IGenericItem);
+  };
+
+  const columnHelper = createColumnHelper<IRelationship>();
+  const columns = [
+    columnHelper.accessor("source", {
       cell: (info) => {
-        const sourceEntity = info.getValue();
-        // Use fetched name if available, otherwise fall back to relationship data name
-        const displayName = entityNames[sourceEntity._id] || sourceEntity.name;
+        const src = info.getValue();
+        const name = entityNames[src._id] || src.name;
         return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={displayName} disabled={displayName.length < 32} showArrow>
-              <Flex align={"center"} gap={"1"} w={"100%"} justify={"space-between"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(displayName, { length: 32 })}
-                </Text>
-              </Flex>
+          <Flex align={"center"} gap={"1"} w={"100%"}>
+            <Tooltip content={name} disabled={name.length < 32} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(name, { length: 32 })}
+              </Text>
             </Tooltip>
           </Flex>
         );
       },
       header: "Source",
     }),
-    relationshipTableColumnHelper.accessor("type", {
-      cell: (info) => {
-        return (
-          <Flex p={"1"}>
-            <Tag.Root size={"sm"}>
-              <Tag.Label fontSize={"xs"}>{info.getValue()}</Tag.Label>
-            </Tag.Root>
-          </Flex>
-        );
-      },
+    columnHelper.accessor("type", {
+      cell: (info) => (
+        <Flex p={"1"}>
+          <Tag.Root size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{info.getValue()}</Tag.Label>
+          </Tag.Root>
+        </Flex>
+      ),
       header: "Type",
-      meta: {
-        minWidth: 100,
-        maxWidth: 100,
-      },
+      meta: { minWidth: 100, maxWidth: 100 },
     }),
-    relationshipTableColumnHelper.accessor("target", {
+    columnHelper.accessor("target", {
       cell: (info) => {
-        const targetEntity = info.getValue();
-        // Use fetched name if available, otherwise fall back to relationship data name
+        const tgt = info.getValue();
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"}>
-            <Linky id={targetEntity._id} type={"entities"} />
+            <Linky id={tgt._id} type={"entities"} />
             <Button
-              size="2xs"
-              variant="subtle"
-              colorPalette="red"
+              size={"2xs"}
+              variant={"subtle"}
+              colorPalette={"red"}
               aria-label={"Remove relationship"}
-              onClick={() => {
-                removeRelationship(info.row.original);
-              }}
+              onClick={() => removeRelationship(info.row.original)}
             >
               Remove
               <Icon name={"delete"} size={"xs"} />
@@ -196,33 +156,114 @@ const Relationships = (props: RelationshipsProps) => {
       header: "Target",
     }),
   ];
-  const relationshipTableActions: DataTableAction[] = [
+
+  const actions: DataTableAction[] = [
     {
       label: "Remove Relationships",
       icon: "delete",
       action(table, rows) {
-        const toRemove: IRelationship[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toRemove.push(table.getRow(rowIndex).original);
-        }
-        removeRelationships(toRemove);
+        removeRelationships(Object.keys(rows).map((i) => table.getRow(i).original));
       },
     },
   ];
 
   return (
-    <Flex w={"100%"}>
-      <DataTable
-        data={props.relationships}
-        setData={props.setRelationships}
-        columns={relationshipTableColumns}
-        viewOnly={props.viewOnly}
-        actions={relationshipTableActions}
-        selectedRows={{}}
-        visibleColumns={{}}
-        showPagination
-        showSelection
-      />
+    <Flex direction={"column"} w={"100%"} gap={"1"}>
+      {!props.viewOnly && (
+        <>
+          {/* Source and target */}
+          <Flex
+            direction={"row"}
+            gap={"2"}
+            align={"center"}
+            p={"2"}
+            rounded={"md"}
+            bg={"gray.50"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+          >
+            <Flex direction={"column"} gap={"1"} flex={"1"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Source
+              </Text>
+              <Input size={"xs"} rounded={"md"} value={props.sourceName || ""} readOnly disabled bg={"white"} />
+            </Flex>
+            <Icon
+              name={"a_right_fill"}
+              size={"sm"}
+              color={selectedType === "parent" ? "blue.400" : selectedType === "child" ? "green.600" : "purple.400"}
+            />
+            <Flex direction={"column"} gap={"1"} flex={"1"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Target
+              </Text>
+              <SearchSelect resultType={"entity"} value={selectedTarget} onChange={setSelectedTarget} />
+            </Flex>
+          </Flex>
+
+          {/* Type and Add */}
+          <Flex direction={"row"} align={"center"} gap={"2"} p={"1"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} flexShrink={0}>
+              Type
+            </Text>
+            <Flex gap={"1"}>
+              {(["general", "parent", "child"] as RelationshipType[]).map((type) => {
+                const palette = type === "parent" ? "blue" : type === "child" ? "green" : "purple";
+                return (
+                  <Button
+                    key={type}
+                    size={"xs"}
+                    rounded={"md"}
+                    variant={selectedType === type ? "solid" : "outline"}
+                    colorPalette={selectedType === type ? palette : "gray"}
+                    onClick={() => setSelectedType(type)}
+                  >
+                    {_.capitalize(type)}
+                  </Button>
+                );
+              })}
+            </Flex>
+            <Spacer />
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              disabled={_.isUndefined(selectedTarget._id)}
+              onClick={addRelationship}
+              flexShrink={0}
+              data-testid={"add-relationship-button"}
+            >
+              Add
+              <Icon name={"add"} size={"xs"} />
+            </Button>
+          </Flex>
+        </>
+      )}
+
+      {props.relationships.length > 0 ? (
+        <DataTable
+          data={props.relationships}
+          setData={props.setRelationships}
+          columns={columns}
+          viewOnly={props.viewOnly}
+          actions={actions}
+          selectedRows={{}}
+          visibleColumns={{}}
+          showPagination
+          showSelection
+        />
+      ) : (
+        <Flex justify={"center"} align={"center"} minH={"120px"}>
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <Icon name={"graph"} size={"lg"} />
+              </EmptyState.Indicator>
+              <EmptyState.Description>No Relationships</EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        </Flex>
+      )}
     </Flex>
   );
 };
