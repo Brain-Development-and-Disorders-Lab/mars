@@ -14,6 +14,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -28,10 +29,13 @@ import { IAttribute, IValue, ResponseData } from "@types";
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
+// Apollo and GraphQL
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
+
+// Utility functions and libraries
 import { isValidValues } from "@lib/util";
+import dayjs from "dayjs";
 
 // Authentication context
 import { auth } from "@lib/auth";
@@ -49,6 +53,7 @@ const Template = () => {
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
+  const [created, setCreated] = useState("");
   const [values, setValues] = useState<IValue[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -185,6 +190,30 @@ const Template = () => {
                 {isNameError && (
                   <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
                 )}
+              </Field.Root>
+
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Template Owner
+                </Field.Label>
+                <Flex>
+                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+              </Field.Root>
+
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Template Created
+                </Field.Label>
+                <Input
+                  size={"xs"}
+                  rounded={"md"}
+                  type={"datetime-local"}
+                  bg={"white"}
+                  value={created}
+                  onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+                />
+                <Information text={"Specify a timestamp for the Template."} />
               </Field.Root>
             </Flex>
           </Flex>

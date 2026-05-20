@@ -255,7 +255,7 @@ const SearchSelect = (props: SearchSelectProps) => {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            backgroundColor={"transparent"}
+            backgroundColor={props.isEmbedded ? "transparent" : "white"}
             data-testid={"value-editor"}
             size={"xs"}
             rounded={props.isEmbedded ? "none" : "md"}

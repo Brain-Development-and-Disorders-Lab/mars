@@ -27,7 +27,6 @@ import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
 import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
-import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
 import Linky from "@components/Linky";
 import { Information } from "@components/Label";
@@ -36,15 +35,7 @@ import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import {
-  AttributeModel,
-  AttributeCardProps,
-  IGenericItem,
-  ISelectOption,
-  ResponseData,
-  IRelationship,
-  RelationshipType,
-} from "@types";
+import { AttributeModel, AttributeCardProps, IGenericItem, ISelectOption, ResponseData, IRelationship } from "@types";
 
 // Utility functions and libraries
 import { isValidAttributes, createSelectOptions, removeTypename } from "@lib/util";
@@ -65,8 +56,6 @@ import { usePostHog } from "posthog-js/react";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
-
-const RELATIONSHIP_TYPES: RelationshipType[] = ["general", "parent", "child"];
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -105,8 +94,6 @@ const Entity = () => {
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
-  const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState({} as IGenericItem);
-  const [selectedRelationshipType, setSelectedRelationshipType] = useState("general" as RelationshipType);
   const [relationships, setRelationships] = useState([] as IRelationship[]);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
@@ -336,17 +323,6 @@ const Entity = () => {
     }
   };
 
-  const addRelationship = () => {
-    const relationship: IRelationship = {
-      source: { _id: "no_id", name },
-      target: { _id: selectedRelationshipTarget._id, name: selectedRelationshipTarget.name },
-      type: selectedRelationshipType,
-    };
-    setRelationships([...relationships, relationship]);
-    setSelectedRelationshipType("general");
-    setSelectedRelationshipTarget({} as IGenericItem);
-  };
-
   const onRemoveAttributeCard = (identifier: string) => {
     setSelectedAttributes(selectedAttributes.filter((attribute) => attribute._id !== identifier));
   };
@@ -560,73 +536,12 @@ const Entity = () => {
                   Entity Relationships
                 </Text>
                 <Information text={"Specify the relationships between this Entity and other Entities."} />
-
-                <Flex direction={"row"} gap={"1"} justify={"left"} align={"center"} wrap={"wrap"}>
-                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"20%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Source
-                    </Text>
-                    <Input size={"xs"} rounded={"md"} value={name} readOnly disabled />
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"30%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Type
-                    </Text>
-                    <Flex gap={"1"}>
-                      {RELATIONSHIP_TYPES.map((type) => (
-                        <Button
-                          key={type}
-                          size={"xs"}
-                          rounded={"md"}
-                          variant={selectedRelationshipType === type ? "solid" : "outline"}
-                          colorPalette={selectedRelationshipType === type ? "blue" : "gray"}
-                          onClick={() => setSelectedRelationshipType(type)}
-                        >
-                          {_.capitalize(type)}
-                        </Button>
-                      ))}
-                    </Flex>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"40%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Target
-                    </Text>
-                    <SearchSelect
-                      resultType={"entity"}
-                      value={selectedRelationshipTarget}
-                      onChange={setSelectedRelationshipTarget}
-                    />
-                  </Flex>
-                  <Button
-                    data-testid={"create-entity-add-relationship"}
-                    colorPalette={"green"}
-                    size={"xs"}
-                    rounded={"md"}
-                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
-                    onClick={addRelationship}
-                  >
-                    Add
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
-                </Flex>
-
-                {relationships.length > 0 ? (
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Relationships
-                    </Text>
-                    <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
-                  </Flex>
-                ) : (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"graph"} size={"lg"} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Relationships</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                )}
+                <Relationships
+                  relationships={relationships}
+                  setRelationships={setRelationships}
+                  viewOnly={false}
+                  sourceName={name}
+                />
               </Flex>
             </Flex>
 
