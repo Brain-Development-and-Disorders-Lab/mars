@@ -321,7 +321,7 @@ const Entities = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
+          <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
             <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
@@ -341,8 +341,8 @@ const Entities = () => {
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
             <Flex
               direction={"column"}
-              gap={"1"}
-              p={"1"}
+              gap={"2"}
+              p={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -371,7 +371,7 @@ const Entities = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Created Between
                     </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Field.Root gap={"0"}>
                         <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
@@ -410,7 +410,7 @@ const Entities = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Owner
                     </Text>
-                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
+                    <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"}>
                       {_.uniq(entityData.map((e) => e.owner))
                         .filter((owner) => owner)
                         .map((owner) => (
@@ -467,11 +467,11 @@ const Entities = () => {
                   </Flex>
 
                   {/* Attribute Count Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                  <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Attribute Count
                     </Text>
-                    <Flex direction={"column"} gap={"1"}>
+                    <Flex direction={"column"} gap={"2"}>
                       {["0", "1-5", "6-10", "11+"].map((range) => (
                         <Checkbox.Root
                           key={range}
@@ -509,7 +509,7 @@ const Entities = () => {
                 </Flex>
 
                 {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
                   <Button
                     size={"xs"}
                     rounded={"md"}

@@ -268,7 +268,7 @@ const Projects = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"}>
+          <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
             <Heading fontWeight={"bold"} size={"md"}>
               Projects
@@ -290,8 +290,8 @@ const Projects = () => {
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
             <Flex
               direction={"column"}
-              gap={"1"}
-              p={"1"}
+              gap={"2"}
+              p={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -320,7 +320,7 @@ const Projects = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Created Between
                     </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Field.Root gap={"0"}>
                         <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
                         <Input
@@ -359,7 +359,7 @@ const Projects = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Owner
                     </Text>
-                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
+                    <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"}>
                       {_.uniq(projects.map((p) => p.owner))
                         .filter((owner) => owner)
                         .map((owner) => (
@@ -398,7 +398,7 @@ const Projects = () => {
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Entity Count
                     </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Field.Root gap={"0"}>
                         <Field.Label fontSize={"xs"}>Min</Field.Label>
                         <Input
@@ -438,7 +438,7 @@ const Projects = () => {
                 </Flex>
 
                 {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
                   <Button
                     size={"xs"}
                     rounded={"md"}
