@@ -835,7 +835,7 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"search"} size={"sm"} />
@@ -858,7 +858,7 @@ const Search = () => {
             value={activeTab}
             onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
           >
-            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"}>
+            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
               <Button
                 size={"xs"}
                 rounded={"sm"}
@@ -889,13 +889,13 @@ const Search = () => {
 
             {/* Text search */}
             <Tabs.Content value={"text"} p={"0"} pt={"1"}>
-              <Flex direction={"column"} gap={"1"}>
+              <Flex direction={"column"} gap={"2"}>
                 {/* Filter section */}
                 <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
                   <Flex
                     direction={"column"}
-                    gap={"1"}
-                    p={"1"}
+                    gap={"2"}
+                    p={"2"}
                     rounded={"md"}
                     border={GLOBAL_STYLES.border.style}
                     borderColor={GLOBAL_STYLES.border.color}
@@ -1071,7 +1071,7 @@ const Search = () => {
                 </Collapsible.Root>
 
                 {/* Search input and submit */}
-                <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
                   <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
                     <Input
                       size={"xs"}
@@ -1162,10 +1162,10 @@ const Search = () => {
               <Flex id={"resultsContainer"} direction={"column"} w={"100%"} gap={"1"}>
                 {results.length > 0 ? (
                   <>
-                    <Heading id={"resultsHeading"} size={"sm"} fontWeight={"semibold"}>
-                      {results.length} result
+                    <Text id={"resultsHeading"} fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      Showing: {results.length} result
                       {results.length > 1 ? "s" : ""}
-                    </Heading>
+                    </Text>
                     <DataTable
                       columns={searchResultColumns}
                       visibleColumns={visibleColumns}

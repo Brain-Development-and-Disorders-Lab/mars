@@ -461,7 +461,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!!workspace && !loading}>
-      <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
+      <Flex direction={"column"} w={"100%"} p={"1"} gap={"2"}>
         {session?.user?.hasSeenWalkthrough !== true && !isSessionPending && breakpoint !== "base" && (
           <Joyride
             continuous
@@ -486,7 +486,7 @@ const Dashboard = () => {
         <SearchBox />
 
         {/* Metrics */}
-        <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             flex={"1"}
@@ -608,8 +608,8 @@ const Dashboard = () => {
           )}
         </Flex>
 
-        <Flex direction={"row"} wrap={{ base: "wrap", lg: "nowrap" }} gap={"1"}>
-          <Flex direction={"column"} gap={"1"} flex={{ base: "1 1 100%", lg: "0 0 70%" }} minW={"0"}>
+        <Flex direction={"row"} wrap={{ base: "wrap", lg: "nowrap" }} gap={"2"}>
+          <Flex direction={"column"} gap={"2"} flex={{ base: "1 1 100%", lg: "0 0 70%" }} minW={"0"}>
             {/* Recent Projects */}
             <Flex
               direction={"column"}
@@ -726,16 +726,23 @@ const Dashboard = () => {
           {/* Activity */}
           <Flex
             direction={"column"}
+            gap={"2"}
             flex={{ base: "1 1 100%", lg: "0 0 30%" }}
-            p={"2"}
-            gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            h={"fit-content"}
+            minW={"0"}
+            pr={{ base: "", lg: "2" }}
           >
-            <ActivityFeed />
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"1"}
+              bg={GLOBAL_STYLES.card.bg}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              h={"fit-content"}
+            >
+              <ActivityFeed />
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

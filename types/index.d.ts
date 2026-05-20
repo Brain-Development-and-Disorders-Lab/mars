@@ -601,6 +601,8 @@ export type IconNames =
   // Arrows
   | "a_right"
   | "a_right_fill"
+  | "a_left_fill"
+  | "a_both_fill"
 
   // Chevrons
   | "c_left"

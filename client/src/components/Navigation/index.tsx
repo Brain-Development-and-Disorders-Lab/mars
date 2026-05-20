@@ -336,15 +336,6 @@ const Navigation = () => {
               <Menu.ItemGroup title={"View"}>
                 <Menu.ItemGroupLabel>View</Menu.ItemGroupLabel>
                 <Menu.Item
-                  id={"navProjectButtonMobile"}
-                  value={"projects"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/projects")}
-                >
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                  Projects
-                </Menu.Item>
-                <Menu.Item
                   id={"navEntitiesButtonMobile"}
                   value={"entities"}
                   fontSize={"xs"}
@@ -352,6 +343,15 @@ const Navigation = () => {
                 >
                   <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                   Entities
+                </Menu.Item>
+                <Menu.Item
+                  id={"navProjectButtonMobile"}
+                  value={"projects"}
+                  fontSize={"xs"}
+                  onClick={() => navigate("/projects")}
+                >
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+                  Projects
                 </Menu.Item>
                 <Menu.Item
                   id={"navTemplatesButtonMobile"}

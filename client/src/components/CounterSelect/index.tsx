@@ -283,12 +283,12 @@ const CounterSelect = (props: CounterProps) => {
 
   return (
     <Flex direction={"column"} gap={"1"} w={"100%"}>
-      <Flex w={"100%"} gap={"1"}>
+      <Flex w={"100%"} gap={"2"}>
         <Select.Root
           key={"select-counter"}
           size={"xs"}
           rounded={"md"}
-          minW={"200px"}
+          minW={"100px"}
           collection={counterCollection}
           onValueChange={handleSelectCounter}
           disabled={counterCollection.items.length === 0}

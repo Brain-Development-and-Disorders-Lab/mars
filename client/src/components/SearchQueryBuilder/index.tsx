@@ -184,12 +184,12 @@ const SearchQueryBuilder = ({ query, onQueryChange, fields, isValid, onSearch, o
   const [previewOpen, setPreviewOpen] = useState(false);
 
   return (
-    <Flex direction={"column"} gap={"1"}>
+    <Flex direction={"column"} gap={"2"}>
       <Collapsible.Root open={previewOpen} onOpenChange={(e) => setPreviewOpen(e.open)}>
         <Flex
           direction={"column"}
-          gap={"1"}
-          p={"1"}
+          gap={"2"}
+          p={"2"}
           rounded={"md"}
           border={GLOBAL_STYLES.border.style}
           borderColor={GLOBAL_STYLES.border.color}
@@ -227,7 +227,7 @@ const SearchQueryBuilder = ({ query, onQueryChange, fields, isValid, onSearch, o
           />
         </QueryBuilderDnD>
       </QueryBuilderChakra>
-      <Flex justify={"right"} gap={"1"}>
+      <Flex justify={"right"} gap={"2"}>
         <Button
           aria-label={"Run Query"}
           colorPalette={"green"}

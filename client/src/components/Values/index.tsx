@@ -1004,15 +1004,15 @@ const Values = (props: {
 
       {/* Pagination Toolbar */}
       <Flex
-        gap={1}
+        gap={2}
         align={"center"}
         wrap={"wrap"}
         justify={{ base: "space-between", sm: "space-between" }}
         w={"100%"}
-        mt={1}
+        mt={2}
         flexShrink={0}
       >
-        <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={2} align={"center"} wrap={"wrap"}>
           <IconButton
             variant={"outline"}
             size={"xs"}

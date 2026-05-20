@@ -61,7 +61,7 @@ body .w-md-editor-text {
     display: flex;
     width: 100%;
     gap: var(--chakra-spacing-2);
-    padding: var(--chakra-spacing-1);
+    padding: var(--chakra-spacing-2);
     flex-direction: column;
     background: white;
     border-radius: var(--chakra-radii-md);
@@ -100,11 +100,11 @@ body .w-md-editor-text {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: var(--chakra-spacing-1) !important;
+  gap: var(--chakra-spacing-2) !important;
   flex-wrap: wrap;
 
   .ruleGroup-notToggle {
-    gap: var(--chakra-spacing-1);
+    gap: var(--chakra-spacing-2);
   }
 
   .ruleGroup-combinators {
@@ -196,7 +196,7 @@ body .w-md-editor-text {
 
   .rule {
     display: flex;
-    gap: var(--chakra-spacing-1);
+    gap: var(--chakra-spacing-2);
     flex-wrap: wrap;
 
     .rule-remove {

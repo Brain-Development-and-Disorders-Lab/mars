@@ -834,7 +834,14 @@ const DataTable = (props: DataTableProps) => {
   );
 
   return (
-    <Box w={"100%"} maxW={"100%"} display={"flex"} flexDirection={"column"} css={{ WebkitOverflowScrolling: "touch" }}>
+    <Box
+      w={"100%"}
+      maxW={"100%"}
+      minW={"0"}
+      display={"flex"}
+      flexDirection={"column"}
+      css={{ WebkitOverflowScrolling: "touch" }}
+    >
       <Box
         ref={containerRef}
         w={"100%"}
@@ -993,14 +1000,15 @@ const DataTable = (props: DataTableProps) => {
         </Box>
       </Box>
 
-      <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={1} flexShrink={0}>
-        <Flex direction={"row"} gap={1} align={"center"} flexShrink={0}>
+      <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
+        <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>
           {props.showPagination && (
-            <Flex direction={"row"} gap={1} align={"center"}>
+            <Flex direction={"row"} gap={2} align={"center"}>
               <IconButton
                 variant={"outline"}
                 size={"xs"}
                 rounded={"md"}
+                bg={"white"}
                 aria-label={"first page"}
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
@@ -1011,6 +1019,7 @@ const DataTable = (props: DataTableProps) => {
                 variant={"outline"}
                 size={"xs"}
                 rounded={"md"}
+                bg={"white"}
                 aria-label={"previous page"}
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -1032,6 +1041,7 @@ const DataTable = (props: DataTableProps) => {
                 variant={"outline"}
                 size={"xs"}
                 rounded={"md"}
+                bg={"white"}
                 aria-label={"next page"}
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -1042,6 +1052,7 @@ const DataTable = (props: DataTableProps) => {
                 variant={"outline"}
                 size={"xs"}
                 rounded={"md"}
+                bg={"white"}
                 aria-label={"last page"}
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
@@ -1110,6 +1121,7 @@ const DataTable = (props: DataTableProps) => {
               key={"select-columns"}
               size={"xs"}
               w={"200px"}
+              bg={"white"}
               collection={columnNamesCollection}
               value={visibleColumnsForSelect}
               onValueChange={(details) => {
@@ -1172,6 +1184,7 @@ const DataTable = (props: DataTableProps) => {
                     key={"select-pagesize"}
                     size={"xs"}
                     w={"80px"}
+                    bg={"white"}
                     collection={pageLengthsCollection}
                     value={pageLength}
                     onValueChange={(details) => {

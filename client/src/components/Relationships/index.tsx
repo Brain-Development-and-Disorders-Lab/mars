@@ -1,14 +1,13 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { Button, EmptyState, Flex, Input, Spacer, Text, Tag } from "@chakra-ui/react";
-import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
-import { createColumnHelper } from "@tanstack/react-table";
+import { toaster } from "@components/Toast";
 
 // Custom and existing types
-import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps, RelationshipType } from "@types";
+import { IconNames, IGenericItem, IRelationship, RelationshipsProps, RelationshipType } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -20,6 +19,24 @@ import { ignoreAbort } from "@lib/util";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
+
+const TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
+  parent: "orange.600",
+  child: "yellow.400",
+  general: "cyan.600",
+};
+
+const TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {
+  parent: "a_right_fill",
+  child: "a_left_fill",
+  general: "a_both_fill",
+};
+
+const TYPE_PALETTE: Record<RelationshipType, string> = {
+  parent: "orange",
+  child: "yellow",
+  general: "cyan",
+};
 
 const Relationships = (props: RelationshipsProps) => {
   const GET_ENTITY_NAME = gql`
@@ -77,22 +94,37 @@ const Relationships = (props: RelationshipsProps) => {
   const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean =>
     _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
 
-  const relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean =>
-    relationships.some((r) => relationshipIsEqual(r, relationship));
-
   const removeRelationship = (relationship: IRelationship) => {
     props.setRelationships(props.relationships.filter((r) => !relationshipIsEqual(r, relationship)));
-  };
-
-  const removeRelationships = (toRemove: IRelationship[]) => {
-    props.setRelationships(props.relationships.filter((r) => !relationshipExists(r, toRemove)));
   };
 
   // Add form state
   const [selectedType, setSelectedType] = useState<RelationshipType>("general");
   const [selectedTarget, setSelectedTarget] = useState<IGenericItem>({} as IGenericItem);
 
+  const addValidationError = useMemo(() => {
+    if (_.isUndefined(selectedTarget._id)) return null;
+    if (selectedTarget._id === props.sourceId) return "Cannot add a relationship to itself";
+    const candidate: IRelationship = {
+      source: { _id: props.sourceId || "no_id", name: props.sourceName || "" },
+      target: selectedTarget,
+      type: selectedType,
+    };
+    if (props.relationships.some((r) => relationshipIsEqual(r, candidate))) return "This relationship already exists";
+    return null;
+  }, [selectedTarget, selectedType, props.sourceId, props.sourceName, props.relationships]);
+
   const addRelationship = () => {
+    if (addValidationError) {
+      toaster.create({
+        title: "Invalid Relationship",
+        description: addValidationError,
+        type: "warning",
+        duration: 2000,
+        closable: true,
+      });
+      return;
+    }
     props.setRelationships([
       ...props.relationships,
       {
@@ -104,68 +136,6 @@ const Relationships = (props: RelationshipsProps) => {
     setSelectedType("general");
     setSelectedTarget({} as IGenericItem);
   };
-
-  const columnHelper = createColumnHelper<IRelationship>();
-  const columns = [
-    columnHelper.accessor("source", {
-      cell: (info) => {
-        const src = info.getValue();
-        const name = entityNames[src._id] || src.name;
-        return (
-          <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Tooltip content={name} disabled={name.length < 32} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(name, { length: 32 })}
-              </Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
-      header: "Source",
-    }),
-    columnHelper.accessor("type", {
-      cell: (info) => (
-        <Flex p={"1"}>
-          <Tag.Root size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue()}</Tag.Label>
-          </Tag.Root>
-        </Flex>
-      ),
-      header: "Type",
-      meta: { minWidth: 100, maxWidth: 100 },
-    }),
-    columnHelper.accessor("target", {
-      cell: (info) => {
-        const tgt = info.getValue();
-        return (
-          <Flex w={"100%"} justify={"space-between"} gap={"1"}>
-            <Linky id={tgt._id} type={"entities"} />
-            <Button
-              size={"2xs"}
-              variant={"subtle"}
-              colorPalette={"red"}
-              aria-label={"Remove relationship"}
-              onClick={() => removeRelationship(info.row.original)}
-            >
-              Remove
-              <Icon name={"delete"} size={"xs"} />
-            </Button>
-          </Flex>
-        );
-      },
-      header: "Target",
-    }),
-  ];
-
-  const actions: DataTableAction[] = [
-    {
-      label: "Remove Relationships",
-      icon: "delete",
-      action(table, rows) {
-        removeRelationships(Object.keys(rows).map((i) => table.getRow(i).original));
-      },
-    },
-  ];
 
   return (
     <Flex direction={"column"} w={"100%"} gap={"1"}>
@@ -182,18 +152,14 @@ const Relationships = (props: RelationshipsProps) => {
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
-            <Flex direction={"column"} gap={"1"} flex={"1"}>
+            <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                 Source
               </Text>
               <Input size={"xs"} rounded={"md"} value={props.sourceName || ""} readOnly disabled bg={"white"} />
             </Flex>
-            <Icon
-              name={"a_right_fill"}
-              size={"sm"}
-              color={selectedType === "parent" ? "blue.400" : selectedType === "child" ? "green.600" : "purple.400"}
-            />
-            <Flex direction={"column"} gap={"1"} flex={"1"}>
+            <Icon name={TYPE_ARROW_ICON[selectedType]} size={"sm"} color={TYPE_ARROW_COLOR[selectedType]} />
+            <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                 Target
               </Text>
@@ -207,21 +173,20 @@ const Relationships = (props: RelationshipsProps) => {
               Type
             </Text>
             <Flex gap={"1"}>
-              {(["general", "parent", "child"] as RelationshipType[]).map((type) => {
-                const palette = type === "parent" ? "blue" : type === "child" ? "green" : "purple";
-                return (
-                  <Button
-                    key={type}
-                    size={"xs"}
-                    rounded={"md"}
-                    variant={selectedType === type ? "solid" : "outline"}
-                    colorPalette={selectedType === type ? palette : "gray"}
-                    onClick={() => setSelectedType(type)}
-                  >
-                    {_.capitalize(type)}
-                  </Button>
-                );
-              })}
+              {(["general", "parent", "child"] as RelationshipType[]).map((type) => (
+                <Button
+                  key={type}
+                  size={"xs"}
+                  rounded={"md"}
+                  variant={selectedType === type ? "solid" : "outline"}
+                  colorPalette={selectedType === type ? TYPE_PALETTE[type] : "gray"}
+                  bg={selectedType === type ? undefined : "white"}
+                  color={selectedType === type ? undefined : "black"}
+                  onClick={() => setSelectedType(type)}
+                >
+                  {_.capitalize(type)}
+                </Button>
+              ))}
             </Flex>
             <Spacer />
             <Button
@@ -241,17 +206,71 @@ const Relationships = (props: RelationshipsProps) => {
       )}
 
       {props.relationships.length > 0 ? (
-        <DataTable
-          data={props.relationships}
-          setData={props.setRelationships}
-          columns={columns}
-          viewOnly={props.viewOnly}
-          actions={actions}
-          selectedRows={{}}
-          visibleColumns={{}}
-          showPagination
-          showSelection
-        />
+        <Flex
+          direction={"column"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+          rounded={"md"}
+          overflow={"hidden"}
+        >
+          {props.relationships.map((relationship, index) => {
+            const sourceName = entityNames[relationship.source._id] || relationship.source.name;
+            return (
+              <Flex
+                key={`${relationship.source._id}-${relationship.target._id}-${relationship.type}-${index}`}
+                direction={"row"}
+                align={"center"}
+                gap={"2"}
+                px={"2"}
+                py={"1.5"}
+                borderBottom={index < props.relationships.length - 1 ? "1px solid" : "none"}
+                borderColor={"gray.200"}
+                bg={"white"}
+                _hover={{ bg: "gray.25" }}
+                wrap={"wrap"}
+              >
+                {/* Source */}
+                <Tooltip content={sourceName} disabled={sourceName.length < 24} showArrow>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0} maxW={"120px"} truncate>
+                    {_.truncate(sourceName, { length: 24 })}
+                  </Text>
+                </Tooltip>
+
+                {/* Arrow */}
+                <Icon
+                  name={TYPE_ARROW_ICON[relationship.type]}
+                  size={"xs"}
+                  color={TYPE_ARROW_COLOR[relationship.type]}
+                />
+
+                {/* Target */}
+                <Flex flex={"1"} minW={0}>
+                  <Linky id={relationship.target._id} type={"entities"} />
+                </Flex>
+
+                {/* Type badge */}
+                <Tag.Root size={"sm"} colorPalette={TYPE_PALETTE[relationship.type]} flexShrink={0}>
+                  <Tag.Label fontSize={"xs"}>{_.capitalize(relationship.type)}</Tag.Label>
+                </Tag.Root>
+
+                {/* Remove */}
+                {!props.viewOnly && (
+                  <Button
+                    size={"2xs"}
+                    variant={"subtle"}
+                    colorPalette={"red"}
+                    flexShrink={0}
+                    aria-label={"Remove relationship"}
+                    onClick={() => removeRelationship(relationship)}
+                  >
+                    Remove
+                    <Icon name={"delete"} size={"xs"} />
+                  </Button>
+                )}
+              </Flex>
+            );
+          })}
+        </Flex>
       ) : (
         <Flex justify={"center"} align={"center"} minH={"120px"}>
           <EmptyState.Root>

@@ -7,6 +7,7 @@ import {
   BsActivity,
   BsArchiveFill,
   BsArrowCounterclockwise,
+  BsArrowLeftCircleFill,
   BsArrowRight,
   BsArrowRightCircleFill,
   BsArrowUpRight,
@@ -42,6 +43,7 @@ import {
   BsFillBookFill,
   BsFillBookmarkFill,
   BsFillCloudUploadFill,
+  BsFillDashCircleFill,
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
@@ -165,6 +167,8 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   // Arrows
   a_right: BsArrowRight,
   a_right_fill: BsArrowRightCircleFill,
+  a_left_fill: BsArrowLeftCircleFill,
+  a_both_fill: BsFillDashCircleFill,
 
   // Chevrons
   c_left: BsChevronLeft,

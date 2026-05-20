@@ -278,14 +278,14 @@ const Activity = () => {
 
   return (
     <Content isError={!_.isUndefined(error) && !initialLoaded} isLoaded={initialLoaded || !loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"activity"} size={"sm"} />
             <Heading size={"md"}>Workspace Activity</Heading>
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"1"} w={"100%"} minW="0" maxW="100%">
+        <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
             All activity in the current Workspace is shown below, sorted by most recent. Sort the activity using the
             column headers or use the filters below.
@@ -317,7 +317,7 @@ const Activity = () => {
             <Flex
               direction={"column"}
               gap={"1"}
-              p={"1"}
+              p={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -496,7 +496,7 @@ const Activity = () => {
                 </Flex>
 
                 {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
+                <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
                   <Button
                     size={"xs"}
                     rounded={"md"}
