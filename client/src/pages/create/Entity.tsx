@@ -11,7 +11,6 @@ import {
   Dialog,
   EmptyState,
   Field,
-  Fieldset,
   Flex,
   Heading,
   Input,
@@ -67,13 +66,12 @@ import { usePostHog } from "posthog-js/react";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+const RELATIONSHIP_TYPES: RelationshipType[] = ["general", "parent", "child"];
+
 const Entity = () => {
   const posthog = usePostHog();
 
-  // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
-
-  // Page steps
   const pageSteps = [
     { title: "Start", description: "Basic information" },
     { title: "Relationships", description: "Relationships between Entities" },
@@ -82,36 +80,23 @@ const Entity = () => {
   const [pageStep, setPageStep] = useState(0);
   const [informationOpen, setInformationOpen] = useState(false);
 
-  // Navigation and routing
   const navigate = useNavigate();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    // Check if this is during the `create` mutation
-    if (isSubmitting) {
-      return false;
-    }
-
-    // Default blocker condition
+    if (isSubmitting) return false;
     return name !== "" && currentLocation.pathname !== nextLocation.pathname;
   });
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
-  // Projects
   const [projects, setProjects] = useState([] as IGenericItem[]);
-
-  // Templates
   const [templates, setTemplates] = useState([] as AttributeModel[]);
 
-  // Templates collection for Select component
   const templatesCollection = useMemo(() => {
     const items = createSelectOptions<AttributeModel>(templates, "_id", "name");
-    return createListCollection<ISelectOption>({
-      items: items || [],
-    });
+    return createListCollection<ISelectOption>({ items: items || [] });
   }, [templates]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [name, setName] = useState("");
   const [counter, setCounter] = useState("");
   const [useCounter, setUseCounter] = useState(false);
@@ -120,25 +105,15 @@ const Entity = () => {
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
-  // Manage relationships
-  const selectRelationshipTypeRef = useRef(null);
   const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState({} as IGenericItem);
   const [selectedRelationshipType, setSelectedRelationshipType] = useState("general" as RelationshipType);
   const [relationships, setRelationships] = useState([] as IRelationship[]);
-
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
-
-  // Selected template value for the Select component
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
 
-  // AI Template suggestions, `undefined`: not yet run, `null`: ran with no match, `string`: matched Template ID
   const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
   const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
 
-  // Authentication and user
-  /**
-   * Helper function to get user information
-   */
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
@@ -158,14 +133,11 @@ const Entity = () => {
     getUser();
   }, []);
 
-  // Various validation error states
   const isNameError = (useCounter === false && name === "") || (useCounter === true && counter === "");
   const isDateError = created === "";
   const validDetails = !isNameError && !isDateError;
-
   const [validAttributes, setValidAttributes] = useState(false);
 
-  // GraphQL operations
   const GET_CREATE_ENTITIES_DATA = gql`
     query GetCreateEntitiesData {
       projects {
@@ -190,9 +162,7 @@ const Entity = () => {
   const { loading, error, data } = useQuery<{
     projects: IGenericItem[];
     templates: AttributeModel[];
-  }>(GET_CREATE_ENTITIES_DATA, {
-    fetchPolicy: "network-only",
-  });
+  }>(GET_CREATE_ENTITIES_DATA, { fetchPolicy: "network-only" });
 
   const GET_COUNTER_CURRENT = gql`
     query GetCounterCurrent($_id: String) {
@@ -242,30 +212,18 @@ const Entity = () => {
     fetchPolicy: "network-only",
   });
 
-  // Assign data
   useEffect(() => {
-    if (data?.projects) {
-      setProjects(data.projects);
-    }
-    if (data?.templates) {
-      setTemplates(data.templates);
-    }
+    if (data?.projects) setProjects(data.projects);
+    if (data?.templates) setTemplates(data.templates);
   }, [data]);
 
-  // Capture event
   useEffect(() => {
     posthog?.capture("create_entity_start");
   }, [posthog]);
 
   useEffect(() => {
     if (error) {
-      toaster.create({
-        title: "Error",
-        type: "error",
-        description: error.message,
-        duration: 4000,
-        closable: true,
-      });
+      toaster.create({ title: "Error", type: "error", description: error.message, duration: 4000, closable: true });
     }
   }, [error]);
 
@@ -274,71 +232,50 @@ const Entity = () => {
   }, [selectedAttributes]);
 
   const isValidInput = (): boolean => {
-    if (_.isEqual("start", pageState)) {
-      return validDetails;
-    } else if (_.isEqual("attributes", pageState)) {
-      if (selectedAttributes.length > 0) {
-        return validAttributes;
-      }
+    if (_.isEqual("start", pageState)) return validDetails;
+    if (_.isEqual("attributes", pageState)) {
+      if (selectedAttributes.length > 0) return validAttributes;
       return true;
     }
     return true;
   };
 
-  // Handle clicking "Next"
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
-      // Capture event
       posthog.capture("create_entity_relationships");
       setPageState("relationships");
       setPageStep(1);
     } else if (_.isEqual("relationships", pageState)) {
-      // Capture event
       posthog.capture("create_entity_attributes");
-
       setPageState("attributes");
       setPageStep(2);
 
-      // Fire AI template suggestion in the background if templates are available
       if (templates.length > 0) {
         setIsSuggestingTemplate(true);
         setSuggestedTemplateId(null);
-        const fetchTemplateSuggestion = async () => {
-          try {
-            const result = await runSuggestTemplate({
-              variables: {
-                name,
-                description,
-                templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
-              },
-            });
-            setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
-          } catch {
-            // Silently ignore, error could be related to AI configuration
-          } finally {
-            setIsSuggestingTemplate(false);
-          }
-        };
-        fetchTemplateSuggestion();
+        try {
+          const result = await runSuggestTemplate({
+            variables: {
+              name,
+              description,
+              templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+            },
+          });
+          setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
+        } catch {
+          // Silently ignore AI configuration errors
+        } finally {
+          setIsSuggestingTemplate(false);
+        }
       }
     } else if (_.isEqual("attributes", pageState)) {
-      // Capture event
       posthog.capture("create_entity_finished");
-
       setIsSubmitting(true);
 
-      // Steps to use the Counter if selected
       let generatedName = name;
       if (useCounter) {
-        // Get the current value of the Counter and substitute the name value
-        const currentCounterValueResult = await currentCounterValue({
-          variables: {
-            _id: counter,
-          },
-        });
-
+        const currentCounterValueResult = await currentCounterValue({ variables: { _id: counter } });
         if (currentCounterValueError) {
-          // Raise an error and cancel the create operation
           toaster.create({
             title: "Error",
             type: "error",
@@ -349,18 +286,9 @@ const Entity = () => {
           setIsSubmitting(false);
           return;
         }
-
-        // Else, handle updating the name with the current Counter value
         if (currentCounterValueResult.data?.currentCounterValue) {
           generatedName = currentCounterValueResult.data.currentCounterValue.data;
-
-          // Increment the Counter value
-          await incrementCounter({
-            variables: {
-              _id: counter,
-            },
-          });
-
+          await incrementCounter({ variables: { _id: counter } });
           if (incrementCounterError) {
             toaster.create({
               title: "Error",
@@ -373,16 +301,15 @@ const Entity = () => {
         }
       }
 
-      // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
           entity: removeTypename({
             name: generatedName,
-            owner: owner,
-            created: created,
+            owner,
+            created,
             archived: false,
-            description: description,
-            relationships: relationships,
+            description,
+            relationships,
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
@@ -397,51 +324,33 @@ const Entity = () => {
     }
   };
 
-  // Handle clicking "Back"
   const onPageBack = () => {
     if (_.isEqual("relationships", pageState)) {
-      // Capture event
       posthog.capture("create_entity_start");
-
       setPageState("start");
       setPageStep(0);
     } else if (_.isEqual("attributes", pageState)) {
-      // Capture event
       posthog.capture("create_entity_relationships");
-
       setPageState("relationships");
       setPageStep(1);
     }
   };
 
   const addRelationship = () => {
-    // Create the `IRelationship` data structure
     const relationship: IRelationship = {
-      source: {
-        _id: "no_id",
-        name: name,
-      },
-      target: {
-        _id: selectedRelationshipTarget._id,
-        name: selectedRelationshipTarget.name,
-      },
+      source: { _id: "no_id", name },
+      target: { _id: selectedRelationshipTarget._id, name: selectedRelationshipTarget.name },
       type: selectedRelationshipType,
     };
-
     setRelationships([...relationships, relationship]);
-
-    // Reset the relationship modal state
     setSelectedRelationshipType("general");
     setSelectedRelationshipTarget({} as IGenericItem);
   };
 
-  // Removal callback
   const onRemoveAttributeCard = (identifier: string) => {
-    // We need to filter the removed attribute
     setSelectedAttributes(selectedAttributes.filter((attribute) => attribute._id !== identifier));
   };
 
-  // Used to receive data from a AttributeCard component
   const onUpdateAttributeCard = (data: AttributeCardProps) => {
     setSelectedAttributes([
       ...selectedAttributes.map((attribute) => {
@@ -461,24 +370,39 @@ const Entity = () => {
     ]);
   };
 
+  const applyTemplate = (templateId: string) => {
+    const template = templates.find((t) => t._id === templateId);
+    if (template) {
+      setSelectedAttributes([
+        ...selectedAttributes,
+        {
+          _id: `${template._id}-${nanoid(6)}`,
+          name: template.name,
+          timestamp: template.timestamp,
+          owner: template.owner,
+          archived: false,
+          description: template.description,
+          values: template.values,
+        },
+      ]);
+    }
+  };
+
   return (
     <Content isLoaded={!loading && !createLoading} isError={!_.isUndefined(error) && !_.isUndefined(createError)}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-            <Heading size={"sm"}>Create Entity</Heading>
-            <Spacer />
-            <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
-              Info
-              <Icon name={"info"} size={"xs"} />
-            </Button>
-          </Flex>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"}>
+          <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+          <Heading size={"sm"}>Create Entity</Heading>
+          <Spacer />
+          <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
+            Info
+            <Icon name={"info"} size={"xs"} />
+          </Button>
         </Flex>
 
-        {/* Main pages */}
-        {/* Stepper progress indicator */}
+        {/* Stepper */}
         <Steps.Root
           step={pageStep}
           colorPalette={"green"}
@@ -501,89 +425,82 @@ const Entity = () => {
           </Steps.List>
         </Steps.Root>
 
-        {/* "Start" page */}
+        {/* Start page */}
         {_.isEqual("start", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} w={{ base: "100%", md: "50%" }} p={"1"} gap={"1"} grow={"1"} rounded={"md"}>
+            <Flex direction={"column"} w={{ base: "100%", md: "50%" }} p={"1"} gap={"1"} grow={"1"}>
               <Flex
                 direction={"column"}
-                p={"1"}
-                gap={"1"}
+                p={"2"}
+                gap={"2"}
+                bg={"gray.50"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                <Fieldset.Root invalid={isNameError} gap={"1"}>
-                  <Fieldset.Content mt={"1"}>
-                    <Field.Root required gap={"1"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Entity Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Flex gap={"1"} justify={"space-between"}>
-                        {useCounter ? (
-                          <CounterSelect counter={counter} setCounter={setCounter} showCreate />
-                        ) : (
-                          <Flex w={"100%"}>
-                            <Input
-                              data-testid={"create-entity-name"}
-                              name={"name"}
-                              value={name}
-                              placeholder={"Name"}
-                              size={"xs"}
-                              minW={"240px"}
-                              rounded={"md"}
-                              onChange={(event) => {
-                                setName(event.target.value);
-                              }}
-                            />
-                          </Flex>
-                        )}
-                        <Flex>
-                          <Button
-                            size={"xs"}
-                            rounded={"md"}
-                            onClick={() => {
-                              setUseCounter(!useCounter);
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Details
+                </Text>
 
-                              // Reset the stored name and counter
-                              setName("");
-                              setCounter("");
-                            }}
-                            colorPalette={"blue"}
-                          >
-                            Use {useCounter ? "Text" : "Counter"}
-                            <Icon name={useCounter ? "text" : "counter"} size={"xs"} />
-                          </Button>
-                        </Flex>
-                      </Flex>
-                      {isNameError && !useCounter && (
-                        <Field.ErrorText fontSize={"xs"}>A name or ID must be specified.</Field.ErrorText>
-                      )}
-                      {isNameError && useCounter && (
-                        <Field.ErrorText fontSize={"xs"}>A Counter must be selected or created.</Field.ErrorText>
-                      )}
-                    </Field.Root>
-
-                    <Field.Root invalid={isDateError} required gap={"1"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Entity Created
-                        <Field.RequiredIndicator />
-                      </Field.Label>
+                <Field.Root required gap={"1"}>
+                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                    Entity Name
+                    <Field.RequiredIndicator />
+                  </Field.Label>
+                  <Flex gap={"1"}>
+                    {useCounter ? (
+                      <CounterSelect counter={counter} setCounter={setCounter} showCreate />
+                    ) : (
                       <Input
-                        placeholder={"Select Date and Time"}
+                        data-testid={"create-entity-name"}
+                        name={"name"}
+                        value={name}
+                        placeholder={"Name"}
                         size={"xs"}
+                        w={"md"}
                         rounded={"md"}
-                        type={"date"}
-                        value={created}
-                        onChange={(event) => setCreated(event.target.value)}
+                        bg={"white"}
+                        onChange={(event) => setName(event.target.value)}
                       />
-                      {isDateError && (
-                        <Field.ErrorText fontSize={"xs"}>A created date must be specified.</Field.ErrorText>
-                      )}
-                    </Field.Root>
-                  </Fieldset.Content>
-                </Fieldset.Root>
+                    )}
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      variant={"outline"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        setUseCounter(!useCounter);
+                        setName("");
+                        setCounter("");
+                      }}
+                    >
+                      {useCounter ? "Use Text" : "Use Counter"}
+                      <Icon name={useCounter ? "text" : "counter"} size={"xs"} />
+                    </Button>
+                  </Flex>
+                  {isNameError && !useCounter && (
+                    <Field.ErrorText fontSize={"xs"}>A name or ID must be specified.</Field.ErrorText>
+                  )}
+                  {isNameError && useCounter && (
+                    <Field.ErrorText fontSize={"xs"}>A Counter must be selected or created.</Field.ErrorText>
+                  )}
+                </Field.Root>
+
+                <Field.Root required gap={"1"}>
+                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                    Entity Created
+                    <Field.RequiredIndicator />
+                  </Field.Label>
+                  <Input
+                    size={"xs"}
+                    rounded={"md"}
+                    type={"date"}
+                    bg={"white"}
+                    value={created}
+                    onChange={(event) => setCreated(event.target.value)}
+                  />
+                  {isDateError && <Field.ErrorText fontSize={"xs"}>A created date must be specified.</Field.ErrorText>}
+                </Field.Root>
               </Flex>
             </Flex>
 
@@ -595,111 +512,83 @@ const Entity = () => {
               gap={"1"}
               grow={"1"}
               basis={"50%"}
-              rounded={"md"}
             >
               <Flex
                 direction={"column"}
-                p={"1"}
-                gap={"1"}
+                p={"2"}
+                gap={"2"}
+                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                {/* Description */}
-                <Fieldset.Root gap={"0"}>
-                  <Fieldset.Content gap={"0"}>
-                    <Field.Root gap={"1"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Entity Description
-                      </Field.Label>
-                      <Information text={'Only describe the Entity, metadata is specified in the "Attributes" step.'} />
-                      <Box data-testid={"create-entity-description"} w={"100%"}>
-                        <MDEditor
-                          height={150}
-                          minHeight={100}
-                          maxHeight={400}
-                          style={{ width: "100%" }}
-                          value={description}
-                          preview={"edit"}
-                          extraCommands={[]}
-                          onChange={(value) => {
-                            setDescription(value || "");
-                          }}
-                        />
-                      </Box>
-                    </Field.Root>
-                  </Fieldset.Content>
-                </Fieldset.Root>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Description
+                </Text>
+                <Information text={"Describe the Entity. Metadata goes in the Attributes step."} />
+                <Box data-testid={"create-entity-description"} w={"100%"}>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    style={{ width: "100%" }}
+                    value={description}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => setDescription(value || "")}
+                  />
+                </Box>
               </Flex>
             </Flex>
           </Flex>
         )}
 
-        {/* "Relationships" page */}
+        {/* Relationships page */}
         {_.isEqual("relationships", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"} basis={"50%"} rounded={"md"}>
-              {/* Relationships */}
+            <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"} basis={"50%"}>
               <Flex
                 direction={"column"}
-                p={"1"}
-                gap={"1"}
+                p={"2"}
+                gap={"2"}
+                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                   Entity Relationships
-                </Heading>
+                </Text>
                 <Information text={"Specify the relationships between this Entity and other Entities."} />
-                <Flex direction={"row"} gap={"1"} justify={"space-between"} align={"end"}>
-                  <Flex direction={"column"} gap={"1"} w={"33%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+
+                <Flex direction={"row"} gap={"1"} justify={"left"} align={"center"} wrap={"wrap"}>
+                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"20%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Source
                     </Text>
                     <Input size={"xs"} rounded={"md"} value={name} readOnly disabled />
                   </Flex>
-                  <Flex direction={"column"} gap={"1"} w={"33%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"30%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Type
                     </Text>
-                    <Select.Root
-                      key={"select-relationship-type"}
-                      size={"xs"}
-                      collection={createListCollection({
-                        items: ["General", "Parent", "Child"],
-                      })}
-                      onValueChange={(details) => {
-                        setSelectedRelationshipType(details.items[0].toLowerCase() as RelationshipType);
-                      }}
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger data-testid={"select-relationship-type"} rounded={"md"}>
-                          <Select.ValueText placeholder={"Select Relationship Type"} />
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal container={selectRelationshipTypeRef}>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {createListCollection({
-                              items: ["General", "Parent", "Child"],
-                            }).items.map((relationship) => (
-                              <Select.Item item={relationship} key={relationship}>
-                                {relationship}
-                                <Select.ItemIndicator />
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
+                    <Flex gap={"1"}>
+                      {RELATIONSHIP_TYPES.map((type) => (
+                        <Button
+                          key={type}
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={selectedRelationshipType === type ? "solid" : "outline"}
+                          colorPalette={selectedRelationshipType === type ? "blue" : "gray"}
+                          onClick={() => setSelectedRelationshipType(type)}
+                        >
+                          {_.capitalize(type)}
+                        </Button>
+                      ))}
+                    </Flex>
                   </Flex>
-                  <Flex direction={"column"} gap={"1"} w={"33%"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                  <Flex direction={"column"} gap={"1"} grow={"1"} basis={"40%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Target
                     </Text>
                     <SearchSelect
@@ -714,7 +603,7 @@ const Entity = () => {
                     size={"xs"}
                     rounded={"md"}
                     disabled={_.isUndefined(selectedRelationshipTarget._id)}
-                    onClick={() => addRelationship()}
+                    onClick={addRelationship}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
@@ -723,9 +612,9 @@ const Entity = () => {
 
                 {relationships.length > 0 ? (
                   <Flex direction={"column"} gap={"1"}>
-                    <Heading size={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
                       Relationships
-                    </Heading>
+                    </Text>
                     <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
                   </Flex>
                 ) : (
@@ -749,262 +638,207 @@ const Entity = () => {
               gap={"1"}
               grow={"1"}
               basis={"50%"}
-              rounded={"md"}
             >
-              {/* Projects */}
               <Flex
                 direction={"column"}
-                p={"1"}
-                gap={"1"}
+                p={"2"}
+                gap={"2"}
+                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Fieldset.Root>
-                  <CheckboxGroup
-                    value={selectedProjects}
-                    onValueChange={(event: string[]) => {
-                      if (event) {
-                        setSelectedProjects([...event]);
-                      }
-                    }}
-                  >
-                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Linked Projects
-                    </Text>
-                    <Information text={"Specify the Projects that this new Entity should be included in."} />
-                    <Fieldset.Content gap={"1"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Available Projects
-                      </Text>
-                      <Stack gap={"1"} direction={"column"} ml={"0.5"}>
-                        {projects &&
-                          projects.length > 0 &&
-                          projects.map((project) => {
-                            return (
-                              <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label>
-                                  <Linky id={project._id} type={"projects"} />
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            );
-                          })}
-                        {projects.length === 0 && (
-                          <EmptyState.Root>
-                            <EmptyState.Content>
-                              <EmptyState.Indicator>
-                                <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
-                              </EmptyState.Indicator>
-                              <EmptyState.Description>No Projects</EmptyState.Description>
-                            </EmptyState.Content>
-                          </EmptyState.Root>
-                        )}
-                      </Stack>
-                    </Fieldset.Content>
-                  </CheckboxGroup>
-                </Fieldset.Root>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Linked Projects
+                </Text>
+                <Information text={"Specify the Projects that this new Entity should be included in."} />
+                <CheckboxGroup
+                  value={selectedProjects}
+                  onValueChange={(event: string[]) => {
+                    if (event) setSelectedProjects([...event]);
+                  }}
+                >
+                  <Stack gap={"1"} direction={"column"}>
+                    {projects.length > 0 ? (
+                      projects.map((project) => (
+                        <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Linky id={project._id} type={"projects"} />
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                      ))
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>No Projects</EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
+                  </Stack>
+                </CheckboxGroup>
               </Flex>
             </Flex>
           </Flex>
         )}
 
-        {/* "Attributes" page */}
+        {/* Attributes page */}
         {_.isEqual("attributes", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} p={"1"} w={"100%"} gap={"1"} rounded={"md"}>
-              <Heading size={"sm"} fontWeight={"semibold"} ml={"0.5"}>
-                Entity Attributes
-              </Heading>
-              <Information
-                text={
-                  "Add Attributes containing metadata about this Entity. Attributes can use an existing Template or be created manually."
-                }
-              />
+            <Flex direction={"column"} p={"1"} w={"100%"} gap={"1"}>
               <Flex
-                direction={"row"}
-                p={"1"}
-                gap={"1"}
-                align={"end"}
+                direction={"column"}
+                p={"2"}
+                gap={"2"}
+                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
-                  {/* Drop-down to select Templates */}
-                  <Fieldset.Root maxW={"sm"}>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Select.Root
-                          key={"select-template"}
-                          size={"xs"}
-                          collection={templatesCollection}
-                          disabled={templatesCollection.items.length === 0}
-                          rounded={"md"}
-                          value={selectedTemplateValue}
-                          onValueChange={(details) => {
-                            const selectedTemplateId = details.value[0];
-                            if (selectedTemplateId && !_.isEqual(selectedTemplateId, "")) {
-                              for (const template of templates) {
-                                if (_.isEqual(selectedTemplateId, template._id)) {
-                                  setSelectedAttributes([
-                                    ...selectedAttributes,
-                                    {
-                                      _id: `${template._id}-${nanoid(6)}`, // Use existing ID with unique identifier appended
-                                      name: template.name,
-                                      timestamp: template.timestamp,
-                                      owner: template.owner,
-                                      archived: false,
-                                      description: template.description,
-                                      values: template.values,
-                                    },
-                                  ]);
-                                  // Reset the select after adding the template
-                                  setSelectedTemplateValue([]);
-                                  break;
-                                }
-                              }
-                            }
-                          }}
-                        >
-                          <Select.HiddenSelect />
-                          <Select.Label>
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                Use Template ({templatesCollection.items.length} available)
-                              </Text>
-                              {isSuggestingTemplate && (
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
-                                  <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
-                                  <Text fontSize={"xs"} color={"purple.300"}>
-                                    Suggesting Template...
-                                  </Text>
-                                </Flex>
-                              )}
-                              {!isSuggestingTemplate && suggestedTemplateId && (
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
-                                  <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
-                                  <Text
-                                    fontSize={"xs"}
-                                    color={"purple.600"}
-                                    cursor={"pointer"}
-                                    _hover={{ textDecoration: "underline" }}
-                                    onClick={() => {
-                                      const template = templates.find((t) => t._id === suggestedTemplateId);
-                                      if (template) {
-                                        setSelectedAttributes([
-                                          ...selectedAttributes,
-                                          {
-                                            _id: `${template._id}-${nanoid(6)}`,
-                                            name: template.name,
-                                            timestamp: template.timestamp,
-                                            owner: template.owner,
-                                            archived: false,
-                                            description: template.description,
-                                            values: template.values,
-                                          },
-                                        ]);
-                                      }
-                                    }}
-                                  >
-                                    Suggested Template: {templates.find((t) => t._id === suggestedTemplateId)?.name}
-                                  </Text>
-                                </Flex>
-                              )}
-                              {!isSuggestingTemplate && suggestedTemplateId === null && (
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
-                                  <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
-                                  <Text fontSize={"xs"} color={"gray.400"}>
-                                    No Suggested Templates
-                                  </Text>
-                                </Flex>
-                              )}
-                            </Flex>
-                          </Select.Label>
-                          <Select.Control>
-                            <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"}>
-                              <Flex direction={"row"} gap={"2"} align={"center"}>
-                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
-                                <Text fontSize={"xs"} color={"gray.500"}>
-                                  {"Select Template"}
-                                </Text>
-                              </Flex>
-                            </Select.Trigger>
-                            <Select.IndicatorGroup>
-                              <Select.Indicator />
-                            </Select.IndicatorGroup>
-                          </Select.Control>
-                          <Portal>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {templatesCollection.items &&
-                                  templatesCollection.items.length > 0 &&
-                                  templatesCollection.items.map((template: ISelectOption) => (
-                                    <Select.Item item={template} key={template.value} fontSize={"xs"}>
-                                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                                        {template.label}
-                                      </Flex>
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Portal>
-                        </Select.Root>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Entity Attributes
+                </Text>
+                <Information
+                  text={
+                    "Add Attributes containing metadata about this Entity. Use an existing Template or create one manually."
+                  }
+                />
 
-                <Button
-                  data-testid={"create-entity-new-attribute"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
-                    setSelectedAttributes([
-                      ...selectedAttributes,
-                      {
-                        _id: `a-${nanoid(6)}`,
-                        name: "",
-                        timestamp: dayjs(Date.now()).toISOString(),
-                        owner: owner,
-                        archived: false,
-                        description: "",
-                        values: [],
-                      },
-                    ]);
-                  }}
-                >
-                  Create new Attribute
-                  <Icon name={"add"} size={"xs"} />
-                </Button>
+                <Flex direction={"row"} gap={"1"} align={"end"}>
+                  {/* Template selector */}
+                  <Flex direction={"column"} gap={"1"} grow={"1"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Use Template ({templatesCollection.items.length} available)
+                      </Text>
+                      {isSuggestingTemplate && (
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                          <Text fontSize={"xs"} color={"purple.300"}>
+                            Suggesting Template...
+                          </Text>
+                        </Flex>
+                      )}
+                      {!isSuggestingTemplate && suggestedTemplateId && (
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                          <Text
+                            fontSize={"xs"}
+                            color={"purple.600"}
+                            cursor={"pointer"}
+                            _hover={{ textDecoration: "underline" }}
+                            onClick={() => {
+                              applyTemplate(suggestedTemplateId);
+                            }}
+                          >
+                            Suggested: {templates.find((t) => t._id === suggestedTemplateId)?.name}
+                          </Text>
+                        </Flex>
+                      )}
+                      {!isSuggestingTemplate && suggestedTemplateId === null && (
+                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
+                          <Text fontSize={"xs"} color={"gray.400"}>
+                            No Suggested Templates
+                          </Text>
+                        </Flex>
+                      )}
+                    </Flex>
+                    <Select.Root
+                      key={"select-template"}
+                      size={"xs"}
+                      collection={templatesCollection}
+                      disabled={templatesCollection.items.length === 0}
+                      rounded={"md"}
+                      value={selectedTemplateValue}
+                      onValueChange={(details) => {
+                        const selectedTemplateId = details.value[0];
+                        if (selectedTemplateId && !_.isEqual(selectedTemplateId, "")) {
+                          applyTemplate(selectedTemplateId);
+                          setSelectedTemplateValue([]);
+                        }
+                      }}
+                    >
+                      <Select.HiddenSelect />
+                      <Select.Control>
+                        <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"} bg={"white"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
+                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                            <Text fontSize={"xs"} color={"gray.500"}>
+                              Select Template
+                            </Text>
+                          </Flex>
+                        </Select.Trigger>
+                        <Select.IndicatorGroup>
+                          <Select.Indicator />
+                        </Select.IndicatorGroup>
+                      </Select.Control>
+                      <Portal>
+                        <Select.Positioner>
+                          <Select.Content>
+                            {templatesCollection.items.map((template: ISelectOption) => (
+                              <Select.Item item={template} key={template.value} fontSize={"xs"}>
+                                <Flex direction={"row"} gap={"2"} align={"center"}>
+                                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                                  {template.label}
+                                </Flex>
+                                <Select.ItemIndicator />
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Portal>
+                    </Select.Root>
+                  </Flex>
+
+                  <Button
+                    data-testid={"create-entity-new-attribute"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => {
+                      setSelectedAttributes([
+                        ...selectedAttributes,
+                        {
+                          _id: `a-${nanoid(6)}`,
+                          name: "",
+                          timestamp: dayjs(Date.now()).toISOString(),
+                          owner,
+                          archived: false,
+                          description: "",
+                          values: [],
+                        },
+                      ]);
+                    }}
+                  >
+                    Create new Attribute
+                    <Icon name={"add"} size={"xs"} />
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
 
             <Flex w={"100%"} minH={selectedAttributes.length > 0 ? "fit-content" : "200px"} p={"1"} pt={"0"}>
-              {/* Display all Attributes */}
               {selectedAttributes.length > 0 ? (
                 <Stack gap={"1"} w={"100%"} data-testid={"create-entity-attributes"}>
-                  {selectedAttributes.map((attribute) => {
-                    return (
-                      <AttributeCard
-                        _id={attribute._id}
-                        key={attribute._id}
-                        name={attribute.name}
-                        owner={attribute.owner}
-                        archived={attribute.archived}
-                        description={attribute.description}
-                        values={attribute.values}
-                        restrictDataValues={false}
-                        onRemove={onRemoveAttributeCard}
-                        onUpdate={onUpdateAttributeCard}
-                      />
-                    );
-                  })}
+                  {selectedAttributes.map((attribute) => (
+                    <AttributeCard
+                      _id={attribute._id}
+                      key={attribute._id}
+                      name={attribute.name}
+                      owner={attribute.owner}
+                      archived={attribute.archived}
+                      description={attribute.description}
+                      values={attribute.values}
+                      restrictDataValues={false}
+                      onRemove={onRemoveAttributeCard}
+                      onUpdate={onUpdateAttributeCard}
+                    />
+                  ))}
                 </Stack>
               ) : (
                 <EmptyState.Root>
@@ -1046,7 +880,6 @@ const Entity = () => {
               </Dialog.Header>
               <Dialog.Body p={"2"} gap={"0"}>
                 <Flex direction={"column"} gap={"2"}>
-                  {/* Overview */}
                   <Flex
                     direction={"column"}
                     gap={"1"}
@@ -1069,7 +902,6 @@ const Entity = () => {
                     </Text>
                   </Flex>
 
-                  {/* Steps */}
                   <Flex direction={"column"} gap={"1.5"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                       Creation Steps
@@ -1137,7 +969,7 @@ const Entity = () => {
                             Relationships - Link to Other Entities
                           </Text>
                           <Text fontSize={"xs"} color={"gray.600"}>
-                            Define how this Entity relates to others (e.g. origin, product) and assign it to Projects.
+                            Define how this Entity relates to others and assign it to Projects.
                           </Text>
                         </Flex>
                       </Flex>
@@ -1241,7 +1073,6 @@ const Entity = () => {
         </Button>
       </Flex>
 
-      {/* Blocker warning message */}
       <UnsavedChangesModal
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}

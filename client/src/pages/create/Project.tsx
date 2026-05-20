@@ -9,7 +9,6 @@ import {
   Dialog,
   EmptyState,
   Field,
-  Fieldset,
   Flex,
   Heading,
   Input,
@@ -23,6 +22,7 @@ import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
+import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import MDEditor from "@uiw/react-md-editor";
@@ -52,18 +52,12 @@ import { GLOBAL_STYLES } from "@variables";
 const Project = () => {
   const posthog = usePostHog();
 
-  // Information dialog state
   const [informationOpen, setInformationOpen] = useState(false);
-
   const [name, setName] = useState("");
   const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
 
-  // Authentication and user
-  /**
-   * Helper function to get user information
-   */
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
@@ -83,15 +77,9 @@ const Project = () => {
     getUser();
   }, []);
 
-  // Navigation and routing
   const navigate = useNavigate();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    // Check if this is during the `create` mutation
-    if (isSubmitting) {
-      return false;
-    }
-
-    // Default blocker condition
+    if (isSubmitting) return false;
     return (
       (name !== "" || description !== "" || entities.length > 0) && currentLocation.pathname !== nextLocation.pathname
     );
@@ -102,10 +90,8 @@ const Project = () => {
   const [entitiesOpen, setEntitiesOpen] = useState(false);
   const [selectedEntities, setSelectedEntities] = useState([] as IGenericItem[]);
   const [entities, setEntities] = useState([] as string[]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // GraphQL operations
   const CREATE_PROJECT = gql`
     mutation CreateProject($project: ProjectCreateInput) {
       createProject(project: $project) {
@@ -120,48 +106,37 @@ const Project = () => {
 
   useEffect(() => {
     if (error) {
-      toaster.create({
-        title: "Error",
-        description: error.message,
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
+      toaster.create({ title: "Error", description: error.message, type: "error", duration: 2000, closable: true });
     }
   }, [error]);
 
-  // Capture event
   useEffect(() => {
     posthog?.capture("create_project_start");
   }, [posthog]);
 
-  // Form validation
   const isNameError = name === "";
   const isOwnerError = owner === "";
   const isDescriptionError = description === "";
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
 
-  // Define the columns for Entities listing
   const entitiesColumns = [
     {
       id: (info: Cell<string, string>) => info.row.original,
-      cell: (info: Cell<string, string>) => {
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Linky id={info.row.original} type={"entities"} size={"xs"} />
-            <Button
-              size="2xs"
-              variant="subtle"
-              colorPalette="red"
-              aria-label={"Remove entity"}
-              onClick={() => removeEntity(info.row.original)}
-            >
-              Remove
-              <Icon name={"delete"} size={"xs"} />
-            </Button>
-          </Flex>
-        );
-      },
+      cell: (info: Cell<string, string>) => (
+        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+          <Linky id={info.row.original} type={"entities"} size={"xs"} />
+          <Button
+            size="2xs"
+            variant="subtle"
+            colorPalette="red"
+            aria-label={"Remove entity"}
+            onClick={() => removeEntity(info.row.original)}
+          >
+            Remove
+            <Icon name={"delete"} size={"xs"} />
+          </Button>
+        </Flex>
+      ),
       header: "Name",
     },
   ];
@@ -173,10 +148,6 @@ const Project = () => {
     setEntitiesOpen(false);
   };
 
-  /**
-   * Callback function to remove Entity from Project
-   * @param {string} entity Entity identifier to remove
-   */
   const removeEntity = (entity: string): void => {
     if (_.includes(entities, entity)) {
       setEntities([...entities.filter((e) => !_.isEqual(e, entity))]);
@@ -187,19 +158,18 @@ const Project = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-            <Heading size={"sm"}>Create Project</Heading>
-            <Spacer />
-            <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
-              Info
-              <Icon name={"info"} size={"xs"} />
-            </Button>
-          </Flex>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"}>
+          <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+          <Heading size={"sm"}>Create Project</Heading>
+          <Spacer />
+          <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
+            Info
+            <Icon name={"info"} size={"xs"} />
+          </Button>
         </Flex>
 
         <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          {/* Details */}
           <Flex
             direction={"column"}
             w={{ base: "100%", md: "50%" }}
@@ -207,68 +177,67 @@ const Project = () => {
             pt={{ base: "0", lg: "1" }}
             gap={"1"}
             grow={"1"}
-            rounded={"md"}
           >
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              gap={"2"}
+              bg={"gray.50"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <Fieldset.Root invalid={isNameError}>
-                <Fieldset.Content gap={"1"}>
-                  <Field.Root required gap={"0"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Project Name
-                      <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Input
-                      data-testid={"create-project-name"}
-                      name={"name"}
-                      size={"xs"}
-                      rounded={"md"}
-                      placeholder={"Name"}
-                      borderColor={"gray.300"}
-                      focusRingColor={"black"}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                    {isNameError && (
-                      <Field.ErrorText fontSize={"xs"}>
-                        A name to identify the Project must be specified.
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Details
+              </Text>
 
-                  <Field.Root gap={"0"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Project Owner
-                    </Field.Label>
-                    <Flex>
-                      <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
-                    </Flex>
-                  </Field.Root>
+              <Field.Root required gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Project Name
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <Input
+                  data-testid={"create-project-name"}
+                  name={"name"}
+                  size={"xs"}
+                  rounded={"md"}
+                  placeholder={"Name"}
+                  bg={"white"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+                {isNameError && (
+                  <Field.ErrorText fontSize={"xs"}>A name to identify the Project must be specified.</Field.ErrorText>
+                )}
+              </Field.Root>
 
-                  <Field.Root gap={"1"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Project Created
-                    </Field.Label>
-                    <Input
-                      size={"xs"}
-                      rounded={"md"}
-                      type={"datetime-local"}
-                      value={created}
-                      onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
-                    />
-                    <Field.HelperText fontSize={"xs"}>Specify a timestamp for the Project.</Field.HelperText>
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Project Owner
+                </Field.Label>
+                <Flex>
+                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+              </Field.Root>
+
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Project Created
+                </Field.Label>
+                <Input
+                  size={"xs"}
+                  rounded={"md"}
+                  type={"datetime-local"}
+                  bg={"white"}
+                  value={created}
+                  onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+                />
+                <Information text={"Specify a timestamp for the Project."} />
+              </Field.Root>
             </Flex>
           </Flex>
 
+          {/* Description */}
           <Flex
             direction={"column"}
             p={"1"}
@@ -277,74 +246,66 @@ const Project = () => {
             gap={"1"}
             grow={"1"}
             basis={"50%"}
-            rounded={"md"}
           >
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              gap={"2"}
+              bg={"gray.50"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              {/* Project description */}
-              <Fieldset.Root invalid={isDescriptionError}>
-                <Fieldset.Content>
-                  <Field.Root required gap={"1"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Project Description
-                      <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Box data-testid={"create-project-description"} w={"100%"}>
-                      <MDEditor
-                        height={150}
-                        minHeight={100}
-                        maxHeight={400}
-                        style={{ width: "100%" }}
-                        value={description}
-                        preview={"edit"}
-                        extraCommands={[]}
-                        onChange={(value) => {
-                          setDescription(value || "");
-                        }}
-                      />
-                    </Box>
-                    {isDescriptionError && (
-                      <Field.ErrorText fontSize={"xs"}>A description must be provided.</Field.ErrorText>
-                    )}
-                    <Field.HelperText fontSize={"xs"}>
-                      Describe the purpose and contents of this Project.
-                    </Field.HelperText>
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Description
+              </Text>
+              <Field.Root required gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Project Description
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <Box data-testid={"create-project-description"} w={"100%"}>
+                  <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
+                    style={{ width: "100%" }}
+                    value={description}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => setDescription(value || "")}
+                  />
+                </Box>
+                {isDescriptionError && (
+                  <Field.ErrorText fontSize={"xs"}>A description must be provided.</Field.ErrorText>
+                )}
+              </Field.Root>
             </Flex>
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} px={"1"} gap={"1"} wrap={"wrap"}>
-          <Flex justify={"space-between"} align={"center"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"}>
-              Project Entities
-            </Text>
-            <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setEntitiesOpen(true)}>
-              Add Entity
-              <Icon name={"add"} size={"xs"} />
-            </Button>
-          </Flex>
+        {/* Entities */}
+        <Flex direction={"column"} p={"1"} gap={"1"}>
           <Flex
             direction={"column"}
-            p={"1"}
-            gap={"1"}
-            w={"100%"}
+            p={"2"}
+            gap={"2"}
+            bg={"gray.50"}
             rounded={"md"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
-            align={"center"}
-            justify={"center"}
           >
-            <Flex w={"100%"} justify={"center"} align={"center"} minH={entities.length > 0 ? "fit-content" : "200px"}>
-              {entities && entities.length > 0 ? (
+            <Flex justify={"space-between"} align={"center"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Entities
+              </Text>
+              <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setEntitiesOpen(true)}>
+                Add Entity
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Flex>
+            <Flex w={"100%"} justify={"center"} align={"center"} minH={entities.length > 0 ? "fit-content" : "120px"}>
+              {entities.length > 0 ? (
                 <DataTable
                   data={entities}
                   columns={entitiesColumns}
@@ -369,7 +330,6 @@ const Project = () => {
         </Flex>
       </Flex>
 
-      {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
 
       {/* Action buttons */}
@@ -393,29 +353,14 @@ const Project = () => {
           rounded={"md"}
           colorPalette={"green"}
           onClick={async () => {
-            // Capture event
             posthog.capture("create_project_finish");
-
-            // Push the data
             setIsSubmitting(true);
-
-            // Execute the GraphQL mutation
             const response = await createProject({
               variables: {
-                project: {
-                  name: name,
-                  owner: owner,
-                  archived: false,
-                  description: description,
-                  created: created,
-                  entities: entities,
-                  collaborators: [],
-                },
+                project: { name, owner, archived: false, description, created, entities, collaborators: [] },
               },
             });
-
             if (response.data?.createProject.success) {
-              setIsSubmitting(false);
               navigate("/projects");
             }
             setIsSubmitting(false);
@@ -427,7 +372,7 @@ const Project = () => {
         </Button>
       </Flex>
 
-      {/* Modal to add Entities */}
+      {/* Add Entities dialog */}
       <Dialog.Root
         open={entitiesOpen}
         onOpenChange={(event) => {
@@ -467,8 +412,7 @@ const Project = () => {
                 setSelectedEntities={setSelectedEntities}
               />
             </Dialog.Body>
-
-            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
               <Button
                 colorPalette={"red"}
                 size={"xs"}
@@ -482,9 +426,7 @@ const Project = () => {
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
               </Button>
-
               <Spacer />
-
               <Button
                 id={"addEntityDoneButton"}
                 colorPalette={"green"}
@@ -531,7 +473,6 @@ const Project = () => {
             </Dialog.Header>
             <Dialog.Body p={"2"}>
               <Flex direction={"column"} gap={"2"}>
-                {/* Overview */}
                 <Flex
                   direction={"column"}
                   gap={"1"}
@@ -553,7 +494,6 @@ const Project = () => {
                   </Text>
                 </Flex>
 
-                {/* Fields */}
                 <Flex direction={"column"} gap={"1.5"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Fields
@@ -616,7 +556,6 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {/* Blocker warning message */}
       <UnsavedChangesModal
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
