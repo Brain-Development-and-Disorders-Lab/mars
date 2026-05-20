@@ -26,6 +26,7 @@ const nanoid = customAlphabet("1234567890abcdef", 10);
 import _ from "lodash";
 import dayjs from "dayjs";
 import Papa from "papaparse";
+import XLSX from "xlsx";
 import consola from "consola";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
@@ -946,15 +947,21 @@ export class Entities {
    * @param fields Optional argument to specify Entity data fields for export
    * @returns {Promise<string>}
    */
-  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
+  static export = async (
+    _id: string,
+    format: "json" | "csv" | "xlsx",
+    fields?: string[],
+    includeHistory = false,
+  ): Promise<string> => {
     const entity = await Entities.getOne(_id);
 
     if (_.isNull(entity)) {
       return "";
     }
 
-    // Remove `history` field
-    delete (entity as never)["history"];
+    if (!includeHistory) {
+      delete (entity as never)["history"];
+    }
 
     if (_.isEqual(format, "json")) {
       // Handle JSON format
@@ -1020,19 +1027,17 @@ export class Entities {
 
         return JSON.stringify(formatted, null, "  ");
       }
-    } else if (_.isEqual(format, "csv")) {
+    } else if (_.isEqual(format, "csv") || _.isEqual(format, "xlsx")) {
       let exportFields = fields;
 
-      // Handle CSV format
-      const headers: string[] = ["ID", "Name"]; // Headers for CSV file
-      const row: string[] = [entity._id, entity.name]; // First row containing export data
+      // Headers and row for spreadsheet output
+      const headers: string[] = ["ID", "Name"];
+      const row: string[] = [entity._id, entity.name];
 
       // Default behavior is to export all fields
       if (_.isUndefined(exportFields)) {
-        // Add standard string fields
         exportFields = ["created", "owner", "description"];
 
-        // Iterate and generate fields for Origins, Products, Projects, and Attributes
         for await (const relationship of entity.relationships) {
           exportFields.push(`relationship_${relationship.target._id}_${relationship.type}`);
         }
@@ -1044,7 +1049,6 @@ export class Entities {
         }
       }
 
-      // Iterate through the list of "fields" and create row representation
       for await (const field of exportFields) {
         if (_.isEqual(field, "created")) {
           headers.push("Created");
@@ -1053,36 +1057,26 @@ export class Entities {
           headers.push("Owner");
           row.push(entity.owner);
         } else if (_.isEqual(field, "description")) {
-          // "description" data field
           headers.push("Description");
           row.push(entity.description);
         } else if (_.startsWith(field, "relationship_")) {
-          // "relationship" data field
           const target = await Entities.getOne(field.split("_")[1]);
           if (!_.isNull(target)) {
             headers.push(`Relationship (${field.split("_")[2]})`);
             row.push(target.name);
           }
         } else if (_.startsWith(field, "attribute_")) {
-          // "attributes" data field
           const attributeId = field.slice(ATTRIBUTE_PREFIX_LENGTH);
           entity.attributes.map((attribute) => {
             if (_.isEqual(attribute._id, attributeId)) {
               for (const value of attribute.values) {
                 headers.push(`${value?.name} (${attribute?.name})`);
 
-                // Some values are JSON data stored as strings
                 if (value.type === "entity") {
-                  const entityData = JSON.parse(value.data) as {
-                    _id: string;
-                    name: string;
-                  };
+                  const entityData = JSON.parse(value.data) as { _id: string; name: string };
                   row.push(entityData.name);
                 } else if (value.type === "select") {
-                  const selectData = JSON.parse(value.data) as {
-                    selected: string;
-                    options: string[];
-                  };
+                  const selectData = JSON.parse(value.data) as { selected: string; options: string[] };
                   row.push(selectData.selected);
                 } else {
                   row.push(value.data);
@@ -1093,64 +1087,128 @@ export class Entities {
         }
       }
 
-      // Collate and format data as a CSV string
-      const collated = [headers, row];
-      const formatted = Papa.unparse(collated);
+      if (_.isEqual(format, "xlsx")) {
+        const ws = XLSX.utils.aoa_to_sheet([headers, row]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Export");
+        const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
+        return buffer.toString("base64");
+      }
 
-      return formatted;
+      return Papa.unparse([headers, row]);
     } else {
       return "Invalid format";
     }
   };
 
   /**
-   * Generate a string-based representation of multiple Entities for export
+   * Serialise a single attribute value to a plain string for spreadsheet export.
+   */
+  private static serialiseValue = (value: { type: string; data: string }): string => {
+    if (value.type === "entity") {
+      return (JSON.parse(value.data) as { name: string }).name;
+    }
+    if (value.type === "select") {
+      return (JSON.parse(value.data) as { selected: string }).selected;
+    }
+    return value.data;
+  };
+
+  /**
+   * Generate a string-based representation of multiple Entities for export.
+   * For CSV and XLSX, attribute columns are built from the union of all attributes
+   * across the provided entities, with empty cells where an entity lacks a given attribute.
    * @param entities Set of Entity identifiers for export
-   * @param format The format to generate (JSON or CSV)
+   * @param format The format to generate (json, csv, or xlsx)
+   * @param includeAttributes Whether to include attribute columns in spreadsheet output
+   * @param includeHistory Whether to include the history field in JSON output
    * @return {Promise<string>}
    */
-  static exportMany = async (entities: string[], format: string): Promise<string> => {
+  static exportMany = async (
+    entities: string[],
+    format: string,
+    includeAttributes = true,
+    includeHistory = false,
+  ): Promise<string> => {
     if (format === "json") {
-      // Handle JSON format
       const collection = [];
-      for await (const entity of entities) {
-        const result = await Entities.getOne(entity);
+      for await (const entityId of entities) {
+        const result = await Entities.getOne(entityId);
         if (result) {
-          // Remove `history` field
-          delete (result as never)["history"];
-
-          // Add to collection for export
+          if (!includeHistory) {
+            delete (result as never)["history"];
+          }
           collection.push(result);
         }
       }
 
       return JSON.stringify(collection, null, "  ");
-    } else {
-      // Handle CSV format (default)
-      const headers = ["ID", "Name", "Created", "Owner", "Description"];
-      const rows: string[][] = [];
+    }
 
-      for await (const entityId of entities) {
-        const entity = await Entities.getOne(entityId);
-        if (entity) {
-          // Format the row data
-          const row = [
-            entity._id,
-            entity.name,
-            dayjs(entity.created).format("DD MMM YYYY").toString(),
-            entity.owner,
-            entity.description || "",
-          ];
-          rows.push(row);
+    // CSV or XLSX: build union of attribute columns across all fetched entities
+    const fetched: EntityModel[] = [];
+    for await (const entityId of entities) {
+      const entity = await Entities.getOne(entityId);
+      if (entity) {
+        fetched.push(entity);
+      }
+    }
+
+    // Collect the ordered union of attributes seen across all entities
+    const allAttributes: AttributeModel[] = [];
+    if (includeAttributes) {
+      for (const entity of fetched) {
+        for (const attribute of entity.attributes) {
+          if (!allAttributes.some((a) => a._id === attribute._id)) {
+            allAttributes.push(attribute);
+          }
+        }
+      }
+    }
+
+    // Build header row
+    const headers = ["ID", "Name", "Created", "Owner", "Description"];
+    for (const attribute of allAttributes) {
+      for (const value of attribute.values) {
+        headers.push(`${value.name} (${attribute.name})`);
+      }
+    }
+
+    // Build one data row per entity
+    const rows: string[][] = [];
+    for (const entity of fetched) {
+      const row = [
+        entity._id,
+        entity.name,
+        dayjs(entity.created).format("DD MMM YYYY").toString(),
+        entity.owner,
+        entity.description || "",
+      ];
+
+      for (const attribute of allAttributes) {
+        const entityAttr = entity.attributes.find((a) => a._id === attribute._id);
+        for (const value of attribute.values) {
+          if (entityAttr) {
+            const entityValue = entityAttr.values.find((v) => v._id === value._id);
+            row.push(entityValue ? Entities.serialiseValue(entityValue) : "");
+          } else {
+            row.push("");
+          }
         }
       }
 
-      // Combine headers and rows, and format as CSV
-      const collated = [headers, ...rows];
-      const formatted = Papa.unparse(collated);
-
-      return formatted;
+      rows.push(row);
     }
+
+    if (format === "xlsx") {
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Export");
+      const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
+      return buffer.toString("base64");
+    }
+
+    return Papa.unparse([headers, ...rows]);
   };
 
   static addAttachment = async (_id: string, attachment: IGenericItem): Promise<IResponseMessage> => {

@@ -629,9 +629,10 @@ export const typedefs = `#graphql
     workspaceMetrics(_id: String): WorkspaceMetrics
 
     # Export queries
-    exportEntity(_id: String, format: String, fields: [String]): String
-    exportEntities(entities: [String], format: String): String
-    exportProject(_id: String, format: String, fields: [String]): String
+    exportEntity(_id: String, format: String, fields: [String], includeHistory: Boolean): String
+    exportEntities(entities: [String], format: String, includeAttributes: Boolean, includeHistory: Boolean): String
+    exportEntitiesAll(format: String, includeAttributes: Boolean, includeHistory: Boolean): String
+    exportProject(_id: String, format: String, fields: [String], includeHistory: Boolean): String
     exportProjectEntities(_id: String, format: String): String
     exportTemplate(_id: String): String
 

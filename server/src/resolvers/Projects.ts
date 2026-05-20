@@ -83,7 +83,7 @@ export const ProjectsResolvers = {
 
     exportProject: async (
       _parent: IResolverParent,
-      args: { _id: string; format: "json" | "csv"; fields?: string[] },
+      args: { _id: string; format: "json" | "csv"; fields?: string[]; includeHistory?: boolean },
       context: Context,
     ) => {
       // Retrieve the Workspace to determine which Entities to return
@@ -106,7 +106,7 @@ export const ProjectsResolvers = {
       }
 
       if (_.includes(workspace.projects, args._id)) {
-        return await Projects.export(args._id, args.format, args.fields);
+        return await Projects.export(args._id, args.format, args.fields, args.includeHistory ?? false);
       } else {
         throw new GraphQLError("You do not have permission to access this Project", {
           extensions: {

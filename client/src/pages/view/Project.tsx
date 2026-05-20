@@ -4,22 +4,17 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 // Existing and custom components
 import {
   Button,
-  Checkbox,
   CloseButton,
   Dialog,
   Drawer,
   EmptyState,
   Field,
-  Fieldset,
   Flex,
   Heading,
   Input,
   Menu,
-  Portal,
-  RadioGroup,
   Select,
   Spacer,
-  Stack,
   Tag,
   Text,
   createListCollection,
@@ -30,6 +25,7 @@ import {
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
+import ExportModal from "@components/ExportModal";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
@@ -38,7 +34,6 @@ import MultiEntitySelect from "@components/MultiEntitySelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Tooltip from "@components/Tooltip";
-import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import SaveModal from "@components/SaveModal";
@@ -50,7 +45,7 @@ import { Cell } from "@tanstack/react-table";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
-import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
@@ -62,8 +57,6 @@ import { auth } from "@lib/auth";
 import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
-import FileSaver from "file-saver";
-import slugify from "slugify";
 import { GLOBAL_STYLES } from "@variables";
 
 const Project = () => {
@@ -193,12 +186,9 @@ const Project = () => {
   // Entities staged for adding
   const [selectedEntities, setSelectedEntities] = useState<IGenericItem[]>([]);
 
-  // Export modal state and data
-  const selectExportFormatRef = useRef(null);
+  // Export modal state
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportFields, setExportFields] = useState([] as string[]);
-  const [exportFormat, setExportFormat] = useState("json");
-  const [exportEntityDetails, setExportEntityDetails] = React.useState<string | null>("name");
+  const [exportEntitiesOpen, setExportEntitiesOpen] = useState(false);
 
   useEffect(() => {
     if (isLoaded) {
@@ -249,26 +239,6 @@ const Project = () => {
     },
     fetchPolicy: "no-cache",
   });
-
-  // Query to get Project Entities export contents
-  const GET_PROJECT_ENTITIES_EXPORT = gql`
-    query GetProjectEntitiesExport($_id: String, $format: String) {
-      exportProjectEntities(_id: $_id, format: $format)
-    }
-  `;
-  const [exportProjectEntities, { loading: exportEntitiesLoading, error: exportEntitiesError }] = useLazyQuery<{
-    exportProjectEntities: string;
-  }>(GET_PROJECT_ENTITIES_EXPORT);
-
-  // Query to get Project Entities export contents
-  const GET_PROJECT_EXPORT = gql`
-    query GetProjectExport($_id: String, $format: String, $fields: [String]) {
-      exportProject(_id: $_id, format: $format, fields: $fields)
-    }
-  `;
-  const [exportProject, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportProject: string }>(
-    GET_PROJECT_EXPORT,
-  );
 
   // Mutation to update Project
   const UPDATE_PROJECT = gql`
@@ -555,118 +525,14 @@ const Project = () => {
     setIsLoaded(true);
   };
 
-  // Handle clicking the "Export" button
+  // Handle clicking the "Export Project" button
   const handleExportClick = () => {
-    setProject(project);
     setExportOpen(true);
   };
 
-  // Handle clicking the "Export" button
-  const handleExportEntitiesClick = async () => {
-    const response = await exportProjectEntities({
-      variables: { _id: project._id, format: "json" },
-    });
-
-    if (!response.data?.exportProjectEntities) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to export Project Entities",
-        type: "error",
-        duration: 4000,
-        closable: true,
-      });
-    } else {
-      if (response.data.exportProjectEntities) {
-        FileSaver.saveAs(
-          new Blob([response.data.exportProjectEntities]),
-          slugify(`export_${project._id}_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
-        );
-      }
-    }
-
-    if (exportEntitiesError) {
-      toaster.create({
-        title: "Error",
-        description: "Project Entities could not be exported",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  };
-
-  // Handle clicking the "Download" button
-  const handleDownloadClick = async (format: string) => {
-    let fields = exportFields;
-    // Update the exported fields if using JSON format and `Entities` have been selected
-    if (_.isEqual(format, "json") && _.includes(fields, "entities")) {
-      fields = exportFields.filter((field) => !_.isEqual(field, "entities"));
-      if (_.isEqual(exportEntityDetails, "name")) {
-        fields.push("entities_names");
-      } else {
-        fields.push("entities_id");
-      }
-    }
-
-    // Send query to generate data
-    const response = await exportProject({
-      variables: {
-        _id: id,
-        fields: fields,
-        format: format,
-      },
-    });
-
-    if (!response.data?.exportProject || exportError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred exporting this Project",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    } else if (response.data.exportProject) {
-      FileSaver.saveAs(
-        new Blob([response.data.exportProject]),
-        slugify(`${projectName.replace(" ", "")}_export.${format}`),
-      );
-
-      // Close the "Export" modal
-      setExportOpen(false);
-
-      // Reset the export state
-      setExportFields([]);
-
-      toaster.create({
-        title: "Info",
-        description: `Generated ${format.toUpperCase()} file`,
-        type: "info",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  };
-
-  // Handle checkbox selection on the export modal
-  const handleExportCheck = (field: string, checkState: boolean) => {
-    if (_.isEqual(checkState, true)) {
-      // If checked after click, add field to exportFields
-      if (!exportFields.includes(field)) {
-        const updatedFields = [...exportFields, field];
-        setExportFields(updatedFields);
-      }
-    } else {
-      // If unchecked after click, remove the field from exportFields
-      if (exportFields.includes(field)) {
-        const updatedFields = exportFields.filter((existingField) => {
-          if (!_.isEqual(existingField, field)) {
-            return existingField;
-          }
-          return;
-        });
-        setExportFields(updatedFields);
-      }
-    }
+  // Handle clicking the "Export Entities" button
+  const handleExportEntitiesClick = () => {
+    setExportEntitiesOpen(true);
   };
 
   /**
@@ -873,7 +739,7 @@ const Project = () => {
                     value={"export-project"}
                     onClick={handleExportClick}
                     fontSize={"xs"}
-                    disabled={exportLoading || projectArchived || !!previewVersion}
+                    disabled={projectArchived || !!previewVersion}
                   >
                     <Icon name={"download"} size={"xs"} />
                     Export Project
@@ -887,12 +753,7 @@ const Project = () => {
                       value={"export-entities"}
                       onClick={handleExportEntitiesClick}
                       fontSize={"xs"}
-                      disabled={
-                        displayProjectEntities?.length === 0 ||
-                        exportEntitiesLoading ||
-                        displayProjectArchived ||
-                        !!previewVersion
-                      }
+                      disabled={displayProjectEntities?.length === 0 || displayProjectArchived || !!previewVersion}
                     >
                       <Icon name={"download"} size={"xs"} />
                       Export Entities
@@ -1614,252 +1475,16 @@ const Project = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Dialog to export Entities */}
-        <Dialog.Root
-          open={exportOpen}
-          onOpenChange={(details) => setExportOpen(details.open)}
-          size={"xl"}
-          placement={"center"}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
-              {/* Heading and close button */}
-              <Dialog.Header
-                p={"2"}
-                fontWeight={"semibold"}
-                fontSize={"xs"}
-                bg={GLOBAL_STYLES.dialog.footerColor}
-                roundedTop={"md"}
-              >
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"download"} size={"xs"} />
-                  <Text fontWeight={"semibold"} fontSize={"xs"}>
-                    Export Project
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setExportOpen(false)} />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"} gap={"1"}>
-                {/* Select export format */}
-                <Flex w={"100%"} direction={"column"} py={"1"} gap={"1"} ref={selectExportFormatRef}>
-                  <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} ml={"0.5"}>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Format:
-                      </Text>
-                      <Fieldset.Root w={"fit-content"}>
-                        <Fieldset.Content>
-                          <Field.Root>
-                            <Select.Root
-                              key={"select-export-format"}
-                              w={"120px"}
-                              size={"xs"}
-                              rounded={"md"}
-                              collection={createListCollection({
-                                items: ["JSON", "CSV"],
-                              })}
-                              defaultValue={["JSON"]}
-                              onValueChange={(details) => setExportFormat(details.items[0].toLowerCase())}
-                            >
-                              <Select.HiddenSelect />
-                              <Select.Control>
-                                <Select.Trigger rounded={"md"}>
-                                  <Select.ValueText placeholder={"Select Export Format"} />
-                                </Select.Trigger>
-                                <Select.IndicatorGroup>
-                                  <Select.Indicator />
-                                </Select.IndicatorGroup>
-                              </Select.Control>
-                              <Portal container={selectExportFormatRef}>
-                                <Select.Positioner>
-                                  <Select.Content>
-                                    {createListCollection({
-                                      items: ["JSON", "CSV"],
-                                    }).items.map((valueType) => (
-                                      <Select.Item item={valueType} key={valueType}>
-                                        {valueType}
-                                        <Select.ItemIndicator />
-                                      </Select.Item>
-                                    ))}
-                                  </Select.Content>
-                                </Select.Positioner>
-                              </Portal>
-                            </Select.Root>
-                          </Field.Root>
-                        </Fieldset.Content>
-                      </Fieldset.Root>
-                    </Flex>
-                    {/* Export information */}
-                    {_.isEqual(exportFormat, "json") && (
-                      <Information text={"JSON files can be re-imported into Metadatify."} />
-                    )}
-                    {_.isEqual(exportFormat, "csv") && (
-                      <Information text={"To export Entities alongside Project details, use JSON format."} />
-                    )}
-                  </Flex>
-                  <Text fontSize={"xs"}>Select the Project fields to be exported:</Text>
-                </Flex>
+        {/* Export project modal */}
+        <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"project"} id={id} />
 
-                {/* Selection content */}
-                <Flex
-                  direction={"row"}
-                  p={"1"}
-                  gap={"1"}
-                  rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
-                >
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"}>Details</Fieldset.Legend>
-                      {!loading ? (
-                        <Stack gap={"1"} direction={"column"}>
-                          <Checkbox.Root disabled defaultChecked size={"xs"} rounded={"md"} fontSize={"xs"}>
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label>
-                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                <Text fontWeight={"semibold"}>Name:</Text>
-                                <Text>{projectName}</Text>
-                              </Flex>
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                          <Checkbox.Root
-                            size={"xs"}
-                            rounded={"md"}
-                            fontSize={"xs"}
-                            checked={_.includes(exportFields, "created")}
-                            onCheckedChange={(details) => handleExportCheck("created", details.checked as boolean)}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                <Text fontWeight={"semibold"}>Created:</Text>
-                                <Text>{dayjs(project.created).format("DD MMM YYYY")}</Text>
-                              </Flex>
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                          <Checkbox.Root
-                            size={"xs"}
-                            rounded={"md"}
-                            checked={_.includes(exportFields, "owner")}
-                            onCheckedChange={(details) => handleExportCheck("owner", details.checked as boolean)}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label>
-                              <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                Owner:
-                                <ActorTag identifier={project.owner} inlineNoAvatar fallback={""} size={"sm"} />
-                              </Flex>
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                          <Checkbox.Root
-                            size={"xs"}
-                            rounded={"md"}
-                            checked={_.includes(exportFields, "description")}
-                            onCheckedChange={(details) => handleExportCheck("description", details.checked as boolean)}
-                            disabled={_.isEqual(projectDescription, "")}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                <Text fontWeight={"semibold"}>Description:</Text>
-                                <Text lineClamp={1}>
-                                  {_.isEqual(projectDescription, "")
-                                    ? "No Description"
-                                    : _.truncate(projectDescription, {
-                                        length: 32,
-                                      })}
-                                </Text>
-                              </Flex>
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"xs"}>Loading details...</Text>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"}>Entities</Fieldset.Legend>
-                      {!loading ? (
-                        <Tooltip
-                          content={"Entities cannot be included when exporting to CSV"}
-                          disabled={_.isEqual(exportFormat, "json")}
-                          showArrow
-                        >
-                          <Checkbox.Root
-                            size={"xs"}
-                            rounded={"md"}
-                            checked={_.includes(exportFields, "entities")}
-                            onCheckedChange={(details) => handleExportCheck("entities", details.checked as boolean)}
-                            disabled={_.isEqual(projectEntities.length, 0) || _.isEqual(exportFormat, "csv")}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              <Text lineClamp={1} fontSize={"xs"}>
-                                Export all Entities
-                              </Text>
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        </Tooltip>
-                      ) : (
-                        <Text fontSize={"xs"}>Loading details...</Text>
-                      )}
-                      {_.includes(exportFields, "entities") && (
-                        <RadioGroup.Root
-                          value={exportEntityDetails}
-                          onValueChange={(event) => setExportEntityDetails(event.value)}
-                          size={"xs"}
-                        >
-                          <Stack direction={"row"} gap={"1"}>
-                            <RadioGroup.Item value={"name"}>
-                              <RadioGroup.ItemHiddenInput />
-                              <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"xs"}>Names Only</RadioGroup.Label>
-                            </RadioGroup.Item>
-                            <RadioGroup.Item value={"_id"}>
-                              <RadioGroup.ItemHiddenInput />
-                              <RadioGroup.ItemIndicator />
-                              <RadioGroup.Label fontSize={"xs"}>Identifiers Only</RadioGroup.Label>
-                            </RadioGroup.Item>
-                          </Stack>
-                        </RadioGroup.Root>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                <Flex direction={"column"} w={"30%"} gap={"1"}>
-                  {/* "Download" button */}
-                  <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
-                    <Button
-                      colorPalette={"blue"}
-                      size={"xs"}
-                      rounded={"md"}
-                      onClick={() => handleDownloadClick(exportFormat)}
-                      loading={exportLoading}
-                    >
-                      Download
-                      <Icon name={"download"} size={"xs"} />
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+        {/* Export project entities modal */}
+        <ExportModal
+          open={exportEntitiesOpen}
+          setOpen={setExportEntitiesOpen}
+          dataType={"entities"}
+          ids={projectEntities}
+        />
 
         {/* Save message modal */}
         <SaveModal

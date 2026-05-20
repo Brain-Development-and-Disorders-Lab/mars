@@ -11,13 +11,10 @@ import {
   useDisclosure,
   Tag,
   Select,
-  Checkbox,
-  Stack,
   Drawer,
   IconButton,
   Menu,
   Dialog,
-  Separator,
   Fieldset,
   Field,
   createListCollection,
@@ -31,6 +28,7 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
+import ExportModal from "@components/ExportModal";
 import RelationshipGraph from "@components/RelationshipGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -44,7 +42,6 @@ import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Relationships from "@components/Relationships";
 import Tooltip from "@components/Tooltip";
-import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import SaveModal from "@components/SaveModal";
@@ -316,15 +313,6 @@ const Entity = () => {
   const [getFile] = useLazyQuery<{ downloadFile: string }>(GET_FILE_URL);
 
   // Query to export an Entity, returning the string contents of a file for download
-  const EXPORT_ENTITY = gql`
-    query ExportEntity($_id: String, $format: String, $fields: [String]) {
-      exportEntity(_id: $_id, format: $format, fields: $fields)
-    }
-  `;
-  const [exportEntity, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportEntity: string }>(
-    EXPORT_ENTITY,
-  );
-
   const SUGGEST_TEMPLATE = gql`
     query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
       suggestTemplate(name: $name, description: $description, templates: $templates)
@@ -633,11 +621,7 @@ const Entity = () => {
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // Export dialog
-  const selectExportFormatRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportFields, setExportFields] = useState<string[]>(["owner"]);
-
-  const [exportFormat, setExportFormat] = useState("json");
 
   // Upload dialog
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -1062,72 +1046,6 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = async (format: string) => {
-    // Execute query to export the Entity
-    const response = await exportEntity({
-      variables: {
-        _id: id,
-        format: format,
-        fields: exportFields,
-      },
-    });
-
-    if (response.data) {
-      let exportData = response.data.exportEntity;
-      // Clean the response data if required
-      if (_.isEqual(format, "json")) {
-        exportData = JSON.stringify(JSON.parse(exportData), null, "  ");
-      }
-
-      FileSaver.saveAs(new Blob([exportData]), slugify(`${entityName.replace(" ", "")}_export.${format}`));
-      posthog.capture("entity_exported", { format });
-
-      // Close the "Export" modal
-      setExportOpen(false);
-
-      // Reset the export state
-      setExportFields([]);
-
-      toaster.create({
-        title: "Success",
-        description: `Successfully generated ${format.toUpperCase()} file`,
-        type: "success",
-        duration: 2000,
-        closable: true,
-      });
-    }
-
-    if (exportError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred when exporting this Entity",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  };
-
-  // A list of all fields that can be exported, generated when the interface is opened
-  const allExportFields = ["name", "created", "owner", "description"];
-
-  // Handle checkbox selection on the export modal
-  const handleExportCheck = (field: string, checkState: boolean) => {
-    if (_.isEqual(checkState, true)) {
-      // If checked after click, add field to exportFields
-      if (!exportFields.includes(field)) {
-        const updatedFields = [...exportFields, field];
-        setExportFields(updatedFields);
-      }
-    } else {
-      // If unchecked after click, remove the field from exportFields
-      if (exportFields.includes(field)) {
-        const updatedFields = exportFields.filter((existingField) => !_.isEqual(existingField, field));
-        setExportFields(updatedFields);
-      }
-    }
-  };
-
   // Handle clicking the "Clone" button
   const handleCloneClick = async () => {
     // Create a new Entity, with `(cloned)` appended to the name
@@ -2991,332 +2909,7 @@ const Entity = () => {
         />
 
         {/* Export modal */}
-        <Dialog.Root
-          open={exportOpen}
-          onOpenChange={(event) => setExportOpen(event.open)}
-          size={"xl"}
-          placement={"center"}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Trigger />
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
-              {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"download"} size={"xs"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Export Entity
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setExportOpen(false)} />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"} gap={"1"}>
-                {/* Export information */}
-                {_.isEqual(exportFormat, "json") && (
-                  <Information text={"JSON files can be re-imported into Metadatify."} />
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Information
-                    text={
-                      "When exporting Origins, Products, or Projects, only the name will be exported. To export identifiers, use JSON format."
-                    }
-                  />
-                )}
-
-                {/* Select export format */}
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"1"}
-                  gap={"1"}
-                  justify={"space-between"}
-                  align={"center"}
-                  ref={selectExportFormatRef}
-                >
-                  <Flex gap={"1"} align={"center"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Format:
-                    </Text>
-                    <Fieldset.Root w={"fit-content"}>
-                      <Fieldset.Content>
-                        <Field.Root>
-                          <Select.Root
-                            key={"select-export-format"}
-                            w={"120px"}
-                            size={"xs"}
-                            collection={createListCollection({
-                              items: ["JSON", "CSV"],
-                            })}
-                            defaultValue={["JSON"]}
-                            onValueChange={(details) => setExportFormat(details.items[0].toLowerCase())}
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger rounded={"md"}>
-                                <Select.ValueText placeholder={"Select Export Format"} />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Portal container={selectExportFormatRef}>
-                              <Select.Positioner>
-                                <Select.Content>
-                                  {createListCollection({
-                                    items: ["JSON", "CSV"],
-                                  }).items.map((valueType) => (
-                                    <Select.Item item={valueType} key={valueType}>
-                                      {valueType}
-                                      <Select.ItemIndicator />
-                                    </Select.Item>
-                                  ))}
-                                </Select.Content>
-                              </Select.Positioner>
-                            </Portal>
-                          </Select.Root>
-                        </Field.Root>
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Select the Entity fields to be exported.
-                  </Text>
-                </Flex>
-
-                {/* Selection content */}
-                <Flex
-                  direction={"column"}
-                  p={"1"}
-                  gap={"1"}
-                  rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
-                >
-                  <Flex direction={"row"} gap={"1"}>
-                    <Fieldset.Root>
-                      <Fieldset.Content gap={"1"}>
-                        <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                          Entity Details
-                        </Fieldset.Legend>
-                        {!loading ? (
-                          <Stack gap={"1"} direction={"column"}>
-                            <Checkbox.Root disabled defaultChecked fontSize={"xs"} size={"xs"}>
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>
-                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                  <Text fontWeight={"semibold"}>Name:</Text>
-                                  <Text>{entityName}</Text>
-                                </Flex>
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                            <Checkbox.Root
-                              checked={_.includes(exportFields, "created")}
-                              onCheckedChange={(details) => handleExportCheck("created", details.checked as boolean)}
-                              fontSize={"xs"}
-                              size={"xs"}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>
-                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                  <Text fontWeight={"semibold"}>Created:</Text>
-                                  <Text>{dayjs(entity.created).format("DD MMM YYYY")}</Text>
-                                </Flex>
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                            <Checkbox.Root checked={true} disabled fontSize={"xs"} size={"xs"}>
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>
-                                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                  Owner:
-                                  <ActorTag identifier={entity.owner} inlineNoAvatar fallback={""} size={"sm"} />
-                                </Flex>
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                            <Checkbox.Root
-                              checked={_.includes(exportFields, "description")}
-                              onCheckedChange={(details) =>
-                                handleExportCheck("description", details.checked as boolean)
-                              }
-                              disabled={_.isEqual(entityDescription, "")}
-                              size={"xs"}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>
-                                <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
-                                  <Text fontWeight={"semibold"}>Description:</Text>
-                                  <Text lineClamp={1}>
-                                    {_.isEqual(entityDescription, "")
-                                      ? "No Description"
-                                      : _.truncate(entityDescription, {
-                                          length: 32,
-                                        })}
-                                  </Text>
-                                </Flex>
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                          </Stack>
-                        ) : (
-                          <Text fontSize={"sm"}>Loading details</Text>
-                        )}
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                    <Fieldset.Root>
-                      <Fieldset.Content gap={"1"}>
-                        <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                          Linked Projects
-                        </Fieldset.Legend>
-                        {!loading && entityProjects.length > 0 ? (
-                          <Stack gap={1} direction={"column"}>
-                            {entityProjects.map((project) => {
-                              allExportFields.push(`project_${project}`);
-                              return (
-                                <Checkbox.Root
-                                  size={"xs"}
-                                  key={project}
-                                  checked={_.includes(exportFields, `project_${project}`)}
-                                  onCheckedChange={(details) =>
-                                    handleExportCheck(`project_${project}`, details.checked as boolean)
-                                  }
-                                >
-                                  <Checkbox.HiddenInput />
-                                  <Checkbox.Control />
-                                  <Checkbox.Label>
-                                    <Linky id={project} type={"projects"} size={"xs"} />
-                                  </Checkbox.Label>
-                                </Checkbox.Root>
-                              );
-                            })}
-                          </Stack>
-                        ) : (
-                          <Text fontSize={"xs"}>No Projects</Text>
-                        )}
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-
-                  <Separator />
-
-                  <Flex direction={"row"} gap={"1"}>
-                    <Fieldset.Root>
-                      <Fieldset.Content gap={"1"}>
-                        <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                          Entity Relationships
-                        </Fieldset.Legend>
-                        {!loading && entityRelationships?.length > 0 ? (
-                          <Stack gap={1} direction={"column"}>
-                            {entityRelationships.map((relationship) => {
-                              allExportFields.push(`relationship_${relationship.target._id}_${relationship.type}`);
-                              return (
-                                <Checkbox.Root
-                                  size={"xs"}
-                                  fontSize={"xs"}
-                                  key={relationship.target._id}
-                                  checked={_.includes(
-                                    exportFields,
-                                    `relationship_${relationship.target._id}_${relationship.type}`,
-                                  )}
-                                  onCheckedChange={(details) =>
-                                    handleExportCheck(
-                                      `relationship_${relationship.target._id}_${relationship.type}`,
-                                      details.checked as boolean,
-                                    )
-                                  }
-                                >
-                                  <Checkbox.HiddenInput />
-                                  <Checkbox.Control />
-                                  <Checkbox.Label>
-                                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                                      {relationship.type === "general" ? (
-                                        <Text fontWeight={"semibold"}>Related to:</Text>
-                                      ) : (
-                                        <Text fontWeight={"semibold"}>{_.capitalize(relationship.type)} of:</Text>
-                                      )}
-                                      <Linky id={relationship.target._id} type={"entities"} size={"xs"} />
-                                    </Flex>
-                                  </Checkbox.Label>
-                                </Checkbox.Root>
-                              );
-                            })}
-                          </Stack>
-                        ) : (
-                          <Text fontSize={"xs"}>No Relationships</Text>
-                        )}
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-
-                  <Separator />
-
-                  <Flex direction={"row"} gap={"1"}>
-                    <Fieldset.Root>
-                      <Fieldset.Content gap={"1"}>
-                        <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                          Entity Attributes
-                        </Fieldset.Legend>
-                        {!loading && entityAttributes.length > 0 ? (
-                          <Stack gap={1} direction={"column"}>
-                            {entityAttributes.map((attribute) => {
-                              allExportFields.push(`attribute_${attribute._id}`);
-                              return (
-                                <Checkbox.Root
-                                  size={"xs"}
-                                  fontSize={"xs"}
-                                  key={attribute._id}
-                                  checked={_.includes(exportFields, `attribute_${attribute._id}`)}
-                                  onCheckedChange={(details) =>
-                                    handleExportCheck(`attribute_${attribute._id}`, details.checked as boolean)
-                                  }
-                                >
-                                  <Checkbox.HiddenInput />
-                                  <Checkbox.Control />
-                                  <Checkbox.Label>
-                                    <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                      <Text fontWeight={"semibold"}>Attribute:</Text>
-                                      <Text>{attribute.name}</Text>
-                                    </Flex>
-                                  </Checkbox.Label>
-                                </Checkbox.Root>
-                              );
-                            })}
-                          </Stack>
-                        ) : (
-                          <Text fontSize={"xs"}>No Attributes</Text>
-                        )}
-                      </Fieldset.Content>
-                    </Fieldset.Root>
-                  </Flex>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                <Flex direction={"column"} w={"30%"} gap={"1"}>
-                  {/* "Download" button */}
-                  <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
-                    <Button
-                      variant={"solid"}
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"blue"}
-                      onClick={() => handleDownloadClick(exportFormat)}
-                      loading={exportLoading}
-                    >
-                      Download
-                      <Icon name={"download"} size={"xs"} />
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+        <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
 
         {/* Graph modal */}
         <Dialog.Root
