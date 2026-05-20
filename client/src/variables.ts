@@ -18,6 +18,9 @@ export const GLOBAL_STYLES = {
     style: "1px solid",
     color: "gray.300",
   },
+  card: {
+    bg: "gray.50",
+  },
   entity: {
     iconColor: "purple.500",
     defaultColor: "purple.400",

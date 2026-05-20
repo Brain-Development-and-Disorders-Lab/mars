@@ -1881,7 +1881,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
                 <Flex
                   direction={"row"}
-                  gap={"1"}
+                  gap={"2"}
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
@@ -1915,7 +1915,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
                 <Flex
                   direction={"row"}
-                  gap={"1"}
+                  gap={"2"}
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
