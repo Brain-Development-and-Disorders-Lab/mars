@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -7,16 +7,10 @@ import {
   Flex,
   Heading,
   Text,
-  Dialog,
   Button,
   Spacer,
   Tag,
-  useDisclosure,
-  Select,
-  Portal,
-  createListCollection,
   EmptyState,
-  CloseButton,
   Field,
   Input,
   Checkbox,
@@ -24,14 +18,14 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
+import ExportModal from "@components/ExportModal";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
-import { toaster } from "@components/Toast";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { DataTableAction, EntityModel, IGenericItem } from "@types";
+import { DataTableAction, EntityModel } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -41,13 +35,10 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { ignoreAbort } from "@lib/util";
 import _ from "lodash";
-import FileSaver from "file-saver";
-import slugify from "slugify";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -95,49 +86,8 @@ const Entities = () => {
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Entities export modal
-  const { open: isExportOpen, onOpen: onExportOpen, onClose: onExportClose } = useDisclosure();
-
-  const [toExport, setToExport] = useState([] as IGenericItem[]);
-  const [exportFormat, setExportFormat] = useState("json" as "json" | "csv");
-  const exportEntitiesRef = useRef<HTMLDivElement>(null);
-  const [exportFormatSelected, setExportFormatSelected] = useState(false);
-  const [exportAll, setExportAll] = useState(false);
-
-  // Add state for export table columns
-  const [exportTableVisibleColumns] = useState({
-    name: true,
-    _id: true,
-  });
-
-  // Setup columns for review table
-  const exportTableColumnHelper = createColumnHelper<IGenericItem>();
-  const exportTableColumns = [
-    exportTableColumnHelper.accessor("name", {
-      cell: (info) => {
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 32 })}
-              </Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
-      header: "Entity Name",
-    }),
-    exportTableColumnHelper.accessor("_id", {
-      cell: () => (
-        <Flex direction={"row"} gap={"1"} align={"center"} p={"1"}>
-          <Icon name={"download"} color={"blue.600"} size={"xs"} />
-          <Text fontWeight={"semibold"} fontSize={"xs"} color={"blue.600"}>
-            {"Export"}
-          </Text>
-        </Flex>
-      ),
-      header: "Action",
-    }),
-  ];
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportIds, setExportIds] = useState<string[] | undefined>(undefined);
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -210,26 +160,6 @@ const Entities = () => {
       sort: sortState || undefined,
     },
   });
-
-  // Query to generate exported data for selected Entities
-  const GET_ENTITIES_EXPORT = gql`
-    query GetEntitiesExport($entities: [String], $format: String) {
-      exportEntities(entities: $entities, format: $format)
-    }
-  `;
-  const [exportEntities, { loading: exportLoading, error: exportError }] = useLazyQuery<{ exportEntities: string }>(
-    GET_ENTITIES_EXPORT,
-  );
-
-  // Query to generate exported data for all Entities
-  const GET_ENTITIES_EXPORT_ALL = gql`
-    query GetEntitiesExportAll($format: String) {
-      exportEntitiesAll(format: $format)
-    }
-  `;
-  const [exportEntitiesAll, { loading: exportAllLoading, error: exportAllError }] = useLazyQuery<{
-    exportEntitiesAll: string;
-  }>(GET_ENTITIES_EXPORT_ALL);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -368,19 +298,9 @@ const Entities = () => {
       icon: "download",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, rows: any) => {
-        // Export rows that have been selected
-        const selectedEntities: IGenericItem[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          selectedEntities.push({
-            _id: table.getRow(rowIndex).original._id,
-            name: table.getRow(rowIndex).original.name,
-          });
-        }
-        setToExport(selectedEntities);
-
-        // Open the Entity export modal
-        onExportOpen();
-
+        const ids = Object.keys(rows).map((rowIndex) => table.getRow(rowIndex).original._id as string);
+        setExportIds(ids);
+        setExportOpen(true);
         table.resetRowSelection();
       },
     },
@@ -390,63 +310,12 @@ const Entities = () => {
       alwaysEnabled: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action: async (table, _rows: any) => {
-        setExportAll(true);
-        onExportOpen();
+        setExportIds(undefined);
+        setExportOpen(true);
         table.resetRowSelection();
       },
     },
   ];
-
-  const onExportClick = async () => {
-    if (exportAll) {
-      const response = await exportEntitiesAll({
-        variables: { format: exportFormat },
-      }).catch(ignoreAbort);
-
-      if (!response?.data?.exportEntitiesAll || exportAllError) {
-        toaster.create({
-          title: "Error",
-          description: "Unable to export all Entities",
-          type: "error",
-          duration: 2000,
-          closable: true,
-        });
-      } else if (response?.data?.exportEntitiesAll) {
-        FileSaver.saveAs(
-          new Blob([response.data.exportEntitiesAll]),
-          slugify(`export_entities_all_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
-        );
-      }
-    } else {
-      const response = await exportEntities({
-        variables: {
-          // Only pass the Entity identifiers
-          entities: toExport.map((entity) => entity._id),
-          format: exportFormat,
-        },
-      }).catch(ignoreAbort);
-
-      if (!response?.data?.exportEntities || exportError) {
-        toaster.create({
-          title: "Error",
-          description: "Unable to export selected Entities",
-          type: "error",
-          duration: 2000,
-          closable: true,
-        });
-      } else if (response?.data?.exportEntities) {
-        FileSaver.saveAs(
-          new Blob([response.data.exportEntities]),
-          slugify(`export_entities_selected_${dayjs(Date.now()).format("YYYY_MM_DD")}.${exportFormat}`),
-        );
-      }
-    }
-
-    // Reset the Entity export collection and close the modal
-    setToExport([]);
-    setExportAll(false);
-    onExportClose();
-  };
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
@@ -729,130 +598,7 @@ const Entities = () => {
         </Flex>
       </Flex>
 
-      <Dialog.Root
-        open={isExportOpen}
-        size={exportAll ? "md" : "xl"}
-        placement={"center"}
-        scrollBehavior={"inside"}
-        onEscapeKeyDown={onExportClose}
-        onInteractOutside={onExportClose}
-      >
-        <Dialog.Trigger />
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            {/* Heading and close button */}
-            <Dialog.Header
-              p={"2"}
-              fontWeight={"semibold"}
-              roundedTop={"md"}
-              borderColor={GLOBAL_STYLES.border.color}
-              bg={GLOBAL_STYLES.dialog.headerColor}
-            >
-              <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-                <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
-                  <Icon name={"download"} size={"xs"} />
-                  <Text fontWeight={"semibold"} fontSize={"xs"}>
-                    Export Entities
-                  </Text>
-                </Flex>
-              </Flex>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={onExportClose} />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-            <Dialog.Body p={"1"}>
-              {/* Select export format */}
-              <Flex gap={"1"} direction={"column"}>
-                <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    File Format:
-                  </Text>
-                  <Flex>
-                    <Field.Root invalid={!exportFormatSelected} required>
-                      <Select.Root
-                        key={"select-export-format"}
-                        size={"xs"}
-                        w={"xs"}
-                        rounded={"md"}
-                        collection={createListCollection({
-                          items: ["JSON", "CSV"],
-                        })}
-                        onValueChange={(details) => {
-                          setExportFormat(details.items[0].toLowerCase() as "json" | "csv");
-                          setExportFormatSelected(true);
-                        }}
-                      >
-                        <Select.HiddenSelect />
-                        <Select.Control>
-                          <Select.Trigger rounded={"md"}>
-                            <Select.ValueText placeholder={"Select export format"} />
-                          </Select.Trigger>
-                          <Select.IndicatorGroup>
-                            <Select.Indicator />
-                          </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Portal container={exportEntitiesRef}>
-                          <Select.Positioner>
-                            <Select.Content zIndex={9999}>
-                              {createListCollection({
-                                items: ["JSON", "CSV"],
-                              }).items.map((valueType) => (
-                                <Select.Item item={valueType} key={valueType}>
-                                  {valueType}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ))}
-                            </Select.Content>
-                          </Select.Positioner>
-                        </Portal>
-                      </Select.Root>
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-
-                <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"}>
-                  {exportAll ? (
-                    <Flex align={"center"} gap={"1"} p={"2"}>
-                      <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        {`All ${data?.entities?.total ?? 0} Entities will be exported`}
-                      </Text>
-                    </Flex>
-                  ) : (
-                    <DataTable
-                      columns={exportTableColumns}
-                      data={toExport}
-                      visibleColumns={exportTableVisibleColumns}
-                      selectedRows={{}}
-                      showPagination
-                    />
-                  )}
-                </Flex>
-              </Flex>
-            </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                {/* "Export" button */}
-                <Flex direction={"row"} w={"100%"} gap={"2"} justify={"right"} align={"center"}>
-                  <Button
-                    colorPalette={"blue"}
-                    size={"xs"}
-                    onClick={() => onExportClick()}
-                    loading={exportLoading || exportAllLoading}
-                    loadingText={"Exporting..."}
-                    rounded={"md"}
-                    disabled={!exportFormatSelected}
-                  >
-                    Download
-                    <Icon name={"download"} />
-                  </Button>
-                </Flex>
-              </Flex>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
     </Content>
   );
 };

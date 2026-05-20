@@ -482,6 +482,19 @@ export type ImportDialogProps = {
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
+export type ExportDataType = "entity" | "entities" | "project" | "template";
+
+// `ExportModal` props
+export type ExportModalProps = {
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+  dataType: ExportDataType;
+  // Single-item export (entity, project, or template)
+  id?: string;
+  // Multi-entity export; undefined means export all entities
+  ids?: string[];
+};
+
 // `ScanModal` props
 export type ScanModalProps = {
   open: boolean;

@@ -31,6 +31,7 @@ import TimestampTag from "@components/TimestampTag";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
+import ExportModal from "@components/ExportModal";
 import SaveModal from "@components/SaveModal";
 import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -41,8 +42,6 @@ import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
 import _ from "lodash";
-import slugify from "slugify";
-import FileSaver from "file-saver";
 import dayjs from "dayjs";
 
 // Routing and navigation
@@ -50,7 +49,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -68,6 +67,8 @@ const Template = () => {
   const [templateValues, setTemplateValues] = useState<IValue[]>([]);
   const [templateUsage, setTemplateUsage] = useState<AttributeUsage[]>([]);
   const [templateHistory, setTemplateHistory] = useState<AttributeHistory[]>([]);
+
+  const [exportOpen, setExportOpen] = useState(false);
 
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -200,16 +201,6 @@ const Template = () => {
     },
     fetchPolicy: "no-cache",
   });
-
-  // Query to get Template export contents
-  const GET_TEMPLATE_EXPORT = gql`
-    query GetTemplateExport($_id: String) {
-      exportTemplate(_id: $_id)
-    }
-  `;
-  const [exportTemplate, { error: exportError }] = useLazyQuery<{
-    exportTemplate: string;
-  }>(GET_TEMPLATE_EXPORT);
 
   // Mutation to update Template
   const UPDATE_TEMPLATE = gql`
@@ -444,40 +435,6 @@ const Template = () => {
     }
   };
 
-  /**
-   * Handle the export button being clicked
-   */
-  const handleDownloadClick = async () => {
-    const response = await exportTemplate({
-      variables: {
-        _id: id,
-      },
-    });
-
-    if (!response.data?.exportTemplate || exportError) {
-      toaster.create({
-        title: "Error",
-        description: "An error occurred exporting this Template",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    } else if (response.data.exportTemplate) {
-      FileSaver.saveAs(
-        new Blob([response.data.exportTemplate]),
-        slugify(`${templateName.replace(" ", "")}_export.json`),
-      );
-
-      toaster.create({
-        title: "Success",
-        description: `Generated JSON file`,
-        type: "success",
-        duration: 2000,
-        closable: true,
-      });
-    }
-  };
-
   // Define the columns for Template usage
   const usageColumnHelper = createColumnHelper<AttributeUsage>();
   const usageColumns = [
@@ -655,8 +612,8 @@ const Template = () => {
                   <Menu.Item
                     fontSize={"xs"}
                     value={"export"}
-                    onClick={handleDownloadClick}
-                    disabled={editing || templateArchived}
+                    onClick={() => setExportOpen(true)}
+                    disabled={templateArchived || !!previewVersion}
                   >
                     <Icon name={"download"} size={"xs"} />
                     Export
@@ -1259,6 +1216,8 @@ const Template = () => {
           </Flex>
         </Flex>
       </Flex>
+
+      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
 
       {/* Save message modal */}
       <SaveModal
