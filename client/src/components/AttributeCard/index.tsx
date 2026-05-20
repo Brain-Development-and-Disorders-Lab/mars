@@ -54,6 +54,7 @@ const AttributeCard = (props: AttributeCardProps) => {
         gap={"1"}
         border={GLOBAL_STYLES.border.style}
         borderColor={GLOBAL_STYLES.border.color}
+        bg={"white"}
         rounded={"md"}
         p={"1"}
       >
@@ -82,7 +83,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             >
               <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Attribute{name !== "" ? `: ${name}` : ""}
+                {name !== "" ? name : "New Attribute"}
               </Text>
             </Flex>
           </Flex>

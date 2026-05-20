@@ -32,7 +32,7 @@ test.describe("Import", () => {
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(csvPath);
 
-      await selectDropdownOption(page, '[data-testid="import-type-select-trigger"]', "Entities");
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
@@ -63,7 +63,7 @@ test.describe("Import", () => {
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(jsonPath);
 
-      await selectDropdownOption(page, '[data-testid="import-type-select-trigger"]', "Entities");
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       // Wait for continue button to be enabled
       await clickButtonWhenEnabled(page, "#importContinueButton");
@@ -73,7 +73,7 @@ test.describe("Import", () => {
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
       await page
-        .locator("text=Existing Attributes defined in JSON will be preserved")
+        .locator("text=Existing Attributes from the JSON file will be preserved")
         .waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 

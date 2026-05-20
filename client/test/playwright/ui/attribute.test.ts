@@ -104,13 +104,11 @@ test.describe("Template", () => {
       await openItemFromTable(page, templateName, "View Template");
 
       await page.click('[data-testid="templateActionsButton"]');
-      const downloadPromise = page.waitForEvent("download");
       await page.click('[data-value="export"]');
+      await page.locator('button:has-text("Download")').waitFor({ state: "visible", timeout: 10000 });
+      const downloadPromise = page.waitForEvent("download");
+      await page.locator('button:has-text("Download")').click();
       await downloadPromise;
-      await page
-        .locator(".chakra-toast__root")
-        .filter({ hasText: "Generated JSON file" })
-        .waitFor({ state: "visible", timeout: 10000 });
     });
   });
 
