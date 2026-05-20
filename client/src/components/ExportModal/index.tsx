@@ -1,21 +1,8 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Checkbox,
-  CloseButton,
-  Dialog,
-  Fieldset,
-  Flex,
-  Portal,
-  Select,
-  Separator,
-  Stack,
-  Text,
-  createListCollection,
-} from "@chakra-ui/react";
+import { Button, Checkbox, CloseButton, Dialog, Flex, Stack, Text } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -158,8 +145,6 @@ const ExportModal = (props: ExportModalProps) => {
   const [includeHistory, setIncludeHistory] = useState(false);
   const [includeAttributes, setIncludeAttributes] = useState(true);
   const [exportFields, setExportFields] = useState<string[]>([]);
-
-  const formatSelectRef = useRef<HTMLDivElement>(null);
 
   // Fetch entity or project details for single-item field selection
   const [getEntity, { data: entityData, loading: entityLoading }] = useLazyQuery<{
@@ -308,66 +293,59 @@ const ExportModal = (props: ExportModalProps) => {
             </Dialog.CloseTrigger>
           </Dialog.Header>
 
-          <Dialog.Body p={"1"} gap={"1"}>
-            {/* Format selector */}
-            <Flex w={"100%"} direction={"row"} p={"1"} gap={"1"} align={"center"} ref={formatSelectRef}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Format:
+          <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} gap={"2"}>
+            {/* Format */}
+            <Flex direction={"column"} gap={"1.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Format
               </Text>
-              <Select.Root
-                key={"select-export-format"}
-                w={"120px"}
-                size={"xs"}
-                collection={createListCollection({ items: formatOptions })}
-                defaultValue={["JSON"]}
-                onValueChange={(details) => {
-                  setFormat(details.items[0].toLowerCase() as "json" | "csv" | "xlsx");
-                }}
-              >
-                <Select.HiddenSelect />
-                <Select.Control>
-                  <Select.Trigger rounded={"md"}>
-                    <Select.ValueText placeholder={"Select format"} />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal container={formatSelectRef}>
-                  <Select.Positioner>
-                    <Select.Content zIndex={9999}>
-                      {formatOptions.map((option) => (
-                        <Select.Item item={option} key={option}>
-                          {option}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
+              <Flex gap={"1"}>
+                {formatOptions.map((opt) => {
+                  const val = opt.toLowerCase() as typeof format;
+                  return (
+                    <Button
+                      key={opt}
+                      size={"xs"}
+                      rounded={"md"}
+                      variant={format === val ? "solid" : "outline"}
+                      colorPalette={format === val ? "blue" : "gray"}
+                      onClick={() => setFormat(val)}
+                    >
+                      {opt}
+                    </Button>
+                  );
+                })}
+              </Flex>
             </Flex>
 
-            {/* Single entity field selection */}
+            {/* Entity field selection */}
             {dataType === "entity" && (
               <Flex
                 direction={"column"}
-                p={"1"}
-                gap={"1"}
+                gap={"2"}
+                p={"2"}
                 rounded={"md"}
+                bg={"gray.50"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Flex direction={"row"} gap={"1"}>
-                  {/* Details fieldset */}
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                        Entity Details
-                      </Fieldset.Legend>
-                      {!dataLoading && entity ? (
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Fields
+                </Text>
+                {dataLoading || !entity ? (
+                  <Text fontSize={"xs"} color={"gray.500"}>
+                    Loading fields...
+                  </Text>
+                ) : (
+                  <>
+                    <Flex direction={"row"} gap={"6"} wrap={"wrap"}>
+                      {/* Details */}
+                      <Flex direction={"column"} gap={"1"} grow={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Details
+                        </Text>
                         <Stack gap={"1"} direction={"column"}>
-                          <Checkbox.Root disabled defaultChecked fontSize={"xs"} size={"xs"}>
+                          <Checkbox.Root disabled defaultChecked size={"xs"}>
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label>
@@ -382,7 +360,6 @@ const ExportModal = (props: ExportModalProps) => {
                             onCheckedChange={(details) =>
                               setExportFields(toggleField(exportFields, "created", details.checked as boolean))
                             }
-                            fontSize={"xs"}
                             size={"xs"}
                           >
                             <Checkbox.HiddenInput />
@@ -394,12 +371,14 @@ const ExportModal = (props: ExportModalProps) => {
                               </Flex>
                             </Checkbox.Label>
                           </Checkbox.Root>
-                          <Checkbox.Root checked disabled fontSize={"xs"} size={"xs"}>
+                          <Checkbox.Root checked disabled size={"xs"}>
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label>
                               <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                Owner:
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  Owner:
+                                </Text>
                                 <ActorTag identifier={entity.owner} inlineNoAvatar fallback={""} size={"sm"} />
                               </Flex>
                             </Checkbox.Label>
@@ -419,68 +398,59 @@ const ExportModal = (props: ExportModalProps) => {
                                 <Text fontWeight={"semibold"}>Description:</Text>
                                 <Text lineClamp={1}>
                                   {_.isEqual(entity.description, "")
-                                    ? "No Description"
+                                    ? "No description"
                                     : _.truncate(entity.description, { length: 32 })}
                                 </Text>
                               </Flex>
                             </Checkbox.Label>
                           </Checkbox.Root>
                         </Stack>
-                      ) : (
-                        <Text fontSize={"xs"}>Loading details...</Text>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
+                      </Flex>
 
-                  {/* Linked projects fieldset */}
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                        Linked Projects
-                      </Fieldset.Legend>
-                      {!dataLoading && entity && entity.projects.length > 0 ? (
-                        <Stack gap={"1"} direction={"column"}>
-                          {entity.projects.map((projectId) => (
-                            <Checkbox.Root
-                              size={"xs"}
-                              key={projectId}
-                              checked={_.includes(exportFields, `project_${projectId}`)}
-                              onCheckedChange={(details) =>
-                                setExportFields(
-                                  toggleField(exportFields, `project_${projectId}`, details.checked as boolean),
-                                )
-                              }
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label>
-                                <Linky id={projectId} type={"projects"} size={"xs"} />
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                          ))}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"xs"}>No Projects</Text>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
+                      {/* Projects */}
+                      <Flex direction={"column"} gap={"1"} grow={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Projects
+                        </Text>
+                        {entity.projects.length > 0 ? (
+                          <Stack gap={"1"} direction={"column"}>
+                            {entity.projects.map((projectId) => (
+                              <Checkbox.Root
+                                size={"xs"}
+                                key={projectId}
+                                checked={_.includes(exportFields, `project_${projectId}`)}
+                                onCheckedChange={(details) =>
+                                  setExportFields(
+                                    toggleField(exportFields, `project_${projectId}`, details.checked as boolean),
+                                  )
+                                }
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label>
+                                  <Linky id={projectId} type={"projects"} size={"xs"} />
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+                          </Stack>
+                        ) : (
+                          <Text fontSize={"xs"} color={"gray.500"}>
+                            No projects
+                          </Text>
+                        )}
+                      </Flex>
+                    </Flex>
 
-                <Separator />
-
-                {/* Relationships fieldset */}
-                <Flex direction={"row"} gap={"1"}>
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                        Entity Relationships
-                      </Fieldset.Legend>
-                      {!dataLoading && entity && entity.relationships.length > 0 ? (
+                    {/* Relationships */}
+                    {entity.relationships.length > 0 && (
+                      <Flex direction={"column"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Relationships
+                        </Text>
                         <Stack gap={"1"} direction={"column"}>
                           {entity.relationships.map((relationship) => (
                             <Checkbox.Root
                               size={"xs"}
-                              fontSize={"xs"}
                               key={`${relationship.target._id}_${relationship.type}`}
                               checked={_.includes(
                                 exportFields,
@@ -500,39 +470,30 @@ const ExportModal = (props: ExportModalProps) => {
                               <Checkbox.Control />
                               <Checkbox.Label>
                                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                                  {relationship.type === "general" ? (
-                                    <Text fontWeight={"semibold"}>Related to:</Text>
-                                  ) : (
-                                    <Text fontWeight={"semibold"}>{_.capitalize(relationship.type)} of:</Text>
-                                  )}
+                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                    {relationship.type === "general"
+                                      ? "Related to:"
+                                      : `${_.capitalize(relationship.type)} of:`}
+                                  </Text>
                                   <Linky id={relationship.target._id} type={"entities"} size={"xs"} />
                                 </Flex>
                               </Checkbox.Label>
                             </Checkbox.Root>
                           ))}
                         </Stack>
-                      ) : (
-                        <Text fontSize={"xs"}>No Relationships</Text>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
+                      </Flex>
+                    )}
 
-                <Separator />
-
-                {/* Attributes fieldset */}
-                <Flex direction={"row"} gap={"1"}>
-                  <Fieldset.Root>
-                    <Fieldset.Content gap={"1"}>
-                      <Fieldset.Legend fontSize={"xs"} fontWeight={"semibold"}>
-                        Entity Attributes
-                      </Fieldset.Legend>
-                      {!dataLoading && entity && entity.attributes.length > 0 ? (
+                    {/* Attributes */}
+                    {entity.attributes.length > 0 && (
+                      <Flex direction={"column"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Attributes
+                        </Text>
                         <Stack gap={"1"} direction={"column"}>
                           {entity.attributes.map((attribute) => (
                             <Checkbox.Root
                               size={"xs"}
-                              fontSize={"xs"}
                               key={attribute._id}
                               checked={_.includes(exportFields, `attribute_${attribute._id}`)}
                               onCheckedChange={(details) =>
@@ -544,78 +505,71 @@ const ExportModal = (props: ExportModalProps) => {
                               <Checkbox.HiddenInput />
                               <Checkbox.Control />
                               <Checkbox.Label>
-                                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                  <Text fontWeight={"semibold"}>Attribute:</Text>
-                                  <Text>{attribute.name}</Text>
-                                </Flex>
+                                <Text fontSize={"xs"}>{attribute.name}</Text>
                               </Checkbox.Label>
                             </Checkbox.Root>
                           ))}
                         </Stack>
-                      ) : (
-                        <Text fontSize={"xs"}>No Attributes</Text>
-                      )}
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
+                      </Flex>
+                    )}
+                  </>
+                )}
               </Flex>
             )}
 
             {/* Multi-entity summary */}
             {dataType === "entities" && (
               <Flex
-                direction={"column"}
-                p={"1"}
-                gap={"1"}
+                direction={"row"}
+                gap={"2"}
+                p={"2"}
+                align={"center"}
                 rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                bg={"purple.50"}
+                border={"1px solid"}
+                borderColor={"purple.200"}
               >
-                <Flex align={"center"} gap={"1"} p={"1"}>
-                  <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                <Flex direction={"column"} gap={"0.5"} grow={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"bold"}>
+                    {ids !== undefined ? `${ids.length} ${ids.length === 1 ? "Entity" : "Entities"}` : "All Entities"}
+                  </Text>
+                  <Text fontSize={"xs"} color={"gray.500"}>
                     {ids !== undefined
-                      ? `${ids.length} ${ids.length === 1 ? "Entity" : "Entities"} selected`
-                      : "All Entities will be exported"}
+                      ? "Selected entities will be exported"
+                      : "All entities in this workspace will be exported"}
                   </Text>
                 </Flex>
-
-                {/* Include Attributes toggle for spreadsheet formats */}
-                {format !== "json" && (
-                  <Flex px={"1"}>
-                    <Checkbox.Root
-                      size={"xs"}
-                      checked={includeAttributes}
-                      onCheckedChange={(details) => setIncludeAttributes(details.checked as boolean)}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Checkbox.Label>
-                        <Text fontSize={"xs"}>Include Attribute columns</Text>
-                      </Checkbox.Label>
-                    </Checkbox.Root>
-                  </Flex>
-                )}
               </Flex>
             )}
 
-            {/* Single project field selection */}
+            {/* Project field selection */}
             {dataType === "project" && (
               <Flex
-                direction={"row"}
-                p={"1"}
-                gap={"1"}
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
                 rounded={"md"}
+                bg={"gray.50"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                {/* Details fieldset */}
-                <Fieldset.Root>
-                  <Fieldset.Content gap={"1"}>
-                    <Fieldset.Legend fontSize={"xs"}>Details</Fieldset.Legend>
-                    {!dataLoading && project ? (
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Fields
+                </Text>
+                {dataLoading || !project ? (
+                  <Text fontSize={"xs"} color={"gray.500"}>
+                    Loading fields...
+                  </Text>
+                ) : (
+                  <Flex direction={"row"} gap={"6"} wrap={"wrap"}>
+                    {/* Details */}
+                    <Flex direction={"column"} gap={"1"} grow={"1"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Details
+                      </Text>
                       <Stack gap={"1"} direction={"column"}>
-                        <Checkbox.Root disabled defaultChecked size={"xs"} rounded={"md"} fontSize={"xs"}>
+                        <Checkbox.Root disabled defaultChecked size={"xs"}>
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
                           <Checkbox.Label>
@@ -627,8 +581,6 @@ const ExportModal = (props: ExportModalProps) => {
                         </Checkbox.Root>
                         <Checkbox.Root
                           size={"xs"}
-                          rounded={"md"}
-                          fontSize={"xs"}
                           checked={_.includes(exportFields, "created")}
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "created", details.checked as boolean))
@@ -636,7 +588,7 @@ const ExportModal = (props: ExportModalProps) => {
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
-                          <Checkbox.Label fontSize={"xs"}>
+                          <Checkbox.Label>
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Created:</Text>
                               <Text>{dayjs(project.created).format("DD MMM YYYY")}</Text>
@@ -645,7 +597,6 @@ const ExportModal = (props: ExportModalProps) => {
                         </Checkbox.Root>
                         <Checkbox.Root
                           size={"xs"}
-                          rounded={"md"}
                           checked={_.includes(exportFields, "owner")}
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "owner", details.checked as boolean))
@@ -655,14 +606,15 @@ const ExportModal = (props: ExportModalProps) => {
                           <Checkbox.Control />
                           <Checkbox.Label>
                             <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                              Owner:
+                              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                Owner:
+                              </Text>
                               <ActorTag identifier={project.owner} inlineNoAvatar fallback={""} size={"sm"} />
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
                         <Checkbox.Root
                           size={"xs"}
-                          rounded={"md"}
                           checked={_.includes(exportFields, "description")}
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "description", details.checked as boolean))
@@ -671,29 +623,25 @@ const ExportModal = (props: ExportModalProps) => {
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
-                          <Checkbox.Label fontSize={"xs"}>
+                          <Checkbox.Label>
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Description:</Text>
                               <Text lineClamp={1}>
                                 {_.isEqual(project.description, "")
-                                  ? "No Description"
+                                  ? "No description"
                                   : _.truncate(project.description, { length: 32 })}
                               </Text>
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
                       </Stack>
-                    ) : (
-                      <Text fontSize={"xs"}>Loading details...</Text>
-                    )}
-                  </Fieldset.Content>
-                </Fieldset.Root>
+                    </Flex>
 
-                {/* Entities fieldset */}
-                <Fieldset.Root>
-                  <Fieldset.Content gap={"1"}>
-                    <Fieldset.Legend fontSize={"xs"}>Entities</Fieldset.Legend>
-                    {!dataLoading && project ? (
+                    {/* Entities */}
+                    <Flex direction={"column"} gap={"1"} grow={"1"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Entities
+                      </Text>
                       <Tooltip
                         content={"Entities cannot be included when exporting to CSV"}
                         disabled={format === "json"}
@@ -701,7 +649,6 @@ const ExportModal = (props: ExportModalProps) => {
                       >
                         <Checkbox.Root
                           size={"xs"}
-                          rounded={"md"}
                           checked={_.includes(exportFields, "entities")}
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "entities", details.checked as boolean))
@@ -710,22 +657,35 @@ const ExportModal = (props: ExportModalProps) => {
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
-                          <Checkbox.Label fontSize={"xs"}>
-                            <Text fontSize={"xs"}>Export all Entities</Text>
+                          <Checkbox.Label>
+                            <Text fontSize={"xs"}>
+                              {project.entities.length === 0
+                                ? "No entities"
+                                : `Export all ${project.entities.length} ${project.entities.length === 1 ? "entity" : "entities"}`}
+                            </Text>
                           </Checkbox.Label>
                         </Checkbox.Root>
                       </Tooltip>
-                    ) : (
-                      <Text fontSize={"xs"}>Loading details...</Text>
-                    )}
-                  </Fieldset.Content>
-                </Fieldset.Root>
+                    </Flex>
+                  </Flex>
+                )}
               </Flex>
             )}
 
-            {/* Include History toggle */}
+            {/* Options */}
             {dataType !== "template" && (
-              <Flex px={"1"} pt={"1"}>
+              <Flex
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
+                rounded={"md"}
+                bg={"gray.50"}
+                border={GLOBAL_STYLES.border.style}
+                borderColor={GLOBAL_STYLES.border.color}
+              >
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  Options
+                </Text>
                 <Tooltip content={"History is only included in JSON exports"} disabled={format === "json"} showArrow>
                   <Checkbox.Root
                     size={"xs"}
@@ -736,16 +696,29 @@ const ExportModal = (props: ExportModalProps) => {
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
                     <Checkbox.Label>
-                      <Text fontSize={"xs"}>Include History</Text>
+                      <Text fontSize={"xs"}>Include version history</Text>
                     </Checkbox.Label>
                   </Checkbox.Root>
                 </Tooltip>
+                {dataType === "entities" && format !== "json" && (
+                  <Checkbox.Root
+                    size={"xs"}
+                    checked={includeAttributes}
+                    onCheckedChange={(details) => setIncludeAttributes(details.checked as boolean)}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                    <Checkbox.Label>
+                      <Text fontSize={"xs"}>Include attribute columns</Text>
+                    </Checkbox.Label>
+                  </Checkbox.Root>
+                )}
               </Flex>
             )}
           </Dialog.Body>
 
           {/* Footer */}
-          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"}>
               <Button
                 colorPalette={"blue"}
