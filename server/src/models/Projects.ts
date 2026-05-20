@@ -322,15 +322,21 @@ export class Projects {
    * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
-  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
+  static export = async (
+    _id: string,
+    format: "json" | "csv",
+    fields?: string[],
+    includeHistory = false,
+  ): Promise<string> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
       return "";
     }
 
-    // Remove `history` field
-    delete (project as never)["history"];
+    if (!includeHistory) {
+      delete (project as never)["history"];
+    }
 
     if (_.isEqual(format, "csv")) {
       let exportFields = fields;

@@ -157,7 +157,7 @@ export const EntitiesResolvers = {
     // Export one Entity by _id
     exportEntity: async (
       _parent: IResolverParent,
-      args: { _id: string; format: "json" | "csv"; fields?: string[] },
+      args: { _id: string; format: "json" | "csv" | "xlsx"; fields?: string[]; includeHistory?: boolean },
       context: Context,
     ) => {
       // Verify access to the Workspace
@@ -192,7 +192,7 @@ export const EntitiesResolvers = {
 
       // Check that Entity is owned by the user and exists in the Workspace
       if (_.includes(workspace.entities, entity._id)) {
-        const exportResult = await Entities.export(args._id, args.format, args.fields);
+        const exportResult = await Entities.export(args._id, args.format, args.fields, args.includeHistory ?? false);
         if (process.env.DISABLE_CAPTURE !== "true") {
           PostHogClient?.capture({
             distinctId: context.user,
@@ -213,7 +213,7 @@ export const EntitiesResolvers = {
     // Export multiple Entities by _id
     exportEntities: async (
       _parent: IResolverParent,
-      args: { entities: string[]; format: string },
+      args: { entities: string[]; format: string; includeAttributes?: boolean; includeHistory?: boolean },
       context: Context,
     ) => {
       // Verify access to the Workspace
@@ -246,7 +246,12 @@ export const EntitiesResolvers = {
         }
       }
 
-      const exportResult = await Entities.exportMany(authorizedEntities, args.format);
+      const exportResult = await Entities.exportMany(
+        authorizedEntities,
+        args.format,
+        args.includeAttributes ?? true,
+        args.includeHistory ?? false,
+      );
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
@@ -258,7 +263,11 @@ export const EntitiesResolvers = {
     },
 
     // Export all Entities within a Workspace
-    exportEntitiesAll: async (_parent: IResolverParent, args: { format: string }, context: Context) => {
+    exportEntitiesAll: async (
+      _parent: IResolverParent,
+      args: { format: string; includeAttributes?: boolean; includeHistory?: boolean },
+      context: Context,
+    ) => {
       // Verify access to the Workspace
       const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
@@ -279,7 +288,12 @@ export const EntitiesResolvers = {
         });
       }
 
-      const exportResult = await Entities.exportMany(workspace.entities, args.format);
+      const exportResult = await Entities.exportMany(
+        workspace.entities,
+        args.format,
+        args.includeAttributes ?? true,
+        args.includeHistory ?? false,
+      );
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
