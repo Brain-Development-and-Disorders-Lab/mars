@@ -7,7 +7,7 @@ import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Values from "@components/Values";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { AttributeViewButtonProps } from "@types";
@@ -142,17 +142,10 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Description
                     </Text>
-                    <MDEditor
-                      height={150}
-                      minHeight={100}
-                      maxHeight={400}
-                      style={{ width: "100%" }}
+                    <RichTextEditor
                       value={description}
-                      preview={isEditing ? "edit" : "preview"}
-                      extraCommands={[]}
-                      onChange={(value) => {
-                        setDescription(value || "");
-                      }}
+                      onChange={(value) => setDescription(value)}
+                      readOnly={!isEditing}
                     />
                   </Flex>
                 </Flex>

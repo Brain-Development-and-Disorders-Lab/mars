@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   CloseButton,
   Dialog,
@@ -25,7 +24,7 @@ import MultiEntitySelect from "@components/MultiEntitySelect";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -264,18 +263,11 @@ const Project = () => {
                   Project Description
                   <Field.RequiredIndicator />
                 </Field.Label>
-                <Box data-testid={"create-project-description"} w={"100%"}>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    style={{ width: "100%" }}
-                    value={description}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => setDescription(value || "")}
-                  />
-                </Box>
+                <RichTextEditor
+                  data-testid={"create-project-description"}
+                  value={description}
+                  onChange={(value) => setDescription(value)}
+                />
                 {isDescriptionError && (
                   <Field.ErrorText fontSize={"xs"}>A description must be provided.</Field.ErrorText>
                 )}

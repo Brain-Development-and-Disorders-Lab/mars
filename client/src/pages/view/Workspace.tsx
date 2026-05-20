@@ -12,7 +12,7 @@ import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
@@ -761,18 +761,7 @@ const Workspace = () => {
               <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                 Description
               </Text>
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                style={{ width: "100%" }}
-                value={description}
-                preview={"edit"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setDescription(value || "");
-                }}
-              />
+              <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
             </Flex>
           </Flex>
         </Flex>

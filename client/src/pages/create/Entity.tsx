@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -32,7 +31,7 @@ import Linky from "@components/Linky";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { AttributeModel, AttributeCardProps, IGenericItem, ISelectOption, ResponseData, IRelationship } from "@types";
@@ -56,6 +55,7 @@ import { usePostHog } from "posthog-js/react";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
+import ActorTag from "@components/ActorTag";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -366,9 +366,9 @@ const Entity = () => {
 
   return (
     <Content isLoaded={!loading && !createLoading} isError={!_.isUndefined(error) && !_.isUndefined(createError)}>
-      <Flex direction={"column"}>
+      <Flex direction={"column"} gap={"2"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"}>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
           <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
           <Heading size={"sm"}>Create Entity</Heading>
           <Spacer />
@@ -403,118 +403,108 @@ const Entity = () => {
 
         {/* Start page */}
         {_.isEqual("start", pageState) && (
-          <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} w={{ base: "100%", md: "50%" }} p={"1"} gap={"1"} grow={"1"}>
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                bg={"gray.50"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-                rounded={"md"}
-              >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Details
-                </Text>
+          <Flex direction={"row"} gap={"2"} p={"1"} wrap={"wrap"}>
+            <Flex
+              direction={"column"}
+              flex={{ base: "0 0 100%", md: "1" }}
+              p={"2"}
+              gap={"2"}
+              bg={"gray.50"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Details
+              </Text>
 
-                <Field.Root required gap={"1"}>
-                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                    Entity Name
-                    <Field.RequiredIndicator />
-                  </Field.Label>
-                  <Flex gap={"1"}>
-                    {useCounter ? (
-                      <CounterSelect counter={counter} setCounter={setCounter} showCreate />
-                    ) : (
-                      <Input
-                        data-testid={"create-entity-name"}
-                        name={"name"}
-                        value={name}
-                        placeholder={"Name"}
-                        size={"xs"}
-                        w={"md"}
-                        rounded={"md"}
-                        bg={"white"}
-                        onChange={(event) => setName(event.target.value)}
-                      />
-                    )}
-                    <Button
+              <Field.Root required gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Entity Name
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <Flex gap={"2"} w={"100%"}>
+                  {useCounter ? (
+                    <CounterSelect counter={counter} setCounter={setCounter} showCreate />
+                  ) : (
+                    <Input
+                      data-testid={"create-entity-name"}
+                      name={"name"}
+                      value={name}
+                      placeholder={"Name"}
                       size={"xs"}
                       rounded={"md"}
-                      variant={"outline"}
-                      colorPalette={"blue"}
-                      onClick={() => {
-                        setUseCounter(!useCounter);
-                        setName("");
-                        setCounter("");
-                      }}
-                    >
-                      {useCounter ? "Use Text" : "Use Counter"}
-                      <Icon name={useCounter ? "text" : "counter"} size={"xs"} />
-                    </Button>
-                  </Flex>
-                  {isNameError && !useCounter && (
-                    <Field.ErrorText fontSize={"xs"}>A name or ID must be specified.</Field.ErrorText>
+                      bg={"white"}
+                      onChange={(event) => setName(event.target.value)}
+                    />
                   )}
-                  {isNameError && useCounter && (
-                    <Field.ErrorText fontSize={"xs"}>A Counter must be selected or created.</Field.ErrorText>
-                  )}
-                </Field.Root>
-
-                <Field.Root required gap={"1"}>
-                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                    Entity Created
-                    <Field.RequiredIndicator />
-                  </Field.Label>
-                  <Input
+                  <Button
                     size={"xs"}
                     rounded={"md"}
-                    type={"date"}
-                    bg={"white"}
-                    value={created}
-                    onChange={(event) => setCreated(event.target.value)}
-                  />
-                  {isDateError && <Field.ErrorText fontSize={"xs"}>A created date must be specified.</Field.ErrorText>}
-                </Field.Root>
-              </Flex>
+                    variant={"outline"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      setUseCounter(!useCounter);
+                      setName("");
+                      setCounter("");
+                    }}
+                  >
+                    {useCounter ? "Use Text" : "Use Counter"}
+                    <Icon name={useCounter ? "text" : "counter"} size={"xs"} />
+                  </Button>
+                </Flex>
+                {isNameError && !useCounter && (
+                  <Field.ErrorText fontSize={"xs"}>A name or ID must be specified.</Field.ErrorText>
+                )}
+                {isNameError && useCounter && (
+                  <Field.ErrorText fontSize={"xs"}>A Counter must be selected or created.</Field.ErrorText>
+                )}
+              </Field.Root>
+
+              <Field.Root required gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Entity Created
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <Input
+                  size={"xs"}
+                  rounded={"md"}
+                  type={"date"}
+                  bg={"white"}
+                  value={created}
+                  onChange={(event) => setCreated(event.target.value)}
+                />
+                {isDateError && <Field.ErrorText fontSize={"xs"}>A created date must be specified.</Field.ErrorText>}
+              </Field.Root>
+
+              <Field.Root gap={"1"}>
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                  Entity Owner
+                </Field.Label>
+                <ActorTag size={"md"} identifier={owner} fallback={"Unknown User"} />
+              </Field.Root>
             </Flex>
 
             <Flex
               direction={"column"}
-              p={"1"}
-              pl={{ base: "1", lg: "0" }}
-              pt={{ base: "0", lg: "1" }}
-              gap={"1"}
-              grow={"1"}
-              basis={"50%"}
+              flex={{ base: "0 0 100%", md: "1" }}
+              p={"2"}
+              gap={"2"}
+              bg={"gray.50"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
             >
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                bg={"gray.50"}
-                rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-              >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Description
-                </Text>
-                <Information text={"Describe the Entity. Metadata goes in the Attributes step."} />
-                <Box data-testid={"create-entity-description"} w={"100%"}>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    style={{ width: "100%" }}
-                    value={description}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => setDescription(value || "")}
-                  />
-                </Box>
-              </Flex>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Description
+              </Text>
+              <Information text={"Describe the Entity. Metadata goes in the Attributes step."} />
+              <RichTextEditor
+                data-testid={"create-entity-description"}
+                value={description}
+                onChange={(value) => setDescription(value)}
+                h={"100%"}
+              />
             </Flex>
           </Flex>
         )}
@@ -522,7 +512,7 @@ const Entity = () => {
         {/* Relationships page */}
         {_.isEqual("relationships", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"} basis={"50%"}>
+            <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
               <Flex
                 direction={"column"}
                 p={"2"}
@@ -545,15 +535,7 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            <Flex
-              direction={"column"}
-              p={"1"}
-              pl={{ base: "1", sm: "0", md: "0", lg: "0" }}
-              pt={{ base: "0", sm: "0", md: "0", lg: "1" }}
-              gap={"1"}
-              grow={"1"}
-              basis={"50%"}
-            >
+            <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
               <Flex
                 direction={"column"}
                 p={"2"}
@@ -603,8 +585,8 @@ const Entity = () => {
 
         {/* Attributes page */}
         {_.isEqual("attributes", pageState) && (
-          <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-            <Flex direction={"column"} p={"1"} w={"100%"} gap={"1"}>
+          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+            <Flex direction={"column"} p={"1"} w={"100%"} gap={"2"}>
               <Flex
                 direction={"column"}
                 p={"2"}
@@ -623,10 +605,10 @@ const Entity = () => {
                   }
                 />
 
-                <Flex direction={"row"} gap={"1"} align={"end"}>
+                <Flex direction={"row"} gap={"2"} align={"end"}>
                   {/* Template selector */}
-                  <Flex direction={"column"} gap={"1"} grow={"1"}>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Flex direction={"column"} gap={"2"} grow={"1"}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Use Template ({templatesCollection.items.length} available)
                       </Text>
@@ -739,7 +721,7 @@ const Entity = () => {
 
             <Flex w={"100%"} minH={selectedAttributes.length > 0 ? "fit-content" : "200px"} p={"1"} pt={"0"}>
               {selectedAttributes.length > 0 ? (
-                <Stack gap={"1"} w={"100%"} data-testid={"create-entity-attributes"}>
+                <Stack gap={"2"} w={"100%"} data-testid={"create-entity-attributes"}>
                   {selectedAttributes.map((attribute) => (
                     <AttributeCard
                       _id={attribute._id}

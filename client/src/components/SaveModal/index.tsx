@@ -4,7 +4,7 @@ import React from "react";
 // Existing and custom components
 import { Button, Dialog, Flex, Text, CloseButton } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { SaveModalProps } from "@types";
@@ -13,21 +13,7 @@ import { SaveModalProps } from "@types";
 import { GLOBAL_STYLES } from "@variables";
 
 const SaveModal = (props: SaveModalProps) => {
-  const {
-    open,
-    onOpenChange,
-    onDone,
-    value,
-    onChange,
-    description,
-    placeholder,
-    showCloseButton = false,
-    modifiedType,
-  } = props;
-
-  const defaultPlaceholder = modifiedType
-    ? `(Optional) Enter a description of the changes made to the ${modifiedType}.`
-    : "(Optional) Enter a description of the changes made.";
+  const { open, onOpenChange, onDone, value, onChange, description, showCloseButton = false, modifiedType } = props;
 
   const defaultDescription = modifiedType
     ? `Specify a description of the changes made to the ${modifiedType}.`
@@ -64,22 +50,7 @@ const SaveModal = (props: SaveModalProps) => {
                   {description !== undefined ? description : defaultDescription}
                 </Text>
               )}
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                id={"saveMessageInput"}
-                style={{ width: "100%" }}
-                value={value}
-                preview={"edit"}
-                extraCommands={[]}
-                textareaProps={
-                  placeholder !== undefined ? { placeholder: placeholder || defaultPlaceholder } : undefined
-                }
-                onChange={(newValue) => {
-                  onChange(newValue || "");
-                }}
-              />
+              <RichTextEditor id={"saveMessageInput"} value={value} onChange={(newValue) => onChange(newValue)} />
             </Flex>
           </Dialog.Body>
           <Dialog.Footer

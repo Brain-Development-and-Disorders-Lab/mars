@@ -46,7 +46,7 @@ import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import SaveModal from "@components/SaveModal";
 import { Cell, createColumnHelper } from "@tanstack/react-table";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import {
@@ -2045,18 +2045,11 @@ const Entity = () => {
                   Entity Description
                 </Text>
                 <Flex>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
+                  <RichTextEditor
                     id={"entityDescriptionInput"}
-                    style={{ width: "100%" }}
                     value={previewVersion ? displayEntityDescription : entityDescription}
-                    preview={editing && !previewVersion ? "edit" : "preview"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setEntityDescription(value || "");
-                    }}
+                    readOnly={!(editing && !previewVersion)}
+                    onChange={(value) => setEntityDescription(value)}
                   />
                 </Flex>
               </Flex>
@@ -2488,17 +2481,9 @@ const Entity = () => {
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
                                 Description
                               </Field.Label>
-                              <MDEditor
-                                height={118}
-                                minHeight={100}
-                                maxHeight={400}
-                                style={{ width: "100%" }}
+                              <RichTextEditor
                                 value={attributeDescription}
-                                preview={"edit"}
-                                extraCommands={[]}
-                                onChange={(value) => {
-                                  setAttributeDescription(value || "");
-                                }}
+                                onChange={(value) => setAttributeDescription(value)}
                               />
                             </Field.Root>
                           </Fieldset.Content>

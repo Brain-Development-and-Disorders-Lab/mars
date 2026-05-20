@@ -6,7 +6,7 @@ import { Button, Flex, Input, Text, Fieldset, Field, Collapsible, IconButton } f
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { AttributeCardProps } from "@types";
@@ -51,15 +51,15 @@ const AttributeCard = (props: AttributeCardProps) => {
     <Collapsible.Root open={isOpen} onOpenChange={(event) => setIsOpen(event.open)}>
       <Flex
         direction={"column"}
-        gap={"1"}
+        gap={"2"}
         border={GLOBAL_STYLES.border.style}
         borderColor={GLOBAL_STYLES.border.color}
         bg={"white"}
         rounded={"md"}
-        p={"1"}
+        p={"2"}
       >
-        <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"} gap={"1"}>
-          <Flex direction={"row"} gap={"1"} align={"center"}>
+        <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"} gap={"2"}>
+          <Flex direction={"row"} gap={"2"} align={"center"}>
             <Collapsible.Trigger asChild>
               <IconButton
                 size={"2xs"}
@@ -88,7 +88,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Flex>
           </Flex>
 
-          <Flex gap={"1"}>
+          <Flex gap={"2"}>
             <Button
               size={"xs"}
               rounded={"md"}
@@ -105,12 +105,12 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Flex>
         </Flex>
         <Collapsible.Content>
-          <Flex direction={"column"} gap={"1"}>
-            <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+          <Flex direction={"column"} gap={"2"}>
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
               {/* Attribute name */}
               <Flex
                 direction={"column"}
-                p={"1"}
+                p={"2"}
                 h={"fit-content"}
                 w={{ base: "100%", md: "50%" }}
                 gap={"1"}
@@ -157,9 +157,9 @@ const AttributeCard = (props: AttributeCardProps) => {
               {/* Attribute description */}
               <Flex
                 direction={"row"}
-                p={"1"}
+                p={"2"}
                 h={"fit-content"}
-                gap={"1"}
+                gap={"2"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
@@ -167,23 +167,12 @@ const AttributeCard = (props: AttributeCardProps) => {
               >
                 <Fieldset.Root>
                   <Fieldset.Content>
-                    <Field.Root gap={"1"} required>
+                    <Field.Root gap={"2"} required>
                       <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Description
                         <Field.RequiredIndicator />
                       </Field.Label>
-                      <MDEditor
-                        height={150}
-                        minHeight={100}
-                        maxHeight={400}
-                        style={{ width: "100%" }}
-                        value={description}
-                        preview={"edit"}
-                        extraCommands={[]}
-                        onChange={(value) => {
-                          setDescription(value || "");
-                        }}
-                      />
+                      <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>
@@ -193,7 +182,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             {/* Attribute Values */}
             <Fieldset.Root>
               <Fieldset.Content>
-                <Field.Root gap={"1"} required>
+                <Field.Root gap={"2"} required>
                   <Flex direction={"column"} gap={"0.5"} ml={"0.5"}>
                     <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
                       Template Values

@@ -8,7 +8,7 @@ import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
 import { UnsavedChangesModal } from "@components/WarningModal";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -272,19 +272,11 @@ const CreateWorkspace = () => {
                     <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
                       Workspace Description
                     </Field.Label>
-                    <MDEditor
-                      height={150}
-                      minHeight={100}
-                      maxHeight={400}
+                    <RichTextEditor
                       id={"modalWorkspaceDescription"}
                       data-testid={"create-workspace-description"}
-                      style={{ width: "100%" }}
                       value={description}
-                      preview={"edit"}
-                      extraCommands={[]}
-                      onChange={(value) => {
-                        setDescription(value || "");
-                      }}
+                      onChange={(value) => setDescription(value)}
                     />
                   </Field.Root>
                 </Fieldset.Content>

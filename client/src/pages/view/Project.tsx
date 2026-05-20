@@ -37,7 +37,7 @@ import Tooltip from "@components/Tooltip";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import SaveModal from "@components/SaveModal";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { ProjectHistory, ProjectModel, DataTableAction, IGenericItem, ResponseData } from "@types";
@@ -1308,18 +1308,11 @@ const Project = () => {
               <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                 Project Description
               </Text>
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
+              <RichTextEditor
                 id={"projectDescriptionInput"}
-                style={{ width: "100%" }}
                 value={previewVersion ? displayProjectDescription : projectDescription}
-                preview={editing && !previewVersion ? "edit" : "preview"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setProjectDescription(value || "");
-                }}
+                readOnly={!(editing && !previewVersion)}
+                onChange={(value) => setProjectDescription(value)}
               />
             </Flex>
           </Flex>

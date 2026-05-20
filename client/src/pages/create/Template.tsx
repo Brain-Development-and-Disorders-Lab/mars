@@ -21,7 +21,7 @@ import Values from "@components/Values";
 import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { IAttribute, IValue, ResponseData } from "@types";
@@ -245,16 +245,7 @@ const Template = () => {
                   Template Description
                   <Field.RequiredIndicator />
                 </Field.Label>
-                <MDEditor
-                  height={150}
-                  minHeight={100}
-                  maxHeight={400}
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => setDescription(value || "")}
-                />
+                <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
                 {isDescriptionError && (
                   <Field.ErrorText fontSize={"xs"}>A description should be provided for the Template.</Field.ErrorText>
                 )}

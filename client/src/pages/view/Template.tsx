@@ -33,7 +33,7 @@ import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
 import ExportModal from "@components/ExportModal";
 import SaveModal from "@components/SaveModal";
-import MDEditor from "@uiw/react-md-editor";
+import RichTextEditor from "@components/RichTextEditor";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -1147,18 +1147,11 @@ const Template = () => {
               <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
                 Template Description
               </Text>
-              <MDEditor
+              <RichTextEditor
                 id={"attributeDescriptionInput"}
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                style={{ width: "100%" }}
                 value={displayTemplateDescription}
-                preview={editing && !previewVersion ? "edit" : "preview"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setTemplateDescription(value || "");
-                }}
+                readOnly={!(editing && !previewVersion)}
+                onChange={(value) => setTemplateDescription(value)}
               />
             </Flex>
           </Flex>
