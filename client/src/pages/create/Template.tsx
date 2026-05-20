@@ -142,9 +142,9 @@ const Template = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"}>
-          <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-          <Heading size={"sm"}>Create Template</Heading>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
+          <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+          <Heading size={"md"}>Create Template</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
             Info
@@ -152,105 +152,84 @@ const Template = () => {
           </Button>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"2"} p={"1"} wrap={"wrap"}>
           {/* Name */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            p={"1"}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            bg={"gray.50"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              bg={"gray.50"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-              rounded={"md"}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Details
-              </Text>
-              <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Template Name
-                  <Field.RequiredIndicator />
-                </Field.Label>
-                <Input
-                  size={"xs"}
-                  placeholder={"Name"}
-                  rounded={"md"}
-                  bg={"white"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                {isNameError && (
-                  <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
-                )}
-              </Field.Root>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              Details
+            </Text>
+            <Field.Root required gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                Template Name
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                size={"xs"}
+                placeholder={"Name"}
+                rounded={"md"}
+                bg={"white"}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              {isNameError && (
+                <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
+              )}
+            </Field.Root>
 
-              <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Template Owner
-                </Field.Label>
-                <Flex>
-                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
-                </Flex>
-              </Field.Root>
+            <Field.Root gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                Template Owner
+              </Field.Label>
+              <Flex>
+                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+              </Flex>
+            </Field.Root>
 
-              <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Template Created
-                </Field.Label>
-                <Input
-                  size={"xs"}
-                  rounded={"md"}
-                  type={"datetime-local"}
-                  bg={"white"}
-                  value={created}
-                  onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
-                />
-                <Information text={"Specify a timestamp for the Template."} />
-              </Field.Root>
-            </Flex>
+            <Field.Root gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                Template Created
+              </Field.Label>
+              <Input
+                size={"xs"}
+                rounded={"md"}
+                type={"datetime-local"}
+                bg={"white"}
+                value={created}
+                onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+              />
+            </Field.Root>
           </Flex>
 
           {/* Description */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            p={"1"}
-            pl={{ base: "1", lg: "0" }}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            bg={"gray.50"}
+            rounded={"md"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
           >
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              bg={"gray.50"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Description
-              </Text>
-              <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Template Description
-                  <Field.RequiredIndicator />
-                </Field.Label>
-                <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
-                {isDescriptionError && (
-                  <Field.ErrorText fontSize={"xs"}>A description should be provided for the Template.</Field.ErrorText>
-                )}
-              </Field.Root>
-            </Flex>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              Description
+            </Text>
+            <Field.Root required gap={"1"} h={"100%"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                Template Description
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <RichTextEditor value={description} onChange={(value) => setDescription(value)} h={"100%"} />
+            </Field.Root>
           </Flex>
         </Flex>
 

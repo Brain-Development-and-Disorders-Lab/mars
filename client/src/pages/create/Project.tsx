@@ -21,7 +21,6 @@ import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
-import { Information } from "@components/Label";
 import { UnsavedChangesModal } from "@components/WarningModal";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
@@ -157,9 +156,9 @@ const Project = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"}>
-          <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-          <Heading size={"sm"}>Create Project</Heading>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
+          <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
+          <Heading size={"md"}>Create Project</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
             Info
@@ -167,112 +166,92 @@ const Project = () => {
           </Button>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"2"} p={"1"} wrap={"wrap"}>
           {/* Details */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            p={"1"}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            bg={"gray.50"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              bg={"gray.50"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Details
-              </Text>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              Details
+            </Text>
 
-              <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Project Name
-                  <Field.RequiredIndicator />
-                </Field.Label>
-                <Input
-                  data-testid={"create-project-name"}
-                  name={"name"}
-                  size={"xs"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  bg={"white"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                {isNameError && (
-                  <Field.ErrorText fontSize={"xs"}>A name to identify the Project must be specified.</Field.ErrorText>
-                )}
-              </Field.Root>
+            <Field.Root required gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                Project Name
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                data-testid={"create-project-name"}
+                name={"name"}
+                size={"xs"}
+                rounded={"md"}
+                placeholder={"Name"}
+                bg={"white"}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              {isNameError && (
+                <Field.ErrorText fontSize={"xs"}>A name to identify the Project must be specified.</Field.ErrorText>
+              )}
+            </Field.Root>
 
-              <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Project Owner
-                </Field.Label>
-                <Flex>
-                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
-                </Flex>
-              </Field.Root>
+            <Field.Root gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                Project Owner
+              </Field.Label>
+              <Flex>
+                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+              </Flex>
+            </Field.Root>
 
-              <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Project Created
-                </Field.Label>
-                <Input
-                  size={"xs"}
-                  rounded={"md"}
-                  type={"datetime-local"}
-                  bg={"white"}
-                  value={created}
-                  onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
-                />
-                <Information text={"Specify a timestamp for the Project."} />
-              </Field.Root>
-            </Flex>
+            <Field.Root gap={"1"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                Project Created
+              </Field.Label>
+              <Input
+                size={"xs"}
+                rounded={"md"}
+                type={"datetime-local"}
+                bg={"white"}
+                value={created}
+                onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+              />
+            </Field.Root>
           </Flex>
 
           {/* Description */}
           <Flex
             direction={"column"}
-            p={"1"}
-            pl={{ base: "1", lg: "0" }}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
-            basis={"50%"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            bg={"gray.50"}
+            rounded={"md"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
           >
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              bg={"gray.50"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Description
-              </Text>
-              <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Project Description
-                  <Field.RequiredIndicator />
-                </Field.Label>
-                <RichTextEditor
-                  data-testid={"create-project-description"}
-                  value={description}
-                  onChange={(value) => setDescription(value)}
-                />
-                {isDescriptionError && (
-                  <Field.ErrorText fontSize={"xs"}>A description must be provided.</Field.ErrorText>
-                )}
-              </Field.Root>
-            </Flex>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              Description
+            </Text>
+            <Field.Root required gap={"1"} h={"100%"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                Project Description
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <RichTextEditor
+                data-testid={"create-entity-description"}
+                value={description}
+                onChange={(value) => setDescription(value)}
+                h={"100%"}
+              />
+            </Field.Root>
           </Flex>
         </Flex>
 
@@ -397,7 +376,7 @@ const Project = () => {
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
-            <Dialog.Body p={"1"} px={"2"}>
+            <Dialog.Body p={"2"}>
               <MultiEntitySelect
                 projectEntities={entities}
                 selectedEntities={selectedEntities}

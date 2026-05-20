@@ -370,7 +370,7 @@ const Entity = () => {
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
           <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
-          <Heading size={"sm"}>Create Entity</Heading>
+          <Heading size={"md"}>Create Entity</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
             Info
