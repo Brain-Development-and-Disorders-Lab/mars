@@ -12,7 +12,7 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} roundedTop={"md"} bg={"orange.300"}>
+          <Dialog.Header p={"2"} roundedTop={"md"} bg={"orange.400"}>
             <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"warning"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -21,13 +21,13 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
             </Flex>
           </Dialog.Header>
 
-          <Dialog.Body p={"1"}>
+          <Dialog.Body p={"2"}>
             <Text fontSize={"xs"} ml={"0.5"}>
               Are you sure you want to leave this page? You will lose any unsaved changes.
             </Text>
           </Dialog.Body>
 
-          <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
             <Flex w={"100%"} justify={"space-between"}>
               <Button
                 size={"xs"}

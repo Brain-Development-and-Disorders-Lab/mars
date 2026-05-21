@@ -21,7 +21,7 @@ import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 

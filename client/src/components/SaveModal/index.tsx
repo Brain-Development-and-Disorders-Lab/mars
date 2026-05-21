@@ -43,8 +43,9 @@ const SaveModal = (props: SaveModalProps) => {
               </Dialog.CloseTrigger>
             )}
           </Dialog.Header>
-          <Dialog.Body p={"1"}>
-            <Flex direction={"column"} gap={"1"}>
+
+          <Dialog.Body p={"2"}>
+            <Flex direction={"column"} gap={"2"}>
               {(description !== undefined ? description : defaultDescription) && (
                 <Text fontSize={"xs"} color={"gray.600"}>
                   {description !== undefined ? description : defaultDescription}
@@ -53,12 +54,13 @@ const SaveModal = (props: SaveModalProps) => {
               <RichTextEditor id={"saveMessageInput"} value={value} onChange={(newValue) => onChange(newValue)} />
             </Flex>
           </Dialog.Body>
+
           <Dialog.Footer
-            p={"1"}
+            p={"2"}
             bg={showCloseButton ? GLOBAL_STYLES.dialog.footerColor : undefined}
             roundedBottom={showCloseButton ? "md" : undefined}
           >
-            <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
+            <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
               <Button
                 variant={"solid"}
                 size={"xs"}

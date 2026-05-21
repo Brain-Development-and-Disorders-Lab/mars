@@ -27,9 +27,10 @@ import CounterSelect from "@components/CounterSelect";
 import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import Relationships from "@components/Relationships";
+import AddRelationshipsDialog from "@components/RelationshipAddDialog";
 import Linky from "@components/Linky";
 import { Information } from "@components/Label";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
@@ -95,6 +96,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const [relationships, setRelationships] = useState([] as IRelationship[]);
+  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
   const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
 
@@ -522,15 +524,29 @@ const Entity = () => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Entity Relationships
-                </Text>
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Entity Relationships
+                  </Text>
+                  <Button
+                    variant={"solid"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => setAddRelationshipsOpen(true)}
+                  >
+                    Add
+                    <Icon name={"add"} size={"xs"} />
+                  </Button>
+                </Flex>
                 <Information text={"Specify the relationships between this Entity and other Entities."} />
-                <Relationships
-                  relationships={relationships}
-                  setRelationships={setRelationships}
-                  viewOnly={false}
+                <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
+                <AddRelationshipsDialog
+                  open={addRelationshipsOpen}
+                  onClose={() => setAddRelationshipsOpen(false)}
                   sourceName={name}
+                  existingRelationships={relationships}
+                  onAdd={(added) => setRelationships([...relationships, ...added])}
                 />
               </Flex>
             </Flex>

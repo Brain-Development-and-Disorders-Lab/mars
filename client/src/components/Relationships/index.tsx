@@ -1,10 +1,8 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { Button, EmptyState, Flex, Input, Spacer, Text, Tag } from "@chakra-ui/react";
+import { Button, EmptyState, Flex, Text, Tag } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
-import { toaster } from "@components/Toast";
 
 // Custom and existing types
 import { IconNames, IGenericItem, IRelationship, RelationshipsProps, RelationshipType } from "@types";
@@ -20,19 +18,19 @@ import { ignoreAbort } from "@lib/util";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-const TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
+export const RELATIONSHIP_TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
   parent: "orange.600",
   child: "yellow.400",
   general: "cyan.600",
 };
 
-const TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {
+export const RELATIONSHIP_TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {
   parent: "a_right_fill",
   child: "a_left_fill",
   general: "a_both_fill",
 };
 
-const TYPE_PALETTE: Record<RelationshipType, string> = {
+export const RELATIONSHIP_TYPE_PALETTE: Record<RelationshipType, string> = {
   parent: "orange",
   child: "yellow",
   general: "cyan",
@@ -98,113 +96,8 @@ const Relationships = (props: RelationshipsProps) => {
     props.setRelationships(props.relationships.filter((r) => !relationshipIsEqual(r, relationship)));
   };
 
-  // Add form state
-  const [selectedType, setSelectedType] = useState<RelationshipType>("general");
-  const [selectedTarget, setSelectedTarget] = useState<IGenericItem>({} as IGenericItem);
-
-  const addValidationError = useMemo(() => {
-    if (_.isUndefined(selectedTarget._id)) return null;
-    if (selectedTarget._id === props.sourceId) return "Cannot add a relationship to itself";
-    const candidate: IRelationship = {
-      source: { _id: props.sourceId || "no_id", name: props.sourceName || "" },
-      target: selectedTarget,
-      type: selectedType,
-    };
-    if (props.relationships.some((r) => relationshipIsEqual(r, candidate))) return "This relationship already exists";
-    return null;
-  }, [selectedTarget, selectedType, props.sourceId, props.sourceName, props.relationships]);
-
-  const addRelationship = () => {
-    if (addValidationError) {
-      toaster.create({
-        title: "Invalid Relationship",
-        description: addValidationError,
-        type: "warning",
-        duration: 2000,
-        closable: true,
-      });
-      return;
-    }
-    props.setRelationships([
-      ...props.relationships,
-      {
-        source: { _id: props.sourceId || "no_id", name: props.sourceName || "" },
-        target: { _id: selectedTarget._id, name: selectedTarget.name },
-        type: selectedType,
-      },
-    ]);
-    setSelectedType("general");
-    setSelectedTarget({} as IGenericItem);
-  };
-
   return (
     <Flex direction={"column"} w={"100%"} gap={"1"}>
-      {!props.viewOnly && (
-        <>
-          {/* Source and target */}
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            align={"center"}
-            p={"2"}
-            rounded={"md"}
-            bg={"gray.50"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Source
-              </Text>
-              <Input size={"xs"} rounded={"md"} value={props.sourceName || ""} readOnly disabled bg={"white"} />
-            </Flex>
-            <Icon name={TYPE_ARROW_ICON[selectedType]} size={"sm"} color={TYPE_ARROW_COLOR[selectedType]} />
-            <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Target
-              </Text>
-              <SearchSelect resultType={"entity"} value={selectedTarget} onChange={setSelectedTarget} />
-            </Flex>
-          </Flex>
-
-          {/* Type and Add */}
-          <Flex direction={"row"} align={"center"} gap={"2"} p={"1"}>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} flexShrink={0}>
-              Type
-            </Text>
-            <Flex gap={"1"}>
-              {(["general", "parent", "child"] as RelationshipType[]).map((type) => (
-                <Button
-                  key={type}
-                  size={"xs"}
-                  rounded={"md"}
-                  variant={selectedType === type ? "solid" : "outline"}
-                  colorPalette={selectedType === type ? TYPE_PALETTE[type] : "gray"}
-                  bg={selectedType === type ? undefined : "white"}
-                  color={selectedType === type ? undefined : "black"}
-                  onClick={() => setSelectedType(type)}
-                >
-                  {_.capitalize(type)}
-                </Button>
-              ))}
-            </Flex>
-            <Spacer />
-            <Button
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              disabled={_.isUndefined(selectedTarget._id)}
-              onClick={addRelationship}
-              flexShrink={0}
-              data-testid={"add-relationship-button"}
-            >
-              Add
-              <Icon name={"add"} size={"xs"} />
-            </Button>
-          </Flex>
-        </>
-      )}
-
       {props.relationships.length > 0 ? (
         <Flex
           direction={"column"}
@@ -238,9 +131,9 @@ const Relationships = (props: RelationshipsProps) => {
 
                 {/* Arrow */}
                 <Icon
-                  name={TYPE_ARROW_ICON[relationship.type]}
+                  name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
                   size={"xs"}
-                  color={TYPE_ARROW_COLOR[relationship.type]}
+                  color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
                 />
 
                 {/* Target */}
@@ -249,7 +142,7 @@ const Relationships = (props: RelationshipsProps) => {
                 </Flex>
 
                 {/* Type badge */}
-                <Tag.Root size={"sm"} colorPalette={TYPE_PALETTE[relationship.type]} flexShrink={0}>
+                <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[relationship.type]} flexShrink={0}>
                   <Tag.Label fontSize={"xs"}>{_.capitalize(relationship.type)}</Tag.Label>
                 </Tag.Root>
 

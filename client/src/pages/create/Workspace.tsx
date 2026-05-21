@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Custom types

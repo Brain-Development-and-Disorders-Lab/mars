@@ -34,7 +34,7 @@ import MultiEntitySelect from "@components/MultiEntitySelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
 import { toaster } from "@components/Toast";
 import SaveModal from "@components/SaveModal";
 import RichTextEditor from "@components/RichTextEditor";

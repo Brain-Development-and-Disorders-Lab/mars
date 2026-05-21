@@ -239,6 +239,16 @@ export type RelationshipsProps = {
   sourceId?: string;
 };
 
+// Utility type to specify the props of `RelationshipAddDialog`
+export type RelationshipAddDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  sourceId?: string;
+  sourceName: string;
+  existingRelationships: IRelationship[];
+  onAdd: (relationships: IRelationship[]) => void;
+};
+
 // Workspace types
 export type IWorkspace = {
   name: string;

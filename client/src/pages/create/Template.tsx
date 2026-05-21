@@ -19,7 +19,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import { Information } from "@components/Label";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
