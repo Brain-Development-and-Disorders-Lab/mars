@@ -676,16 +676,8 @@ const Project = () => {
           </Flex>
         )}
 
-        <Flex
-          gap={"1"}
-          p={"1"}
-          pb={{ base: "1", lg: "0" }}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          wrap={"wrap"}
-        >
-          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+        <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
             <Flex
               id={"projectNameTag"}
               align={"center"}
@@ -724,7 +716,7 @@ const Project = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -836,20 +828,39 @@ const Project = () => {
                     </Flex>
                   </Drawer.Header>
 
-                  <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                  <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Last modified:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length > 0 ? dayjs(projectHistory[0].timestamp).fromNow() : "never"}
+                        </Text>
+                      </Flex>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Versions:
+                        </Text>
+                        <Text fontSize={"xs"} fontWeight={"normal"}>
+                          {projectHistory.length}
+                        </Text>
+                      </Flex>
+                    </Flex>
+
                     <Flex
                       direction={"row"}
-                      gap={"1"}
+                      gap={"2"}
                       align={"start"}
                       rounded={"md"}
                       bg={"gray.100"}
-                      p={"1"}
+                      p={"2"}
                       justify={"space-between"}
                       wrap={"wrap"}
                     >
                       <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                          Sort by:
+                          Sort
                         </Text>
                         <Select.Root
                           value={[historySortOrder]}
@@ -908,13 +919,13 @@ const Project = () => {
 
                       <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                          Date filter:
+                          Edited Between
                         </Text>
 
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
                           <Field.Root gap={"0"}>
                             <Field.Label fontSize={"xs"} ml={"0.5"}>
-                              Start date
+                              Start
                             </Field.Label>
                             <Input
                               type={"date"}
@@ -928,7 +939,7 @@ const Project = () => {
                           </Field.Root>
                           <Field.Root gap={"0"}>
                             <Field.Label fontSize={"xs"} ml={"0.5"}>
-                              End date
+                              End
                             </Field.Label>
                             <Input
                               type={"date"}
@@ -941,7 +952,7 @@ const Project = () => {
                             />
                           </Field.Root>
                         </Flex>
-                        <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"} w={"100%"}>
+                        <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
                           <Button
                             size={"xs"}
                             rounded={"md"}
@@ -979,27 +990,8 @@ const Project = () => {
                       </Flex>
                     </Flex>
 
-                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"}>
-                      <Flex direction={"row"} gap={"1"}>
-                        <Text fontSize={"xs"} fontWeight={"semibold"}>
-                          Last modified:
-                        </Text>
-                        <Text fontSize={"xs"} fontWeight={"normal"}>
-                          {projectHistory.length > 0 ? dayjs(projectHistory[0].timestamp).fromNow() : "never"}
-                        </Text>
-                      </Flex>
-                      <Flex direction={"row"} gap={"1"}>
-                        <Text fontSize={"xs"} fontWeight={"semibold"}>
-                          Versions:
-                        </Text>
-                        <Text fontSize={"xs"} fontWeight={"normal"}>
-                          {projectHistory.length}
-                        </Text>
-                      </Flex>
-                    </Flex>
-
-                    {sortedProjectHistory && sortedProjectHistory.length > 0 ? (
-                      <Timeline.Root size="sm" variant="subtle" mt={"1"}>
+                    {sortedProjectHistory.length > 0 ? (
+                      <Timeline.Root size="sm" variant="subtle" mt={"2"}>
                         {sortedProjectHistory.map((projectVersion) => {
                           const isExpanded = expandedVersions.has(projectVersion.version);
                           return (
@@ -1009,7 +1001,7 @@ const Project = () => {
                                 <Timeline.Indicator />
                               </Timeline.Connector>
                               <Timeline.Content>
-                                <Flex direction={"column"} gap={"1"} w={"100%"}>
+                                <Flex direction={"column"} gap={"2"} w={"100%"}>
                                   <Flex
                                     direction={{ base: "column", sm: "row" }}
                                     gap={"2"}
@@ -1018,12 +1010,12 @@ const Project = () => {
                                   >
                                     <Flex direction={"column"} gap={"0.5"} grow={"1"}>
                                       <Flex direction={"row"} gap={"1"} align={"center"}>
-                                        <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                          {projectVersion.name}
-                                        </Text>
                                         <Tag.Root size={"sm"} colorPalette={"green"}>
                                           <Tag.Label fontSize={"xs"}>{projectVersion.version.slice(0, 6)}</Tag.Label>
                                         </Tag.Root>
+                                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                          {projectVersion.name}
+                                        </Text>
                                         <Text fontSize={"xs"} color={"gray.500"}>
                                           {dayjs(projectVersion.timestamp).fromNow()}
                                         </Text>
@@ -1040,11 +1032,9 @@ const Project = () => {
                                             </Text>
                                           </Tooltip>
                                         ) : (
-                                          <Flex>
-                                            <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                              <Tag.Label fontSize={"xs"}>No message</Tag.Label>
-                                            </Tag.Root>
-                                          </Flex>
+                                          <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                            <Tag.Label fontSize={"xs"}>No message</Tag.Label>
+                                          </Tag.Root>
                                         )}
                                       </Flex>
                                     </Flex>
@@ -1083,19 +1073,18 @@ const Project = () => {
                                           setPreviewVersion(projectVersion);
                                           setHistoryOpen(false);
                                         }}
-                                        disabled={displayProjectArchived}
+                                        disabled={projectArchived}
                                       >
                                         Preview
                                         <Icon name={"expand"} size={"xs"} />
                                       </Button>
                                       <Button
-                                        colorPalette={"orange"}
+                                        variant={"solid"}
                                         size={"xs"}
                                         rounded={"md"}
-                                        onClick={() => {
-                                          handleRestoreFromHistoryClick(projectVersion);
-                                        }}
-                                        disabled={displayProjectArchived || !!previewVersion}
+                                        colorPalette={"orange"}
+                                        onClick={() => handleRestoreFromHistoryClick(projectVersion)}
+                                        disabled={projectArchived || !!previewVersion}
                                       >
                                         Restore
                                         <Icon name={"rewind"} size={"xs"} />
@@ -1140,9 +1129,11 @@ const Project = () => {
                                             Description:
                                           </Text>
                                           {_.isEqual(projectVersion.description, "") ? (
-                                            <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-                                            </Tag.Root>
+                                            <Flex>
+                                              <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
+                                              </Tag.Root>
+                                            </Flex>
                                           ) : (
                                             <Text fontSize={"xs"}>{projectVersion.description}</Text>
                                           )}
@@ -1176,7 +1167,11 @@ const Project = () => {
                                                 ))}
                                               </Flex>
                                             ) : (
-                                              <Text fontSize={"xs"}>No Entities</Text>
+                                              <Flex>
+                                                <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                  <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
+                                                </Tag.Root>
+                                              </Flex>
                                             )}
                                           </Flex>
 
@@ -1205,7 +1200,11 @@ const Project = () => {
                                                 ))}
                                               </Flex>
                                             ) : (
-                                              <Text fontSize={"xs"}>No Collaborators</Text>
+                                              <Flex>
+                                                <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                  <Tag.Label fontSize={"xs"}>No Collaborators</Tag.Label>
+                                                </Tag.Root>
+                                              </Flex>
                                             )}
                                           </Flex>
                                         </Flex>
