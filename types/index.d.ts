@@ -107,6 +107,7 @@ export type AttributeViewButtonProps = {
   attribute: AttributeModel;
   editing?: boolean;
   isTemplate?: boolean;
+  permittedDataValues?: ColumnInfo[];
   onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
   cancelCallback?: () => void;
@@ -247,6 +248,19 @@ export type RelationshipAddDialogProps = {
   sourceName: string;
   existingRelationships: IRelationship[];
   onAdd: (relationships: IRelationship[]) => void;
+};
+
+export type AttributeAddDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  owner: string;
+  templates: AttributeModel[];
+  entityName: string;
+  entityDescription: string;
+  permittedDataValues?: ColumnInfo[];
+  onAdd: (attribute: AttributeModel) => void;
+  /** Optional, shown only when the user is creating from scratch (not from a template). */
+  onSaveAsTemplate?: (attribute: IAttribute) => Promise<void>;
 };
 
 // Workspace types

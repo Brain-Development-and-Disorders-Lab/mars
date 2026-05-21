@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -13,19 +13,20 @@ import {
   Flex,
   Heading,
   Input,
-  Portal,
-  Select,
   Spacer,
   Stack,
   Steps,
+  Tag,
   Text,
-  createListCollection,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import AttributeCard from "@components/AttributeCard";
+import Tooltip from "@components/Tooltip";
+import AttributeViewButton from "@components/AttributeViewButton";
+import AttributeAddDialog from "@components/AttributeAddDialog";
 import Relationships from "@components/Relationships";
 import AddRelationshipsDialog from "@components/RelationshipAddDialog";
 import Linky from "@components/Linky";
@@ -35,13 +36,15 @@ import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
-import { AttributeModel, AttributeCardProps, IGenericItem, ISelectOption, ResponseData, IRelationship } from "@types";
+import { AttributeModel, IGenericItem, IRelationship, ResponseData } from "@types";
+
+// TanStack table
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Utility functions and libraries
-import { isValidAttributes, createSelectOptions, removeTypename } from "@lib/util";
+import { isValidAttributes, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
-import { nanoid } from "nanoid";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
@@ -81,11 +84,6 @@ const Entity = () => {
   const [projects, setProjects] = useState([] as IGenericItem[]);
   const [templates, setTemplates] = useState([] as AttributeModel[]);
 
-  const templatesCollection = useMemo(() => {
-    const items = createSelectOptions<AttributeModel>(templates, "_id", "name");
-    return createListCollection<ISelectOption>({ items: items || [] });
-  }, [templates]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [counter, setCounter] = useState("");
@@ -98,10 +96,7 @@ const Entity = () => {
   const [relationships, setRelationships] = useState([] as IRelationship[]);
   const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
-  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
-
-  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
-  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
+  const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
@@ -192,15 +187,6 @@ const Entity = () => {
     createEntity: ResponseData<string>;
   }>(CREATE_ENTITY);
 
-  const SUGGEST_TEMPLATE = gql`
-    query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
-      suggestTemplate(name: $name, description: $description, templates: $templates)
-    }
-  `;
-  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
-    fetchPolicy: "network-only",
-  });
-
   useEffect(() => {
     if (data?.projects) setProjects(data.projects);
     if (data?.templates) setTemplates(data.templates);
@@ -238,25 +224,6 @@ const Entity = () => {
       posthog.capture("create_entity_attributes");
       setPageState("attributes");
       setPageStep(2);
-
-      if (templates.length > 0) {
-        setIsSuggestingTemplate(true);
-        setSuggestedTemplateId(null);
-        try {
-          const result = await runSuggestTemplate({
-            variables: {
-              name,
-              description,
-              templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
-            },
-          });
-          setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
-        } catch {
-          // Silently ignore AI configuration errors
-        } finally {
-          setIsSuggestingTemplate(false);
-        }
-      }
     } else if (_.isEqual("attributes", pageState)) {
       posthog.capture("create_entity_finished");
       setIsSubmitting(true);
@@ -325,46 +292,83 @@ const Entity = () => {
     }
   };
 
-  const onRemoveAttributeCard = (identifier: string) => {
-    setSelectedAttributes(selectedAttributes.filter((attribute) => attribute._id !== identifier));
+  const removeAttribute = (id: string) => {
+    setSelectedAttributes(selectedAttributes.filter((a) => a._id !== id));
   };
 
-  const onUpdateAttributeCard = (data: AttributeCardProps) => {
-    setSelectedAttributes([
-      ...selectedAttributes.map((attribute) => {
-        if (_.isEqual(attribute._id, data._id)) {
-          return {
-            _id: data._id,
-            name: data.name,
-            owner: attribute.owner,
-            timestamp: attribute.timestamp,
-            archived: false,
-            description: data.description,
-            values: data.values,
-          };
+  const onAttributeUpdate = (updated: AttributeModel) => {
+    setSelectedAttributes(
+      selectedAttributes.map((a) =>
+        _.isEqual(a._id, updated._id)
+          ? { ...a, name: updated.name, description: updated.description, values: updated.values }
+          : a,
+      ),
+    );
+  };
+
+  /** Returns true if the attribute ID corresponds to a known template (template IDs are used as a prefix). */
+  const isKnownTemplate = (id: string): boolean =>
+    templates.some((t) => _.startsWith(id, t._id) || _.isEqual(id, t._id));
+
+  const attributeColumnHelper = createColumnHelper<AttributeModel>();
+  const attributeTableColumns = [
+    attributeColumnHelper.accessor("name", {
+      cell: (info) => (
+        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 16 })}
+            </Text>
+          </Tooltip>
+          <AttributeViewButton
+            attribute={info.row.original}
+            editing={true}
+            isTemplate={isKnownTemplate(info.row.original._id)}
+            onAttributeUpdate={onAttributeUpdate}
+            removeCallback={() => removeAttribute(info.row.original._id)}
+          />
+        </Flex>
+      ),
+      header: "Name",
+      meta: { minWidth: 240 },
+    }),
+    attributeColumnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+            </Tag.Root>
+          );
         }
-        return attribute;
-      }),
-    ]);
-  };
-
-  const applyTemplate = (templateId: string) => {
-    const template = templates.find((t) => t._id === templateId);
-    if (template) {
-      setSelectedAttributes([
-        ...selectedAttributes,
-        {
-          _id: `${template._id}-${nanoid(6)}`,
-          name: template.name,
-          timestamp: template.timestamp,
-          owner: template.owner,
-          archived: false,
-          description: template.description,
-          values: template.values,
-        },
-      ]);
-    }
-  };
+        return (
+          <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
+            <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Description",
+    }),
+    attributeColumnHelper.accessor("values", {
+      cell: (info) => {
+        const values = info.row.original.values;
+        if (values.length === 0) {
+          return (
+            <Text fontSize={"xs"} color={"gray.500"}>
+              No values
+            </Text>
+          );
+        }
+        const valueNames = values.map((v) => v.name).join(", ");
+        return (
+          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
+            <Text fontSize={"xs"}>{valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Values",
+    }),
+  ];
 
   return (
     <Content isLoaded={!loading && !createLoading} isError={!_.isUndefined(error) && !_.isUndefined(createError)}>
@@ -601,158 +605,59 @@ const Entity = () => {
 
         {/* Attributes page */}
         {_.isEqual("attributes", pageState) && (
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-            <Flex direction={"column"} p={"1"} w={"100%"} gap={"2"}>
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                bg={"gray.50"}
-                rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-              >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Entity Attributes
-                </Text>
-                <Information
-                  text={
-                    "Add Attributes containing metadata about this Entity. Use an existing Template or create one manually."
-                  }
-                />
-
-                <Flex direction={"row"} gap={"2"} align={"end"}>
-                  {/* Template selector */}
-                  <Flex direction={"column"} gap={"2"} grow={"1"}>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Use Template ({templatesCollection.items.length} available)
-                      </Text>
-                      {isSuggestingTemplate && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
-                          <Text fontSize={"xs"} color={"purple.300"}>
-                            Suggesting Template...
-                          </Text>
-                        </Flex>
-                      )}
-                      {!isSuggestingTemplate && suggestedTemplateId && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
-                          <Text
-                            fontSize={"xs"}
-                            color={"purple.600"}
-                            cursor={"pointer"}
-                            _hover={{ textDecoration: "underline" }}
-                            onClick={() => {
-                              applyTemplate(suggestedTemplateId);
-                            }}
-                          >
-                            Suggested: {templates.find((t) => t._id === suggestedTemplateId)?.name}
-                          </Text>
-                        </Flex>
-                      )}
-                      {!isSuggestingTemplate && suggestedTemplateId === null && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
-                          <Text fontSize={"xs"} color={"gray.400"}>
-                            No Suggested Templates
-                          </Text>
-                        </Flex>
-                      )}
-                    </Flex>
-                    <Select.Root
-                      key={"select-template"}
-                      size={"xs"}
-                      collection={templatesCollection}
-                      disabled={templatesCollection.items.length === 0}
-                      rounded={"md"}
-                      value={selectedTemplateValue}
-                      onValueChange={(details) => {
-                        const selectedTemplateId = details.value[0];
-                        if (selectedTemplateId && !_.isEqual(selectedTemplateId, "")) {
-                          applyTemplate(selectedTemplateId);
-                          setSelectedTemplateValue([]);
-                        }
-                      }}
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger data-testid={"select-template-trigger"} rounded={"md"} bg={"white"}>
-                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
-                            <Text fontSize={"xs"} color={"gray.500"}>
-                              Select Template
-                            </Text>
-                          </Flex>
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {templatesCollection.items.map((template: ISelectOption) => (
-                              <Select.Item item={template} key={template.value} fontSize={"xs"}>
-                                <Flex direction={"row"} gap={"2"} align={"center"}>
-                                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                                  {template.label}
-                                </Flex>
-                                <Select.ItemIndicator />
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
-                  </Flex>
-
-                  <Button
-                    data-testid={"create-entity-new-attribute"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      setSelectedAttributes([
-                        ...selectedAttributes,
-                        {
-                          _id: `a-${nanoid(6)}`,
-                          name: "",
-                          timestamp: dayjs(Date.now()).toISOString(),
-                          owner,
-                          archived: false,
-                          description: "",
-                          values: [],
-                        },
-                      ]);
-                    }}
-                  >
-                    Create new Attribute
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
+          <Flex direction={"column"} gap={"2"} p={"1"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              bg={"gray.50"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Entity Attributes
+                  </Text>
                 </Flex>
+                <Button
+                  data-testid={"create-entity-add-attribute"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => setAddAttributesOpen(true)}
+                >
+                  Add
+                  <Icon name={"add"} size={"xs"} />
+                </Button>
               </Flex>
+              <Information
+                text={
+                  "Add Attributes containing metadata about this Entity. Use an existing Template or create one manually."
+                }
+              />
             </Flex>
 
-            <Flex w={"100%"} minH={selectedAttributes.length > 0 ? "fit-content" : "200px"} p={"1"} pt={"0"}>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={"center"}
+              minH={selectedAttributes.length > 0 ? "fit-content" : "120px"}
+              data-testid={"create-entity-attributes"}
+            >
               {selectedAttributes.length > 0 ? (
-                <Stack gap={"2"} w={"100%"} data-testid={"create-entity-attributes"}>
-                  {selectedAttributes.map((attribute) => (
-                    <AttributeCard
-                      _id={attribute._id}
-                      key={attribute._id}
-                      name={attribute.name}
-                      owner={attribute.owner}
-                      archived={attribute.archived}
-                      description={attribute.description}
-                      values={attribute.values}
-                      restrictDataValues={false}
-                      onRemove={onRemoveAttributeCard}
-                      onUpdate={onUpdateAttributeCard}
-                    />
-                  ))}
-                </Stack>
+                <DataTable
+                  data={selectedAttributes}
+                  columns={attributeTableColumns}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  viewOnly={false}
+                  showPagination
+                  showSelection
+                />
               ) : (
                 <EmptyState.Root>
                   <EmptyState.Content>
@@ -764,6 +669,16 @@ const Entity = () => {
                 </EmptyState.Root>
               )}
             </Flex>
+
+            <AttributeAddDialog
+              open={addAttributesOpen}
+              onClose={() => setAddAttributesOpen(false)}
+              owner={owner}
+              templates={templates}
+              entityName={name}
+              entityDescription={description}
+              onAdd={(attribute) => setSelectedAttributes([...selectedAttributes, attribute])}
+            />
           </Flex>
         )}
 

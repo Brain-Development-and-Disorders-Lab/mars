@@ -6,6 +6,7 @@ import {
   Flex,
   Button,
   Dialog,
+  EmptyState,
   Text,
   Input,
   Select,
@@ -20,18 +21,17 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
-import Attribute from "@components/AttributeCard";
+import AttributeAddDialog from "@components/AttributeAddDialog";
+import AttributeViewButton from "@components/AttributeViewButton";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import { Information } from "@components/Label";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
 import {
   AttributeModel,
-  AttributeCardProps,
   ColumnInfo,
   IGenericItem,
   EntityImportReview,
@@ -54,7 +54,6 @@ import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { removeTypename, isValidValues, getValueTypeIconProps } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
-import { nanoid } from "nanoid";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -258,15 +257,11 @@ const ImportDialog = (props: ImportDialogProps) => {
     }),
   );
 
-  // Templates
-  const [templatesCollection, setTemplatesCollection] = useState(
-    createListCollection({
-      items: [] as AttributeModel[],
-      itemToValue: (item: AttributeModel) => item._id,
-      itemToString: (item: AttributeModel) => item.name,
-    }),
-  );
-  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
+  // Templates available for attribute creation
+  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+
+  // Controls the "Add Attribute" dialog on the mapping step
+  const [addAttributeOpen, setAddAttributeOpen] = useState(false);
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
@@ -277,7 +272,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
-  const [attributeValidity, setAttributeValidity] = useState<Record<string, boolean>>({});
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
@@ -468,9 +462,10 @@ const ImportDialog = (props: ImportDialogProps) => {
   useEffect(() => {
     if (!_.isEqual(entityInterfacePage, "mapping")) return;
     const allValid =
-      attributesField.length === 0 || attributesField.every((attr) => attributeValidity[attr._id] === true);
+      attributesField.length === 0 ||
+      attributesField.every((attr) => attr.name !== "" && attr.description !== "" && isValidValues(attr.values));
     setContinueDisabled(!allValid);
-  }, [entityInterfacePage, attributeValidity, attributesField]);
+  }, [entityInterfacePage, attributesField]);
 
   const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
@@ -608,13 +603,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
         t.values.every((v) => !["entity", "select"].includes(v.type)),
       );
-      setTemplatesCollection(
-        createListCollection({
-          items: supportedTemplates,
-          itemToValue: (item: AttributeModel) => item._id,
-          itemToString: (item: AttributeModel) => item.name,
-        }),
-      );
+      setTemplates(supportedTemplates);
     }
     if (response.data?.projects) {
       setProjectsCollection(
@@ -919,35 +908,68 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   const onRemoveAttribute = (identifier: string) => {
     setAttributesField(attributesField.filter((attribute) => attribute._id !== identifier));
-    setAttributeValidity((prev) => {
-      const next = { ...prev };
-      delete next[identifier];
-      return next;
-    });
   };
 
-  const onAttributeValidityChange = (id: string, isValid: boolean) => {
-    setAttributeValidity((prev) => ({ ...prev, [id]: isValid }));
+  const onUpdateAttribute = (updated: AttributeModel) => {
+    setAttributesField(attributesField.map((attr) => (_.isEqual(attr._id, updated._id) ? updated : attr)));
   };
 
-  const onUpdateAttribute = (data: AttributeCardProps) => {
-    setAttributesField([
-      ...attributesField.map((attribute) => {
-        if (_.isEqual(attribute._id, data._id)) {
-          return {
-            _id: data._id,
-            name: data.name,
-            timestamp: attribute.timestamp,
-            owner: attribute.owner,
-            archived: false,
-            description: data.description,
-            values: data.values,
-          };
+  const attributeColumnHelper = createColumnHelper<AttributeModel>();
+  const attributeTableColumns = [
+    attributeColumnHelper.accessor("name", {
+      cell: (info) => {
+        const attribute = info.row.original;
+        return (
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={info.getValue() !== "" ? "black" : "gray.400"}>
+              {info.getValue() !== "" ? info.getValue() : "Unnamed"}
+            </Text>
+            <AttributeViewButton
+              attribute={attribute}
+              editing={true}
+              permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+              onAttributeUpdate={onUpdateAttribute}
+              removeCallback={() => onRemoveAttribute(attribute._id)}
+            />
+          </Flex>
+        );
+      },
+      header: "Name",
+      meta: {
+        minWidth: 320,
+      },
+    }),
+    attributeColumnHelper.accessor("description", {
+      cell: (info) => (
+        <Tooltip content={info.getValue()} disabled={info.getValue().length < 40} showArrow>
+          <Text fontSize={"xs"} truncate maxW={"200px"}>
+            {_.truncate(info.getValue(), { length: 40 })}
+          </Text>
+        </Tooltip>
+      ),
+      header: "Description",
+    }),
+    attributeColumnHelper.accessor("values", {
+      cell: (info) => {
+        const values = info.row.original.values;
+        if (values.length === 0) {
+          return (
+            <Text fontSize={"xs"} color={"gray.500"}>
+              No values
+            </Text>
+          );
         }
-        return attribute;
-      }),
-    ]);
-  };
+        const valueNames = values.map((value) => value.name).join(", ");
+        const truncatedNames = valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames;
+        return (
+          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
+            <Text fontSize={"xs"}>{truncatedNames}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Values",
+    }),
+  ];
 
   /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
   const onBackClick = () => {
@@ -1127,16 +1149,9 @@ const ImportDialog = (props: ImportDialogProps) => {
         itemToString: (item: IGenericItem) => item.name,
       }),
     );
-    setTemplatesCollection(
-      createListCollection({
-        items: [] as AttributeModel[],
-        itemToValue: (item: AttributeModel) => item._id,
-        itemToString: (item: AttributeModel) => item.name,
-      }),
-    );
-    setSelectedTemplateValue([]);
+    setTemplates([]);
+    setAddAttributeOpen(false);
     setAttributesField([]);
-    setAttributeValidity({});
     setReviewEntities([]);
     setReviewTemplates([]);
     setConfirmWarningsOpen(false);
@@ -1751,128 +1766,46 @@ const ImportDialog = (props: ImportDialogProps) => {
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Attributes
-                </Text>
-                <Information
-                  text={
-                    isSpreadsheetFile(fileType)
-                      ? "Assign spreadsheet columns to Attribute values, or use an existing Template."
-                      : "Existing Attributes from the JSON file will be preserved."
-                  }
-                />
-
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} wrap={["wrap", "nowrap"]}>
-                  {/* Drop-down to select a Template */}
-                  <Fieldset.Root maxW={"sm"}>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Select.Root
-                          key={"select-template"}
-                          size={"xs"}
-                          bg={"white"}
-                          rounded={"md"}
-                          collection={templatesCollection}
-                          value={selectedTemplateValue}
-                          onValueChange={(details) => {
-                            const selectedTemplate = details.items[0];
-                            if (!_.isEqual(selectedTemplate._id, "")) {
-                              for (const template of templatesCollection.items || []) {
-                                if (_.isEqual(selectedTemplate._id, template._id)) {
-                                  setAttributesField([
-                                    ...attributesField,
-                                    {
-                                      _id: `${template._id}-${nanoid(6)}`,
-                                      name: template.name,
-                                      timestamp: template.timestamp,
-                                      owner: template.owner,
-                                      archived: false,
-                                      description: template.description,
-                                      values: template.values,
-                                    },
-                                  ]);
-                                  setSelectedTemplateValue([]);
-                                  break;
-                                }
-                              }
-                            }
-                          }}
-                          disabled={templatesCollection.items?.length === 0}
-                        >
-                          <Select.HiddenSelect />
-                          <Select.Control>
-                            <Select.Trigger rounded={"md"}>
-                              <Flex direction={"row"} gap={"2"} align={"center"}>
-                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
-                                <Text fontSize={"xs"} color={"gray.500"}>
-                                  {"Select Template"}
-                                </Text>
-                              </Flex>
-                            </Select.Trigger>
-                            <Select.IndicatorGroup>
-                              <Select.Indicator />
-                            </Select.IndicatorGroup>
-                          </Select.Control>
-                          <Portal>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {templatesCollection.items?.map((template: AttributeModel) => (
-                                  <Select.Item item={template} key={template._id}>
-                                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                                      <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                                      {template.name}
-                                    </Flex>
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                )) || []}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Portal>
-                        </Select.Root>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      setAttributesField([
-                        ...attributesField,
-                        {
-                          _id: `a-${nanoid(6)}`,
-                          name: "",
-                          timestamp: dayjs(Date.now()).toISOString(),
-                          owner: ownerField,
-                          archived: false,
-                          description: "",
-                          values: [],
-                        },
-                      ]);
-                    }}
-                  >
-                    Create
+                <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Attributes
+                  </Text>
+                  <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setAddAttributeOpen(true)}>
+                    Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
 
-                {attributesField.map((attribute) => (
-                  <Attribute
-                    _id={attribute._id}
-                    key={attribute._id}
-                    name={attribute.name}
-                    owner={attribute.owner}
-                    archived={attribute.archived}
-                    description={attribute.description}
-                    values={attribute.values}
-                    restrictDataValues={true}
-                    permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
-                    onRemove={onRemoveAttribute}
-                    onUpdate={onUpdateAttribute}
-                    onValidityChange={onAttributeValidityChange}
+                {attributesField.length > 0 ? (
+                  <DataTable
+                    columns={attributeTableColumns}
+                    data={attributesField}
+                    visibleColumns={{}}
+                    selectedRows={{}}
                   />
-                ))}
+                ) : (
+                  <Flex justify={"center"} align={"center"} minH={"80px"}>
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>No Attributes added</EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
+                  </Flex>
+                )}
+
+                <AttributeAddDialog
+                  open={addAttributeOpen}
+                  onClose={() => setAddAttributeOpen(false)}
+                  owner={ownerField}
+                  templates={templates}
+                  entityName={""}
+                  entityDescription={""}
+                  permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+                  onAdd={(attribute) => setAttributesField([...attributesField, attribute])}
+                />
               </Flex>
             )}
 

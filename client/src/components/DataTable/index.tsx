@@ -881,12 +881,14 @@ const DataTable = (props: DataTableProps) => {
                   const columnWidth = getColumnWidth(header.id, isLastColumn);
                   const columnMinWidth = getColumnMinWidth(header.id);
                   const align = getColumnAlign(header.id);
+                  const headerMeta = header.column.columnDef.meta as ColumnMeta | undefined;
                   return (
                     <Flex
                       key={header.id}
                       w={columnWidth}
                       flex={isLastColumn ? "1 1 auto" : "0 0 auto"}
                       minW={isLastColumn ? `${columnMinWidth}px` : columnWidth}
+                      maxW={isLastColumn && headerMeta?.maxWidth ? `${headerMeta.maxWidth}px` : undefined}
                       px={1}
                       py={1}
                       fontSize={"xs"}
@@ -969,6 +971,7 @@ const DataTable = (props: DataTableProps) => {
                     const columnWidth = getColumnWidth(cell.column.id, isLastCell);
                     const columnMinWidth = getColumnMinWidth(cell.column.id);
                     const align = getColumnAlign(cell.column.id);
+                    const cellMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     return (
                       <Box
                         key={cell.id}
@@ -976,6 +979,7 @@ const DataTable = (props: DataTableProps) => {
                         w={columnWidth}
                         flex={isLastCell ? "1 1 auto" : "0 0 auto"}
                         minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
+                        maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
                         h={"34px"}
                         px={1}
                         py={0.5}

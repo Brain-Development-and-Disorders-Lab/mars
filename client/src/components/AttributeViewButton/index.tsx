@@ -159,7 +159,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     minH={values.length > 0 ? "fit-content" : "200px"}
                   >
                     {values && values.length > 0 ? (
-                      <Values viewOnly={!isEditing} values={values} setValues={setValues} />
+                      <Values
+                        viewOnly={!isEditing}
+                        values={values}
+                        setValues={setValues}
+                        permittedValues={props.permittedDataValues}
+                      />
                     ) : (
                       <EmptyState.Root>
                         <EmptyState.Content>

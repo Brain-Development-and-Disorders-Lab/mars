@@ -1170,8 +1170,10 @@ const ValueRow = (props: {
   const [valueName, setValueName] = useState(props.value.name);
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
-  const initialData =
-    inColumnMode && props.permittedValues?.some((c) => c.name === props.value.data) ? props.value.data : "";
+  let initialData = props.value.data;
+  if (inColumnMode && !props.permittedValues?.some((c) => c.name === props.value.data)) {
+    initialData = "";
+  }
   const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
   useEffect(() => {
