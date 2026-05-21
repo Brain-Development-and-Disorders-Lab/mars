@@ -25,10 +25,10 @@ import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import AttributeViewButton from "@components/AttributeViewButton";
-import AttributeAddDialog from "@components/AddAttributeDialog";
+import AddAttributeDialog from "@components/AddAttributeDialog";
 import Relationships from "@components/Relationships";
 import AddRelationshipsDialog from "@components/AddRelationshipDialog";
+import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import Linky from "@components/Linky";
 import { Information } from "@components/Label";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
@@ -313,22 +313,52 @@ const Entity = () => {
   const attributeColumnHelper = createColumnHelper<AttributeModel>();
   const attributeTableColumns = [
     attributeColumnHelper.accessor("name", {
-      cell: (info) => (
-        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 16 })}
-            </Text>
-          </Tooltip>
-          <AttributeViewButton
-            attribute={info.row.original}
-            editing={true}
-            isTemplate={isKnownTemplate(info.row.original._id)}
-            onAttributeUpdate={onAttributeUpdate}
-            removeCallback={() => removeAttribute(info.row.original._id)}
-          />
-        </Flex>
-      ),
+      cell: (info) => {
+        const attribute = info.row.original;
+        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
+        return (
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 16 })}
+              </Text>
+            </Tooltip>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size="2xs"
+                variant="subtle"
+                rounded="md"
+                colorPalette="gray"
+                aria-label={"View Attribute"}
+                onClick={() => setViewAttributeDialogOpen(true)}
+              >
+                Edit
+                <Icon name={"edit"} size={"xs"} />
+              </Button>
+              <Button
+                size="2xs"
+                rounded="md"
+                variant="subtle"
+                colorPalette="red"
+                aria-label={"Delete Attribute"}
+                onClick={() => removeAttribute(attribute._id)}
+              >
+                Delete
+                <Icon name={"delete"} size={"xs"} />
+              </Button>
+              <ViewAttributeDialog
+                open={viewAttributeDialogOpen}
+                setOpen={setViewAttributeDialogOpen}
+                attribute={attribute}
+                editing={true}
+                isTemplate={isKnownTemplate(attribute._id)}
+                onAttributeUpdate={onAttributeUpdate}
+                removeCallback={() => removeAttribute(attribute._id)}
+              />
+            </Flex>
+          </Flex>
+        );
+      },
       header: "Name",
       meta: { minWidth: 240 },
     }),
@@ -670,7 +700,7 @@ const Entity = () => {
               )}
             </Flex>
 
-            <AttributeAddDialog
+            <AddAttributeDialog
               open={addAttributesOpen}
               onClose={() => setAddAttributesOpen(false)}
               owner={owner}

@@ -34,14 +34,14 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
 import PreviewDialog from "@components/PreviewDialog";
-import AttributeViewButton from "@components/AttributeViewButton";
-import AttributeAddDialog from "@components/AddAttributeDialog";
+import ViewAttributeDialog from "@components/ViewAttributeDialog";
+import AddAttributeDialog from "@components/AddAttributeDialog";
 import SearchSelect from "@components/SearchSelect";
 import AlertDialog from "@components/AlertDialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import AddRelationshipDialog from "@components/AddRelationshipDialog";
 import Relationships from "@components/Relationships";
-import RelationshipAddDialog from "@components/AddRelationshipDialog";
 import Tooltip from "@components/Tooltip";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
@@ -736,6 +736,8 @@ const Entity = () => {
   const attributeTableColumns = [
     attributeTableColumnHelper.accessor("name", {
       cell: (info) => {
+        const attribute = info.row.original;
+        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
@@ -743,15 +745,43 @@ const Entity = () => {
                 {_.truncate(info.getValue(), { length: 16 })}
               </Text>
             </Tooltip>
-            <AttributeViewButton
-              attribute={info.row.original}
-              editing={editing}
-              isTemplate={isKnownTemplate(info.row.original._id, templates)}
-              onAttributeUpdate={onAttributeUpdate}
-              removeCallback={() => {
-                removeAttribute(info.row.original._id);
-              }}
-            />
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size="2xs"
+                variant="subtle"
+                rounded="md"
+                colorPalette="gray"
+                aria-label={"View Attribute"}
+                onClick={() => setViewAttributeDialogOpen(true)}
+              >
+                {editing ? "Edit" : "Expand"}
+                <Icon name={editing ? "edit" : "expand"} size={"xs"} />
+              </Button>
+              {editing && (
+                <Button
+                  size="2xs"
+                  rounded="md"
+                  variant="subtle"
+                  colorPalette="red"
+                  aria-label={"Delete Attribute"}
+                  onClick={() => removeAttribute(attribute._id)}
+                >
+                  Delete
+                  <Icon name={"delete"} size={"xs"} />
+                </Button>
+              )}
+              <ViewAttributeDialog
+                open={viewAttributeDialogOpen}
+                setOpen={setViewAttributeDialogOpen}
+                attribute={attribute}
+                editing={editing}
+                isTemplate={isKnownTemplate(attribute._id, templates)}
+                onAttributeUpdate={onAttributeUpdate}
+                removeCallback={() => {
+                  removeAttribute(attribute._id);
+                }}
+              />
+            </Flex>
           </Flex>
         );
       },
@@ -2191,7 +2221,7 @@ const Entity = () => {
         </Flex>
 
         {/* Add Attributes dialog */}
-        <AttributeAddDialog
+        <AddAttributeDialog
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
           owner={user}
@@ -2330,7 +2360,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Add Relationships dialog */}
-        <RelationshipAddDialog
+        <AddRelationshipDialog
           open={addRelationshipsOpen}
           onClose={() => setAddRelationshipsOpen(false)}
           sourceId={entity._id}

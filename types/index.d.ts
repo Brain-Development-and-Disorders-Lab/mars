@@ -103,11 +103,18 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributeViewButtonProps = {
+export type ViewAttributeDialogProps = {
+  // Dialog state
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+
+  // Dialog Attribute information
   attribute: AttributeModel;
   editing?: boolean;
   isTemplate?: boolean;
   permittedDataValues?: ColumnInfo[];
+
+  // Callback functions
   onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
   cancelCallback?: () => void;

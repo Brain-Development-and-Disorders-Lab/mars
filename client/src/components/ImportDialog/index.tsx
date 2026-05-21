@@ -21,8 +21,8 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
-import AttributeAddDialog from "@components/AddAttributeDialog";
-import AttributeViewButton from "@components/AttributeViewButton";
+import AddAttributeDialog from "@components/AddAttributeDialog";
+import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -919,18 +919,44 @@ const ImportDialog = (props: ImportDialogProps) => {
     attributeColumnHelper.accessor("name", {
       cell: (info) => {
         const attribute = info.row.original;
+        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
         return (
           <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
             <Text fontSize={"xs"} fontWeight={"semibold"} color={info.getValue() !== "" ? "black" : "gray.400"}>
               {info.getValue() !== "" ? info.getValue() : "Unnamed"}
             </Text>
-            <AttributeViewButton
-              attribute={attribute}
-              editing={true}
-              permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
-              onAttributeUpdate={onUpdateAttribute}
-              removeCallback={() => onRemoveAttribute(attribute._id)}
-            />
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size="2xs"
+                variant="subtle"
+                rounded="md"
+                colorPalette="gray"
+                aria-label={"View Attribute"}
+                onClick={() => setViewAttributeDialogOpen(true)}
+              >
+                Edit
+                <Icon name={"edit"} size={"xs"} />
+              </Button>
+              <Button
+                size="2xs"
+                rounded="md"
+                variant="subtle"
+                colorPalette="red"
+                aria-label={"Delete Attribute"}
+                onClick={() => onRemoveAttribute(attribute._id)}
+              >
+                Delete
+                <Icon name={"delete"} size={"xs"} />
+              </Button>
+              <ViewAttributeDialog
+                open={viewAttributeDialogOpen}
+                setOpen={setViewAttributeDialogOpen}
+                attribute={attribute}
+                editing={true}
+                permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+                onAttributeUpdate={onUpdateAttribute}
+              />
+            </Flex>
           </Flex>
         );
       },
@@ -1168,7 +1194,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     <Dialog.Root
       open={props.open}
       placement={"center"}
-      size={"xl"}
+      size={"lg"}
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
     >
@@ -1796,7 +1822,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   </Flex>
                 )}
 
-                <AttributeAddDialog
+                <AddAttributeDialog
                   open={addAttributeOpen}
                   onClose={() => setAddAttributeOpen(false)}
                   owner={ownerField}
