@@ -5,8 +5,8 @@ import React, { useState } from "react";
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
-import ScanModal from "@components/ScanModal";
-import ReportModal from "@components/ReportModal";
+import ScanDialog from "@components/ScanDialog";
+import ReportDialog from "@components/ReportDialog";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -32,7 +32,7 @@ const Navigation = () => {
   // Workspace context value
   const { workspace } = useWorkspace();
 
-  // Modal open states
+  // Dialog open states
   const [importOpen, setImportOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -212,7 +212,7 @@ const Navigation = () => {
                   colorPalette={"blue"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("import_modal_open");
+                    posthog.capture("import_dialog_open");
 
                     setImportOpen(true);
                   }}
@@ -233,7 +233,7 @@ const Navigation = () => {
                   colorPalette={"green"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_modal_open");
+                    posthog.capture("scan_dialog_open");
 
                     setScanOpen(true);
                   }}
@@ -254,7 +254,7 @@ const Navigation = () => {
                 colorPalette={"red"}
                 onClick={() => {
                   // Capture event
-                  posthog.capture("bug_modal_open");
+                  posthog.capture("bug_dialog_open");
 
                   setReportOpen(true);
                 }}
@@ -381,7 +381,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_modal_open");
+                    posthog.capture("scan_dialog_open");
 
                     setScanOpen(true);
                   }}
@@ -409,11 +409,11 @@ const Navigation = () => {
       {/* `ImportDialog` component */}
       <ImportDialog open={importOpen} setOpen={setImportOpen} />
 
-      {/* `ScanModal` component */}
-      <ScanModal open={scanOpen} setOpen={setScanOpen} />
+      {/* `ScanDialog` component */}
+      <ScanDialog open={scanOpen} setOpen={setScanOpen} />
 
-      {/* `ReportModal` component */}
-      <ReportModal open={reportOpen} setOpen={setReportOpen} />
+      {/* `ReportDialog` component */}
+      <ReportDialog open={reportOpen} setOpen={setReportOpen} />
     </Flex>
   );
 };

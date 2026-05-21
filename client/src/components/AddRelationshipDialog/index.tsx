@@ -9,7 +9,7 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { IGenericItem, IRelationship, RelationshipAddDialogProps, RelationshipType } from "@types";
+import { IGenericItem, IRelationship, AddRelationshipDialogProps, RelationshipType } from "@types";
 
 // Utility imports
 import _ from "lodash";
@@ -22,14 +22,14 @@ import {
   RELATIONSHIP_TYPE_PALETTE,
 } from "@components/Relationships";
 
-const RelationshipAddDialog = ({
+const AddRelationshipDialog = ({
   open,
   onClose,
   sourceId,
   sourceName,
   existingRelationships,
   onAdd,
-}: RelationshipAddDialogProps) => {
+}: AddRelationshipDialogProps) => {
   const [staged, setStaged] = useState<IRelationship[]>([]);
   const [selectedType, setSelectedType] = useState<RelationshipType>("general");
   const [selectedTarget, setSelectedTarget] = useState<IGenericItem>({} as IGenericItem);
@@ -275,4 +275,4 @@ const RelationshipAddDialog = ({
   );
 };
 
-export default RelationshipAddDialog;
+export default AddRelationshipDialog;

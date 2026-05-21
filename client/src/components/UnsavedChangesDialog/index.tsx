@@ -4,9 +4,9 @@ import { Button, Flex, Text, Dialog } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Custom types
-import { UnsavedChangesModalProps } from "@types";
+import { UnsavedChangesDialogProps } from "@types";
 
-const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
+const UnsavedChangesDialog = (props: UnsavedChangesDialogProps) => {
   return (
     <Dialog.Root open={props.blocker.state === "blocked"} placement={"center"} size={"xs"}>
       <Dialog.Backdrop />
@@ -61,4 +61,4 @@ const UnsavedChangesModal = (props: UnsavedChangesModalProps) => {
   );
 };
 
-export { UnsavedChangesModal };
+export { UnsavedChangesDialog };

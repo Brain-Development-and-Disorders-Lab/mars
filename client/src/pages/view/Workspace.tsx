@@ -256,7 +256,7 @@ const Workspace = () => {
   }, [entities, projects, templates]);
 
   /**
-   * Handler function for modal `Done` button, apply updates to the Workspace
+   * Handler function for dialog `Done` button, apply updates to the Workspace
    */
   const handleUpdateClick = async () => {
     await updateWorkspace({
@@ -679,7 +679,7 @@ const Workspace = () => {
             <Icon name={"cross"} size={"xs"} />
           </Button>
           <Button
-            id={"modalWorkspaceCreateButton"}
+            id={"dialogWorkspaceCreateButton"}
             size={"xs"}
             rounded={"md"}
             colorPalette={"green"}
@@ -713,7 +713,7 @@ const Workspace = () => {
                   Name
                 </Text>
                 <Input
-                  id={"modalWorkspaceName"}
+                  id={"dialogWorkspaceName"}
                   bg={"white"}
                   size={"xs"}
                   rounded={"md"}

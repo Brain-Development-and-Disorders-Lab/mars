@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import ExportModal from "@components/ExportModal";
+import ExportDialog from "@components/ExportDialog";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
@@ -85,7 +85,7 @@ const Entities = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
-  // Entities export modal
+  // Entities export dialog
   const [exportOpen, setExportOpen] = useState(false);
   const [exportIds, setExportIds] = useState<string[] | undefined>(undefined);
 
@@ -598,7 +598,7 @@ const Entities = () => {
         </Flex>
       </Flex>
 
-      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
+      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
     </Content>
   );
 };

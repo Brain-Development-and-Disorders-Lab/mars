@@ -197,7 +197,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       setDescription(attribute.description);
                       setValues(attribute.values);
 
-                      // Close the modal
+                      // Close the dialog
                       setOpen(false);
 
                       // Run the 'cancel' action (if specified)
@@ -214,7 +214,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     size={"xs"}
                     rounded={"md"}
                     onClick={() => {
-                      // Close the modal
+                      // Close the dialog
                       setOpen(false);
 
                       // Run the 'done' action (if specified)

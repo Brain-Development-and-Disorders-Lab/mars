@@ -42,7 +42,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
   const posthog = usePostHog();
 
-  // Modal state for transition overlay
+  // Dialog state for transition overlay
   const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
 
   // Store all Workspaces
@@ -142,7 +142,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Update Workspace` button
    */
   const handleUpdateClick = () => {
-    // Open the update Workspace modal
+    // Open the update Workspace dialog
     navigate(`/workspaces/${workspace}`);
 
     // Ensure `WorkspaceSwitcher` is closed
@@ -153,7 +153,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Create Workspace` button
    */
   const handleCreateClick = () => {
-    // Open the create Workspace modal
+    // Open the create Workspace dialog
     navigate("/create/workspace");
 
     // Ensure `WorkspaceSwitcher` is closed

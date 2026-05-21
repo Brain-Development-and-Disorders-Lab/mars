@@ -70,7 +70,7 @@ const CounterSelect = (props: CounterProps) => {
   // Overall error state
   const isValidInput = counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
 
-  // Create Counter modal disclosure
+  // Create Counter dialog disclosure
   const [open, setOpen] = useState(false);
 
   // Workspace context value

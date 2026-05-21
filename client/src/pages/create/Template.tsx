@@ -19,7 +19,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import { Information } from "@components/Label";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
@@ -253,7 +253,7 @@ const Template = () => {
         </Flex>
       </Flex>
 
-      {/* Information modal */}
+      {/* Information dialog */}
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}
@@ -476,7 +476,7 @@ const Template = () => {
         </Button>
       </Flex>
 
-      <UnsavedChangesModal
+      <UnsavedChangesDialog
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

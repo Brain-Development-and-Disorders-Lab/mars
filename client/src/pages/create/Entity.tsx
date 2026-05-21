@@ -26,12 +26,12 @@ import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import AttributeViewButton from "@components/AttributeViewButton";
-import AttributeAddDialog from "@components/AttributeAddDialog";
+import AttributeAddDialog from "@components/AddAttributeDialog";
 import Relationships from "@components/Relationships";
-import AddRelationshipsDialog from "@components/RelationshipAddDialog";
+import AddRelationshipsDialog from "@components/AddRelationshipDialog";
 import Linky from "@components/Linky";
 import { Information } from "@components/Label";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
@@ -682,7 +682,7 @@ const Entity = () => {
           </Flex>
         )}
 
-        {/* Information modal */}
+        {/* Information dialog */}
         <Dialog.Root
           open={informationOpen}
           onOpenChange={(event) => setInformationOpen(event.open)}
@@ -901,7 +901,7 @@ const Entity = () => {
         </Button>
       </Flex>
 
-      <UnsavedChangesModal
+      <UnsavedChangesDialog
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

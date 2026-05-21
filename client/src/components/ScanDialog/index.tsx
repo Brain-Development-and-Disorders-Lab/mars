@@ -7,7 +7,7 @@ import { toaster } from "@components/Toast";
 import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeScannerState } from "html5-qrcode";
 
 // Custom types
-import { IGenericItem, ScanModalProps, ScannerProps } from "@types";
+import { IGenericItem, ScanDialogProps, ScannerProps } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -28,7 +28,7 @@ import { GLOBAL_STYLES } from "@variables";
 // Constants
 const REGION_ID = "scanner-region";
 
-const ScanModal = (props: ScanModalProps) => {
+const ScanDialog = (props: ScanDialogProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
 
@@ -72,7 +72,7 @@ const ScanModal = (props: ScanModalProps) => {
   };
 
   /**
-   * Handle the modal being closed by the user, resetting the state and removing the keypress handler
+   * Handle the dialog being closed by the user, resetting the state and removing the keypress handler
    */
   const handleOnClose = async () => {
     await onScannerCleanup();
@@ -258,7 +258,7 @@ const ScanModal = (props: ScanModalProps) => {
     };
   };
 
-  // Setup the scanner when the modal is opened
+  // Setup the scanner when the dialog is opened
   useEffect(() => {
     if (props.open) {
       setupScanner();
@@ -370,4 +370,4 @@ const ScanModal = (props: ScanModalProps) => {
   );
 };
 
-export default ScanModal;
+export default ScanDialog;

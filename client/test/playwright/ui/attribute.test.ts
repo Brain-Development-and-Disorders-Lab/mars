@@ -15,8 +15,8 @@ import {
   createTestEntity,
 } from "../helpers";
 
-async function openAddAttributeModal(page: Page): Promise<void> {
-  await page.click("#addAttributeModalButton");
+async function openAddAttributeDialog(page: Page): Promise<void> {
+  await page.click("#addAttributeDialogButton");
   await page.locator("[data-testid='create-attribute-name']").waitFor({ state: "visible", timeout: 10000 });
 }
 
@@ -39,7 +39,7 @@ async function fillAndSaveAttribute(
     { timeout: 5000 },
   );
   await page.locator("[data-testid='save-add-attribute-button']").click();
-  await page.locator("#addAttributeModalButton").waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("#addAttributeDialogButton").waitFor({ state: "visible", timeout: 10000 });
 }
 
 test.describe("Template", () => {
@@ -155,14 +155,14 @@ test.describe("Template", () => {
       await openItemFromTable(page, entityName, "View Entity");
 
       await page.click("#editEntityButton");
-      await openAddAttributeModal(page);
+      await openAddAttributeDialog(page);
       await fillAndSaveAttribute(page, "Color", "Hue", "Blue");
       await expect(page.locator("text=Color")).toBeVisible({ timeout: 5000 });
 
       await saveAndWait(page);
       await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });
 
-      // Attribute values are shown in a modal, so only the name is visible inline after reload
+      // Attribute values are shown in a dialog, so only the name is visible inline after reload
       await page.reload();
       await page.waitForLoadState("networkidle");
       await expect(page.locator("text=Color")).toBeVisible({ timeout: 10000 });
@@ -176,7 +176,7 @@ test.describe("Template", () => {
       await openItemFromTable(page, entityName, "View Entity");
 
       await page.click("#editEntityButton");
-      await openAddAttributeModal(page);
+      await openAddAttributeDialog(page);
 
       await page.locator("[data-testid='create-attribute-name'] input").fill("Measurements");
       await page.locator("[data-testid='create-attribute-description'] textarea").fill("Multiple measurement values");
@@ -197,12 +197,12 @@ test.describe("Template", () => {
         { timeout: 5000 },
       );
       await page.locator("[data-testid='save-add-attribute-button']").click();
-      await page.locator("#addAttributeModalButton").waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("#addAttributeDialogButton").waitFor({ state: "visible", timeout: 10000 });
 
       await saveAndWait(page);
       await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });
 
-      // Attribute values are shown in a modal, so only the name is visible inline after reload
+      // Attribute values are shown in a dialog, so only the name is visible inline after reload
       await page.reload();
       await page.waitForLoadState("networkidle");
       await expect(page.locator("text=Measurements")).toBeVisible({ timeout: 10000 });
@@ -216,7 +216,7 @@ test.describe("Template", () => {
       await openItemFromTable(page, entityName, "View Entity");
 
       await page.click("#editEntityButton");
-      await openAddAttributeModal(page);
+      await openAddAttributeDialog(page);
       await fillAndSaveAttribute(page, "Temp Attribute", "Key", "Value");
       await saveAndWait(page);
       await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });

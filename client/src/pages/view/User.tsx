@@ -759,7 +759,7 @@ const User = () => {
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Input
-                        id={"modalUserFirstName"}
+                        id={"dialogUserFirstName"}
                         size={"xs"}
                         rounded={"md"}
                         placeholder={"First Name"}
@@ -775,7 +775,7 @@ const User = () => {
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Input
-                        id={"modalUserLastName"}
+                        id={"dialogUserLastName"}
                         size={"xs"}
                         rounded={"md"}
                         placeholder={"Last Name"}
@@ -811,7 +811,7 @@ const User = () => {
                       )}
                     </Flex>
                     <Input
-                      id={"modalUserEmail"}
+                      id={"dialogUserEmail"}
                       size={"xs"}
                       rounded={"md"}
                       placeholder={"Email"}
@@ -873,7 +873,7 @@ const User = () => {
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
-                      id={"modalUserAffiliation"}
+                      id={"dialoglUserAffiliation"}
                       size={"xs"}
                       rounded={"md"}
                       placeholder={"Affiliation"}

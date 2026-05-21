@@ -10,7 +10,7 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
-import { AttributeModel, ExportModalProps, IRelationship } from "@types";
+import { AttributeModel, ExportDialogProps, IRelationship } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -138,7 +138,7 @@ const toggleField = (fields: string[], key: string, checked: boolean): string[] 
   return fields.filter((f) => f !== key);
 };
 
-const ExportModal = (props: ExportModalProps) => {
+const ExportDialog = (props: ExportDialogProps) => {
   const { open, setOpen, dataType, id, ids } = props;
 
   const [format, setFormat] = useState<"json" | "csv" | "xlsx">("json");
@@ -200,7 +200,7 @@ const ExportModal = (props: ExportModalProps) => {
         getProject({ variables: { _id: id } });
       }
     } else {
-      // Reset state when the modal closes
+      // Reset state when the dialog closes
       setFormat("json");
       setIncludeHistory(false);
       setIncludeAttributes(true);
@@ -739,4 +739,4 @@ const ExportModal = (props: ExportModalProps) => {
   );
 };
 
-export default ExportModal;
+export default ExportDialog;

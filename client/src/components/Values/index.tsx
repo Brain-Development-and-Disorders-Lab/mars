@@ -298,7 +298,7 @@ const ValueDataSelect = (props: {
   // Setup state using this data
   const [selected, setSelected] = useState<SelectOption>(initialSelected);
   const [options, setOptions] = useState<SelectOption[]>(initialOptions);
-  const [addOptionModalOpen, setAddOptionModalOpen] = useState(false);
+  const [addOptionDialogOpen, setAddOptionDialogOpen] = useState(false);
 
   // Additional state
   const [newOption, setNewOption] = useState<string>("");
@@ -307,7 +307,7 @@ const ValueDataSelect = (props: {
   /**
    * Update the `newOption` state and perform error check to ensure
    * only valid Options are entered
-   * @param value Updated Option value entered through modal
+   * @param value Updated Option value entered through dialog
    */
   const updateNewOption = (value: string) => {
     setNewOption(value);
@@ -340,20 +340,20 @@ const ValueDataSelect = (props: {
     );
     setSelected(options[0]);
     setNewOption("");
-    setAddOptionModalOpen(false);
+    setAddOptionDialogOpen(false);
   };
 
   // Handle canceling select options
   const cancelSelectOptions = () => {
     setNewOption("");
-    setAddOptionModalOpen(false);
+    setAddOptionDialogOpen(false);
   };
 
-  // Handle opening select options modal
-  const openSelectModal = () => {
+  // Handle opening select options dialog
+  const openSelectDialog = () => {
     setOptions([]);
     setNewOption("");
-    setAddOptionModalOpen(true);
+    setAddOptionDialogOpen(true);
   };
 
   return (
@@ -433,7 +433,7 @@ const ValueDataSelect = (props: {
           cursor={props.viewOnly ? "default" : "pointer"}
           onClick={() => {
             if (!props.viewOnly) {
-              openSelectModal();
+              openSelectDialog();
             }
           }}
         >
@@ -444,8 +444,8 @@ const ValueDataSelect = (props: {
         </Flex>
       )}
 
-      {/* Select Add Options Modal */}
-      <Dialog.Root open={addOptionModalOpen} size={"sm"} placement={"center"} closeOnEscape closeOnInteractOutside>
+      {/* Select Add Options Dialog */}
+      <Dialog.Root open={addOptionDialogOpen} size={"sm"} placement={"center"} closeOnEscape closeOnInteractOutside>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>

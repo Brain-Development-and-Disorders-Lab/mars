@@ -103,8 +103,8 @@ export async function resetEnvironment(page: Page): Promise<void> {
   await page.locator("#createAccountButton").click();
 
   // Create a Workspace
-  await page.locator("#modalWorkspaceName").fill("Test Workspace");
-  await page.locator("#modalWorkspaceCreateButton").click();
+  await page.locator("#dialogWorkspaceName").fill("Test Workspace");
+  await page.locator("#dialogWorkspaceCreateButton").click();
 }
 
 /**

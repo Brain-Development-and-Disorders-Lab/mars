@@ -65,7 +65,7 @@ test.describe("Project", () => {
       await page.locator("[data-testid='create-project-name']").fill(getUniqueName("Project Cancel"));
       await page.click("[data-testid='create-project-cancel']");
 
-      // A blocker modal may appear when navigating away with unsaved changes
+      // A blocker dialog may appear when navigating away with unsaved changes
       const continueButton = page.locator('button:has-text("Continue")');
       if ((await continueButton.count()) > 0) {
         await continueButton.click();

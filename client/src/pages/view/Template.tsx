@@ -31,8 +31,8 @@ import TimestampTag from "@components/TimestampTag";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
-import ExportModal from "@components/ExportModal";
-import SaveModal from "@components/SaveModal";
+import ExportDialog from "@components/ExportDialog";
+import SaveDialog from "@components/SaveDialog";
 import RichTextEditor from "@components/RichTextEditor";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -73,7 +73,7 @@ const Template = () => {
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
-  // Save message modal
+  // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -337,7 +337,7 @@ const Template = () => {
   };
 
   /**
-   * Handle the "Done" button within the save message modal
+   * Handle the "Done" button within the save message dialog
    */
   const handleSaveMessageDoneClick = async () => {
     try {
@@ -1210,10 +1210,10 @@ const Template = () => {
         </Flex>
       </Flex>
 
-      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
+      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
 
-      {/* Save message modal */}
-      <SaveModal
+      {/* Save message dialog */}
+      <SaveDialog
         open={saveMessageOpen}
         onOpenChange={(details) => setSaveMessageOpen(details.open)}
         onDone={handleSaveMessageDoneClick}

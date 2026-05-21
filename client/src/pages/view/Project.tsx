@@ -25,7 +25,7 @@ import {
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
-import ExportModal from "@components/ExportModal";
+import ExportDialog from "@components/ExportDialog";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
@@ -34,9 +34,9 @@ import MultiEntitySelect from "@components/MultiEntitySelect";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import SaveModal from "@components/SaveModal";
+import SaveDialog from "@components/SaveDialog";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
@@ -179,14 +179,14 @@ const Project = () => {
     return project;
   }, [previewVersion, project]);
 
-  // Save message modal
+  // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
   // Entities staged for adding
   const [selectedEntities, setSelectedEntities] = useState<IGenericItem[]>([]);
 
-  // Export modal state
+  // Export dialog state
   const [exportOpen, setExportOpen] = useState(false);
   const [exportEntitiesOpen, setExportEntitiesOpen] = useState(false);
 
@@ -315,7 +315,7 @@ const Project = () => {
   const handleEditClick = () => {
     if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
-      // Open the save message modal
+      // Open the save message dialog
       setSaveMessageOpen(true);
     } else {
       setEditing(true);
@@ -324,7 +324,7 @@ const Project = () => {
 
   /**
    * Helper function to handle clicking the "Done" button within
-   * the save message modal
+   * the save message dialog
    */
   const handleSaveMessageDoneClick = async () => {
     setIsUpdating(true);
@@ -381,7 +381,7 @@ const Project = () => {
     setEditing(false);
     setIsUpdating(false);
 
-    // Close the save message modal
+    // Close the save message dialog
     setSaveMessageOpen(false);
   };
 
@@ -1391,7 +1391,7 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        {/* Modal to add Entities */}
+        {/* Dialog to add Entities */}
         <Dialog.Root
           open={entitiesOpen}
           onOpenChange={(details) => {
@@ -1468,19 +1468,19 @@ const Project = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Export project modal */}
-        <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"project"} id={id} />
+        {/* Export dialog, individual project */}
+        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"project"} id={id} />
 
-        {/* Export project entities modal */}
-        <ExportModal
+        {/* Export dialog, project entities */}
+        <ExportDialog
           open={exportEntitiesOpen}
           setOpen={setExportEntitiesOpen}
           dataType={"entities"}
           ids={projectEntities}
         />
 
-        {/* Save message modal */}
-        <SaveModal
+        {/* Save message dialog */}
+        <SaveDialog
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -1491,7 +1491,7 @@ const Project = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesModal
+        <UnsavedChangesDialog
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}

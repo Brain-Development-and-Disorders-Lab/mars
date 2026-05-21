@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Custom types
@@ -159,7 +159,7 @@ const CreateWorkspace = () => {
         navigate("/");
         activateWorkspace(created._id);
 
-        // Reset modal state
+        // Reset dialog state
         setName("");
         setDescription("");
         setCollaborators([]);
@@ -243,7 +243,7 @@ const CreateWorkspace = () => {
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
-                      id={"modalWorkspaceName"}
+                      id={"dialogWorkspaceName"}
                       data-testid={"create-workspace-name"}
                       size={"xs"}
                       rounded={"md"}
@@ -273,7 +273,7 @@ const CreateWorkspace = () => {
                       Workspace Description
                     </Field.Label>
                     <RichTextEditor
-                      id={"modalWorkspaceDescription"}
+                      id={"dialogWorkspaceDescription"}
                       data-testid={"create-workspace-description"}
                       value={description}
                       onChange={(value) => setDescription(value)}
@@ -312,7 +312,7 @@ const CreateWorkspace = () => {
           </Button>
         )}
         <Button
-          id={"modalWorkspaceCreateButton"}
+          id={"dialogWorkspaceCreateButton"}
           data-testid={"create-workspace-button"}
           size={"xs"}
           rounded={"md"}
@@ -327,7 +327,7 @@ const CreateWorkspace = () => {
       </Flex>
 
       {/* Blocker warning message */}
-      <UnsavedChangesModal
+      <UnsavedChangesDialog
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

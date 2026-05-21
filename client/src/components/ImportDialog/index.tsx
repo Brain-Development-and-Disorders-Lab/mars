@@ -21,7 +21,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
-import AttributeAddDialog from "@components/AttributeAddDialog";
+import AttributeAddDialog from "@components/AddAttributeDialog";
 import AttributeViewButton from "@components/AttributeViewButton";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";

@@ -240,8 +240,8 @@ export type RelationshipsProps = {
   sourceId?: string;
 };
 
-// Utility type to specify the props of `RelationshipAddDialog`
-export type RelationshipAddDialogProps = {
+// Utility type to specify the props of `AddRelationshipDialog`
+export type AddRelationshipDialogProps = {
   open: boolean;
   onClose: () => void;
   sourceId?: string;
@@ -250,7 +250,7 @@ export type RelationshipAddDialogProps = {
   onAdd: (relationships: IRelationship[]) => void;
 };
 
-export type AttributeAddDialogProps = {
+export type AddAttributeDialogProps = {
   open: boolean;
   onClose: () => void;
   owner: string;
@@ -489,14 +489,14 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// `PreviewModal` props
-export type PreviewModalProps = {
+// `PreviewDialog` props
+export type PreviewDialogProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
 };
 
-// `PreviewModal` support type
-export type PreviewSupport = {
+// `PreviewDialog` support type
+export type PreviewDialogSupport = {
   document: boolean;
   image: boolean;
   sequence: boolean;
@@ -510,8 +510,8 @@ export type ImportDialogProps = {
 
 export type ExportDataType = "entity" | "entities" | "project" | "template";
 
-// `ExportModal` props
-export type ExportModalProps = {
+// `ExportDialog` props
+export type ExportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
   dataType: ExportDataType;
@@ -521,20 +521,20 @@ export type ExportModalProps = {
   ids?: string[];
 };
 
-// `ScanModal` props
-export type ScanModalProps = {
+// `ScanDialog` props
+export type ScanDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `ReportModal` props
-export type ReportModalProps = {
+// `ReportDialog` props
+export type ReportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `UnsavedChangesModal` props
-export type UnsavedChangesModalProps = {
+// `UnsavedChangesDialog` props
+export type UnsavedChangesDialogProps = {
   blocker: Blocker;
   cancelBlockerRef: React.MutableRefObject<null>;
   onClose: () => void;
@@ -671,8 +671,8 @@ export type MultiEntitySelectProps = {
   setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
-// SaveModal props
-export type SaveModalProps = {
+// `SaveDialog` props
+export type SaveDialogProps = {
   open: boolean;
   onOpenChange: (details: { open: boolean }) => void;
   onDone: () => void;

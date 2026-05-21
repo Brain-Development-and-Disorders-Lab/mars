@@ -127,7 +127,7 @@ These are essentially a collection of Entity objects, contained within a list un
 
 ![Import JSON - Step 1](../img/import_JSON_1.png)
 
-Click the blue "Import" button located under the "Tools" heading on the navigation bar to open the import modal. Ensure "Entities" is selected as the "File contents". Browse or drag and drop a JSON file into the field, and click "Continue".
+Click the blue "Import" button located under the "Tools" heading on the navigation bar to open the import dialog. Ensure "Entities" is selected as the "File contents". Browse or drag and drop a JSON file into the field, and click "Continue".
 
 #### Step 2
 
@@ -168,7 +168,7 @@ For example, the `description` column in a CSV file could be assigned to populat
 
 ![Import CSV - Step 1](../img/import_CSV_1.png)
 
-Click the blue "Import" button located under the "Tools" heading on the navigation bar to open the import modal. Ensure "Entities" is selected as the "File contents". Browse or drag and drop a CSV file into the field, and click "Continue".
+Click the blue "Import" button located under the "Tools" heading on the navigation bar to open the import dialog. Ensure "Entities" is selected as the "File contents". Browse or drag and drop a CSV file into the field, and click "Continue".
 
 #### Step 2
 

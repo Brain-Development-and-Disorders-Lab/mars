@@ -7,12 +7,12 @@ import Icon from "@components/Icon";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
-import { SaveModalProps } from "@types";
+import { SaveDialogProps } from "@types";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-const SaveModal = (props: SaveModalProps) => {
+const SaveDialog = (props: SaveDialogProps) => {
   const { open, onOpenChange, onDone, value, onChange, description, showCloseButton = false, modifiedType } = props;
 
   const defaultDescription = modifiedType
@@ -83,4 +83,4 @@ const SaveModal = (props: SaveModalProps) => {
   );
 };
 
-export default SaveModal;
+export default SaveDialog;

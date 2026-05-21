@@ -20,7 +20,7 @@ import { getRecentErrors } from "@lib/errors";
 import { usePostHog } from "posthog-js/react";
 
 // Custom types
-import { ReportModalProps } from "@types";
+import { ReportDialogProps } from "@types";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -48,7 +48,7 @@ const REPORT_ISSUE = gql`
   }
 `;
 
-const ReportModal = (props: ReportModalProps) => {
+const ReportDialog = (props: ReportDialogProps) => {
   const { open, setOpen } = props;
   const posthog = usePostHog();
 
@@ -149,4 +149,4 @@ const ReportModal = (props: ReportModalProps) => {
   );
 };
 
-export default ReportModal;
+export default ReportDialog;

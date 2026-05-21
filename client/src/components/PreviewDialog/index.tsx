@@ -4,7 +4,7 @@ import { Flex, IconButton, Image, Spacer, Spinner, Text, Dialog, CloseButton, Bu
 import Icon from "@components/Icon";
 
 // Custom types
-import { PreviewModalProps, PreviewSupport } from "@types";
+import { PreviewDialogProps, PreviewDialogSupport } from "@types";
 
 // PDF preview imports
 import { pdfjs, Document, Page } from "react-pdf";
@@ -407,7 +407,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   );
 };
 
-const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) => {
+const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] }) => {
   // Page view state
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
@@ -416,7 +416,7 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
   const [previewType, setPreviewType] = useState<"document" | "image" | "sequence" | null>(null);
   const [previewSource, setPreviewSource] = useState("");
 
-  const [previewSupport, setPreviewSupport] = useState<PreviewSupport>({
+  const [previewSupport, setPreviewSupport] = useState<PreviewDialogSupport>({
     document: getWindowDimensions().width > MIN_WIDTH_DOCUMENT,
     image: getWindowDimensions().width > MIN_WIDTH_IMAGE,
     sequence: getWindowDimensions().width > MIN_WIDTH_SEQUENCE,
@@ -586,7 +586,7 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
   );
 };
 
-const PreviewModal = (props: PreviewModalProps) => {
+const PreviewDialog = (props: PreviewDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const defaultTrigger = (
@@ -635,4 +635,4 @@ const PreviewModal = (props: PreviewModalProps) => {
   );
 };
 
-export default PreviewModal;
+export default PreviewDialog;

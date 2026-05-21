@@ -21,7 +21,7 @@ import Values from "@components/Values";
 import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
-import { AttributeAddDialogProps, AttributeModel, ISelectOption, IValue } from "@types";
+import { AddAttributeDialogProps, AttributeModel, ISelectOption, IValue } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -46,7 +46,7 @@ const SUGGEST_TEMPLATE = gql`
  * Dialog for adding a new Attribute to an Entity, used in both the create and view flows.
  * Handles template selection, AI-powered template suggestions, and optional "Save as Template".
  */
-const AttributeAddDialog = (props: AttributeAddDialogProps) => {
+const AddAttributeDialog = (props: AddAttributeDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [values, setValues] = useState<IValue[]>([]);
@@ -389,4 +389,4 @@ const AttributeAddDialog = (props: AttributeAddDialogProps) => {
   );
 };
 
-export default AttributeAddDialog;
+export default AddAttributeDialog;

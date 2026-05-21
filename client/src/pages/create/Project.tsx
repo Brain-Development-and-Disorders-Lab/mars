@@ -21,7 +21,7 @@ import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
 
@@ -414,7 +414,7 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {/* Information modal */}
+      {/* Information modialogdal */}
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}
@@ -527,7 +527,7 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      <UnsavedChangesModal
+      <UnsavedChangesDialog
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

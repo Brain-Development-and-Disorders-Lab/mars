@@ -28,24 +28,24 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import ExportModal from "@components/ExportModal";
+import ExportDialog from "@components/ExportDialog";
 import RelationshipGraph from "@components/RelationshipGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
-import PreviewModal from "@components/PreviewModal";
+import PreviewDialog from "@components/PreviewDialog";
 import AttributeViewButton from "@components/AttributeViewButton";
-import AttributeAddDialog from "@components/AttributeAddDialog";
+import AttributeAddDialog from "@components/AddAttributeDialog";
 import SearchSelect from "@components/SearchSelect";
 import AlertDialog from "@components/AlertDialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Relationships from "@components/Relationships";
-import RelationshipAddDialog from "@components/RelationshipAddDialog";
+import RelationshipAddDialog from "@components/AddRelationshipDialog";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesModal } from "@components/UnsavedChangesModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import SaveModal from "@components/SaveModal";
+import SaveDialog from "@components/SaveDialog";
 import { Cell, createColumnHelper } from "@tanstack/react-table";
 import RichTextEditor from "@components/RichTextEditor";
 
@@ -115,11 +115,11 @@ const Entity = () => {
   // Add relationships dialog
   const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
 
-  // Save message modal
+  // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Clone modal
+  // Clone dialog
   const [cloneOpen, setCloneOpen] = useState(false);
   const [clonedEntityName, setClonedEntityName] = useState("");
 
@@ -555,7 +555,7 @@ const Entity = () => {
   const handleEditClick = () => {
     if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
-      // Open the save message modal
+      // Open the save message dialog
       setSaveMessageOpen(true);
     } else {
       setEditing(true);
@@ -564,7 +564,7 @@ const Entity = () => {
 
   /**
    * Helper function to handle clicking the "Done" button within
-   * the save message modal
+   * the save message dialog
    */
   const handleSaveMessageDoneClick = async () => {
     setIsUpdating(updateLoading);
@@ -604,7 +604,7 @@ const Entity = () => {
       });
     }
 
-    // Close the save message modal
+    // Close the save message dialog
     setSaveMessageOpen(false);
     setSaveMessage("");
 
@@ -831,7 +831,7 @@ const Entity = () => {
               </Text>
             </Tooltip>
             <Flex gap={"1"} align={"center"}>
-              <PreviewModal
+              <PreviewDialog
                 attachment={{
                   _id: attachmentId,
                   name: attachmentName,
@@ -1286,7 +1286,7 @@ const Entity = () => {
 
             {editing && (
               <Button
-                id={"addProjectsModalButton"}
+                id={"addProjectsDialogButton"}
                 variant={"solid"}
                 size={"xs"}
                 rounded={"md"}
@@ -1974,7 +1974,7 @@ const Entity = () => {
                   </Text>
                 </Flex>
                 <Button
-                  id={"addAttributeModalButton"}
+                  id={"addAttributeDialogButton"}
                   variant={"solid"}
                   size={"xs"}
                   rounded={"md"}
@@ -2037,7 +2037,7 @@ const Entity = () => {
                   </Text>
                 </Flex>
                 <Button
-                  id={"addProjectsModalButton"}
+                  id={"addProjectsDialogButton"}
                   variant={"solid"}
                   size={"xs"}
                   rounded={"md"}
@@ -2190,6 +2190,7 @@ const Entity = () => {
           </Flex>
         </Flex>
 
+        {/* Add Attributes dialog */}
         <AttributeAddDialog
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
@@ -2201,7 +2202,7 @@ const Entity = () => {
           onSaveAsTemplate={onSaveAsTemplate}
         />
 
-        {/* Add Projects modal */}
+        {/* Add Projects dialog */}
         <Dialog.Root
           open={addProjectsOpen}
           onOpenChange={(event) => setAddProjectsOpen(event.open)}
@@ -2352,10 +2353,10 @@ const Entity = () => {
           }}
         />
 
-        {/* Export modal */}
-        <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
+        {/* Export dialog */}
+        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
 
-        {/* Graph modal */}
+        {/* Graph dialog */}
         <Dialog.Root
           open={graphOpen}
           onOpenChange={(event) => setGraphOpen(event.open)}
@@ -2384,7 +2385,7 @@ const Entity = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Share modal */}
+        {/* Share dialog */}
         <Dialog.Root
           open={shareOpen}
           onOpenChange={(event) => setShareOpen(event.open)}
@@ -2511,7 +2512,7 @@ const Entity = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Clone modal */}
+        {/* Clone dialog */}
         <Dialog.Root
           open={cloneOpen}
           onOpenChange={(details) => setCloneOpen(details.open)}
@@ -2590,8 +2591,8 @@ const Entity = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Save message modal */}
-        <SaveModal
+        {/* Save message dialog */}
+        <SaveDialog
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -2603,7 +2604,7 @@ const Entity = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesModal
+        <UnsavedChangesDialog
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}
