@@ -496,6 +496,13 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
+// `RichTextEditor` props
+export interface RichTextEditorProps extends Omit<BoxProps, "onChange"> {
+  value: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}
+
 // `PreviewDialog` props
 export type PreviewDialogProps = {
   attachment: IGenericItem;

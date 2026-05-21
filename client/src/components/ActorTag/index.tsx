@@ -112,8 +112,9 @@ const ActorTag = (props: ActorTagProps) => {
       borderColor={GLOBAL_STYLES.border.color}
       bg={"white"}
       minW={"120px"}
-      maxW={props.size === "sm" ? "180px" : "200px"}
-      h={"54px"}
+      w={"fit-content"}
+      maxW={"180px"}
+      h={"52px"}
     >
       <Avatar.Root
         size={props.size === "sm" ? "xs" : "sm"}
@@ -123,7 +124,7 @@ const ActorTag = (props: ActorTagProps) => {
         <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
       <Skeleton loading={loading} asChild>
-        <Flex direction={"column"} gap={"0.5"} align={"center"}>
+        <Flex direction={"column"} gap={"0.5"} align={"left"} w={"100%"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>

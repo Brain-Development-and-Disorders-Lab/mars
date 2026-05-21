@@ -23,7 +23,7 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
     <Flex
       direction={"row"}
       align={"center"}
-      h={"54px"}
+      h={"52px"}
       w={"fit-content"}
       border={GLOBAL_STYLES.border.style}
       borderColor={"blue.200"}
@@ -47,11 +47,11 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
 
       {/* Timestamp label */}
       <Flex direction={"column"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
-        <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
-          {_.isUndefined(props.description) ? "Timestamp" : props.description}
-        </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} mr={"0.5"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
           {dateString}
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"medium"} mr={"0.5"} color={"gray.400"}>
+          {_.isUndefined(props.description) ? "Timestamp" : props.description}
         </Text>
       </Flex>
     </Flex>

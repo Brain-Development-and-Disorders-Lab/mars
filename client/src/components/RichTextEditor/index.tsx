@@ -22,14 +22,19 @@ import {
   BsArrowClockwise,
 } from "react-icons/bs";
 
+// Custom types
+import { RichTextEditorProps } from "@types";
+
+// Shared editor instance passed via context to avoid prop-drilling through sub-components
 const EditorContext = createContext<{ editor: Editor | null } | null>(null);
 
-function useEditorContext() {
+const useEditorContext = () => {
   const ctx = useContext(EditorContext);
   if (!ctx) throw new Error("useEditorContext must be used within RichTextEditor");
   return ctx;
-}
+};
 
+// Chakra-compatible style object applied to the Root Box, targeting ProseMirror's DOM structure
 const proseMirrorCss = defineStyle({
   display: "flex",
   flexDirection: "column",
@@ -85,6 +90,7 @@ const proseMirrorCss = defineStyle({
     "& em": { fontStyle: "italic" },
     "& strong": { fontWeight: "bold" },
   },
+  // data-disabled is set by Chakra when the disabled prop is passed to Root
   "&[data-disabled] .ProseMirror": { pointerEvents: "none", opacity: 0.5, cursor: "not-allowed" },
 });
 
@@ -92,6 +98,7 @@ interface RootProps extends BoxProps {
   editor: Editor | null;
 }
 
+/** Provides the editor instance to all sub-components via context */
 const Root = forwardRef<HTMLDivElement, RootProps>(function Root({ editor, children, css, ...rest }, ref) {
   const value = useMemo(() => ({ editor }), [editor]);
   return (
@@ -103,6 +110,7 @@ const Root = forwardRef<HTMLDivElement, RootProps>(function Root({ editor, child
   );
 });
 
+/** Horizontal toolbar strip rendered above the editor content area */
 const Toolbar = forwardRef<HTMLDivElement, StackProps>(function Toolbar(props, ref) {
   return (
     <HStack
@@ -119,6 +127,7 @@ const Toolbar = forwardRef<HTMLDivElement, StackProps>(function Toolbar(props, r
   );
 });
 
+/** Renders the tiptap EditorContent, wired to the editor from context */
 const Content = forwardRef<HTMLDivElement, Omit<React.ComponentProps<typeof EditorContent>, "editor">>(
   function Content(props, ref) {
     const { editor } = useEditorContext();
@@ -134,10 +143,15 @@ const Content = forwardRef<HTMLDivElement, Omit<React.ComponentProps<typeof Edit
   },
 );
 
+/** Groups related toolbar buttons with consistent spacing */
 const ControlGroup = forwardRef<HTMLDivElement, StackProps>(function ControlGroup(props, ref) {
   return <HStack ref={ref} gap={"1"} {...props} />;
 });
 
+/**
+ * A single toolbar button that runs a tiptap command on click.
+ * The button highlights when the cursor is inside the relevant mark or node.
+ */
 const ControlButton = (props: {
   label: string;
   icon: React.ReactNode;
@@ -239,30 +253,34 @@ const Redo = () => (
   <ControlButton label={"Redo"} icon={<BsArrowClockwise />} command={(e) => e.chain().focus().redo().run()} />
 );
 
-// ── RichTextEditor ────────────────────────────────────────────────────────────
-
-interface RichTextEditorProps extends Omit<BoxProps, "onChange"> {
-  value: string;
-  onChange?: (value: string) => void;
-  readOnly?: boolean;
-}
-
+/**
+ * Tiptap-based rich text editor with an optional formatting toolbar.
+ * Controlled via `value` / `onChange`; pass `readOnly` to render without the toolbar
+ * and with the editor locked.
+ */
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { value, onChange, readOnly = false, ...rest } = props;
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: value,
-    editable: !readOnly,
+    editable: !readOnly, // initial value only, kept in sync below
     onUpdate({ editor }) {
       onChange?.(editor.getHTML());
     },
   });
 
+  // Sync externally-controlled content changes (e.g. loading saved data) into the editor
   useEffect(() => {
     if (!editor || value === editor.getHTML()) return;
     editor.commands.setContent(value);
   }, [value, editor]);
+
+  // useEditor's `editable` option is read once on mount, so prop changes need an explicit sync
+  useEffect(() => {
+    if (!editor) return;
+    editor.setEditable(!readOnly);
+  }, [editor, readOnly]);
 
   return (
     <Root editor={editor} css={{ "--content-min-height": "sizes.24" }} w={"100%"} minH={"180px"} {...rest}>
@@ -289,7 +307,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
           </ControlGroup>
         </Toolbar>
       )}
-      <Content />
+      <Content readOnly={readOnly} />
     </Root>
   );
 };
