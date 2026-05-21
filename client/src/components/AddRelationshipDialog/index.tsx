@@ -4,6 +4,7 @@ import React, { useState } from "react";
 // Existing and custom components
 import { Button, CloseButton, Dialog, Flex, Input, Portal, Spacer, Tag, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -180,7 +181,7 @@ const AddRelationshipDialog = ({
                     onClick={stageRelationship}
                     flexShrink={0}
                   >
-                    Add
+                    Create
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
@@ -192,7 +193,6 @@ const AddRelationshipDialog = ({
                   border={GLOBAL_STYLES.border.style}
                   borderColor={GLOBAL_STYLES.border.color}
                   overflow={"hidden"}
-                  minH={"60px"}
                 >
                   {staged.length > 0 ? (
                     staged.map((rel, index) => (
@@ -218,9 +218,7 @@ const AddRelationshipDialog = ({
                           color={RELATIONSHIP_TYPE_ARROW_COLOR[rel.type]}
                         />
                         <Flex flex={"1"} minW={0}>
-                          <Text fontSize={"xs"} truncate>
-                            {rel.target.name}
-                          </Text>
+                          <Linky id={rel.target._id} type={"entities"} />
                         </Flex>
                         <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[rel.type]} flexShrink={0}>
                           <Tag.Label fontSize={"xs"}>{_.capitalize(rel.type)}</Tag.Label>
@@ -241,7 +239,7 @@ const AddRelationshipDialog = ({
                     <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"} grow={"1"}>
                       <Icon name={"graph"} size={"md"} color={"gray.300"} />
                       <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                        No relationships staged
+                        No Relationships
                       </Text>
                     </Flex>
                   )}
@@ -264,7 +262,7 @@ const AddRelationshipDialog = ({
                   disabled={staged.length === 0}
                 >
                   Add {staged.length} {staged.length === 1 ? "Relationship" : "Relationships"}
-                  <Icon name={"check"} size={"xs"} />
+                  <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
             </Dialog.Footer>

@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { Button, EmptyState, Flex, Text, Tag } from "@chakra-ui/react";
+import { Button, EmptyState, Flex, Text, Tag, Box } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Tooltip from "@components/Tooltip";
@@ -123,22 +123,40 @@ const Relationships = (props: RelationshipsProps) => {
                 wrap={"wrap"}
               >
                 {/* Source */}
-                <Tooltip content={sourceName} disabled={sourceName.length < 24} showArrow>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0} maxW={"120px"} truncate>
-                    {_.truncate(sourceName, { length: 24 })}
+                <Tooltip content={sourceName} disabled={sourceName.length < 48} showArrow>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0}>
+                    {_.truncate(sourceName, { length: 48 })}
                   </Text>
                 </Tooltip>
 
-                {/* Arrow */}
-                <Icon
-                  name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
-                  size={"xs"}
-                  color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
-                />
+                <Flex direction={"row"} gap={"0"} align={"center"}>
+                  {relationship.type === "parent" && (
+                    <Box w={"75px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                  )}
+
+                  {relationship.type === "general" && (
+                    <Box w={"37.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                  )}
+
+                  {/* Arrow */}
+                  <Icon
+                    name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
+                    size={"xs"}
+                    color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
+                  />
+
+                  {relationship.type === "general" && (
+                    <Box w={"37.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                  )}
+
+                  {relationship.type === "child" && (
+                    <Box w={"75px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                  )}
+                </Flex>
 
                 {/* Target */}
                 <Flex flex={"1"} minW={0}>
-                  <Linky id={relationship.target._id} type={"entities"} />
+                  <Linky id={relationship.target._id} type={"entities"} truncate={64} />
                 </Flex>
 
                 {/* Type badge */}

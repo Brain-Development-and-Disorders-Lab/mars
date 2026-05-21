@@ -30,7 +30,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import ExportDialog from "@components/ExportDialog";
-import RelationshipGraph from "@components/RelationshipGraph";
+import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
@@ -2136,7 +2136,7 @@ const Entity = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Flex gap={"1"} direction={"column"}>
+              <Flex gap={"2"} direction={"column"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} />
@@ -2420,7 +2420,7 @@ const Entity = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"}>
-                <RelationshipGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
+                <RelationshipsGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
               </Dialog.Body>
             </Dialog.Content>
           </Dialog.Positioner>

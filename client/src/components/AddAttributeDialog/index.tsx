@@ -377,7 +377,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     disabled={isError}
                   >
                     Add
-                    <Icon name={"check"} size={"xs"} />
+                    <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
               </Flex>
