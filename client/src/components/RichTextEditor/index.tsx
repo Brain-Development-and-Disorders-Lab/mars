@@ -265,7 +265,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   }, [value, editor]);
 
   return (
-    <Root editor={editor} css={{ "--content-min-height": "sizes.24" }} w={"100%"} {...rest}>
+    <Root editor={editor} css={{ "--content-min-height": "sizes.24" }} w={"100%"} minH={"180px"} {...rest}>
       {!readOnly && (
         <Toolbar padding={"1"}>
           <ControlGroup>

@@ -24,6 +24,7 @@ import {
   EmptyState,
   Timeline,
   Collapsible,
+  Spacer,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -1933,24 +1934,34 @@ const Entity = () => {
                     bg={"white"}
                   />
                 </Flex>
-                <TimestampTag timestamp={entity.created} description={"Created"} />
               </Flex>
 
-              {/* "Created" and "Owner" fields */}
+              {/* "Owner", "Timestamp", and "Visibility" fields */}
               <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Visibility
-                  </Text>
-                  <VisibilityTag isPublic={false} isInherited />
-                </Flex>
-
                 {/* Owner */}
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                     Entity Owner
                   </Text>
                   <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+
+                {/* Timestamp */}
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Entity Timestamp
+                  </Text>
+                  <TimestampTag timestamp={entity.created} description={"Created"} />
+                </Flex>
+
+                <Spacer />
+
+                {/* Visibility */}
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Entity Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
               </Flex>
             </Flex>

@@ -21,18 +21,33 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
 
   return (
     <Flex
+      direction={"row"}
       align={"center"}
-      gap={"2"}
-      p={"1"}
-      rounded={"md"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
-      bg={"white"}
       h={"54px"}
+      w={"fit-content"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={"blue.200"}
+      rounded={"md"}
+      overflow={"hidden"}
+      cursor={"not-allowed"}
+      flexShrink={0}
     >
-      <Icon name={"v_date"} size={"xs"} color={"orange"} />
-      <Flex direction={"column"} gap={"0"}>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+      {/* Timestamp badge */}
+      <Flex
+        align={"center"}
+        justify={"center"}
+        bg={"blue.50"}
+        px={"1.5"}
+        h={"100%"}
+        borderRight={"1px solid"}
+        borderColor={"blue.200"}
+      >
+        <Icon name={"clock"} size={"xs"} color={"blue.500"} />
+      </Flex>
+
+      {/* Timestamp label */}
+      <Flex direction={"column"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
+        <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
           {_.isUndefined(props.description) ? "Timestamp" : props.description}
         </Text>
         <Text fontSize={"xs"} fontWeight={"semibold"} mr={"0.5"}>
