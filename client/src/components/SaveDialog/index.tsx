@@ -28,7 +28,7 @@ const SaveDialog = (props: SaveDialogProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={showCloseButton ? "xs" : "md"}
-            bg={GLOBAL_STYLES.dialog.headerColor}
+            bg={GLOBAL_STYLES.dialog.header.bg}
             roundedTop={"md"}
           >
             <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -47,7 +47,7 @@ const SaveDialog = (props: SaveDialogProps) => {
           <Dialog.Body p={"2"}>
             <Flex direction={"column"} gap={"2"}>
               {(description !== undefined ? description : defaultDescription) && (
-                <Text fontSize={"xs"} color={"gray.600"}>
+                <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   {description !== undefined ? description : defaultDescription}
                 </Text>
               )}
@@ -55,7 +55,7 @@ const SaveDialog = (props: SaveDialogProps) => {
             </Flex>
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
               <Button
                 variant={"solid"}

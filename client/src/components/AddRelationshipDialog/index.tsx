@@ -107,7 +107,7 @@ const AddRelationshipDialog = ({
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content w={["lg", "xl", "2xl"]}>
-            <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+            <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"graph"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -133,7 +133,7 @@ const AddRelationshipDialog = ({
                   borderColor={GLOBAL_STYLES.border.color}
                 >
                   <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Source
                     </Text>
                     <Input size={"xs"} rounded={"md"} value={sourceName} readOnly disabled bg={"white"} />
@@ -144,7 +144,7 @@ const AddRelationshipDialog = ({
                     color={RELATIONSHIP_TYPE_ARROW_COLOR[selectedType]}
                   />
                   <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Target
                     </Text>
                     <SearchSelect resultType={"entity"} value={selectedTarget} onChange={setSelectedTarget} />
@@ -153,7 +153,12 @@ const AddRelationshipDialog = ({
 
                 {/* Type selector and stage button */}
                 <Flex direction={"row"} align={"center"} gap={"2"} p={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} flexShrink={0}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    flexShrink={0}
+                  >
                     Type
                   </Text>
                   <Flex gap={"1"}>
@@ -247,7 +252,7 @@ const AddRelationshipDialog = ({
               </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                 <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleClose}>
                   Cancel

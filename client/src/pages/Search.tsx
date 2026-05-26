@@ -368,7 +368,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -926,7 +926,11 @@ const Search = () => {
                         <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
                           {/* Search options section */}
                           <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                            <Text
+                              fontSize={"xs"}
+                              fontWeight={"semibold"}
+                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            >
                               Search Options
                             </Text>
                             <Checkbox.Root
@@ -943,7 +947,11 @@ const Search = () => {
 
                           {/* Entity filters section */}
                           <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                            <Text
+                              fontSize={"xs"}
+                              fontWeight={"semibold"}
+                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            >
                               Entity Filters
                             </Text>
 
@@ -951,7 +959,7 @@ const Search = () => {
                               {/* Date range */}
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={"gray.600"}>
+                                  <Text fontSize={"2xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                     Created Start
                                   </Text>
                                   <Input
@@ -968,7 +976,7 @@ const Search = () => {
                                   />
                                 </Flex>
                                 <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={"gray.600"}>
+                                  <Text fontSize={"2xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                     Created End
                                   </Text>
                                   <Input
@@ -1154,7 +1162,7 @@ const Search = () => {
           <Flex gap={"1"} p={"0"} w={"100%"}>
             {isSearching && (
               <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
-                <Spinner size={"lg"} color={"gray.600"} />
+                <Spinner size={"lg"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
               </Flex>
             )}
 
@@ -1178,7 +1186,7 @@ const Search = () => {
                   </>
                 ) : (
                   <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       No results found
                     </Text>
                   </Flex>

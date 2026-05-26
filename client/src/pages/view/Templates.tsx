@@ -248,7 +248,7 @@ const Templates = () => {
     columnHelper.accessor("timestamp", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -274,7 +274,7 @@ const Templates = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
@@ -483,7 +483,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

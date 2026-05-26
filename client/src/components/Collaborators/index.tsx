@@ -117,8 +117,8 @@ const Collaborators = (props: CollaboratorsProps) => {
       {/* Collaborators display */}
       <Flex direction={"column"} gap={"2"}>
         <Flex direction={"row"} gap={"1"} py={"1.5"} align={"center"} ml={"0.5"}>
-          <Icon name={"person"} size={"xs"} color={"gray.600"} />
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+          <Icon name={"person"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Collaborators
           </Text>
         </Flex>

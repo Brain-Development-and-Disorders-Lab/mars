@@ -43,7 +43,7 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
           <Dialog.Header
             p={"1"}
             flexShrink={0}
-            bg={GLOBAL_STYLES.template.defaultColor}
+            bg={GLOBAL_STYLES.template.color.default}
             borderBottom={"2px"}
             roundedTop={"md"}
           >

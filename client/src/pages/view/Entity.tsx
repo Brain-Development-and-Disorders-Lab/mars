@@ -1179,7 +1179,7 @@ const Entity = () => {
               <Tag.Root colorPalette={"green"}>
                 <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
               </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -1220,11 +1220,11 @@ const Entity = () => {
               gap={"1"}
               p={"1"}
               border={"2px solid"}
-              borderColor={GLOBAL_STYLES.entity.iconColor}
+              borderColor={GLOBAL_STYLES.entity.color.icon}
               bg={"purple.50"}
               rounded={"md"}
             >
-              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
               <Tooltip content={displayEntityData.name}>
                 <Heading fontWeight={"semibold"} size={"sm"}>
                   {_.truncate(displayEntityData.name, { length: 30 })}
@@ -1384,7 +1384,7 @@ const Entity = () => {
                     <Drawer.CloseTrigger asChild>
                       <CloseButton size={"2xs"} top={"6px"} onClick={() => setHistoryOpen(false)} />
                     </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
                         <Icon name={"clock"} size={"xs"} />
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -1592,7 +1592,7 @@ const Entity = () => {
                                               disabled={entityVersion.message.length <= 40}
                                               showArrow
                                             >
-                                              <Text fontSize={"xs"} color={"gray.600"}>
+                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                                 {_.truncate(entityVersion.message, { length: 40 })}
                                               </Text>
                                             </Tooltip>
@@ -1920,7 +1920,12 @@ const Entity = () => {
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Name
                   </Text>
                   <Input
@@ -1943,7 +1948,12 @@ const Entity = () => {
               <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
                 {/* Owner */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Owner
                   </Text>
                   <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
@@ -1951,7 +1961,12 @@ const Entity = () => {
 
                 {/* Timestamp */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={entity.created} description={"Created"} />
@@ -1961,7 +1976,12 @@ const Entity = () => {
 
                 {/* Visibility */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -1982,7 +2002,7 @@ const Entity = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor
@@ -2012,8 +2032,13 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Attributes
                   </Text>
                 </Flex>
@@ -2041,7 +2066,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Attributes</EmptyState.Description>
                     </EmptyState.Content>
@@ -2075,8 +2100,13 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Projects
                   </Text>
                 </Flex>
@@ -2103,7 +2133,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Projects</EmptyState.Description>
                     </EmptyState.Content>
@@ -2143,7 +2173,12 @@ const Entity = () => {
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Relationships
                     </Text>
                   </Flex>
@@ -2184,7 +2219,12 @@ const Entity = () => {
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"attachment"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Attachments
                     </Text>
                   </Flex>
@@ -2258,7 +2298,7 @@ const Entity = () => {
             <Dialog.Backdrop />
             <Dialog.Positioner>
               <Dialog.Content w={["lg", "xl", "2xl"]}>
-                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                     <Icon name={"project"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2333,7 +2373,7 @@ const Entity = () => {
                         ))
                       ) : (
                         <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.lightColor} />
+                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.color.light} />
                           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                             No Projects selected
                           </Text>
@@ -2343,7 +2383,7 @@ const Entity = () => {
                   </Flex>
                 </Dialog.Body>
 
-                <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+                <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
                       variant={"solid"}
@@ -2411,7 +2451,7 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"graph"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2441,7 +2481,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"share"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2538,7 +2578,7 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
                   <Button
                     variant={"solid"}
@@ -2568,7 +2608,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"copy"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2582,7 +2622,7 @@ const Entity = () => {
 
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} color={"gray.600"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     By default, the cloned Entity will be created with the same name, but with "(cloned)" appended to
                     the end. You can modify the name below.
                   </Text>
@@ -2605,7 +2645,7 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                   <Button
                     variant={"solid"}

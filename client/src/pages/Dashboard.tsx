@@ -275,7 +275,7 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("timestamp", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -361,7 +361,7 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -499,8 +499,8 @@ const Dashboard = () => {
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 Entities
               </Text>
             </Flex>
@@ -530,8 +530,8 @@ const Dashboard = () => {
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 Projects
               </Text>
             </Flex>
@@ -561,8 +561,8 @@ const Dashboard = () => {
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 Templates
               </Text>
             </Flex>
@@ -594,7 +594,7 @@ const Dashboard = () => {
             >
               <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"person"} size={"xs"} color={"gray.500"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Collaborators
                 </Text>
               </Flex>
@@ -623,8 +623,8 @@ const Dashboard = () => {
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Projects
                 </Text>
               </Flex>
@@ -643,7 +643,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -677,8 +677,8 @@ const Dashboard = () => {
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Entities
                 </Text>
               </Flex>
@@ -701,7 +701,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>

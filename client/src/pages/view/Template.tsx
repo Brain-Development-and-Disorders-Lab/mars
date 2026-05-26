@@ -519,7 +519,7 @@ const Template = () => {
               <Tag.Root colorPalette={"green"}>
                 <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
               </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -559,11 +559,11 @@ const Template = () => {
               gap={"1"}
               p={"1"}
               border={"2px solid"}
-              borderColor={GLOBAL_STYLES.template.iconColor}
+              borderColor={GLOBAL_STYLES.template.color.icon}
               bg={"teal.50"}
               rounded={"md"}
             >
-              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
               <Heading fontWeight={"semibold"} size={"sm"}>
                 {displayTemplateName}
               </Heading>
@@ -894,7 +894,7 @@ const Template = () => {
                                               disabled={templateVersion.message.length <= 40}
                                               showArrow
                                             >
-                                              <Text fontSize={"xs"} color={"gray.600"}>
+                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                                 {_.truncate(templateVersion.message, { length: 40 })}
                                               </Text>
                                             </Tooltip>
@@ -1100,7 +1100,12 @@ const Template = () => {
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Name
                   </Text>
                   <Input
@@ -1121,21 +1126,36 @@ const Template = () => {
 
               <Flex gap={"2"} direction={"row"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Owner
                   </Text>
                   <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={template.timestamp} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -1156,7 +1176,7 @@ const Template = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor
@@ -1183,7 +1203,7 @@ const Template = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Values
               </Text>
               <Values
@@ -1207,7 +1227,7 @@ const Template = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Usage
               </Text>
               {templateUsage.length > 0 ? (
@@ -1224,7 +1244,7 @@ const Template = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Usage</EmptyState.Description>
                   </EmptyState.Content>

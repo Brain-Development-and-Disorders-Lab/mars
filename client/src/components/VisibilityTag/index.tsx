@@ -61,7 +61,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
 
       <Flex direction={"row"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
         <Flex direction={"column"} gap={"0"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {props.isPublic ? "Public" : "Private"}
           </Text>
           {isBreakpointActive("xl", "up") && (

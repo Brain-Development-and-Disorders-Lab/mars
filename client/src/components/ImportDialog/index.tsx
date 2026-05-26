@@ -1233,7 +1233,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} flexShrink={0} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+          <Dialog.Header p={"2"} flexShrink={0} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"upload"} size={"xs"} />
               <Text fontWeight={"semibold"} fontSize={"xs"}>
@@ -1295,7 +1295,12 @@ const ImportDialog = (props: ImportDialogProps) => {
             {/* Select file type of import */}
             {entityStep === 0 && templateStep === 0 && (
               <Flex direction={"column"} gap={"2"} py={"2"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   File Contents
                 </Text>
                 <Flex gap={"2"}>
@@ -1343,7 +1348,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     File:
                   </Text>
-                  <Text fontSize={"xs"} color={"gray.600"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     {fileName}
                   </Text>
                 </Flex>
@@ -1402,8 +1407,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                         {_.isUndefined(importType) && (
                           <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                             <Flex direction={"row"} align={"center"} justify={"center"} gap={"2"}>
-                              <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
-                              <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                              <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.light} />
+                              <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
                             </Flex>
                             <Text fontSize={"xs"} fontWeight={"semibold"}>
                               Select File Contents
@@ -1419,8 +1424,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xl"}
                               color={
                                 importType === "entities"
-                                  ? GLOBAL_STYLES.entity.lightColor
-                                  : GLOBAL_STYLES.template.lightColor
+                                  ? GLOBAL_STYLES.entity.color.light
+                                  : GLOBAL_STYLES.template.color.light
                               }
                             />
                             <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
@@ -1449,8 +1454,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xl"}
                               color={
                                 importType === "entities"
-                                  ? GLOBAL_STYLES.entity.lightColor
-                                  : GLOBAL_STYLES.template.lightColor
+                                  ? GLOBAL_STYLES.entity.color.light
+                                  : GLOBAL_STYLES.template.color.light
                               }
                             />
                             <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1517,7 +1522,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Setup
                 </Text>
                 {isSpreadsheetFile(fileType) && (
@@ -1525,7 +1530,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1548,7 +1553,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           }
                           required
                         >
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -1609,7 +1614,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1626,7 +1631,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         </Field.Root>
 
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name
                           </Field.Label>
                           <Input
@@ -1649,7 +1654,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Flex direction={"row"} gap={"1"}>
                         {/* Description */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Description
                           </Field.Label>
                           {isSpreadsheetFile(fileType) ? (
@@ -1697,7 +1702,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                         {/* Project */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Project
                           </Field.Label>
                           <Select.Root
@@ -1717,7 +1722,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     name={"project"}
                                     size={"xs"}
                                     color={
-                                      projectField ? GLOBAL_STYLES.project.iconColor : GLOBAL_STYLES.project.lightColor
+                                      projectField
+                                        ? GLOBAL_STYLES.project.color.icon
+                                        : GLOBAL_STYLES.project.color.light
                                     }
                                   />
                                   <Text fontSize={"xs"} color={projectField ? "black" : "gray.500"}>
@@ -1738,7 +1745,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   {projectsCollection.items?.map((project: IGenericItem) => (
                                     <Select.Item item={project} key={project._id}>
                                       <Flex direction={"row"} gap={"2"} align={"center"}>
-                                        <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+                                        <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
                                         {project.name}
                                       </Flex>
                                       <Select.ItemIndicator />
@@ -1759,7 +1766,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root gap={"0.5"}>
-                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                           Owner
                         </Field.Label>
                         <Flex>
@@ -1784,7 +1791,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 rounded={"md"}
               >
                 <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     Attributes
                   </Text>
                   <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setAddAttributeOpen(true)}>
@@ -1805,7 +1812,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <EmptyState.Root>
                       <EmptyState.Content>
                         <EmptyState.Indicator>
-                          <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                          <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
                         </EmptyState.Indicator>
                         <EmptyState.Description>No Attributes added</EmptyState.Description>
                       </EmptyState.Content>
@@ -1839,7 +1846,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   border={"1px solid"}
                   borderColor={"purple.200"}
                 >
-                  <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
                     <Text fontSize={"xs"} fontWeight={"bold"}>
                       Reviewing {reviewEntities.length} {reviewEntities.length === 1 ? "Entity" : "Entities"}
@@ -1873,7 +1880,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   border={"1px solid"}
                   borderColor={"teal.200"}
                 >
-                  <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+                  <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
                     <Text fontSize={"xs"} fontWeight={"bold"}>
                       Reviewing {reviewTemplates.length} {reviewTemplates.length === 1 ? "Template" : "Templates"}
@@ -1894,7 +1901,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             )}
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
               <Flex align={"center"} justify={"center"} gap={"2"}>
                 <Button

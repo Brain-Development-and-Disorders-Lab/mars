@@ -56,7 +56,7 @@ const Navigation = () => {
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               Workspace
             </Text>
 
@@ -128,7 +128,7 @@ const Navigation = () => {
               Create
             </Button>
 
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               View
             </Text>
 
@@ -148,7 +148,7 @@ const Navigation = () => {
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -170,7 +170,7 @@ const Navigation = () => {
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -192,13 +192,13 @@ const Navigation = () => {
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
               Templates
             </Button>
           </Flex>
 
           <Flex direction={"column"} gap={"2"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               Tools
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
@@ -341,7 +341,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/entities")}
                 >
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
                   Entities
                 </Menu.Item>
                 <Menu.Item
@@ -350,7 +350,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/projects")}
                 >
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
                   Projects
                 </Menu.Item>
                 <Menu.Item
@@ -359,7 +359,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/templates")}
                 >
-                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>

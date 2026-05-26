@@ -449,7 +449,7 @@ const ValueDataSelect = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+            <Dialog.Header p={"0"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
               <Flex direction={"row"} align={"center"} gap={"1"} p={"2"}>
                 <Icon name={"v_select"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -539,7 +539,7 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name={"cross"} />
@@ -854,7 +854,7 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={"gray.600"}
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
               bg={"gray.100"}
               borderRight={"1px solid"}
               borderColor={"gray.200"}
@@ -891,7 +891,7 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={"gray.600"}
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
               bg={"gray.100"}
               borderRight={"1px solid"}
               borderColor={"gray.200"}
@@ -927,7 +927,7 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={"gray.600"}
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
               bg={"gray.100"}
               position={"relative"}
               textAlign={"center"}
@@ -1218,19 +1218,19 @@ const ValueRow = (props: {
     let iconStyle: IconNames = "link";
     let badgeBg = "blue.50";
     let badgeBorder = "blue.100";
-    let iconColor = GLOBAL_STYLES.project.iconColor;
+    let iconColor = GLOBAL_STYLES.project.color.icon;
 
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
         badgeBg = "blue.50";
         badgeBorder = "blue.100";
-        iconColor = GLOBAL_STYLES.project.iconColor;
+        iconColor = GLOBAL_STYLES.project.color.icon;
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";
         badgeBorder = "gray.200";
-        iconColor = "gray.600";
+        iconColor = GLOBAL_STYLES.font.secondaryHeader.color;
       }
     }
 

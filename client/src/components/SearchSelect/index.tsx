@@ -91,7 +91,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const isLoading = entitiesLoading || projectsLoading || searchLoading || (isTyping && !hasSearched);
 
   const iconName = props.resultType === "entity" ? "entity" : "project";
-  const iconColor = props.resultType === "entity" ? GLOBAL_STYLES.entity.iconColor : GLOBAL_STYLES.project.iconColor;
+  const iconColor = props.resultType === "entity" ? GLOBAL_STYLES.entity.color.icon : GLOBAL_STYLES.project.color.icon;
 
   useEffect(() => {
     setInputValue(props.value?.name || "");

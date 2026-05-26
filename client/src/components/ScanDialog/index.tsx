@@ -285,7 +285,7 @@ const ScanDialog = (props: ScanDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"scan"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>

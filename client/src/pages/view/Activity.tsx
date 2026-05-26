@@ -260,10 +260,10 @@ const Activity = () => {
     columnHelper.accessor("timestamp", {
       cell: (info) => (
         <Flex direction={"row"} gap={"1"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).format("MMM D, YYYY h:mm A")}
           </Text>
-          <Text fontSize={"xs"} color={"gray.600"}>
+          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             ({dayjs(info.getValue()).fromNow()})
           </Text>
         </Flex>
@@ -542,7 +542,7 @@ const Activity = () => {
             {/* Live Indicator */}
             <Flex align={"center"} gap={"1"} ml={"0.5"}>
               <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-              <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
                 Live
               </Text>
             </Flex>

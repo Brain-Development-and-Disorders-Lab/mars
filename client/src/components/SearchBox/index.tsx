@@ -386,7 +386,7 @@ const SearchBox = () => {
                                   {result.name}
                                 </Text>
                                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.iconColor} />
+                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.color.icon} />
                                   <Text fontSize={"2xs"} color={"gray.500"}>
                                     {resultType}
                                   </Text>

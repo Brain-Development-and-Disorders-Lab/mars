@@ -80,7 +80,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   const createLabel = (id: string, name: string, isPrimary: boolean, relCount?: number): React.JSX.Element => (
     <Flex direction={"column"} w={"100%"} h={"100%"} justify={"center"} gap={"1.5"} px={"1"}>
       <Flex align={"center"} gap={"1.5"} w={"100%"}>
-        <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+        <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
         <Tooltip content={name} disabled={name.length < 22}>
           <Text fontWeight={"semibold"} fontSize={"xs"} truncate>
             {_.truncate(name, { length: 22 })}

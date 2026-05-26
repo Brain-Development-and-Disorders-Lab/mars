@@ -404,7 +404,7 @@ const Entity = () => {
       <Flex direction={"column"} gap={"2"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+          <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
           <Heading size={"md"}>Create Entity</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -451,7 +451,12 @@ const Entity = () => {
               rounded={"md"}
             >
               <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Field.Label
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Name
                   <Field.RequiredIndicator />
                 </Field.Label>
@@ -494,7 +499,12 @@ const Entity = () => {
               </Field.Root>
 
               <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Field.Label
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Created
                   <Field.RequiredIndicator />
                 </Field.Label>
@@ -510,7 +520,12 @@ const Entity = () => {
               </Field.Root>
 
               <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Field.Label
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Owner
                 </Field.Label>
                 <ActorTag size={"md"} identifier={owner} fallback={"Unknown User"} />
@@ -526,7 +541,7 @@ const Entity = () => {
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor
@@ -552,7 +567,7 @@ const Entity = () => {
                 borderColor={GLOBAL_STYLES.border.color}
               >
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     Relationships
                   </Text>
                   <Button
@@ -586,7 +601,7 @@ const Entity = () => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Projects
                 </Text>
                 <CheckboxGroup
@@ -610,7 +625,7 @@ const Entity = () => {
                       <EmptyState.Root>
                         <EmptyState.Content>
                           <EmptyState.Indicator>
-                            <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                            <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                           </EmptyState.Indicator>
                           <EmptyState.Description>No Projects</EmptyState.Description>
                         </EmptyState.Content>
@@ -637,8 +652,13 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Attributes
                   </Text>
                 </Flex>
@@ -710,9 +730,9 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Entities
                   </Text>
@@ -738,7 +758,7 @@ const Entity = () => {
                         What is an Entity?
                       </Text>
                     </Flex>
-                    <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                    <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                       Entities represent the things you want to track: samples, datasets, protocols, instruments, and so
                       on. Each Entity stores structured metadata through Attributes, and can be linked to other Entities
                       or organised into Projects.
@@ -746,7 +766,12 @@ const Entity = () => {
                   </Flex>
 
                   <Flex direction={"column"} gap={"2"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Creation Steps
                     </Text>
                     <Flex direction={"column"} gap={"2"}>
@@ -778,7 +803,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Start - Basic Details
                           </Text>
-                          <Text fontSize={"xs"} color={"gray.600"}>
+                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Set the Entity's name, description, and visibility.
                           </Text>
                         </Flex>
@@ -811,7 +836,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Relationships - Link to Other Entities
                           </Text>
-                          <Text fontSize={"xs"} color={"gray.600"}>
+                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Define how this Entity relates to others and assign it to Projects.
                           </Text>
                         </Flex>
@@ -844,7 +869,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Attributes - Attach Metadata
                           </Text>
-                          <Text fontSize={"xs"} color={"gray.600"}>
+                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Select Attribute Templates and add Values to describe this Entity's metadata.
                           </Text>
                         </Flex>

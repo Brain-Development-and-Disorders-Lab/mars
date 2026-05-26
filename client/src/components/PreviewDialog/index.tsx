@@ -89,7 +89,7 @@ const DocumentPreview = (props: {
         align={"center"}
         fontSize={"sm"}
         fontWeight={"semibold"}
-        color={"gray.600"}
+        color={GLOBAL_STYLES.font.secondaryHeader.color}
       >
         <Document file={props.previewSource} onLoadSuccess={props.onLoadSuccess} loading={"Loading Page..."}>
           <Page pageNumber={props.previewIndex} width={containerWidth} />
@@ -316,8 +316,8 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   if (loading) {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"}>
-        <Spinner color={"gray.600"} />
-        <Text fontSize={"xs"} color={"gray.600"} mt={"2"}>
+        <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
+        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} mt={"2"}>
           Loading Sequence...
         </Text>
       </Flex>
@@ -438,10 +438,10 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
     if (loading || !previewType || !previewSource) {
       return (
         <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
-          <Text fontSize={"sm"} color={"gray.600"} fontWeight={"semibold"}>
+          <Text fontSize={"sm"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Preparing Preview
           </Text>
-          <Spinner color={"gray.600"} />
+          <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
         </Flex>
       );
     }
@@ -531,7 +531,7 @@ const PreviewDialog = (props: PreviewDialogProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={"xs"}
-            bg={GLOBAL_STYLES.dialog.headerColor}
+            bg={GLOBAL_STYLES.dialog.header.bg}
             roundedTop={"md"}
             flexShrink={0}
           >

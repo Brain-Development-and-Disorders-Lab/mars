@@ -212,7 +212,7 @@ const Login = () => {
                       color={"gray.400"}
                       fontWeight={"semibold"}
                       cursor={"pointer"}
-                      _hover={{ color: "gray.600" }}
+                      _hover={{ color: GLOBAL_STYLES.font.secondaryHeader.color }}
                       alignSelf={"flex-end"}
                       onClick={() => navigate("/forgot-password")}
                     >

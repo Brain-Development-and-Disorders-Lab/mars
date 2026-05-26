@@ -343,7 +343,7 @@ const ExportDialog = (props: ExportDialogProps) => {
       <Dialog.Positioner>
         <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
           {/* Header */}
-          <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+          <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"download"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -358,7 +358,7 @@ const ExportDialog = (props: ExportDialogProps) => {
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} gap={"2"}>
             {/* Format */}
             <Flex direction={"column"} gap={"1.5"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Format
               </Text>
               <Flex gap={"1"}>
@@ -391,7 +391,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !entity ? (
@@ -591,7 +591,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 border={"1px solid"}
                 borderColor={"purple.200"}
               >
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Flex direction={"column"} gap={"0.5"} grow={"1"}>
                   <Text fontSize={"xs"} fontWeight={"bold"}>
                     {ids !== undefined ? `${ids.length} ${ids.length === 1 ? "Entity" : "Entities"}` : "All Entities"}
@@ -616,7 +616,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !project ? (
@@ -745,7 +745,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !template ? (
@@ -870,7 +870,7 @@ const ExportDialog = (props: ExportDialogProps) => {
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 Options
               </Text>
               <Tooltip content={"History is only included in JSON exports"} disabled={format === "json"} showArrow>
@@ -904,7 +904,7 @@ const ExportDialog = (props: ExportDialogProps) => {
           </Dialog.Body>
 
           {/* Footer */}
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"} gap={"2"}>
               {dataType === "template" && (
                 <Button

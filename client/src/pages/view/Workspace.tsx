@@ -710,7 +710,12 @@ const Workspace = () => {
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Name
                   </Text>
                   <Input
@@ -728,21 +733,36 @@ const Workspace = () => {
               {/* "Owner", "Timestamp", and "Visibility" fields */}
               <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Owner
                   </Text>
                   <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={created} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
@@ -763,7 +783,7 @@ const Workspace = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
@@ -795,8 +815,13 @@ const Workspace = () => {
               minW={"0"}
             >
               <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Archived Entities
                 </Text>
               </Flex>
@@ -821,7 +846,7 @@ const Workspace = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
+                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Archived Entities</EmptyState.Description>
                     </EmptyState.Content>
@@ -845,8 +870,13 @@ const Workspace = () => {
               minW={"0"}
             >
               <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Archived Projects
                 </Text>
               </Flex>
@@ -871,7 +901,7 @@ const Workspace = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Archived Projects</EmptyState.Description>
                     </EmptyState.Content>
@@ -893,8 +923,13 @@ const Workspace = () => {
               minW={"0"}
             >
               <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Archived Templates
                 </Text>
               </Flex>
@@ -919,7 +954,7 @@ const Workspace = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                        <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Archived Templates</EmptyState.Description>
                     </EmptyState.Content>
@@ -943,8 +978,13 @@ const Workspace = () => {
               minW={"0"}
             >
               <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"counter"} size={"xs"} color={"gray.600"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Icon name={"counter"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Counters
                 </Text>
               </Flex>

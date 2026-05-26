@@ -160,7 +160,7 @@ const columns = [
   }),
   columnHelper.accessor("created", {
     cell: (info) => (
-      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
         {dayjs(info.getValue()).fromNow()}
       </Text>
     ),

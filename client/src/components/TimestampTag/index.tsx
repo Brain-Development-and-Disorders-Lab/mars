@@ -47,7 +47,7 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
 
       {/* Timestamp label */}
       <Flex direction={"column"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
           {dateString}
         </Text>
         <Text fontSize={"xs"} fontWeight={"medium"} mr={"0.5"} color={"gray.400"}>

@@ -14,6 +14,11 @@ export const STORAGE_KEY = "metadatify_storage";
 
 // Default styling
 export const GLOBAL_STYLES = {
+  font: {
+    secondaryHeader: {
+      color: "gray.600",
+    },
+  },
   border: {
     style: "1px solid",
     color: "gray.300",
@@ -21,23 +26,33 @@ export const GLOBAL_STYLES = {
   card: {
     bg: "gray.50",
   },
+  dialog: {
+    header: {
+      bg: "gray.200",
+    },
+    footer: {
+      bg: "gray.100",
+    },
+  },
   entity: {
-    iconColor: "purple.500",
-    defaultColor: "purple.400",
-    lightColor: "purple.200",
+    color: {
+      default: "purple.400",
+      light: "purple.200",
+      icon: "purple.500",
+    },
   },
   project: {
-    iconColor: "blue.500",
-    defaultColor: "blue.400",
-    lightColor: "blue.200",
+    color: {
+      default: "blue.400",
+      light: "blue.200",
+      icon: "blue.500",
+    },
   },
   template: {
-    iconColor: "teal.500",
-    defaultColor: "teal.400",
-    lightColor: "teal.200",
-  },
-  dialog: {
-    headerColor: "gray.200",
-    footerColor: "gray.100",
+    color: {
+      default: "teal.400",
+      light: "teal.200",
+      icon: "teal.500",
+    },
   },
 };

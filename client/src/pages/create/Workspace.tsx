@@ -240,7 +240,12 @@ const CreateWorkspace = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+                    <Field.Label
+                      fontWeight={"semibold"}
+                      fontSize={"xs"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Name
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -259,7 +264,12 @@ const CreateWorkspace = () => {
               </Fieldset.Root>
 
               <Flex direction={"column"} gap={"2"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   Owner
                 </Text>
                 <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
@@ -279,7 +289,12 @@ const CreateWorkspace = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root gap={"1"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+                    <Field.Label
+                      fontWeight={"semibold"}
+                      fontSize={"xs"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Description
                     </Field.Label>
                     <RichTextEditor

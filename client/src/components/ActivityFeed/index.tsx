@@ -23,6 +23,9 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const GET_ACTIVITY = gql`
   query GetActivity($limit: Int) {
     activity(limit: $limit) {
@@ -80,7 +83,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         </Flex>
         <Flex align={"center"} gap={"1"} mr={"0.5"}>
           <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-          <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Live
           </Text>
         </Flex>

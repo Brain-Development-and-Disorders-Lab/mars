@@ -161,7 +161,11 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
     <Menu.Root>
       <Menu.Trigger asChild>
         <Button variant={"subtle"} size={"xs"} p={0} minW={"auto"} h={"auto"} onClick={(e) => e.stopPropagation()}>
-          <Icon name={"filter"} size={"xs"} color={currentFilter.length > 0 ? "blue.700" : "gray.600"} />
+          <Icon
+            name={"filter"}
+            size={"xs"}
+            color={currentFilter.length > 0 ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color}
+          />
         </Button>
       </Menu.Trigger>
       <Portal>
@@ -893,7 +897,7 @@ const DataTable = (props: DataTableProps) => {
                       py={1}
                       fontSize={"xs"}
                       fontWeight={"semibold"}
-                      color={"gray.600"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
                       bg={"gray.100"}
                       borderRight={!isLastColumn ? "1px solid" : "none"}
                       borderColor={"gray.200"}
@@ -933,7 +937,9 @@ const DataTable = (props: DataTableProps) => {
                                         ? "sort_down"
                                         : "sort"
                                   }
-                                  color={header.column.getIsSorted() ? "blue.700" : "gray.600"}
+                                  color={
+                                    header.column.getIsSorted() ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color
+                                  }
                                   size={"xs"}
                                 />
                               </Button>

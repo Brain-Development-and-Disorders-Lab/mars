@@ -644,7 +644,7 @@ const Project = () => {
               <Tag.Root colorPalette={"green"}>
                 <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
               </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -685,11 +685,11 @@ const Project = () => {
               gap={"1"}
               p={"1"}
               border={"2px solid"}
-              borderColor={GLOBAL_STYLES.project.iconColor}
+              borderColor={GLOBAL_STYLES.project.color.icon}
               rounded={"md"}
               bg={"blue.50"}
             >
-              <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
+              <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
               <Heading fontWeight={"semibold"} size={"sm"}>
                 {displayProjectData.name}
               </Heading>
@@ -1028,7 +1028,7 @@ const Project = () => {
                                             disabled={projectVersion.message.length <= 40}
                                             showArrow
                                           >
-                                            <Text fontSize={"xs"} color={"gray.600"}>
+                                            <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                               {_.truncate(projectVersion.message, { length: 40 })}
                                             </Text>
                                           </Tooltip>
@@ -1269,7 +1269,12 @@ const Project = () => {
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Name
                   </Text>
                   <Input
@@ -1290,21 +1295,36 @@ const Project = () => {
 
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Owner
                   </Text>
                   <ActorTag identifier={project.owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={project.created} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -1325,7 +1345,7 @@ const Project = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor
@@ -1355,8 +1375,8 @@ const Project = () => {
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     Entities
                   </Text>
                 </Flex>
@@ -1393,7 +1413,7 @@ const Project = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
+                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Entities</EmptyState.Description>
                     </EmptyState.Content>
@@ -1442,7 +1462,7 @@ const Project = () => {
                 p={"2"}
                 fontWeight={"semibold"}
                 fontSize={"xs"}
-                bg={GLOBAL_STYLES.dialog.headerColor}
+                bg={GLOBAL_STYLES.dialog.header.bg}
                 roundedTop={"md"}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
@@ -1470,7 +1490,7 @@ const Project = () => {
                 />
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Button
                   colorPalette={"red"}
                   size={"xs"}

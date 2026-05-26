@@ -174,7 +174,7 @@ const UploadDialog = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                   <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
                     <Icon name={"upload"} size={"xs"} />
@@ -282,7 +282,7 @@ const UploadDialog = (props: {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"xs"}

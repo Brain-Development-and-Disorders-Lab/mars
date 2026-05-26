@@ -749,7 +749,13 @@ const User = () => {
             >
               {/* Avatar */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text ml={"0.5"} color={"gray.600"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
+                <Text
+                  ml={"0.5"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  textAlign={"left"}
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                >
                   Avatar
                 </Text>
                 <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
@@ -760,7 +766,12 @@ const User = () => {
                 <Fieldset.Content>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Field.Root gap={"0"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
                         First Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -777,7 +788,12 @@ const User = () => {
                       />
                     </Field.Root>
                     <Field.Root gap={"0"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
                         Last Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -802,7 +818,12 @@ const User = () => {
                 <Fieldset.Content gap={"1"}>
                   <Field.Root invalid={emailError !== ""} required gap={"0"}>
                     <Flex direction={"row"} align={"center"} gap={"2"} justify={"start"} w={"100%"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                      <Field.Label
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
                         Email
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -877,7 +898,12 @@ const User = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root invalid={affiliationError !== ""} required gap={"0"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                    <Field.Label
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      ml={"0.5"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    >
                       Affiliation
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -906,7 +932,13 @@ const User = () => {
 
               {/* ORCiD */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text ml={"0.5"} color={"gray.600"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
+                <Text
+                  ml={"0.5"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  textAlign={"left"}
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                >
                   ORCiD
                 </Text>
                 <Flex align={"start"} direction={"column"} justify={"center"} gap={"1"} wrap={"wrap"}>
@@ -945,8 +977,13 @@ const User = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} py={"1.5"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"workspace"} size={"xs"} color={"gray.600"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                <Icon name={"workspace"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  ml={"0.5"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                >
                   Workspaces
                 </Text>
               </Flex>
@@ -991,8 +1028,13 @@ const User = () => {
                   <Flex direction={"column"} p={"0"} gap={"2"}>
                     <Flex direction={"row"} justify={"space-between"} align={"center"}>
                       <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
-                        <Icon name={"key"} size={"xs"} color={"gray.600"} />
-                        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                        <Icon name={"key"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          ml={"0.5"}
+                          color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        >
                           API Access
                         </Text>
                       </Flex>

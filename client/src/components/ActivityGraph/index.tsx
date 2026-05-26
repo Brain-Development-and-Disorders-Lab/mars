@@ -120,7 +120,7 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
       borderColor={GLOBAL_STYLES.border.color}
     >
       {title && (
-        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
           {title}
         </Text>
       )}

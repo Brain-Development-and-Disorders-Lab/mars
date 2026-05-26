@@ -142,7 +142,7 @@ const Template = () => {
       <Flex direction={"column"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+          <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
           <Heading size={"md"}>Create Template</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -164,7 +164,12 @@ const Template = () => {
             rounded={"md"}
           >
             <Field.Root required gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
                 Name
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -182,7 +187,12 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
                 Owner
               </Field.Label>
               <Flex>
@@ -191,7 +201,12 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
                 Created
               </Field.Label>
               <Input
@@ -216,7 +231,12 @@ const Template = () => {
             borderColor={GLOBAL_STYLES.border.color}
           >
             <Field.Root required gap={"1"} h={"100%"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
                 Description
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -236,7 +256,7 @@ const Template = () => {
             rounded={"md"}
           >
             <Field.Root>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                 Values
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -266,11 +286,11 @@ const Template = () => {
               p={"2"}
               fontWeight={"semibold"}
               fontSize={"xs"}
-              bg={GLOBAL_STYLES.dialog.headerColor}
+              bg={GLOBAL_STYLES.dialog.header.bg}
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
                 Template Attributes
               </Flex>
             </Dialog.Header>
@@ -291,7 +311,7 @@ const Template = () => {
                       What is a Template?
                     </Text>
                   </Flex>
-                  <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                     Templates define a set of metadata fields that can be applied to Entities during creation. Use them
                     to pre-populate Attributes and keep metadata consistent across similar Entities.
                   </Text>

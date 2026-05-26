@@ -174,7 +174,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"attribute"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -245,7 +245,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                   <Select.Control>
                     <Select.Trigger rounded={"md"} bg={"white"}>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
+                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.light} />
                         <Text fontSize={"xs"} color={"gray.500"}>
                           Select Template
                         </Text>
@@ -261,7 +261,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                         {templatesCollection.items.map((template: ISelectOption) => (
                           <Select.Item item={template} key={template.value} fontSize={"xs"}>
                             <Flex direction={"row"} gap={"2"} align={"center"}>
-                              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
                               {template.label}
                             </Flex>
                             <Select.ItemIndicator />
@@ -295,7 +295,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     w={{ base: "100%", md: "calc(50% - 4px)" }}
                   >
                     <Field.Root required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                         Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -309,7 +309,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                       />
                     </Field.Root>
                     <Flex direction={"column"} gap={"1"}>
-                      <Text fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                         Owner
                       </Text>
                       <ActorTag identifier={props.owner} fallback={"Unknown User"} size={"sm"} />
@@ -327,7 +327,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     grow={"1"}
                   >
                     <Field.Root required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                         Description
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -338,7 +338,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
 
                 {/* Values */}
                 <Field.Root required>
-                  <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                  <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     Values
                     <Field.RequiredIndicator />
                   </Field.Label>
@@ -347,7 +347,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
               </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Flex direction={"row"} gap={"2"} justify={"space-between"} w={"100%"}>
                 <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleClose}>
                   Cancel

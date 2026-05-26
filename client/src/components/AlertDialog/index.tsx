@@ -45,7 +45,7 @@ const AlertDialog = (props: AlertDialogProps) => {
             </Flex>
           </Dialog.Header>
           <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Button
               size={"xs"}
               rounded={"md"}

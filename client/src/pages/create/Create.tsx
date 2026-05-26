@@ -26,7 +26,12 @@ const Create = () => {
           <Icon name={"add"} size={"sm"} />
           <Heading size={"lg"}>Create</Heading>
         </Flex>
-        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"} textAlign={"center"}>
+        <Text
+          fontSize={"sm"}
+          fontWeight={"semibold"}
+          color={GLOBAL_STYLES.font.secondaryHeader.color}
+          textAlign={"center"}
+        >
           Create a new Entity, Template, or Project to continue building your metadata collection.
         </Text>
         <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"} justify={"center"}>
@@ -40,7 +45,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Heading size={"md"}>Entity</Heading>
               </Flex>
             </Card.Header>
@@ -57,7 +62,7 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
                     <Tag.Root colorPalette={"purple"}>
@@ -69,7 +74,7 @@ const Create = () => {
                   </Flex>
 
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -117,7 +122,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
                 <Heading size={"md"}>Project</Heading>
               </Flex>
             </Card.Header>
@@ -134,7 +139,7 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
                     <Tag.Root colorPalette={"blue"}>
@@ -145,7 +150,7 @@ const Create = () => {
                     </Tag.Root>
                   </Flex>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -184,7 +189,7 @@ const Create = () => {
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                 <Heading size={"md"}>Template</Heading>
               </Flex>
             </Card.Header>
@@ -201,7 +206,7 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
                     <Tag.Root colorPalette={"teal"}>
