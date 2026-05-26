@@ -122,62 +122,62 @@ const Relationships = (props: RelationshipsProps) => {
                 _hover={{ bg: "gray.25" }}
                 wrap={"wrap"}
               >
-                {/* Source */}
-                <Tooltip content={sourceName} disabled={sourceName.length < 48} showArrow>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0}>
-                    {_.truncate(sourceName, { length: 48 })}
-                  </Text>
-                </Tooltip>
+                {/* Source, arrow, and target as one unit so the badge wraps below, never between them */}
+                <Flex direction={"row"} align={"center"} gap={"2"}>
+                  <Tooltip content={sourceName} disabled={sourceName.length < 24} showArrow>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      {_.truncate(sourceName, { length: 24 })}
+                    </Text>
+                  </Tooltip>
 
-                <Flex direction={"row"} gap={"0"} align={"center"}>
-                  {relationship.type === "parent" && (
-                    <Box w={"75px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
-                  )}
+                  {/* Relationship arrow */}
+                  <Flex direction={"row"} gap={"0"} align={"center"}>
+                    {relationship.type === "parent" && (
+                      <Box w={"55px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
 
-                  {relationship.type === "general" && (
-                    <Box w={"37.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
-                  )}
+                    {relationship.type === "general" && (
+                      <Box w={"27.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
 
-                  {/* Arrow */}
-                  <Icon
-                    name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
-                    size={"xs"}
-                    color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
-                  />
+                    <Icon
+                      name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
+                      size={"xs"}
+                      color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
+                    />
 
-                  {relationship.type === "general" && (
-                    <Box w={"37.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
-                  )}
+                    {relationship.type === "general" && (
+                      <Box w={"27.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
 
-                  {relationship.type === "child" && (
-                    <Box w={"75px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
-                  )}
+                    {relationship.type === "child" && (
+                      <Box w={"55px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
+                  </Flex>
+
+                  <Linky id={relationship.target._id} type={"entities"} truncate={12} />
                 </Flex>
 
-                {/* Target */}
-                <Flex flex={"1"} minW={0}>
-                  <Linky id={relationship.target._id} type={"entities"} truncate={64} />
+                <Flex direction={"row"} gap={"2"} ml={"auto"}>
+                  {/* Type badge */}
+                  <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[relationship.type]}>
+                    <Tag.Label fontSize={"xs"}>{_.capitalize(relationship.type)}</Tag.Label>
+                  </Tag.Root>
+
+                  {/* Remove */}
+                  {!props.viewOnly && (
+                    <Button
+                      size={"2xs"}
+                      variant={"subtle"}
+                      colorPalette={"red"}
+                      aria-label={"Remove relationship"}
+                      onClick={() => removeRelationship(relationship)}
+                    >
+                      Remove
+                      <Icon name={"delete"} size={"xs"} />
+                    </Button>
+                  )}
                 </Flex>
-
-                {/* Type badge */}
-                <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[relationship.type]} flexShrink={0}>
-                  <Tag.Label fontSize={"xs"}>{_.capitalize(relationship.type)}</Tag.Label>
-                </Tag.Root>
-
-                {/* Remove */}
-                {!props.viewOnly && (
-                  <Button
-                    size={"2xs"}
-                    variant={"subtle"}
-                    colorPalette={"red"}
-                    flexShrink={0}
-                    aria-label={"Remove relationship"}
-                    onClick={() => removeRelationship(relationship)}
-                  >
-                    Remove
-                    <Icon name={"delete"} size={"xs"} />
-                  </Button>
-                )}
               </Flex>
             );
           })}

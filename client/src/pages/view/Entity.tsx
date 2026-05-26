@@ -1171,15 +1171,17 @@ const Entity = () => {
             px={"1.5"}
             pt={"1.5"}
           >
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"clock"} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Preview:
-              </Text>
-              <Tag.Root colorPalette={"green"}>
-                <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
-              </Tag.Root>
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Flex direction={"row"} align={"center"} gap={"1"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"clock"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Preview:
+                </Text>
+                <Tag.Root colorPalette={"green"}>
+                  <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
+                </Tag.Root>
+              </Flex>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>

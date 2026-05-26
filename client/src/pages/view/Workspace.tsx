@@ -731,7 +731,7 @@ const Workspace = () => {
               </Flex>
 
               {/* "Owner", "Timestamp", and "Visibility" fields */}
-              <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text
                     fontSize={"xs"}

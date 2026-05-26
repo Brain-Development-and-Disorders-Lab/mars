@@ -212,9 +212,9 @@ const AddRelationshipDialog = ({
                         borderColor={"gray.200"}
                         bg={"white"}
                       >
-                        <Tooltip content={rel.source.name} disabled={rel.source.name.length < 24} showArrow>
+                        <Tooltip content={rel.source.name} disabled={rel.source.name.length < 18} showArrow>
                           <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0} maxW={"120px"} truncate>
-                            {_.truncate(rel.source.name, { length: 24 })}
+                            {_.truncate(rel.source.name, { length: 18 })}
                           </Text>
                         </Tooltip>
                         <Icon
@@ -223,7 +223,7 @@ const AddRelationshipDialog = ({
                           color={RELATIONSHIP_TYPE_ARROW_COLOR[rel.type]}
                         />
                         <Flex flex={"1"} minW={0}>
-                          <Linky id={rel.target._id} type={"entities"} />
+                          <Linky id={rel.target._id} type={"entities"} truncate={18} />
                         </Flex>
                         <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[rel.type]} flexShrink={0}>
                           <Tag.Label fontSize={"xs"}>{_.capitalize(rel.type)}</Tag.Label>

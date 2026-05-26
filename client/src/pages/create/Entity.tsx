@@ -567,9 +567,12 @@ const Entity = () => {
                 borderColor={GLOBAL_STYLES.border.color}
               >
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                    Relationships
-                  </Text>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Icon size={"xs"} name={"graph"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      Relationships
+                    </Text>
+                  </Flex>
                   <Button
                     variant={"solid"}
                     size={"xs"}
@@ -601,9 +604,12 @@ const Entity = () => {
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                  Projects
-                </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Icon size={"xs"} name={"project"} color={GLOBAL_STYLES.project.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    Projects
+                  </Text>
+                </Flex>
                 <CheckboxGroup
                   value={selectedProjects}
                   onValueChange={(event: string[]) => {

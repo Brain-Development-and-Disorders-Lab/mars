@@ -22,7 +22,7 @@ import _ from "lodash";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
 
 /**
  * Utility to get the icon name, badge background, border, and icon color

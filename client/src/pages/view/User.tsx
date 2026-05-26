@@ -1014,61 +1014,61 @@ const User = () => {
           </Flex>
 
           {features.api && (
-            <Flex direction={"row"} gap={"2"}>
-              <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
-                {/* API options */}
-                <Flex
-                  direction={"column"}
-                  p={"2"}
-                  gap={"2"}
-                  rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
-                >
-                  <Flex direction={"column"} p={"0"} gap={"2"}>
-                    <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                      <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
-                        <Icon name={"key"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          ml={"0.5"}
-                          color={GLOBAL_STYLES.font.secondaryHeader.color}
-                        >
-                          API Access
-                        </Text>
-                      </Flex>
-                      <Button
-                        size={"xs"}
-                        rounded={"md"}
-                        colorPalette={"green"}
-                        onClick={() => handleGenerateKeyClick()}
-                        loading={generateKeyLoading}
-                      >
-                        Add API Key
-                        <Icon name={"add"} size={"xs"} />
-                      </Button>
-                    </Flex>
-                    {userKeys.length > 0 ? (
-                      <DataTable
-                        columns={apiKeysTableColumns}
-                        data={userKeys}
-                        visibleColumns={{}}
-                        selectedRows={{}}
-                        showPagination
-                      />
-                    ) : (
-                      <EmptyState.Root>
-                        <EmptyState.Content>
-                          <EmptyState.Indicator>
-                            <Icon name={"key"} size={"lg"} />
-                          </EmptyState.Indicator>
-                          <EmptyState.Description>No API keys</EmptyState.Description>
-                        </EmptyState.Content>
-                      </EmptyState.Root>
-                    )}
-                  </Flex>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex direction={"row"} py={"1.5"} gap={"1"} align={"center"} ml={"0.5"}>
+                  <Icon name={"key"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    ml={"0.5"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  >
+                    API Access
+                  </Text>
                 </Flex>
+                <Button
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => handleGenerateKeyClick()}
+                  loading={generateKeyLoading}
+                >
+                  Add API Key
+                  <Icon name={"add"} size={"xs"} />
+                </Button>
+              </Flex>
+
+              <Flex>
+                {userKeys.length > 0 ? (
+                  <DataTable
+                    columns={apiKeysTableColumns}
+                    data={userKeys}
+                    visibleColumns={{}}
+                    selectedRows={{}}
+                    showPagination
+                  />
+                ) : (
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"key"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No API keys</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                )}
               </Flex>
             </Flex>
           )}

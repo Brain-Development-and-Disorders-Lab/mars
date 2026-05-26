@@ -923,12 +923,13 @@ const Search = () => {
                     </Flex>
                     <Collapsible.Content>
                       <Flex direction={"column"} gap={"2"} p={"1"}>
-                        <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
+                        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {/* Search options section */}
-                          <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
+                          <Flex direction={"column"} gap={"2"} minW={"220px"} flexShrink={0}>
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
+                              ml={"0.5"}
                               color={GLOBAL_STYLES.font.secondaryHeader.color}
                             >
                               Search Options
@@ -946,21 +947,27 @@ const Search = () => {
                           </Flex>
 
                           {/* Entity filters section */}
-                          <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
+                          <Flex direction={"column"} gap={"2"}>
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
+                              ml={"0.5"}
                               color={GLOBAL_STYLES.font.secondaryHeader.color}
                             >
                               Entity Filters
                             </Text>
 
-                            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                               {/* Date range */}
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                                    Created Start
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Flex direction={"column"} gap={"1"}>
+                                  <Text
+                                    fontSize={"xs"}
+                                    fontWeight={"semibold"}
+                                    ml={"0.5"}
+                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                  >
+                                    Start
                                   </Text>
                                   <Input
                                     type={"date"}
@@ -975,9 +982,14 @@ const Search = () => {
                                     }
                                   />
                                 </Flex>
-                                <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                                    Created End
+                                <Flex direction={"column"} gap={"1"}>
+                                  <Text
+                                    fontSize={"xs"}
+                                    fontWeight={"semibold"}
+                                    ml={"0.5"}
+                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                  >
+                                    End
                                   </Text>
                                   <Input
                                     type={"date"}
@@ -995,7 +1007,7 @@ const Search = () => {
                               </Flex>
 
                               {/* Boolean filters */}
-                              <Flex direction={"column"} gap={"1"} mt={"1"}>
+                              <Flex direction={"column"} gap={"1"} mt={"1"} ml={"1"}>
                                 <Checkbox.Root
                                   size={"xs"}
                                   colorPalette={"blue"}

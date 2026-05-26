@@ -53,6 +53,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { getValueTypeIconProps } from "@lib/util";
 
+// Hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
+
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
@@ -460,10 +463,10 @@ const ValueDataSelect = (props: {
                 <CloseButton size={"2xs"} top={"6px"} onClick={cancelSelectOptions} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
-            <Dialog.Body p={"1"} gap={"1"} pb={"1"}>
-              <Flex direction={"column"} gap={"1"}>
-                <Flex direction={"row"} gap={"1"}>
-                  <Field.Root invalid={invalidOption} gap={"1"}>
+            <Dialog.Body p={"2"} gap={"2"} pb={"1"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"}>
+                  <Field.Root invalid={invalidOption} gap={"0.5"}>
                     <Input
                       size={"xs"}
                       rounded={"md"}
@@ -488,11 +491,12 @@ const ValueDataSelect = (props: {
                     disabled={invalidOption}
                   >
                     Add
-                    <Icon name={"add"} />
+                    <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
+
                 <Box>
-                  <Stack gap={"1"} separator={<Separator />} pb={"1"} maxH={"200px"} overflowY={"auto"}>
+                  <Stack gap={"2"} separator={<Separator />} pb={"1"} maxH={"200px"} overflowY={"auto"}>
                     {options.length > 0 ? (
                       options.map((option, index) => (
                         <Flex
@@ -542,7 +546,7 @@ const ValueDataSelect = (props: {
             <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={cancelSelectOptions}>
                 Cancel
-                <Icon name={"cross"} />
+                <Icon name={"cross"} size={"xs"} />
               </Button>
               <Spacer />
               <Button
@@ -553,7 +557,7 @@ const ValueDataSelect = (props: {
                 disabled={options.length === 0}
               >
                 Confirm
-                <Icon name={"check"} />
+                <Icon name={"check"} size={"xs"} />
               </Button>
             </Dialog.Footer>
           </Dialog.Content>
@@ -654,12 +658,29 @@ const Values = (props: {
   // Local type for tracking column names
   type ValuesColumn = "name" | "type" | "value";
 
+  const { breakpoint, getResponsiveValue } = useBreakpoint();
+
   // Counter for unique IDs
   const idCounter = useRef(0);
 
-  // Column widths and their minimums
-  const minColumnWidths = { name: 220, type: 120, value: 260 };
+  // Column widths scaled to the current breakpoint
+  const minColumnWidths = getResponsiveValue<{ name: number; type: number; value: number }>(
+    {
+      base: { name: 120, type: 100, value: 150 },
+      sm: { name: 150, type: 110, value: 180 },
+      md: { name: 180, type: 120, value: 200 },
+    },
+    { name: 220, type: 120, value: 260 },
+  );
+  const minColumnWidthsRef = useRef(minColumnWidths);
+  minColumnWidthsRef.current = minColumnWidths;
+
   const [columnWidths, setColumnWidths] = useState({ ...minColumnWidths });
+
+  // Reset column widths to responsive defaults when the breakpoint changes
+  useEffect(() => {
+    setColumnWidths({ ...minColumnWidthsRef.current });
+  }, [breakpoint]);
 
   // Refs for components involved in changing column widths
   const tableRef = useRef<HTMLDivElement>(null);
@@ -728,9 +749,9 @@ const Values = (props: {
     if (!resizeRef.current) return;
     const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
     const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
-    // For name and type, reserve space for the value column's minimum width
-    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? minColumnWidths.value : 0);
-    const newWidth = Math.min(maxWidth, Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)));
+    const mins = minColumnWidthsRef.current;
+    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? mins.value : 0);
+    const newWidth = Math.min(maxWidth, Math.max(mins[column], startWidth + (event.clientX - startX)));
     setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
   }, []);
 
@@ -808,7 +829,7 @@ const Values = (props: {
       <Box flex={"1"} minH={"0"} overflowX={"auto"} overflowY={"auto"}>
         <Box
           ref={tableRef}
-          minW={"800px"}
+          minW={getResponsiveValue({ base: "360px", sm: "440px", md: "490px" }, "600px")}
           w={"100%"}
           border={GLOBAL_STYLES.border.style}
           borderColor={GLOBAL_STYLES.border.color}
@@ -1580,6 +1601,8 @@ const ValueRow = (props: {
       {!props.viewOnly && (
         <Box
           w={"40px"}
+          minW={"40px"}
+          flex={"0 0 auto"}
           px={1}
           py={0.5}
           display={"flex"}

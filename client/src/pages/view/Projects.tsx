@@ -266,7 +266,7 @@ const Projects = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} justify={"center"}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
@@ -280,6 +280,7 @@ const Projects = () => {
             </Button>
           </Flex>
         </Flex>
+
         <Flex direction={"column"} gap={"2"} w={"100%"}>
           <Text fontSize={"xs"} ml={"0.5"}>
             All Projects in the current Workspace are shown below. Sort the Projects using the column headers or use the
@@ -313,161 +314,197 @@ const Projects = () => {
                   </Button>
                 </Collapsible.Trigger>
               </Flex>
+
               <Collapsible.Content>
-                <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
-                  {/* Date Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Created Between
-                    </Text>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.startDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              startDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.endDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              endDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
-                    </Flex>
-                  </Flex>
-
-                  {/* Owner Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Owner
-                    </Text>
-                    <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"}>
-                      {_.uniq(projects.map((p) => p.owner))
-                        .filter((owner) => owner)
-                        .map((owner) => (
-                          <Checkbox.Root
-                            key={owner}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.owners.includes(owner)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  owners: [...filterState.owners, owner],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  owners: filterState.owners.filter((o) => o !== owner),
-                                });
-                              }
-                            }}
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                    {/* Date Range Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Created Between
+                      </Text>
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
                           >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
+                            Start (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.startDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                startDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            End (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.endDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                endDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                    </Flex>
+
+                    {/* Owner Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Owner
+                      </Text>
+                      <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
+                        {_.uniq(projects.map((p) => p.owner))
+                          .filter((owner) => owner)
+                          .map((owner) => (
+                            <Checkbox.Root
+                              key={owner}
+                              size={"xs"}
+                              colorPalette={"blue"}
+                              checked={filterState.owners.includes(owner)}
+                              onCheckedChange={(details) => {
+                                const isChecked = details.checked as boolean;
+                                if (isChecked) {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: [...filterState.owners, owner],
+                                  });
+                                } else {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: filterState.owners.filter((o) => o !== owner),
+                                  });
+                                }
+                              }}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label fontSize={"xs"}>
+                                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                              </Checkbox.Label>
+                            </Checkbox.Root>
+                          ))}
+                      </Flex>
+                    </Flex>
+
+                    {/* Entity Count Range Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Entity Count
+                      </Text>
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Minimum
+                          </Field.Label>
+                          <Input
+                            type={"number"}
+                            size={"xs"}
+                            bg={"white"}
+                            min={0}
+                            value={filterState.entityCountMin}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                entityCountMin: e.target.value,
+                              })
+                            }
+                            placeholder="0"
+                          />
+                        </Field.Root>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Maximum
+                          </Field.Label>
+                          <Input
+                            type={"number"}
+                            size={"xs"}
+                            bg={"white"}
+                            min={0}
+                            value={filterState.entityCountMax}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                entityCountMax: e.target.value,
+                              })
+                            }
+                            placeholder="∞"
+                          />
+                        </Field.Root>
+                      </Flex>
                     </Flex>
                   </Flex>
 
-                  {/* Entity Count Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Entity Count
-                    </Text>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Min</Field.Label>
-                        <Input
-                          type={"number"}
-                          size={"xs"}
-                          bg={"white"}
-                          min={0}
-                          value={filterState.entityCountMin}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              entityCountMin: e.target.value,
-                            })
-                          }
-                          placeholder="0"
-                        />
-                      </Field.Root>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Max</Field.Label>
-                        <Input
-                          type={"number"}
-                          size={"xs"}
-                          bg={"white"}
-                          min={0}
-                          value={filterState.entityCountMax}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              entityCountMax: e.target.value,
-                            })
-                          }
-                          placeholder="∞"
-                        />
-                      </Field.Root>
-                    </Flex>
+                  {/* Filter control buttons */}
+                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        setAppliedFilters({ ...filterState });
+                      }}
+                    >
+                      Apply Filters
+                    </Button>
+                    <Button
+                      size={"xs"}
+                      variant={"outline"}
+                      rounded={"md"}
+                      onClick={() => {
+                        const clearedState = {
+                          startDate: "",
+                          endDate: "",
+                          owners: [],
+                          entityCountMin: "",
+                          entityCountMax: "",
+                        };
+                        setFilterState(clearedState);
+                        setAppliedFilters(clearedState);
+                      }}
+                      disabled={activeFilterCount === 0}
+                    >
+                      Reset Filters
+                    </Button>
                   </Flex>
-                </Flex>
-
-                {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      setAppliedFilters({ ...filterState });
-                    }}
-                  >
-                    Apply Filters
-                  </Button>
-                  <Button
-                    size={"xs"}
-                    variant={"outline"}
-                    rounded={"md"}
-                    onClick={() => {
-                      const clearedState = {
-                        startDate: "",
-                        endDate: "",
-                        owners: [],
-                        entityCountMin: "",
-                        entityCountMax: "",
-                      };
-                      setFilterState(clearedState);
-                      setAppliedFilters(clearedState);
-                    }}
-                    disabled={activeFilterCount === 0}
-                  >
-                    Reset Filters
-                  </Button>
                 </Flex>
               </Collapsible.Content>
             </Flex>

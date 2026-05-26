@@ -339,193 +339,220 @@ const Activity = () => {
                   </Button>
                 </Collapsible.Trigger>
               </Flex>
+
               <Collapsible.Content>
-                <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
-                  {/* Date Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Date Range
-                    </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.startDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              startDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.endDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              endDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                    {/* Date Range Filter */}
+                    <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Date Range
+                      </Text>
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Field.Root gap={"0"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                            Start (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.startDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                startDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                        <Field.Root gap={"0"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                            End (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.endDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                endDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
+                    </Flex>
+
+                    {/* Checkbox Filters Group */}
+                    <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Activity Details
+                      </Text>
+                      <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
+                        {/* Operation Type Filter */}
+                        <Flex direction={"column"} gap={"1"}>
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Operation Type
+                          </Text>
+                          <Flex direction={"column"} gap={"2"} ml={"1"}>
+                            {["create", "update", "archived"].map((type) => (
+                              <Checkbox.Root
+                                key={type}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.activityTypes.includes(type)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      activityTypes: [...filterState.activityTypes, type],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      activityTypes: filterState.activityTypes.filter((t) => t !== type),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
+                                  {type === "create" ? "Created" : type}
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+                          </Flex>
+                        </Flex>
+
+                        {/* Target Type Filter */}
+                        <Flex direction={"column"} gap={"1"}>
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Target Type
+                          </Text>
+                          <Flex direction={"column"} gap={"2"} ml={"1"}>
+                            {["entities", "projects", "templates"].map((type) => (
+                              <Checkbox.Root
+                                key={type}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.targetTypes.includes(type)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      targetTypes: [...filterState.targetTypes, type],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      targetTypes: filterState.targetTypes.filter((t) => t !== type),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
+                                  {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Template"}
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+                          </Flex>
+                        </Flex>
+
+                        {/* Medium Filter */}
+                        <Flex direction={"column"} gap={"1"}>
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Medium
+                          </Text>
+                          <Flex direction={"column"} gap={"2"} ml={"1"}>
+                            {["api", "web"].map((type) => (
+                              <Checkbox.Root
+                                key={type}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.mediums.includes(type)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      mediums: [...filterState.mediums, type],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      mediums: filterState.mediums.filter((t) => t !== type),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
+                                  {type === "api" ? "API" : type}
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+                          </Flex>
+                        </Flex>
+                      </Flex>
                     </Flex>
                   </Flex>
 
-                  {/* Checkbox Filters Group */}
-                  <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
-                    {/* Operation Type Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Operation Type
-                      </Text>
-                      <Flex direction={"column"} gap={"1"}>
-                        {["create", "update", "archived"].map((type) => (
-                          <Checkbox.Root
-                            key={type}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.activityTypes.includes(type)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  activityTypes: [...filterState.activityTypes, type],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  activityTypes: filterState.activityTypes.filter((t) => t !== type),
-                                });
-                              }
-                            }}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                              {type === "create" ? "Created" : type}
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
-                      </Flex>
-                    </Flex>
-
-                    {/* Target Type Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Target Type
-                      </Text>
-                      <Flex direction={"column"} gap={"1"}>
-                        {["entities", "projects", "templates"].map((type) => (
-                          <Checkbox.Root
-                            key={type}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.targetTypes.includes(type)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  targetTypes: [...filterState.targetTypes, type],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  targetTypes: filterState.targetTypes.filter((t) => t !== type),
-                                });
-                              }
-                            }}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                              {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Template"}
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
-                      </Flex>
-                    </Flex>
-
-                    {/* Medium Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Medium
-                      </Text>
-                      <Flex direction={"column"} gap={"1"}>
-                        {["api", "web"].map((type) => (
-                          <Checkbox.Root
-                            key={type}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.mediums.includes(type)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  mediums: [...filterState.mediums, type],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  mediums: filterState.mediums.filter((t) => t !== type),
-                                });
-                              }
-                            }}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                              {type === "api" ? "API" : type}
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
-                      </Flex>
-                    </Flex>
+                  {/* Filter control buttons */}
+                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        setAppliedFilters({ ...filterState });
+                      }}
+                    >
+                      Apply Filters
+                    </Button>
+                    <Button
+                      size={"xs"}
+                      variant={"outline"}
+                      rounded={"md"}
+                      onClick={() => {
+                        const clearedState = {
+                          startDate: "",
+                          endDate: "",
+                          activityTypes: [],
+                          targetTypes: [],
+                          mediums: [],
+                        };
+                        setFilterState(clearedState);
+                        setAppliedFilters(clearedState);
+                      }}
+                      disabled={activeFilterCount === 0}
+                    >
+                      Reset Filters
+                    </Button>
                   </Flex>
-                </Flex>
-
-                {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      setAppliedFilters({ ...filterState });
-                    }}
-                  >
-                    Apply Filters
-                  </Button>
-                  <Button
-                    size={"xs"}
-                    variant={"outline"}
-                    rounded={"md"}
-                    onClick={() => {
-                      const clearedState = {
-                        startDate: "",
-                        endDate: "",
-                        activityTypes: [],
-                        targetTypes: [],
-                        mediums: [],
-                      };
-                      setFilterState(clearedState);
-                      setAppliedFilters(clearedState);
-                    }}
-                    disabled={activeFilterCount === 0}
-                  >
-                    Reset Filters
-                  </Button>
                 </Flex>
               </Collapsible.Content>
             </Flex>
