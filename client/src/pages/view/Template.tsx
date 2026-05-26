@@ -507,6 +507,7 @@ const Template = () => {
             bg={"blue.100"}
             mx={"-1.5"}
             mt={"-1.5"}
+            mb={"1"}
             px={"1.5"}
             pt={"1.5"}
           >
@@ -522,7 +523,7 @@ const Template = () => {
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -551,16 +552,8 @@ const Template = () => {
           </Flex>
         )}
 
-        <Flex
-          gap={"1"}
-          p={"1"}
-          pb={{ base: "1", lg: "0" }}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          wrap={"wrap"}
-        >
-          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+        <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
             <Flex
               align={"center"}
               gap={"1"}
@@ -598,7 +591,7 @@ const Template = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -643,7 +636,7 @@ const Template = () => {
                 <Icon name={"rewind"} size={"xs"} />
               </Button>
             ) : (
-              <Flex gap={"1"}>
+              <Flex gap={"2"}>
                 {editing && (
                   <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
                     Cancel
@@ -676,11 +669,11 @@ const Template = () => {
             >
               <Drawer.Trigger asChild>
                 <Button
-                  id={"historyButton"}
+                  onClick={() => setHistoryOpen(true)}
                   variant={"subtle"}
+                  colorPalette={"gray"}
                   size={"xs"}
                   rounded={"md"}
-                  onClick={() => setHistoryOpen(true)}
                 >
                   History
                   <Icon name={"clock"} size={"xs"} />
@@ -691,7 +684,7 @@ const Template = () => {
                 <Drawer.Positioner padding={"4"}>
                   <Drawer.Content rounded={"md"}>
                     <Drawer.CloseTrigger asChild>
-                      <CloseButton size={"2xs"} top={"6px"} onClick={() => setHistoryOpen(false)} />
+                      <CloseButton top={"6px"} size={"2xs"} onClick={() => setHistoryOpen(false)} />
                     </Drawer.CloseTrigger>
                     <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -702,20 +695,39 @@ const Template = () => {
                       </Flex>
                     </Drawer.Header>
 
-                    <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                    <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {templateHistory.length > 0 ? dayjs(templateHistory[0].timestamp).fromNow() : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Versions:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {templateHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+
                       <Flex
                         direction={"row"}
-                        gap={"1"}
+                        gap={"2"}
                         align={"start"}
                         rounded={"md"}
                         bg={"gray.100"}
-                        p={"1"}
+                        p={"2"}
                         justify={"space-between"}
                         wrap={"wrap"}
                       >
                         <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Sort by:
+                            Sort
                           </Text>
                           <Select.Root
                             value={[historySortOrder]}
@@ -774,13 +786,13 @@ const Template = () => {
 
                         <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Date filter:
+                            Edited Between
                           </Text>
 
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Start date
+                                Start
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -794,7 +806,7 @@ const Template = () => {
                             </Field.Root>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                End date
+                                End
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -807,7 +819,7 @@ const Template = () => {
                               />
                             </Field.Root>
                           </Flex>
-                          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"} w={"100%"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
                             <Button
                               size={"xs"}
                               rounded={"md"}
@@ -845,27 +857,8 @@ const Template = () => {
                         </Flex>
                       </Flex>
 
-                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length > 0 ? dayjs(templateHistory[0].timestamp).fromNow() : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
-
                       {sortedTemplateHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle" mt={"1"}>
+                        <Timeline.Root size="sm" variant="subtle" mt={"2"}>
                           {sortedTemplateHistory.map((templateVersion) => {
                             const isExpanded = expandedVersions.has(templateVersion.version);
                             return (
@@ -1088,15 +1081,25 @@ const Template = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
-          {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
+          {/* Template Overview and Description */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Overview */}
-            <Flex direction={"column"} p={"1"} h={"fit-content"} gap={"1"} bg={"gray.100"} rounded={"md"} grow={"1"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              bg={"gray.100"}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Name
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Name
                   </Text>
                   <Input
                     id={"attributeNameInput"}
@@ -1112,23 +1115,28 @@ const Template = () => {
                     borderColor={GLOBAL_STYLES.border.color}
                   />
                 </Flex>
-
-                <TimestampTag timestamp={template.timestamp} description={"Created"} />
               </Flex>
 
-              <Flex gap={"1"} direction={"row"}>
+              <Flex gap={"2"} direction={"row"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Visibility
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Owner
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Owner
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Timestamp
                   </Text>
-                  <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
+                  <TimestampTag timestamp={template.timestamp} description={"Created"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -1136,16 +1144,18 @@ const Template = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              h={"100%"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
-              basis={"40%"}
               grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                Template Description
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                Description
               </Text>
               <RichTextEditor
                 id={"attributeDescriptionInput"}
@@ -1156,56 +1166,69 @@ const Template = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-              Template Values
-            </Text>
-            <Values
-              key={previewVersion?.version ?? "current"}
-              viewOnly={!editing || !!previewVersion}
-              values={displayTemplateValues}
-              setValues={setTemplateValues}
-            />
-          </Flex>
-
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-              Template Usage
-            </Text>
-            {templateUsage.length > 0 ? (
-              <DataTable
-                data={templateUsage}
-                columns={usageColumns}
-                visibleColumns={{}}
-                selectedRows={{}}
-                viewOnly={true}
-                showSelection={true}
-                showPagination
+          {/* Template Values and Usage */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Values */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                Values
+              </Text>
+              <Values
+                key={previewVersion?.version ?? "current"}
+                viewOnly={!editing || !!previewVersion}
+                values={displayTemplateValues}
+                setValues={setTemplateValues}
               />
-            ) : (
-              <EmptyState.Root>
-                <EmptyState.Content>
-                  <EmptyState.Indicator>
-                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
-                  </EmptyState.Indicator>
-                  <EmptyState.Description>No Usage</EmptyState.Description>
-                </EmptyState.Content>
-              </EmptyState.Root>
-            )}
+            </Flex>
+
+            {/* Usage */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                Usage
+              </Text>
+              {templateUsage.length > 0 ? (
+                <DataTable
+                  data={templateUsage}
+                  columns={usageColumns}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  viewOnly={true}
+                  showSelection={true}
+                  showPagination
+                />
+              ) : (
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Usage</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
+              )}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

@@ -1268,7 +1268,7 @@ const Project = () => {
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Project Name
+                    Name
                   </Text>
                   <Input
                     id={"projectNameInput"}
@@ -1289,21 +1289,21 @@ const Project = () => {
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Project Owner
+                    Owner
                   </Text>
                   <ActorTag identifier={project.owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Project Timestamp
+                    Timestamp
                   </Text>
                   <TimestampTag timestamp={project.created} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Project Visibility
+                    Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
@@ -1324,7 +1324,7 @@ const Project = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                Project Description
+                Description
               </Text>
               <RichTextEditor
                 id={"projectDescriptionInput"}
@@ -1355,7 +1355,7 @@ const Project = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                   <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Project Entities
+                    Entities
                   </Text>
                 </Flex>
                 <Button

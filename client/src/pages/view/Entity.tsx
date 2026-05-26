@@ -1919,7 +1919,7 @@ const Entity = () => {
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Name
+                    Name
                   </Text>
                   <Input
                     id={"entityNameInput"}
@@ -1942,7 +1942,7 @@ const Entity = () => {
                 {/* Owner */}
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Owner
+                    Owner
                   </Text>
                   <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
@@ -1950,7 +1950,7 @@ const Entity = () => {
                 {/* Timestamp */}
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Timestamp
+                    Timestamp
                   </Text>
                   <TimestampTag timestamp={entity.created} description={"Created"} />
                 </Flex>
@@ -1960,7 +1960,7 @@ const Entity = () => {
                 {/* Visibility */}
                 <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Visibility
+                    Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
                 </Flex>
@@ -1981,7 +1981,7 @@ const Entity = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                Entity Description
+                Description
               </Text>
               <RichTextEditor
                 id={"entityDescriptionInput"}
@@ -2012,7 +2012,7 @@ const Entity = () => {
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Entity Attributes
+                    Attributes
                   </Text>
                 </Flex>
                 <Button
@@ -2075,7 +2075,7 @@ const Entity = () => {
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                    Linked Projects
+                    Projects
                   </Text>
                 </Flex>
                 <Button
@@ -2142,7 +2142,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                      Entity Relationships
+                      Relationships
                     </Text>
                   </Flex>
                   <Button
@@ -2183,7 +2183,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"attachment"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
-                      Entity Attachments
+                      Attachments
                     </Text>
                   </Flex>
                   <Button
