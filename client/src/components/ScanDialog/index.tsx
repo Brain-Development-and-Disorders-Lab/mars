@@ -296,7 +296,7 @@ const ScanDialog = (props: ScanDialogProps) => {
               <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"1"} gap={"1"} w={"100%"} alignContent={"center"}>
+          <Dialog.Body p={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
             {/* Camera view */}
             <Flex justify={"center"} align={"center"}>
               <Flex
@@ -323,7 +323,7 @@ const ScanDialog = (props: ScanDialogProps) => {
             )}
 
             {/* Manual entry field */}
-            <Flex align={"center"} mt={"1"} w={"100%"} justify={"center"} gap={"1"}>
+            <Flex align={"center"} mt={"2"} w={"100%"} justify={"center"} gap={"2"}>
               {!showInput && (
                 <Flex>
                   <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={handleManualInputSelect}>
@@ -334,7 +334,7 @@ const ScanDialog = (props: ScanDialogProps) => {
               )}
 
               {showInput && (
-                <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
+                <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
                   <Flex grow={1}>
                     <Input
                       size={"xs"}

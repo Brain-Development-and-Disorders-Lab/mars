@@ -122,7 +122,7 @@ const ReportDialog = (props: ReportDialogProps) => {
               />
             </Flex>
           </Dialog.Body>
-          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
               <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleCancel}>
                 Cancel

@@ -1395,7 +1395,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                         borderStyle={fileName === "" ? "dashed" : "solid"}
                         borderColor={fileName !== "" ? "gray.300" : GLOBAL_STYLES.border.color}
                         rounded={"md"}
-                        bg={fileName !== "" ? "gray.50" : "white"}
+                        bg={fileName !== "" ? GLOBAL_STYLES.card.bg : "white"}
                         cursor={"pointer"}
                       >
                         {/* Condition 1: File type not specified */}
@@ -1512,7 +1512,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 direction={"column"}
                 gap={"2"}
                 p={"2"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}

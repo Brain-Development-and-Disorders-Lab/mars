@@ -292,7 +292,7 @@ const Activity = () => {
           </Text>
 
           {/* Activity Charts Section */}
-          <Flex direction={{ base: "column", md: "row" }} gap={"1"} w={"100%"} minW="0" maxW="100%">
+          <Flex direction={{ base: "column", md: "row" }} gap={"2"} w={"100%"} minW={"0"} maxW={"100%"}>
             <Flex direction={"column"} flex={"1"} minW="0">
               <ActivityGraph activities={activityData} title="Overall Activity" height="200px" />
             </Flex>

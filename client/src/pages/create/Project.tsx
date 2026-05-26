@@ -173,18 +173,14 @@ const Project = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
+            bg={GLOBAL_STYLES.card.bg}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
           >
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-              Details
-            </Text>
-
             <Field.Root required gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                Project Name
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Name
                 <Field.RequiredIndicator />
               </Field.Label>
               <Input
@@ -203,8 +199,8 @@ const Project = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                Project Owner
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Owner
               </Field.Label>
               <Flex>
                 <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
@@ -212,8 +208,8 @@ const Project = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                Project Created
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Created
               </Field.Label>
               <Input
                 size={"xs"}
@@ -232,17 +228,13 @@ const Project = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
             rounded={"md"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-              Description
-            </Text>
             <Field.Root required gap={"1"} h={"100%"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                Project Description
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Description
                 <Field.RequiredIndicator />
               </Field.Label>
               <RichTextEditor
@@ -261,7 +253,6 @@ const Project = () => {
             direction={"column"}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
             rounded={"md"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
@@ -447,7 +438,7 @@ const Project = () => {
                 <Flex
                   direction={"column"}
                   gap={"1"}
-                  bg={"gray.50"}
+                  bg={GLOBAL_STYLES.card.bg}
                   p={"2"}
                   rounded={"md"}
                   border={GLOBAL_STYLES.border.style}
@@ -465,11 +456,11 @@ const Project = () => {
                   </Text>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1.5"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                     Fields
                   </Text>
-                  <Flex direction={"column"} gap={"1"}>
+                  <Flex direction={"column"} gap={"2"}>
                     <Flex
                       direction={"column"}
                       gap={"0.5"}
@@ -508,7 +499,7 @@ const Project = () => {
                       gap={"0.5"}
                       p={"2"}
                       rounded={"md"}
-                      bg={"gray.50"}
+                      bg={GLOBAL_STYLES.card.bg}
                       border={GLOBAL_STYLES.border.style}
                       borderColor={GLOBAL_STYLES.border.color}
                     >

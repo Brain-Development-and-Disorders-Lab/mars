@@ -108,9 +108,19 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   };
 
   return (
-    <Flex direction={"column"} gap={"1"} p={"1"} rounded={"md"} bg={"gray.50"} h={height} w={"100%"}>
+    <Flex
+      direction={"column"}
+      gap={"1"}
+      p={"1"}
+      rounded={"md"}
+      bg={GLOBAL_STYLES.card.bg}
+      h={height}
+      w={"100%"}
+      border={GLOBAL_STYLES.border.style}
+      borderColor={GLOBAL_STYLES.border.color}
+    >
       {title && (
-        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
           {title}
         </Text>
       )}

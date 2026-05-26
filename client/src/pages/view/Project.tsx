@@ -703,7 +703,7 @@ const Project = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={"gray.500"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 rounded={"md"}
               >
                 <Icon name={"archive"} size={"sm"} color={"gray.500"} />
@@ -1111,7 +1111,7 @@ const Project = () => {
                                         gap={"2"}
                                         mt={"1"}
                                         p={"2"}
-                                        bg={"gray.50"}
+                                        bg={GLOBAL_STYLES.card.bg}
                                         rounded={"md"}
                                       >
                                         <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1261,6 +1261,8 @@ const Project = () => {
               bg={"gray.100"}
               rounded={"md"}
               grow={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
@@ -1354,7 +1356,7 @@ const Project = () => {
                 {/* Entities in the Project */}
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                   <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
                     Entities
                   </Text>
                 </Flex>

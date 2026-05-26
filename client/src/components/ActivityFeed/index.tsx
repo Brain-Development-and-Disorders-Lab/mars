@@ -69,9 +69,9 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
   }, [activities, feedLimit]);
 
   return (
-    <Flex direction={"column"} data-timestamp-update={timestampUpdate}>
+    <Flex direction={"column"} data-timestamp-update={timestampUpdate} gap={"2"}>
       {/* Activity heading */}
-      <Flex id={"recentActivityHeader"} align={"center"} gap={"1"} ml={"0.5"} justify={"space-between"}>
+      <Flex id={"recentActivityHeader"} align={"center"} gap={"2"} ml={"0.5"} justify={"space-between"}>
         <Flex align={"center"} gap={"1"}>
           <Icon name={"activity"} size={"xs"} />
           <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -98,7 +98,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
       {/* Activity Chart */}
       <Flex direction={"row"} gap={"1"} ml={"0.5"}>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-          Activity:
+          Activity Range:
         </Text>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
           {dayjs().subtract(6, "day").format("MMM D, YYYY")} - {dayjs().format("MMM D, YYYY")}

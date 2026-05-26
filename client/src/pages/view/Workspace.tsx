@@ -658,324 +658,323 @@ const Workspace = () => {
       isError={!_.isUndefined(workspaceDataError) || !_.isUndefined(workspaceError)}
       isLoaded={!workspaceDataLoading && !workspaceLoading}
     >
-      <Flex
-        gap={"1"}
-        p={"1"}
-        pb={{ base: "1", lg: "0" }}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        wrap={"wrap"}
-      >
-        <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
-          <Icon name={"workspace"} size={"sm"} />
-          <Heading fontWeight={"semibold"} size={"sm"}>
-            {name}
-          </Heading>
-        </Flex>
-        <Flex direction={"row"} align={"center"} gap={"1"}>
-          <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
-            Cancel
-            <Icon name={"cross"} size={"xs"} />
-          </Button>
-          <Button
-            id={"dialogWorkspaceCreateButton"}
-            size={"xs"}
-            rounded={"md"}
-            colorPalette={"green"}
-            disabled={name === ""}
-            loading={
-              workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
-            }
-            onClick={() => handleUpdateClick()}
-          >
-            Save
-            <Icon name={"save"} size={"xs"} />
-          </Button>
-        </Flex>
-      </Flex>
-
-      <Flex direction={"column"} gap={"1"} p={"1"}>
-        <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
-          {/* Workspace name */}
-          <Flex
-            direction={"column"}
-            p={"1"}
-            h={"fit-content"}
-            w={{ base: "100%", md: "50%" }}
-            gap={"1"}
-            bg={"gray.100"}
-            rounded={"md"}
-          >
-            <Flex direction={"row"} gap={"1"}>
-              <Flex direction={"column"} gap={"1"} grow={"1"}>
-                <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                  Name
-                </Text>
-                <Input
-                  id={"dialogWorkspaceName"}
-                  bg={"white"}
-                  size={"xs"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </Flex>
-
-              <TimestampTag timestamp={created} description={"Created"} />
-            </Flex>
-
-            {/* "Visibility" and "Owner" fields */}
-            <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-              <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                  Visibility
-                </Text>
-                <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
-              </Flex>
-
-              <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                  Owner
-                </Text>
-                <Flex>
-                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
-                </Flex>
-              </Flex>
+      <Flex direction={"column"}>
+        <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
+            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
+              <Icon name={"workspace"} size={"sm"} />
+              <Heading fontWeight={"semibold"} size={"sm"}>
+                {name}
+              </Heading>
             </Flex>
           </Flex>
 
-          {/* Workspace description */}
-          <Flex
-            direction={"row"}
-            p={"1"}
-            h={"fit-content"}
-            gap={"1"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            rounded={"md"}
-            grow={"1"}
-          >
-            <Flex direction={"column"} gap={"1"} w={"100%"}>
-              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+          <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
+              Cancel
+              <Icon name={"cross"} size={"xs"} />
+            </Button>
+            <Button
+              id={"dialogWorkspaceCreateButton"}
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              disabled={name === ""}
+              loading={
+                workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
+              }
+              onClick={() => handleUpdateClick()}
+            >
+              Save
+              <Icon name={"save"} size={"xs"} />
+            </Button>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
+          {/* Workspace Overview and Description */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Overview */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              bg={GLOBAL_STYLES.card.bg}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Flex direction={"column"} gap={"1"} grow={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Name
+                  </Text>
+                  <Input
+                    id={"dialogWorkspaceName"}
+                    bg={"white"}
+                    size={"xs"}
+                    rounded={"md"}
+                    placeholder={"Name"}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </Flex>
+              </Flex>
+
+              {/* "Owner", "Timestamp", and "Visibility" fields */}
+              <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Owner
+                  </Text>
+                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Timestamp
+                  </Text>
+                  <TimestampTag timestamp={created} description={"Created"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
+                </Flex>
+              </Flex>
+            </Flex>
+
+            {/* Description */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"100%"}
+              gap={"2"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                 Description
               </Text>
               <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
             </Flex>
           </Flex>
-        </Flex>
 
-        <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
-          {/* Workspace collaborators */}
-          <Flex w={{ base: "100%", md: "50%" }}>
-            <Collaborators
-              editing={true}
-              currentUser={currentUser}
-              owner={owner}
-              projectCollaborators={collaborators}
-              setProjectCollaborators={setCollaborators}
-            />
-          </Flex>
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+            {/* Workspace collaborators */}
+            <Flex w={{ base: "100%", md: "50%" }}>
+              <Collaborators
+                editing={true}
+                currentUser={currentUser}
+                owner={owner}
+                projectCollaborators={collaborators}
+                setProjectCollaborators={setCollaborators}
+              />
+            </Flex>
 
-          {/* Workspace Entities */}
-          <Flex
-            direction={"column"}
-            p={"1"}
-            h={"fit-content"}
-            gap={"1"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            rounded={"md"}
-            grow={"1"}
-            minW={"0"}
-          >
-            <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+            {/* Workspace Entities */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              minW={"0"}
+            >
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
                 <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Archived Workspace Entities
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Archived Entities
                 </Text>
               </Flex>
-            </Flex>
-            <Flex
-              w={"100%"}
-              minW={"0"}
-              justify={"flex-start"}
-              align={shownEntities.length > 0 ? "" : "center"}
-              minH={shownEntities.length > 0 ? "fit-content" : "200px"}
-            >
-              {shownEntities.length > 0 ? (
-                <DataTable
-                  data={shownEntities}
-                  columns={entitiesTableColumns}
-                  visibleColumns={{}}
-                  selectedRows={selectedEntities}
-                  actions={entitiesTableActions}
-                  showPagination
-                  showSelection
-                />
-              ) : (
-                <EmptyState.Root>
-                  <EmptyState.Content>
-                    <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
-                    </EmptyState.Indicator>
-                    <EmptyState.Description>No Archived Workspace Entities</EmptyState.Description>
-                  </EmptyState.Content>
-                </EmptyState.Root>
-              )}
+              <Flex
+                w={"100%"}
+                minW={"0"}
+                justify={"flex-start"}
+                align={shownEntities.length > 0 ? "" : "center"}
+                minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownEntities.length > 0 ? (
+                  <DataTable
+                    data={shownEntities}
+                    columns={entitiesTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedEntities}
+                    actions={entitiesTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No Archived Entities</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                )}
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
 
-        <Flex direction={"row"} p={"0"} gap={"1"} wrap={"wrap"}>
-          {/* Workspace Projects */}
-          <Flex
-            direction={"column"}
-            p={"1"}
-            gap={"1"}
-            h={"fit-content"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            rounded={"md"}
-            w={{ base: "100%", md: "50%" }}
-            minW={"0"}
-          >
-            <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+          <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
+            {/* Workspace Projects */}
+            <Flex
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              h={"fit-content"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              w={{ base: "100%", md: "50%" }}
+              minW={"0"}
+            >
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
                 <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Archived Workspace Projects
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Archived Projects
                 </Text>
               </Flex>
+              <Flex
+                w={"100%"}
+                minW={"0"}
+                justify={"flex-start"}
+                align={shownProjects.length > 0 ? "" : "center"}
+                minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownProjects.length > 0 ? (
+                  <DataTable
+                    data={shownProjects}
+                    columns={projectsTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedProjects}
+                    actions={projectsTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No Archived Projects</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                )}
+              </Flex>
             </Flex>
-            <Flex
-              w={"100%"}
-              minW={"0"}
-              justify={"flex-start"}
-              align={shownProjects.length > 0 ? "" : "center"}
-              minH={shownProjects.length > 0 ? "fit-content" : "200px"}
-            >
-              {shownProjects.length > 0 ? (
-                <DataTable
-                  data={shownProjects}
-                  columns={projectsTableColumns}
-                  visibleColumns={{}}
-                  selectedRows={selectedProjects}
-                  actions={projectsTableActions}
-                  showPagination
-                  showSelection
-                />
-              ) : (
-                <EmptyState.Root>
-                  <EmptyState.Content>
-                    <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
-                    </EmptyState.Indicator>
-                    <EmptyState.Description>No Archived Workspace Projects</EmptyState.Description>
-                  </EmptyState.Content>
-                </EmptyState.Root>
-              )}
-            </Flex>
-          </Flex>
 
-          {/* Workspace Templates */}
-          <Flex
-            direction={"column"}
-            p={"1"}
-            h={"fit-content"}
-            gap={"1"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            rounded={"md"}
-            grow={"1"}
-            minW={"0"}
-          >
-            <Flex w={"100%"} align={"center"} justify={"space-between"}>
-              <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+            {/* Workspace Templates */}
+            <Flex
+              direction={"column"}
+              p={"1"}
+              h={"fit-content"}
+              gap={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              minW={"0"}
+            >
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
                 <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Archived Workspace Templates
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Archived Templates
                 </Text>
               </Flex>
-            </Flex>
-            <Flex
-              w={"100%"}
-              minW={"0"}
-              justify={"flex-start"}
-              align={shownTemplates.length > 0 ? "" : "center"}
-              minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
-            >
-              {shownTemplates.length > 0 ? (
-                <DataTable
-                  data={shownTemplates}
-                  columns={templatesTableColumns}
-                  visibleColumns={{}}
-                  selectedRows={selectedTemplates}
-                  actions={templatesTableActions}
-                  showPagination
-                  showSelection
-                />
-              ) : (
-                <EmptyState.Root>
-                  <EmptyState.Content>
-                    <EmptyState.Indicator>
-                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
-                    </EmptyState.Indicator>
-                    <EmptyState.Description>No Archived Workspace Templates</EmptyState.Description>
-                  </EmptyState.Content>
-                </EmptyState.Root>
-              )}
+              <Flex
+                w={"100%"}
+                minW={"0"}
+                justify={"flex-start"}
+                align={shownTemplates.length > 0 ? "" : "center"}
+                minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownTemplates.length > 0 ? (
+                  <DataTable
+                    data={shownTemplates}
+                    columns={templatesTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedTemplates}
+                    actions={templatesTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No Archived Templates</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                )}
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
 
-        <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
-          {/* Workspace Counters */}
-          <Flex
-            direction={"column"}
-            p={"1"}
-            gap={"1"}
-            h={"fit-content"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            rounded={"md"}
-            w={{ base: "100%", md: "50%" }}
-            minW={"0"}
-          >
-            <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-              <Icon name={"counter"} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Workspace Counters
-              </Text>
-            </Flex>
+          <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
+            {/* Workspace Counters */}
             <Flex
-              w={"100%"}
+              direction={"column"}
+              p={"1"}
+              gap={"1"}
+              h={"fit-content"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              w={{ base: "100%", md: "50%" }}
               minW={"0"}
-              justify={"flex-start"}
-              align={counters.length > 0 ? "" : "center"}
-              minH={counters.length > 0 ? "fit-content" : "200px"}
             >
-              {counters.length > 0 ? (
-                <DataTable
-                  data={counters}
-                  columns={countersTableColumns}
-                  visibleColumns={{}}
-                  actions={[]}
-                  selectedRows={{}}
-                  showPagination
-                />
-              ) : (
-                <EmptyState.Root>
-                  <EmptyState.Content>
-                    <EmptyState.Indicator>
-                      <Icon name={"counter"} size={"lg"} />
-                    </EmptyState.Indicator>
-                    <EmptyState.Description>No Workspace Counters</EmptyState.Description>
-                  </EmptyState.Content>
-                </EmptyState.Root>
-              )}
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
+                <Icon name={"counter"} size={"xs"} color={"gray.600"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Counters
+                </Text>
+              </Flex>
+              <Flex
+                w={"100%"}
+                minW={"0"}
+                justify={"flex-start"}
+                align={counters.length > 0 ? "" : "center"}
+                minH={counters.length > 0 ? "fit-content" : "200px"}
+              >
+                {counters.length > 0 ? (
+                  <DataTable
+                    data={counters}
+                    columns={countersTableColumns}
+                    visibleColumns={{}}
+                    actions={[]}
+                    selectedRows={{}}
+                    showPagination
+                  />
+                ) : (
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <Icon name={"counter"} size={"lg"} />
+                      </EmptyState.Indicator>
+                      <EmptyState.Description>No Counters</EmptyState.Description>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                )}
+              </Flex>
             </Flex>
           </Flex>
         </Flex>

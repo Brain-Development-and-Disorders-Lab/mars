@@ -735,7 +735,6 @@ const Dashboard = () => {
               direction={"column"}
               p={"2"}
               gap={"1"}
-              bg={GLOBAL_STYLES.card.bg}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}

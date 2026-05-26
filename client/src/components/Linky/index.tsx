@@ -269,7 +269,7 @@ const Linky = (props: LinkyProps) => {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={showArchived ? "gray.50" : badgeBg}
+                bg={showArchived ? GLOBAL_STYLES.card.bg : badgeBg}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -288,7 +288,7 @@ const Linky = (props: LinkyProps) => {
                 <Flex
                   align={"center"}
                   justify={"center"}
-                  bg={"gray.50"}
+                  bg={GLOBAL_STYLES.card.bg}
                   px={"1.5"}
                   h={"100%"}
                   borderLeft={"1px solid"}

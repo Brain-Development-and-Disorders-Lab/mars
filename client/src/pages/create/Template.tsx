@@ -18,7 +18,6 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import { Information } from "@components/Label";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
@@ -159,17 +158,14 @@ const Template = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
+            bg={GLOBAL_STYLES.card.bg}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
           >
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-              Details
-            </Text>
             <Field.Root required gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                Template Name
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Name
                 <Field.RequiredIndicator />
               </Field.Label>
               <Input
@@ -186,8 +182,8 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                Template Owner
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Owner
               </Field.Label>
               <Flex>
                 <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
@@ -195,8 +191,8 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                Template Created
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Created
               </Field.Label>
               <Input
                 size={"xs"}
@@ -215,17 +211,13 @@ const Template = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
             rounded={"md"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-              Description
-            </Text>
             <Field.Root required gap={"1"} h={"100%"}>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                Template Description
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                Description
                 <Field.RequiredIndicator />
               </Field.Label>
               <RichTextEditor value={description} onChange={(value) => setDescription(value)} h={"100%"} />
@@ -239,16 +231,17 @@ const Template = () => {
             direction={"column"}
             p={"2"}
             gap={"2"}
-            bg={"gray.50"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
           >
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-              Values
-            </Text>
-            <Information text={"At least one Value with a name and type is required."} />
-            <Values viewOnly={false} values={values} setValues={setValues} />
+            <Field.Root>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Values
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Values viewOnly={false} values={values} setValues={setValues} />
+            </Field.Root>
           </Flex>
         </Flex>
       </Flex>
@@ -286,7 +279,7 @@ const Template = () => {
                 <Flex
                   direction={"column"}
                   gap={"1"}
-                  bg={"gray.50"}
+                  bg={GLOBAL_STYLES.card.bg}
                   p={"2"}
                   rounded={"md"}
                   border={GLOBAL_STYLES.border.style}
@@ -304,11 +297,11 @@ const Template = () => {
                   </Text>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1.5"}>
+                <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Supported Value Types
                   </Text>
-                  <Flex direction={"row"} wrap={"wrap"} gap={"1.5"}>
+                  <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                     <Flex
                       direction={"row"}
                       gap={"2"}

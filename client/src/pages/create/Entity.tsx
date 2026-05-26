@@ -30,7 +30,6 @@ import Relationships from "@components/Relationships";
 import AddRelationshipsDialog from "@components/AddRelationshipDialog";
 import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import Linky from "@components/Linky";
-import { Information } from "@components/Label";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import RichTextEditor from "@components/RichTextEditor";
@@ -443,20 +442,17 @@ const Entity = () => {
             <Flex
               direction={"column"}
               flex={{ base: "0 0 100%", md: "1" }}
+              h={"fit-content"}
               p={"2"}
               gap={"2"}
-              bg={"gray.50"}
+              bg={GLOBAL_STYLES.card.bg}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                Details
-              </Text>
-
               <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Entity Name
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Name
                   <Field.RequiredIndicator />
                 </Field.Label>
                 <Flex gap={"2"} w={"100%"}>
@@ -477,7 +473,7 @@ const Entity = () => {
                   <Button
                     size={"xs"}
                     rounded={"md"}
-                    variant={"outline"}
+                    variant={"solid"}
                     colorPalette={"blue"}
                     onClick={() => {
                       setUseCounter(!useCounter);
@@ -498,8 +494,8 @@ const Entity = () => {
               </Field.Root>
 
               <Field.Root required gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Entity Created
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Created
                   <Field.RequiredIndicator />
                 </Field.Label>
                 <Input
@@ -514,8 +510,8 @@ const Entity = () => {
               </Field.Root>
 
               <Field.Root gap={"1"}>
-                <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                  Entity Owner
+                <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Owner
                 </Field.Label>
                 <ActorTag size={"md"} identifier={owner} fallback={"Unknown User"} />
               </Field.Root>
@@ -526,15 +522,13 @@ const Entity = () => {
               flex={{ base: "0 0 100%", md: "1" }}
               p={"2"}
               gap={"2"}
-              bg={"gray.50"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                 Description
               </Text>
-              <Information text={"Describe the Entity. Metadata goes in the Attributes step."} />
               <RichTextEditor
                 data-testid={"create-entity-description"}
                 value={description}
@@ -553,14 +547,13 @@ const Entity = () => {
                 direction={"column"}
                 p={"2"}
                 gap={"2"}
-                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Entity Relationships
+                    Relationships
                   </Text>
                   <Button
                     variant={"solid"}
@@ -573,7 +566,6 @@ const Entity = () => {
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
-                <Information text={"Specify the relationships between this Entity and other Entities."} />
                 <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
                 <AddRelationshipsDialog
                   open={addRelationshipsOpen}
@@ -590,15 +582,13 @@ const Entity = () => {
                 direction={"column"}
                 p={"2"}
                 gap={"2"}
-                bg={"gray.50"}
                 rounded={"md"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Linked Projects
+                  Projects
                 </Text>
-                <Information text={"Specify the Projects that this new Entity should be included in."} />
                 <CheckboxGroup
                   value={selectedProjects}
                   onValueChange={(event: string[]) => {
@@ -640,7 +630,7 @@ const Entity = () => {
               direction={"column"}
               p={"2"}
               gap={"2"}
-              bg={"gray.50"}
+              bg={GLOBAL_STYLES.card.bg}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -648,8 +638,8 @@ const Entity = () => {
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
                   <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Entity Attributes
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Attributes
                   </Text>
                 </Flex>
                 <Button
@@ -664,11 +654,6 @@ const Entity = () => {
                   <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
-              <Information
-                text={
-                  "Add Attributes containing metadata about this Entity. Use an existing Template or create one manually."
-                }
-              />
             </Flex>
 
             <Flex
@@ -741,7 +726,7 @@ const Entity = () => {
                   <Flex
                     direction={"column"}
                     gap={"1"}
-                    bg={"gray.50"}
+                    bg={GLOBAL_STYLES.card.bg}
                     p={"2"}
                     rounded={"md"}
                     border={GLOBAL_STYLES.border.style}
@@ -760,11 +745,11 @@ const Entity = () => {
                     </Text>
                   </Flex>
 
-                  <Flex direction={"column"} gap={"1.5"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                  <Flex direction={"column"} gap={"2"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                       Creation Steps
                     </Text>
-                    <Flex direction={"column"} gap={"1"}>
+                    <Flex direction={"column"} gap={"2"}>
                       <Flex
                         direction={"row"}
                         gap={"2"}

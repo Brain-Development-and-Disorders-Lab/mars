@@ -669,81 +669,87 @@ const User = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex
-        gap={"1"}
-        p={"1"}
-        pb={{ base: "1", lg: "0" }}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        wrap={"wrap"}
-      >
+      <Flex direction={"column"}>
         <Flex
-          align={"center"}
           gap={"1"}
           p={"1"}
-          border={"2px solid"}
-          borderColor={"gray.700"}
-          bg={"gray.100"}
-          rounded={"md"}
+          pb={{ base: "1", lg: "0" }}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
         >
-          <Icon name={"person"} size={"sm"} />
-          <Heading fontWeight={"semibold"} size={"sm"}>
-            {staticName}
-          </Heading>
-        </Flex>
-        {editing ? (
-          <Flex direction={"row"} align={"center"} gap={"1"}>
-            <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
-              Cancel
-              <Icon name={"cross"} size={"xs"} />
-            </Button>
+          <Flex
+            align={"center"}
+            gap={"1"}
+            p={"1"}
+            border={"2px solid"}
+            borderColor={"gray.700"}
+            bg={"gray.100"}
+            rounded={"md"}
+          >
+            <Icon name={"person"} size={"sm"} />
+            <Heading fontWeight={"semibold"} size={"sm"}>
+              {staticName}
+            </Heading>
+          </Flex>
+          {editing ? (
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
+                Cancel
+                <Icon name={"cross"} size={"xs"} />
+              </Button>
+              <Button
+                id={"userDoneButton"}
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"green"}
+                loading={userUpdateLoading}
+                disabled={!isFormValid()}
+                onClick={() => handleUpdateClick()}
+              >
+                Done
+                <Icon name={"check"} size={"xs"} />
+              </Button>
+            </Flex>
+          ) : (
             <Button
-              id={"userDoneButton"}
               size={"xs"}
               rounded={"md"}
-              colorPalette={"green"}
-              loading={userUpdateLoading}
-              disabled={!isFormValid()}
-              onClick={() => handleUpdateClick()}
+              colorPalette={"blue"}
+              onClick={() => {
+                setEditing(true);
+                // Validate fields when entering edit mode
+                validateEmail(userEmail);
+                validateAffiliation(userAffiliation);
+              }}
             >
-              Done
-              <Icon name={"check"} size={"xs"} />
+              Edit
+              <Icon name={"edit"} size={"xs"} />
             </Button>
-          </Flex>
-        ) : (
-          <Button
-            size={"xs"}
-            rounded={"md"}
-            colorPalette={"blue"}
-            onClick={() => {
-              setEditing(true);
-              // Validate fields when entering edit mode
-              validateEmail(userEmail);
-              validateAffiliation(userAffiliation);
-            }}
-          >
-            Edit
-            <Icon name={"edit"} size={"xs"} />
-          </Button>
-        )}
-      </Flex>
+          )}
+        </Flex>
 
-      <Flex direction={"column"} gap={"1"} p={"1"}>
-        <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-          <Flex direction={"column"} p={"0"} gap={"1"} w={{ base: "100%", md: "40%" }}>
-            {/* User details */}
+        <Flex direction={"column"} gap={"2"} p={"1"} mt={"1"}>
+          {/* Account Overview and Workspaces */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Overview */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              bg={GLOBAL_STYLES.card.bg}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               {/* Avatar */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
+                <Text ml={"0.5"} color={"gray.600"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   Avatar
                 </Text>
                 <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
@@ -754,7 +760,7 @@ const User = () => {
                 <Fieldset.Content>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Field.Root gap={"0"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                         First Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -766,11 +772,12 @@ const User = () => {
                         type={"text"}
                         value={userFirstName}
                         mt={"0.5"}
+                        bg={"white"}
                         disabled
                       />
                     </Field.Root>
                     <Field.Root gap={"0"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                         Last Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -782,6 +789,7 @@ const User = () => {
                         type={"text"}
                         value={userLastName}
                         mt={"0.5"}
+                        bg={"white"}
                         disabled
                       />
                     </Field.Root>
@@ -794,7 +802,7 @@ const User = () => {
                 <Fieldset.Content gap={"1"}>
                   <Field.Root invalid={emailError !== ""} required gap={"0"}>
                     <Flex direction={"row"} align={"center"} gap={"2"} justify={"start"} w={"100%"}>
-                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                         Email
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -819,6 +827,7 @@ const User = () => {
                       value={userEmail}
                       disabled={!editing}
                       mt={"0.5"}
+                      bg={"white"}
                       onChange={(event) => {
                         setUserEmail(event.target.value);
                         validateEmail(event.target.value);
@@ -868,7 +877,7 @@ const User = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root invalid={affiliationError !== ""} required gap={"0"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                       Affiliation
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -880,6 +889,7 @@ const User = () => {
                       value={userAffiliation}
                       disabled={!editing}
                       mt={"0.5"}
+                      bg={"white"}
                       onChange={(event) => {
                         setUserAffiliation(event.target.value);
                         validateAffiliation(event.target.value);
@@ -896,7 +906,7 @@ const User = () => {
 
               {/* ORCiD */}
               <Flex direction={"column"} p={"0"} gap={"1"}>
-                <Text ml={"0.5"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
+                <Text ml={"0.5"} color={"gray.600"} textAlign={"left"} fontSize={"xs"} fontWeight={"semibold"}>
                   ORCiD
                 </Text>
                 <Flex align={"start"} direction={"column"} justify={"center"} gap={"1"} wrap={"wrap"}>
@@ -920,20 +930,23 @@ const User = () => {
                 </Flex>
               </Flex>
             </Flex>
-          </Flex>
 
-          <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} w={{ base: "100%", md: "50%" }}>
+            {/* Workspaces */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"workspace"} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
+              <Flex direction={"row"} py={"1.5"} gap={"1"} align={"center"} ml={"0.5"}>
+                <Icon name={"workspace"} size={"xs"} color={"gray.600"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                   Workspaces
                 </Text>
               </Flex>
@@ -962,62 +975,62 @@ const User = () => {
               </Flex>
             </Flex>
           </Flex>
-        </Flex>
 
-        {features.api && (
-          <Flex direction={"row"} gap={"1"}>
-            <Flex direction={"column"} p={"0"} gap={"1"} grow={"1"} basis={"50%"}>
-              {/* API options */}
-              <Flex
-                direction={"column"}
-                p={"1"}
-                gap={"1"}
-                rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-              >
-                <Flex direction={"column"} p={"0"} gap={"1"}>
-                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                    <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
-                      <Icon name={"key"} size={"xs"} />
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        API Access
-                      </Text>
+          {features.api && (
+            <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+                {/* API options */}
+                <Flex
+                  direction={"column"}
+                  p={"2"}
+                  gap={"2"}
+                  rounded={"md"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                >
+                  <Flex direction={"column"} p={"0"} gap={"2"}>
+                    <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                      <Flex direction={"row"} p={"0"} gap={"1"} align={"center"} ml={"0.5"}>
+                        <Icon name={"key"} size={"xs"} color={"gray.600"} />
+                        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                          API Access
+                        </Text>
+                      </Flex>
+                      <Button
+                        size={"xs"}
+                        rounded={"md"}
+                        colorPalette={"green"}
+                        onClick={() => handleGenerateKeyClick()}
+                        loading={generateKeyLoading}
+                      >
+                        Add API Key
+                        <Icon name={"add"} size={"xs"} />
+                      </Button>
                     </Flex>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"green"}
-                      onClick={() => handleGenerateKeyClick()}
-                      loading={generateKeyLoading}
-                    >
-                      Add API Key
-                      <Icon name={"add"} size={"xs"} />
-                    </Button>
+                    {userKeys.length > 0 ? (
+                      <DataTable
+                        columns={apiKeysTableColumns}
+                        data={userKeys}
+                        visibleColumns={{}}
+                        selectedRows={{}}
+                        showPagination
+                      />
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"key"} size={"lg"} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>No API keys</EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
                   </Flex>
-                  {userKeys.length > 0 ? (
-                    <DataTable
-                      columns={apiKeysTableColumns}
-                      data={userKeys}
-                      visibleColumns={{}}
-                      selectedRows={{}}
-                      showPagination
-                    />
-                  ) : (
-                    <EmptyState.Root>
-                      <EmptyState.Content>
-                        <EmptyState.Indicator>
-                          <Icon name={"key"} size={"lg"} />
-                        </EmptyState.Indicator>
-                        <EmptyState.Description>No API keys</EmptyState.Description>
-                      </EmptyState.Content>
-                    </EmptyState.Root>
-                  )}
                 </Flex>
               </Flex>
             </Flex>
-          </Flex>
-        )}
+          )}
+        </Flex>
       </Flex>
     </Content>
   );

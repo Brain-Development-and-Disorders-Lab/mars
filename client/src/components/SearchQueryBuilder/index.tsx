@@ -163,7 +163,7 @@ const renderQueryGroup = (group: RuleGroupType, isNested = false): React.ReactNo
         border: GLOBAL_STYLES.border.style,
         borderColor: "gray.200",
         rounded: "md",
-        bg: "gray.50",
+        bg: GLOBAL_STYLES.card.bg,
       })}
     >
       {group.rules.map((rule, i) => (

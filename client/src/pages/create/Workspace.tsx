@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Flex, Spacer, Input, Button, Text, Heading, Fieldset, Field, useDisclosure } from "@chakra-ui/react";
 
 // Custom components
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
@@ -199,7 +200,7 @@ const CreateWorkspace = () => {
     <Content>
       <Flex direction={"column"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         {/* Page header */}
-        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
+        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"} ml={"0.5"}>
           <Flex align={"center"} gap={"1"} w={"100%"} pt={"1"} minW="0">
             <Icon name={"workspace"} size={"sm"} />
             <Heading size={"md"}>Create Workspace</Heading>
@@ -208,38 +209,39 @@ const CreateWorkspace = () => {
 
         <Flex direction={"column"} p={"1"} gap={"1"} grow={"1"}>
           {workspace === "" ? (
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"xs"}>
               Before you can get started using Metadatify, you must be invited as Collaborator on an existing Workspace
               or create a new Workspace below.
             </Text>
           ) : (
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"xs"}>
               Workspaces can be used to organize Entities and Projects, as well as inviting collaborators to work
-              together on experiments.
+              together.
             </Text>
           )}
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+          <Text fontSize={"xs"}>
             Use the Workspace switcher in the navigation bar to view all Workspaces and switch the active Workspace.
           </Text>
         </Flex>
 
-        <Flex direction={"row"} p={"1"} gap={"1"} wrap={"wrap"}>
-          <Flex direction={"column"} p={"0"} gap={"1"} w={{ base: "100%", md: "50%" }}>
+        <Flex direction={"row"} p={"1"} gap={"2"} wrap={"wrap"}>
+          <Flex direction={"column"} p={"0"} gap={"2"} w={{ base: "100%", md: "50%" }}>
             {/* Workspace name */}
             <Flex
               direction={"column"}
               h={"fit-content"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              gap={"2"}
               rounded={"md"}
+              bg={GLOBAL_STYLES.card.bg}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root required gap={"1"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
-                      Workspace Name
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+                      Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
@@ -249,19 +251,27 @@ const CreateWorkspace = () => {
                       rounded={"md"}
                       placeholder={"Name"}
                       value={name}
+                      bg={"white"}
                       onChange={(event) => setName(event.target.value)}
                     />
                   </Field.Root>
                 </Fieldset.Content>
               </Fieldset.Root>
+
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                  Owner
+                </Text>
+                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+              </Flex>
             </Flex>
 
             {/* Workspace description */}
             <Flex
               direction={"column"}
               h={"fit-content"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -269,8 +279,8 @@ const CreateWorkspace = () => {
               <Fieldset.Root>
                 <Fieldset.Content>
                   <Field.Root gap={"1"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
-                      Workspace Description
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+                      Description
                     </Field.Label>
                     <RichTextEditor
                       id={"dialogWorkspaceDescription"}

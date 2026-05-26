@@ -387,7 +387,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
@@ -612,7 +612,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
@@ -741,7 +741,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
               >
@@ -866,7 +866,7 @@ const ExportDialog = (props: ExportDialogProps) => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              bg={"gray.50"}
+              bg={GLOBAL_STYLES.card.bg}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >

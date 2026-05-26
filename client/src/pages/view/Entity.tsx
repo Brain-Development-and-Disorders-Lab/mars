@@ -1240,7 +1240,7 @@ const Entity = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={"gray.500"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 rounded={"md"}
               >
                 <Icon name={"archive"} size={"sm"} color={"gray.500"} />
@@ -1675,7 +1675,7 @@ const Entity = () => {
                                           gap={"2"}
                                           mt={"1"}
                                           p={"2"}
-                                          bg={"gray.50"}
+                                          bg={GLOBAL_STYLES.card.bg}
                                           rounded={"md"}
                                         >
                                           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1912,6 +1912,8 @@ const Entity = () => {
               bg={"gray.100"}
               rounded={"md"}
               grow={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
