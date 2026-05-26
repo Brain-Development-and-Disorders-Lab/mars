@@ -295,8 +295,8 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     w={{ base: "100%", md: "calc(50% - 4px)" }}
                   >
                     <Field.Root required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                        Attribute Name
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                        Name
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Input
@@ -309,7 +309,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                       />
                     </Field.Root>
                     <Flex direction={"column"} gap={"1"}>
-                      <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                      <Text fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         Owner
                       </Text>
                       <ActorTag identifier={props.owner} fallback={"Unknown User"} size={"sm"} />
@@ -327,7 +327,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     grow={"1"}
                   >
                     <Field.Root required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         Description
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -338,7 +338,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
 
                 {/* Values */}
                 <Field.Root required>
-                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                  <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                     Values
                     <Field.RequiredIndicator />
                   </Field.Label>

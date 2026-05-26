@@ -201,14 +201,44 @@ export class Templates {
    * @param _id Template identifier
    * @returns {Promise<string>}
    */
-  static export = async (_id: string): Promise<string> => {
+  static export = async (_id: string, fields?: string[], includeHistory = false): Promise<string> => {
     const template = await Templates.getOne(_id);
 
     if (_.isNull(template)) {
       return "";
     }
 
-    return JSON.stringify(template, null, "  ");
+    if (!includeHistory) {
+      delete (template as never)["history"];
+    }
+
+    if (_.isUndefined(fields)) {
+      return JSON.stringify(template, null, "  ");
+    }
+
+    const formatted: Record<string, unknown> = {
+      _id: template._id,
+      name: template.name,
+      values: template.values,
+    };
+
+    for (const field of fields) {
+      if (_.isEqual(field, "description")) {
+        formatted["description"] = template.description;
+      } else if (_.isEqual(field, "owner")) {
+        formatted["owner"] = template.owner;
+      } else if (_.isEqual(field, "timestamp")) {
+        formatted["timestamp"] = template.timestamp;
+      } else if (_.isEqual(field, "archived")) {
+        formatted["archived"] = template.archived;
+      }
+    }
+
+    if (includeHistory) {
+      formatted["history"] = template.history;
+    }
+
+    return JSON.stringify(formatted, null, "  ");
   };
 
   /**

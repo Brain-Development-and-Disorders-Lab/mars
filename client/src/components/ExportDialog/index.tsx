@@ -114,9 +114,27 @@ const EXPORT_PROJECT = gql`
   }
 `;
 
+const GET_TEMPLATE_FOR_EXPORT = gql`
+  query GetTemplateForExport($_id: String) {
+    template(_id: $_id) {
+      _id
+      name
+      owner
+      timestamp
+      description
+      archived
+      values {
+        _id
+        name
+        type
+      }
+    }
+  }
+`;
+
 const EXPORT_TEMPLATE = gql`
-  query ExportTemplate($_id: String) {
-    exportTemplate(_id: $_id)
+  query ExportTemplate($_id: String, $fields: [String], $includeHistory: Boolean) {
+    exportTemplate(_id: $_id, fields: $fields, includeHistory: $includeHistory)
   }
 `;
 
@@ -171,6 +189,18 @@ const ExportDialog = (props: ExportDialogProps) => {
     };
   }>(GET_PROJECT_FOR_EXPORT);
 
+  const [getTemplate, { data: templateData, loading: templateLoading }] = useLazyQuery<{
+    template: {
+      _id: string;
+      name: string;
+      owner: string;
+      timestamp: string;
+      description: string;
+      archived: boolean;
+      values: { _id: string; name: string; type: string }[];
+    };
+  }>(GET_TEMPLATE_FOR_EXPORT);
+
   // Export queries
   const [exportEntity, { loading: exportEntityLoading }] = useLazyQuery<{ exportEntity: string }>(EXPORT_ENTITY);
   const [exportEntities, { loading: exportEntitiesLoading }] = useLazyQuery<{ exportEntities: string }>(
@@ -198,6 +228,9 @@ const ExportDialog = (props: ExportDialogProps) => {
       }
       if (dataType === "project" && id) {
         getProject({ variables: { _id: id } });
+      }
+      if (dataType === "template" && id) {
+        getTemplate({ variables: { _id: id } });
       }
     } else {
       // Reset state when the dialog closes
@@ -240,7 +273,9 @@ const ExportDialog = (props: ExportDialogProps) => {
       responseData = response?.data?.exportProject;
       filename = slugify(`export_project_${datestamp}.${format}`);
     } else if (dataType === "template" && id) {
-      const response = await exportTemplate({ variables: { _id: id } }).catch(ignoreAbort);
+      const response = await exportTemplate({
+        variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
+      }).catch(ignoreAbort);
       responseData = response?.data?.exportTemplate;
       filename = slugify(`export_template_${datestamp}.json`);
     }
@@ -261,9 +296,36 @@ const ExportDialog = (props: ExportDialogProps) => {
     setOpen(false);
   };
 
+  const handleCopyJson = async () => {
+    if (dataType !== "template" || !id) return;
+    const response = await exportTemplate({
+      variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
+    }).catch(ignoreAbort);
+    const responseData = response?.data?.exportTemplate;
+    if (!responseData) {
+      toaster.create({
+        title: "Error",
+        description: "Unable to copy template JSON",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+      return;
+    }
+    await navigator.clipboard.writeText(responseData);
+    toaster.create({
+      title: "Copied",
+      description: "Template JSON copied to clipboard",
+      type: "success",
+      duration: 2000,
+      closable: true,
+    });
+  };
+
   const entity = entityData?.entity;
   const project = projectData?.project;
-  const dataLoading = entityLoading || projectLoading;
+  const template = templateData?.template;
+  const dataLoading = entityLoading || projectLoading || templateLoading;
 
   const title = DIALOG_TITLE[dataType];
   const formatOptions = FORMAT_OPTIONS[dataType];
@@ -296,7 +358,7 @@ const ExportDialog = (props: ExportDialogProps) => {
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} gap={"2"}>
             {/* Format */}
             <Flex direction={"column"} gap={"1.5"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                 Format
               </Text>
               <Flex gap={"1"}>
@@ -672,8 +734,8 @@ const ExportDialog = (props: ExportDialogProps) => {
               </Flex>
             )}
 
-            {/* Options */}
-            {dataType !== "template" && (
+            {/* Template field selection */}
+            {dataType === "template" && (
               <Flex
                 direction={"column"}
                 gap={"2"}
@@ -684,42 +746,180 @@ const ExportDialog = (props: ExportDialogProps) => {
                 borderColor={GLOBAL_STYLES.border.color}
               >
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Options
+                  Fields
                 </Text>
-                <Tooltip content={"History is only included in JSON exports"} disabled={format === "json"} showArrow>
-                  <Checkbox.Root
-                    size={"xs"}
-                    checked={includeHistory}
-                    onCheckedChange={(details) => setIncludeHistory(details.checked as boolean)}
-                    disabled={format !== "json"}
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                    <Checkbox.Label>
-                      <Text fontSize={"xs"}>Include version history</Text>
-                    </Checkbox.Label>
-                  </Checkbox.Root>
-                </Tooltip>
-                {dataType === "entities" && format !== "json" && (
-                  <Checkbox.Root
-                    size={"xs"}
-                    checked={includeAttributes}
-                    onCheckedChange={(details) => setIncludeAttributes(details.checked as boolean)}
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                    <Checkbox.Label>
-                      <Text fontSize={"xs"}>Include attribute columns</Text>
-                    </Checkbox.Label>
-                  </Checkbox.Root>
+                {dataLoading || !template ? (
+                  <Text fontSize={"xs"} color={"gray.500"}>
+                    Loading fields...
+                  </Text>
+                ) : (
+                  <Flex direction={"row"} gap={"6"} wrap={"wrap"}>
+                    {/* Details */}
+                    <Flex direction={"column"} gap={"1"} grow={"1"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Details
+                      </Text>
+                      <Stack gap={"1"} direction={"column"}>
+                        <Checkbox.Root disabled defaultChecked size={"xs"}>
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                              <Text fontWeight={"semibold"}>Name:</Text>
+                              <Text>{template.name}</Text>
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                        <Checkbox.Root disabled defaultChecked size={"xs"}>
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                              <Text fontWeight={"semibold"}>Values:</Text>
+                              <Text>
+                                {template.values.length} {template.values.length === 1 ? "value" : "values"}
+                              </Text>
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                        <Checkbox.Root
+                          size={"xs"}
+                          checked={_.includes(exportFields, "timestamp")}
+                          onCheckedChange={(details) =>
+                            setExportFields(toggleField(exportFields, "timestamp", details.checked as boolean))
+                          }
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                              <Text fontWeight={"semibold"}>Created:</Text>
+                              <Text>{dayjs(template.timestamp).format("DD MMM YYYY")}</Text>
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                        <Checkbox.Root
+                          size={"xs"}
+                          checked={_.includes(exportFields, "owner")}
+                          onCheckedChange={(details) =>
+                            setExportFields(toggleField(exportFields, "owner", details.checked as boolean))
+                          }
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                Owner:
+                              </Text>
+                              <ActorTag identifier={template.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                        <Checkbox.Root
+                          size={"xs"}
+                          checked={_.includes(exportFields, "description")}
+                          onCheckedChange={(details) =>
+                            setExportFields(toggleField(exportFields, "description", details.checked as boolean))
+                          }
+                          disabled={_.isEqual(template.description, "")}
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                              <Text fontWeight={"semibold"}>Description:</Text>
+                              <Text lineClamp={1}>
+                                {_.isEqual(template.description, "")
+                                  ? "No description"
+                                  : _.truncate(template.description, { length: 32 })}
+                              </Text>
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                        <Checkbox.Root
+                          size={"xs"}
+                          checked={_.includes(exportFields, "archived")}
+                          onCheckedChange={(details) =>
+                            setExportFields(toggleField(exportFields, "archived", details.checked as boolean))
+                          }
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
+                              <Text fontWeight={"semibold"}>Archived:</Text>
+                              <Text>{template.archived ? "Yes" : "No"}</Text>
+                            </Flex>
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                      </Stack>
+                    </Flex>
+                  </Flex>
                 )}
               </Flex>
             )}
+
+            {/* Options */}
+            <Flex
+              direction={"column"}
+              gap={"2"}
+              p={"2"}
+              rounded={"md"}
+              bg={"gray.50"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                Options
+              </Text>
+              <Tooltip content={"History is only included in JSON exports"} disabled={format === "json"} showArrow>
+                <Checkbox.Root
+                  size={"xs"}
+                  checked={includeHistory}
+                  onCheckedChange={(details) => setIncludeHistory(details.checked as boolean)}
+                  disabled={format !== "json"}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>
+                    <Text fontSize={"xs"}>Include version history</Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+              </Tooltip>
+              {dataType === "entities" && format !== "json" && (
+                <Checkbox.Root
+                  size={"xs"}
+                  checked={includeAttributes}
+                  onCheckedChange={(details) => setIncludeAttributes(details.checked as boolean)}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>
+                    <Text fontSize={"xs"}>Include attribute columns</Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+              )}
+            </Flex>
           </Dialog.Body>
 
           {/* Footer */}
           <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-            <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"}>
+            <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"} gap={"2"}>
+              {dataType === "template" && (
+                <Button
+                  colorPalette={"blue"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  onClick={handleCopyJson}
+                  loading={isLoading}
+                  loadingText={"Copying..."}
+                >
+                  Copy JSON
+                  <Icon name={"copy"} size={"xs"} />
+                </Button>
+              )}
               <Button
                 colorPalette={"blue"}
                 size={"xs"}

@@ -1201,12 +1201,12 @@ const ImportDialog = (props: ImportDialogProps) => {
       <AlertDialog
         open={confirmWarningsOpen}
         setOpen={setConfirmWarningsOpen}
-        header="Import with Warnings"
-        leftButtonLabel="Cancel"
-        leftButtonColor="red"
+        header={"Import with Warnings"}
+        leftButtonLabel={"Cancel"}
+        leftButtonColor={"red"}
         leftButtonAction={() => setConfirmWarningsOpen(false)}
-        rightButtonLabel="Import Anyway"
-        rightButtonColor="green"
+        rightButtonLabel={"Import Anyway"}
+        rightButtonColor={"green"}
         rightButtonAction={async () => {
           setConfirmWarningsOpen(false);
           posthog.capture("import_finish", { importType: "entities" });
@@ -1244,7 +1244,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} _hover={{ bg: "gray.200" }} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"1"} gap={"1"}>
+          <Dialog.Body p={"2"} gap={"2"}>
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
               <Steps.Root
@@ -1294,11 +1294,11 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Select file type of import */}
             {entityStep === 0 && templateStep === 0 && (
-              <Flex direction={"column"} gap={"1"} pb={"1"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Flex direction={"column"} gap={"2"} py={"2"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                   File Contents
                 </Text>
-                <Flex gap={"1"}>
+                <Flex gap={"2"}>
                   {(["entities", "template"] as const).map((type) => (
                     <Button
                       key={type}
@@ -1329,7 +1329,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Flex
                 w={"100%"}
                 justify={"left"}
-                gap={"1"}
+                gap={"2"}
                 align={"baseline"}
                 direction={"column"}
                 rounded={"md"}
@@ -1337,7 +1337,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                 border={"1px solid"}
                 borderColor={"blue.200"}
                 p={"2"}
-                my={"1"}
+                my={"2"}
               >
                 <Flex direction={"row"} gap={"1"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1393,9 +1393,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                         justify={"center"}
                         border={GLOBAL_STYLES.border.style}
                         borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={fileName !== "" ? "blue.300" : GLOBAL_STYLES.border.color}
+                        borderColor={fileName !== "" ? "gray.300" : GLOBAL_STYLES.border.color}
                         rounded={"md"}
-                        bg={fileName !== "" ? "blue.50" : "gray.50"}
+                        bg={fileName !== "" ? "gray.50" : "white"}
                         cursor={"pointer"}
                       >
                         {/* Condition 1: File type not specified */}
@@ -1525,7 +1525,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1537,7 +1537,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             onChange={(event) => setNamePrefixField(event.target.value)}
                           />
                           <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Add a prefix to each Entity name
+                            Append a prefix to each Entity name
                           </Field.HelperText>
                         </Field.Root>
 
@@ -1548,7 +1548,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           }
                           required
                         >
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -1574,7 +1574,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                           </Flex>
                           {!nameUseCounter && (
                             <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                              <Field.HelperText fontSize={"xs"}>Column containing Entity name</Field.HelperText>
                               {isSuggesting && (
                                 <>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
@@ -1593,7 +1592,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     _hover={{ textDecoration: "underline" }}
                                     onClick={() => setNameField(columns.find((c) => c.name === suggestions.name))}
                                   >
-                                    Suggested: {suggestions.name}
+                                    Suggested Column: {suggestions.name}
                                   </Text>
                                 </>
                               )}
@@ -1610,7 +1609,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1627,13 +1626,17 @@ const ImportDialog = (props: ImportDialogProps) => {
                         </Field.Root>
 
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Name
                           </Field.Label>
-                          <Input size={"xs"} bg={"white"} rounded={"md"} placeholder={'"name"'} disabled readOnly />
-                          <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            JSON field containing Entity name
-                          </Field.HelperText>
+                          <Input
+                            size={"xs"}
+                            bg={"white"}
+                            rounded={"md"}
+                            placeholder={'JSON: "name"'}
+                            disabled
+                            readOnly
+                          />
                         </Field.Root>
                       </Flex>
                     </Fieldset.Content>
@@ -1646,7 +1649,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Flex direction={"row"} gap={"1"}>
                         {/* Description */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Description
                           </Field.Label>
                           {isSpreadsheetFile(fileType) ? (
@@ -1656,17 +1659,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xs"}
                               bg={"white"}
                               rounded={"md"}
-                              placeholder={'"description"'}
+                              placeholder={'JSON: "description"'}
                               disabled
                               readOnly
                             />
                           )}
                           <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                            <Field.HelperText fontSize={"xs"}>
-                              {isSpreadsheetFile(fileType)
-                                ? "Column containing Entity description"
-                                : "JSON field containing Entity description"}
-                            </Field.HelperText>
                             {isSpreadsheetFile(fileType) && isSuggesting && (
                               <>
                                 <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
@@ -1690,7 +1688,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                       setDescriptionField(columns.find((c) => c.name === suggestions.description))
                                     }
                                   >
-                                    Suggested: {suggestions.description}
+                                    Suggested Column: {suggestions.description}
                                   </Text>
                                 </Flex>
                               )}
@@ -1699,7 +1697,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                         {/* Project */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                             Project
                           </Field.Label>
                           <Select.Root
@@ -1750,9 +1748,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                               </Select.Positioner>
                             </Portal>
                           </Select.Root>
-                          <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Add Entities to a Project
-                          </Field.HelperText>
                         </Field.Root>
                       </Flex>
                     </Fieldset.Content>
@@ -1764,15 +1759,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root gap={"0.5"}>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                           Owner
                         </Field.Label>
                         <Flex>
                           <ActorTag identifier={ownerField} fallback={"Unknown"} size={"md"} />
                         </Flex>
-                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          Owner of imported Entities
-                        </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -1787,7 +1779,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                 direction={"column"}
                 gap={"2"}
                 p={"2"}
-                bg={"gray.50"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
@@ -1837,7 +1828,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Entity Step 3: Review */}
             {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
+              <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"}>
                 <Flex
                   direction={"row"}
                   gap={"2"}
@@ -1871,7 +1862,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             {/* Template Steps */}
             {/* Template Step 1: Review */}
             {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
+              <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"} mt={"2"}>
                 <Flex
                   direction={"row"}
                   gap={"2"}
