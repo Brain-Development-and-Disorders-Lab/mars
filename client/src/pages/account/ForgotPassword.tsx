@@ -97,7 +97,7 @@ const ForgotPassword = () => {
           {!submitted && (
             <Fieldset.Root w={"100%"}>
               <Field.Root gap={"0.5"} required>
-                <Field.Label fontSize={"xs"} ml={"0.5"}>
+                <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
                   Email
                   <Field.RequiredIndicator />
                 </Field.Label>

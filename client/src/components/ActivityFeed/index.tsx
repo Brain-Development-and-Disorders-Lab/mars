@@ -75,7 +75,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
     <Flex direction={"column"} data-timestamp-update={timestampUpdate} gap={"2"}>
       {/* Activity heading */}
       <Flex id={"recentActivityHeader"} align={"center"} gap={"2"} ml={"0.5"} justify={"space-between"}>
-        <Flex align={"center"} gap={"1"}>
+        <Flex align={"center"} gap={"1"} py={"1.5"}>
           <Icon name={"activity"} size={"xs"} />
           <Text fontSize={"sm"} fontWeight={"semibold"}>
             Workspace Activity

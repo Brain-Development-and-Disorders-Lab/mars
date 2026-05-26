@@ -614,7 +614,6 @@ const Dashboard = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              bg={GLOBAL_STYLES.card.bg}
               rounded={"md"}
               gap={"2"}
               border={GLOBAL_STYLES.border.style}
@@ -622,7 +621,7 @@ const Dashboard = () => {
               minW={"0"}
               maxW={"100%"}
             >
-              <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"0.5"}>
                 <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Projects
@@ -668,7 +667,6 @@ const Dashboard = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              bg={GLOBAL_STYLES.card.bg}
               rounded={"md"}
               gap={"2"}
               border={GLOBAL_STYLES.border.style}
@@ -676,7 +674,7 @@ const Dashboard = () => {
               minW={"0"}
               maxW={"100%"}
             >
-              <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"1.5"}>
                 <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Entities
