@@ -1,17 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  EmptyState,
-  Field,
-  Fieldset,
-  Flex,
-  Input,
-  Separator,
-  Spacer,
-  Stack,
-  Tag,
-  Text,
-} from "@chakra-ui/react";
+import { Button, EmptyState, Field, Fieldset, Flex, Input, Separator, Stack, Tag, Text } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -118,8 +106,8 @@ const Collaborators = (props: CollaboratorsProps) => {
   return (
     <Flex
       direction={"column"}
-      gap={"1"}
-      p={"1"}
+      gap={"2"}
+      p={"2"}
       h={"fit-content"}
       rounded={"md"}
       border={GLOBAL_STYLES.border.style}
@@ -127,14 +115,14 @@ const Collaborators = (props: CollaboratorsProps) => {
       grow={"1"}
     >
       {/* Collaborators display */}
-      <Flex direction={"column"} gap={"1"}>
-        <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-          <Icon name={"person"} size={"xs"} />
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
+      <Flex direction={"column"} gap={"2"}>
+        <Flex direction={"row"} gap={"1"} py={"1.5"} align={"center"} ml={"0.5"}>
+          <Icon name={"person"} size={"xs"} color={"gray.600"} />
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
             Collaborators
           </Text>
         </Flex>
-        <Flex direction={"row"} gap={"2"} align={"center"}>
+        <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
           <Fieldset.Root>
             <Fieldset.Content>
               <Field.Root invalid={newCollaborator !== "" && !validEmail}>
@@ -149,7 +137,6 @@ const Collaborators = (props: CollaboratorsProps) => {
               </Field.Root>
             </Fieldset.Content>
           </Fieldset.Root>
-          <Spacer />
           <Button
             colorPalette={"green"}
             size={"xs"}

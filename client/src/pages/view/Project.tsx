@@ -632,6 +632,7 @@ const Project = () => {
             bg={"blue.100"}
             mx={"-1.5"}
             mt={"-1.5"}
+            mb={"1"}
             px={"1.5"}
             pt={"1.5"}
           >
@@ -1248,14 +1249,25 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
-          {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
+          {/* Project Overview and Description */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Overview */}
-            <Flex direction={"column"} p={"1"} h={"fit-content"} gap={"1"} bg={"gray.100"} rounded={"md"} grow={"1"}>
-              <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              bg={"gray.100"}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              {/* "Name" field */}
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+                <Flex direction={"column"} gap={"2"} grow={"1"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                     Project Name
                   </Text>
                   <Input
@@ -1272,23 +1284,28 @@ const Project = () => {
                     borderColor={GLOBAL_STYLES.border.color}
                   />
                 </Flex>
-
-                <TimestampTag timestamp={project.created} description={"Created"} />
               </Flex>
 
-              <Flex gap={"1"} direction={"row"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Project Visibility
-                  </Text>
-                  <VisibilityTag isPublic={false} isInherited />
-                </Flex>
-
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                     Project Owner
                   </Text>
                   <ActorTag identifier={project.owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Project Timestamp
+                  </Text>
+                  <TimestampTag timestamp={project.created} description={"Created"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
+                    Project Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -1296,15 +1313,17 @@ const Project = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              h={"100%"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
-              basis={"40%"}
               grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"} ml={"0.5"}>
                 Project Description
               </Text>
               <RichTextEditor
@@ -1316,18 +1335,20 @@ const Project = () => {
             </Flex>
           </Flex>
 
-          {/* "Entities" and "Collaborators" */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+          {/* Project Entities and Collaborators */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Entities */}
             <Flex
               direction={"column"}
+              p={"2"}
               h={"fit-content"}
-              p={"1"}
-              gap={"1"}
+              gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
-              w={{ base: "100%", md: "50%" }}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
@@ -1380,13 +1401,24 @@ const Project = () => {
             </Flex>
 
             {/* Collaborators */}
-            <Collaborators
-              editing={editing && !previewVersion}
-              currentUser={currentUser}
-              owner={project.owner}
-              projectCollaborators={displayProjectCollaborators}
-              setProjectCollaborators={setProjectCollaborators}
-            />
+            <Flex
+              direction={"column"}
+              p={"0"}
+              h={"fit-content"}
+              gap={"0"}
+              rounded={"md"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Collaborators
+                editing={editing && !previewVersion}
+                currentUser={currentUser}
+                owner={project.owner}
+                projectCollaborators={displayProjectCollaborators}
+                setProjectCollaborators={setProjectCollaborators}
+              />
+            </Flex>
           </Flex>
         </Flex>
 
@@ -1428,7 +1460,7 @@ const Project = () => {
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"1"} gap={"1"}>
+              <Dialog.Body p={"2"} gap={"2"}>
                 <MultiEntitySelect
                   projectEntities={projectEntities}
                   selectedEntities={selectedEntities}
@@ -1436,7 +1468,7 @@ const Project = () => {
                 />
               </Dialog.Body>
 
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
                 <Button
                   colorPalette={"red"}
                   size={"xs"}

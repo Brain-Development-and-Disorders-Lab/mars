@@ -55,11 +55,7 @@ const SaveDialog = (props: SaveDialogProps) => {
             </Flex>
           </Dialog.Body>
 
-          <Dialog.Footer
-            p={"2"}
-            bg={showCloseButton ? GLOBAL_STYLES.dialog.footerColor : undefined}
-            roundedBottom={showCloseButton ? "md" : undefined}
-          >
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
               <Button
                 variant={"solid"}
