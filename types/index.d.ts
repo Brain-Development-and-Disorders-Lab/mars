@@ -1,6 +1,8 @@
-// Import types
-import { ReadStream } from "fs";
+// Import external types
 import { ObjectId } from "mongodb";
+import { BoxProps } from "@chakra-ui/react";
+import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
+import { ReadStream } from "fs";
 
 // Request types to the server
 declare enum Requests {
@@ -138,7 +140,7 @@ export type IValue = {
   disabled?: boolean;
   showRemove?: boolean;
   onRemove?: (id: string) => void;
-  onUpdate?: (data: D) => void;
+  onUpdate?: (data: string) => void;
 };
 
 export type IValueSelectData = {
@@ -557,6 +559,7 @@ export type UnsavedChangesDialogProps = {
 
 // `Scanner` props
 export type ScannerProps = Html5QrcodeCameraScanConfig & {
+  fps: number;
   verbose: boolean;
 };
 
@@ -720,7 +723,7 @@ export type IFile = Promise<{
   filename: string;
   mimetype: string;
   encoding: string;
-  createReadStream: () => fs.ReadStream;
+  createReadStream: () => ReadStream;
 }>;
 
 // Generic GraphQL resolver parent type (for unused parents)

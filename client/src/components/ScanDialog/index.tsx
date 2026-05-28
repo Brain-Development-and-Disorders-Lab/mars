@@ -242,7 +242,10 @@ const ScanDialog = (props: ScanDialogProps) => {
   const startScanner = async () => {
     await codeScanner?.start(
       { facingMode: "environment" },
-      createConfig(props),
+      createConfig({
+        fps: 60,
+        verbose: false,
+      }),
       (decodedText) => {
         onScannerResult(decodedText);
       },
