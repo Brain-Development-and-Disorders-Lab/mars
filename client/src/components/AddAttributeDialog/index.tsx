@@ -12,13 +12,13 @@ import {
   Portal,
   Select,
   Text,
+  Textarea,
   createListCollection,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Values from "@components/Values";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { AddAttributeDialogProps, AttributeModel, ISelectOption, IValue } from "@types";
@@ -326,12 +326,18 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     borderColor={GLOBAL_STYLES.border.color}
                     grow={"1"}
                   >
-                    <Field.Root required>
+                    <Field.Root h={"100%"} required>
                       <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                         Description
                         <Field.RequiredIndicator />
                       </Field.Label>
-                      <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
+                      <Textarea
+                        value={description}
+                        size={"xs"}
+                        h={"100%"}
+                        bg={"white"}
+                        onChange={(event) => setDescription(event.target.value)}
+                      />
                     </Field.Root>
                   </Flex>
                 </Flex>

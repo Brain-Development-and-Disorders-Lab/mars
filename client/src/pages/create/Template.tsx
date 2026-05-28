@@ -12,6 +12,7 @@ import {
   Input,
   Spacer,
   Text,
+  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
@@ -20,7 +21,6 @@ import Icon from "@components/Icon";
 import Values from "@components/Values";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { IAttribute, IValue, ResponseData } from "@types";
@@ -240,7 +240,12 @@ const Template = () => {
                 Description
                 <Field.RequiredIndicator />
               </Field.Label>
-              <RichTextEditor value={description} onChange={(value) => setDescription(value)} h={"100%"} />
+              <Textarea
+                value={description}
+                size={"xs"}
+                h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
+              />
             </Field.Root>
           </Flex>
         </Flex>

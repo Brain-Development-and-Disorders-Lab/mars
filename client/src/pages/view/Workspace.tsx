@@ -1,6 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import { Flex, Input, Button, Text, Heading, Code, EmptyState } from "@chakra-ui/react";
+import { Flex, Input, Button, Text, Heading, Code, EmptyState, Textarea } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -12,7 +12,6 @@ import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import VisibilityTag from "@components/VisibilityTag";
-import RichTextEditor from "@components/RichTextEditor";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
@@ -786,7 +785,12 @@ const Workspace = () => {
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
-              <RichTextEditor value={description} onChange={(value) => setDescription(value)} />
+              <Textarea
+                value={description}
+                size={"xs"}
+                h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
+              />
             </Flex>
           </Flex>
 

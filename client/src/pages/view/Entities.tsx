@@ -308,7 +308,7 @@ const Entities = () => {
       label: () => `Export All (${data?.entities?.total ?? 0})`,
       icon: "download",
       alwaysEnabled: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       action: async (table, _rows: any) => {
         setExportIds(undefined);
         setExportOpen(true);

@@ -21,6 +21,7 @@ import {
   useDisclosure,
   Timeline,
   Collapsible,
+  Textarea,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
@@ -37,7 +38,6 @@ import Tooltip from "@components/Tooltip";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import SaveDialog from "@components/SaveDialog";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { ProjectHistory, ProjectModel, DataTableAction, IGenericItem, ResponseData } from "@types";
@@ -57,6 +57,8 @@ import { auth } from "@lib/auth";
 import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
+
+// Variables
 import { GLOBAL_STYLES } from "@variables";
 
 const Project = () => {
@@ -1159,14 +1161,12 @@ const Project = () => {
                                             {projectVersion.entities.length > 0 ? (
                                               <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
                                                 {projectVersion.entities.map((entityId) => (
-                                                  <Tag.Root
+                                                  <Linky
                                                     key={`v_e_${projectVersion.timestamp}_${entityId}`}
-                                                    size={"sm"}
-                                                  >
-                                                    <Tag.Label fontSize={"xs"}>
-                                                      <Linky type={"entities"} id={entityId} size={"xs"} />
-                                                    </Tag.Label>
-                                                  </Tag.Root>
+                                                    type={"entities"}
+                                                    id={entityId}
+                                                    size={"xs"}
+                                                  />
                                                 ))}
                                               </Flex>
                                             ) : (
@@ -1350,11 +1350,13 @@ const Project = () => {
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
-              <RichTextEditor
+              <Textarea
                 id={"projectDescriptionInput"}
                 value={previewVersion ? displayProjectDescription : projectDescription}
+                size={"xs"}
+                h={"100%"}
                 readOnly={!(editing && !previewVersion)}
-                onChange={(value) => setProjectDescription(value)}
+                onChange={(event) => setProjectDescription(event.target.value)}
               />
             </Flex>
           </Flex>

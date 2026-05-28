@@ -13,6 +13,7 @@ import {
   Input,
   Spacer,
   Text,
+  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -23,7 +24,6 @@ import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -257,11 +257,12 @@ const Project = () => {
                 Description
                 <Field.RequiredIndicator />
               </Field.Label>
-              <RichTextEditor
+              <Textarea
                 data-testid={"create-entity-description"}
                 value={description}
-                onChange={(value) => setDescription(value)}
+                size={"xs"}
                 h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
               />
             </Field.Root>
           </Flex>

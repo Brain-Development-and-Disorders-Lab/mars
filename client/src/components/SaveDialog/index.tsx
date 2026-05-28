@@ -2,9 +2,8 @@
 import React from "react";
 
 // Existing and custom components
-import { Button, Dialog, Flex, Text, CloseButton } from "@chakra-ui/react";
+import { Button, Dialog, Flex, Text, CloseButton, Textarea } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { SaveDialogProps } from "@types";
@@ -51,7 +50,15 @@ const SaveDialog = (props: SaveDialogProps) => {
                   {description !== undefined ? description : defaultDescription}
                 </Text>
               )}
-              <RichTextEditor id={"saveMessageInput"} value={value} onChange={(newValue) => onChange(newValue)} />
+              <Textarea
+                id={"saveMessageInput"}
+                placeholder={"Describe any changes made..."}
+                value={value}
+                size={"xs"}
+                h={"100%"}
+                minH={"120px"}
+                onChange={(event) => onChange(event.target.value)}
+              />
             </Flex>
           </Dialog.Body>
 

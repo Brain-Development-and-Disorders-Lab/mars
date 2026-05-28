@@ -25,6 +25,7 @@ import {
   Timeline,
   Collapsible,
   Spacer,
+  Textarea,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -48,7 +49,6 @@ import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import SaveDialog from "@components/SaveDialog";
 import { Cell, createColumnHelper } from "@tanstack/react-table";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import {
@@ -87,7 +87,7 @@ import { auth } from "@lib/auth";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-// Analytics
+// Events
 import { usePostHog } from "posthog-js/react";
 
 const Entity = () => {
@@ -2007,12 +2007,13 @@ const Entity = () => {
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
-              <RichTextEditor
+              <Textarea
                 id={"entityDescriptionInput"}
                 value={previewVersion ? displayEntityDescription : entityDescription}
                 readOnly={!(editing && !previewVersion)}
-                onChange={(value) => setEntityDescription(value)}
+                onChange={(event) => setEntityDescription(event.target.value)}
                 h={"100%"}
+                size={"xs"}
               />
             </Flex>
           </Flex>

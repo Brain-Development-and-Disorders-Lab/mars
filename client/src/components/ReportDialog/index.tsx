@@ -113,6 +113,7 @@ const ReportDialog = (props: ReportDialogProps) => {
               </Text>
               <Textarea
                 size={"xs"}
+                h={"100%"}
                 rounded={"md"}
                 placeholder={"What happened?"}
                 value={description}

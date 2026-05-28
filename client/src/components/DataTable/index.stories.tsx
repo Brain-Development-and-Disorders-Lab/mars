@@ -8,9 +8,9 @@ import DataTable from "@components/DataTable";
 import React from "react";
 import { Flex, Text, Button, Tag } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import ActorTag from "@components/ActorTag";
 
 // Utility imports
 import _ from "lodash";

@@ -18,8 +18,10 @@ import {
   Select,
   Tag,
   Text,
+  Textarea,
   Timeline,
 } from "@chakra-ui/react";
+import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -33,8 +35,6 @@ import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
 import ExportDialog from "@components/ExportDialog";
 import SaveDialog from "@components/SaveDialog";
-import RichTextEditor from "@components/RichTextEditor";
-import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData } from "@types";
@@ -1181,11 +1181,13 @@ const Template = () => {
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
-              <RichTextEditor
+              <Textarea
                 id={"attributeDescriptionInput"}
                 value={displayTemplateDescription}
+                size={"xs"}
+                h={"100%"}
                 readOnly={!(editing && !previewVersion)}
-                onChange={(value) => setTemplateDescription(value)}
+                onChange={(event) => setTemplateDescription(event.target.value)}
               />
             </Flex>
           </Flex>

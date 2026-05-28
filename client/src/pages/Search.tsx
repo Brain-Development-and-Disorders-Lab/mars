@@ -20,6 +20,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -36,6 +37,7 @@ import {
 
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useFeatures } from "@hooks/useFeatures";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -62,9 +64,8 @@ import { JSONPath } from "jsonpath-plus";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-import SearchQueryBuilder from "@components/SearchQueryBuilder";
+// Events
 import { usePostHog } from "posthog-js/react";
-import { useFeatures } from "@hooks/useFeatures";
 
 const Search = () => {
   const [query, setQuery] = useState("");

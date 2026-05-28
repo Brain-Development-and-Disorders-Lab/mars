@@ -58,6 +58,15 @@ import dayjs from "dayjs";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Events
+import { usePostHog } from "posthog-js/react";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
+// Hooks
+import { useFeatures } from "@hooks/useFeatures";
+
 // Variables
 const JSON_MIME_TYPE = "application/json";
 const CSV_MIME_TYPE = "text/csv";
@@ -183,15 +192,6 @@ const IMPORT_TEMPLATE_JSON = gql`
     }
   }
 `;
-
-// Events
-import { usePostHog } from "posthog-js/react";
-
-// Variables
-import { GLOBAL_STYLES } from "@variables";
-
-// Hooks
-import { useFeatures } from "@hooks/useFeatures";
 
 const ImportDialog = (props: ImportDialogProps) => {
   // Posthog

@@ -2,12 +2,11 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Input, Dialog, Text, CloseButton, EmptyState } from "@chakra-ui/react";
+import { Button, Flex, Input, Dialog, Text, CloseButton, EmptyState, Textarea } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Values from "@components/Values";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { ViewAttributeDialogProps } from "@types";
@@ -116,9 +115,11 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                     Description
                   </Text>
-                  <RichTextEditor
+                  <Textarea
                     value={description}
-                    onChange={(value) => setDescription(value)}
+                    size={"xs"}
+                    h={"100%"}
+                    onChange={(event) => setDescription(event.target.value)}
                     readOnly={!isEditing}
                   />
                 </Flex>

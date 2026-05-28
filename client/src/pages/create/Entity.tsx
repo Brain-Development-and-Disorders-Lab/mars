@@ -18,6 +18,7 @@ import {
   Steps,
   Tag,
   Text,
+  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -25,6 +26,7 @@ import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
+import ActorTag from "@components/ActorTag";
 import AddAttributeDialog from "@components/AddAttributeDialog";
 import Relationships from "@components/Relationships";
 import AddRelationshipsDialog from "@components/AddRelationshipDialog";
@@ -32,7 +34,6 @@ import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import Linky from "@components/Linky";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Existing and custom types
 import { AttributeModel, IGenericItem, IRelationship, ResponseData } from "@types";
@@ -58,7 +59,6 @@ import { usePostHog } from "posthog-js/react";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
-import ActorTag from "@components/ActorTag";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -544,11 +544,12 @@ const Entity = () => {
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
-              <RichTextEditor
+              <Textarea
                 data-testid={"create-entity-description"}
                 value={description}
-                onChange={(value) => setDescription(value)}
+                size={"xs"}
                 h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
               />
             </Flex>
           </Flex>

@@ -1,6 +1,6 @@
 // React and Chakra UI components
 import React, { useEffect, useRef, useState } from "react";
-import { Flex, Spacer, Input, Button, Text, Heading, Fieldset, Field, useDisclosure } from "@chakra-ui/react";
+import { Flex, Spacer, Input, Button, Text, Heading, Fieldset, Field, useDisclosure, Textarea } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -9,7 +9,6 @@ import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
-import RichTextEditor from "@components/RichTextEditor";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -297,11 +296,14 @@ const CreateWorkspace = () => {
                     >
                       Description
                     </Field.Label>
-                    <RichTextEditor
+                    <Textarea
                       id={"dialogWorkspaceDescription"}
                       data-testid={"create-workspace-description"}
                       value={description}
-                      onChange={(value) => setDescription(value)}
+                      size={"xs"}
+                      h={"100%"}
+                      minH={"120px"}
+                      onChange={(event) => setDescription(event.target.value)}
                     />
                   </Field.Root>
                 </Fieldset.Content>
