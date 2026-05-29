@@ -31,7 +31,7 @@ describe("AlertDialog Component", () => {
   describe("Basic Rendering", () => {
     it("renders when open", () => {
       renderAlertDialog({ open: true });
-      expect(screen.getByText("Alert")).toBeTruthy();
+      expect(screen.getByText("Alert: Alert")).toBeTruthy();
       expect(screen.getByText("Dialog content")).toBeTruthy();
     });
 
@@ -42,7 +42,7 @@ describe("AlertDialog Component", () => {
 
     it("renders with custom header", () => {
       renderAlertDialog({ header: "Custom Header" });
-      expect(screen.getByText("Custom Header")).toBeTruthy();
+      expect(screen.getByText("Alert: Custom Header")).toBeTruthy();
     });
   });
 
