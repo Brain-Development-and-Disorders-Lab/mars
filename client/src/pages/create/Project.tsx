@@ -258,7 +258,7 @@ const Project = () => {
                 <Field.RequiredIndicator />
               </Field.Label>
               <Textarea
-                data-testid={"create-entity-description"}
+                data-testid={"create-project-description"}
                 value={description}
                 size={"xs"}
                 h={"100%"}

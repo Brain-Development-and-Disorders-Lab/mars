@@ -5,7 +5,6 @@ import { test, expect } from "@playwright/test";
 import {
   navigateToSection,
   openItemFromTable,
-  fillMDEditor,
   saveAndWait,
   clickButtonByText,
   getUniqueName,
@@ -33,9 +32,7 @@ test.describe("Entity", () => {
 
       await page.locator("[data-testid='create-entity-name']").fill(entityName);
       await page.locator('input[type="date"]').fill("2023-10-01");
-      await page
-        .locator("[data-testid='create-entity-description'] textarea")
-        .fill("This is a test entity for navigation.");
+      await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for navigation.");
 
       await page.click("[data-testid='create-entity-continue']");
       await expect(page.locator("text=No Relationships")).toBeVisible();
@@ -60,9 +57,7 @@ test.describe("Entity", () => {
 
       await page.locator("[data-testid='create-entity-name']").fill(entityName);
       await page.locator('input[type="date"]').fill("2023-10-01");
-      await page
-        .locator("[data-testid='create-entity-description'] textarea")
-        .fill("This is a test entity for completion.");
+      await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for completion.");
       await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-finish']");
@@ -97,7 +92,7 @@ test.describe("Entity", () => {
       const updatedDescription = "Updated Entity description";
 
       await page.click("#editEntityButton");
-      await fillMDEditor(page, "#entityDescriptionInput", updatedDescription);
+      await page.locator("#entityDescriptionInput").fill(updatedDescription);
       await saveAndWait(page);
 
       await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });

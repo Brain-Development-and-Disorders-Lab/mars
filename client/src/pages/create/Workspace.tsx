@@ -223,18 +223,18 @@ const CreateWorkspace = () => {
           </Text>
         </Flex>
 
-        <Flex direction={"row"} p={"1"} gap={"2"} wrap={"wrap"}>
-          <Flex direction={"column"} p={"0"} gap={"2"} w={{ base: "100%", md: "50%" }}>
-            {/* Workspace name */}
+        <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             <Flex
               direction={"column"}
+              flex={{ base: "0 0 100%", md: "1" }}
               h={"fit-content"}
               p={"2"}
               gap={"2"}
-              rounded={"md"}
               bg={GLOBAL_STYLES.card.bg}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
             >
               <Fieldset.Root>
                 <Fieldset.Content>
@@ -278,36 +278,24 @@ const CreateWorkspace = () => {
             {/* Workspace description */}
             <Flex
               direction={"column"}
-              h={"fit-content"}
+              flex={{ base: "0 0 100%", md: "1" }}
               p={"2"}
               gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Field.Root gap={"1"}>
-                    <Field.Label
-                      fontWeight={"semibold"}
-                      fontSize={"xs"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
-                      Description
-                    </Field.Label>
-                    <Textarea
-                      id={"dialogWorkspaceDescription"}
-                      data-testid={"create-workspace-description"}
-                      value={description}
-                      size={"xs"}
-                      h={"100%"}
-                      minH={"120px"}
-                      onChange={(event) => setDescription(event.target.value)}
-                    />
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                Description
+              </Text>
+              <Textarea
+                data-testid={"create-workspace-description"}
+                id={"dialogWorkspaceDescription"}
+                value={description}
+                size={"xs"}
+                h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
+              />
             </Flex>
           </Flex>
 

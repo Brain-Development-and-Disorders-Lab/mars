@@ -5,7 +5,6 @@ import { test, expect, Page } from "@playwright/test";
 import {
   navigateToSection,
   openItemFromTable,
-  fillMDEditor,
   clickButtonByText,
   saveAndWait,
   getUniqueName,
@@ -26,8 +25,8 @@ async function fillAndSaveAttribute(
   valueName: string,
   valueData: string,
 ): Promise<void> {
-  await page.locator("[data-testid='create-attribute-name'] input").fill(attributeName);
-  await page.locator("[data-testid='create-attribute-description'] textarea").fill("Attribute description");
+  await page.locator("[data-testid='create-attribute-name']").fill(attributeName);
+  await page.locator("[data-testid='create-attribute-description']").fill("Attribute description");
   await page.click("#addValueRowButton");
   await page.locator('input[placeholder="Enter name"]').fill(valueName);
   await page.locator('input[placeholder="Enter text"]').fill(valueData);
@@ -78,7 +77,7 @@ test.describe("Template", () => {
 
       await page.click("#editTemplateButton");
       await page.locator("#attributeNameInput").fill(`${templateName} Updated`);
-      await fillMDEditor(page, "#attributeDescriptionInput", "Updated description");
+      await page.locator("#attributeDescriptionInput").fill("Updated description");
       await saveAndWait(page);
       await expect(
         page.locator(".chakra-toast__root").filter({ hasText: "Updated Successfully" }).first(),
@@ -178,8 +177,8 @@ test.describe("Template", () => {
       await page.click("#editEntityButton");
       await openAddAttributeDialog(page);
 
-      await page.locator("[data-testid='create-attribute-name'] input").fill("Measurements");
-      await page.locator("[data-testid='create-attribute-description'] textarea").fill("Multiple measurement values");
+      await page.locator("[data-testid='create-attribute-name']").fill("Measurements");
+      await page.locator("[data-testid='create-attribute-description']").fill("Multiple measurement values");
 
       await page.click("#addValueRowButton");
       await page.locator('input[placeholder="Enter name"]').nth(0).fill("Width");

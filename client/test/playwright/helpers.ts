@@ -18,7 +18,7 @@ export async function createTestEntity(page: Page, entityName: string): Promise<
   await page.locator("[data-testid='create-entity-name']").waitFor({ state: "visible", timeout: 10000 });
   await page.locator("[data-testid='create-entity-name']").fill(entityName);
   await page.locator('input[type="date"]').fill("2023-10-01");
-  await page.locator("[data-testid='create-entity-description'] textarea").fill("Test entity");
+  await page.locator("[data-testid='create-entity-description']").fill("Test entity");
   await page.click("[data-testid='create-entity-continue']");
   await page.click("[data-testid='create-entity-continue']");
   await page.click("[data-testid='create-entity-finish']");
@@ -32,8 +32,8 @@ export async function createTestTemplate(page: Page, templateName: string): Prom
   await page.goto("/create/template");
   await page.locator('input[placeholder="Name"]').waitFor({ state: "visible", timeout: 10000 });
   await page.locator('input[placeholder="Name"]').fill(templateName);
-  await page.locator(".w-md-editor textarea").first().click();
-  await page.locator(".w-md-editor textarea").first().fill("Test template description");
+  await page.locator("[data-testid='create-template-description']").first().click();
+  await page.locator("[data-testid='create-template-description']").first().fill("Test template description");
   await page.click("#addValueRowButton");
   await page.locator('input[placeholder="Enter name"]').fill("Test Value");
   await page.waitForTimeout(500);
@@ -61,9 +61,7 @@ export async function setupEnvironment(page: Page, testName: string): Promise<vo
   await page.goto("/create/workspace");
   await page.locator("[data-testid='create-workspace-name']").waitFor({ state: "visible", timeout: 10000 });
   await page.locator("[data-testid='create-workspace-name']").fill(`Test Workspace - ${testName}`);
-  await page
-    .locator("[data-testid='create-workspace-description'] textarea")
-    .fill(`Test Workspace for test: ${testName}`);
+  await page.locator("[data-testid='create-workspace-description']").fill(`Test Workspace for test: ${testName}`);
   await page.click("[data-testid='create-workspace-button']");
   await page.waitForURL("/", { timeout: 10000 });
 }
@@ -84,12 +82,12 @@ export async function resetEnvironment(page: Page): Promise<void> {
     sessionStorage.clear();
     localStorage.clear();
   });
-  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
 
   // Create user account
   await page.locator("#createAccountButton").waitFor({ state: "visible", timeout: 10000 });
   await page.click("#createAccountButton");
-  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
 
   // Populate user information (use environment variables for specific details)
   await page.locator("#userFirstNameInput").fill("User");
@@ -113,7 +111,7 @@ export async function resetEnvironment(page: Page): Promise<void> {
 export async function navigateToSection(page: Page, section: "Entities" | "Projects" | "Templates"): Promise<void> {
   await page.goto("/");
   await page.click(`button:has-text("${section}")`);
-  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
 }
 
 /**
@@ -184,17 +182,6 @@ export async function openItemFromTable(
     await buttons.first().scrollIntoViewIfNeeded();
     await buttons.first().click();
   }
-}
-
-/**
- * Fill an MDEditor textarea
- */
-export async function fillMDEditor(page: Page, selector: string, value: string): Promise<void> {
-  const textarea = page.locator(`${selector} textarea`);
-  await textarea.waitFor({ state: "visible", timeout: 5000 });
-  await textarea.click();
-  await textarea.clear();
-  await textarea.fill(value);
 }
 
 /**

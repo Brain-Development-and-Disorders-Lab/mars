@@ -300,6 +300,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Input
+                        data-testid={"create-attribute-name"}
                         bg={"white"}
                         size={"xs"}
                         rounded={"md"}
@@ -332,6 +333,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                         <Field.RequiredIndicator />
                       </Field.Label>
                       <Textarea
+                        data-testid={"create-attribute-description"}
                         value={description}
                         size={"xs"}
                         h={"100%"}
@@ -375,6 +377,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     </Button>
                   )}
                   <Button
+                    data-testid={"save-add-attribute-button"}
                     variant={"solid"}
                     size={"xs"}
                     rounded={"md"}

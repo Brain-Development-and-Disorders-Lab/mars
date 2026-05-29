@@ -241,6 +241,7 @@ const Template = () => {
                 <Field.RequiredIndicator />
               </Field.Label>
               <Textarea
+                data-testid={"create-template-description"}
                 value={description}
                 size={"xs"}
                 h={"100%"}
