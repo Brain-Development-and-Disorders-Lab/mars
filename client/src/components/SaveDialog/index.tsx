@@ -2,32 +2,17 @@
 import React from "react";
 
 // Existing and custom components
-import { Button, Dialog, Flex, Text, CloseButton } from "@chakra-ui/react";
+import { Button, Dialog, Flex, Text, CloseButton, Textarea } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { SaveModalProps } from "@types";
+import { SaveDialogProps } from "@types";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-const SaveModal = (props: SaveModalProps) => {
-  const {
-    open,
-    onOpenChange,
-    onDone,
-    value,
-    onChange,
-    description,
-    placeholder,
-    showCloseButton = false,
-    modifiedType,
-  } = props;
-
-  const defaultPlaceholder = modifiedType
-    ? `(Optional) Enter a description of the changes made to the ${modifiedType}.`
-    : "(Optional) Enter a description of the changes made.";
+const SaveDialog = (props: SaveDialogProps) => {
+  const { open, onOpenChange, onDone, value, onChange, description, showCloseButton = false, modifiedType } = props;
 
   const defaultDescription = modifiedType
     ? `Specify a description of the changes made to the ${modifiedType}.`
@@ -42,7 +27,7 @@ const SaveModal = (props: SaveModalProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={showCloseButton ? "xs" : "md"}
-            bg={GLOBAL_STYLES.dialog.headerColor}
+            bg={GLOBAL_STYLES.dialog.header.bg}
             roundedTop={"md"}
           >
             <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -57,37 +42,28 @@ const SaveModal = (props: SaveModalProps) => {
               </Dialog.CloseTrigger>
             )}
           </Dialog.Header>
-          <Dialog.Body p={"1"}>
-            <Flex direction={"column"} gap={"1"}>
+
+          <Dialog.Body p={"2"}>
+            <Flex direction={"column"} gap={"2"}>
               {(description !== undefined ? description : defaultDescription) && (
-                <Text fontSize={"xs"} color={"gray.600"}>
+                <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   {description !== undefined ? description : defaultDescription}
                 </Text>
               )}
-              <MDEditor
-                height={150}
-                minHeight={100}
-                maxHeight={400}
+              <Textarea
                 id={"saveMessageInput"}
-                style={{ width: "100%" }}
+                placeholder={"Describe any changes made..."}
                 value={value}
-                preview={"edit"}
-                extraCommands={[]}
-                textareaProps={
-                  placeholder !== undefined ? { placeholder: placeholder || defaultPlaceholder } : undefined
-                }
-                onChange={(newValue) => {
-                  onChange(newValue || "");
-                }}
+                size={"xs"}
+                h={"100%"}
+                minH={"120px"}
+                onChange={(event) => onChange(event.target.value)}
               />
             </Flex>
           </Dialog.Body>
-          <Dialog.Footer
-            p={"1"}
-            bg={showCloseButton ? GLOBAL_STYLES.dialog.footerColor : undefined}
-            roundedBottom={showCloseButton ? "md" : undefined}
-          >
-            <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
+
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
               <Button
                 variant={"solid"}
                 size={"xs"}
@@ -110,4 +86,4 @@ const SaveModal = (props: SaveModalProps) => {
   );
 };
 
-export default SaveModal;
+export default SaveDialog;

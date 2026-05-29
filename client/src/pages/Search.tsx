@@ -20,6 +20,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -36,6 +37,7 @@ import {
 
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useFeatures } from "@hooks/useFeatures";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -62,9 +64,8 @@ import { JSONPath } from "jsonpath-plus";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-import SearchQueryBuilder from "@components/SearchQueryBuilder";
+// Events
 import { usePostHog } from "posthog-js/react";
-import { useFeatures } from "@hooks/useFeatures";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -368,7 +369,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -835,7 +836,7 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
             <Icon name={"search"} size={"sm"} />
@@ -858,7 +859,7 @@ const Search = () => {
             value={activeTab}
             onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
           >
-            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"}>
+            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
               <Button
                 size={"xs"}
                 rounded={"sm"}
@@ -889,13 +890,13 @@ const Search = () => {
 
             {/* Text search */}
             <Tabs.Content value={"text"} p={"0"} pt={"1"}>
-              <Flex direction={"column"} gap={"1"}>
+              <Flex direction={"column"} gap={"2"}>
                 {/* Filter section */}
                 <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
                   <Flex
                     direction={"column"}
-                    gap={"1"}
-                    p={"1"}
+                    gap={"2"}
+                    p={"2"}
                     rounded={"md"}
                     border={GLOBAL_STYLES.border.style}
                     borderColor={GLOBAL_STYLES.border.color}
@@ -923,10 +924,15 @@ const Search = () => {
                     </Flex>
                     <Collapsible.Content>
                       <Flex direction={"column"} gap={"2"} p={"1"}>
-                        <Flex direction={"row"} gap={["2", "4"]} wrap={"wrap"}>
+                        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {/* Search options section */}
-                          <Flex direction={"column"} gap={"1"} minW={"220px"} flexShrink={0}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                          <Flex direction={"column"} gap={"2"} minW={"220px"} flexShrink={0}>
+                            <Text
+                              fontSize={"xs"}
+                              fontWeight={"semibold"}
+                              ml={"0.5"}
+                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            >
                               Search Options
                             </Text>
                             <Checkbox.Root
@@ -942,17 +948,27 @@ const Search = () => {
                           </Flex>
 
                           {/* Entity filters section */}
-                          <Flex direction={"column"} gap={"1"} minW={"260px"} flexShrink={0}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                          <Flex direction={"column"} gap={"2"}>
+                            <Text
+                              fontSize={"xs"}
+                              fontWeight={"semibold"}
+                              ml={"0.5"}
+                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            >
                               Entity Filters
                             </Text>
 
-                            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                               {/* Date range */}
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={"gray.600"}>
-                                    Created Start
+                              <Flex direction={"row"} gap={"2"} align={"center"}>
+                                <Flex direction={"column"} gap={"1"}>
+                                  <Text
+                                    fontSize={"xs"}
+                                    fontWeight={"semibold"}
+                                    ml={"0.5"}
+                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                  >
+                                    Start
                                   </Text>
                                   <Input
                                     type={"date"}
@@ -967,9 +983,14 @@ const Search = () => {
                                     }
                                   />
                                 </Flex>
-                                <Flex direction={"column"} gap={"0.5"}>
-                                  <Text fontSize={"2xs"} color={"gray.600"}>
-                                    Created End
+                                <Flex direction={"column"} gap={"1"}>
+                                  <Text
+                                    fontSize={"xs"}
+                                    fontWeight={"semibold"}
+                                    ml={"0.5"}
+                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                  >
+                                    End
                                   </Text>
                                   <Input
                                     type={"date"}
@@ -987,7 +1008,7 @@ const Search = () => {
                               </Flex>
 
                               {/* Boolean filters */}
-                              <Flex direction={"column"} gap={"1"} mt={"1"}>
+                              <Flex direction={"column"} gap={"1"} mt={"1"} ml={"1"}>
                                 <Checkbox.Root
                                   size={"xs"}
                                   colorPalette={"blue"}
@@ -1071,7 +1092,7 @@ const Search = () => {
                 </Collapsible.Root>
 
                 {/* Search input and submit */}
-                <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
                   <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
                     <Input
                       size={"xs"}
@@ -1154,7 +1175,7 @@ const Search = () => {
           <Flex gap={"1"} p={"0"} w={"100%"}>
             {isSearching && (
               <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
-                <Spinner size={"lg"} color={"gray.600"} />
+                <Spinner size={"lg"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
               </Flex>
             )}
 
@@ -1162,10 +1183,10 @@ const Search = () => {
               <Flex id={"resultsContainer"} direction={"column"} w={"100%"} gap={"1"}>
                 {results.length > 0 ? (
                   <>
-                    <Heading id={"resultsHeading"} size={"sm"} fontWeight={"semibold"}>
-                      {results.length} result
+                    <Text id={"resultsHeading"} fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      Showing: {results.length} result
                       {results.length > 1 ? "s" : ""}
-                    </Heading>
+                    </Text>
                     <DataTable
                       columns={searchResultColumns}
                       visibleColumns={visibleColumns}
@@ -1178,7 +1199,7 @@ const Search = () => {
                   </>
                 ) : (
                   <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       No results found
                     </Text>
                   </Flex>

@@ -177,7 +177,7 @@ const Login = () => {
               <Flex direction={"column"} gap={"2"}>
                 <Fieldset.Root>
                   <Field.Root gap={"0.5"} required>
-                    <FieldLabel fontSize={"xs"}>
+                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                       Email
                       <Field.RequiredIndicator />
                     </FieldLabel>
@@ -193,7 +193,7 @@ const Login = () => {
                   </Field.Root>
 
                   <Field.Root gap={"0.5"} required>
-                    <FieldLabel fontSize={"xs"}>
+                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
                       Password
                       <Field.RequiredIndicator />
                     </FieldLabel>
@@ -212,7 +212,7 @@ const Login = () => {
                       color={"gray.400"}
                       fontWeight={"semibold"}
                       cursor={"pointer"}
-                      _hover={{ color: "gray.600" }}
+                      _hover={{ color: GLOBAL_STYLES.font.secondaryHeader.color }}
                       alignSelf={"flex-end"}
                       onClick={() => navigate("/forgot-password")}
                     >

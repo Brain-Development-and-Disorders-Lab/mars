@@ -2,7 +2,7 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
-import { Button, Dialog, CloseButton, Field, Fieldset, Flex, Input, Tag, Text } from "@chakra-ui/react";
+import { Button, Dialog, CloseButton, Fieldset, Flex, Input, Tag, Text } from "@chakra-ui/react";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -174,7 +174,7 @@ const UploadDialog = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={"blue.300"}>
+              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                   <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
                     <Icon name={"upload"} size={"xs"} />
@@ -187,25 +187,8 @@ const UploadDialog = (props: {
                   </Dialog.CloseTrigger>
                 </Flex>
               </Dialog.Header>
-              <Dialog.Body p={"1"} gap={"1"}>
+              <Dialog.Body p={"2"} gap={"2"}>
                 <Flex gap={"1"} direction={"column"}>
-                  <Flex gap={"1"} direction={"row"} align={"center"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Supported file formats:
-                    </Text>
-                    <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>PDF</Tag.Label>
-                    </Tag.Root>
-                    <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>JPEG</Tag.Label>
-                    </Tag.Root>
-                    <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>PNG</Tag.Label>
-                    </Tag.Root>
-                    <Tag.Root colorPalette={"green"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>DNA</Tag.Label>
-                    </Tag.Root>
-                  </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>
                     <Fieldset.Root>
                       <Fieldset.Content h={"100%"} w={"100%"}>
@@ -216,10 +199,10 @@ const UploadDialog = (props: {
                           w={"100%"}
                           align={"center"}
                           justify={"center"}
-                          border={"1px"}
-                          borderStyle={"dashed"}
-                          borderColor={GLOBAL_STYLES.border.color}
-                          bg={"gray.50"}
+                          border={GLOBAL_STYLES.border.style}
+                          borderStyle={_.isEqual(file, {}) ? "dashed" : "solid"}
+                          borderColor={!_.isEqual(file, {}) ? "blue.300" : GLOBAL_STYLES.border.color}
+                          bg={!_.isEqual(file, {}) ? GLOBAL_STYLES.card.bg : "white"}
                           rounded={"md"}
                           cursor={"pointer"}
                           onClick={handleDropZoneClick}
@@ -227,65 +210,79 @@ const UploadDialog = (props: {
                           onDrop={handleDrop}
                         >
                           {_.isEqual(file, {}) ? (
-                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
-                              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                Drag file here
-                              </Text>
-                              <Text fontSize={"sm"}>or click to upload</Text>
+                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
+                              <Icon name={"upload"} size={"xl"} color={"gray.300"} />
+                              <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
+                                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                                  Click to upload file
+                                </Text>
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  or drag and drop
+                                </Text>
+                                <Flex direction={"row"} gap={"1"} mt={"1"}>
+                                  {["PDF", "JPEG", "PNG", "DNA"].map((fmt) => (
+                                    <Tag.Root key={fmt} size={"sm"} colorPalette={"gray"} variant={"outline"}>
+                                      <Tag.Label fontSize={"xs"}>{fmt}</Tag.Label>
+                                    </Tag.Root>
+                                  ))}
+                                </Flex>
+                              </Flex>
                             </Flex>
                           ) : (
-                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
-                              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                {displayName}
-                              </Text>
-                              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
-                                {displayType}
-                              </Text>
+                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
+                              <Icon name={"upload"} size={"xl"} color={"blue.300"} />
+                              <Flex direction={"column"} justify={"center"} align={"center"}>
+                                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                                  {displayName}
+                                </Text>
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  {displayType}
+                                </Text>
+                              </Flex>
                             </Flex>
                           )}
                         </Flex>
-                        <Field.Root h={"100%"} w={"100%"}>
-                          <Input
-                            ref={fileInputRef}
-                            type={"file"}
-                            h={"100%"}
-                            w={"100%"}
-                            rounded={"md"}
-                            position={"absolute"}
-                            top={"0"}
-                            left={"0"}
-                            opacity={"0"}
-                            aria-hidden={"true"}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                              if (event.target.files && event.target.files.length > 0) {
-                                // Only accept image or PDF files
-                                if (
-                                  _.includes(
-                                    ["image/jpeg", "image/png", "application/pdf"],
-                                    event.target.files[0].type,
-                                  ) ||
-                                  _.endsWith(event.target.files[0].name, ".dna")
-                                ) {
-                                  setFile(event.target.files[0]);
-                                } else {
-                                  toaster.create({
-                                    title: "Warning",
-                                    type: "warning",
-                                    description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
-                                    duration: 4000,
-                                    closable: true,
-                                  });
-                                }
+                        <Input
+                          ref={fileInputRef}
+                          type={"file"}
+                          h={"100%"}
+                          w={"100%"}
+                          rounded={"md"}
+                          position={"absolute"}
+                          top={"0"}
+                          left={"0"}
+                          opacity={"0"}
+                          aria-hidden={"true"}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                            if (event.target.files && event.target.files.length > 0) {
+                              // Only accept image or PDF files
+                              if (
+                                _.includes(
+                                  ["image/jpeg", "image/png", "application/pdf"],
+                                  event.target.files[0].type,
+                                ) ||
+                                _.endsWith(event.target.files[0].name, ".dna")
+                              ) {
+                                setFile(event.target.files[0]);
+                              } else {
+                                toaster.create({
+                                  title: "Warning",
+                                  type: "warning",
+                                  description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
+                                  duration: 4000,
+                                  closable: true,
+                                });
                               }
-                            }}
-                          />
-                        </Field.Root>
+                            }
+                          }}
+                        />
                       </Fieldset.Content>
                     </Fieldset.Root>
                   </Flex>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"xs"}

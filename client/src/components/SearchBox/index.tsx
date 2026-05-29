@@ -250,7 +250,7 @@ const SearchBox = () => {
       <Flex direction={"column"} gap={"0"} w={"100%"}>
         {/* Input row with dropdown */}
         <Box position={"relative"} w={"100%"}>
-          <Flex gap={"1"} align={"center"} w={"100%"}>
+          <Flex gap={"2"} align={"center"} w={"100%"}>
             <InputGroup
               startElement={features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined}
             >
@@ -317,12 +317,12 @@ const SearchBox = () => {
               <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"column"} gap={"1"}>
                 <Flex width={"100%"} direction={"row"} gap={"1"} align={"center"}>
                   {isSearching ? (
-                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} p={"2"}>
                       <Spinner size={"xs"} />
                       <Text fontSize={"xs"}>Searching...</Text>
                     </Flex>
                   ) : (
-                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} p={"2"}>
                       <Text fontSize={"xs"}>Showing</Text>
                       <Text fontWeight={"semibold"} fontSize={"xs"}>
                         {Math.min(results.length, MAX_RESULTS)}
@@ -379,13 +379,14 @@ const SearchBox = () => {
                               justify={"space-between"}
                               align={"center"}
                               p={"0"}
+                              pl={"2"}
                             >
                               <Flex direction={"column"} gap={"0.5"}>
                                 <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
                                   {result.name}
                                 </Text>
                                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.iconColor} />
+                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.color.icon} />
                                   <Text fontSize={"2xs"} color={"gray.500"}>
                                     {resultType}
                                   </Text>
@@ -393,7 +394,7 @@ const SearchBox = () => {
                               </Flex>
                               <Button
                                 size="2xs"
-                                mx={"1"}
+                                mx={"2"}
                                 variant="subtle"
                                 colorPalette="gray"
                                 aria-label={`View ${resultType}`}

@@ -339,7 +339,7 @@ const Signup = () => {
                 <Flex direction={"row"} gap={"4"}>
                   <Flex direction={"column"} w={"100%"}>
                     <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         First Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -359,7 +359,7 @@ const Signup = () => {
                   </Flex>
                   <Flex direction={"column"} w={"100%"}>
                     <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         Last Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -381,7 +381,7 @@ const Signup = () => {
                 <Flex direction={"column"} gap={"4"}>
                   <Flex direction={"column"} gap={"1"}>
                     <Field.Root gap={"0.5"} invalid={emailError !== ""} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         Email
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -409,7 +409,7 @@ const Signup = () => {
 
                   <Flex direction={"column"}>
                     <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"}>
+                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                         Affiliation
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -448,7 +448,7 @@ const Signup = () => {
               {!isExistingUser && (
                 <Flex direction={"column"} gap={"1"} w={"100%"}>
                   <Field.Root gap={"0.5"} required>
-                    <Field.Label fontSize={"xs"}>
+                    <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                       Password
                       <Field.RequiredIndicator />
                     </Field.Label>
@@ -464,7 +464,7 @@ const Signup = () => {
                     />
                   </Field.Root>
                   <Field.Root gap={"0.5"} invalid={!isPasswordValid} required>
-                    <Field.Label fontSize={"xs"}>
+                    <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
                       Confirm Password
                       <Field.RequiredIndicator />
                     </Field.Label>

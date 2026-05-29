@@ -1,6 +1,8 @@
-// Import types
-import { ReadStream } from "fs";
+// Import external types
 import { ObjectId } from "mongodb";
+import { BoxProps } from "@chakra-ui/react";
+import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
+import { ReadStream } from "fs";
 
 // Request types to the server
 declare enum Requests {
@@ -103,10 +105,18 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributeViewButtonProps = {
+export type ViewAttributeDialogProps = {
+  // Dialog state
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+
+  // Dialog Attribute information
   attribute: AttributeModel;
   editing?: boolean;
   isTemplate?: boolean;
+  permittedDataValues?: ColumnInfo[];
+
+  // Callback functions
   onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
   cancelCallback?: () => void;
@@ -130,7 +140,7 @@ export type IValue = {
   disabled?: boolean;
   showRemove?: boolean;
   onRemove?: (id: string) => void;
-  onUpdate?: (data: D) => void;
+  onUpdate?: (data: string) => void;
 };
 
 export type IValueSelectData = {
@@ -235,6 +245,31 @@ export type RelationshipsProps = {
   relationships: IRelationship[];
   setRelationships: (value: React.SetStateAction<IRelationship[]>) => void;
   viewOnly?: boolean;
+  sourceName?: string;
+  sourceId?: string;
+};
+
+// Utility type to specify the props of `AddRelationshipDialog`
+export type AddRelationshipDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  sourceId?: string;
+  sourceName: string;
+  existingRelationships: IRelationship[];
+  onAdd: (relationships: IRelationship[]) => void;
+};
+
+export type AddAttributeDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  owner: string;
+  templates: AttributeModel[];
+  entityName: string;
+  entityDescription: string;
+  permittedDataValues?: ColumnInfo[];
+  onAdd: (attribute: AttributeModel) => void;
+  /** Optional, shown only when the user is creating from scratch (not from a template). */
+  onSaveAsTemplate?: (attribute: IAttribute) => Promise<void>;
 };
 
 // Workspace types
@@ -463,14 +498,21 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// `PreviewModal` props
-export type PreviewModalProps = {
+// `RichTextEditor` props
+export interface RichTextEditorProps extends Omit<BoxProps, "onChange"> {
+  value: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}
+
+// `PreviewDialog` props
+export type PreviewDialogProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
 };
 
-// `PreviewModal` support type
-export type PreviewSupport = {
+// `PreviewDialog` support type
+export type PreviewDialogSupport = {
   document: boolean;
   image: boolean;
   sequence: boolean;
@@ -484,8 +526,8 @@ export type ImportDialogProps = {
 
 export type ExportDataType = "entity" | "entities" | "project" | "template";
 
-// `ExportModal` props
-export type ExportModalProps = {
+// `ExportDialog` props
+export type ExportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
   dataType: ExportDataType;
@@ -495,20 +537,20 @@ export type ExportModalProps = {
   ids?: string[];
 };
 
-// `ScanModal` props
-export type ScanModalProps = {
+// `ScanDialog` props
+export type ScanDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `ReportModal` props
-export type ReportModalProps = {
+// `ReportDialog` props
+export type ReportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `UnsavedChangesModal` props
-export type UnsavedChangesModalProps = {
+// `UnsavedChangesDialog` props
+export type UnsavedChangesDialogProps = {
   blocker: Blocker;
   cancelBlockerRef: React.MutableRefObject<null>;
   onClose: () => void;
@@ -517,6 +559,7 @@ export type UnsavedChangesModalProps = {
 
 // `Scanner` props
 export type ScannerProps = Html5QrcodeCameraScanConfig & {
+  fps: number;
   verbose: boolean;
 };
 
@@ -598,6 +641,9 @@ export type IconNames =
 
   // Arrows
   | "a_right"
+  | "a_right_fill"
+  | "a_left_fill"
+  | "a_both_fill"
 
   // Chevrons
   | "c_left"
@@ -642,8 +688,8 @@ export type MultiEntitySelectProps = {
   setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
-// SaveModal props
-export type SaveModalProps = {
+// `SaveDialog` props
+export type SaveDialogProps = {
   open: boolean;
   onOpenChange: (details: { open: boolean }) => void;
   onDone: () => void;
@@ -677,7 +723,7 @@ export type IFile = Promise<{
   filename: string;
   mimetype: string;
   encoding: string;
-  createReadStream: () => fs.ReadStream;
+  createReadStream: () => ReadStream;
 }>;
 
 // Generic GraphQL resolver parent type (for unused parents)

@@ -5,7 +5,6 @@ import test, { expect, Page } from "@playwright/test";
 import {
   navigateToSection,
   openItemFromTable,
-  fillMDEditor,
   saveAndWait,
   clickButtonByText,
   getUniqueName,
@@ -19,9 +18,7 @@ async function createTestProject(page: Page, projectName: string): Promise<void>
   await page.locator("[data-testid='create-project-name']").waitFor({ state: "visible", timeout: 10000 });
   await page.locator("[data-testid='create-project-name']").fill(projectName);
   await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
-  await page
-    .locator("[data-testid='create-project-description'] textarea")
-    .fill("Test project for entity editing tests");
+  await page.locator("[data-testid='create-project-description']").fill("Test project for entity editing tests");
   await page.click("[data-testid='create-project-finish']");
   await page.waitForURL(/\/projects/, { timeout: 10000 });
   await page.waitForTimeout(1000);
@@ -42,9 +39,7 @@ test.describe("Project", () => {
 
       await page.locator("[data-testid='create-project-name']").fill(projectName);
       await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
-      await page
-        .locator("[data-testid='create-project-description'] textarea")
-        .fill("This is a test project description.");
+      await page.locator("[data-testid='create-project-description']").fill("This is a test project description.");
       await page.click("[data-testid='create-project-finish']");
 
       await expect(page).toHaveURL(/\/projects/);
@@ -56,7 +51,7 @@ test.describe("Project", () => {
       await page.locator("[data-testid='create-project-name']").fill(getUniqueName("Project Name"));
       await expect(page.locator("[data-testid='create-project-finish']")).toBeDisabled();
 
-      await page.locator("[data-testid='create-project-description'] textarea").fill("Test description");
+      await page.locator("[data-testid='create-project-description']").fill("Test description");
       await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
       await expect(page.locator("[data-testid='create-project-finish']")).toBeEnabled();
     });
@@ -65,7 +60,7 @@ test.describe("Project", () => {
       await page.locator("[data-testid='create-project-name']").fill(getUniqueName("Project Cancel"));
       await page.click("[data-testid='create-project-cancel']");
 
-      // A blocker modal may appear when navigating away with unsaved changes
+      // A blocker dialog may appear when navigating away with unsaved changes
       const continueButton = page.locator('button:has-text("Continue")');
       if ((await continueButton.count()) > 0) {
         await continueButton.click();
@@ -106,7 +101,7 @@ test.describe("Project", () => {
       const updatedDescription = "Updated Project description";
 
       await page.click("#editProjectButton");
-      await fillMDEditor(page, "#projectDescriptionInput", updatedDescription);
+      await page.locator("#projectDescriptionInput").fill(updatedDescription);
       await saveAndWait(page);
 
       await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });

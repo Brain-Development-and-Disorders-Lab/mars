@@ -18,8 +18,10 @@ import {
   Select,
   Tag,
   Text,
+  Textarea,
   Timeline,
 } from "@chakra-ui/react";
+import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
@@ -31,10 +33,8 @@ import TimestampTag from "@components/TimestampTag";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import VisibilityTag from "@components/VisibilityTag";
-import ExportModal from "@components/ExportModal";
-import SaveModal from "@components/SaveModal";
-import MDEditor from "@uiw/react-md-editor";
-import { createColumnHelper } from "@tanstack/react-table";
+import ExportDialog from "@components/ExportDialog";
+import SaveDialog from "@components/SaveDialog";
 
 // Existing and custom types
 import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData } from "@types";
@@ -73,7 +73,7 @@ const Template = () => {
   // State for dialog confirming if user should archive
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
-  // Save message modal
+  // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -337,7 +337,7 @@ const Template = () => {
   };
 
   /**
-   * Handle the "Done" button within the save message modal
+   * Handle the "Done" button within the save message dialog
    */
   const handleSaveMessageDoneClick = async () => {
     try {
@@ -507,22 +507,25 @@ const Template = () => {
             bg={"blue.100"}
             mx={"-1.5"}
             mt={"-1.5"}
+            mb={"1"}
             px={"1.5"}
             pt={"1.5"}
           >
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"clock"} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Preview:
-              </Text>
-              <Tag.Root colorPalette={"green"}>
-                <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
-              </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+            <Flex direction={"row"} align={"center"} gap={"1"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"clock"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Preview:
+                </Text>
+                <Tag.Root colorPalette={"green"}>
+                  <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
+                </Tag.Root>
+              </Flex>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -551,26 +554,18 @@ const Template = () => {
           </Flex>
         )}
 
-        <Flex
-          gap={"1"}
-          p={"1"}
-          pb={{ base: "1", lg: "0" }}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          wrap={"wrap"}
-        >
-          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+        <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
             <Flex
               align={"center"}
               gap={"1"}
               p={"1"}
               border={"2px solid"}
-              borderColor={GLOBAL_STYLES.template.iconColor}
+              borderColor={GLOBAL_STYLES.template.color.icon}
               bg={"teal.50"}
               rounded={"md"}
             >
-              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
               <Heading fontWeight={"semibold"} size={"sm"}>
                 {displayTemplateName}
               </Heading>
@@ -584,7 +579,7 @@ const Template = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={"gray.500"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 rounded={"md"}
               >
                 <Icon name={"archive"} size={"sm"} color={"gray.500"} />
@@ -598,7 +593,7 @@ const Template = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -643,7 +638,7 @@ const Template = () => {
                 <Icon name={"rewind"} size={"xs"} />
               </Button>
             ) : (
-              <Flex gap={"1"}>
+              <Flex gap={"2"}>
                 {editing && (
                   <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
                     Cancel
@@ -676,11 +671,11 @@ const Template = () => {
             >
               <Drawer.Trigger asChild>
                 <Button
-                  id={"historyButton"}
+                  onClick={() => setHistoryOpen(true)}
                   variant={"subtle"}
+                  colorPalette={"gray"}
                   size={"xs"}
                   rounded={"md"}
-                  onClick={() => setHistoryOpen(true)}
                 >
                   History
                   <Icon name={"clock"} size={"xs"} />
@@ -691,9 +686,9 @@ const Template = () => {
                 <Drawer.Positioner padding={"4"}>
                   <Drawer.Content rounded={"md"}>
                     <Drawer.CloseTrigger asChild>
-                      <CloseButton size={"2xs"} top={"6px"} onClick={() => setHistoryOpen(false)} />
+                      <CloseButton top={"6px"} size={"2xs"} onClick={() => setHistoryOpen(false)} />
                     </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
                         <Icon name={"clock"} size={"xs"} />
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -702,20 +697,39 @@ const Template = () => {
                       </Flex>
                     </Drawer.Header>
 
-                    <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                    <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {templateHistory.length > 0 ? dayjs(templateHistory[0].timestamp).fromNow() : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Versions:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {templateHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+
                       <Flex
                         direction={"row"}
-                        gap={"1"}
+                        gap={"2"}
                         align={"start"}
                         rounded={"md"}
                         bg={"gray.100"}
-                        p={"1"}
+                        p={"2"}
                         justify={"space-between"}
                         wrap={"wrap"}
                       >
                         <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Sort by:
+                            Sort
                           </Text>
                           <Select.Root
                             value={[historySortOrder]}
@@ -774,13 +788,13 @@ const Template = () => {
 
                         <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Date filter:
+                            Edited Between
                           </Text>
 
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Start date
+                                Start
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -794,7 +808,7 @@ const Template = () => {
                             </Field.Root>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                End date
+                                End
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -807,7 +821,7 @@ const Template = () => {
                               />
                             </Field.Root>
                           </Flex>
-                          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"} w={"100%"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
                             <Button
                               size={"xs"}
                               rounded={"md"}
@@ -845,27 +859,8 @@ const Template = () => {
                         </Flex>
                       </Flex>
 
-                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length > 0 ? dayjs(templateHistory[0].timestamp).fromNow() : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
-
                       {sortedTemplateHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle" mt={"1"}>
+                        <Timeline.Root size="sm" variant="subtle" mt={"2"}>
                           {sortedTemplateHistory.map((templateVersion) => {
                             const isExpanded = expandedVersions.has(templateVersion.version);
                             return (
@@ -901,7 +896,7 @@ const Template = () => {
                                               disabled={templateVersion.message.length <= 40}
                                               showArrow
                                             >
-                                              <Text fontSize={"xs"} color={"gray.600"}>
+                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                                 {_.truncate(templateVersion.message, { length: 40 })}
                                               </Text>
                                             </Tooltip>
@@ -984,7 +979,7 @@ const Template = () => {
                                           gap={"2"}
                                           mt={"1"}
                                           p={"2"}
-                                          bg={"gray.50"}
+                                          bg={GLOBAL_STYLES.card.bg}
                                           rounded={"md"}
                                         >
                                           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1088,15 +1083,32 @@ const Template = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"1"} p={"1"} wrap={"wrap"}>
-          {/* Overview and "Description" field */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
+          {/* Template Overview and Description */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Overview */}
-            <Flex direction={"column"} p={"1"} h={"fit-content"} gap={"1"} bg={"gray.100"} rounded={"md"} grow={"1"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              bg={"gray.100"}
+              rounded={"md"}
+              grow={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Name
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Name
                   </Text>
                   <Input
                     id={"attributeNameInput"}
@@ -1112,23 +1124,43 @@ const Template = () => {
                     borderColor={GLOBAL_STYLES.border.color}
                   />
                 </Flex>
-
-                <TimestampTag timestamp={template.timestamp} description={"Created"} />
               </Flex>
 
-              <Flex gap={"1"} direction={"row"}>
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Visibility
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Owner
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Template Owner
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Timestamp
                   </Text>
-                  <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
+                  <TimestampTag timestamp={template.timestamp} description={"Created"} />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -1136,91 +1168,101 @@ const Template = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
+              h={"100%"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
-              basis={"40%"}
               grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                Template Description
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                Description
               </Text>
-              <MDEditor
+              <Textarea
                 id={"attributeDescriptionInput"}
-                height={150}
-                minHeight={100}
-                maxHeight={400}
-                style={{ width: "100%" }}
                 value={displayTemplateDescription}
-                preview={editing && !previewVersion ? "edit" : "preview"}
-                extraCommands={[]}
-                onChange={(value) => {
-                  setTemplateDescription(value || "");
-                }}
+                size={"xs"}
+                h={"100%"}
+                readOnly={!(editing && !previewVersion)}
+                onChange={(event) => setTemplateDescription(event.target.value)}
               />
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-              Template Values
-            </Text>
-            <Values
-              key={previewVersion?.version ?? "current"}
-              viewOnly={!editing || !!previewVersion}
-              values={displayTemplateValues}
-              setValues={setTemplateValues}
-            />
-          </Flex>
-
-          <Flex
-            direction={"column"}
-            gap={"1"}
-            p={"1"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-              Template Usage
-            </Text>
-            {templateUsage.length > 0 ? (
-              <DataTable
-                data={templateUsage}
-                columns={usageColumns}
-                visibleColumns={{}}
-                selectedRows={{}}
-                viewOnly={true}
-                showSelection={true}
-                showPagination
+          {/* Template Values and Usage */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Values */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                Values
+              </Text>
+              <Values
+                key={previewVersion?.version ?? "current"}
+                viewOnly={!editing || !!previewVersion}
+                values={displayTemplateValues}
+                setValues={setTemplateValues}
               />
-            ) : (
-              <EmptyState.Root>
-                <EmptyState.Content>
-                  <EmptyState.Indicator>
-                    <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
-                  </EmptyState.Indicator>
-                  <EmptyState.Description>No Usage</EmptyState.Description>
-                </EmptyState.Content>
-              </EmptyState.Root>
-            )}
+            </Flex>
+
+            {/* Usage */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                Usage
+              </Text>
+              {templateUsage.length > 0 ? (
+                <DataTable
+                  data={templateUsage}
+                  columns={usageColumns}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  viewOnly={true}
+                  showSelection={true}
+                  showPagination
+                />
+              ) : (
+                <EmptyState.Root>
+                  <EmptyState.Content>
+                    <EmptyState.Indicator>
+                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
+                    </EmptyState.Indicator>
+                    <EmptyState.Description>No Usage</EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState.Root>
+              )}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
 
-      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
+      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
 
-      {/* Save message modal */}
-      <SaveModal
+      {/* Save message dialog */}
+      <SaveDialog
         open={saveMessageOpen}
         onOpenChange={(details) => setSaveMessageOpen(details.open)}
         onDone={handleSaveMessageDoneClick}

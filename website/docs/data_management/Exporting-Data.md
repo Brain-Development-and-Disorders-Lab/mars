@@ -20,7 +20,7 @@ Individual Entities can also be exported from the Entity View.
 
 ![Export Entities - Entity View](../img/export_Entities_2.png)
 
-The modal will present a set of checkboxes to select the data that will be be exported. The file format can also be selected.
+The dialog will present a set of checkboxes to select the data that will be be exported. The file format can also be selected.
 
 Exporting in JSON format:
 

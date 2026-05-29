@@ -1,13 +1,11 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { Flex, Text, Tag, Button } from "@chakra-ui/react";
-import DataTable from "@components/DataTable";
+import { Button, EmptyState, Flex, Text, Tag, Box } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Tooltip from "@components/Tooltip";
-import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom and existing types
-import { DataTableAction, IGenericItem, IRelationship, RelationshipsProps } from "@types";
+import { IconNames, IGenericItem, IRelationship, RelationshipsProps, RelationshipType } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -17,8 +15,28 @@ import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
+export const RELATIONSHIP_TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
+  parent: "orange.600",
+  child: "yellow.400",
+  general: "cyan.600",
+};
+
+export const RELATIONSHIP_TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {
+  parent: "a_right_fill",
+  child: "a_left_fill",
+  general: "a_both_fill",
+};
+
+export const RELATIONSHIP_TYPE_PALETTE: Record<RelationshipType, string> = {
+  parent: "orange",
+  child: "yellow",
+  general: "cyan",
+};
+
 const Relationships = (props: RelationshipsProps) => {
-  // GraphQL query to fetch entity name by ID
   const GET_ENTITY_NAME = gql`
     query GetEntityName($_id: String) {
       entity(_id: $_id) {
@@ -29,7 +47,6 @@ const Relationships = (props: RelationshipsProps) => {
   `;
   const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, { fetchPolicy: "network-only" });
 
-  // Extract all unique entity IDs from relationships
   const uniqueEntityIds = useMemo(() => {
     const ids = new Set<string>();
     props.relationships.forEach((rel) => {
@@ -39,190 +56,144 @@ const Relationships = (props: RelationshipsProps) => {
     return Array.from(ids);
   }, [props.relationships]);
 
-  // State to store fetched entity names
   const [entityNames, setEntityNames] = useState<Record<string, string>>({});
 
-  // Fetch entity names for all unique IDs
   useEffect(() => {
     let isMounted = true;
 
     const fetchEntityNames = async () => {
       const nameMap: Record<string, string> = {};
-
-      // Fetch names for all unique entity IDs
       await Promise.all(
         uniqueEntityIds.map(async (entityId) => {
           try {
-            const { data } = await getEntityName({
-              variables: { _id: entityId },
-            });
+            const { data } = await getEntityName({ variables: { _id: entityId } });
             if (data?.entity && isMounted) {
               nameMap[entityId] = data.entity.name;
             }
-          } catch (error: any) {
-            // If fetch fails, fall back to the name from relationship data
+          } catch {
             if (isMounted) {
-              const relationship = props.relationships.find(
-                (rel) => rel.source._id === entityId || rel.target._id === entityId,
-              );
-              if (relationship) {
-                nameMap[entityId] =
-                  relationship.source._id === entityId ? relationship.source.name : relationship.target.name;
+              const rel = props.relationships.find((r) => r.source._id === entityId || r.target._id === entityId);
+              if (rel) {
+                nameMap[entityId] = rel.source._id === entityId ? rel.source.name : rel.target.name;
               }
             }
           }
         }),
       );
-
-      if (isMounted) {
-        setEntityNames(nameMap);
-      }
+      if (isMounted) setEntityNames(nameMap);
     };
 
-    if (uniqueEntityIds.length > 0) {
-      fetchEntityNames().catch(ignoreAbort);
-    }
-
+    if (uniqueEntityIds.length > 0) fetchEntityNames().catch(ignoreAbort);
     return () => {
       isMounted = false;
     };
   }, [uniqueEntityIds, getEntityName, props.relationships]);
 
-  /**
-   * Compare two `IRelationship` structures and determine if they are describing
-   * the same relationship or not
-   * @param a Relationship
-   * @param b Relationship
-   * @return {boolean}
-   */
-  const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean => {
-    return _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
-  };
+  const relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean =>
+    _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
 
-  /**
-   * Search a collection of existing `IRelationship` structures to find if another
-   * `IRelationship` already exists in the collection or not
-   * @param relationship Relationship structure to search for
-   * @param relationships Collection of existing Relationships
-   * @return {boolean}
-   */
-  const relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean => {
-    for (const r of relationships) {
-      if (relationshipIsEqual(r, relationship)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // Remove Relationship from the Entity state
   const removeRelationship = (relationship: IRelationship) => {
-    props.setRelationships([
-      ...props.relationships.filter((r) => {
-        return !relationshipIsEqual(r, relationship);
-      }),
-    ]);
+    props.setRelationships(props.relationships.filter((r) => !relationshipIsEqual(r, relationship)));
   };
-
-  // Remove multiple Relationships from the Entity state
-  const removeRelationships = (toRemove: IRelationship[]) => {
-    props.setRelationships(
-      props.relationships.filter((r) => {
-        return !relationshipExists(r, toRemove);
-      }),
-    );
-  };
-
-  // Configure relationships table columns and data
-  const relationshipTableColumnHelper = createColumnHelper<IRelationship>();
-  const relationshipTableColumns = [
-    relationshipTableColumnHelper.accessor("source", {
-      cell: (info) => {
-        const sourceEntity = info.getValue();
-        // Use fetched name if available, otherwise fall back to relationship data name
-        const displayName = entityNames[sourceEntity._id] || sourceEntity.name;
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={displayName} disabled={displayName.length < 32} showArrow>
-              <Flex align={"center"} gap={"1"} w={"100%"} justify={"space-between"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(displayName, { length: 32 })}
-                </Text>
-              </Flex>
-            </Tooltip>
-          </Flex>
-        );
-      },
-      header: "Source",
-    }),
-    relationshipTableColumnHelper.accessor("type", {
-      cell: (info) => {
-        return (
-          <Flex p={"1"}>
-            <Tag.Root size={"sm"}>
-              <Tag.Label fontSize={"xs"}>{info.getValue()}</Tag.Label>
-            </Tag.Root>
-          </Flex>
-        );
-      },
-      header: "Type",
-      meta: {
-        minWidth: 100,
-        maxWidth: 100,
-      },
-    }),
-    relationshipTableColumnHelper.accessor("target", {
-      cell: (info) => {
-        const targetEntity = info.getValue();
-        // Use fetched name if available, otherwise fall back to relationship data name
-        return (
-          <Flex w={"100%"} justify={"space-between"} gap={"1"}>
-            <Linky id={targetEntity._id} type={"entities"} />
-            <Button
-              size="2xs"
-              variant="subtle"
-              colorPalette="red"
-              aria-label={"Remove relationship"}
-              onClick={() => {
-                removeRelationship(info.row.original);
-              }}
-            >
-              Remove
-              <Icon name={"delete"} size={"xs"} />
-            </Button>
-          </Flex>
-        );
-      },
-      header: "Target",
-    }),
-  ];
-  const relationshipTableActions: DataTableAction[] = [
-    {
-      label: "Remove Relationships",
-      icon: "delete",
-      action(table, rows) {
-        const toRemove: IRelationship[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toRemove.push(table.getRow(rowIndex).original);
-        }
-        removeRelationships(toRemove);
-      },
-    },
-  ];
 
   return (
-    <Flex w={"100%"}>
-      <DataTable
-        data={props.relationships}
-        setData={props.setRelationships}
-        columns={relationshipTableColumns}
-        viewOnly={props.viewOnly}
-        actions={relationshipTableActions}
-        selectedRows={{}}
-        visibleColumns={{}}
-        showPagination
-        showSelection
-      />
+    <Flex direction={"column"} w={"100%"} gap={"1"}>
+      {props.relationships.length > 0 ? (
+        <Flex
+          direction={"column"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+          rounded={"md"}
+          overflow={"hidden"}
+        >
+          {props.relationships.map((relationship, index) => {
+            const sourceName = entityNames[relationship.source._id] || relationship.source.name;
+            return (
+              <Flex
+                key={`${relationship.source._id}-${relationship.target._id}-${relationship.type}-${index}`}
+                direction={"row"}
+                align={"center"}
+                gap={"2"}
+                px={"2"}
+                py={"1.5"}
+                borderBottom={index < props.relationships.length - 1 ? "1px solid" : "none"}
+                borderColor={"gray.200"}
+                bg={"white"}
+                _hover={{ bg: "gray.25" }}
+                wrap={"wrap"}
+              >
+                {/* Source, arrow, and target as one unit so the badge wraps below, never between them */}
+                <Flex direction={"row"} align={"center"} gap={"2"}>
+                  <Tooltip content={sourceName} disabled={sourceName.length < 24} showArrow>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      {_.truncate(sourceName, { length: 24 })}
+                    </Text>
+                  </Tooltip>
+
+                  {/* Relationship arrow */}
+                  <Flex direction={"row"} gap={"0"} align={"center"}>
+                    {relationship.type === "parent" && (
+                      <Box w={"55px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
+
+                    {relationship.type === "general" && (
+                      <Box w={"27.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
+
+                    <Icon
+                      name={RELATIONSHIP_TYPE_ARROW_ICON[relationship.type]}
+                      size={"xs"}
+                      color={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]}
+                    />
+
+                    {relationship.type === "general" && (
+                      <Box w={"27.5px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
+
+                    {relationship.type === "child" && (
+                      <Box w={"55px"} h={"2px"} bg={RELATIONSHIP_TYPE_ARROW_COLOR[relationship.type]} />
+                    )}
+                  </Flex>
+
+                  <Linky id={relationship.target._id} type={"entities"} truncate={12} />
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"} ml={"auto"}>
+                  {/* Type badge */}
+                  <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[relationship.type]}>
+                    <Tag.Label fontSize={"xs"}>{_.capitalize(relationship.type)}</Tag.Label>
+                  </Tag.Root>
+
+                  {/* Remove */}
+                  {!props.viewOnly && (
+                    <Button
+                      size={"2xs"}
+                      variant={"subtle"}
+                      colorPalette={"red"}
+                      aria-label={"Remove relationship"}
+                      onClick={() => removeRelationship(relationship)}
+                    >
+                      Remove
+                      <Icon name={"delete"} size={"xs"} />
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
+            );
+          })}
+        </Flex>
+      ) : (
+        <Flex justify={"center"} align={"center"} minH={"120px"}>
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <Icon name={"graph"} size={"lg"} />
+              </EmptyState.Indicator>
+              <EmptyState.Description>No Relationships</EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        </Flex>
+      )}
     </Flex>
   );
 };

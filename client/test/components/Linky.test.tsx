@@ -272,9 +272,9 @@ describe("Linky Component", () => {
         </ChakraProvider>,
       );
 
-      // Initially shows loading, then shows fallback when query returns no data
+      // Initially shows loading, then shows truncated fallback when query returns no data
       await waitFor(() => {
-        expect(screen.getByText("Missing ID Fallback")).toBeTruthy();
+        expect(screen.getByText("Missing ID Fall...")).toBeTruthy();
       });
     });
   });

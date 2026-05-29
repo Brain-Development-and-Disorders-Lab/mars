@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Text, Tag, Stat, Badge, EmptyState } from "@chakra-ui/react";
+import { Button, Flex, Heading, Text, Tag, Badge, EmptyState } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -275,7 +275,7 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("timestamp", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -361,7 +361,7 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -461,7 +461,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!!workspace && !loading}>
-      <Flex direction={"column"} w={"100%"} p={"1"} gap={"1"}>
+      <Flex direction={"column"} w={"100%"} p={"1"} gap={"2"}>
         {session?.user?.hasSeenWalkthrough !== true && !isSessionPending && breakpoint !== "base" && (
           <Joyride
             continuous
@@ -472,95 +472,162 @@ const Dashboard = () => {
             tooltipComponent={WalkthroughTooltip}
           />
         )}
-        <Flex direction={"column"} basis={"70%"} gap={"1"}>
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"dashboard"} size={"sm"} />
-                <Heading size={"xl"}>Dashboard</Heading>
-              </Flex>
-            </Flex>
 
-            <Flex>
-              <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
-            </Flex>
+        {/* Header */}
+        <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"1"}>
+          <Flex direction={"row"} align={"center"} gap={"1"}>
+            <Icon name={"dashboard"} size={"sm"} />
+            <Heading size={"xl"}>Dashboard</Heading>
           </Flex>
-
-          {/* Quick Search */}
-          <SearchBox />
-
-          <Flex
-            p={"2"}
-            gap={"2"}
-            rounded={"md"}
-            basis={"30%"}
-            align={"center"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-          >
-            <Stat.Root>
-              <Stat.Label fontSize={"xs"}>Total Workspace Entities</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>{entityMetrics.all}</Stat.ValueText>
-              <Badge px={"0"} variant={"plain"} colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}>
-                {entityMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                {entityMetrics.addedDay} in last 24 hours
-              </Badge>
-            </Stat.Root>
-
-            <Stat.Root>
-              <Stat.Label fontSize={"xs"}>Total Workspace Projects</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>{projectMetrics.all}</Stat.ValueText>
-              <Badge px={"0"} variant={"plain"} colorPalette={projectMetrics.addedDay > 0 ? "green" : "gray"}>
-                {projectMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                {projectMetrics.addedDay} in last 24 hours
-              </Badge>
-            </Stat.Root>
-
-            <Stat.Root>
-              <Stat.Label fontSize={"xs"}>Total Workspace Templates</Stat.Label>
-              <Stat.ValueText fontSize={"md"}>{templateMetrics.all}</Stat.ValueText>
-              <Badge px={"0"} variant={"plain"} colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}>
-                {templateMetrics.addedDay > 0 && <Stat.UpIndicator />}
-                {templateMetrics.addedDay} in last 24 hours
-              </Badge>
-            </Stat.Root>
-
-            {breakpoint !== "base" && breakpoint !== "sm" && (
-              <Stat.Root>
-                <Stat.Label fontSize={"xs"}>Total Workspace Collaborators</Stat.Label>
-                <Stat.ValueText fontSize={"md"}>{workspaceMetrics.collaborators}</Stat.ValueText>
-                <Badge px={"0"} variant={"plain"} colorPalette={"gray"}>
-                  No change
-                </Badge>
-              </Stat.Root>
-            )}
-          </Flex>
+          <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
         </Flex>
 
-        <Flex direction={"row"} wrap={{ base: "wrap", lg: "nowrap" }} gap={"1"} p={"0"}>
-          <Flex direction={"column"} gap={"1"} flex={{ base: "1 1 100%", lg: "0 0 70%" }} minW={"0"}>
-            {/* Projects and Entities */}
+        {/* Quick Search */}
+        <SearchBox />
+
+        {/* Metrics */}
+        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            flex={"1"}
+            minW={"120px"}
+            p={"2"}
+            gap={"1"}
+            bg={GLOBAL_STYLES.card.bg}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                Entities
+              </Text>
+            </Flex>
+            <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
+              {entityMetrics.all ?? "–"}
+            </Text>
+            <Badge
+              px={"0"}
+              variant={"plain"}
+              colorPalette={entityMetrics.addedDay > 0 ? "green" : "gray"}
+              fontSize={"xs"}
+            >
+              {entityMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+              {entityMetrics.addedDay > 0 ? `+${entityMetrics.addedDay} today` : "No new today"}
+            </Badge>
+          </Flex>
+
+          <Flex
+            direction={"column"}
+            flex={"1"}
+            minW={"120px"}
+            p={"2"}
+            gap={"1"}
+            bg={GLOBAL_STYLES.card.bg}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                Projects
+              </Text>
+            </Flex>
+            <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
+              {projectMetrics.all ?? "–"}
+            </Text>
+            <Badge
+              px={"0"}
+              variant={"plain"}
+              colorPalette={projectMetrics.addedDay > 0 ? "green" : "gray"}
+              fontSize={"xs"}
+            >
+              {projectMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+              {projectMetrics.addedDay > 0 ? `+${projectMetrics.addedDay} today` : "No new today"}
+            </Badge>
+          </Flex>
+
+          <Flex
+            direction={"column"}
+            flex={"1"}
+            minW={"120px"}
+            p={"2"}
+            gap={"1"}
+            bg={GLOBAL_STYLES.card.bg}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
+          >
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                Templates
+              </Text>
+            </Flex>
+            <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
+              {templateMetrics.all ?? "–"}
+            </Text>
+            <Badge
+              px={"0"}
+              variant={"plain"}
+              colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}
+              fontSize={"xs"}
+            >
+              {templateMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+              {templateMetrics.addedDay > 0 ? `+${templateMetrics.addedDay} today` : "No new today"}
+            </Badge>
+          </Flex>
+
+          {breakpoint !== "base" && breakpoint !== "sm" && (
             <Flex
               direction={"column"}
-              p={"1"}
-              background={"white"}
-              rounded={"md"}
+              flex={"1"}
+              minW={"120px"}
+              p={"2"}
               gap={"1"}
+              bg={GLOBAL_STYLES.card.bg}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              rounded={"md"}
+            >
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"person"} size={"xs"} color={"gray.500"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                  Collaborators
+                </Text>
+              </Flex>
+              <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
+                {workspaceMetrics.collaborators ?? "–"}
+              </Text>
+              <Badge px={"0"} variant={"plain"} colorPalette={"gray"} fontSize={"xs"}>
+                No change
+              </Badge>
+            </Flex>
+          )}
+        </Flex>
+
+        <Flex direction={"row"} wrap={{ base: "wrap", lg: "nowrap" }} gap={"2"}>
+          <Flex direction={"column"} gap={"2"} flex={{ base: "1 1 100%", lg: "0 0 70%" }} minW={"0"}>
+            {/* Recent Projects */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              rounded={"md"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
-              {/* Projects heading */}
-              <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
+              <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"0.5"}>
+                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Projects
                 </Text>
               </Flex>
 
-              {/* Projects table */}
-              {/* Condition: Loaded and content present */}
               {!loading && projectData.length > 0 && (
                 <DataTable
                   columns={projectTableColumns}
@@ -571,23 +638,22 @@ const Dashboard = () => {
                 />
               )}
 
-              {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(projectData) && (
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}
 
-              <Flex justify={"right"}>
+              <Flex justify={"flex-end"}>
                 <Button
-                  key={`view-projects-all`}
                   size={"xs"}
                   rounded={"md"}
+                  variant={"solid"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/projects`)}
                 >
@@ -597,27 +663,24 @@ const Dashboard = () => {
               </Flex>
             </Flex>
 
+            {/* Recent Entities */}
             <Flex
               direction={"column"}
-              p={"1"}
-              background={"white"}
+              p={"2"}
               rounded={"md"}
-              gap={"1"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
-              {/* Entities heading */}
-              <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
-                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
+              <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"1.5"}>
+                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Recent Entities
                 </Text>
               </Flex>
 
-              {/* Entities table */}
-              {/* Condition: Loaded and content present */}
               {!loading && entityData.length > 0 && (
                 <DataTable
                   columns={entityTableColumns}
@@ -632,28 +695,27 @@ const Dashboard = () => {
                 />
               )}
 
-              {/* Condition: Loaded and no content present */}
               {!loading && _.isEmpty(entityData) && (
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.defaultColor} />
+                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
                 </EmptyState.Root>
               )}
 
-              <Flex justify={"right"}>
+              <Flex justify={"flex-end"}>
                 <Button
-                  key={`view-entity-all`}
                   size={"xs"}
                   rounded={"md"}
+                  variant={"solid"}
                   colorPalette={"blue"}
                   onClick={() => navigate(`/entities`)}
                 >
                   All Entities
-                  <Icon name={"c_right"} />
+                  <Icon name={"a_right"} size={"xs"} />
                 </Button>
               </Flex>
             </Flex>
@@ -662,15 +724,22 @@ const Dashboard = () => {
           {/* Activity */}
           <Flex
             direction={"column"}
+            gap={"2"}
             flex={{ base: "1 1 100%", lg: "0 0 30%" }}
-            p={"1"}
-            gap={"1"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            h={"fit-content"}
+            minW={"0"}
+            pr={{ base: "", lg: "2" }}
           >
-            <ActivityFeed />
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"1"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              h={"fit-content"}
+            >
+              <ActivityFeed />
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

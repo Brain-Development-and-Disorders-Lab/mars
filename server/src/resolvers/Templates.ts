@@ -134,7 +134,11 @@ export const TemplatesResolvers = {
     },
 
     // Export a Template
-    exportTemplate: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<string> => {
+    exportTemplate: async (
+      _parent: IResolverParent,
+      args: { _id: string; fields?: string[]; includeHistory?: boolean },
+      context: Context,
+    ): Promise<string> => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -155,7 +159,7 @@ export const TemplatesResolvers = {
       }
 
       if (_.includes(workspace.templates, args._id)) {
-        return await Templates.export(args._id);
+        return await Templates.export(args._id, args.fields, args.includeHistory);
       } else {
         throw new GraphQLError("You do not have permission to access this Template", {
           extensions: {

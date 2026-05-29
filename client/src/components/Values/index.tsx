@@ -53,6 +53,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { getValueTypeIconProps } from "@lib/util";
 
+// Hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
+
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
@@ -298,7 +301,7 @@ const ValueDataSelect = (props: {
   // Setup state using this data
   const [selected, setSelected] = useState<SelectOption>(initialSelected);
   const [options, setOptions] = useState<SelectOption[]>(initialOptions);
-  const [addOptionModalOpen, setAddOptionModalOpen] = useState(false);
+  const [addOptionDialogOpen, setAddOptionDialogOpen] = useState(false);
 
   // Additional state
   const [newOption, setNewOption] = useState<string>("");
@@ -307,7 +310,7 @@ const ValueDataSelect = (props: {
   /**
    * Update the `newOption` state and perform error check to ensure
    * only valid Options are entered
-   * @param value Updated Option value entered through modal
+   * @param value Updated Option value entered through dialog
    */
   const updateNewOption = (value: string) => {
     setNewOption(value);
@@ -340,20 +343,20 @@ const ValueDataSelect = (props: {
     );
     setSelected(options[0]);
     setNewOption("");
-    setAddOptionModalOpen(false);
+    setAddOptionDialogOpen(false);
   };
 
   // Handle canceling select options
   const cancelSelectOptions = () => {
     setNewOption("");
-    setAddOptionModalOpen(false);
+    setAddOptionDialogOpen(false);
   };
 
-  // Handle opening select options modal
-  const openSelectModal = () => {
+  // Handle opening select options dialog
+  const openSelectDialog = () => {
     setOptions([]);
     setNewOption("");
-    setAddOptionModalOpen(true);
+    setAddOptionDialogOpen(true);
   };
 
   return (
@@ -418,9 +421,9 @@ const ValueDataSelect = (props: {
           h={"100%"}
           p={"0"}
           gap={"2"}
-          align="center"
-          justify="center"
-          border="1px solid transparent"
+          align={"center"}
+          justify={"center"}
+          border={"1px solid transparent"}
           _focus={{
             bg: "white",
             borderColor: "blue.300",
@@ -433,7 +436,7 @@ const ValueDataSelect = (props: {
           cursor={props.viewOnly ? "default" : "pointer"}
           onClick={() => {
             if (!props.viewOnly) {
-              openSelectModal();
+              openSelectDialog();
             }
           }}
         >
@@ -444,30 +447,30 @@ const ValueDataSelect = (props: {
         </Flex>
       )}
 
-      {/* Select Add Options Modal */}
-      <Dialog.Root open={addOptionModalOpen} size="sm" placement="center" closeOnEscape closeOnInteractOutside>
+      {/* Select Add Options Dialog */}
+      <Dialog.Root open={addOptionDialogOpen} size={"sm"} placement={"center"} closeOnEscape closeOnInteractOutside>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop="md" bg={GLOBAL_STYLES.dialog.headerColor}>
-              <Flex direction="row" align="center" gap="1" p={"2"}>
-                <Icon name="v_select" />
-                <Text fontSize="xs" fontWeight="semibold">
+            <Dialog.Header p={"0"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+              <Flex direction={"row"} align={"center"} gap={"1"} p={"2"}>
+                <Icon name={"v_select"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
                   Add Options
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size="2xs" top={"6px"} onClick={cancelSelectOptions} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={cancelSelectOptions} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
-            <Dialog.Body p="1" gap="1" pb="1">
-              <Flex direction="column" gap="1">
-                <Flex direction="row" gap="1">
-                  <Field.Root invalid={invalidOption} gap={"1"}>
+            <Dialog.Body p={"2"} gap={"2"} pb={"1"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"}>
+                  <Field.Root invalid={invalidOption} gap={"0.5"}>
                     <Input
-                      size="xs"
-                      rounded="md"
-                      placeholder="Enter Option"
+                      size={"xs"}
+                      rounded={"md"}
+                      placeholder={"Enter Option"}
                       value={newOption}
                       onChange={(e) => updateNewOption(e.target.value)}
                       onKeyUp={(e) => {
@@ -480,36 +483,43 @@ const ValueDataSelect = (props: {
                       Please specify a valid Option
                     </Field.ErrorText>
                   </Field.Root>
-                  <Button colorPalette="green" size="xs" rounded="md" onClick={addOption} disabled={invalidOption}>
+                  <Button
+                    colorPalette={"green"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={addOption}
+                    disabled={invalidOption}
+                  >
                     Add
-                    <Icon name="add" />
+                    <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
+
                 <Box>
-                  <Stack gap="1" separator={<Separator />} pb="1" maxH="200px" overflowY={"auto"}>
+                  <Stack gap={"2"} separator={<Separator />} pb={"1"} maxH={"200px"} overflowY={"auto"}>
                     {options.length > 0 ? (
                       options.map((option, index) => (
                         <Flex
                           key={option.value}
-                          direction="row"
+                          direction={"row"}
                           cursor={props.viewOnly ? "default" : "text"}
                           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-                          justify="space-between"
-                          align="center"
+                          justify={"space-between"}
+                          align={"center"}
                         >
-                          <Flex gap="1">
-                            <Text fontWeight="semibold" fontSize="xs" ml={"0.5"}>
+                          <Flex gap={"1"}>
+                            <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
                               Option {index + 1}:
                             </Text>
-                            <Text fontSize="xs">{option.value}</Text>
+                            <Text fontSize={"xs"}>{option.value}</Text>
                           </Flex>
                           <IconButton
                             aria-label={`remove_${index}`}
-                            size="2xs"
-                            colorPalette="red"
+                            size={"2xs"}
+                            colorPalette={"red"}
                             onClick={() => removeOption(option)}
                           >
-                            <Icon name="delete" />
+                            <Icon name={"delete"} />
                           </IconButton>
                         </Flex>
                       ))
@@ -517,14 +527,14 @@ const ValueDataSelect = (props: {
                       <Flex
                         cursor={props.viewOnly ? "default" : "text"}
                         onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-                        align="center"
-                        justify="center"
-                        minH="60px"
-                        rounded="md"
+                        align={"center"}
+                        justify={"center"}
+                        minH={"60px"}
+                        rounded={"md"}
                         border={GLOBAL_STYLES.border.style}
                         borderColor={GLOBAL_STYLES.border.color}
                       >
-                        <Text fontSize="xs" fontWeight="semibold" color="gray.400">
+                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                           No Options added
                         </Text>
                       </Flex>
@@ -533,21 +543,21 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p="1" bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom="md">
-              <Button size="xs" rounded="md" colorPalette="red" onClick={cancelSelectOptions}>
+            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={cancelSelectOptions}>
                 Cancel
-                <Icon name="cross" />
+                <Icon name={"cross"} size={"xs"} />
               </Button>
               <Spacer />
               <Button
-                size="xs"
-                rounded="md"
-                colorPalette="green"
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"green"}
                 onClick={confirmSelectOptions}
                 disabled={options.length === 0}
               >
                 Confirm
-                <Icon name="check" />
+                <Icon name={"check"} size={"xs"} />
               </Button>
             </Dialog.Footer>
           </Dialog.Content>
@@ -648,12 +658,29 @@ const Values = (props: {
   // Local type for tracking column names
   type ValuesColumn = "name" | "type" | "value";
 
+  const { breakpoint, getResponsiveValue } = useBreakpoint();
+
   // Counter for unique IDs
   const idCounter = useRef(0);
 
-  // Column widths and their minimums
-  const minColumnWidths = { name: 220, type: 120, value: 260 };
+  // Column widths scaled to the current breakpoint
+  const minColumnWidths = getResponsiveValue<{ name: number; type: number; value: number }>(
+    {
+      base: { name: 120, type: 100, value: 150 },
+      sm: { name: 150, type: 110, value: 180 },
+      md: { name: 180, type: 120, value: 200 },
+    },
+    { name: 220, type: 120, value: 260 },
+  );
+  const minColumnWidthsRef = useRef(minColumnWidths);
+  minColumnWidthsRef.current = minColumnWidths;
+
   const [columnWidths, setColumnWidths] = useState({ ...minColumnWidths });
+
+  // Reset column widths to responsive defaults when the breakpoint changes
+  useEffect(() => {
+    setColumnWidths({ ...minColumnWidthsRef.current });
+  }, [breakpoint]);
 
   // Refs for components involved in changing column widths
   const tableRef = useRef<HTMLDivElement>(null);
@@ -722,9 +749,9 @@ const Values = (props: {
     if (!resizeRef.current) return;
     const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
     const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
-    // For name and type, reserve space for the value column's minimum width
-    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? minColumnWidths.value : 0);
-    const newWidth = Math.min(maxWidth, Math.max(minColumnWidths[column], startWidth + (event.clientX - startX)));
+    const mins = minColumnWidthsRef.current;
+    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? mins.value : 0);
+    const newWidth = Math.min(maxWidth, Math.max(mins[column], startWidth + (event.clientX - startX)));
     setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
   }, []);
 
@@ -797,41 +824,41 @@ const Values = (props: {
   };
 
   return (
-    <Box w="100%" display="flex" flexDirection="column" css={{ WebkitOverflowScrolling: "touch" }}>
+    <Box w={"100%"} display={"flex"} flexDirection={"column"} css={{ WebkitOverflowScrolling: "touch" }}>
       {/* Table */}
-      <Box flex="1" minH="0" overflowX="auto" overflowY="auto">
+      <Box flex={"1"} minH={"0"} overflowX={"auto"} overflowY={"auto"}>
         <Box
           ref={tableRef}
-          minW="800px"
-          w="100%"
+          minW={getResponsiveValue({ base: "360px", sm: "440px", md: "490px" }, "600px")}
+          w={"100%"}
           border={GLOBAL_STYLES.border.style}
           borderColor={GLOBAL_STYLES.border.color}
-          borderRadius="md"
-          overflow="hidden"
+          borderRadius={"md"}
+          overflow={"hidden"}
         >
           {/* Header Row */}
-          <Flex gap={0} bg="gray.100" borderBottom="1px solid" borderColor="gray.200" direction="row">
+          <Flex gap={0} bg={"gray.100"} borderBottom={"1px solid"} borderColor={"gray.200"} direction={"row"}>
             {/* Select Column Header */}
             {!props.viewOnly && (
               <Flex
-                w="40px"
+                w={"40px"}
                 flex={"0 0 auto"}
-                minW="40px"
+                minW={"40px"}
                 px={1}
                 py={1}
-                align="center"
-                justify="center"
-                bg="gray.100"
-                borderRight="1px solid"
-                borderColor="gray.200"
-                overflow="hidden"
+                align={"center"}
+                justify={"center"}
+                bg={"gray.100"}
+                borderRight={"1px solid"}
+                borderColor={"gray.200"}
+                overflow={"hidden"}
                 flexShrink={0}
               >
                 <Checkbox.Root
                   checked={allSelected ? true : someSelected ? "indeterminate" : false}
                   onCheckedChange={toggleSelectAll}
-                  size="xs"
-                  colorPalette="blue"
+                  size={"xs"}
+                  colorPalette={"blue"}
                 >
                   <Checkbox.HiddenInput />
                   <Checkbox.Control />
@@ -846,30 +873,30 @@ const Values = (props: {
               minW={`${columnWidths.name}px`}
               px={1}
               py={1}
-              fontSize="xs"
-              fontWeight="semibold"
-              color="gray.600"
-              bg="gray.100"
-              borderRight="1px solid"
-              borderColor="gray.200"
-              position="relative"
-              textAlign="center"
-              lineHeight="1.2"
-              align="center"
-              justify="center"
-              overflow="hidden"
+              fontSize={"xs"}
+              fontWeight={"semibold"}
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
+              bg={"gray.100"}
+              borderRight={"1px solid"}
+              borderColor={"gray.200"}
+              position={"relative"}
+              textAlign={"center"}
+              lineHeight={"1.2"}
+              align={"center"}
+              justify={"center"}
+              overflow={"hidden"}
               flexShrink={0}
             >
-              <Text textAlign="center">Name</Text>
+              <Text textAlign={"center"}>Name</Text>
               {/* Resize Handle */}
               <Box
-                position="absolute"
-                right="-1px"
-                top="0"
-                bottom="0"
-                width="3px"
-                cursor="col-resize"
-                bg="transparent"
+                position={"absolute"}
+                right={"-1px"}
+                top={"0"}
+                bottom={"0"}
+                width={"3px"}
+                cursor={"col-resize"}
+                bg={"transparent"}
                 _hover={{ bg: "blue.300" }}
                 onMouseDown={(e) => handleResizeStart("name", e)}
                 zIndex={10}
@@ -883,30 +910,30 @@ const Values = (props: {
               minW={`${columnWidths.type}px`}
               px={1}
               py={1}
-              fontSize="xs"
-              fontWeight="semibold"
-              color="gray.600"
-              bg="gray.100"
-              borderRight="1px solid"
-              borderColor="gray.200"
-              position="relative"
-              textAlign="center"
-              lineHeight="1.2"
-              align="center"
-              justify="center"
-              overflow="hidden"
+              fontSize={"xs"}
+              fontWeight={"semibold"}
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
+              bg={"gray.100"}
+              borderRight={"1px solid"}
+              borderColor={"gray.200"}
+              position={"relative"}
+              textAlign={"center"}
+              lineHeight={"1.2"}
+              align={"center"}
+              justify={"center"}
+              overflow={"hidden"}
               flexShrink={0}
             >
-              <Text textAlign="center">Type</Text>
+              <Text textAlign={"center"}>Type</Text>
               {/* Resize Handle */}
               <Box
-                position="absolute"
-                right="-1px"
-                top="0"
-                bottom="0"
-                width="3px"
-                cursor="col-resize"
-                bg="transparent"
+                position={"absolute"}
+                right={"-1px"}
+                top={"0"}
+                bottom={"0"}
+                width={"3px"}
+                cursor={"col-resize"}
+                bg={"transparent"}
                 _hover={{ bg: "blue.300" }}
                 onMouseDown={(e) => handleResizeStart("type", e)}
                 zIndex={10}
@@ -921,26 +948,26 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color="gray.600"
-              bg="gray.100"
-              position="relative"
-              textAlign="center"
-              lineHeight="1.2"
-              align="center"
-              justify="center"
-              overflow="hidden"
+              color={GLOBAL_STYLES.font.secondaryHeader.color}
+              bg={"gray.100"}
+              position={"relative"}
+              textAlign={"center"}
+              lineHeight={"1.2"}
+              align={"center"}
+              justify={"center"}
+              overflow={"hidden"}
               flexShrink={0}
             >
-              <Text textAlign="center">Value</Text>
+              <Text textAlign={"center"}>Value</Text>
               {/* Resize Handle */}
               <Box
-                position="absolute"
-                right="-1px"
-                top="0"
-                bottom="0"
-                width="3px"
-                cursor="col-resize"
-                bg="transparent"
+                position={"absolute"}
+                right={"-1px"}
+                top={"0"}
+                bottom={"0"}
+                width={"3px"}
+                cursor={"col-resize"}
+                bg={"transparent"}
                 _hover={{ bg: "blue.300" }}
                 onMouseDown={(e) => handleResizeStart("value", e)}
                 zIndex={10}
@@ -949,7 +976,7 @@ const Values = (props: {
           </Flex>
 
           {/* Data Rows */}
-          <Box overflowY="auto" overflowX="hidden">
+          <Box overflowY={"auto"} overflowX={"hidden"}>
             {paginatedValues.map((value, index) => (
               <ValueRow
                 key={value._id}
@@ -967,20 +994,27 @@ const Values = (props: {
 
           {/* Add Row Button */}
           {!props.viewOnly && (
-            <Flex borderTop="1px solid" borderColor="gray.200" p={0} justify="center" align="center" bg="gray.100">
+            <Flex
+              borderTop={"1px solid"}
+              borderColor={"gray.200"}
+              p={0}
+              justify={"center"}
+              align={"center"}
+              bg={"gray.100"}
+            >
               <Button
-                id="addValueRowButton"
-                size="xs"
-                variant="ghost"
-                colorPalette="green"
+                id={"addValueRowButton"}
+                size={"xs"}
+                variant={"ghost"}
+                colorPalette={"green"}
                 onClick={addRow}
-                aria-label="Add value"
-                w="100%"
+                aria-label={"Add value"}
+                w={"100%"}
                 h={"fit-content"}
                 p={"0.5"}
               >
-                <Icon name="add" size="xs" />
-                <Text ml={1} fontSize="xs" fontWeight="semibold">
+                <Icon name={"add"} size={"xs"} />
+                <Text ml={1} fontSize={"xs"} fontWeight={"semibold"}>
                   Add Value
                 </Text>
               </Button>
@@ -991,86 +1025,86 @@ const Values = (props: {
 
       {/* Pagination Toolbar */}
       <Flex
-        gap={1}
-        align="center"
-        wrap="wrap"
+        gap={2}
+        align={"center"}
+        wrap={"wrap"}
         justify={{ base: "space-between", sm: "space-between" }}
-        w="100%"
-        mt={1}
+        w={"100%"}
+        mt={2}
         flexShrink={0}
       >
-        <Flex direction="row" gap={1} align="center" wrap="wrap">
+        <Flex direction={"row"} gap={2} align={"center"} wrap={"wrap"}>
           <IconButton
-            variant="outline"
-            size="xs"
-            rounded="md"
-            aria-label="first page"
+            variant={"outline"}
+            size={"xs"}
+            rounded={"md"}
+            aria-label={"first page"}
             onClick={() => setCurrentPage(1)}
             disabled={currentPage <= 1}
           >
-            <Icon name="c_double_left" />
+            <Icon name={"c_double_left"} />
           </IconButton>
           <IconButton
-            variant="outline"
-            size="xs"
-            rounded="md"
-            aria-label="previous page"
+            variant={"outline"}
+            size={"xs"}
+            rounded={"md"}
+            aria-label={"previous page"}
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage <= 1}
           >
-            <Icon name="c_left" />
+            <Icon name={"c_left"} />
           </IconButton>
           {totalPages > 0 && (
             <Flex gap={1}>
-              <Text fontSize="xs" fontWeight="semibold">
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {currentPage}
               </Text>
-              <Text fontSize="xs"> of </Text>
-              <Text fontSize="xs" fontWeight="semibold">
+              <Text fontSize={"xs"}> of </Text>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {totalPages}
               </Text>
             </Flex>
           )}
           <IconButton
-            variant="outline"
-            size="xs"
-            rounded="md"
-            aria-label="next page"
+            variant={"outline"}
+            size={"xs"}
+            rounded={"md"}
+            aria-label={"next page"}
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage >= totalPages}
           >
-            <Icon name="c_right" />
+            <Icon name={"c_right"} />
           </IconButton>
           <IconButton
-            variant="outline"
-            size="xs"
-            rounded="md"
-            aria-label="last page"
+            variant={"outline"}
+            size={"xs"}
+            rounded={"md"}
+            aria-label={"last page"}
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage >= totalPages}
           >
-            <Icon name="c_double_right" />
+            <Icon name={"c_double_right"} />
           </IconButton>
           {!props.viewOnly && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette="yellow" size="xs" rounded="md">
+                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
                   Actions
-                  <Icon name="lightning" size="xs" />
+                  <Icon name={"lightning"} size={"xs"} />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
-                <Menu.Content p={1} rounded="md">
+                <Menu.Content p={1} rounded={"md"}>
                   <Menu.Item
-                    value="remove"
+                    value={"remove"}
                     disabled={selectedRows.size === 0}
                     onClick={() => {
                       if (selectedRows.size > 0) removeSelectedRows();
                     }}
                   >
-                    <Flex direction="row" gap="1" align="center">
-                      <Icon name="delete" size="xs" />
-                      <Text fontSize="xs">Remove Values ({selectedRows.size})</Text>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"delete"} size={"xs"} />
+                      <Text fontSize={"xs"}>Remove Values ({selectedRows.size})</Text>
                     </Flex>
                   </Menu.Item>
                 </Menu.Content>
@@ -1079,24 +1113,24 @@ const Values = (props: {
           )}
         </Flex>
 
-        <Flex direction="row" gap={1} align="center" wrap="wrap">
-          <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+        <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
+          <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
             Show:
           </Text>
-          <Fieldset.Root w="fit-content">
+          <Fieldset.Root w={"fit-content"}>
             <Fieldset.Content>
               <Field.Root>
                 <Select.Root
-                  size="xs"
-                  w="80px"
+                  size={"xs"}
+                  w={"80px"}
                   collection={createListCollection({ items: PAGE_SIZE_OPTIONS })}
                   value={[rowsPerPage.toString()]}
                   onValueChange={(details) => setRowsPerPage(parseInt(details.value[0]))}
                 >
                   <Select.HiddenSelect />
                   <Select.Control>
-                    <Select.Trigger rounded="md">
-                      <Select.ValueText placeholder="Page Size" />
+                    <Select.Trigger rounded={"md"}>
+                      <Select.ValueText placeholder={"Page Size"} />
                     </Select.Trigger>
                     <Select.IndicatorGroup>
                       <Select.Indicator />
@@ -1157,8 +1191,10 @@ const ValueRow = (props: {
   const [valueName, setValueName] = useState(props.value.name);
   const [valueType, setValueType] = useState<IValueType>(props.value.type);
   const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
-  const initialData =
-    inColumnMode && props.permittedValues?.some((c) => c.name === props.value.data) ? props.value.data : "";
+  let initialData = props.value.data;
+  if (inColumnMode && !props.permittedValues?.some((c) => c.name === props.value.data)) {
+    initialData = "";
+  }
   const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
   useEffect(() => {
@@ -1203,19 +1239,19 @@ const ValueRow = (props: {
     let iconStyle: IconNames = "link";
     let badgeBg = "blue.50";
     let badgeBorder = "blue.100";
-    let iconColor = GLOBAL_STYLES.project.iconColor;
+    let iconColor = GLOBAL_STYLES.project.color.icon;
 
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
         badgeBg = "blue.50";
         badgeBorder = "blue.100";
-        iconColor = GLOBAL_STYLES.project.iconColor;
+        iconColor = GLOBAL_STYLES.project.color.icon;
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";
         badgeBorder = "gray.200";
-        iconColor = "gray.600";
+        iconColor = GLOBAL_STYLES.font.secondaryHeader.color;
       }
     }
 
@@ -1336,15 +1372,15 @@ const ValueRow = (props: {
         <Input
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
-          size="xs"
+          size={"xs"}
           h={"100%"}
-          borderRadius="none"
-          fontSize="xs"
-          type="number"
+          borderRadius={"none"}
+          fontSize={"xs"}
+          type={"number"}
           readOnly={props.viewOnly}
-          placeholder="Enter number"
-          border="1px solid transparent"
-          bg="transparent"
+          placeholder={"Enter number"}
+          border={"1px solid transparent"}
+          bg={"transparent"}
           cursor={props.viewOnly ? "default" : "text"}
           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
           _focus={{
@@ -1364,14 +1400,14 @@ const ValueRow = (props: {
         <Input
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
-          size="xs"
+          size={"xs"}
           h={"100%"}
-          borderRadius="none"
-          fontSize="xs"
+          borderRadius={"none"}
+          fontSize={"xs"}
           readOnly={props.viewOnly}
-          placeholder="Enter text"
-          border="1px solid transparent"
-          bg="transparent"
+          placeholder={"Enter text"}
+          border={"1px solid transparent"}
+          bg={"transparent"}
           cursor={props.viewOnly ? "default" : "text"}
           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
           _focus={{
@@ -1392,14 +1428,14 @@ const ValueRow = (props: {
           <Input
             value={valueData}
             onChange={(e) => setValueData(e.target.value)}
-            size="xs"
+            size={"xs"}
             h={"100%"}
-            borderRadius="none"
-            fontSize="xs"
+            borderRadius={"none"}
+            fontSize={"xs"}
             readOnly={props.viewOnly}
-            placeholder="Enter URL"
-            border="1px solid transparent"
-            bg="transparent"
+            placeholder={"Enter URL"}
+            border={"1px solid transparent"}
+            bg={"transparent"}
             cursor={props.viewOnly ? "default" : "text"}
             onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
             _focus={{
@@ -1422,14 +1458,14 @@ const ValueRow = (props: {
         <Input
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
-          size="xs"
+          size={"xs"}
           h={"100%"}
-          borderRadius="none"
-          fontSize="xs"
-          type="date"
+          borderRadius={"none"}
+          fontSize={"xs"}
+          type={"date"}
           readOnly={props.viewOnly}
-          border="1px solid transparent"
-          bg="transparent"
+          border={"1px solid transparent"}
+          bg={"transparent"}
           cursor={props.viewOnly ? "default" : "text"}
           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
           _focus={{
@@ -1448,12 +1484,12 @@ const ValueRow = (props: {
       // Check if select has options configured
       return (
         <Flex
-          w="100%"
+          w={"100%"}
           h={"100%"}
           p={"0"}
-          align="center"
-          justify="center"
-          border="1px solid transparent"
+          align={"center"}
+          justify={"center"}
+          border={"1px solid transparent"}
           _focus={{
             bg: "white",
             borderColor: "blue.300",
@@ -1471,12 +1507,12 @@ const ValueRow = (props: {
       if (!props.viewOnly) {
         return (
           <Flex
-            w="100%"
+            w={"100%"}
             h={"100%"}
             p={"0"}
-            align="center"
-            justify="center"
-            border="1px solid transparent"
+            align={"center"}
+            justify={"center"}
+            border={"1px solid transparent"}
             _focus={{
               bg: "white",
               borderColor: "blue.300",
@@ -1506,7 +1542,7 @@ const ValueRow = (props: {
             align={"center"}
             pt={"0.5"}
             px={"2"}
-            border="1px solid transparent"
+            border={"1px solid transparent"}
             _focus={{
               bg: "white",
               borderColor: "blue.300",
@@ -1517,7 +1553,7 @@ const ValueRow = (props: {
               boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
             }}
           >
-            <Linky type="entities" id={JSON.parse(valueData)._id || ""} size="xs" />
+            <Linky type={"entities"} id={JSON.parse(valueData)._id || ""} size={"xs"} />
           </Flex>
         );
       }
@@ -1526,15 +1562,15 @@ const ValueRow = (props: {
         <Input
           value={valueData}
           onChange={(e) => setValueData(e.target.value)}
-          size="xs"
+          size={"xs"}
           h={props.viewOnly ? "34px" : "100%"}
           px={1}
           py={0.5}
-          fontSize="xs"
+          fontSize={"xs"}
           readOnly={props.viewOnly}
-          placeholder="Enter value"
-          border="1px solid transparent"
-          bg="transparent"
+          placeholder={"Enter value"}
+          border={"1px solid transparent"}
+          bg={"transparent"}
           cursor={props.viewOnly ? "default" : "text"}
           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
           _focus={{
@@ -1556,31 +1592,33 @@ const ValueRow = (props: {
     <Flex
       gap={0}
       borderBottom={props.hideBorder ? "none" : "1px solid"}
-      borderColor="gray.200"
+      borderColor={"gray.200"}
       _hover={{ bg: "gray.25" }}
-      overflow="hidden"
-      bg={props.isSelected ? "blue.50" : "transparent"}
+      overflow={"hidden"}
+      bg={props.isSelected ? "blue.50" : "white"}
     >
       {/* Drag Handle Column */}
       {!props.viewOnly && (
         <Box
-          w="40px"
+          w={"40px"}
+          minW={"40px"}
+          flex={"0 0 auto"}
           px={1}
           py={0.5}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          borderRight="1px solid"
-          borderColor="gray.200"
-          bg={props.isSelected ? "blue.100" : "transparent"}
+          display={"flex"}
+          alignItems={"center"}
+          justifyContent={"center"}
+          borderRight={"1px solid"}
+          borderColor={"gray.200"}
+          bg={props.isSelected ? "blue.100" : "white"}
           _hover={{ bg: props.isSelected ? "blue.200" : "gray.100" }}
           cursor={props.viewOnly ? "default" : "pointer"}
         >
           <Checkbox.Root
             checked={props.isSelected}
             onCheckedChange={() => props.onToggleSelect()}
-            size="xs"
-            colorPalette="blue"
+            size={"xs"}
+            colorPalette={"blue"}
             disabled={props.viewOnly}
           >
             <Checkbox.HiddenInput />
@@ -1595,22 +1633,22 @@ const ValueRow = (props: {
         flex={"0 0 auto"}
         p={"0"}
         m={"0"}
-        borderRight="1px solid"
-        borderColor="gray.200"
+        borderRight={"1px solid"}
+        borderColor={"gray.200"}
       >
         <Input
           value={valueName}
           onChange={(e) => setValueName(e.target.value)}
-          size="xs"
+          size={"xs"}
           px={1}
           py={0}
-          h="100%"
-          fontSize="xs"
+          h={"100%"}
+          fontSize={"xs"}
           readOnly={props.viewOnly}
-          placeholder="Enter name"
-          border="1px solid transparent"
-          borderRadius="none"
-          bg="transparent"
+          placeholder={"Enter name"}
+          border={"1px solid transparent"}
+          borderRadius={"none"}
+          bg={"transparent"}
           cursor={props.viewOnly ? "default" : "text"}
           onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
           _focus={{
@@ -1699,21 +1737,21 @@ const ValueRow = (props: {
         flex={"1 1 auto"}
         minW={`${props.columnWidths.value}px`}
         p={"0"}
-        overflow="visible"
-        justify="space-between"
-        align="center"
+        overflow={"visible"}
+        justify={"space-between"}
+        align={"center"}
       >
         {props.permittedValues !== undefined ? (
           props.viewOnly ? (
-            <Flex w="100%" h="100%" align="center" px="2">
-              <Text fontSize="xs" color={valueData ? "gray.700" : "gray.400"}>
+            <Flex w={"100%"} h={"100%"} align={"center"} px={"2"}>
+              <Text fontSize={"xs"} color={valueData ? "gray.700" : "gray.400"}>
                 {valueData || (inColumnMode ? "No column selected" : "No value set")}
               </Text>
             </Flex>
           ) : (
-            <Flex w="100%" h="100%" align="center" overflow="visible">
+            <Flex w={"100%"} h={"100%"} align={"center"} overflow={"visible"}>
               {/* Column picker or free-form input depending on source mode */}
-              <Flex flex="1 1 auto" h="100%" overflow="visible">
+              <Flex flex={"1 1 auto"} h={"100%"} overflow={"visible"}>
                 {inColumnMode ? (
                   <ReactSelect<SelectOption>
                     options={props.permittedValues.map((col) => ({
@@ -1766,10 +1804,10 @@ const ValueRow = (props: {
               {/* Source toggle */}
               <Button
                 aria-label={inColumnMode ? "switch-to-value" : "switch-to-column"}
-                size="2xs"
+                size={"2xs"}
                 mx={"1"}
-                variant="outline"
-                colorPalette="gray"
+                variant={"outline"}
+                colorPalette={"gray"}
                 flexShrink={0}
                 onClick={() => {
                   const newSource = source === "column" ? "value" : "column";
@@ -1777,7 +1815,7 @@ const ValueRow = (props: {
                   setValueData(newSource === "value" ? generateDefaultData(valueType) : "");
                 }}
               >
-                <Icon name={inColumnMode ? "grid" : "edit"} size="xs" />
+                <Icon name={inColumnMode ? "grid" : "edit"} size={"xs"} />
                 {inColumnMode ? "Column" : "Value"}
               </Button>
             </Flex>
@@ -1787,14 +1825,14 @@ const ValueRow = (props: {
         )}
         {props.viewOnly && valueType !== "entity" && !props.permittedValues && (
           <IconButton
-            aria-label="Copy value"
-            size="2xs"
+            aria-label={"Copy value"}
+            size={"2xs"}
             mx={"1"}
-            variant="outline"
-            colorPalette="gray"
+            variant={"outline"}
+            colorPalette={"gray"}
             onClick={() => copyToClipboard(valueType, valueData)}
           >
-            <Icon name="copy" size="xs" />
+            <Icon name={"copy"} size={"xs"} />
           </IconButton>
         )}
       </Flex>

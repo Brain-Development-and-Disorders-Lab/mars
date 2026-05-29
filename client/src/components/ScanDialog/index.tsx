@@ -7,7 +7,7 @@ import { toaster } from "@components/Toast";
 import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeScannerState } from "html5-qrcode";
 
 // Custom types
-import { IGenericItem, ScanModalProps, ScannerProps } from "@types";
+import { IGenericItem, ScanDialogProps, ScannerProps } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -28,7 +28,7 @@ import { GLOBAL_STYLES } from "@variables";
 // Constants
 const REGION_ID = "scanner-region";
 
-const ScanModal = (props: ScanModalProps) => {
+const ScanDialog = (props: ScanDialogProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
 
@@ -72,7 +72,7 @@ const ScanModal = (props: ScanModalProps) => {
   };
 
   /**
-   * Handle the modal being closed by the user, resetting the state and removing the keypress handler
+   * Handle the dialog being closed by the user, resetting the state and removing the keypress handler
    */
   const handleOnClose = async () => {
     await onScannerCleanup();
@@ -242,7 +242,10 @@ const ScanModal = (props: ScanModalProps) => {
   const startScanner = async () => {
     await codeScanner?.start(
       { facingMode: "environment" },
-      createConfig(props),
+      createConfig({
+        fps: 60,
+        verbose: false,
+      }),
       (decodedText) => {
         onScannerResult(decodedText);
       },
@@ -258,7 +261,7 @@ const ScanModal = (props: ScanModalProps) => {
     };
   };
 
-  // Setup the scanner when the modal is opened
+  // Setup the scanner when the dialog is opened
   useEffect(() => {
     if (props.open) {
       setupScanner();
@@ -285,7 +288,7 @@ const ScanModal = (props: ScanModalProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.headerColor}>
+          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"scan"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -296,7 +299,7 @@ const ScanModal = (props: ScanModalProps) => {
               <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"1"} gap={"1"} w={"100%"} alignContent={"center"}>
+          <Dialog.Body p={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
             {/* Camera view */}
             <Flex justify={"center"} align={"center"}>
               <Flex
@@ -323,7 +326,7 @@ const ScanModal = (props: ScanModalProps) => {
             )}
 
             {/* Manual entry field */}
-            <Flex align={"center"} mt={"1"} w={"100%"} justify={"center"} gap={"1"}>
+            <Flex align={"center"} mt={"2"} w={"100%"} justify={"center"} gap={"2"}>
               {!showInput && (
                 <Flex>
                   <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={handleManualInputSelect}>
@@ -334,7 +337,7 @@ const ScanModal = (props: ScanModalProps) => {
               )}
 
               {showInput && (
-                <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
+                <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
                   <Flex grow={1}>
                     <Input
                       size={"xs"}
@@ -370,4 +373,4 @@ const ScanModal = (props: ScanModalProps) => {
   );
 };
 
-export default ScanModal;
+export default ScanDialog;

@@ -1,85 +1,52 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Flex, IconButton, Image, Spacer, Spinner, Text, Dialog, CloseButton, Button } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
-// Custom types
-import { PreviewModalProps, PreviewSupport } from "@types";
+import { PreviewDialogProps } from "@types";
 
-// PDF preview imports
+// PDF preview
 import { pdfjs, Document, Page } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// DNA preview imports
+// DNA sequence preview
 import { SeqViz } from "seqviz";
 import seqparse from "seqparse";
 
-// Zoom and pan import for image previews
-import { TransformComponent, TransformWrapper, useControls, type ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
+// Zoom and pan controls
+import { TransformComponent, TransformWrapper, type ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 
-// GraphQL
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { GLOBAL_STYLES, STATIC_URL } from "src/variables";
 
-// Utility functions
 import _ from "lodash";
 
-// Setup PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-// Variables
 const IMAGE_TYPES = ["png", "jpg", "jpeg"];
-const MIN_WIDTH_DOCUMENT = 400; // Minimum width for document preview
-const MIN_WIDTH_IMAGE = 300; // Minimum width for image preview
-const MIN_WIDTH_SEQUENCE = 500; // Minimum width for sequence preview
+
+/** Zoom controls that operate via the TransformWrapper ref, so they can live outside the TransformWrapper context. */
+const ZoomControls = ({ transformRef }: { transformRef: React.RefObject<ReactZoomPanPinchRef | null> }) => (
+  <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"} flexShrink={0} pt={"2"}>
+    <IconButton size={"xs"} variant={"subtle"} aria-label={"Zoom out"} onClick={() => transformRef.current?.zoomOut()}>
+      <Icon name={"zoom_out"} size={"xs"} />
+    </IconButton>
+    <Button size={"xs"} variant={"subtle"} aria-label={"Reset"} onClick={() => transformRef.current?.resetTransform()}>
+      Reset
+      <Icon name={"reload"} size={"xs"} />
+    </Button>
+    <IconButton size={"xs"} variant={"subtle"} aria-label={"Zoom in"} onClick={() => transformRef.current?.zoomIn()}>
+      <Icon name={"zoom_in"} size={"xs"} />
+    </IconButton>
+  </Flex>
+);
 
 /**
- * Get the current window dimensions
- * @returns {Object} The current window dimensions
+ * Renders a PDF page using react-pdf with page navigation below.
+ * The page scales to the container width; vertical overflow scrolls within the content area
+ * so the navigation controls are always visible at the base.
  */
-const getWindowDimensions = () => {
-  return {
-    width: window.innerWidth,
-    height: window.innerHeight,
-  };
-};
-
-const ImageControls = () => {
-  // Controls for image preview
-  const { zoomIn, zoomOut, resetTransform } = useControls();
-
-  return (
-    <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} flexShrink={0} py={"1"}>
-      <IconButton size={"xs"} variant={"subtle"} aria-label={"Zoom out"} onClick={() => zoomOut()}>
-        <Icon name={"zoom_out"} size={"xs"} />
-      </IconButton>
-      <Button size={"xs"} variant={"subtle"} aria-label={"Reset"} onClick={() => resetTransform()}>
-        Reset
-        <Icon name={"reload"} size={"xs"} />
-      </Button>
-      <IconButton size={"xs"} variant={"subtle"} aria-label={"Zoom in"} onClick={() => zoomIn()}>
-        <Icon name={"zoom_in"} size={"xs"} />
-      </IconButton>
-    </Flex>
-  );
-};
-
-const UnsupportedPreview = () => {
-  return (
-    <Flex minH={"200px"} w={"100%"} align={"center"} justify={"center"} direction={"column"} gap={"2"}>
-      <Text fontSize={"sm"} fontWeight={"semibold"} textAlign={"center"}>
-        Unsupported screen size
-      </Text>
-      <Text fontSize={"sm"} color={"gray.500"} fontWeight={"semibold"} textAlign={"center"}>
-        Preview can not be shown on this screen size
-      </Text>
-    </Flex>
-  );
-};
-
-// Document preview component
 const DocumentPreview = (props: {
   previewSource: string;
   previewIndex: number;
@@ -88,122 +55,115 @@ const DocumentPreview = (props: {
   onPreviousPage: () => void;
   onNextPage: () => void;
 }) => {
-  const transformRef = React.useRef<ReactZoomPanPinchRef | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number | undefined>(undefined);
 
-  const handleDocumentLoad = (args: { numPages: number }) => {
-    props.onLoadSuccess(args);
-    // Reset transform after document loads
-    if (transformRef.current) {
-      transformRef.current.resetTransform(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(Math.floor(entry.contentRect.width));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Scroll back to the top of the page when navigating
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
     }
-  };
+  }, [props.previewIndex]);
 
   return (
-    <Flex direction={"column"} h={"100%"} flex={"1"} minH={0}>
-      <TransformWrapper
-        ref={transformRef}
-        initialScale={1}
-        minScale={0.5}
-        maxScale={3}
-        limitToBounds={false}
-        centerOnInit
+    <Flex direction={"column"} flex={"1"} minH={0}>
+      <Flex
+        ref={containerRef}
+        flex={"1"}
+        overflowY={"auto"}
+        minH={"100px"}
+        rounded={"md"}
+        border={GLOBAL_STYLES.border.style}
+        borderColor={GLOBAL_STYLES.border.color}
+        justify={"center"}
+        align={"center"}
+        fontSize={"sm"}
+        fontWeight={"semibold"}
+        color={GLOBAL_STYLES.font.secondaryHeader.color}
       >
-        <Flex direction={"column"} h={"100%"} flex={"1"} minH={0}>
-          <Flex
-            flex={"1"}
-            overflow={"hidden"}
-            position={"relative"}
-            minH={0}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            boxSizing={"border-box"}
-          >
-            <TransformComponent
-              wrapperStyle={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Document file={props.previewSource} onLoadSuccess={handleDocumentLoad}>
-                <Page key={`page_${props.previewIndex}`} pageNumber={props.previewIndex} />
-              </Document>
-            </TransformComponent>
-          </Flex>
-          <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"} w={"100%"} flexShrink={0}>
-            <ImageControls />
-            <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"} flexShrink={0}>
-              <IconButton
-                aria-label={"Previous page"}
-                size={"xs"}
-                colorPalette={"blue"}
-                rounded={"md"}
-                onClick={props.onPreviousPage}
-                disabled={props.previewIndex === 1}
-              >
-                <Icon name={"c_left"} size={"xs"} />
-              </IconButton>
-              <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} flexShrink={0}>
-                <Text fontSize={"xs"}>Page</Text>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {props.previewIndex}
-                </Text>
-                <Text fontSize={"xs"}>of</Text>
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {props.previewPages}
-                </Text>
-              </Flex>
-              <IconButton
-                aria-label={"Next page"}
-                size={"xs"}
-                colorPalette={"blue"}
-                rounded={"md"}
-                onClick={props.onNextPage}
-                disabled={props.previewIndex === props.previewPages}
-              >
-                <Icon name={"c_right"} size={"xs"} />
-              </IconButton>
-            </Flex>
-          </Flex>
+        <Document file={props.previewSource} onLoadSuccess={props.onLoadSuccess} loading={"Loading Page..."}>
+          <Page pageNumber={props.previewIndex} width={containerWidth} />
+        </Document>
+      </Flex>
+      <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"} flexShrink={0} pt={"2"}>
+        <IconButton
+          aria-label={"Previous page"}
+          size={"xs"}
+          colorPalette={"blue"}
+          rounded={"md"}
+          onClick={props.onPreviousPage}
+          disabled={props.previewIndex === 1}
+        >
+          <Icon name={"c_left"} size={"xs"} />
+        </IconButton>
+        <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+          <Text fontSize={"xs"}>Page</Text>
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            {props.previewIndex}
+          </Text>
+          <Text fontSize={"xs"}>of</Text>
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            {props.previewPages}
+          </Text>
         </Flex>
-      </TransformWrapper>
+        <IconButton
+          aria-label={"Next page"}
+          size={"xs"}
+          colorPalette={"blue"}
+          rounded={"md"}
+          onClick={props.onNextPage}
+          disabled={props.previewIndex === props.previewPages}
+        >
+          <Icon name={"c_right"} size={"xs"} />
+        </IconButton>
+      </Flex>
     </Flex>
   );
 };
 
-// Image preview component
+/**
+ * Renders an image with zoom/pan controls. The image is contained within the
+ * dialog bounds initially; zoom/pan allows inspecting at higher magnification.
+ */
 const ImagePreview = (props: { previewSource: string }) => {
-  const transformRef = React.useRef<ReactZoomPanPinchRef | null>(null);
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
 
   const handleImageLoad = () => {
-    // Reset transform after image loads
     if (transformRef.current) {
       transformRef.current.resetTransform(0);
     }
   };
 
   return (
-    <Flex direction={"column"} h={"100%"} flex={"1"} minH={0}>
-      <TransformWrapper
-        ref={transformRef}
-        initialScale={1}
-        minScale={0.5}
-        maxScale={3}
-        limitToBounds={false}
-        centerOnInit
+    <Flex direction={"column"} flex={"1"} minH={0}>
+      {/* TransformWrapper is scoped to the content cell so it does not disrupt the flex height chain */}
+      <Flex
+        flex={"1"}
+        overflow={"hidden"}
+        position={"relative"}
+        minH={0}
+        rounded={"md"}
+        border={GLOBAL_STYLES.border.style}
+        borderColor={GLOBAL_STYLES.border.color}
+        boxSizing={"border-box"}
       >
-        <Flex
-          flex={"1"}
-          overflow={"hidden"}
-          position={"relative"}
-          minH={0}
-          rounded={"md"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
-          boxSizing={"border-box"}
+        <TransformWrapper
+          ref={transformRef}
+          initialScale={1}
+          minScale={0.5}
+          maxScale={3}
+          limitToBounds={false}
+          centerOnInit
         >
           <TransformComponent
             wrapperStyle={{
@@ -213,23 +173,29 @@ const ImagePreview = (props: { previewSource: string }) => {
               justifyContent: "center",
               alignItems: "center",
             }}
+            contentStyle={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <Image
               src={props.previewSource}
-              maxW={"none"}
-              maxH={"none"}
+              maxW={"100%"}
+              maxH={"100%"}
               objectFit={"contain"}
               onLoad={handleImageLoad}
             />
           </TransformComponent>
-        </Flex>
-        <ImageControls />
-      </TransformWrapper>
+        </TransformWrapper>
+      </Flex>
+      <ZoomControls transformRef={transformRef} />
     </Flex>
   );
 };
 
-// Sequence preview component
 interface SequencePreviewProps {
   name: string;
   fileUrl: string;
@@ -246,6 +212,7 @@ interface ParsedSequence {
   }>;
 }
 
+/** Fetches and parses a sequence file (FASTA, GenBank, SnapGene) then renders it with SeqViz. */
 const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -259,34 +226,28 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
         setLoading(true);
         setError(null);
 
-        // Fetch the file
         const response = await fetch(fileUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch file: ${response.statusText}`);
         }
 
-        // Check file extension to determine if it's a SnapGene .dna file
         const fileExtension = name.split(".").pop()?.toLowerCase();
         const isSnapGene = fileExtension === "dna";
 
         let text: string;
 
         if (isSnapGene) {
-          // For SnapGene .dna files, try to read as text first
-          // SnapGene files may have binary headers but contain text data
+          // SnapGene files may have binary headers, fall back to arrayBuffer if text() fails
           try {
             text = await response.text();
           } catch {
-            // If text() fails, try arrayBuffer approach
             const arrayBuffer = await response.arrayBuffer();
             text = new TextDecoder("utf-8", { fatal: false }).decode(arrayBuffer);
           }
         } else {
-          // For text-based files, read as text
           text = await response.text();
         }
 
-        // Try to parse with seqparse (works for FASTA, GenBank, and some SnapGene files)
         let parsed: {
           seq?: string;
           annotations?: ParsedSequence["annotations"];
@@ -298,7 +259,6 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
         }
 
         if (parsed && typeof parsed === "object" && parsed.seq) {
-          // Successfully parsed with seqparse
           const normalizedSeq = parsed.seq
             .toUpperCase()
             .replace(/\s+/g, "")
@@ -315,8 +275,6 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
             });
           }
         } else {
-          // Parsing failed or returned invalid data, treat as raw sequence
-          // Remove common file format headers and extract sequence
           const normalizedSeq = text
             .toUpperCase()
             .replace(/\s+/g, "")
@@ -358,9 +316,9 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   if (loading) {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"}>
-        <Spinner color={"gray.600"} />
-        <Text fontSize={"xs"} color={"gray.600"} mt={"2"}>
-          Loading sequence...
+        <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
+        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} mt={"2"}>
+          Loading Sequence...
         </Text>
       </Flex>
     );
@@ -370,7 +328,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"} gap={"2"}>
         <Text color={"red.500"} fontWeight={"semibold"} fontSize={"sm"}>
-          Error loading sequence
+          Error displaying Sequence
         </Text>
         <Text fontSize={"xs"} color={"gray.500"}>
           {error}
@@ -383,7 +341,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"}>
         <Text fontSize={"xs"} color={"gray.500"}>
-          No sequence data available
+          No Sequence data available
         </Text>
       </Flex>
     );
@@ -391,6 +349,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
 
   return (
     <Flex
+      id={"seqviz_container"}
       direction={"column"}
       h={"100%"}
       flex={"1"}
@@ -399,28 +358,18 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
       border={GLOBAL_STYLES.border.style}
       borderColor={GLOBAL_STYLES.border.color}
       overflow={"hidden"}
-      position={"relative"}
-      boxSizing={"border-box"}
     >
-      {sequenceData && <SeqViz name={name} seq={sequenceData.seq} annotations={sequenceData.annotations} />}
+      <SeqViz name={name} seq={sequenceData.seq} annotations={sequenceData.annotations} />
     </Flex>
   );
 };
 
-const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) => {
-  // Page view state
+/** Manages file URL resolution and preview type detection for a given attachment. */
+const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] }) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
-
-  // Preview data state
   const [previewType, setPreviewType] = useState<"document" | "image" | "sequence" | null>(null);
   const [previewSource, setPreviewSource] = useState("");
-
-  const [previewSupport, setPreviewSupport] = useState<PreviewSupport>({
-    document: getWindowDimensions().width > MIN_WIDTH_DOCUMENT,
-    image: getWindowDimensions().width > MIN_WIDTH_IMAGE,
-    sequence: getWindowDimensions().width > MIN_WIDTH_SEQUENCE,
-  });
 
   const GET_FILE_URL = gql`
     query GetFileURL($_id: String) {
@@ -434,19 +383,16 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
     skip: !props.attachment._id,
   });
 
-  // Handlers for page view manipulation
   const onPreviewDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
     setPreviewPages(numPages);
   };
 
-  // Show the next page of the PDF if available
   const nextPage = () => {
     if (previewIndex < previewPages) {
       setPreviewIndex(previewIndex + 1);
     }
   };
 
-  // Show the previous page of the PDF if available
   const previousPage = () => {
     if (previewIndex > 1) {
       setPreviewIndex(previewIndex - 1);
@@ -463,10 +409,8 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
 
   useEffect(() => {
     if (data?.downloadFile) {
-      // Generate the static URL to retrieve the file preview
       setPreviewSource(`${STATIC_URL}${data.downloadFile}`);
 
-      // Set the preview type depending on the file type
       const fileType = _.toLower(props.attachment.name.split(".").pop());
       if (fileType === "pdf") {
         setPreviewType("document");
@@ -480,26 +424,7 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
     }
   }, [data, props.attachment.name]);
 
-  useEffect(() => {
-    // Update the preview support based on the current window dimensions
-    const handleResize = () => {
-      setPreviewSupport({
-        document: getWindowDimensions().width > MIN_WIDTH_DOCUMENT,
-        image: getWindowDimensions().width > MIN_WIDTH_IMAGE,
-        sequence: getWindowDimensions().width > MIN_WIDTH_SEQUENCE,
-      });
-    };
-
-    // Add the event listener to the window
-    window.addEventListener("resize", handleResize);
-
-    // Remove the event listener when the component unmounts
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Render preview based on state
   const renderPreview = () => {
-    // Validate attachment has required fields
     if (!props.attachment || !props.attachment._id) {
       return (
         <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
@@ -510,20 +435,19 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
       );
     }
 
-    // Show loading if query is loading or we don't have preview data yet
     if (loading || !previewType || !previewSource) {
       return (
         <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
-          <Text fontSize={"sm"} color={"gray.600"} fontWeight={"semibold"}>
+          <Text fontSize={"sm"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Preparing Preview
           </Text>
-          <Spinner color={"gray.600"} />
+          <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
         </Flex>
       );
     }
 
     return (
-      <Flex direction={"column"} w={"100%"} h={"100%"} flex={"1"} gap={"1"}>
+      <Flex direction={"column"} w={"100%"} h={"100%"} flex={"1"} minH={0} gap={"1"}>
         <Flex direction={"row"} gap={"1"} align={"center"} flexShrink={0} mx={"0.5"}>
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             Name:
@@ -536,31 +460,21 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
           <Text fontSize={"xs"}>{previewType}</Text>
         </Flex>
 
-        {previewType === "document" &&
-          (previewSupport.document ? (
-            <DocumentPreview
-              previewSource={previewSource}
-              previewIndex={previewIndex}
-              previewPages={previewPages}
-              onLoadSuccess={onPreviewDocumentLoadSuccess}
-              onPreviousPage={previousPage}
-              onNextPage={nextPage}
-            />
-          ) : (
-            <UnsupportedPreview />
-          ))}
+        {previewType === "document" && (
+          <DocumentPreview
+            previewSource={previewSource}
+            previewIndex={previewIndex}
+            previewPages={previewPages}
+            onLoadSuccess={onPreviewDocumentLoadSuccess}
+            onPreviousPage={previousPage}
+            onNextPage={nextPage}
+          />
+        )}
 
-        {previewType === "image" &&
-          (previewSupport.image ? <ImagePreview previewSource={previewSource} /> : <UnsupportedPreview />)}
+        {previewType === "image" && <ImagePreview previewSource={previewSource} />}
 
-        {previewType === "sequence" &&
-          (previewSupport.sequence ? (
-            <SequencePreview name={props.attachment.name} fileUrl={previewSource} />
-          ) : (
-            <UnsupportedPreview />
-          ))}
+        {previewType === "sequence" && <SequencePreview name={props.attachment.name} fileUrl={previewSource} />}
 
-        {/* Show error if we have an error and no data after loading completes */}
         {error && !loading && !data && (
           <Flex
             minH={"400px"}
@@ -580,13 +494,18 @@ const PreviewContent = (props: { attachment: PreviewModalProps["attachment"] }) 
   };
 
   return (
-    <Flex w={"100%"} h={"100%"} flex={"1"} direction={"column"}>
+    <Flex w={"100%"} h={"100%"} flex={"1"} minH={0} direction={"column"}>
       {renderPreview()}
     </Flex>
   );
 };
 
-const PreviewModal = (props: PreviewModalProps) => {
+/**
+ * Dialog for previewing attachments. Supports PDF documents, images (PNG, JPG),
+ * and DNA sequence files. All content scales to fit the dialog rather than relying
+ * on fixed screen-size breakpoints.
+ */
+const PreviewDialog = (props: PreviewDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const defaultTrigger = (
@@ -600,19 +519,19 @@ const PreviewModal = (props: PreviewModalProps) => {
       open={open}
       onOpenChange={(event) => setOpen(event.open)}
       placement={"center"}
-      size={"cover"}
+      size={"lg"}
       closeOnEscape
       closeOnInteractOutside
     >
       <Dialog.Trigger asChild>{props.trigger || defaultTrigger}</Dialog.Trigger>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content gap={"0"} display={"flex"} flexDirection={"column"} maxH={"90vh"}>
+        <Dialog.Content gap={"0"} display={"flex"} flexDirection={"column"} h={"90vh"}>
           <Dialog.Header
             p={"2"}
             fontWeight={"semibold"}
             fontSize={"xs"}
-            bg={GLOBAL_STYLES.dialog.headerColor}
+            bg={GLOBAL_STYLES.dialog.header.bg}
             roundedTop={"md"}
             flexShrink={0}
           >
@@ -626,7 +545,7 @@ const PreviewModal = (props: PreviewModalProps) => {
               <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"1"} display={"flex"} flexDirection={"column"} flex={"1"} overflow={"hidden"} minH={0}>
+          <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} flex={"1"} overflow={"hidden"} minH={0}>
             <PreviewContent attachment={props.attachment} />
           </Dialog.Body>
         </Dialog.Content>
@@ -635,4 +554,4 @@ const PreviewModal = (props: PreviewModalProps) => {
   );
 };
 
-export default PreviewModal;
+export default PreviewDialog;

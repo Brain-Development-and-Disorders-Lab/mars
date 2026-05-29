@@ -23,6 +23,9 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 const GET_ACTIVITY = gql`
   query GetActivity($limit: Int) {
     activity(limit: $limit) {
@@ -69,10 +72,10 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
   }, [activities, feedLimit]);
 
   return (
-    <Flex direction={"column"} data-timestamp-update={timestampUpdate}>
+    <Flex direction={"column"} data-timestamp-update={timestampUpdate} gap={"2"}>
       {/* Activity heading */}
-      <Flex id={"recentActivityHeader"} align={"center"} gap={"1"} ml={"0.5"} justify={"space-between"}>
-        <Flex align={"center"} gap={"1"}>
+      <Flex id={"recentActivityHeader"} align={"center"} gap={"2"} ml={"0.5"} justify={"space-between"}>
+        <Flex align={"center"} gap={"1"} py={"1.5"}>
           <Icon name={"activity"} size={"xs"} />
           <Text fontSize={"sm"} fontWeight={"semibold"}>
             Workspace Activity
@@ -80,7 +83,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         </Flex>
         <Flex align={"center"} gap={"1"} mr={"0.5"}>
           <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-          <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Live
           </Text>
         </Flex>
@@ -98,7 +101,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
       {/* Activity Chart */}
       <Flex direction={"row"} gap={"1"} ml={"0.5"}>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-          Activity:
+          Activity Range:
         </Text>
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
           {dayjs().subtract(6, "day").format("MMM D, YYYY")} - {dayjs().format("MMM D, YYYY")}
@@ -149,7 +152,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
 
           <Flex justify={"right"} pr={"0.5"} pb={"0.5"}>
             <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={() => navigate("/activity")}>
-              View All
+              All Activity
               <Icon name={"a_right"} size={"xs"} />
             </Button>
           </Flex>

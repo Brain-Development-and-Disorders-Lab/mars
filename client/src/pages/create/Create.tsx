@@ -26,26 +26,31 @@ const Create = () => {
           <Icon name={"add"} size={"sm"} />
           <Heading size={"lg"}>Create</Heading>
         </Flex>
-        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"} textAlign={"center"}>
-          Create a new Entity, Template, or Project to continue building your metadata catalog.
+        <Text
+          fontSize={"sm"}
+          fontWeight={"semibold"}
+          color={GLOBAL_STYLES.font.secondaryHeader.color}
+          textAlign={"center"}
+        >
+          Create a new Entity, Template, or Project to continue building your metadata collection.
         </Text>
-        <Flex direction={"row"} gap={"1"} wrap={"wrap"} align={"center"} justify={"center"}>
+        <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"} justify={"center"}>
           {/* Entity card */}
           <Card.Root
             maxW={"340px"}
-            h={"340px"}
+            h={"380px"}
             variant={"outline"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Heading size={"md"}>Entity</Heading>
               </Flex>
             </Card.Header>
             <Card.Body>
-              <Stack separator={<Separator />} gap={"1"}>
+              <Stack separator={<Separator />} gap={"2"}>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
@@ -56,20 +61,20 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
-                  <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"purple"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"purple"}>
                       <Tag.Label>Created</Tag.Label>
                     </Tag.Root>
                   </Flex>
 
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -110,19 +115,19 @@ const Create = () => {
           {/* Project card */}
           <Card.Root
             maxW={"340px"}
-            h={"340px"}
+            h={"380px"}
             variant={"outline"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.iconColor} />
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
                 <Heading size={"md"}>Project</Heading>
               </Flex>
             </Card.Header>
             <Card.Body>
-              <Stack separator={<Separator />} gap={"1"}>
+              <Stack separator={<Separator />} gap={"2"}>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
@@ -133,15 +138,23 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
-                  <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"blue"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"blue"}>
                       <Tag.Label>Description</Tag.Label>
+                    </Tag.Root>
+                  </Flex>
+                  <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      Optional:
+                    </Text>
+                    <Tag.Root>
+                      <Tag.Label>Entities</Tag.Label>
                     </Tag.Root>
                   </Flex>
                 </Flex>
@@ -169,19 +182,19 @@ const Create = () => {
           {/* Template card */}
           <Card.Root
             maxW={"340px"}
-            h={"340px"}
+            h={"380px"}
             variant={"outline"}
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                 <Heading size={"md"}>Template</Heading>
               </Flex>
             </Card.Header>
             <Card.Body>
-              <Stack separator={<Separator />} gap={"1"}>
+              <Stack separator={<Separator />} gap={"2"}>
                 <Flex p={"1"} gap={"2"} direction={"column"}>
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Description
@@ -192,17 +205,17 @@ const Create = () => {
                   <Heading size={"xs"} textTransform={"uppercase"}>
                     Fields
                   </Heading>
-                  <Flex align={"center"} wrap={"wrap"} gap={"1"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"teal"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"teal"}>
                       <Tag.Label>Description</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root>
+                    <Tag.Root colorPalette={"teal"}>
                       <Tag.Label>Values</Tag.Label>
                     </Tag.Root>
                   </Flex>

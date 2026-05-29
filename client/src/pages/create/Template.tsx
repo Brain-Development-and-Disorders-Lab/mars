@@ -7,20 +7,20 @@ import {
   CloseButton,
   Dialog,
   Field,
-  Fieldset,
   Flex,
   Heading,
   Input,
   Spacer,
   Text,
+  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import { IAttribute, IValue, ResponseData } from "@types";
@@ -28,10 +28,13 @@ import { IAttribute, IValue, ResponseData } from "@types";
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
+// Apollo and GraphQL
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
+
+// Utility functions and libraries
 import { isValidValues } from "@lib/util";
+import dayjs from "dayjs";
 
 // Authentication context
 import { auth } from "@lib/auth";
@@ -46,18 +49,13 @@ const Template = () => {
   const posthog = usePostHog();
 
   const [informationOpen, setInformationOpen] = useState(false);
-
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
+  const [created, setCreated] = useState("");
   const [values, setValues] = useState<IValue[]>([]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Authentication and user
-  /**
-   * Helper function to get user information
-   */
   const getUser = async () => {
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
@@ -77,7 +75,6 @@ const Template = () => {
     getUser();
   }, []);
 
-  // Various validation error states
   const isNameError = name === "";
   const isDescriptionError = description === "";
   const isDetailsError = isNameError || isDescriptionError;
@@ -86,21 +83,12 @@ const Template = () => {
     setIsValueError(!isValidValues(values, true));
   }, [values]);
 
-  // Capture event
   useEffect(() => {
     posthog?.capture("create_template_start");
   }, [posthog]);
 
-  // Store Template data
-  const templateData: IAttribute = {
-    name: name,
-    owner: owner,
-    archived: false,
-    description: description,
-    values: values,
-  };
+  const templateData: IAttribute = { name, owner, archived: false, description, values };
 
-  // GraphQL operations
   const CREATE_TEMPLATE = gql`
     mutation CreateTemplate($template: AttributeCreateInput) {
       createTemplate(template: $template) {
@@ -113,15 +101,9 @@ const Template = () => {
     createTemplate: ResponseData<string>;
   }>(CREATE_TEMPLATE);
 
-  // Navigation and routing
   const navigate = useNavigate();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    // Check if this is during the `create` mutation
-    if (isSubmitting) {
-      return false;
-    }
-
-    // Default blocker condition
+    if (isSubmitting) return false;
     return (
       (name !== "" || description !== "" || values.length > 0) && currentLocation.pathname !== nextLocation.pathname
     );
@@ -129,23 +111,12 @@ const Template = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
-  /**
-   * Handle creation of a new Attribute
-   */
   const onSubmit = async () => {
-    // Capture event
     posthog?.capture("create_template_finish");
-
     setIsSubmitting(true);
+    const response = await createTemplate({ variables: { template: templateData } });
 
-    // Execute the GraphQL mutation
-    const response = await createTemplate({
-      variables: {
-        template: templateData,
-      },
-    });
-
-    if (!response.data?.createTemplate || !response.data.createTemplate.success) {
+    if (!response.data?.createTemplate?.success) {
       toaster.create({
         title: "Error",
         description: "An error occurred when creating Template",
@@ -153,13 +124,8 @@ const Template = () => {
         duration: 2000,
         closable: true,
       });
-    } else if (response.data.createTemplate.success) {
-      toaster.create({
-        title: "Template created successfully",
-        type: "success",
-        duration: 2000,
-        closable: true,
-      });
+    } else {
+      toaster.create({ title: "Template created successfully", type: "success", duration: 2000, closable: true });
       setIsSubmitting(false);
       navigate("/templates");
     }
@@ -167,13 +133,7 @@ const Template = () => {
 
   useEffect(() => {
     if (error) {
-      toaster.create({
-        title: "Error",
-        description: error.message,
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
+      toaster.create({ title: "Error", description: error.message, type: "error", duration: 2000, closable: true });
     }
   }, [error]);
 
@@ -181,136 +141,138 @@ const Template = () => {
     <Content isLoaded={!loading}>
       <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} p={"1"} align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-            <Heading size={"sm"}>Create Template</Heading>
-            <Spacer />
-            <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
-              Info
-              <Icon name={"info"} size={"xs"} />
-            </Button>
+        <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
+          <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+          <Heading size={"md"}>Create Template</Heading>
+          <Spacer />
+          <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
+            Info
+            <Icon name={"info"} size={"xs"} />
+          </Button>
+        </Flex>
+
+        <Flex direction={"row"} gap={"2"} p={"1"} wrap={"wrap"}>
+          {/* Name */}
+          <Flex
+            direction={"column"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            bg={GLOBAL_STYLES.card.bg}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+            rounded={"md"}
+          >
+            <Field.Root required gap={"1"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
+                Name
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                size={"xs"}
+                placeholder={"Name"}
+                rounded={"md"}
+                bg={"white"}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              {isNameError && (
+                <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
+              )}
+            </Field.Root>
+
+            <Field.Root gap={"1"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
+                Owner
+              </Field.Label>
+              <Flex>
+                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+              </Flex>
+            </Field.Root>
+
+            <Field.Root gap={"1"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
+                Created
+              </Field.Label>
+              <Input
+                size={"xs"}
+                rounded={"md"}
+                type={"datetime-local"}
+                bg={"white"}
+                value={created}
+                onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+              />
+            </Field.Root>
+          </Flex>
+
+          {/* Description */}
+          <Flex
+            direction={"column"}
+            flex={{ base: "0 0 100%", md: "1" }}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
+          >
+            <Field.Root required gap={"1"} h={"100%"}>
+              <Field.Label
+                fontSize={"xs"}
+                fontWeight={"semibold"}
+                ml={"0.5"}
+                color={GLOBAL_STYLES.font.secondaryHeader.color}
+              >
+                Description
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Textarea
+                data-testid={"create-template-description"}
+                value={description}
+                size={"xs"}
+                h={"100%"}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </Field.Root>
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+        {/* Values */}
+        <Flex direction={"column"} p={"1"} gap={"1"}>
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            p={"1"}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
+            p={"2"}
+            gap={"2"}
+            border={GLOBAL_STYLES.border.style}
+            borderColor={GLOBAL_STYLES.border.color}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-              rounded={"md"}
-            >
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Field.Root required gap={"1"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Template Name
-                      <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Input
-                      size={"xs"}
-                      placeholder={"Name"}
-                      rounded={"md"}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      required
-                    />
-                    {isNameError && (
-                      <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
-                    )}
-                    <Field.HelperText fontSize={"xs"}>
-                      Provide a concise and descriptive name for the Template.
-                    </Field.HelperText>
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
-            </Flex>
+            <Field.Root>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                Values
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Values viewOnly={false} values={values} setValues={setValues} />
+            </Field.Root>
           </Flex>
-
-          <Flex
-            direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            p={"1"}
-            pl={{ base: "1", lg: "0" }}
-            pt={{ base: "0", lg: "1" }}
-            gap={"1"}
-            grow={"1"}
-            rounded={"md"}
-          >
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-            >
-              <Fieldset.Root>
-                <Fieldset.Content>
-                  <Field.Root required gap={"1"}>
-                    <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Template Description
-                      <Field.RequiredIndicator />
-                    </Field.Label>
-                    <MDEditor
-                      height={150}
-                      minHeight={100}
-                      maxHeight={400}
-                      style={{ width: "100%" }}
-                      value={description}
-                      preview={"edit"}
-                      extraCommands={[]}
-                      onChange={(value) => {
-                        setDescription(value || "");
-                      }}
-                    />
-                    {isDescriptionError && (
-                      <Field.ErrorText fontSize={"xs"}>
-                        A description should be provided for the Template.
-                      </Field.ErrorText>
-                    )}
-                    <Field.HelperText fontSize={"xs"}>
-                      Describe the purpose and contents of this Template.
-                    </Field.HelperText>
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
-            </Flex>
-          </Flex>
-        </Flex>
-
-        <Flex w={"100%"} p={"1"} gap={"0.5"} direction={"column"}>
-          <Fieldset.Root>
-            <Fieldset.Content>
-              <Field.Root required gap={"1"}>
-                <Flex direction={"column"} gap={"0.5"} ml={"0.5"}>
-                  <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
-                    Template Values
-                    <Field.RequiredIndicator />
-                  </Field.Label>
-                  <Text fontSize={"xs"}>
-                    Specify at least 1 Value for this Template. A name and type is required, however the actual value is
-                    optional.
-                  </Text>
-                </Flex>
-                <Values viewOnly={false} values={values} setValues={setValues} />
-              </Field.Root>
-            </Fieldset.Content>
-          </Fieldset.Root>
         </Flex>
       </Flex>
 
-      {/* Information modal */}
+      {/* Information dialog */}
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}
@@ -330,21 +292,20 @@ const Template = () => {
               p={"2"}
               fontWeight={"semibold"}
               fontSize={"xs"}
-              bg={GLOBAL_STYLES.dialog.headerColor}
+              bg={GLOBAL_STYLES.dialog.header.bg}
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
                 Template Attributes
               </Flex>
             </Dialog.Header>
             <Dialog.Body p={"2"}>
               <Flex gap={"2"} direction={"column"}>
-                {/* Overview */}
                 <Flex
                   direction={"column"}
                   gap={"1"}
-                  bg={"gray.50"}
+                  bg={GLOBAL_STYLES.card.bg}
                   p={"2"}
                   rounded={"md"}
                   border={GLOBAL_STYLES.border.style}
@@ -356,18 +317,17 @@ const Template = () => {
                       What is a Template?
                     </Text>
                   </Flex>
-                  <Text fontSize={"xs"} color={"gray.600"} lineHeight={"tall"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                     Templates define a set of metadata fields that can be applied to Entities during creation. Use them
                     to pre-populate Attributes and keep metadata consistent across similar Entities.
                   </Text>
                 </Flex>
 
-                {/* Value Types */}
-                <Flex direction={"column"} gap={"1.5"}>
+                <Flex direction={"column"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Supported Value Types
                   </Text>
-                  <Flex direction={"row"} wrap={"wrap"} gap={"1.5"}>
+                  <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                     <Flex
                       direction={"row"}
                       gap={"2"}
@@ -508,7 +468,6 @@ const Template = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {/* Place the action buttons at the bottom of the screen on desktop */}
       <Spacer />
 
       {/* Action buttons */}
@@ -536,8 +495,7 @@ const Template = () => {
         </Button>
       </Flex>
 
-      {/* Blocker warning message */}
-      <UnsavedChangesModal
+      <UnsavedChangesDialog
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

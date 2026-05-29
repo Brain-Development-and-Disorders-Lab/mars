@@ -36,16 +36,16 @@ const AlertDialog = (props: AlertDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"orange.300"}>
+          <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"orange.400"}>
             <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />
               <Text fontWeight={"semibold"} fontSize={"xs"}>
-                {header}
+                Alert: {header}
               </Text>
             </Flex>
           </Dialog.Header>
           <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
-          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Button
               size={"xs"}
               rounded={"md"}

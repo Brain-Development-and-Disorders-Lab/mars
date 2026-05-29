@@ -5,8 +5,8 @@ import React, { useState } from "react";
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
-import ScanModal from "@components/ScanModal";
-import ReportModal from "@components/ReportModal";
+import ScanDialog from "@components/ScanDialog";
+import ReportDialog from "@components/ReportDialog";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -32,7 +32,7 @@ const Navigation = () => {
   // Workspace context value
   const { workspace } = useWorkspace();
 
-  // Modal open states
+  // Dialog open states
   const [importOpen, setImportOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -56,7 +56,7 @@ const Navigation = () => {
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               Workspace
             </Text>
 
@@ -128,7 +128,7 @@ const Navigation = () => {
               Create
             </Button>
 
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               View
             </Text>
 
@@ -148,7 +148,7 @@ const Navigation = () => {
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -170,7 +170,7 @@ const Navigation = () => {
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -192,13 +192,13 @@ const Navigation = () => {
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
               Templates
             </Button>
           </Flex>
 
           <Flex direction={"column"} gap={"2"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
               Tools
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
@@ -212,7 +212,7 @@ const Navigation = () => {
                   colorPalette={"blue"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("import_modal_open");
+                    posthog.capture("import_dialog_open");
 
                     setImportOpen(true);
                   }}
@@ -233,7 +233,7 @@ const Navigation = () => {
                   colorPalette={"green"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_modal_open");
+                    posthog.capture("scan_dialog_open");
 
                     setScanOpen(true);
                   }}
@@ -254,7 +254,7 @@ const Navigation = () => {
                 colorPalette={"red"}
                 onClick={() => {
                   // Capture event
-                  posthog.capture("bug_modal_open");
+                  posthog.capture("bug_dialog_open");
 
                   setReportOpen(true);
                 }}
@@ -336,22 +336,22 @@ const Navigation = () => {
               <Menu.ItemGroup title={"View"}>
                 <Menu.ItemGroupLabel>View</Menu.ItemGroupLabel>
                 <Menu.Item
-                  id={"navProjectButtonMobile"}
-                  value={"projects"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/projects")}
-                >
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                  Projects
-                </Menu.Item>
-                <Menu.Item
                   id={"navEntitiesButtonMobile"}
                   value={"entities"}
                   fontSize={"xs"}
                   onClick={() => navigate("/entities")}
                 >
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
                   Entities
+                </Menu.Item>
+                <Menu.Item
+                  id={"navProjectButtonMobile"}
+                  value={"projects"}
+                  fontSize={"xs"}
+                  onClick={() => navigate("/projects")}
+                >
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                  Projects
                 </Menu.Item>
                 <Menu.Item
                   id={"navTemplatesButtonMobile"}
@@ -359,7 +359,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/templates")}
                 >
-                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
+                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>
@@ -381,7 +381,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_modal_open");
+                    posthog.capture("scan_dialog_open");
 
                     setScanOpen(true);
                   }}
@@ -409,11 +409,11 @@ const Navigation = () => {
       {/* `ImportDialog` component */}
       <ImportDialog open={importOpen} setOpen={setImportOpen} />
 
-      {/* `ScanModal` component */}
-      <ScanModal open={scanOpen} setOpen={setScanOpen} />
+      {/* `ScanDialog` component */}
+      <ScanDialog open={scanOpen} setOpen={setScanOpen} />
 
-      {/* `ReportModal` component */}
-      <ReportModal open={reportOpen} setOpen={setReportOpen} />
+      {/* `ReportDialog` component */}
+      <ReportDialog open={reportOpen} setOpen={setReportOpen} />
     </Flex>
   );
 };

@@ -22,7 +22,7 @@ import _ from "lodash";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
 
 /**
  * Utility to get the icon name, badge background, border, and icon color
@@ -32,17 +32,27 @@ const getTypeStyle = (
   type: "entities" | "projects" | "templates",
 ): { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string } => {
   if (type === "projects") {
-    return { icon: "project", badgeBg: "blue.50", badgeBorder: "blue.100", iconColor: GLOBAL_STYLES.project.iconColor };
+    return {
+      icon: "project",
+      badgeBg: "blue.50",
+      badgeBorder: "blue.100",
+      iconColor: GLOBAL_STYLES.project.color.icon,
+    };
   } else if (type === "templates") {
     return {
       icon: "template",
       badgeBg: "teal.50",
       badgeBorder: "teal.100",
-      iconColor: GLOBAL_STYLES.template.iconColor,
+      iconColor: GLOBAL_STYLES.template.color.icon,
     };
   }
   // entities
-  return { icon: "entity", badgeBg: "purple.50", badgeBorder: "purple.100", iconColor: GLOBAL_STYLES.entity.iconColor };
+  return {
+    icon: "entity",
+    badgeBg: "purple.50",
+    badgeBorder: "purple.100",
+    iconColor: GLOBAL_STYLES.entity.color.icon,
+  };
 };
 
 const Linky = (props: LinkyProps) => {
@@ -269,7 +279,7 @@ const Linky = (props: LinkyProps) => {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={showArchived ? "gray.50" : badgeBg}
+                bg={showArchived ? GLOBAL_STYLES.card.bg : badgeBg}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -288,7 +298,7 @@ const Linky = (props: LinkyProps) => {
                 <Flex
                   align={"center"}
                   justify={"center"}
-                  bg={"gray.50"}
+                  bg={GLOBAL_STYLES.card.bg}
                   px={"1.5"}
                   h={"100%"}
                   borderLeft={"1px solid"}

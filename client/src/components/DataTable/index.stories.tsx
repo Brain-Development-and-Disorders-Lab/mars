@@ -8,9 +8,9 @@ import DataTable from "@components/DataTable";
 import React from "react";
 import { Flex, Text, Button, Tag } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import ActorTag from "@components/ActorTag";
 
 // Utility imports
 import _ from "lodash";
@@ -160,7 +160,7 @@ const columns = [
   }),
   columnHelper.accessor("created", {
     cell: (info) => (
-      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
         {dayjs(info.getValue()).fromNow()}
       </Text>
     ),

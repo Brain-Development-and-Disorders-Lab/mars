@@ -248,7 +248,7 @@ const Templates = () => {
     columnHelper.accessor("timestamp", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -271,10 +271,10 @@ const Templates = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"}>
-            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+          <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
+            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
@@ -293,8 +293,8 @@ const Templates = () => {
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
             <Flex
               direction={"column"}
-              gap={"1"}
-              p={"1"}
+              gap={"2"}
+              p={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -317,71 +317,123 @@ const Templates = () => {
                 </Collapsible.Trigger>
               </Flex>
               <Collapsible.Content>
-                <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
-                  {/* Date Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Created Between
-                    </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.startDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              startDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.endDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              endDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
+                    {/* Date Range Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Created Between
+                      </Text>
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Field.Root gap={"0"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                            Start (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.startDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                startDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                        <Field.Root gap={"0"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                            End (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.endDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                endDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
                     </Flex>
-                  </Flex>
 
-                  {/* Owner Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Owner
-                    </Text>
-                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
-                      {_.uniq(templates.map((t) => t.owner))
-                        .filter((owner) => owner)
-                        .map((owner) => (
+                    {/* Owner Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Owner
+                      </Text>
+                      <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
+                        {_.uniq(templates.map((t) => t.owner))
+                          .filter((owner) => owner)
+                          .map((owner) => (
+                            <Checkbox.Root
+                              key={owner}
+                              size={"xs"}
+                              colorPalette={"blue"}
+                              checked={filterState.owners.includes(owner)}
+                              onCheckedChange={(details) => {
+                                const isChecked = details.checked as boolean;
+                                if (isChecked) {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: [...filterState.owners, owner],
+                                  });
+                                } else {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: filterState.owners.filter((o) => o !== owner),
+                                  });
+                                }
+                              }}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label fontSize={"xs"}>
+                                <ActorTag identifier={owner} fallback={"Unknown User"} size="sm" inline />
+                              </Checkbox.Label>
+                            </Checkbox.Root>
+                          ))}
+                      </Flex>
+                    </Flex>
+
+                    {/* Value Count Range Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Value Count
+                      </Text>
+                      <Flex direction={"column"} gap={"2"} ml={"1"}>
+                        {["0", "1-5", "6-10", "11+"].map((range) => (
                           <Checkbox.Root
-                            key={owner}
+                            key={range}
                             size={"xs"}
                             colorPalette={"blue"}
-                            checked={filterState.owners.includes(owner)}
+                            checked={filterState.valueCountRanges.includes(range)}
                             onCheckedChange={(details) => {
                               const isChecked = details.checked as boolean;
                               if (isChecked) {
                                 setFilterState({
                                   ...filterState,
-                                  owners: [...filterState.owners, owner],
+                                  valueCountRanges: [...filterState.valueCountRanges, range],
                                 });
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  owners: filterState.owners.filter((o) => o !== owner),
+                                  valueCountRanges: filterState.valueCountRanges.filter((r) => r !== range),
                                 });
                               }
                             }}
@@ -389,81 +441,45 @@ const Templates = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag identifier={owner} fallback={"Unknown User"} size="sm" inline />
+                              {range === "0" ? "0 values" : range === "11+" ? "11+ values" : `${range} values`}
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
+                      </Flex>
                     </Flex>
                   </Flex>
 
-                  {/* Value Count Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Value Count
-                    </Text>
-                    <Flex direction={"column"} gap={"1"}>
-                      {["0", "1-5", "6-10", "11+"].map((range) => (
-                        <Checkbox.Root
-                          key={range}
-                          size={"xs"}
-                          colorPalette={"blue"}
-                          checked={filterState.valueCountRanges.includes(range)}
-                          onCheckedChange={(details) => {
-                            const isChecked = details.checked as boolean;
-                            if (isChecked) {
-                              setFilterState({
-                                ...filterState,
-                                valueCountRanges: [...filterState.valueCountRanges, range],
-                              });
-                            } else {
-                              setFilterState({
-                                ...filterState,
-                                valueCountRanges: filterState.valueCountRanges.filter((r) => r !== range),
-                              });
-                            }
-                          }}
-                        >
-                          <Checkbox.HiddenInput />
-                          <Checkbox.Control />
-                          <Checkbox.Label fontSize={"xs"}>
-                            {range === "0" ? "0 values" : range === "11+" ? "11+ values" : `${range} values`}
-                          </Checkbox.Label>
-                        </Checkbox.Root>
-                      ))}
-                    </Flex>
+                  {/* Filter control buttons */}
+                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        setAppliedFilters({ ...filterState });
+                      }}
+                    >
+                      Apply Filters
+                    </Button>
+                    <Button
+                      size={"xs"}
+                      variant={"outline"}
+                      rounded={"md"}
+                      onClick={() => {
+                        const clearedState = {
+                          startDate: "",
+                          endDate: "",
+                          owners: [],
+                          valueCountRanges: [],
+                        };
+                        setFilterState(clearedState);
+                        setAppliedFilters(clearedState);
+                      }}
+                      disabled={activeFilterCount === 0}
+                    >
+                      Reset Filters
+                    </Button>
                   </Flex>
-                </Flex>
-
-                {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      setAppliedFilters({ ...filterState });
-                    }}
-                  >
-                    Apply Filters
-                  </Button>
-                  <Button
-                    size={"xs"}
-                    variant={"outline"}
-                    rounded={"md"}
-                    onClick={() => {
-                      const clearedState = {
-                        startDate: "",
-                        endDate: "",
-                        owners: [],
-                        valueCountRanges: [],
-                      };
-                      setFilterState(clearedState);
-                      setAppliedFilters(clearedState);
-                    }}
-                    disabled={activeFilterCount === 0}
-                  >
-                    Reset Filters
-                  </Button>
                 </Flex>
               </Collapsible.Content>
             </Flex>
@@ -483,7 +499,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.defaultColor} />
+                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

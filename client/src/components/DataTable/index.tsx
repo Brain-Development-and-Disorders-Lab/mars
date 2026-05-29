@@ -160,29 +160,33 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
   return (
     <Menu.Root>
       <Menu.Trigger asChild>
-        <Button variant="subtle" size="xs" p={0} minW="auto" h="auto" onClick={(e) => e.stopPropagation()}>
-          <Icon name="filter" size="xs" color={currentFilter.length > 0 ? "blue.700" : "gray.600"} />
+        <Button variant={"subtle"} size={"xs"} p={0} minW={"auto"} h={"auto"} onClick={(e) => e.stopPropagation()}>
+          <Icon
+            name={"filter"}
+            size={"xs"}
+            color={currentFilter.length > 0 ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color}
+          />
         </Button>
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
           <Menu.Content p={"1"}>
-            <Flex direction="column" p="1" gap="1" minW="200px" maxW="200px">
-              <Text fontSize="xs" fontWeight="semibold">
+            <Flex direction={"column"} p={"1"} gap={"1"} minW={"200px"} maxW={"200px"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Column Filters
               </Text>
               <Input
-                size="xs"
-                rounded="md"
-                placeholder="Search values..."
+                size={"xs"}
+                rounded={"md"}
+                placeholder={"Search values..."}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <Flex direction="row" gap="2" justify="space-between">
+              <Flex direction={"row"} gap={"2"} justify={"space-between"}>
                 <Button
-                  size="xs"
-                  variant="outline"
-                  rounded="md"
+                  size={"xs"}
+                  variant={"outline"}
+                  rounded={"md"}
                   onClick={(e) => {
                     e.stopPropagation();
                     table.getColumn(columnId)?.setFilterValue(values);
@@ -191,9 +195,9 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
                   Select All
                 </Button>
                 <Button
-                  size="xs"
-                  variant="outline"
-                  rounded="md"
+                  size={"xs"}
+                  variant={"outline"}
+                  rounded={"md"}
                   onClick={(e) => {
                     e.stopPropagation();
                     table.getColumn(columnId)?.setFilterValue([]);
@@ -202,12 +206,12 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
                   Clear All
                 </Button>
               </Flex>
-              <Flex direction="column" maxH="200px" overflowY="auto" gap="1">
+              <Flex direction={"column"} maxH={"200px"} overflowY={"auto"} gap={"1"}>
                 {filtered.map((value, index) => (
                   <Menu.CheckboxItem
                     key={`${columnId}_${getFilterKey(value)}_${index}`}
                     value={getFilterKey(value)}
-                    fontSize="xs"
+                    fontSize={"xs"}
                     checked={currentFilter.includes(value)}
                     closeOnSelect={false}
                     onCheckedChange={(checked) => {
@@ -221,7 +225,7 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
                   </Menu.CheckboxItem>
                 ))}
                 {filtered.length === 0 && (
-                  <Text fontSize="xs" color="gray.500" p="2" textAlign="center">
+                  <Text fontSize={"xs"} color={"gray.500"} p={"2"} textAlign={"center"}>
                     No values found
                   </Text>
                 )}
@@ -433,11 +437,11 @@ const DataTable = (props: DataTableProps) => {
       {
         id: "select",
         header: ({ table: tableInstance }: { table: Table<RowData> }) => (
-          <Flex align="center" justify="center" w="100%" h="100%">
+          <Flex align={"center"} justify={"center"} w={"100%"} h={"100%"}>
             <Checkbox.Root
               disabled={props.viewOnly}
-              size="xs"
-              colorPalette="blue"
+              size={"xs"}
+              colorPalette={"blue"}
               checked={
                 tableInstance.getIsAllRowsSelected()
                   ? true
@@ -462,10 +466,10 @@ const DataTable = (props: DataTableProps) => {
             toggleSelected: (value?: boolean) => void;
           };
         }) => (
-          <Flex align="center" justify="center" w="100%" h="100%">
+          <Flex align={"center"} justify={"center"} w={"100%"} h={"100%"}>
             <Checkbox.Root
-              size="xs"
-              colorPalette="blue"
+              size={"xs"}
+              colorPalette={"blue"}
               checked={row.getIsSelected() ? true : row.getIsSomeSelected() ? "indeterminate" : false}
               disabled={!row.getCanSelect() || props.viewOnly}
               onCheckedChange={() => row.toggleSelected(!row.getIsSelected())}
@@ -834,36 +838,43 @@ const DataTable = (props: DataTableProps) => {
   );
 
   return (
-    <Box w="100%" maxW="100%" display="flex" flexDirection="column" css={{ WebkitOverflowScrolling: "touch" }}>
+    <Box
+      w={"100%"}
+      maxW={"100%"}
+      minW={"0"}
+      display={"flex"}
+      flexDirection={"column"}
+      css={{ WebkitOverflowScrolling: "touch" }}
+    >
       <Box
         ref={containerRef}
-        w="100%"
-        maxW="100%"
-        flex="1"
-        minH="0"
-        minW="0"
-        overflowX="auto"
-        overflowY="auto"
-        position="relative"
-        className="data-table-scroll-container"
+        w={"100%"}
+        maxW={"100%"}
+        flex={"1"}
+        minH={"0"}
+        minW={"0"}
+        overflowX={"auto"}
+        overflowY={"auto"}
+        position={"relative"}
+        className={"data-table-scroll-container"}
       >
         <Box
           w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
           minW={`${totalMinWidth}px`}
           border={GLOBAL_STYLES.border.style}
           borderColor={GLOBAL_STYLES.border.color}
-          borderRadius="md"
-          overflow="hidden"
-          display="flex"
-          flexDirection="column"
+          borderRadius={"md"}
+          overflow={"hidden"}
+          display={"flex"}
+          flexDirection={"column"}
         >
           {headerGroups.length > 0 && (
             <Flex
               gap={0}
-              bg="gray.100"
-              borderBottom="1px solid"
-              borderColor="gray.200"
-              direction="row"
+              bg={"gray.100"}
+              borderBottom={"1px solid"}
+              borderColor={"gray.200"}
+              direction={"row"}
               w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
             >
               {headerGroups[0].headers
@@ -874,43 +885,45 @@ const DataTable = (props: DataTableProps) => {
                   const columnWidth = getColumnWidth(header.id, isLastColumn);
                   const columnMinWidth = getColumnMinWidth(header.id);
                   const align = getColumnAlign(header.id);
+                  const headerMeta = header.column.columnDef.meta as ColumnMeta | undefined;
                   return (
                     <Flex
                       key={header.id}
                       w={columnWidth}
                       flex={isLastColumn ? "1 1 auto" : "0 0 auto"}
                       minW={isLastColumn ? `${columnMinWidth}px` : columnWidth}
+                      maxW={isLastColumn && headerMeta?.maxWidth ? `${headerMeta.maxWidth}px` : undefined}
                       px={1}
                       py={1}
-                      fontSize="xs"
-                      fontWeight="semibold"
-                      color="gray.600"
-                      bg="gray.100"
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      bg={"gray.100"}
                       borderRight={!isLastColumn ? "1px solid" : "none"}
-                      borderColor="gray.200"
-                      position="relative"
+                      borderColor={"gray.200"}
+                      position={"relative"}
                       textAlign={align}
-                      lineHeight="1.2"
-                      align="center"
-                      justify="center"
-                      overflow="hidden"
+                      lineHeight={"1.2"}
+                      align={"center"}
+                      justify={"center"}
+                      overflow={"hidden"}
                       flexShrink={0}
                     >
                       {isSelectColumn ? (
                         flexRender(header.column.columnDef.header, header.getContext())
                       ) : (
-                        <Flex direction="row" align="center" gap={1} justify="space-between" w="100%">
+                        <Flex direction={"row"} align={"center"} gap={1} justify={"space-between"} w={"100%"}>
                           <Text textAlign={align}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </Text>
-                          <Flex direction="row" gap={1} align="center" justify="center">
+                          <Flex direction={"row"} gap={1} align={"center"} justify={"center"}>
                             {canSortColumn(header.id) && (
                               <Button
-                                size="xs"
-                                variant="subtle"
+                                size={"xs"}
+                                variant={"subtle"}
                                 p={0}
-                                minW="auto"
-                                h="auto"
+                                minW={"auto"}
+                                h={"auto"}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   header.column.getToggleSortingHandler()?.(e);
@@ -924,8 +937,10 @@ const DataTable = (props: DataTableProps) => {
                                         ? "sort_down"
                                         : "sort"
                                   }
-                                  color={header.column.getIsSorted() ? "blue.700" : "gray.600"}
-                                  size="xs"
+                                  color={
+                                    header.column.getIsSorted() ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color
+                                  }
+                                  size={"xs"}
                                 />
                               </Button>
                             )}
@@ -941,7 +956,7 @@ const DataTable = (props: DataTableProps) => {
             </Flex>
           )}
 
-          <Box overflowY="auto" overflowX="hidden" w={props.fill !== false ? "100%" : `${totalMinWidth}px`}>
+          <Box overflowY={"auto"} overflowX={"hidden"} w={props.fill !== false ? "100%" : `${totalMinWidth}px`}>
             {rows.map((row, rowIndex) => {
               const isSelected = row.getIsSelected();
               const visibleCells = row.getVisibleCells();
@@ -952,16 +967,17 @@ const DataTable = (props: DataTableProps) => {
                   gap={0}
                   w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
                   borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
-                  borderColor="gray.200"
+                  borderColor={"gray.200"}
                   _hover={{ bg: "gray.25" }}
-                  overflow="hidden"
-                  bg={isSelected ? "blue.50" : "transparent"}
+                  overflow={"hidden"}
+                  bg={isSelected ? "blue.50" : "white"}
                 >
                   {visibleCells.map((cell, cellIndex) => {
                     const isLastCell = cellIndex === visibleCells.length - 1;
                     const columnWidth = getColumnWidth(cell.column.id, isLastCell);
                     const columnMinWidth = getColumnMinWidth(cell.column.id);
                     const align = getColumnAlign(cell.column.id);
+                    const cellMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     return (
                       <Box
                         key={cell.id}
@@ -969,17 +985,18 @@ const DataTable = (props: DataTableProps) => {
                         w={columnWidth}
                         flex={isLastCell ? "1 1 auto" : "0 0 auto"}
                         minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
+                        maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
                         h={"34px"}
                         px={1}
                         py={0.5}
                         borderRight={!isLastCell ? "1px solid" : "none"}
-                        borderColor="gray.200"
+                        borderColor={"gray.200"}
                         textAlign={align}
-                        overflow="hidden"
-                        display="flex"
-                        alignItems="center"
+                        overflow={"hidden"}
+                        display={"flex"}
+                        alignItems={"center"}
                         justifyContent={align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"}
-                        bg={isSelected ? "blue.50" : "transparent"}
+                        bg={isSelected ? "blue.50" : "white"}
                         flexShrink={0}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -993,60 +1010,64 @@ const DataTable = (props: DataTableProps) => {
         </Box>
       </Box>
 
-      <Flex gap={1} align="center" justify="space-between" w="100%" mt={1} flexShrink={0}>
-        <Flex direction="row" gap={1} align="center" flexShrink={0}>
+      <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
+        <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>
           {props.showPagination && (
-            <Flex direction="row" gap={1} align="center">
+            <Flex direction={"row"} gap={2} align={"center"}>
               <IconButton
-                variant="outline"
-                size="xs"
-                rounded="md"
-                aria-label="first page"
+                variant={"outline"}
+                size={"xs"}
+                rounded={"md"}
+                bg={"white"}
+                aria-label={"first page"}
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                <Icon name="c_double_left" />
+                <Icon name={"c_double_left"} />
               </IconButton>
               <IconButton
-                variant="outline"
-                size="xs"
-                rounded="md"
-                aria-label="previous page"
+                variant={"outline"}
+                size={"xs"}
+                rounded={"md"}
+                bg={"white"}
+                aria-label={"previous page"}
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                <Icon name="c_left" />
+                <Icon name={"c_left"} />
               </IconButton>
               {table.getPageCount() > 0 && (
                 <Flex gap={1}>
-                  <Text fontSize="xs" fontWeight="semibold">
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
                     {table.getState().pagination.pageIndex + 1}
                   </Text>
-                  <Text fontSize="xs"> of </Text>
-                  <Text fontSize="xs" fontWeight="semibold">
+                  <Text fontSize={"xs"}> of </Text>
+                  <Text fontSize={"xs"} fontWeight={"semibold"}>
                     {table.getPageCount()}
                   </Text>
                 </Flex>
               )}
               <IconButton
-                variant="outline"
-                size="xs"
-                rounded="md"
-                aria-label="next page"
+                variant={"outline"}
+                size={"xs"}
+                rounded={"md"}
+                bg={"white"}
+                aria-label={"next page"}
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                <Icon name="c_right" />
+                <Icon name={"c_right"} />
               </IconButton>
               <IconButton
-                variant="outline"
-                size="xs"
-                rounded="md"
-                aria-label="last page"
+                variant={"outline"}
+                size={"xs"}
+                rounded={"md"}
+                bg={"white"}
+                aria-label={"last page"}
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                <Icon name="c_double_right" />
+                <Icon name={"c_double_right"} />
               </IconButton>
             </Flex>
           )}
@@ -1054,9 +1075,9 @@ const DataTable = (props: DataTableProps) => {
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette="yellow" size="xs" rounded="md">
+                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
                   Actions
-                  <Icon name="lightning" size="xs" />
+                  <Icon name={"lightning"} size={"xs"} />
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
@@ -1081,17 +1102,17 @@ const DataTable = (props: DataTableProps) => {
                           disabled={isDisabled || action.disabled}
                           value={resolvedLabel}
                         >
-                          <Flex direction="row" gap="1" align="center">
-                            <Icon name={action.icon} size="xs" />
-                            <Text fontSize="xs">{resolvedLabel}</Text>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={action.icon} size={"xs"} />
+                            <Text fontSize={"xs"}>{resolvedLabel}</Text>
                           </Flex>
                         </Menu.Item>
                       );
                     })
                   ) : (
-                    <Menu.Item key="no-actions" disabled value="No actions available">
-                      <Flex direction="row" gap="1" align="center">
-                        <Text fontSize="xs">No Actions available</Text>
+                    <Menu.Item key={"no-actions"} disabled value={"No actions available"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"}>No Actions available</Text>
                       </Flex>
                     </Menu.Item>
                   )}
@@ -1102,14 +1123,15 @@ const DataTable = (props: DataTableProps) => {
         </Flex>
 
         {allColumnIds.length > 0 && props.showColumnSelect && showAdvancedControls && (
-          <Flex direction="row" gap={1} align="center" wrap="wrap" justify="center" grow={1}>
-            <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"} justify={"center"} grow={1}>
+            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
               Show Columns:
             </Text>
             <Select.Root
-              key="select-columns"
-              size="xs"
-              w="200px"
+              key={"select-columns"}
+              size={"xs"}
+              w={"200px"}
+              bg={"white"}
               collection={columnNamesCollection}
               value={visibleColumnsForSelect}
               onValueChange={(details) => {
@@ -1122,8 +1144,8 @@ const DataTable = (props: DataTableProps) => {
             >
               <Select.HiddenSelect />
               <Select.Control>
-                <Select.Trigger rounded="md">
-                  <Select.ValueText placeholder="Visible Columns" />
+                <Select.Trigger rounded={"md"}>
+                  <Select.ValueText placeholder={"Visible Columns"} />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
                   <Select.Indicator />
@@ -1161,17 +1183,18 @@ const DataTable = (props: DataTableProps) => {
         )}
 
         {props.showPagination && showAdvancedControls && (
-          <Flex direction="row" gap={1} align="center" wrap="wrap">
-            <Text fontSize="xs" display={{ base: "none", sm: "block" }}>
+          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
+            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
               Show:
             </Text>
-            <Fieldset.Root w="fit-content">
+            <Fieldset.Root w={"fit-content"}>
               <Fieldset.Content>
                 <Field.Root>
                   <Select.Root
-                    key="select-pagesize"
-                    size="xs"
-                    w="80px"
+                    key={"select-pagesize"}
+                    size={"xs"}
+                    w={"80px"}
+                    bg={"white"}
                     collection={pageLengthsCollection}
                     value={pageLength}
                     onValueChange={(details) => {
@@ -1181,8 +1204,8 @@ const DataTable = (props: DataTableProps) => {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger rounded="md">
-                        <Select.ValueText placeholder="Page Size" />
+                      <Select.Trigger rounded={"md"}>
+                        <Select.ValueText placeholder={"Page Size"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>
                         <Select.Indicator />

@@ -75,7 +75,7 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
           ))
         ) : (
           <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-            <Icon name={"entity"} size={"md"} color={GLOBAL_STYLES.entity.lightColor} />
+            <Icon name={"entity"} size={"md"} color={GLOBAL_STYLES.entity.color.light} />
             <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
               No Entities selected
             </Text>

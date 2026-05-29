@@ -20,7 +20,7 @@ import { getRecentErrors } from "@lib/errors";
 import { usePostHog } from "posthog-js/react";
 
 // Custom types
-import { ReportModalProps } from "@types";
+import { ReportDialogProps } from "@types";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -48,7 +48,7 @@ const REPORT_ISSUE = gql`
   }
 `;
 
-const ReportModal = (props: ReportModalProps) => {
+const ReportDialog = (props: ReportDialogProps) => {
   const { open, setOpen } = props;
   const posthog = usePostHog();
 
@@ -113,6 +113,7 @@ const ReportModal = (props: ReportModalProps) => {
               </Text>
               <Textarea
                 size={"xs"}
+                h={"100%"}
                 rounded={"md"}
                 placeholder={"What happened?"}
                 value={description}
@@ -122,7 +123,7 @@ const ReportModal = (props: ReportModalProps) => {
               />
             </Flex>
           </Dialog.Body>
-          <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
               <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleCancel}>
                 Cancel
@@ -149,4 +150,4 @@ const ReportModal = (props: ReportModalProps) => {
   );
 };
 
-export default ReportModal;
+export default ReportDialog;

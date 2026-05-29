@@ -6,6 +6,7 @@ import {
   Flex,
   Button,
   Dialog,
+  EmptyState,
   Text,
   Input,
   Select,
@@ -20,18 +21,17 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
-import Attribute from "@components/AttributeCard";
+import AddAttributeDialog from "@components/AddAttributeDialog";
+import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import { Information } from "@components/Label";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
 import {
   AttributeModel,
-  AttributeCardProps,
   ColumnInfo,
   IGenericItem,
   EntityImportReview,
@@ -54,10 +54,18 @@ import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { removeTypename, isValidValues, getValueTypeIconProps } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
-import { nanoid } from "nanoid";
 
 // Authentication
 import { auth } from "@lib/auth";
+
+// Events
+import { usePostHog } from "posthog-js/react";
+
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
+// Hooks
+import { useFeatures } from "@hooks/useFeatures";
 
 // Variables
 const JSON_MIME_TYPE = "application/json";
@@ -185,15 +193,6 @@ const IMPORT_TEMPLATE_JSON = gql`
   }
 `;
 
-// Events
-import { usePostHog } from "posthog-js/react";
-
-// Variables
-import { GLOBAL_STYLES } from "@variables";
-
-// Hooks
-import { useFeatures } from "@hooks/useFeatures";
-
 const ImportDialog = (props: ImportDialogProps) => {
   // Posthog
   const posthog = usePostHog();
@@ -258,15 +257,11 @@ const ImportDialog = (props: ImportDialogProps) => {
     }),
   );
 
-  // Templates
-  const [templatesCollection, setTemplatesCollection] = useState(
-    createListCollection({
-      items: [] as AttributeModel[],
-      itemToValue: (item: AttributeModel) => item._id,
-      itemToString: (item: AttributeModel) => item.name,
-    }),
-  );
-  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
+  // Templates available for attribute creation
+  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+
+  // Controls the "Add Attribute" dialog on the mapping step
+  const [addAttributeOpen, setAddAttributeOpen] = useState(false);
 
   // Fields to be assigned to columns
   const [namePrefixField, setNamePrefixField] = useState("");
@@ -277,7 +272,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
-  const [attributeValidity, setAttributeValidity] = useState<Record<string, boolean>>({});
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
@@ -468,9 +462,10 @@ const ImportDialog = (props: ImportDialogProps) => {
   useEffect(() => {
     if (!_.isEqual(entityInterfacePage, "mapping")) return;
     const allValid =
-      attributesField.length === 0 || attributesField.every((attr) => attributeValidity[attr._id] === true);
+      attributesField.length === 0 ||
+      attributesField.every((attr) => attr.name !== "" && attr.description !== "" && isValidValues(attr.values));
     setContinueDisabled(!allValid);
-  }, [entityInterfacePage, attributeValidity, attributesField]);
+  }, [entityInterfacePage, attributesField]);
 
   const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
@@ -608,13 +603,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
         t.values.every((v) => !["entity", "select"].includes(v.type)),
       );
-      setTemplatesCollection(
-        createListCollection({
-          items: supportedTemplates,
-          itemToValue: (item: AttributeModel) => item._id,
-          itemToString: (item: AttributeModel) => item.name,
-        }),
-      );
+      setTemplates(supportedTemplates);
     }
     if (response.data?.projects) {
       setProjectsCollection(
@@ -919,35 +908,94 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   const onRemoveAttribute = (identifier: string) => {
     setAttributesField(attributesField.filter((attribute) => attribute._id !== identifier));
-    setAttributeValidity((prev) => {
-      const next = { ...prev };
-      delete next[identifier];
-      return next;
-    });
   };
 
-  const onAttributeValidityChange = (id: string, isValid: boolean) => {
-    setAttributeValidity((prev) => ({ ...prev, [id]: isValid }));
+  const onUpdateAttribute = (updated: AttributeModel) => {
+    setAttributesField(attributesField.map((attr) => (_.isEqual(attr._id, updated._id) ? updated : attr)));
   };
 
-  const onUpdateAttribute = (data: AttributeCardProps) => {
-    setAttributesField([
-      ...attributesField.map((attribute) => {
-        if (_.isEqual(attribute._id, data._id)) {
-          return {
-            _id: data._id,
-            name: data.name,
-            timestamp: attribute.timestamp,
-            owner: attribute.owner,
-            archived: false,
-            description: data.description,
-            values: data.values,
-          };
+  const attributeColumnHelper = createColumnHelper<AttributeModel>();
+  const attributeTableColumns = [
+    attributeColumnHelper.accessor("name", {
+      cell: (info) => {
+        const attribute = info.row.original;
+        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
+        return (
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={info.getValue() !== "" ? "black" : "gray.400"}>
+              {info.getValue() !== "" ? info.getValue() : "Unnamed"}
+            </Text>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size="2xs"
+                variant="subtle"
+                rounded="md"
+                colorPalette="gray"
+                aria-label={"View Attribute"}
+                onClick={() => setViewAttributeDialogOpen(true)}
+              >
+                Edit
+                <Icon name={"edit"} size={"xs"} />
+              </Button>
+              <Button
+                size="2xs"
+                rounded="md"
+                variant="subtle"
+                colorPalette="red"
+                aria-label={"Delete Attribute"}
+                onClick={() => onRemoveAttribute(attribute._id)}
+              >
+                Delete
+                <Icon name={"delete"} size={"xs"} />
+              </Button>
+              <ViewAttributeDialog
+                open={viewAttributeDialogOpen}
+                setOpen={setViewAttributeDialogOpen}
+                attribute={attribute}
+                editing={true}
+                permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+                onAttributeUpdate={onUpdateAttribute}
+              />
+            </Flex>
+          </Flex>
+        );
+      },
+      header: "Name",
+      meta: {
+        minWidth: 320,
+      },
+    }),
+    attributeColumnHelper.accessor("description", {
+      cell: (info) => (
+        <Tooltip content={info.getValue()} disabled={info.getValue().length < 40} showArrow>
+          <Text fontSize={"xs"} truncate maxW={"200px"}>
+            {_.truncate(info.getValue(), { length: 40 })}
+          </Text>
+        </Tooltip>
+      ),
+      header: "Description",
+    }),
+    attributeColumnHelper.accessor("values", {
+      cell: (info) => {
+        const values = info.row.original.values;
+        if (values.length === 0) {
+          return (
+            <Text fontSize={"xs"} color={"gray.500"}>
+              No values
+            </Text>
+          );
         }
-        return attribute;
-      }),
-    ]);
-  };
+        const valueNames = values.map((value) => value.name).join(", ");
+        const truncatedNames = valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames;
+        return (
+          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
+            <Text fontSize={"xs"}>{truncatedNames}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Values",
+    }),
+  ];
 
   /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
   const onBackClick = () => {
@@ -1127,16 +1175,9 @@ const ImportDialog = (props: ImportDialogProps) => {
         itemToString: (item: IGenericItem) => item.name,
       }),
     );
-    setTemplatesCollection(
-      createListCollection({
-        items: [] as AttributeModel[],
-        itemToValue: (item: AttributeModel) => item._id,
-        itemToString: (item: AttributeModel) => item.name,
-      }),
-    );
-    setSelectedTemplateValue([]);
+    setTemplates([]);
+    setAddAttributeOpen(false);
     setAttributesField([]);
-    setAttributeValidity({});
     setReviewEntities([]);
     setReviewTemplates([]);
     setConfirmWarningsOpen(false);
@@ -1153,19 +1194,19 @@ const ImportDialog = (props: ImportDialogProps) => {
     <Dialog.Root
       open={props.open}
       placement={"center"}
-      size={"xl"}
+      size={"lg"}
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
     >
       <AlertDialog
         open={confirmWarningsOpen}
         setOpen={setConfirmWarningsOpen}
-        header="Import with Warnings"
-        leftButtonLabel="Cancel"
-        leftButtonColor="red"
+        header={"Import with Warnings"}
+        leftButtonLabel={"Cancel"}
+        leftButtonColor={"red"}
         leftButtonAction={() => setConfirmWarningsOpen(false)}
-        rightButtonLabel="Import Anyway"
-        rightButtonColor="green"
+        rightButtonLabel={"Import Anyway"}
+        rightButtonColor={"green"}
         rightButtonAction={async () => {
           setConfirmWarningsOpen(false);
           posthog.capture("import_finish", { importType: "entities" });
@@ -1192,7 +1233,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} flexShrink={0} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+          <Dialog.Header p={"2"} flexShrink={0} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"upload"} size={"xs"} />
               <Text fontWeight={"semibold"} fontSize={"xs"}>
@@ -1203,7 +1244,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <CloseButton size={"2xs"} top={"6px"} onClick={handleOnClose} _hover={{ bg: "gray.200" }} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
-          <Dialog.Body p={"1"} gap={"1"}>
+          <Dialog.Body p={"2"} gap={"2"}>
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
               <Steps.Root
@@ -1253,11 +1294,16 @@ const ImportDialog = (props: ImportDialogProps) => {
 
             {/* Select file type of import */}
             {entityStep === 0 && templateStep === 0 && (
-              <Flex direction={"column"} gap={"1"} pb={"1"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+              <Flex direction={"column"} gap={"2"} py={"2"}>
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  ml={"0.5"}
+                >
                   File Contents
                 </Text>
-                <Flex gap={"1"}>
+                <Flex gap={"2"}>
                   {(["entities", "template"] as const).map((type) => (
                     <Button
                       key={type}
@@ -1288,7 +1334,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               <Flex
                 w={"100%"}
                 justify={"left"}
-                gap={"1"}
+                gap={"2"}
                 align={"baseline"}
                 direction={"column"}
                 rounded={"md"}
@@ -1296,13 +1342,13 @@ const ImportDialog = (props: ImportDialogProps) => {
                 border={"1px solid"}
                 borderColor={"blue.200"}
                 p={"2"}
-                my={"1"}
+                my={"2"}
               >
                 <Flex direction={"row"} gap={"1"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     File:
                   </Text>
-                  <Text fontSize={"xs"} color={"gray.600"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     {fileName}
                   </Text>
                 </Flex>
@@ -1352,17 +1398,17 @@ const ImportDialog = (props: ImportDialogProps) => {
                         justify={"center"}
                         border={GLOBAL_STYLES.border.style}
                         borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={fileName !== "" ? "blue.300" : GLOBAL_STYLES.border.color}
+                        borderColor={fileName !== "" ? "gray.300" : GLOBAL_STYLES.border.color}
                         rounded={"md"}
-                        bg={fileName !== "" ? "blue.50" : "gray.50"}
+                        bg={fileName !== "" ? GLOBAL_STYLES.card.bg : "white"}
                         cursor={"pointer"}
                       >
                         {/* Condition 1: File type not specified */}
                         {_.isUndefined(importType) && (
                           <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                             <Flex direction={"row"} align={"center"} justify={"center"} gap={"2"}>
-                              <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.lightColor} />
-                              <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                              <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.light} />
+                              <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
                             </Flex>
                             <Text fontSize={"xs"} fontWeight={"semibold"}>
                               Select File Contents
@@ -1378,8 +1424,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xl"}
                               color={
                                 importType === "entities"
-                                  ? GLOBAL_STYLES.entity.lightColor
-                                  : GLOBAL_STYLES.template.lightColor
+                                  ? GLOBAL_STYLES.entity.color.light
+                                  : GLOBAL_STYLES.template.color.light
                               }
                             />
                             <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
@@ -1408,8 +1454,8 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xl"}
                               color={
                                 importType === "entities"
-                                  ? GLOBAL_STYLES.entity.lightColor
-                                  : GLOBAL_STYLES.template.lightColor
+                                  ? GLOBAL_STYLES.entity.color.light
+                                  : GLOBAL_STYLES.template.color.light
                               }
                             />
                             <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1471,12 +1517,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                 direction={"column"}
                 gap={"2"}
                 p={"2"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                   Setup
                 </Text>
                 {isSpreadsheetFile(fileType) && (
@@ -1484,7 +1530,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1496,7 +1542,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                             onChange={(event) => setNamePrefixField(event.target.value)}
                           />
                           <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Add a prefix to each Entity name
+                            Append a prefix to each Entity name
                           </Field.HelperText>
                         </Field.Root>
 
@@ -1507,7 +1553,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                           }
                           required
                         >
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name
                             <Field.RequiredIndicator />
                           </Field.Label>
@@ -1533,7 +1579,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                           </Flex>
                           {!nameUseCounter && (
                             <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                              <Field.HelperText fontSize={"xs"}>Column containing Entity name</Field.HelperText>
                               {isSuggesting && (
                                 <>
                                   <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
@@ -1552,7 +1597,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     _hover={{ textDecoration: "underline" }}
                                     onClick={() => setNameField(columns.find((c) => c.name === suggestions.name))}
                                   >
-                                    Suggested: {suggestions.name}
+                                    Suggested Column: {suggestions.name}
                                   </Text>
                                 </>
                               )}
@@ -1569,7 +1614,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Fieldset.Content>
                       <Flex direction={"row"} gap={"1"}>
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name Prefix
                           </Field.Label>
                           <Input
@@ -1586,13 +1631,17 @@ const ImportDialog = (props: ImportDialogProps) => {
                         </Field.Root>
 
                         <Field.Root gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Name
                           </Field.Label>
-                          <Input size={"xs"} bg={"white"} rounded={"md"} placeholder={'"name"'} disabled readOnly />
-                          <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            JSON field containing Entity name
-                          </Field.HelperText>
+                          <Input
+                            size={"xs"}
+                            bg={"white"}
+                            rounded={"md"}
+                            placeholder={'JSON: "name"'}
+                            disabled
+                            readOnly
+                          />
                         </Field.Root>
                       </Flex>
                     </Fieldset.Content>
@@ -1605,7 +1654,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       <Flex direction={"row"} gap={"1"}>
                         {/* Description */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Description
                           </Field.Label>
                           {isSpreadsheetFile(fileType) ? (
@@ -1615,17 +1664,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                               size={"xs"}
                               bg={"white"}
                               rounded={"md"}
-                              placeholder={'"description"'}
+                              placeholder={'JSON: "description"'}
                               disabled
                               readOnly
                             />
                           )}
                           <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                            <Field.HelperText fontSize={"xs"}>
-                              {isSpreadsheetFile(fileType)
-                                ? "Column containing Entity description"
-                                : "JSON field containing Entity description"}
-                            </Field.HelperText>
                             {isSpreadsheetFile(fileType) && isSuggesting && (
                               <>
                                 <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
@@ -1649,7 +1693,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                       setDescriptionField(columns.find((c) => c.name === suggestions.description))
                                     }
                                   >
-                                    Suggested: {suggestions.description}
+                                    Suggested Column: {suggestions.description}
                                   </Text>
                                 </Flex>
                               )}
@@ -1658,7 +1702,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
                         {/* Project */}
                         <Field.Root w={"50%"} gap={"0.5"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                             Project
                           </Field.Label>
                           <Select.Root
@@ -1678,7 +1722,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                                     name={"project"}
                                     size={"xs"}
                                     color={
-                                      projectField ? GLOBAL_STYLES.project.iconColor : GLOBAL_STYLES.project.lightColor
+                                      projectField
+                                        ? GLOBAL_STYLES.project.color.icon
+                                        : GLOBAL_STYLES.project.color.light
                                     }
                                   />
                                   <Text fontSize={"xs"} color={projectField ? "black" : "gray.500"}>
@@ -1699,7 +1745,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                                   {projectsCollection.items?.map((project: IGenericItem) => (
                                     <Select.Item item={project} key={project._id}>
                                       <Flex direction={"row"} gap={"2"} align={"center"}>
-                                        <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
+                                        <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
                                         {project.name}
                                       </Flex>
                                       <Select.ItemIndicator />
@@ -1709,9 +1755,6 @@ const ImportDialog = (props: ImportDialogProps) => {
                               </Select.Positioner>
                             </Portal>
                           </Select.Root>
-                          <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                            Add Entities to a Project
-                          </Field.HelperText>
                         </Field.Root>
                       </Flex>
                     </Fieldset.Content>
@@ -1723,15 +1766,12 @@ const ImportDialog = (props: ImportDialogProps) => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root gap={"0.5"}>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                           Owner
                         </Field.Label>
                         <Flex>
                           <ActorTag identifier={ownerField} fallback={"Unknown"} size={"md"} />
                         </Flex>
-                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          Owner of imported Entities
-                        </Field.HelperText>
                       </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
@@ -1746,142 +1786,59 @@ const ImportDialog = (props: ImportDialogProps) => {
                 direction={"column"}
                 gap={"2"}
                 p={"2"}
-                bg={"gray.50"}
                 border={GLOBAL_STYLES.border.style}
                 borderColor={GLOBAL_STYLES.border.color}
                 rounded={"md"}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                  Attributes
-                </Text>
-                <Information
-                  text={
-                    isSpreadsheetFile(fileType)
-                      ? "Assign spreadsheet columns to Attribute values, or use an existing Template."
-                      : "Existing Attributes from the JSON file will be preserved."
-                  }
-                />
-
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} wrap={["wrap", "nowrap"]}>
-                  {/* Drop-down to select a Template */}
-                  <Fieldset.Root maxW={"sm"}>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Select.Root
-                          key={"select-template"}
-                          size={"xs"}
-                          bg={"white"}
-                          rounded={"md"}
-                          collection={templatesCollection}
-                          value={selectedTemplateValue}
-                          onValueChange={(details) => {
-                            const selectedTemplate = details.items[0];
-                            if (!_.isEqual(selectedTemplate._id, "")) {
-                              for (const template of templatesCollection.items || []) {
-                                if (_.isEqual(selectedTemplate._id, template._id)) {
-                                  setAttributesField([
-                                    ...attributesField,
-                                    {
-                                      _id: `${template._id}-${nanoid(6)}`,
-                                      name: template.name,
-                                      timestamp: template.timestamp,
-                                      owner: template.owner,
-                                      archived: false,
-                                      description: template.description,
-                                      values: template.values,
-                                    },
-                                  ]);
-                                  setSelectedTemplateValue([]);
-                                  break;
-                                }
-                              }
-                            }
-                          }}
-                          disabled={templatesCollection.items?.length === 0}
-                        >
-                          <Select.HiddenSelect />
-                          <Select.Control>
-                            <Select.Trigger rounded={"md"}>
-                              <Flex direction={"row"} gap={"2"} align={"center"}>
-                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
-                                <Text fontSize={"xs"} color={"gray.500"}>
-                                  {"Select Template"}
-                                </Text>
-                              </Flex>
-                            </Select.Trigger>
-                            <Select.IndicatorGroup>
-                              <Select.Indicator />
-                            </Select.IndicatorGroup>
-                          </Select.Control>
-                          <Portal>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {templatesCollection.items?.map((template: AttributeModel) => (
-                                  <Select.Item item={template} key={template._id}>
-                                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                                      <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                                      {template.name}
-                                    </Flex>
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                )) || []}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Portal>
-                        </Select.Root>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      setAttributesField([
-                        ...attributesField,
-                        {
-                          _id: `a-${nanoid(6)}`,
-                          name: "",
-                          timestamp: dayjs(Date.now()).toISOString(),
-                          owner: ownerField,
-                          archived: false,
-                          description: "",
-                          values: [],
-                        },
-                      ]);
-                    }}
-                  >
-                    Create
+                <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    Attributes
+                  </Text>
+                  <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setAddAttributeOpen(true)}>
+                    Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
 
-                {attributesField.map((attribute) => (
-                  <Attribute
-                    _id={attribute._id}
-                    key={attribute._id}
-                    name={attribute.name}
-                    owner={attribute.owner}
-                    archived={attribute.archived}
-                    description={attribute.description}
-                    values={attribute.values}
-                    restrictDataValues={true}
-                    permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
-                    onRemove={onRemoveAttribute}
-                    onUpdate={onUpdateAttribute}
-                    onValidityChange={onAttributeValidityChange}
+                {attributesField.length > 0 ? (
+                  <DataTable
+                    columns={attributeTableColumns}
+                    data={attributesField}
+                    visibleColumns={{}}
+                    selectedRows={{}}
                   />
-                ))}
+                ) : (
+                  <Flex justify={"center"} align={"center"} minH={"80px"}>
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>No Attributes added</EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
+                  </Flex>
+                )}
+
+                <AddAttributeDialog
+                  open={addAttributeOpen}
+                  onClose={() => setAddAttributeOpen(false)}
+                  owner={ownerField}
+                  templates={templates}
+                  entityName={""}
+                  entityDescription={""}
+                  permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}
+                  onAdd={(attribute) => setAttributesField([...attributesField, attribute])}
+                />
               </Flex>
             )}
 
             {/* Entity Step 3: Review */}
             {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
+              <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"}>
                 <Flex
                   direction={"row"}
-                  gap={"1"}
+                  gap={"2"}
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
@@ -1889,7 +1846,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   border={"1px solid"}
                   borderColor={"purple.200"}
                 >
-                  <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
                     <Text fontSize={"xs"} fontWeight={"bold"}>
                       Reviewing {reviewEntities.length} {reviewEntities.length === 1 ? "Entity" : "Entities"}
@@ -1912,10 +1869,10 @@ const ImportDialog = (props: ImportDialogProps) => {
             {/* Template Steps */}
             {/* Template Step 1: Review */}
             {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && (
-              <Flex w={"100%"} direction={"column"} gap={"1"} rounded={"md"}>
+              <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"} mt={"2"}>
                 <Flex
                   direction={"row"}
-                  gap={"1"}
+                  gap={"2"}
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
@@ -1923,7 +1880,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   border={"1px solid"}
                   borderColor={"teal.200"}
                 >
-                  <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.iconColor} />
+                  <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
                     <Text fontSize={"xs"} fontWeight={"bold"}>
                       Reviewing {reviewTemplates.length} {reviewTemplates.length === 1 ? "Template" : "Templates"}
@@ -1944,7 +1901,7 @@ const ImportDialog = (props: ImportDialogProps) => {
             )}
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
               <Flex align={"center"} justify={"center"} gap={"2"}>
                 <Button

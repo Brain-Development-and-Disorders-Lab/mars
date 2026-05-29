@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import ExportModal from "@components/ExportModal";
+import ExportDialog from "@components/ExportDialog";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
@@ -85,7 +85,7 @@ const Entities = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
-  // Entities export modal
+  // Entities export dialog
   const [exportOpen, setExportOpen] = useState(false);
   const [exportIds, setExportIds] = useState<string[] | undefined>(undefined);
 
@@ -272,7 +272,7 @@ const Entities = () => {
     }),
     columnHelper.accessor("created", {
       cell: (info) => (
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
           {dayjs(info.getValue()).fromNow()}
         </Text>
       ),
@@ -308,7 +308,7 @@ const Entities = () => {
       label: () => `Export All (${data?.entities?.total ?? 0})`,
       icon: "download",
       alwaysEnabled: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       action: async (table, _rows: any) => {
         setExportIds(undefined);
         setExportOpen(true);
@@ -319,10 +319,10 @@ const Entities = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+          <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
+            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
@@ -341,8 +341,8 @@ const Entities = () => {
           <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
             <Flex
               direction={"column"}
-              gap={"1"}
-              p={"1"}
+              gap={"2"}
+              p={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -365,71 +365,161 @@ const Entities = () => {
                 </Collapsible.Trigger>
               </Flex>
               <Collapsible.Content>
-                <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
-                  {/* Date Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Created Between
-                    </Text>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>Start (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.startDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              startDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
-                      <Field.Root gap={"0"}>
-                        <Field.Label fontSize={"xs"}>End (optional)</Field.Label>
-                        <Input
-                          type={"date"}
-                          size={"xs"}
-                          bg={"white"}
-                          value={filterState.endDate}
-                          onChange={(e) =>
-                            setFilterState({
-                              ...filterState,
-                              endDate: e.target.value,
-                            })
-                          }
-                        />
-                      </Field.Root>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                    {/* Date Range Filter */}
+                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                        Created Between
+                      </Text>
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            Start (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.startDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                startDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                        <Field.Root gap={"0"}>
+                          <Field.Label
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            ml={"0.5"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            End (optional)
+                          </Field.Label>
+                          <Input
+                            type={"date"}
+                            size={"xs"}
+                            bg={"white"}
+                            value={filterState.endDate}
+                            onChange={(e) =>
+                              setFilterState({
+                                ...filterState,
+                                endDate: e.target.value,
+                              })
+                            }
+                          />
+                        </Field.Root>
+                      </Flex>
                     </Flex>
-                  </Flex>
 
-                  {/* Owner Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Owner
-                    </Text>
-                    <Flex direction={"column"} gap={"1"} maxH={"200px"} overflowY={"auto"}>
-                      {_.uniq(entityData.map((e) => e.owner))
-                        .filter((owner) => owner)
-                        .map((owner) => (
+                    {/* Owner Filter */}
+                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Owner
+                      </Text>
+                      <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
+                        {_.uniq(entityData.map((e) => e.owner))
+                          .filter((owner) => owner)
+                          .map((owner) => (
+                            <Checkbox.Root
+                              key={owner}
+                              size={"xs"}
+                              colorPalette={"blue"}
+                              checked={filterState.owners.includes(owner)}
+                              onCheckedChange={(details) => {
+                                const isChecked = details.checked as boolean;
+                                if (isChecked) {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: [...filterState.owners, owner],
+                                  });
+                                } else {
+                                  setFilterState({
+                                    ...filterState,
+                                    owners: filterState.owners.filter((o) => o !== owner),
+                                  });
+                                }
+                              }}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label fontSize={"xs"}>
+                                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                              </Checkbox.Label>
+                            </Checkbox.Root>
+                          ))}
+                      </Flex>
+                    </Flex>
+
+                    {/* Has Attachments Filter */}
+                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Attachments
+                      </Text>
+                      <Checkbox.Root
+                        ml={"1"}
+                        size={"xs"}
+                        colorPalette={"blue"}
+                        checked={filterState.hasAttachments}
+                        onCheckedChange={(details) => {
+                          setFilterState({
+                            ...filterState,
+                            hasAttachments: details.checked as boolean,
+                          });
+                        }}
+                      >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
+                      </Checkbox.Root>
+                    </Flex>
+
+                    {/* Attribute Count Range Filter */}
+                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        ml={"0.5"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      >
+                        Attribute Count
+                      </Text>
+                      <Flex direction={"column"} gap={"2"} ml={"1"}>
+                        {["0", "1-5", "6-10", "11+"].map((range) => (
                           <Checkbox.Root
-                            key={owner}
+                            key={range}
                             size={"xs"}
                             colorPalette={"blue"}
-                            checked={filterState.owners.includes(owner)}
+                            checked={filterState.attributeCountRanges.includes(range)}
                             onCheckedChange={(details) => {
                               const isChecked = details.checked as boolean;
                               if (isChecked) {
                                 setFilterState({
                                   ...filterState,
-                                  owners: [...filterState.owners, owner],
+                                  attributeCountRanges: [...filterState.attributeCountRanges, range],
                                 });
                               } else {
                                 setFilterState({
                                   ...filterState,
-                                  owners: filterState.owners.filter((o) => o !== owner),
+                                  attributeCountRanges: filterState.attributeCountRanges.filter((r) => r !== range),
                                 });
                               }
                             }}
@@ -437,109 +527,51 @@ const Entities = () => {
                             <Checkbox.HiddenInput />
                             <Checkbox.Control />
                             <Checkbox.Label fontSize={"xs"}>
-                              <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                              {range === "0"
+                                ? "0 attributes"
+                                : range === "11+"
+                                  ? "11+ attributes"
+                                  : `${range} attributes`}
                             </Checkbox.Label>
                           </Checkbox.Root>
                         ))}
+                      </Flex>
                     </Flex>
                   </Flex>
 
-                  {/* Has Attachments Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Attachments
-                    </Text>
-                    <Checkbox.Root
+                  {/* Filter control buttons */}
+                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
+                    <Button
                       size={"xs"}
+                      rounded={"md"}
                       colorPalette={"blue"}
-                      checked={filterState.hasAttachments}
-                      onCheckedChange={(details) => {
-                        setFilterState({
-                          ...filterState,
-                          hasAttachments: details.checked as boolean,
-                        });
+                      onClick={() => {
+                        setAppliedFilters({ ...filterState });
+                        setPage(0); // Reset to first page when filters change
                       }}
                     >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
-                    </Checkbox.Root>
+                      Apply Filters
+                    </Button>
+                    <Button
+                      size={"xs"}
+                      variant={"outline"}
+                      rounded={"md"}
+                      onClick={() => {
+                        const clearedState = {
+                          startDate: "",
+                          endDate: "",
+                          owners: [],
+                          hasAttachments: false,
+                          attributeCountRanges: [],
+                        };
+                        setFilterState(clearedState);
+                        setAppliedFilters(clearedState);
+                      }}
+                      disabled={activeFilterCount === 0}
+                    >
+                      Reset Filters
+                    </Button>
                   </Flex>
-
-                  {/* Attribute Count Range Filter */}
-                  <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Attribute Count
-                    </Text>
-                    <Flex direction={"column"} gap={"1"}>
-                      {["0", "1-5", "6-10", "11+"].map((range) => (
-                        <Checkbox.Root
-                          key={range}
-                          size={"xs"}
-                          colorPalette={"blue"}
-                          checked={filterState.attributeCountRanges.includes(range)}
-                          onCheckedChange={(details) => {
-                            const isChecked = details.checked as boolean;
-                            if (isChecked) {
-                              setFilterState({
-                                ...filterState,
-                                attributeCountRanges: [...filterState.attributeCountRanges, range],
-                              });
-                            } else {
-                              setFilterState({
-                                ...filterState,
-                                attributeCountRanges: filterState.attributeCountRanges.filter((r) => r !== range),
-                              });
-                            }
-                          }}
-                        >
-                          <Checkbox.HiddenInput />
-                          <Checkbox.Control />
-                          <Checkbox.Label fontSize={"xs"}>
-                            {range === "0"
-                              ? "0 attributes"
-                              : range === "11+"
-                                ? "11+ attributes"
-                                : `${range} attributes`}
-                          </Checkbox.Label>
-                        </Checkbox.Root>
-                      ))}
-                    </Flex>
-                  </Flex>
-                </Flex>
-
-                {/* Filter control buttons */}
-                <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"}>
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      setAppliedFilters({ ...filterState });
-                      setPage(0); // Reset to first page when filters change
-                    }}
-                  >
-                    Apply Filters
-                  </Button>
-                  <Button
-                    size={"xs"}
-                    variant={"outline"}
-                    rounded={"md"}
-                    onClick={() => {
-                      const clearedState = {
-                        startDate: "",
-                        endDate: "",
-                        owners: [],
-                        hasAttachments: false,
-                        attributeCountRanges: [],
-                      };
-                      setFilterState(clearedState);
-                      setAppliedFilters(clearedState);
-                    }}
-                    disabled={activeFilterCount === 0}
-                  >
-                    Reset Filters
-                  </Button>
                 </Flex>
               </Collapsible.Content>
             </Flex>
@@ -587,7 +619,7 @@ const Entities = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.iconColor} />
+                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.icon} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}
@@ -598,7 +630,7 @@ const Entities = () => {
         </Flex>
       </Flex>
 
-      <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
+      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
     </Content>
   );
 };

@@ -24,29 +24,31 @@ import {
   EmptyState,
   Timeline,
   Collapsible,
+  Spacer,
+  Textarea,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import ExportModal from "@components/ExportModal";
-import RelationshipGraph from "@components/RelationshipGraph";
+import ExportDialog from "@components/ExportDialog";
+import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import UploadDialog from "@components/UploadDialog";
-import Values from "@components/Values";
-import PreviewModal from "@components/PreviewModal";
-import AttributeViewButton from "@components/AttributeViewButton";
+import PreviewDialog from "@components/PreviewDialog";
+import ViewAttributeDialog from "@components/ViewAttributeDialog";
+import AddAttributeDialog from "@components/AddAttributeDialog";
 import SearchSelect from "@components/SearchSelect";
 import AlertDialog from "@components/AlertDialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import AddRelationshipDialog from "@components/AddRelationshipDialog";
 import Relationships from "@components/Relationships";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesModal } from "@components/WarningModal";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
-import SaveModal from "@components/SaveModal";
+import SaveDialog from "@components/SaveDialog";
 import { Cell, createColumnHelper } from "@tanstack/react-table";
-import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import {
@@ -57,20 +59,16 @@ import {
   IAttribute,
   IGenericItem,
   IRelationship,
-  ISelectOption,
-  IValue,
-  RelationshipType,
   ResponseData,
 } from "@types";
 
 // Utility functions and libraries
 import { requestStatic } from "src/database/functions";
-import { createSelectOptions, ignoreAbort, removeTypename } from "@lib/util";
+import { ignoreAbort, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
-import { nanoid } from "nanoid";
 import QRCode from "react-qr-code";
 
 // Apollo client imports
@@ -89,7 +87,7 @@ import { auth } from "@lib/auth";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
-// Analytics
+// Events
 import { usePostHog } from "posthog-js/react";
 
 const Entity = () => {
@@ -115,16 +113,14 @@ const Entity = () => {
   const [selectedProject, setSelectedProject] = useState({} as IGenericItem);
   const [selectedProjects, setSelectedProjects] = useState<IGenericItem[]>([]);
 
+  // Add relationships dialog
   const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
-  const selectRelationshipTypeRef = useRef(null);
-  const [selectedRelationshipType, setSelectedRelationshipType] = useState("general" as RelationshipType);
-  const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState({} as IGenericItem);
 
-  // Save message modal
+  // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Clone modal
+  // Clone dialog
   const [cloneOpen, setCloneOpen] = useState(false);
   const [clonedEntityName, setClonedEntityName] = useState("");
 
@@ -148,30 +144,9 @@ const Entity = () => {
 
   // Templates
   const [templates, setTemplates] = useState<AttributeModel[]>([]);
-  const addAttributesContainerRef = useRef(null);
-  const templatesCollection = useMemo(() => {
-    const items = createSelectOptions<AttributeModel>(templates, "_id", "name");
-    return createListCollection<ISelectOption>({
-      items: items || [],
-    });
-  }, [templates]);
-  const [usingTemplate, setUsingTemplate] = useState(false);
 
-  // AI Template suggestions, `undefined`: not yet run, `null`: ran with no match, `string`: matched Template ID
-  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
-  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
-
-  // Adding Templates to existing Entity
+  // Controls the add-attribute dialog
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
-  const [attributeId, setAttributeId] = useState("");
-  const [attributeName, setAttributeName] = useState("");
-  const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeValues, setAttributeValues] = useState<IValue[]>([]);
-
-  const isAttributeNameError = attributeName === "";
-  const isAttributeDescriptionError = attributeDescription === "";
-  const [isAttributeValueError, setIsAttributeValueError] = useState(false);
-  const isAttributeError = isAttributeNameError || isAttributeDescriptionError || isAttributeValueError;
 
   // Authentication and user
   const [user, setUser] = useState("");
@@ -312,16 +287,6 @@ const Entity = () => {
   `;
   const [getFile] = useLazyQuery<{ downloadFile: string }>(GET_FILE_URL);
 
-  // Query to export an Entity, returning the string contents of a file for download
-  const SUGGEST_TEMPLATE = gql`
-    query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
-      suggestTemplate(name: $name, description: $description, templates: $templates)
-    }
-  `;
-  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
-    fetchPolicy: "network-only",
-  });
-
   // Query to create a new Entity
   const CREATE_ENTITY = gql`
     mutation CreateEntity($entity: EntityCreateInput) {
@@ -345,7 +310,7 @@ const Entity = () => {
       }
     }
   `;
-  const [createTemplate, { loading: loadingTemplateCreate, error: errorTemplateCreate }] = useMutation<{
+  const [createTemplate, { error: errorTemplateCreate }] = useMutation<{
     createTemplate: ResponseData<string>;
   }>(CREATE_TEMPLATE);
 
@@ -465,20 +430,13 @@ const Entity = () => {
     }
   };
 
-  const onSaveAsTemplate = async () => {
-    const attributeData: IAttribute = {
-      name: attributeName,
-      archived: false,
-      owner: user,
-      description: attributeDescription,
-      values: attributeValues,
-    };
-
-    // Execute the GraphQL mutation
+  /**
+   * Saves the current attribute form as a reusable Template.
+   * Called from the add-attribute dialog when the user clicks "Save as Template".
+   */
+  const onSaveAsTemplate = async (attributeData: IAttribute) => {
     const response = await createTemplate({
-      variables: {
-        template: attributeData,
-      },
+      variables: { template: attributeData },
     });
 
     if (errorTemplateCreate || !response.data?.createTemplate) {
@@ -490,42 +448,10 @@ const Entity = () => {
         closable: true,
       });
     } else if (response.data.createTemplate.success) {
-      toaster.create({
-        title: "Saved!",
-        type: "success",
-        duration: 2000,
-        closable: true,
-      });
+      toaster.create({ title: "Saved!", type: "success", duration: 2000, closable: true });
       setTemplates([...templates, attributeData as AttributeModel]);
     }
   };
-
-  useEffect(() => {
-    setIsAttributeValueError(attributeValues.length === 0 || attributeValues.some((value) => value.name === ""));
-  }, [attributeValues]);
-
-  useEffect(() => {
-    if (!addAttributesOpen || templates.length === 0) return;
-    setSuggestedTemplateId(undefined);
-    setIsSuggestingTemplate(true);
-    const fetchTemplateSuggestion = async () => {
-      try {
-        const result = await runSuggestTemplate({
-          variables: {
-            name: entityName,
-            description: entityDescription,
-            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
-          },
-        });
-        setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
-      } catch {
-        // Silently ignore, AI may not be configured
-      } finally {
-        setIsSuggestingTemplate(false);
-      }
-    };
-    fetchTemplateSuggestion();
-  }, [addAttributesOpen]);
 
   // Break up entity data into editable fields
   const [entity, setEntity] = useState<EntityModel>({} as EntityModel);
@@ -630,7 +556,7 @@ const Entity = () => {
   const handleEditClick = () => {
     if (previewVersion) return; // Disable editing in preview mode
     if (editing) {
-      // Open the save message modal
+      // Open the save message dialog
       setSaveMessageOpen(true);
     } else {
       setEditing(true);
@@ -639,7 +565,7 @@ const Entity = () => {
 
   /**
    * Helper function to handle clicking the "Done" button within
-   * the save message modal
+   * the save message dialog
    */
   const handleSaveMessageDoneClick = async () => {
     setIsUpdating(updateLoading);
@@ -679,7 +605,7 @@ const Entity = () => {
       });
     }
 
-    // Close the save message modal
+    // Close the save message dialog
     setSaveMessageOpen(false);
     setSaveMessage("");
 
@@ -811,6 +737,8 @@ const Entity = () => {
   const attributeTableColumns = [
     attributeTableColumnHelper.accessor("name", {
       cell: (info) => {
+        const attribute = info.row.original;
+        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
@@ -818,16 +746,43 @@ const Entity = () => {
                 {_.truncate(info.getValue(), { length: 16 })}
               </Text>
             </Tooltip>
-            <AttributeViewButton
-              attribute={info.row.original}
-              editing={editing}
-              isTemplate={isKnownTemplate(info.row.original._id, templates)}
-              onAttributeUpdate={onAttributeUpdate}
-              cancelCallback={handleCancelAttribute}
-              removeCallback={() => {
-                removeAttribute(info.row.original._id);
-              }}
-            />
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Button
+                size="2xs"
+                variant="subtle"
+                rounded="md"
+                colorPalette="gray"
+                aria-label={"View Attribute"}
+                onClick={() => setViewAttributeDialogOpen(true)}
+              >
+                {editing ? "Edit" : "Expand"}
+                <Icon name={editing ? "edit" : "expand"} size={"xs"} />
+              </Button>
+              {editing && (
+                <Button
+                  size="2xs"
+                  rounded="md"
+                  variant="subtle"
+                  colorPalette="red"
+                  aria-label={"Delete Attribute"}
+                  onClick={() => removeAttribute(attribute._id)}
+                >
+                  Delete
+                  <Icon name={"delete"} size={"xs"} />
+                </Button>
+              )}
+              <ViewAttributeDialog
+                open={viewAttributeDialogOpen}
+                setOpen={setViewAttributeDialogOpen}
+                attribute={attribute}
+                editing={editing}
+                isTemplate={isKnownTemplate(attribute._id, templates)}
+                onAttributeUpdate={onAttributeUpdate}
+                removeCallback={() => {
+                  removeAttribute(attribute._id);
+                }}
+              />
+            </Flex>
           </Flex>
         );
       },
@@ -907,7 +862,7 @@ const Entity = () => {
               </Text>
             </Tooltip>
             <Flex gap={"1"} align={"center"}>
-              <PreviewModal
+              <PreviewDialog
                 attachment={{
                   _id: attachmentId,
                   name: attachmentName,
@@ -1126,30 +1081,6 @@ const Entity = () => {
     navigate(`/entities/${id}`);
   };
 
-  // Add Relationships to the Entity state
-  const addRelationship = (): void => {
-    // Create the `IRelationship` data structure
-    const relationship: IRelationship = {
-      source: {
-        _id: entity._id,
-        name: entityName,
-      },
-      target: {
-        _id: selectedRelationshipTarget._id,
-        name: selectedRelationshipTarget.name,
-      },
-      type: selectedRelationshipType,
-    };
-
-    setEntityRelationships([...entityRelationships, relationship]);
-
-    // Reset the relationship modal state
-    setSelectedRelationshipType("general");
-    setSelectedRelationshipTarget({} as IGenericItem);
-
-    setAddRelationshipsOpen(false);
-  };
-
   // Remove a Project from the Entity state
   const removeProject = (id: string) => {
     setEntityProjects(
@@ -1193,38 +1124,6 @@ const Entity = () => {
     );
   };
 
-  // Add blank Attributes to the Entity state
-  const addAttribute = () => {
-    setEntityAttributes(() => [
-      ...entityAttributes,
-      {
-        _id: usingTemplate ? `${attributeId}-${nanoid(6)}` : `a-${entity._id}-${nanoid(6)}`, // Use existing ID with unique identifier appended
-        name: attributeName,
-        owner: entity.owner,
-        timestamp: dayjs(Date.now()).toISOString(),
-        archived: false,
-        description: attributeDescription,
-        values: attributeValues,
-      },
-    ]);
-    setAddAttributesOpen(false);
-
-    // Reset state of creating an Attribute
-    setAttributeName("");
-    setAttributeDescription("");
-    setAttributeValues([]);
-  };
-
-  // Add template Attributes to the Entity state
-  const addTemplateAttribute = (_id: string) => {
-    setUsingTemplate(true);
-    const template = templates.filter((template) => template._id === _id)[0];
-    setAttributeId(template._id);
-    setAttributeName(template.name);
-    setAttributeDescription(template.description);
-    setAttributeValues(template.values);
-  };
-
   const onAttributeUpdate = (updated: AttributeModel) => {
     const updatedAttributes = _.cloneDeep(entityAttributes).map((attribute) => {
       if (attribute._id === updated._id) {
@@ -1235,16 +1134,6 @@ const Entity = () => {
       return attribute;
     });
     setEntityAttributes([...updatedAttributes]);
-  };
-
-  // Handle cancelling adding an Attribute by clearing the state
-  const handleCancelAttribute = () => {
-    setAddAttributesOpen(false);
-
-    // Reset state of creating an Attribute
-    setAttributeName("");
-    setAttributeDescription("");
-    setAttributeValues([]);
   };
 
   /**
@@ -1278,18 +1167,21 @@ const Entity = () => {
             bg={"blue.100"}
             mx={"-1.5"}
             mt={"-1.5"}
+            mb={"1"}
             px={"1.5"}
             pt={"1.5"}
           >
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"clock"} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                Preview:
-              </Text>
-              <Tag.Root colorPalette={"green"}>
-                <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
-              </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+            <Flex direction={"row"} align={"center"} gap={"1"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"clock"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Preview:
+                </Text>
+                <Tag.Root colorPalette={"green"}>
+                  <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
+                </Tag.Root>
+              </Flex>
+              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -1322,27 +1214,19 @@ const Entity = () => {
           </Flex>
         )}
 
-        <Flex
-          gap={"1"}
-          p={"1"}
-          pb={{ base: "1", lg: "0" }}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          wrap={"wrap"}
-        >
-          <Flex direction={"row"} gap={"1"} align={"center"} p={"0"} m={"0"}>
+        <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
             <Flex
               id={"entityNameTag"}
               align={"center"}
               gap={"1"}
               p={"1"}
               border={"2px solid"}
-              borderColor={GLOBAL_STYLES.entity.iconColor}
+              borderColor={GLOBAL_STYLES.entity.color.icon}
               bg={"purple.50"}
               rounded={"md"}
             >
-              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.iconColor} />
+              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
               <Tooltip content={displayEntityData.name}>
                 <Heading fontWeight={"semibold"} size={"sm"}>
                   {_.truncate(displayEntityData.name, { length: 30 })}
@@ -1358,7 +1242,7 @@ const Entity = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={"gray.500"}
-                bg={"gray.50"}
+                bg={GLOBAL_STYLES.card.bg}
                 rounded={"md"}
               >
                 <Icon name={"archive"} size={"sm"} color={"gray.500"} />
@@ -1372,7 +1256,7 @@ const Entity = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"1"} wrap={"wrap"} align={"center"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -1436,7 +1320,7 @@ const Entity = () => {
 
             {editing && (
               <Button
-                id={"addProjectsModalButton"}
+                id={"addProjectsDialogButton"}
                 variant={"solid"}
                 size={"xs"}
                 rounded={"md"}
@@ -1502,7 +1386,7 @@ const Entity = () => {
                     <Drawer.CloseTrigger asChild>
                       <CloseButton size={"2xs"} top={"6px"} onClick={() => setHistoryOpen(false)} />
                     </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={"blue.300"} roundedTop={"md"}>
+                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
                         <Icon name={"clock"} size={"xs"} />
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -1511,20 +1395,39 @@ const Entity = () => {
                       </Flex>
                     </Drawer.Header>
 
-                    <Drawer.Body pt={"0"} p={"1"} px={"2"}>
+                    <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Last modified:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {entityHistory.length > 0 ? dayjs(entityHistory[0].timestamp).fromNow() : "never"}
+                          </Text>
+                        </Flex>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Versions:
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"normal"}>
+                            {entityHistory.length}
+                          </Text>
+                        </Flex>
+                      </Flex>
+
                       <Flex
                         direction={"row"}
-                        gap={"1"}
+                        gap={"2"}
                         align={"start"}
                         rounded={"md"}
                         bg={"gray.100"}
-                        p={"1"}
+                        p={"2"}
                         justify={"space-between"}
                         wrap={"wrap"}
                       >
                         <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Sort by:
+                            Sort
                           </Text>
                           <Select.Root
                             value={[historySortOrder]}
@@ -1583,13 +1486,13 @@ const Entity = () => {
 
                         <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Date filter:
+                            Edited Between
                           </Text>
 
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"}>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Start date
+                                Start
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -1603,7 +1506,7 @@ const Entity = () => {
                             </Field.Root>
                             <Field.Root gap={"0"}>
                               <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                End date
+                                End
                               </Field.Label>
                               <Input
                                 type={"date"}
@@ -1616,7 +1519,7 @@ const Entity = () => {
                               />
                             </Field.Root>
                           </Flex>
-                          <Flex direction={"row"} gap={"1"} align={"center"} justify={"flex-end"} w={"100%"}>
+                          <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
                             <Button
                               size={"xs"}
                               rounded={"md"}
@@ -1654,27 +1557,8 @@ const Entity = () => {
                         </Flex>
                       </Flex>
 
-                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length > 0 ? dayjs(entityHistory[0].timestamp).fromNow() : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
-
                       {sortedEntityHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle" mt={"1"}>
+                        <Timeline.Root size="sm" variant="subtle" mt={"2"}>
                           {sortedEntityHistory.map((entityVersion) => {
                             const isExpanded = expandedVersions.has(entityVersion.version);
                             return (
@@ -1684,7 +1568,7 @@ const Entity = () => {
                                   <Timeline.Indicator />
                                 </Timeline.Connector>
                                 <Timeline.Content>
-                                  <Flex direction={"column"} gap={"1"} w={"100%"}>
+                                  <Flex direction={"column"} gap={"2"} w={"100%"}>
                                     <Flex
                                       direction={{ base: "column", sm: "row" }}
                                       gap={"2"}
@@ -1710,7 +1594,7 @@ const Entity = () => {
                                               disabled={entityVersion.message.length <= 40}
                                               showArrow
                                             >
-                                              <Text fontSize={"xs"} color={"gray.600"}>
+                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                                                 {_.truncate(entityVersion.message, { length: 40 })}
                                               </Text>
                                             </Tooltip>
@@ -1793,7 +1677,7 @@ const Entity = () => {
                                           gap={"2"}
                                           mt={"1"}
                                           p={"2"}
-                                          bg={"gray.50"}
+                                          bg={GLOBAL_STYLES.card.bg}
                                           rounded={"md"}
                                         >
                                           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1839,18 +1723,20 @@ const Entity = () => {
                                               {entityVersion.projects.length > 0 ? (
                                                 <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
                                                   {entityVersion.projects.map((projectId) => (
-                                                    <Tag.Root
-                                                      key={`v_c_${entityVersion.timestamp}_${projectId}`}
-                                                      size={"sm"}
-                                                    >
-                                                      <Tag.Label fontSize={"xs"}>
-                                                        <Linky type={"projects"} id={projectId} size={"xs"} />
-                                                      </Tag.Label>
-                                                    </Tag.Root>
+                                                    <Linky
+                                                      type={"projects"}
+                                                      id={projectId}
+                                                      size={"xs"}
+                                                      key={`p_${entityVersion}_${projectId}`}
+                                                    />
                                                   ))}
                                                 </Flex>
                                               ) : (
-                                                <Text fontSize={"xs"}>No Projects</Text>
+                                                <Flex>
+                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                    <Tag.Label fontSize={"xs"}>No Projects</Tag.Label>
+                                                  </Tag.Root>
+                                                </Flex>
                                               )}
                                             </Flex>
 
@@ -1868,9 +1754,17 @@ const Entity = () => {
                                                 Relationships
                                               </Text>
                                               <Flex direction={"row"} gap={"1"}>
-                                                <Tag.Root key={`v_o_${entityVersion.timestamp}`} size={"sm"}>
+                                                <Tag.Root
+                                                  key={`v_o_${entityVersion.timestamp}`}
+                                                  size={"sm"}
+                                                  colorPalette={
+                                                    entityVersion.relationships.length > 0 ? undefined : "orange"
+                                                  }
+                                                >
                                                   <Tag.Label fontSize={"xs"}>
-                                                    {entityVersion?.relationships?.length || 0}
+                                                    {entityVersion.relationships.length > 0
+                                                      ? entityVersion.relationships.length
+                                                      : "No Relationships"}
                                                   </Tag.Label>
                                                 </Tag.Root>
                                               </Flex>
@@ -1911,7 +1805,11 @@ const Entity = () => {
                                                   )}
                                                 </Flex>
                                               ) : (
-                                                <Text fontSize={"xs"}>No Attributes</Text>
+                                                <Flex>
+                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                    <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+                                                  </Tag.Root>
+                                                </Flex>
                                               )}
                                             </Flex>
 
@@ -1950,7 +1848,11 @@ const Entity = () => {
                                                   )}
                                                 </Flex>
                                               ) : (
-                                                <Text fontSize={"xs"}>No Attachments</Text>
+                                                <Flex>
+                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
+                                                    <Tag.Label fontSize={"xs"}>No Attachments</Tag.Label>
+                                                  </Tag.Root>
+                                                </Flex>
                                               )}
                                             </Flex>
                                           </Flex>
@@ -2000,26 +1902,33 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"1"} p={"1"}>
+        <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
           {/* Entity Overview and Description */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Entity Overview */}
             <Flex
               direction={"column"}
-              p={"1"}
+              p={"2"}
               h={"fit-content"}
-              gap={"1"}
+              gap={"2"}
               bg={"gray.100"}
               rounded={"md"}
               grow={"1"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               {/* "Name" field */}
-              <Flex gap={"1"} direction={"row"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Entity Name
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+                <Flex direction={"column"} gap={"2"} grow={"1"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Name
                   </Text>
                   <Input
                     id={"entityNameInput"}
@@ -2035,24 +1944,49 @@ const Entity = () => {
                     bg={"white"}
                   />
                 </Flex>
-                <TimestampTag timestamp={entity.created} description={"Created"} />
               </Flex>
 
-              {/* "Created" and "Owner" fields */}
-              <Flex gap={"1"} direction={"row"} w={"100%"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Entity Visibility
-                  </Text>
-                  <VisibilityTag isPublic={false} isInherited />
-                </Flex>
-
+              {/* "Owner", "Timestamp", and "Visibility" fields */}
+              <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
                 {/* Owner */}
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                    Entity Owner
+                <Flex direction={"column"} gap={"2"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Owner
                   </Text>
                   <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
+                </Flex>
+
+                {/* Timestamp */}
+                <Flex direction={"column"} gap={"2"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Timestamp
+                  </Text>
+                  <TimestampTag timestamp={entity.created} description={"Created"} />
+                </Flex>
+
+                <Spacer />
+
+                {/* Visibility */}
+                <Flex direction={"column"} gap={"2"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -2060,9 +1994,9 @@ const Entity = () => {
             {/* Description */}
             <Flex
               direction={"column"}
-              p={"1"}
-              h={"fit-content"}
-              gap={"1"}
+              p={"2"}
+              h={"100%"}
+              gap={"2"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
               rounded={"md"}
@@ -2070,37 +2004,28 @@ const Entity = () => {
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Flex direction={"column"} gap={"1"} w={"100%"}>
-                <Text fontWeight={"bold"} fontSize={"xs"} ml={"0.5"}>
-                  Entity Description
-                </Text>
-                <Flex>
-                  <MDEditor
-                    height={150}
-                    minHeight={100}
-                    maxHeight={400}
-                    id={"entityDescriptionInput"}
-                    style={{ width: "100%" }}
-                    value={previewVersion ? displayEntityDescription : entityDescription}
-                    preview={editing && !previewVersion ? "edit" : "preview"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setEntityDescription(value || "");
-                    }}
-                  />
-                </Flex>
-              </Flex>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                Description
+              </Text>
+              <Textarea
+                id={"entityDescriptionInput"}
+                value={previewVersion ? displayEntityDescription : entityDescription}
+                readOnly={!(editing && !previewVersion)}
+                onChange={(event) => setEntityDescription(event.target.value)}
+                h={"100%"}
+                size={"xs"}
+              />
             </Flex>
           </Flex>
 
-          {/* Attributes and Relationships */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+          {/* Attributes and Projects */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Attributes */}
             <Flex
               direction={"column"}
-              p={"1"}
+              p={"2"}
               h={"fit-content"}
-              gap={"1"}
+              gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -2110,13 +2035,18 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                    Entity Attributes
+                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Attributes
                   </Text>
                 </Flex>
                 <Button
-                  id={"addAttributeModalButton"}
+                  id={"addAttributeDialogButton"}
                   variant={"solid"}
                   size={"xs"}
                   rounded={"md"}
@@ -2139,7 +2069,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.lightColor} />
+                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Attributes</EmptyState.Description>
                     </EmptyState.Content>
@@ -2158,74 +2088,12 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            {/* Relationships */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              h={"fit-content"}
-              gap={"1"}
-              rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex gap={"1"} direction={"column"}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"graph"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                      Entity Relationships
-                    </Text>
-                  </Flex>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
-                    disabled={!editing || !!previewVersion}
-                  >
-                    Add
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
-                </Flex>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={displayEntityRelationships.length > 0 ? "" : "center"}
-                  minH={displayEntityRelationships.length > 0 ? "fit-content" : "120px"}
-                >
-                  {displayEntityRelationships.length > 0 ? (
-                    <Relationships
-                      relationships={displayEntityRelationships}
-                      setRelationships={setEntityRelationships}
-                      viewOnly={!editing || !!previewVersion}
-                    />
-                  ) : (
-                    <EmptyState.Root>
-                      <EmptyState.Content>
-                        <EmptyState.Indicator>
-                          <Icon name={"graph"} size={"lg"} />
-                        </EmptyState.Indicator>
-                        <EmptyState.Description>No Relationships</EmptyState.Description>
-                      </EmptyState.Content>
-                    </EmptyState.Root>
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-
-          {/* Projects and Attachments */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Projects */}
             <Flex
               direction={"column"}
-              p={"1"}
+              p={"2"}
               h={"fit-content"}
-              gap={"1"}
+              gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -2235,13 +2103,18 @@ const Entity = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.iconColor} />
-                  <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                    Linked Projects
+                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
+                    Projects
                   </Text>
                 </Flex>
                 <Button
-                  id={"addProjectsModalButton"}
+                  id={"addProjectsDialogButton"}
                   variant={"solid"}
                   size={"xs"}
                   rounded={"md"}
@@ -2263,7 +2136,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.defaultColor} />
+                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Projects</EmptyState.Description>
                     </EmptyState.Content>
@@ -2282,13 +2155,62 @@ const Entity = () => {
                 )}
               </Flex>
             </Flex>
+          </Flex>
+
+          {/* Relationships and Attachments */}
+          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+            {/* Relationships */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
+            >
+              <Flex gap={"2"} direction={"column"}>
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                    <Icon name={"graph"} size={"xs"} />
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
+                      Relationships
+                    </Text>
+                  </Flex>
+                  <Button
+                    variant={"solid"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => setAddRelationshipsOpen(true)}
+                    disabled={!editing || !!previewVersion}
+                  >
+                    Add
+                    <Icon name={"add"} size={"xs"} />
+                  </Button>
+                </Flex>
+                <Relationships
+                  relationships={displayEntityRelationships}
+                  setRelationships={setEntityRelationships}
+                  viewOnly={!editing || !!previewVersion}
+                />
+              </Flex>
+            </Flex>
 
             {/* Attachments */}
             <Flex
               direction={"column"}
-              p={"1"}
+              p={"2"}
               h={"fit-content"}
-              gap={"1"}
+              gap={"2"}
               rounded={"md"}
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
@@ -2300,8 +2222,13 @@ const Entity = () => {
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"attachment"} size={"xs"} />
-                    <Text fontSize={"xs"} fontWeight={"bold"} ml={"0.5"}>
-                      Entity Attachments
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
+                      Attachments
                     </Text>
                   </Flex>
                   <Button
@@ -2350,282 +2277,19 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        {/* Add Attributes modal */}
-        <Dialog.Root
+        {/* Add Attributes dialog */}
+        <AddAttributeDialog
           open={addAttributesOpen}
-          size={"xl"}
-          placement={"center"}
-          onOpenChange={(event) => setAddAttributesOpen(event.open)}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content ref={addAttributesContainerRef}>
-              <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.template.defaultColor}>
-                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                    Add Attribute
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddAttributesOpen(false)} />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"}>
-                {/* Attribute creation */}
-                <Flex direction={"column"} gap={"1"} justify={"center"}>
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Select.Root
-                      key={"select-template"}
-                      size={"xs"}
-                      rounded={"md"}
-                      collection={templatesCollection}
-                      disabled={templatesCollection.items.length === 0 || usingTemplate}
-                      onValueChange={(details) => {
-                        if (!_.isEqual(details.items[0], "")) {
-                          for (const template of templates) {
-                            if (_.isEqual(details.items[0], template._id)) {
-                              setAttributeName(template.name);
-                              setAttributeDescription(template.description);
-                              setAttributeValues(() => [...template.values]);
-                              break;
-                            }
-                          }
-                        }
-                      }}
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Label fontSize={"xs"} ml={"0.5"}>
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Use Template ({templatesCollection.items.length} available)
-                          </Text>
-                          {isSuggestingTemplate && (
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
-                              <Text fontSize={"xs"} color={"purple.300"}>
-                                Suggesting...
-                              </Text>
-                            </Flex>
-                          )}
-                          {!isSuggestingTemplate && suggestedTemplateId && (
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
-                              <Text
-                                fontSize={"xs"}
-                                color={"purple.600"}
-                                cursor={"pointer"}
-                                _hover={{ textDecoration: "underline" }}
-                                onClick={() => addTemplateAttribute(suggestedTemplateId)}
-                              >
-                                Suggested: {templates.find((t) => t._id === suggestedTemplateId)?.name}
-                              </Text>
-                            </Flex>
-                          )}
-                          {!isSuggestingTemplate && suggestedTemplateId === null && (
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
-                              <Text fontSize={"xs"} color={"gray.400"}>
-                                No Suggestions
-                              </Text>
-                            </Flex>
-                          )}
-                        </Flex>
-                      </Select.Label>
-                      <Select.Control>
-                        <Select.Trigger rounded={"md"}>
-                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                            <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.lightColor} />
-                            <Text fontSize={"xs"} color={"gray.500"}>
-                              {"Select Template"}
-                            </Text>
-                          </Flex>
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal container={addAttributesContainerRef}>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {templatesCollection.items.map((template) => (
-                              <Select.Item
-                                item={template}
-                                key={template.value}
-                                onClick={() => addTemplateAttribute(template.value)}
-                              >
-                                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.iconColor} />
-                                {template.label}
-                                <Select.ItemIndicator />
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
-                  </Flex>
+          onClose={() => setAddAttributesOpen(false)}
+          owner={user}
+          templates={templates}
+          entityName={entityName}
+          entityDescription={entityDescription}
+          onAdd={(attribute) => setEntityAttributes([...entityAttributes, attribute])}
+          onSaveAsTemplate={onSaveAsTemplate}
+        />
 
-                  <Flex direction={"column"} gap={"1"} w={"100%"} justify={"center"}>
-                    <Flex p={"0"}>
-                      {usingTemplate && (
-                        <Flex direction={"row"} gap={"0.5"}>
-                          <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                            Base Template:
-                          </Text>
-                          <Flex ml={"0.5"}>
-                            {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
-                            <Linky id={attributeId.slice(0, 10)} type={"templates"} size={"xs"} />
-                          </Flex>
-                        </Flex>
-                      )}
-                    </Flex>
-
-                    <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-                      {/* Attribute name */}
-                      <Flex
-                        direction={"column"}
-                        p={"1"}
-                        h={"fit-content"}
-                        w={{ base: "100%", md: "50%" }}
-                        gap={"1"}
-                        rounded={"md"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderColor={GLOBAL_STYLES.border.color}
-                      >
-                        <Flex direction={"row"} gap={"1"}>
-                          <Flex grow={"1"}>
-                            <Fieldset.Root>
-                              <Fieldset.Content>
-                                <Field.Root data-testid={"create-attribute-name"} required>
-                                  <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                    Name
-                                    <Field.RequiredIndicator />
-                                  </Field.Label>
-                                  <Input
-                                    bg={"white"}
-                                    size={"xs"}
-                                    rounded={"md"}
-                                    placeholder={"Name"}
-                                    value={attributeName}
-                                    onChange={(event) => setAttributeName(event.target.value)}
-                                  />
-                                </Field.Root>
-                              </Fieldset.Content>
-                            </Fieldset.Root>
-                          </Flex>
-                        </Flex>
-
-                        {/* "Owner" field */}
-                        <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-                          <Flex direction={"column"} gap={"1"}>
-                            <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                              Owner
-                            </Text>
-                            <Flex>
-                              <ActorTag identifier={user} fallback={"Unknown User"} size={"sm"} />
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                      </Flex>
-
-                      {/* Attribute description */}
-                      <Flex
-                        direction={"row"}
-                        p={"1"}
-                        h={"fit-content"}
-                        gap={"1"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderColor={GLOBAL_STYLES.border.color}
-                        rounded={"md"}
-                        grow={"1"}
-                      >
-                        <Fieldset.Root>
-                          <Fieldset.Content>
-                            <Field.Root data-testid={"create-attribute-description"}>
-                              <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Description
-                              </Field.Label>
-                              <MDEditor
-                                height={118}
-                                minHeight={100}
-                                maxHeight={400}
-                                style={{ width: "100%" }}
-                                value={attributeDescription}
-                                preview={"edit"}
-                                extraCommands={[]}
-                                onChange={(value) => {
-                                  setAttributeDescription(value || "");
-                                }}
-                              />
-                            </Field.Root>
-                          </Fieldset.Content>
-                        </Fieldset.Root>
-                      </Flex>
-                    </Flex>
-                    <Flex>
-                      <Fieldset.Root invalid={isAttributeValueError}>
-                        <Fieldset.Content>
-                          <Field.Root required>
-                            <Values viewOnly={false} values={attributeValues} setValues={setAttributeValues} />
-                          </Field.Root>
-                        </Fieldset.Content>
-                      </Fieldset.Root>
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                <Flex direction={"row"} gap={"1"} justify={"space-between"} w={"100%"}>
-                  {/* "Cancel" button */}
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setAddAttributesOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} size={"xs"} />
-                  </Button>
-
-                  <Flex direction={"row"} gap={"1"}>
-                    <Button
-                      variant={"solid"}
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"green"}
-                      onClick={onSaveAsTemplate}
-                      disabled={isAttributeError || usingTemplate}
-                      loading={loadingTemplateCreate}
-                    >
-                      Save as Template
-                      <Icon name={"add"} size={"xs"} />
-                    </Button>
-
-                    <Button
-                      data-testid={"save-add-attribute-button"}
-                      variant={"solid"}
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"green"}
-                      disabled={isAttributeError}
-                      onClick={() => {
-                        addAttribute();
-                      }}
-                    >
-                      Save
-                      <Icon name={"check"} size={"xs"} />
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
-
-        {/* Add Projects modal */}
+        {/* Add Projects dialog */}
         <Dialog.Root
           open={addProjectsOpen}
           onOpenChange={(event) => setAddProjectsOpen(event.open)}
@@ -2637,7 +2301,7 @@ const Entity = () => {
             <Dialog.Backdrop />
             <Dialog.Positioner>
               <Dialog.Content w={["lg", "xl", "2xl"]}>
-                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                     <Icon name={"project"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2648,8 +2312,8 @@ const Entity = () => {
                     <CloseButton size={"2xs"} top={"6px"} onClick={onCancelAddProjectsClick} />
                   </Dialog.CloseTrigger>
                 </Dialog.Header>
-                <Dialog.Body p={"1"} gap={"1"}>
-                  <Flex direction={"column"} gap={"1"}>
+                <Dialog.Body p={"2"} gap={"2"}>
+                  <Flex direction={"column"} gap={"2"}>
                     <SearchSelect
                       id={"projectSearchSelect"}
                       resultType={"project"}
@@ -2681,8 +2345,9 @@ const Entity = () => {
                       }}
                       placeholder={"Search projects..."}
                     />
+
                     <HStack
-                      gap={"1"}
+                      gap={"2"}
                       p={"1"}
                       align={"center"}
                       justify={"center"}
@@ -2711,7 +2376,7 @@ const Entity = () => {
                         ))
                       ) : (
                         <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.lightColor} />
+                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.color.light} />
                           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
                             No Projects selected
                           </Text>
@@ -2720,7 +2385,8 @@ const Entity = () => {
                     </HStack>
                   </Flex>
                 </Dialog.Body>
-                <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+
+                <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
                       variant={"solid"}
@@ -2750,149 +2416,15 @@ const Entity = () => {
           </Portal>
         </Dialog.Root>
 
-        {/* Add Relationships modal */}
-        <Dialog.Root
+        {/* Add Relationships dialog */}
+        <AddRelationshipDialog
           open={addRelationshipsOpen}
-          size={"lg"}
-          placement={"center"}
-          onOpenChange={(event) => setAddRelationshipsOpen(event.open)}
-          closeOnEscape
-          closeOnInteractOutside
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content ref={selectRelationshipTypeRef}>
-              {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
-                <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
-                  <Icon name={"graph"} size={"xs"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Add Relationship
-                  </Text>
-                </Flex>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddRelationshipsOpen(false)} />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body p={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      Description:
-                    </Text>
-                    <Text fontSize={"xs"}>{displayEntityName} is</Text>
-                    <Tag.Root fontSize={"xs"} fontWeight={"semibold"} colorPalette={"yellow"}>
-                      <Tag.Label>
-                        {selectedRelationshipType === "general" && "related"}
-                        {selectedRelationshipType === "child" && "a child"}
-                        {selectedRelationshipType === "parent" && "a parent"}
-                      </Tag.Label>
-                    </Tag.Root>
-                    <Text fontSize={"xs"}>{selectedRelationshipType === "general" ? "to" : "of"}</Text>
-                    <Tag.Root fontSize={"xs"} fontWeight={"semibold"} colorPalette={"blue"}>
-                      <Tag.Label>
-                        {_.isUndefined(selectedRelationshipTarget.name)
-                          ? "Select Entity"
-                          : selectedRelationshipTarget.name}
-                      </Tag.Label>
-                    </Tag.Root>
-                  </Flex>
-                  <Flex
-                    direction={"row"}
-                    gap={"1"}
-                    justify={"space-between"}
-                    p={"1"}
-                    rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
-                  >
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Source
-                      </Text>
-                      <Input size={"xs"} rounded={"md"} value={displayEntityName} readOnly disabled />
-                    </Flex>
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Type
-                      </Text>
-                      <Select.Root
-                        key={"select-relationship-type"}
-                        size={"xs"}
-                        rounded={"md"}
-                        collection={createListCollection({
-                          items: ["General", "Parent", "Child"],
-                        })}
-                        onValueChange={(details) => {
-                          setSelectedRelationshipType(details.items[0].toLowerCase() as RelationshipType);
-                        }}
-                      >
-                        <Select.HiddenSelect />
-                        <Select.Control>
-                          <Select.Trigger rounded={"md"}>
-                            <Select.ValueText placeholder={"Select Relationship Type"} />
-                          </Select.Trigger>
-                          <Select.IndicatorGroup>
-                            <Select.Indicator />
-                          </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Portal container={selectRelationshipTypeRef}>
-                          <Select.Positioner>
-                            <Select.Content>
-                              {createListCollection({
-                                items: ["General", "Parent", "Child"],
-                              }).items.map((relationship) => (
-                                <Select.Item item={relationship} key={relationship}>
-                                  {relationship}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ))}
-                            </Select.Content>
-                          </Select.Positioner>
-                        </Portal>
-                      </Select.Root>
-                    </Flex>
-                    <Flex direction={"column"} gap={"1"} w={"33%"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Target
-                      </Text>
-                      <SearchSelect
-                        resultType={"entity"}
-                        value={selectedRelationshipTarget}
-                        onChange={setSelectedRelationshipTarget}
-                      />
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
-                <Flex direction={"row"} w={"100%"} gap={"2"} justify={"space-between"}>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"red"}
-                    onClick={() => setAddRelationshipsOpen(false)}
-                  >
-                    Cancel
-                    <Icon name={"cross"} size={"xs"} />
-                  </Button>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    disabled={_.isUndefined(selectedRelationshipTarget._id)}
-                    onClick={() => addRelationship()}
-                  >
-                    Done
-                    <Icon name={"check"} size={"xs"} />
-                  </Button>
-                </Flex>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+          onClose={() => setAddRelationshipsOpen(false)}
+          sourceId={entity._id}
+          sourceName={entityName}
+          existingRelationships={entityRelationships}
+          onAdd={(relationships) => setEntityRelationships([...entityRelationships, ...relationships])}
+        />
 
         {/* Upload dialog */}
         <UploadDialog
@@ -2908,10 +2440,10 @@ const Entity = () => {
           }}
         />
 
-        {/* Export modal */}
-        <ExportModal open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
+        {/* Export dialog */}
+        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
 
-        {/* Graph modal */}
+        {/* Graph dialog */}
         <Dialog.Root
           open={graphOpen}
           onOpenChange={(event) => setGraphOpen(event.open)}
@@ -2922,7 +2454,7 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"graph"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2930,17 +2462,17 @@ const Entity = () => {
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setAddRelationshipsOpen(false)} />
+                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setGraphOpen(false)} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"0"}>
-                <RelationshipGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
+              <Dialog.Body p={"1"}>
+                <RelationshipsGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
               </Dialog.Body>
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Share modal */}
+        {/* Share dialog */}
         <Dialog.Root
           open={shareOpen}
           onOpenChange={(event) => setShareOpen(event.open)}
@@ -2952,7 +2484,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"share"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2963,9 +2495,9 @@ const Entity = () => {
                   <CloseButton size={"2xs"} top={"6px"} onClick={() => setShareOpen(false)} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"1"} px={"2"}>
+              <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
                     <Flex w={"25%"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Sharable URL:
@@ -2998,7 +2530,7 @@ const Entity = () => {
                     </IconButton>
                   </Flex>
 
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
                     <Flex w={"25%"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Unique ID:
@@ -3031,7 +2563,7 @@ const Entity = () => {
                     </IconButton>
                   </Flex>
 
-                  <Flex direction={"row"} gap={"1"}>
+                  <Flex direction={"row"} gap={"2"}>
                     <Flex w={"25%"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         QR Code:
@@ -3048,7 +2580,8 @@ const Entity = () => {
                   </Flex>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
                   <Button
                     variant={"solid"}
@@ -3066,7 +2599,7 @@ const Entity = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Clone modal */}
+        {/* Clone dialog */}
         <Dialog.Root
           open={cloneOpen}
           onOpenChange={(details) => setCloneOpen(details.open)}
@@ -3078,7 +2611,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.headerColor} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"copy"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -3089,9 +2622,10 @@ const Entity = () => {
                   <CloseButton size={"2xs"} top={"6px"} onClick={() => setCloneOpen(false)} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body p={"1"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"xs"} color={"gray.600"}>
+
+              <Dialog.Body p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
                     By default, the cloned Entity will be created with the same name, but with "(cloned)" appended to
                     the end. You can modify the name below.
                   </Text>
@@ -3099,7 +2633,7 @@ const Entity = () => {
                   <Fieldset.Root>
                     <Fieldset.Content>
                       <Field.Root>
-                        <Field.Label fontSize={"xs"} fontWeight={"semibold"}>
+                        <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                           Cloned Entity Name:
                         </Field.Label>
                         <Input
@@ -3113,7 +2647,8 @@ const Entity = () => {
                   </Fieldset.Root>
                 </Flex>
               </Dialog.Body>
-              <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footerColor} roundedBottom={"md"}>
+
+              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                   <Button
                     variant={"solid"}
@@ -3143,8 +2678,8 @@ const Entity = () => {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        {/* Save message modal */}
-        <SaveModal
+        {/* Save message dialog */}
+        <SaveDialog
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -3156,7 +2691,7 @@ const Entity = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesModal
+        <UnsavedChangesDialog
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}

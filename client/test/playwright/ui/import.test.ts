@@ -67,14 +67,12 @@ test.describe("Import", () => {
 
       // Wait for continue button to be enabled
       await clickButtonWhenEnabled(page, "#importContinueButton");
-      await page.locator("input[placeholder='\"name\"']").first().waitFor({ state: "visible", timeout: 15000 });
+      await page.locator("input[placeholder='JSON: \"name\"']").first().waitFor({ state: "visible", timeout: 15000 });
       await page.waitForLoadState("networkidle");
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
-      await page
-        .locator("text=Existing Attributes from the JSON file will be preserved")
-        .waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=No Attributes added").waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 
       await clickButtonWhenEnabled(page, "#importContinueButton");

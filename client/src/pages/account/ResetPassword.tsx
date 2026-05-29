@@ -117,7 +117,7 @@ const ResetPassword = () => {
 
           <Fieldset.Root w={"100%"}>
             <Field.Root gap={"0.5"} required>
-              <Field.Label fontSize={"xs"}>
+              <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
                 New Password
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -133,7 +133,7 @@ const ResetPassword = () => {
             </Field.Root>
 
             <Field.Root gap={"0.5"} invalid={confirmPassword !== "" && !passwordsMatch} required>
-              <Field.Label fontSize={"xs"}>
+              <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
                 Confirm Password
                 <Field.RequiredIndicator />
               </Field.Label>
