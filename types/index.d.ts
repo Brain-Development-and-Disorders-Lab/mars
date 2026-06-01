@@ -1,5 +1,4 @@
 // Import external types
-import { ObjectId } from "mongodb";
 import { BoxProps } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
@@ -773,7 +772,7 @@ export type IUser = {
 };
 
 export type UserModel = IUser & {
-  _id: ObjectId; // better-auth: Unique identifier
+  _id: string;
 };
 
 // Metrics

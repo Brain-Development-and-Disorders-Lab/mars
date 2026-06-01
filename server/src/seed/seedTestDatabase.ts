@@ -14,13 +14,13 @@ import { Workspaces } from "@models/Workspaces";
 // Custom types
 import { ResponseData } from "@types";
 
-// Variables
-import { DEMO_USER_ORCID } from "@variables";
-
 // Utility functions
 import "dotenv/config";
 import dayjs from "dayjs";
 import consola from "consola";
+
+// Variables
+export const TEST_USER_ID = "6a19ffaa2cc44416e51e3158";
 
 /**
  * Utility to seed the database with minimal testing values
@@ -30,7 +30,7 @@ export const seedTestDatabase = async (): Promise<void> => {
   // Create a Workspace
   const workspaceResult: ResponseData<string> = await Workspaces.create({
     name: "Test Workspace",
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     public: false,
     collaborators: [],
     description: "This is a test Workspace",
@@ -44,7 +44,7 @@ export const seedTestDatabase = async (): Promise<void> => {
   // Create a Project
   const projectResult: ResponseData<string> = await Projects.create({
     name: "Test Project",
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     archived: false,
     created: dayjs(Date.now()).toISOString(),
     collaborators: [],
@@ -60,7 +60,7 @@ export const seedTestDatabase = async (): Promise<void> => {
     name: "Test Parent Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Parent Entity",
     projects: [projectResult.data],
     relationships: [],
@@ -74,7 +74,7 @@ export const seedTestDatabase = async (): Promise<void> => {
     name: "Test Child Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Child Entity",
     projects: [projectResult.data],
     relationships: [
@@ -101,7 +101,7 @@ export const seedTestDatabase = async (): Promise<void> => {
     name: "Test Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Entity",
     projects: [projectResult.data],
     relationships: [],
@@ -110,7 +110,7 @@ export const seedTestDatabase = async (): Promise<void> => {
         _id: "a-ndl2n3k",
         archived: false,
         name: "Test Attribute",
-        owner: DEMO_USER_ORCID,
+        owner: TEST_USER_ID,
         timestamp: dayjs(Date.now()).toISOString(),
         description: "Test Attribute description",
         values: [
@@ -168,7 +168,7 @@ export const seedTestDatabase = async (): Promise<void> => {
   const templateResult: ResponseData<string> = await Templates.create({
     name: "Test Template",
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Template",
     values: [
       {
