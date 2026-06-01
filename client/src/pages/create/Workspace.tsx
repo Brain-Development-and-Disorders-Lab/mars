@@ -304,8 +304,8 @@ const CreateWorkspace = () => {
             editing={true}
             currentUser={owner}
             owner={owner}
-            projectCollaborators={collaborators}
-            setProjectCollaborators={setCollaborators}
+            collaborators={collaborators}
+            setCollaborators={setCollaborators}
           />
         </Flex>
       </Flex>

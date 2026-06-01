@@ -60,7 +60,7 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
           </Dialog.Header>
 
           <Dialog.Body p={"0"} flex={"1"} overflow={"auto"}>
-            <Flex direction={"column"} p={"1"} gap={"1"}>
+            <Flex direction={"column"} p={"2"} gap={"2"}>
               {props.isTemplate && (
                 <Flex direction={"row"} gap={"0.5"}>
                   <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
@@ -72,18 +72,23 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                   </Flex>
                 </Flex>
               )}
-              <Flex gap={"1"} rounded={"md"} direction={"row"} wrap={"wrap"}>
+              <Flex gap={"2"} rounded={"md"} direction={"row"} wrap={"wrap"}>
                 <Flex
                   direction={"column"}
                   h={"fit-content"}
-                  gap={"1"}
+                  gap={"2"}
                   w={{ base: "100%", md: "50%" }}
                   p={"1"}
                   border={GLOBAL_STYLES.border.style}
                   borderColor={GLOBAL_STYLES.border.color}
                   rounded={"md"}
                 >
-                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Name
                   </Text>
                   <Input
@@ -94,7 +99,12 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                     readOnly={!isEditing}
                   />
                   <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"xs"}
+                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      ml={"0.5"}
+                    >
                       Owner
                     </Text>
                     <Flex>
@@ -112,7 +122,12 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                   borderColor={GLOBAL_STYLES.border.color}
                   rounded={"md"}
                 >
-                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    ml={"0.5"}
+                  >
                     Description
                   </Text>
                   <Textarea

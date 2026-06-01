@@ -2042,7 +2042,7 @@ const Entity = () => {
                     color={GLOBAL_STYLES.font.secondaryHeader.color}
                     ml={"0.5"}
                   >
-                    Attributes
+                    Attributes ({entityAttributes.length})
                   </Text>
                 </Flex>
                 <Button
@@ -2110,7 +2110,7 @@ const Entity = () => {
                     color={GLOBAL_STYLES.font.secondaryHeader.color}
                     ml={"0.5"}
                   >
-                    Projects
+                    Projects ({entityProjects.length})
                   </Text>
                 </Flex>
                 <Button
@@ -2182,7 +2182,7 @@ const Entity = () => {
                       color={GLOBAL_STYLES.font.secondaryHeader.color}
                       ml={"0.5"}
                     >
-                      Relationships
+                      Relationships ({entityRelationships.length})
                     </Text>
                   </Flex>
                   <Button
@@ -2228,7 +2228,7 @@ const Entity = () => {
                       color={GLOBAL_STYLES.font.secondaryHeader.color}
                       ml={"0.5"}
                     >
-                      Attachments
+                      Attachments ({entityAttachments.length})
                     </Text>
                   </Flex>
                   <Button

@@ -49,7 +49,7 @@ const Collaborators = (props: CollaboratorsProps) => {
   const handleAddCollaborator = async () => {
     setAddCollaboratorLoading(true);
     // Prevent adding empty or duplicate collaborator
-    if (newCollaborator && !props.projectCollaborators.includes(newCollaborator)) {
+    if (newCollaborator && !props.collaborators.includes(newCollaborator)) {
       const result = await getCollaboratorUserId({
         variables: {
           email: newCollaborator,
@@ -74,9 +74,9 @@ const Collaborators = (props: CollaboratorsProps) => {
         });
       } else if (result.data) {
         const collaborator = result.data.userByEmail.data;
-        if (!_.includes(props.projectCollaborators, collaborator)) {
+        if (!_.includes(props.collaborators, collaborator)) {
           posthog.capture("collaborator_added");
-          props.setProjectCollaborators((collaborators) => [...collaborators, collaborator]);
+          props.setCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
           toaster.create({
             title: "Warning",
@@ -100,7 +100,7 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   const handleRemoveCollaborator = (collaborator: string) => {
     posthog.capture("collaborator_removed");
-    props.setProjectCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator));
+    props.setCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator));
   };
 
   return (
@@ -119,7 +119,7 @@ const Collaborators = (props: CollaboratorsProps) => {
         <Flex direction={"row"} gap={"1"} py={"1.5"} align={"center"} ml={"0.5"}>
           <Icon name={"person"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
           <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
-            Collaborators
+            Collaborators ({props.collaborators.length})
           </Text>
         </Flex>
         <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
@@ -156,9 +156,9 @@ const Collaborators = (props: CollaboratorsProps) => {
           px={"0"}
           justify={"center"}
           align={"center"}
-          minH={props.projectCollaborators.length > 0 ? "fit-content" : "200px"}
+          minH={props.collaborators.length > 0 ? "fit-content" : "200px"}
         >
-          {props.projectCollaborators.length === 0 ? (
+          {props.collaborators.length === 0 ? (
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
@@ -169,7 +169,7 @@ const Collaborators = (props: CollaboratorsProps) => {
             </EmptyState.Root>
           ) : (
             <Stack gap={"1"} separator={<Separator variant={"solid"} />} w={"100%"}>
-              {props.projectCollaborators.map((collaborator, index) => (
+              {props.collaborators.map((collaborator, index) => (
                 <Flex key={index} align={"center"} w={"100%"} justify={"space-between"}>
                   <Flex gap={"2"} align={"center"}>
                     <ActorTag identifier={collaborator} fallback={"New User"} size={"sm"} />

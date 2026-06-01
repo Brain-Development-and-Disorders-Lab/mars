@@ -152,8 +152,8 @@ export type CollaboratorsProps = {
   editing: boolean;
   currentUser: string;
   owner: string;
-  projectCollaborators: string[];
-  setProjectCollaborators: (value: React.SetStateAction<string[]>) => void;
+  collaborators: string[];
+  setCollaborators: (value: React.SetStateAction<string[]>) => void;
 };
 
 // "Linky" component props

@@ -958,7 +958,7 @@ const Values = (props: {
               overflow={"hidden"}
               flexShrink={0}
             >
-              <Text textAlign={"center"}>Value</Text>
+              <Text textAlign={"center"}>Data</Text>
               {/* Resize Handle */}
               <Box
                 position={"absolute"}
