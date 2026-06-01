@@ -3,14 +3,6 @@ import { BoxProps } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
-// Request types to the server
-declare enum Requests {
-  POST,
-  GET,
-  DELETE,
-}
-export type RequestMethod = keyof typeof Requests;
-
 // Utility type to standardize server response objects
 export type ServerResponse<T> = {
   success: boolean;

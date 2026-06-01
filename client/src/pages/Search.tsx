@@ -43,7 +43,6 @@ import { useFeatures } from "@hooks/useFeatures";
 import { EntityModel, DataTableAction } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -408,23 +407,33 @@ const Search = () => {
       header: "Owner",
     }),
   ];
+
+  const EXPORT_ENTITIES = gql`
+    query ExportEntities($entities: [String], $format: String, $includeAttributes: Boolean) {
+      exportEntities(entities: $entities, format: $format, includeAttributes: $includeAttributes)
+    }
+  `;
+  const [exportEntities] = useLazyQuery<{ exportEntities: string }>(EXPORT_ENTITIES, {
+    fetchPolicy: "network-only",
+  });
+
   const searchResultActions: DataTableAction[] = [
     {
-      label: "Export Entities CSV",
+      label: (count) => `Export selection as CSV (${count})`,
       icon: "download",
       action: async (table, rows) => {
-        // Export rows that have been selected
         const toExport: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
-        });
-        if (response.success) {
+        const response = await exportEntities({
+          variables: { entities: toExport, format: "csv", includeAttributes: true },
+        }).catch(ignoreAbort);
+
+        if (response?.data?.exportEntities) {
           FileSaver.saveAs(
-            new Blob([response.data]),
+            new Blob([response.data.exportEntities]),
             slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
           );
         }
@@ -433,22 +442,21 @@ const Search = () => {
       },
     },
     {
-      label: "Export Entities JSON",
+      label: (count) => `Export selection as JSON (${count})`,
       icon: "download",
       action: async (table, rows: any) => {
-        // Export rows that have been selected
         const toExport: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
-          format: "json",
-        });
-        if (response.success) {
+        const response = await exportEntities({
+          variables: { entities: toExport, format: "json", includeAttributes: true },
+        }).catch(ignoreAbort);
+
+        if (response?.data?.exportEntities) {
           FileSaver.saveAs(
-            new Blob([response.data]),
+            new Blob([response.data.exportEntities]),
             slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
           );
         }
