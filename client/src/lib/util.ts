@@ -2,7 +2,19 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, ISelectOption, IValue, IValueType, IconNames, UserModel } from "@types";
+import {
+  IAttribute,
+  ISelectOption,
+  IValue,
+  IValueType,
+  IconNames,
+  SearchAttributeValue,
+  SearchQuery,
+  UserModel,
+} from "@types";
+
+// Utility functions
+import dayjs from "dayjs";
 
 export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
@@ -232,4 +244,155 @@ export const removeTypename = (obj: any): any => {
     return cleaned;
   }
   return obj;
+};
+
+/**
+ * Converts a `SearchQuery` into a MongoDB query object ready for JSON serialisation.
+ * Each rule is translated independently, then combined with `$and` or `$or` based
+ * on the query combinator. Returns an empty object when there are no rules.
+ */
+export const buildMongoQuery = (query: SearchQuery): Record<string, unknown> => {
+  if (query.rules.length === 0) {
+    return {};
+  }
+
+  const conditions = query.rules.map((rule) => {
+    if (rule.field === "name" || rule.field === "description") {
+      // Case-insensitive regex match against the field value
+      const regex = { $regex: new RegExp(rule.value as string, "gi").toString() };
+      return rule.operator === "does not contain" ? { [rule.field]: { $not: regex } } : { [rule.field]: regex };
+    }
+
+    if (rule.field === "projects") {
+      // Match entities whose projects array contains (or excludes) the given project ID
+      return rule.operator === "not member of"
+        ? { projects: { $not: { $elemMatch: { _id: rule.value } } } }
+        : { projects: { $elemMatch: { _id: rule.value } } };
+    }
+
+    if (rule.field === "relationships") {
+      // "is parent/child of" filters by relationship type in addition to the target ID
+      const target = { "target._id": rule.value };
+      if (rule.operator === "is not related to") return { relationships: { $not: { $elemMatch: target } } };
+      if (rule.operator === "is parent of") return { relationships: { $elemMatch: { ...target, type: "parent" } } };
+      if (rule.operator === "is child of") return { relationships: { $elemMatch: { ...target, type: "child" } } };
+      return { relationships: { $elemMatch: target } };
+    }
+
+    if (rule.field === "attributes") {
+      const attr = rule.value as SearchAttributeValue;
+
+      // Always scope to the selected value type first
+      const conditions: Record<string, unknown>[] = [{ "attributes.values.type": attr.type }];
+
+      if (attr.operator === "contains") {
+        conditions.push({ "attributes.values.data": { $regex: new RegExp(attr.data, "gi").toString() } });
+      } else if (attr.operator === "does not contain") {
+        conditions.push({ "attributes.values.data": { $not: { $regex: new RegExp(attr.data, "gi").toString() } } });
+      } else if (attr.operator === "equals") {
+        if (attr.type === "number") {
+          // $toDouble is required because attribute data is stored as a string
+          conditions.push({
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            { $eq: [{ $toDouble: "$$v.data" }, parseFloat(attr.data)] },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+        } else {
+          // Date equality matches on the YYYY-MM-DD prefix of the stored ISO string
+          conditions.push({
+            "attributes.values.data": { $regex: new RegExp("^" + dayjs(attr.data).format("YYYY-MM-DD")).toString() },
+          });
+        }
+      } else if (attr.operator === ">") {
+        if (attr.type === "number") {
+          conditions.push({
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            { $gt: [{ $toDouble: "$$v.data" }, parseFloat(attr.data)] },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+        } else {
+          // Date "greater than" compares against end-of-day to include the boundary date
+          conditions.push({ "attributes.values.data": { $gt: dayjs(attr.data).endOf("day").toISOString() } });
+        }
+      } else if (attr.operator === "<") {
+        if (attr.type === "number") {
+          conditions.push({
+            $expr: {
+              $anyElementTrue: {
+                $map: {
+                  input: "$attributes",
+                  as: "a",
+                  in: {
+                    $anyElementTrue: {
+                      $map: {
+                        input: "$$a.values",
+                        as: "v",
+                        in: {
+                          $and: [
+                            { $eq: ["$$v.type", "number"] },
+                            { $lt: [{ $toDouble: "$$v.data" }, parseFloat(attr.data)] },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+        } else {
+          // Date "less than" compares against start-of-day for the same reason
+          conditions.push({ "attributes.values.data": { $lt: dayjs(attr.data).startOf("day").toISOString() } });
+        }
+      }
+
+      // $nor inverts the entire condition set when the outer operator is "does not contain"
+      return rule.operator === "does not contain" ? { $nor: conditions } : { $and: conditions };
+    }
+    return {};
+  });
+
+  if (conditions.length === 1) {
+    return conditions[0];
+  }
+
+  return query.combinator === "and" ? { $and: conditions } : { $or: conditions };
 };
