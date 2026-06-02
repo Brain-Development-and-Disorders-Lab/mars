@@ -199,18 +199,6 @@ export const getTestUser = async (): Promise<string> => {
 };
 
 /**
- * Perform login using information stored in environment variables
- * @param page
- */
-export const performLogin = async (page: Page): Promise<void> => {
-  await page.goto("/login");
-  await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL);
-  await page.locator("#userPasswordInput").fill(process.env.TEST_USER_PASSWORD);
-  await page.locator("#userLoginButton").click();
-  await page.waitForSelector("#workspaceSwitcherDesktop");
-};
-
-/**
  * Reset function used prior to running tests and after test completion. Clears and resets the database
  * state, creates new user account with standard test credentials
  * @param page
@@ -235,7 +223,9 @@ export const resetWorkspace = async (page: Page): Promise<void> => {
  * @param workspace Name of the Workspace to switch to
  */
 export const switchWorkspace = async (page: Page, workspace: string): Promise<void> => {
-  await page.click(`#workspaceSwitcherDesktop`);
+  await page.goto("/");
+  await page.locator("#workspaceSwitcherDesktop").waitFor({ state: "visible" });
+  await page.click("#workspaceSwitcherDesktop");
   await page.locator(`[role="menuitem"]:has-text("${workspace}")`).first().click();
   await page.waitForLoadState("networkidle");
 };
