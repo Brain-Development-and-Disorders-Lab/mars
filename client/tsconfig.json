@@ -7,14 +7,15 @@
     "declaration": false,
     "sourceMap": true,
     "inlineSources": true,
+    "baseUrl": "./",
     "paths": {
-      "@components/*": ["./src/components/*"],
-      "@database/*": ["./src/database/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@pages/*": ["./src/pages/*"],
+      "@components/*": ["src/components/*"],
+      "@database/*": ["src/database/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@lib/*": ["src/lib/*"],
+      "@pages/*": ["src/pages/*"],
       "@types": ["../types"],
-      "@variables": ["./src/variables"]
+      "@variables": ["src/variables"]
     },
     "rootDirs": ["src"],
     "strict": true,
