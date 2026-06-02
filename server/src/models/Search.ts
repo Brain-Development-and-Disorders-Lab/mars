@@ -282,7 +282,19 @@ export class Search {
         const [pattern, rawFlags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
         // MongoDB only supports i, m, x flags; strip g, s, and others
         const mongoFlags = (rawFlags ?? "").replace(/[^imx]/g, "");
+        if (mongoFlags !== (rawFlags ?? "")) {
+          console.warn(`[Search] Stripped unsupported regex flags from $regex: "${rawFlags}" → "${mongoFlags}"`);
+        }
         value = new RegExp(pattern, mongoFlags);
+      }
+
+      // Handle case where key is `$options` (MongoDB-native regex flag field)
+      if (_.isString(key) && key === "$options" && _.isString(value)) {
+        const sanitized = value.replace(/[^imx]/g, "");
+        if (sanitized !== value) {
+          console.warn(`[Search] Stripped unsupported regex flags from $options: "${value}" → "${sanitized}"`);
+        }
+        value = sanitized;
       }
 
       return value;
