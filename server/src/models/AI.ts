@@ -41,28 +41,29 @@ Entity schema:
 - attributes[].values[].type: string (value type: "text", "number", "entity", "select", "date", "url")
 - attributes[].values[].data: string (attribute values)
 
-Use regex for text matching: {"field":{"$regex":"/term/gi"}}
+Use regex for text matching: {"field":{"$regex":"/term/i"}}
+Only use the "i" flag in regex patterns. Do not use "g", "s", "m", or any other flags.
 Use comparison operators for dates: {"created":{"$gt":"2024-01-01T00:00:00Z"}}
 Check that an array has at least N+1 elements using index existence: {"attributes.1":{"$exists":true}} means ≥2 attributes
 Combine conditions with: {"$and":[cond1,cond2]}
 
 Examples:
-"named cancer" → {"name":{"$regex":"/cancer/gi"}}
-"description mentions climate" → {"description":{"$regex":"/climate/gi"}}
-"related to John Smith" → {"relationships.target.name":{"$regex":"/John Smith/gi"}}
-"has attribute value 42" → {"attributes.values.data":{"$regex":"/42/gi"}}
-"named cancer related to mouse" → {"$and":[{"name":{"$regex":"/cancer/gi"}},{"relationships.target.name":{"$regex":"/mouse/gi"}}]}
+"named cancer" → {"name":{"$regex":"/cancer/i"}}
+"description mentions climate" → {"description":{"$regex":"/climate/i"}}
+"related to John Smith" → {"relationships.target.name":{"$regex":"/John Smith/i"}}
+"has attribute value 42" → {"attributes.values.data":{"$regex":"/42/i"}}
+"named cancer related to mouse" → {"$and":[{"name":{"$regex":"/cancer/i"}},{"relationships.target.name":{"$regex":"/mouse/i"}}]}
 "created after January 2024" → {"created":{"$gt":"2024-01-01T00:00:00Z"}}
 "created before 2023" → {"created":{"$lt":"2023-01-01T00:00:00Z"}}
 "created between 2022 and 2024" → {"$and":[{"created":{"$gte":"2022-01-01T00:00:00Z"}},{"created":{"$lt":"2024-01-01T00:00:00Z"}}]}
 "archived entities" → {"archived":true}
 "not archived" → {"archived":false}
 "archived with multiple attributes" → {"$and":[{"archived":true},{"attributes.1":{"$exists":true}}]}
-"has attribute named temperature" → {"attributes.name":{"$regex":"/temperature/gi"}}
-"attribute name includes pressure" → {"attributes.name":{"$regex":"/pressure/gi"}}
-"has a numeric attribute" → {"attributes.values.type":{"$regex":"/number/gi"}}
-"has attribute of type date" → {"attributes.values.type":{"$regex":"/date/gi"}}
-"archived named virus with attribute value positive" → {"$and":[{"archived":true},{"name":{"$regex":"/virus/gi"}},{"attributes.values.data":{"$regex":"/positive/gi"}}]}`;
+"has attribute named temperature" → {"attributes.name":{"$regex":"/temperature/i"}}
+"attribute name includes pressure" → {"attributes.name":{"$regex":"/pressure/i"}}
+"has a numeric attribute" → {"attributes.values.type":{"$regex":"/number/i"}}
+"has attribute of type date" → {"attributes.values.type":{"$regex":"/date/i"}}
+"archived named virus with attribute value positive" → {"$and":[{"archived":true},{"name":{"$regex":"/virus/i"}},{"attributes.values.data":{"$regex":"/positive/i"}}]}`;
 
 export class AI {
   /**

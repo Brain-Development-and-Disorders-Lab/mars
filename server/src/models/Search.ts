@@ -279,8 +279,10 @@ export class Search {
 
       // Handle case where key is `$regex`
       if (_.isString(key) && key === "$regex" && key !== value) {
-        const [pattern, flags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
-        value = new RegExp(pattern, flags);
+        const [pattern, rawFlags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
+        // MongoDB only supports i, m, x flags; strip g, s, and others
+        const mongoFlags = (rawFlags ?? "").replace(/[^imx]/g, "");
+        value = new RegExp(pattern, mongoFlags);
       }
 
       return value;
