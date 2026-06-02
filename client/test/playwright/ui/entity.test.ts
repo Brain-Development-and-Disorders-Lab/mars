@@ -21,10 +21,10 @@ test.describe("Entity", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      await createTestWorkspace("Entities-1", user);
+      await createTestWorkspace("Entity-1", user);
 
       // Setup navigation
-      await switchWorkspace(page, "Entities-1");
+      await switchWorkspace(page, "Entity-1");
       await page.goto("/create/entity");
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
     });
@@ -74,13 +74,13 @@ test.describe("Entity", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Entities-2", user);
+      const workspace = await createTestWorkspace("Entity-2", user);
       await createTestEntity("1-Entity-Details", user, workspace);
       await createTestEntity("2-Entity-Description", user, workspace);
 
       // Setup navigation
       await page.goto("/");
-      await switchWorkspace(page, "Entities-2");
+      await switchWorkspace(page, "Entity-2");
     });
 
     test("should be able to rename the Entity", async ({ page }) => {
@@ -118,12 +118,12 @@ test.describe("Entity", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Entities-3", user);
+      const workspace = await createTestWorkspace("Entity-3", user);
       await createTestEntity("1-Entity-List", user, workspace);
 
       // Setup navigation
       await page.goto("/");
-      await switchWorkspace(page, "Entities-3");
+      await switchWorkspace(page, "Entity-3");
     });
 
     test("should appear in the Entities list after creation", async ({ page }) => {
@@ -141,12 +141,12 @@ test.describe("Entity", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Entities-4", user);
+      const workspace = await createTestWorkspace("Entity-4", user);
       await createTestEntity("1-Entity-Archive", user, workspace);
 
       // Setup navigation
       await page.goto("/");
-      await switchWorkspace(page, "Entities-4");
+      await switchWorkspace(page, "Entity-4");
     });
 
     test("should archive and restore an Entity", async ({ page }) => {

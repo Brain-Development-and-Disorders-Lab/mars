@@ -23,12 +23,12 @@ test.describe("Template", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Templates-1", user);
+      const workspace = await createTestWorkspace("Template-1", user);
       await createTestTemplate("1-Template-Create", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Templates-1");
+      await switchWorkspace(page, "Template-1");
     });
 
     test("should create a Template and appear in the list", async ({ page }) => {
@@ -46,12 +46,12 @@ test.describe("Template", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Templates-2", user);
+      const workspace = await createTestWorkspace("Template-2", user);
       await createTestTemplate("1-Template-Edit", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Templates-2");
+      await switchWorkspace(page, "Template-2");
     });
 
     test("allows editing the Template name and description", async ({ page }) => {
@@ -77,12 +77,12 @@ test.describe("Template", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Templates-3", user);
+      const workspace = await createTestWorkspace("Template-3", user);
       await createTestTemplate("1-Template-Export", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Templates-3");
+      await switchWorkspace(page, "Template-3");
     });
 
     test("exports the Template as a JSON file", async ({ page }) => {

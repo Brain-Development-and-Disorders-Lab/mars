@@ -23,10 +23,10 @@ test.describe("Project", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      await createTestWorkspace("Projects-1", user);
+      await createTestWorkspace("Project-1", user);
 
       // Setup navigation
-      await switchWorkspace(page, "Projects-1");
+      await switchWorkspace(page, "Project-1");
       await page.goto("/create/project");
       await expect(page.locator("h2:has-text('Create Project')")).toBeVisible();
     });
@@ -71,12 +71,12 @@ test.describe("Project", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Projects-2", user);
+      const workspace = await createTestWorkspace("Project-2", user);
       await createTestProject("1-Project-Name", user, workspace);
       await createTestProject("2-Project-Description", user, workspace);
 
       // Setup navigation
-      await switchWorkspace(page, "Projects-2");
+      await switchWorkspace(page, "Project-2");
       await page.goto("/");
     });
 
@@ -116,14 +116,14 @@ test.describe("Project", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Projects-3", user);
+      const workspace = await createTestWorkspace("Project-3", user);
       await createTestProject("1-Project-Entity", user, workspace);
       await createTestEntity("1-Entity-Project", user, workspace);
       await createTestProject("2-Entity-Project", user, workspace);
       await createTestEntity("2-Project-Entity", user, workspace);
 
       // Setup navigation
-      await switchWorkspace(page, "Projects-3");
+      await switchWorkspace(page, "Project-3");
       await page.goto("/");
     });
 
@@ -176,11 +176,11 @@ test.describe("Project", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Projects-4", user);
+      const workspace = await createTestWorkspace("Project-4", user);
       await createTestProject("1-Project-List", user, workspace);
 
       // Setup navigation
-      await switchWorkspace(page, "Projects-4");
+      await switchWorkspace(page, "Project-4");
       await page.goto("/");
     });
 
@@ -199,11 +199,11 @@ test.describe("Project", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace
-      const workspace = await createTestWorkspace("Projects-5", user);
+      const workspace = await createTestWorkspace("Project-5", user);
       await createTestProject("1-Project-Archive", user, workspace);
 
       // Setup navigation
-      await switchWorkspace(page, "Projects-5");
+      await switchWorkspace(page, "Project-5");
       await page.goto("/");
     });
 
