@@ -260,7 +260,7 @@ const Signup = () => {
           lastLogin: dayjs(Date.now()).toISOString(),
           api_keys: JSON.stringify([]),
           account_orcid: orcidId,
-          callbackURL: "/login",
+          callbackURL: `${APP_URL}/login`,
           hasSeenWalkthrough: false,
         },
         {
