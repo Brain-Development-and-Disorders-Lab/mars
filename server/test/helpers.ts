@@ -1,13 +1,6 @@
 // Database imports
 import { connect, disconnect, getDatabase, getClient } from "@connectors/database";
 
-// better-auth imports
-import { betterAuth } from "better-auth";
-import { nanoid } from "nanoid";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { testUtils } from "better-auth/plugins";
-import { admin } from "better-auth/plugins/admin";
-
 // Import models for workspace creation
 import { Workspaces } from "@models/Workspaces";
 import { Entities } from "@models/Entities";
@@ -318,12 +311,17 @@ export const createQueryTestEntity = async (workspaceId: string): Promise<void> 
 
 /**
  * Create a Better Auth instance using an active MongoDB database connection.
- * Called after connect() so getDatabase() returns a live Db instance.
+ * Called after connect() so getDatabase() returns a live instance
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _auth: any = null;
-export const getAuth = () => {
+export const getAuth = async () => {
   if (!_auth) {
+    const { betterAuth } = await import("better-auth");
+    const { nanoid } = await import("nanoid");
+    const { mongodbAdapter } = await import("better-auth/adapters/mongodb");
+    const { testUtils } = await import("better-auth/plugins");
+    const { admin } = await import("better-auth/plugins/admin");
     _auth = betterAuth({
       advanced: {
         database: {

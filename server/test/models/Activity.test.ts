@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 
 // Database connectivity
 import { connect, disconnect } from "@connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase } from "../helpers";
 
 describe("Activity model", () => {
   beforeEach(async () => {

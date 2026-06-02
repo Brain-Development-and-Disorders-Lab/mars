@@ -14,11 +14,11 @@ import dayjs from "dayjs";
 import _ from "lodash";
 
 // Variables
-import { DEMO_USER_ORCID } from "../src/variables";
+const TEST_USER_ID = "6a19ffaa2cc44416e51e3158";
 
 // Database connectivity
 import { connect, disconnect } from "@connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase } from "../helpers";
 
 describe("Entity model", () => {
   beforeEach(async () => {
@@ -637,7 +637,7 @@ describe("Entity model", () => {
     // Retrieve existing Entity state and use to create history entry
     const entity: EntityModel | null = await Entities.getOne(result.data);
     if (_.isNull(entity)) throw new Error();
-    await Entities.addHistory(entity, DEMO_USER_ORCID);
+    await Entities.addHistory(entity, TEST_USER_ID);
 
     // Get updated Entity and check that it contains history
     const updated: EntityModel | null = await Entities.getOne(result.data);
@@ -662,7 +662,7 @@ describe("Entity model", () => {
     // Retrieve existing Entity state and use to create history entry
     const entity: EntityModel | null = await Entities.getOne(result.data);
     if (_.isNull(entity)) throw new Error();
-    await Entities.addHistory(entity, DEMO_USER_ORCID);
+    await Entities.addHistory(entity, TEST_USER_ID);
 
     // Get updated Entity and check that it contains expected history
     const updated: EntityModel | null = await Entities.getOne(result.data);

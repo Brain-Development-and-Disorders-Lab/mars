@@ -10,7 +10,7 @@ import { ProjectModel, ResponseData } from "@types";
 
 // Database connectivity
 import { connect, disconnect } from "@connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase } from "../helpers";
 
 import dayjs from "dayjs";
 
