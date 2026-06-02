@@ -252,10 +252,8 @@ export class AI {
     const content = response.choices[0]?.message?.content?.trim();
     if (!content) throw new Error("No response from AI");
 
-    console.log(`[AI] translateSearch: "${query}" → ${content}`);
-
     // LLM signals uninterpretable input by returning the literal string "null"
-    if (content === "null") {
+    if (content === "null" || content === null) {
       throw new GraphQLError("Query could not be interpreted as a search", {
         extensions: { code: "UNINTERPRETABLE_QUERY" },
       });
