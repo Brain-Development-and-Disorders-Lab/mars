@@ -801,8 +801,8 @@ const Workspace = () => {
                 editing={true}
                 currentUser={currentUser}
                 owner={owner}
-                projectCollaborators={collaborators}
-                setProjectCollaborators={setCollaborators}
+                collaborators={collaborators}
+                setCollaborators={setCollaborators}
               />
             </Flex>
 
@@ -826,7 +826,7 @@ const Workspace = () => {
                   color={GLOBAL_STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
-                  Archived Entities
+                  Archived Entities ({shownEntities.length})
                 </Text>
               </Flex>
               <Flex
@@ -881,7 +881,7 @@ const Workspace = () => {
                   color={GLOBAL_STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
-                  Archived Projects
+                  Archived Projects ({shownProjects.length})
                 </Text>
               </Flex>
               <Flex
@@ -934,7 +934,7 @@ const Workspace = () => {
                   color={GLOBAL_STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
-                  Archived Templates
+                  Archived Templates ({shownTemplates.length})
                 </Text>
               </Flex>
               <Flex

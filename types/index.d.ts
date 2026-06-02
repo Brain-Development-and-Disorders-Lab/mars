@@ -1,16 +1,7 @@
 // Import external types
-import { ObjectId } from "mongodb";
 import { BoxProps } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
-
-// Request types to the server
-declare enum Requests {
-  POST,
-  GET,
-  DELETE,
-}
-export type RequestMethod = keyof typeof Requests;
 
 // Utility type to standardize server response objects
 export type ServerResponse<T> = {
@@ -153,8 +144,8 @@ export type CollaboratorsProps = {
   editing: boolean;
   currentUser: string;
   owner: string;
-  projectCollaborators: string[];
-  setProjectCollaborators: (value: React.SetStateAction<string[]>) => void;
+  collaborators: string[];
+  setCollaborators: (value: React.SetStateAction<string[]>) => void;
 };
 
 // "Linky" component props
@@ -663,11 +654,46 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
+// SearchQuery types
+export type SearchCombinator = "and" | "or";
+export type SearchField = "name" | "description" | "projects" | "relationships" | "attributes";
+export type SearchAttributeDataOperator = "contains" | "does not contain" | "equals" | ">" | "<";
+
+export interface SearchAttributeValue {
+  type: IValueType;
+  operator: SearchAttributeDataOperator;
+  data: string;
+}
+
+export interface SearchRule {
+  id: string;
+  field: SearchField;
+  operator: string;
+  value: string | SearchAttributeValue;
+}
+
+export interface SearchQuery {
+  combinator: SearchCombinator;
+  rules: SearchRule[];
+}
+
 // SearchQueryBuilder props
-export type SearchQueryBuilderProps = {
-  setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
-  setResults: React.Dispatch<Partial<EntityModel>[]>;
-  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
+export interface SearchQueryBuilderProps {
+  query: SearchQuery;
+  onQueryChange: (query: SearchQuery) => void;
+  isValid: boolean;
+  onSearch: () => void;
+  onClear: () => void;
+}
+
+// SearchRuleSelect props
+export type SearchRuleSelectProps = {
+  value: string;
+  collection: ListCollection<string>;
+  onChange: (value: string) => void;
+  minW?: string;
+  placeholder?: string;
+  testId?: string;
 };
 
 // SearchSelect props
@@ -773,7 +799,7 @@ export type IUser = {
 };
 
 export type UserModel = IUser & {
-  _id: ObjectId; // better-auth: Unique identifier
+  _id: string;
 };
 
 // Metrics

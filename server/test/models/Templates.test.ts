@@ -10,7 +10,7 @@ import { AttributeModel, IResponseMessage, ResponseData } from "@types";
 
 // Database connectivity
 import { connect, disconnect } from "@connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase } from "../helpers";
 
 // Utility functions
 import dayjs from "dayjs";

@@ -3,7 +3,6 @@ import { AdminMetrics, AdminUser, AdminWorkspace, IResponseMessage, UserFeatures
 
 // Database
 import { getDatabase } from "@connectors/database";
-import { ObjectId } from "mongodb";
 
 // Collection names
 const USERS_COLLECTION = "user";
@@ -35,7 +34,7 @@ export class Admin {
     ]);
 
     return users.map((user) => {
-      const userId = (user._id as ObjectId).toString();
+      const userId = String(user._id);
       const workspaceCount = workspaces.filter(
         (workspace) =>
           workspace.owner === userId ||
@@ -78,7 +77,7 @@ export class Admin {
       const attributeCount = entityIds.reduce((sum, id) => sum + (attrributeCountMap.get(id) ?? 0), 0);
 
       return {
-        _id: workspace._id as string,
+        _id: String(workspace._id),
         name: workspace.name || "",
         description: workspace.description || "",
         owner: workspace.owner || "",
@@ -90,9 +89,7 @@ export class Admin {
   };
 
   static getCurrentUserFeatures = async (_id: string): Promise<UserFeatures> => {
-    const user = await getDatabase()
-      .collection(USERS_COLLECTION)
-      .findOne({ _id: new ObjectId(_id) });
+    const user = await getDatabase().collection(USERS_COLLECTION).findOne({ _id: _id });
     return {
       ai: user?.features?.ai ?? false,
       api: user?.features?.api ?? false,
@@ -104,9 +101,7 @@ export class Admin {
     if (features.ai !== undefined) update["features.ai"] = features.ai;
     if (features.api !== undefined) update["features.api"] = features.api;
 
-    const result = await getDatabase()
-      .collection(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(_id) }, { $set: update });
+    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: update });
 
     return {
       success: result.modifiedCount === 1,
@@ -115,9 +110,7 @@ export class Admin {
   };
 
   static setBanStatus = async (_id: string, banned: boolean): Promise<IResponseMessage> => {
-    const result = await getDatabase()
-      .collection(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(_id) }, { $set: { banned } });
+    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: { banned } });
 
     return {
       success: result.modifiedCount === 1,
@@ -126,9 +119,7 @@ export class Admin {
   };
 
   static setUserRole = async (_id: string, role: string): Promise<IResponseMessage> => {
-    const result = await getDatabase()
-      .collection(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(_id) }, { $set: { role } });
+    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: { role } });
 
     return {
       success: result.modifiedCount === 1,

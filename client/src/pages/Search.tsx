@@ -24,26 +24,14 @@ import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
-// `react-querybuilder` imports
-import {
-  defaultOperators,
-  defaultRuleProcessorMongoDB,
-  Field,
-  formatQuery,
-  RuleGroupType,
-  RuleProcessor,
-  RuleType,
-} from "react-querybuilder";
-
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useFeatures } from "@hooks/useFeatures";
 
 // Existing and custom types
-import { EntityModel, DataTableAction } from "@types";
+import { EntityModel, DataTableAction, SearchQuery } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -55,11 +43,10 @@ import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
 // Utility libraries and functions
-import { ignoreAbort } from "@lib/util";
+import { buildMongoQuery, ignoreAbort } from "@lib/util";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import { JSONPath } from "jsonpath-plus";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -408,23 +395,33 @@ const Search = () => {
       header: "Owner",
     }),
   ];
+
+  const EXPORT_ENTITIES = gql`
+    query ExportEntities($entities: [String], $format: String, $includeAttributes: Boolean) {
+      exportEntities(entities: $entities, format: $format, includeAttributes: $includeAttributes)
+    }
+  `;
+  const [exportEntities] = useLazyQuery<{ exportEntities: string }>(EXPORT_ENTITIES, {
+    fetchPolicy: "network-only",
+  });
+
   const searchResultActions: DataTableAction[] = [
     {
-      label: "Export Entities CSV",
+      label: (count) => `Export selection as CSV (${count})`,
       icon: "download",
       action: async (table, rows) => {
-        // Export rows that have been selected
         const toExport: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
-        });
-        if (response.success) {
+        const response = await exportEntities({
+          variables: { entities: toExport, format: "csv", includeAttributes: true },
+        }).catch(ignoreAbort);
+
+        if (response?.data?.exportEntities) {
           FileSaver.saveAs(
-            new Blob([response.data]),
+            new Blob([response.data.exportEntities]),
             slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
           );
         }
@@ -433,22 +430,21 @@ const Search = () => {
       },
     },
     {
-      label: "Export Entities JSON",
+      label: (count) => `Export selection as JSON (${count})`,
       icon: "download",
       action: async (table, rows: any) => {
-        // Export rows that have been selected
         const toExport: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
-          format: "json",
-        });
-        if (response.success) {
+        const response = await exportEntities({
+          variables: { entities: toExport, format: "json", includeAttributes: true },
+        }).catch(ignoreAbort);
+
+        if (response?.data?.exportEntities) {
           FileSaver.saveAs(
-            new Blob([response.data]),
+            new Blob([response.data.exportEntities]),
             slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
           );
         }
@@ -458,229 +454,7 @@ const Search = () => {
     },
   ];
 
-  const advancedQueryFields: Field[] = [
-    {
-      name: "name",
-      label: "Name",
-      operators: [
-        { name: "=", label: "is" },
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain", "beginsWith", "endsWith"].includes(operator.name),
-        ),
-      ],
-    },
-    {
-      name: "description",
-      label: "Description",
-      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
-    },
-    {
-      name: "projects",
-      label: "Projects",
-      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
-    },
-    {
-      name: "relationships",
-      label: "Relationships",
-      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
-    },
-    {
-      name: "attributes",
-      label: "Attributes",
-      operators: [...defaultOperators.filter((operator) => ["contains", "doesNotContain"].includes(operator.name))],
-    },
-  ];
-
-  // Setup the initial query
-  const initialAdvancedQuery: RuleGroupType = {
-    combinator: "and",
-    rules: [],
-  };
-
-  /**
-   * Custom function for processing specific fields within a search query,
-   * specifically `relationships`
-   * @param {RuleType} rule Rule for processing value
-   * @return {any}
-   */
-  const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
-    if (rule.field === "name") {
-      const value = { $regex: new RegExp(rule.value, "gi").toString() };
-      if (rule.operator === "doesNotContain") {
-        return {
-          name: {
-            $not: value,
-          },
-        };
-      } else if (rule.operator === "contains") {
-        return {
-          name: value,
-        };
-      } else {
-        return defaultRuleProcessorMongoDB(rule);
-      }
-    } else if (rule.field === "relationships") {
-      // Handle `relationships` field
-      if (rule.operator === "doesNotContain") {
-        // If `doesNotContain`, include `$not`
-        return {
-          relationships: {
-            $not: {
-              $elemMatch: {
-                "target._id": rule.value,
-              },
-            },
-          },
-        };
-      } else {
-        return {
-          relationships: {
-            $elemMatch: {
-              "target._id": rule.value,
-            },
-          },
-        };
-      }
-    } else if (rule.field === "attributes") {
-      // Parse the custom rule
-      const customRule = JSON.parse(rule.value);
-
-      // Create a base custom rule structure
-      const processedCustomRules: Record<string, any>[] = [{ "attributes.values.type": customRule.type }];
-
-      // Append query components depending on the specified operator
-      if (customRule.operator === "contains") {
-        processedCustomRules.push({
-          "attributes.values.data": {
-            $regex: new RegExp(customRule.value, "gi").toString(),
-          },
-        });
-      } else if (customRule.operator === "does not contain") {
-        processedCustomRules.push({
-          "attributes.values.data": {
-            $not: {
-              $regex: new RegExp(customRule.value, "gi").toString(),
-            },
-          },
-        });
-      } else if (customRule.operator === "equals") {
-        if (customRule.type === "number") {
-          processedCustomRules.push({
-            $expr: {
-              $anyElementTrue: {
-                $map: {
-                  input: "$attributes",
-                  as: "a",
-                  in: {
-                    $anyElementTrue: {
-                      $map: {
-                        input: "$$a.values",
-                        as: "v",
-                        in: {
-                          $and: [
-                            { $eq: ["$$v.type", "number"] },
-                            {
-                              $eq: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
-        } else {
-          processedCustomRules.push({
-            "attributes.values.data": {
-              $regex: new RegExp("^" + dayjs(customRule.value).format("YYYY-MM-DD")).toString(),
-            },
-          });
-        }
-      } else if (customRule.operator === ">") {
-        if (customRule.type === "number") {
-          processedCustomRules.push({
-            $expr: {
-              $anyElementTrue: {
-                $map: {
-                  input: "$attributes",
-                  as: "a",
-                  in: {
-                    $anyElementTrue: {
-                      $map: {
-                        input: "$$a.values",
-                        as: "v",
-                        in: {
-                          $and: [
-                            { $eq: ["$$v.type", "number"] },
-                            {
-                              $gt: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
-        } else {
-          processedCustomRules.push({
-            "attributes.values.data": {
-              $gt: dayjs(customRule.value).endOf("day").toISOString(),
-            },
-          });
-        }
-      } else if (customRule.operator === "<") {
-        if (customRule.type === "number") {
-          processedCustomRules.push({
-            $expr: {
-              $anyElementTrue: {
-                $map: {
-                  input: "$attributes",
-                  as: "a",
-                  in: {
-                    $anyElementTrue: {
-                      $map: {
-                        input: "$$a.values",
-                        as: "v",
-                        in: {
-                          $and: [
-                            { $eq: ["$$v.type", "number"] },
-                            {
-                              $lt: [{ $toDouble: "$$v.data" }, parseFloat(customRule.value)],
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
-        } else {
-          processedCustomRules.push({
-            "attributes.values.data": {
-              $lt: dayjs(customRule.value).startOf("day").toISOString(),
-            },
-          });
-        }
-      }
-
-      // Handle the operator
-      if (rule.operator === "doesNotContain") {
-        return { $nor: processedCustomRules };
-      } else {
-        return { $and: processedCustomRules };
-      }
-    }
-
-    // Default rule applied
-    return defaultRuleProcessorMongoDB(rule);
-  };
+  const initialAdvancedQuery: SearchQuery = { combinator: "and", rules: [] };
 
   // Query to search by text value
   const SEARCH_ADVANCED = gql`
@@ -723,15 +497,9 @@ const Search = () => {
     setIsSearching(true);
     setHasSearched(true);
 
-    // Format the query in `mongodb` format before sending
     const results = await searchAdvanced({
       variables: {
-        query: JSON.stringify(
-          formatQuery(advancedQuery, {
-            format: "mongodb_query",
-            ruleProcessor: ruleProcessor,
-          }),
-        ),
+        query: JSON.stringify(buildMongoQuery(advancedQuery)),
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
@@ -764,54 +532,16 @@ const Search = () => {
     setIsSearching(false);
   };
 
-  /**
-   * Validate the query as it changes
-   * @param {RuleGroupType} query Query to validate
-   */
-  const validateQuery = (query: RuleGroupType) => {
-    if (query.rules.length > 0) {
-      // Validation involves making sure all fields have a value
-      // Extract all `value` statements from the query
-      const values = JSONPath({
-        path: "$..value",
-        json: query,
-        resultType: "path",
-      });
-      for (const value of values) {
-        // Break the path down into an array of keys
-        const path: string[] = [];
-        for (let key of value.slice(2, -1).split("][")) {
-          // Remove the quotes from the key
-          key = key.replace(/'/g, "");
-          path.push(key);
-        }
-
-        // Iterate down the path until the `value` statement is found
-        let currentLevel = query as any;
-        for (const key of path) {
-          if (key in currentLevel) {
-            // If the key is a `value` statement, check if it is valid
-            if (key === "value") {
-              if (_.isUndefined(currentLevel[key]) || currentLevel[key] === "") {
-                setIsValid(false);
-                return;
-              }
-            } else {
-              // Otherwise, continue down the path
-              currentLevel = currentLevel[key];
-            }
-          }
-        }
-      }
-      setIsValid(true);
-    } else {
-      setIsValid(false);
-    }
-  };
-
   useEffect(() => {
-    // Validate the query as it changes
-    validateQuery(advancedQuery);
+    const valid =
+      advancedQuery.rules.length > 0 &&
+      advancedQuery.rules.every((rule) => {
+        if (rule.field === "attributes") {
+          return typeof rule.value === "object" && rule.value.data !== "";
+        }
+        return typeof rule.value === "string" && rule.value !== "";
+      });
+    setIsValid(valid);
   }, [advancedQuery]);
 
   // Calculate active filter count for text search filters
@@ -1159,7 +889,6 @@ const Search = () => {
               <SearchQueryBuilder
                 query={advancedQuery}
                 onQueryChange={setAdvancedQuery}
-                fields={advancedQueryFields}
                 isValid={isValid}
                 onSearch={onSearchBuiltQuery}
                 onClear={() => {

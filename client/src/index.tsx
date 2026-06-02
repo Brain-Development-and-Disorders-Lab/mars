@@ -159,17 +159,7 @@ const client = new ApolloClient({
       },
     },
   }),
-  defaultOptions: {
-    watchQuery: {
-      errorPolicy: "all",
-    },
-    query: {
-      errorPolicy: "all",
-    },
-    mutate: {
-      errorPolicy: "all",
-    },
-  },
+  defaultOptions: {},
 });
 
 // Render the application

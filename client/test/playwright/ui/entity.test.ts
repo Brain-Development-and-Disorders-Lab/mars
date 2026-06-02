@@ -8,21 +8,23 @@ import {
   saveAndWait,
   clickButtonByText,
   getUniqueName,
-  performLogin,
-  setupEnvironment,
   createTestEntity,
+  createTestUser,
+  createTestWorkspace,
+  switchWorkspace,
 } from "../helpers";
 
 test.describe("Entity", () => {
-  test.beforeEach(async ({ page }) => {
-    test.setTimeout(60000);
-    await performLogin(page);
-    await setupEnvironment(page, "entity");
-    await page.goto("/");
-  });
-
   test.describe("Create", () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      await createTestWorkspace("Entity-1", user);
+
+      // Setup navigation
+      await switchWorkspace(page, "Entity-1");
       await page.goto("/create/entity");
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
     });
@@ -67,27 +69,36 @@ test.describe("Entity", () => {
   });
 
   test.describe("Edit details", () => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Entity-2", user);
+      await createTestEntity("1-Entity-Details", user, workspace);
+      await createTestEntity("2-Entity-Description", user, workspace);
+
+      // Setup navigation
+      await page.goto("/");
+      await switchWorkspace(page, "Entity-2");
+    });
+
     test("should be able to rename the Entity", async ({ page }) => {
-      const entityName = getUniqueName("Test Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
+      await openItemFromTable(page, "1-Entity-Details", "View Entity");
 
       await page.click("#editEntityButton");
-      await page.locator("#entityNameInput").fill(`${entityName} (Updated)`);
+      await page.locator("#entityNameInput").fill("1-Entity-Details (Updated)");
       await saveAndWait(page);
 
-      await expect(page.locator("#entityNameTag")).toContainText(`${entityName} (Updated)`);
-
+      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Updated)");
       await page.reload({ waitUntil: "networkidle" });
-      await expect(page.locator("#entityNameTag")).toContainText(`${entityName} (Updated)`);
+      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Updated)");
     });
 
     test("should be able to update the Entity description", async ({ page }) => {
-      const entityName = getUniqueName("Test Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
+      await openItemFromTable(page, "2-Entity-Description", "View Entity");
 
       const updatedDescription = "Updated Entity description";
 
@@ -102,23 +113,45 @@ test.describe("Entity", () => {
   });
 
   test.describe("List visibility", () => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Entity-3", user);
+      await createTestEntity("1-Entity-List", user, workspace);
+
+      // Setup navigation
+      await page.goto("/");
+      await switchWorkspace(page, "Entity-3");
+    });
+
     test("should appear in the Entities list after creation", async ({ page }) => {
-      const entityName = getUniqueName("Listed Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
 
       const table = page.locator(".data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
-      await expect(table.locator(`text=${entityName}`)).toBeVisible({ timeout: 10000 });
+      await expect(table.locator(`text=1-Entity-List`)).toBeVisible({ timeout: 10000 });
     });
   });
 
   test.describe("Archive", () => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Entity-4", user);
+      await createTestEntity("1-Entity-Archive", user, workspace);
+
+      // Setup navigation
+      await page.goto("/");
+      await switchWorkspace(page, "Entity-4");
+    });
+
     test("should archive and restore an Entity", async ({ page }) => {
-      const entityName = getUniqueName("Archive Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
+      await openItemFromTable(page, "1-Entity-Archive", "View Entity");
 
       await page.click('button:has-text("Actions")');
       await page.locator("#archiveEntityButton").click();

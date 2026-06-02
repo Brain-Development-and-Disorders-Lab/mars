@@ -1,17 +1,20 @@
-// Utility functions and libraries
-import { connect, disconnect, getDatabase } from "@connectors/database";
-
-// Import seed function from seed directory
-import { seedTestDatabase } from "@seed/seedTestDatabase";
+// Database imports
+import { connect, disconnect, getDatabase, getClient } from "@connectors/database";
 
 // Import models for workspace creation
 import { Workspaces } from "@models/Workspaces";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
 import { Templates } from "@models/Templates";
+
+// Utility functions
 import dayjs from "dayjs";
-import { DEMO_USER_ORCID } from "../src/variables";
+
+// Custom types
 import { ResponseData } from "@types";
+
+// Variables
+const TEST_USER_ID = "6a19ffaa2cc44416e51e3158";
 
 // Track connection state to avoid unnecessary connects/disconnects
 let isConnected = false;
@@ -45,7 +48,6 @@ const ensureConnection = async (): Promise<void> => {
  */
 export const setupDatabase = async (): Promise<void> => {
   await ensureConnection();
-  await seedTestDatabase();
 };
 
 /**
@@ -105,7 +107,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
 
   const workspaceResult: ResponseData<string> = await Workspaces.create({
     name: workspaceName,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     public: false,
     collaborators: [],
     description: `Test workspace: ${workspaceName}`,
@@ -124,7 +126,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
   // Create a Project
   const projectResult: ResponseData<string> = await Projects.create({
     name: "Test Project",
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     archived: false,
     created: dayjs(Date.now()).toISOString(),
     collaborators: [],
@@ -140,7 +142,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     name: "Test Parent Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Parent Entity",
     projects: [projectResult.data],
     relationships: [],
@@ -154,7 +156,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     name: "Test Child Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Child Entity",
     projects: [projectResult.data],
     relationships: [
@@ -181,7 +183,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     name: "Test Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Entity",
     projects: [projectResult.data],
     relationships: [],
@@ -190,7 +192,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
         _id: "a-ndl2n3k",
         archived: false,
         name: "Test Attribute",
-        owner: DEMO_USER_ORCID,
+        owner: TEST_USER_ID,
         timestamp: dayjs(Date.now()).toISOString(),
         description: "Test Attribute description",
         values: [
@@ -248,7 +250,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
   const templateResult: ResponseData<string> = await Templates.create({
     name: "Test Template",
     archived: false,
-    owner: DEMO_USER_ORCID,
+    owner: TEST_USER_ID,
     description: "Description for test Template",
     values: [
       {
@@ -262,4 +264,120 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
   await Workspaces.addTemplate(workspaceId, templateResult.data);
 
   return workspaceId;
+};
+
+/**
+ * Create a single Entity with attributes required for query builder tests.
+ * The attribute values are chosen to satisfy all query test cases:
+ * text "Test Value", number "10" (>5, <15, equals 10), date "2026-03-19".
+ * @param workspaceId Workspace to associate the entity with
+ */
+export const createQueryTestEntity = async (workspaceId: string): Promise<void> => {
+  await ensureConnection();
+
+  const entityResult: ResponseData<string> = await Entities.create({
+    name: "Test Entity",
+    created: dayjs(Date.now()).toISOString(),
+    archived: false,
+    owner: TEST_USER_ID,
+    description: "Entity for query builder tests",
+    projects: [],
+    relationships: [],
+    attributes: [
+      {
+        _id: "a-query-test",
+        archived: false,
+        name: "Test Attribute",
+        owner: TEST_USER_ID,
+        timestamp: dayjs(Date.now()).toISOString(),
+        description: "Test Attribute description",
+        values: [
+          { _id: "v-text", name: "Test Text Value", type: "text", data: "Test Value" },
+          { _id: "v-number", name: "Test Number Value", type: "number", data: "10" },
+          { _id: "v-date", name: "Test Date Value", type: "date", data: "2026-03-19" },
+        ],
+      },
+    ],
+    attachments: [],
+    history: [],
+  });
+
+  if (entityResult.success === false) {
+    throw new Error(`Error creating query test Entity: ${entityResult.message}`);
+  }
+
+  await Workspaces.addEntity(workspaceId, entityResult.data);
+};
+
+/**
+ * Create a Better Auth instance using an active MongoDB database connection.
+ * Called after connect() so getDatabase() returns a live instance
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _auth: any = null;
+export const getAuth = async () => {
+  if (!_auth) {
+    const { betterAuth } = await import("better-auth");
+    const { nanoid } = await import("nanoid");
+    const { mongodbAdapter } = await import("better-auth/adapters/mongodb");
+    const { testUtils } = await import("better-auth/plugins");
+    const { admin } = await import("better-auth/plugins/admin");
+    _auth = betterAuth({
+      advanced: {
+        database: {
+          generateId: () => nanoid(),
+        },
+      },
+      database: mongodbAdapter(getDatabase(), {
+        client: getClient(),
+        transaction: false,
+      }),
+      basePath: "/auth",
+      baseURL: "http://127.0.0.1:8000",
+      trustedOrigins: ["http://127.0.0.1:8080"],
+      account: {
+        accountLinking: {
+          allowDifferentEmails: true,
+        },
+      },
+      session: {
+        cookieCache: {
+          enabled: true,
+          maxAge: 5 * 60, // 5 minutes
+        },
+      },
+      plugins: [admin(), testUtils()],
+      user: {
+        modelName: "user",
+        deleteUser: {
+          enabled: true,
+        },
+        additionalFields: {
+          firstName: {
+            type: "string",
+          },
+          lastName: {
+            type: "string",
+          },
+          affiliation: {
+            type: "string",
+          },
+          lastLogin: {
+            type: "string",
+          },
+          hasSeenWalkthrough: {
+            type: "boolean",
+            defaultValue: false,
+          },
+          api_keys: {
+            type: "string[]",
+          },
+          account_orcid: {
+            type: "string",
+          },
+        },
+      },
+    });
+  }
+  return _auth;
 };

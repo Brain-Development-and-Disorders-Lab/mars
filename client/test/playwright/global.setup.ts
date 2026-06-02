@@ -2,8 +2,8 @@
 import { test as setup } from "@playwright/test";
 
 // Test helpers
-import { resetEnvironment } from "./helpers";
+import { resetWorkspace } from "./helpers";
 
 setup("test setup", async ({ page }) => {
-  await resetEnvironment(page);
+  await resetWorkspace(page);
 });

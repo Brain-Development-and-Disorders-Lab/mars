@@ -165,7 +165,7 @@ export class API {
   static handler = async (request: Request, response: Response): Promise<void> => {
     // apiKey and apiUser are already resolved and validated by the authenticate middleware
     const apiKey: APIKey = response.locals.apiKey;
-    const userId: string = response.locals.apiUser._id.toString();
+    const userId: string = response.locals.apiUser._id;
 
     if (request.method === "GET") {
       switch (request.params.path) {

@@ -1381,7 +1381,7 @@ const Project = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                   <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                    Entities
+                    Entities ({projectEntities.length})
                   </Text>
                 </Flex>
                 <Button
@@ -1441,8 +1441,8 @@ const Project = () => {
                 editing={editing && !previewVersion}
                 currentUser={currentUser}
                 owner={project.owner}
-                projectCollaborators={displayProjectCollaborators}
-                setProjectCollaborators={setProjectCollaborators}
+                collaborators={displayProjectCollaborators}
+                setCollaborators={setProjectCollaborators}
               />
             </Flex>
           </Flex>

@@ -1208,7 +1208,7 @@ const Template = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                Values
+                Values ({templateValues.length})
               </Text>
               <Values
                 key={previewVersion?.version ?? "current"}
@@ -1232,7 +1232,7 @@ const Template = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                Usage
+                Usage ({templateUsage.length} {templateUsage.length !== 1 ? "Entities" : "Entity"})
               </Text>
               {templateUsage.length > 0 ? (
                 <DataTable

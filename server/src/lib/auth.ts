@@ -3,6 +3,7 @@ import { getDatabase, getClient } from "@connectors/database";
 
 // better-auth imports
 import { betterAuth } from "better-auth";
+import { nanoid } from "nanoid";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
 import { admin } from "better-auth/plugins/admin";
@@ -87,6 +88,11 @@ const getTrustedOrigins = () => {
  * Create a Better Auth instance using an active MongoDB database connection.
  */
 export const auth = betterAuth({
+  advanced: {
+    database: {
+      generateId: (_options) => nanoid(),
+    },
+  },
   database: mongodbAdapter(getDatabase(), {
     client: getClient(),
     transaction: false,

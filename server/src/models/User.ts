@@ -4,15 +4,7 @@ import { APIKey, IResponseMessage, ResponseData, UserModel } from "@types";
 import _ from "lodash";
 import dayjs from "dayjs";
 
-// Models
-import { Activity } from "./Activity";
-import { Entities } from "@models/Entities";
-import { Projects } from "@models/Projects";
-import { Templates } from "@models/Templates";
-import { Workspaces } from "@models/Workspaces";
-
 // Database
-import { ObjectId } from "mongodb";
 import { getDatabase } from "@connectors/database";
 
 // Collection name
@@ -28,9 +20,7 @@ export class User {
   };
 
   static getOne = async (_id: string): Promise<UserModel | null> => {
-    return await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: new ObjectId(_id) });
+    return await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
   };
 
   static getByEmail = async (email: string): Promise<ResponseData<string>> => {
@@ -41,7 +31,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: (result._id as ObjectId).toString(),
+        data: result._id,
       };
     }
     return {
@@ -59,7 +49,7 @@ export class User {
       return {
         message: "User found successfully",
         success: true,
-        data: (result._id as ObjectId).toString(),
+        data: result._id,
       };
     }
     return {
@@ -70,15 +60,13 @@ export class User {
   };
 
   static exists = async (_id: string): Promise<boolean> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .findOne({ _id: new ObjectId(_id) });
+    const result = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
 
     return !_.isNull(result);
   };
 
   static update = async (updated: UserModel): Promise<IResponseMessage> => {
-    const user = await this.getOne(updated._id.toString());
+    const user = await this.getOne(updated._id);
 
     if (_.isNull(user)) {
       return {
@@ -127,7 +115,7 @@ export class User {
 
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(updated._id) }, update);
+      .updateOne({ _id: updated._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -165,9 +153,7 @@ export class User {
       },
     };
 
-    const response = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(_id) }, update);
+    const response = await getDatabase().collection<UserModel>(USERS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -202,9 +188,7 @@ export class User {
       },
     };
 
-    const response = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: new ObjectId(_id) }, update);
+    const response = await getDatabase().collection<UserModel>(USERS_COLLECTION).updateOne({ _id: _id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
@@ -224,129 +208,5 @@ export class User {
         return keys.some((k) => k.value === api_key);
       }) ?? null
     );
-  };
-
-  static bootstrap = async (user: string, workspace: string): Promise<IResponseMessage> => {
-    const entity = await Entities.create({
-      name: "Example Entity",
-      archived: false,
-      created: dayjs(Date.now()).toISOString(),
-      description: "This is your first Entity. Go ahead and modify it!",
-      owner: user,
-      projects: [],
-      relationships: [],
-      attachments: [],
-      attributes: [
-        {
-          _id: "a-00-example",
-          name: "Example Attribute",
-          owner: user,
-          timestamp: dayjs(Date.now()).toISOString(),
-          archived: false,
-          description: "An example Attribute",
-          values: [
-            {
-              _id: "v-test-00",
-              type: "text",
-              name: "Test Value 00",
-              data: "Test Value Data",
-            },
-            {
-              _id: "v-test-01",
-              type: "number",
-              name: "Test Value 01",
-              data: "10",
-            },
-            {
-              _id: "v-test-02",
-              type: "date",
-              name: "Test Value 02",
-              data: "2026-03-19",
-            },
-          ],
-        },
-      ],
-      history: [],
-    });
-    await Workspaces.addEntity(workspace, entity.data);
-    const entityActivity = await Activity.create({
-      timestamp: dayjs(Date.now()).toISOString(),
-      type: "create",
-      actor: user,
-      details: "Created new Entity",
-      target: {
-        _id: entity.data,
-        type: "entities",
-        name: "Example Entity",
-      },
-    });
-    await Workspaces.addActivity(workspace, entityActivity.data);
-
-    const project = await Projects.create({
-      name: "Example Project",
-      archived: false,
-      created: dayjs(Date.now()).toISOString(),
-      description: "This is an example Project. Feel free to explore and modify it!",
-      owner: user,
-      entities: [],
-      collaborators: [],
-      history: [],
-    });
-    await Workspaces.addProject(workspace, project.data);
-    const projectActivity = await Activity.create({
-      timestamp: dayjs(Date.now()).toISOString(),
-      type: "create",
-      actor: user,
-      details: "Created new Project",
-      target: {
-        _id: project.data,
-        type: "projects",
-        name: "Example Project",
-      },
-    });
-    await Workspaces.addActivity(workspace, projectActivity.data);
-
-    // Add the example Entity to the Project
-    await Projects.addEntity(workspace, entity.data);
-
-    // Create an example Template
-    const template = await Templates.create({
-      name: "Example Template",
-      owner: user,
-      archived: false,
-      description: "An example Template Attribute",
-      values: [
-        {
-          _id: "v-01-example0",
-          type: "text",
-          name: "Test Value 01",
-          data: "Test Value Data",
-        },
-        {
-          _id: "v-02-example0",
-          type: "number",
-          name: "Test Value 01",
-          data: "0",
-        },
-      ],
-    });
-    await Workspaces.addTemplate(workspace, template.data);
-    const templateActivity = await Activity.create({
-      timestamp: dayjs(Date.now()).toISOString(),
-      type: "create",
-      actor: user,
-      details: "Created new Template",
-      target: {
-        _id: template.data,
-        type: "templates",
-        name: "Example Template",
-      },
-    });
-    await Workspaces.addActivity(workspace, templateActivity.data);
-
-    return {
-      success: true,
-      message: "Created example Entity and Project",
-    };
   };
 }

@@ -20,7 +20,6 @@ import _ from "lodash";
 import { Activity } from "@models/Activity";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
-import { User } from "@models/User";
 import { Templates } from "@models/Templates";
 
 // Collection name
@@ -292,9 +291,6 @@ export class Workspaces {
       ...workspace, // Unpack existing Workspace fields
     };
     const response = await getDatabase().collection<WorkspaceModel>(WORKSPACES_COLLECTION).insertOne(joinedWorkspace);
-
-    // Bootstrap the Workspace with an example Entity and Project
-    await User.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
 
     return {
       success: response.acknowledged,

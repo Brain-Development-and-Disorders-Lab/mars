@@ -2,8 +2,8 @@
 import { test as teardown } from "@playwright/test";
 
 // Test helpers
-import { resetEnvironment } from "./helpers";
+import { resetWorkspace } from "./helpers";
 
 teardown("test teardown", async ({ page }) => {
-  await resetEnvironment(page);
+  await resetWorkspace(page);
 });

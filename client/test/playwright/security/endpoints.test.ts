@@ -2,7 +2,7 @@
 import test, { expect } from "@playwright/test";
 
 // Test helper functions
-import { clearUsers } from "../../../../server/test/util";
+import { clearUsers } from "../../../../server/test/helpers";
 
 test.describe("Security, check endpoint access", () => {
   test("should not be able to access /setup", async ({ page }) => {

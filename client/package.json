@@ -25,8 +25,6 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^4.5.5",
-    "@react-querybuilder/chakra": "^8.15.0",
-    "@react-querybuilder/dnd": "^8.2.0",
     "@storybook/addon-themes": "^10.3.1",
     "@tanstack/react-table": "^8.8.5",
     "@tiptap/react": "^3.23.5",
@@ -34,7 +32,7 @@
     "@types/react-router-dom": "^5.3.3",
     "apollo-upload-client": "^19.0.0",
     "axios": "^1.12.0",
-    "better-auth": "^1.4.7",
+    "better-auth": "^1.6.0",
     "chakra-react-select": "^6.1.1",
     "consola": "^3.2.3",
     "date-fns": "^2.29.3",
@@ -52,14 +50,11 @@
     "pdfjs-dist": "^4.2.67",
     "posthog-js": "^1.184.2",
     "react": "^18.2.0",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-joyride": "^2.9.3",
     "react-pdf": "^9.0.0",
     "react-qr-code": "^2.0.15",
-    "react-querybuilder": "^8.5.0",
     "react-router-dom": "^6.3.0",
     "react-zoom-pan-pinch": "^3.6.1",
     "reactflow": "^11.7.0",
@@ -122,5 +117,8 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.1",
     "webpack-merge": "^5.9.0"
+  },
+  "resolutions": {
+    "kysely": "0.28.1"
   }
 }
