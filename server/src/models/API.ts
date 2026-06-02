@@ -80,7 +80,7 @@ export class API {
     }
 
     // `api_keys` is stored as a JSON string by better-auth, parse before filtering
-    const parsedKeys: APIKey[] = JSON.parse(apiUser.api_keys as unknown as string);
+    const parsedKeys: APIKey[] = JSON.parse(apiUser.api_keys);
     const apiKey = parsedKeys.filter((key) => _.isEqual(key.value, providedKey)).pop();
     if (_.isUndefined(apiKey)) {
       const responseData: APIData<object> = {

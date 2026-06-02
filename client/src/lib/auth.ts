@@ -28,7 +28,7 @@ export const auth = createAuthClient({
           type: "boolean",
         },
         api_keys: {
-          type: "string[]",
+          type: "string",
         },
         account_orcid: {
           type: "string",

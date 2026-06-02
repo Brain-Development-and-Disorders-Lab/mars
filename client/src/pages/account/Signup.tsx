@@ -258,7 +258,7 @@ const Signup = () => {
           lastName: userLastName,
           affiliation: userAffiliation,
           lastLogin: dayjs(Date.now()).toISOString(),
-          api_keys: [],
+          api_keys: JSON.stringify([]),
           account_orcid: orcidId,
           callbackURL: "/login",
           hasSeenWalkthrough: false,
