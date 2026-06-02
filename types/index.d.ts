@@ -654,11 +654,46 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
+// SearchQuery types
+export type SearchCombinator = "and" | "or";
+export type SearchField = "name" | "description" | "projects" | "relationships" | "attributes";
+export type SearchAttributeDataOperator = "contains" | "does not contain" | "equals" | ">" | "<";
+
+export interface SearchAttributeValue {
+  type: IValueType;
+  operator: SearchAttributeDataOperator;
+  data: string;
+}
+
+export interface SearchRule {
+  id: string;
+  field: SearchField;
+  operator: string;
+  value: string | SearchAttributeValue;
+}
+
+export interface SearchQuery {
+  combinator: SearchCombinator;
+  rules: SearchRule[];
+}
+
 // SearchQueryBuilder props
-export type SearchQueryBuilderProps = {
-  setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
-  setResults: React.Dispatch<Partial<EntityModel>[]>;
-  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
+export interface SearchQueryBuilderProps {
+  query: SearchQuery;
+  onQueryChange: (query: SearchQuery) => void;
+  isValid: boolean;
+  onSearch: () => void;
+  onClear: () => void;
+}
+
+// SearchRuleSelect props
+export type SearchRuleSelectProps = {
+  value: string;
+  collection: ListCollection<string>;
+  onChange: (value: string) => void;
+  minW?: string;
+  placeholder?: string;
+  testId?: string;
 };
 
 // SearchSelect props

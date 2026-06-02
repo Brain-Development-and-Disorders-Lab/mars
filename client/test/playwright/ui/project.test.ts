@@ -1,5 +1,5 @@
 // Playwright imports
-import test, { expect, Page } from "@playwright/test";
+import test, { expect } from "@playwright/test";
 
 // Test helper functions
 import {
@@ -8,36 +8,31 @@ import {
   saveAndWait,
   clickButtonByText,
   getUniqueName,
-  performLogin,
-  setupEnvironment,
   createTestEntity,
+  createTestProject,
+  createTestUser,
+  createTestWorkspace,
+  switchWorkspace,
+  addEntityToProject,
 } from "../helpers";
-
-async function createTestProject(page: Page, projectName: string): Promise<void> {
-  await page.goto("/create/project");
-  await page.locator("[data-testid='create-project-name']").waitFor({ state: "visible", timeout: 10000 });
-  await page.locator("[data-testid='create-project-name']").fill(projectName);
-  await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
-  await page.locator("[data-testid='create-project-description']").fill("Test project for entity editing tests");
-  await page.click("[data-testid='create-project-finish']");
-  await page.waitForURL(/\/projects/, { timeout: 10000 });
-  await page.waitForTimeout(1000);
-}
 
 test.describe("Project", () => {
   test.describe("Create", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "project");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      await createTestWorkspace("Projects-1", user);
+
+      // Setup navigation
+      await switchWorkspace(page, "Projects-1");
       await page.goto("/create/project");
       await expect(page.locator("h2:has-text('Create Project')")).toBeVisible();
     });
 
     test("should create a project with required fields", async ({ page }) => {
-      const projectName = getUniqueName("Project Complete");
-
-      await page.locator("[data-testid='create-project-name']").fill(projectName);
+      await page.locator("[data-testid='create-project-name']").fill("1-Project-Create");
       await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
       await page.locator("[data-testid='create-project-description']").fill("This is a test project description.");
       await page.click("[data-testid='create-project-finish']");
@@ -71,32 +66,37 @@ test.describe("Project", () => {
   });
 
   test.describe("Edit details", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Projects-2", user);
+      await createTestProject("1-Project-Name", user, workspace);
+      await createTestProject("2-Project-Description", user, workspace);
+
+      // Setup navigation
+      await switchWorkspace(page, "Projects-2");
+      await page.goto("/");
     });
 
     test("should be able to rename the Project", async ({ page }) => {
-      const projectName = getUniqueName("Test Project");
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "1-Project-Name", "View Project");
 
       await page.click("#editProjectButton");
-      await page.locator("#projectNameInput").fill(`${projectName} (Updated)`);
+      await page.locator("#projectNameInput").fill("1-Project-Name (Updated)");
       await saveAndWait(page);
 
-      await expect(page.locator("#projectNameTag")).toContainText(`${projectName} (Updated)`);
+      await expect(page.locator("#projectNameTag")).toContainText("1-Project-Name (Updated)");
 
       await page.reload({ waitUntil: "networkidle" });
-      await expect(page.locator("#projectNameTag")).toContainText(`${projectName} (Updated)`);
+      await expect(page.locator("#projectNameTag")).toContainText("1-Project-Name (Updated)");
     });
 
     test("should be able to update the Project description", async ({ page }) => {
-      const projectName = getUniqueName("Test Project");
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "2-Project-Description", "View Project");
 
       const updatedDescription = "Updated Project description";
 
@@ -110,38 +110,29 @@ test.describe("Project", () => {
     });
   });
 
-  test.describe("Edit entities", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "project-edit-entities");
+  test.describe("Edit Entities", () => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Projects-3", user);
+      await createTestProject("1-Project-Entity", user, workspace);
+      await createTestEntity("1-Entity-Project", user, workspace);
+      await createTestProject("2-Entity-Project", user, workspace);
+      await createTestEntity("2-Project-Entity", user, workspace);
+
+      // Setup navigation
+      await switchWorkspace(page, "Projects-3");
       await page.goto("/");
     });
 
-    async function addEntityToProject(page: Page, entityName: string): Promise<void> {
-      await page.click("#addEntityButton");
-      // Fill the input directly to trigger the debounced search query rather than clicking the outer container
-      await page.locator("#entitySearchSelect input").fill(entityName);
-      // Results load after a 300ms debounce plus network round-trip
-      await page.locator("[data-testid='search-select-result']").first().waitFor({ state: "visible", timeout: 10000 });
-      await page.locator("[data-testid='search-select-result']").filter({ hasText: entityName }).first().click();
-      // The Done button enables once an entity is staged
-      await page.locator("#addEntityDoneButton:not([disabled])").waitFor({ state: "visible", timeout: 5000 });
-      await page.click("#addEntityDoneButton");
-      await saveAndWait(page);
-    }
-
     test("should be able to add and remove an Entity within a Project", async ({ page }) => {
-      const entityName = getUniqueName("Project Test Entity");
-      const projectName = getUniqueName("Project - Add and Remove Entity");
-
-      await createTestEntity(page, entityName);
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "1-Project-Entity", "View Project");
       await page.click("#editProjectButton");
 
-      await addEntityToProject(page, entityName);
+      await addEntityToProject(page, "1-Entity-Project");
 
       // Check for the View button rather than the entity name since the table column truncates long names
       const table = page.locator(".data-table-scroll-container");
@@ -159,63 +150,66 @@ test.describe("Project", () => {
     });
 
     test("should be able to remove a Project from an Entity via the Entity page", async ({ page }) => {
-      const entityName = getUniqueName("Project Test Entity");
-      const projectName = getUniqueName("Project - Remove Project via Entity");
-
-      await createTestEntity(page, entityName);
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "2-Entity-Project", "View Project");
       await page.click("#editProjectButton");
-      await addEntityToProject(page, entityName);
+      await addEntityToProject(page, "2-Project-Entity");
 
       const table = page.locator(".data-table-scroll-container");
       await table.locator('button[aria-label="View Entity"]').first().click();
 
       await page.click("#editEntityButton");
-      const projectsTable = page.locator(".data-table-scroll-container").filter({ hasText: projectName });
+      const projectsTable = page.locator(".data-table-scroll-container").filter({ hasText: "2-Entity-Project" });
       await projectsTable.locator('button[aria-label="Remove Project"]').first().click();
       await saveAndWait(page);
 
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "2-Entity-Project", "View Project");
       await page.click("#editProjectButton");
-      await expect(page.locator(`text=${entityName}`)).not.toBeVisible();
+      await expect(page.locator("text=2-Project-Entity")).not.toBeVisible();
     });
   });
 
   test.describe("List visibility", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "project-list");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Projects-4", user);
+      await createTestProject("1-Project-List", user, workspace);
+
+      // Setup navigation
+      await switchWorkspace(page, "Projects-4");
       await page.goto("/");
     });
 
     test("should appear in the Projects list after creation", async ({ page }) => {
-      const projectName = getUniqueName("Listed Project");
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
 
       const table = page.locator(".data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
-      await expect(table.locator(`text=${projectName}`)).toBeVisible({ timeout: 10000 });
+      await expect(table.locator("text=1-Project-List")).toBeVisible({ timeout: 10000 });
     });
   });
 
   test.describe("Archive", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "project-archive");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Projects-5", user);
+      await createTestProject("1-Project-Archive", user, workspace);
+
+      // Setup navigation
+      await switchWorkspace(page, "Projects-5");
       await page.goto("/");
     });
 
     test("should archive and restore a Project", async ({ page }) => {
-      const projectName = getUniqueName("Archive Project");
-      await createTestProject(page, projectName);
       await navigateToSection(page, "Projects");
-      await openItemFromTable(page, projectName, "View Project");
+      await openItemFromTable(page, "1-Project-Archive", "View Project");
 
       await page.click('button:has-text("Actions")');
       await page.locator('[data-value="archive"]').click();

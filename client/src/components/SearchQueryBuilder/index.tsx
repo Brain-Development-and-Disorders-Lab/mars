@@ -15,6 +15,7 @@ import {
   SearchField,
   SearchQueryBuilderProps,
   SearchRule,
+  SearchRuleSelectProps,
 } from "@types";
 
 // Utility imports
@@ -58,29 +59,25 @@ const DEFAULT_ATTRIBUTE_VALUE: SearchAttributeValue = { type: "text", operator: 
  * Compact Select following the project's string-item collection pattern.
  * Items are used as both the stored value and the display label.
  */
-const InlineSelect = ({
+const SearchRuleSelect = ({
   value,
   collection,
   onChange,
   minW = "100px",
   placeholder = "Select...",
-}: {
-  value: string;
-  collection: ListCollection<string>;
-  onChange: (value: string) => void;
-  minW?: string;
-  placeholder?: string;
-}) => (
+  testId,
+}: SearchRuleSelectProps) => (
   <Select.Root
     size={"xs"}
     rounded={"md"}
+    bg={"white"}
     value={[value]}
     collection={collection}
     onValueChange={(d) => onChange(d.value[0])}
   >
     <Select.HiddenSelect />
     <Select.Control minW={minW}>
-      <Select.Trigger fontSize={"xs"}>
+      <Select.Trigger fontSize={"xs"} data-testid={testId}>
         <Select.ValueText placeholder={placeholder} fontSize={"xs"} />
       </Select.Trigger>
       <Select.IndicatorGroup>
@@ -90,7 +87,7 @@ const InlineSelect = ({
     <Portal>
       <Select.Positioner>
         <Select.Content fontSize={"xs"}>
-          {collection.items.map((item) => (
+          {collection.items.map((item: string) => (
             <Select.Item item={item} key={`${item}`} fontSize={"xs"}>
               {`${item}`}
               <Select.ItemIndicator />
@@ -156,7 +153,13 @@ const RuleRow = React.memo(
           <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
             Entity Field
           </Text>
-          <InlineSelect value={rule.field} collection={FIELDS} onChange={handleFieldChange} minW={"110px"} />
+          <SearchRuleSelect
+            value={rule.field}
+            collection={FIELDS}
+            onChange={handleFieldChange}
+            minW={"110px"}
+            testId={"rule-field-select"}
+          />
         </Flex>
 
         {/* Operator selector */}
@@ -164,11 +167,12 @@ const RuleRow = React.memo(
           <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
             Operator
           </Text>
-          <InlineSelect
+          <SearchRuleSelect
             value={rule.operator}
             collection={FIELD_OPERATORS_MAP[rule.field]}
             onChange={(operator) => onChange({ ...rule, operator })}
             minW={"140px"}
+            testId={"rule-operator-select"}
           />
         </Flex>
 
@@ -185,6 +189,7 @@ const RuleRow = React.memo(
               backgroundColor={"white"}
               placeholder={rule.field === "name" ? "Name" : "Description"}
               value={localText}
+              data-testid={"rule-value-input"}
               onChange={(e) => {
                 setLocalText(e.target.value);
                 onChange({ ...rule, value: e.target.value });
@@ -226,14 +231,15 @@ const RuleRow = React.memo(
               border={GLOBAL_STYLES.border.style}
               borderColor={GLOBAL_STYLES.border.color}
             >
-              <InlineSelect
+              <SearchRuleSelect
                 value={attrVal.type}
                 collection={ATTR_VALUE_TYPES}
                 onChange={(v) => handleAttrTypeChange(v as IValueType)}
                 minW={"80px"}
                 placeholder={"Type"}
+                testId={"rule-attr-type-select"}
               />
-              <InlineSelect
+              <SearchRuleSelect
                 value={attrVal.operator}
                 collection={attrOperators}
                 onChange={(operator) =>
@@ -241,6 +247,7 @@ const RuleRow = React.memo(
                 }
                 minW={"130px"}
                 placeholder={"Condition"}
+                testId={"rule-attr-operator-select"}
               />
               <Input
                 size={"xs"}
@@ -251,6 +258,7 @@ const RuleRow = React.memo(
                 type={attrInputType}
                 placeholder={"Value"}
                 value={localAttrData}
+                data-testid={"rule-attr-value-input"}
                 onChange={(e) => {
                   setLocalAttrData(e.target.value);
                   onChange({ ...rule, value: { ...attrVal, data: e.target.value } });
@@ -308,45 +316,44 @@ const SearchQueryBuilder = ({ query, onQueryChange, isValid, onSearch, onClear }
   return (
     <Flex direction={"column"} gap={"2"}>
       {/* Rule list with combinator selector rendered between each pair */}
-      <Flex direction={"column"} gap={"2"}>
-        {query.rules.length > 0 ? (
-          query.rules.map((rule, i) => (
-            <Flex key={rule.id} direction={"column"} gap={"2"}>
-              {i > 0 && (
-                <Flex maxW={"50px"} ml={"6"}>
-                  <InlineSelect
-                    value={query.combinator}
-                    collection={COMBINATOR_OPS}
-                    onChange={(v) => onQueryChange({ ...query, combinator: v as SearchCombinator })}
-                  />
-                </Flex>
-              )}
-              <RuleRow
-                rule={rule}
-                onChange={(updated) => updateRule(rule.id, updated)}
-                onRemove={() => removeRule(rule.id)}
-              />
-            </Flex>
-          ))
-        ) : (
-          <Flex
-            align={"center"}
-            justify={"center"}
-            gap={"2"}
-            p={"2"}
-            py={"4"}
-            rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
-            bg={GLOBAL_STYLES.card.bg}
-            wrap={"wrap"}
-          >
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
-              No Rules
-            </Text>
+      {query.rules.length > 0 ? (
+        query.rules.map((rule, i) => (
+          <Flex key={rule.id} direction={"column"} gap={"2"}>
+            {i > 0 && (
+              <Flex maxW={"50px"} ml={"6"}>
+                <SearchRuleSelect
+                  value={query.combinator}
+                  collection={COMBINATOR_OPS}
+                  onChange={(v) => onQueryChange({ ...query, combinator: v as SearchCombinator })}
+                  testId={"rule-combinator-select"}
+                />
+              </Flex>
+            )}
+            <RuleRow
+              rule={rule}
+              onChange={(updated) => updateRule(rule.id, updated)}
+              onRemove={() => removeRule(rule.id)}
+            />
           </Flex>
-        )}
-      </Flex>
+        ))
+      ) : (
+        <Flex
+          align={"center"}
+          justify={"center"}
+          gap={"2"}
+          p={"2"}
+          py={"4"}
+          rounded={"md"}
+          border={GLOBAL_STYLES.border.style}
+          borderColor={GLOBAL_STYLES.border.color}
+          bg={GLOBAL_STYLES.card.bg}
+          wrap={"wrap"}
+        >
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
+            No Rules
+          </Text>
+        </Flex>
+      )}
 
       {/* Add Rule button and empty-state hint */}
       <Flex align={"center"} gap={"2"} justify={"space-between"}>

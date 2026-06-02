@@ -1,5 +1,5 @@
 // Playwright components
-import { BrowserContext, Page } from "@playwright/test";
+import { BrowserContext, Locator, Page } from "@playwright/test";
 
 // Access environment variables
 import "dotenv/config";
@@ -52,6 +52,7 @@ export const createTestEntity = async (name: string, owner: string, workspace: s
         values: [
           { _id: "vTest00", name: "Test Value 00", type: "text", data: "Test Value" },
           { _id: "vTest01", name: "Test Value 01", type: "number", data: "10" },
+          { _id: "vTest02", name: "Test Value 02", type: "date", data: dayjs("2026-01-01").toISOString() },
         ],
       },
     ],
@@ -188,7 +189,7 @@ export const createTestUser = async (context: BrowserContext): Promise<string> =
 export const getTestUser = async (): Promise<string> => {
   // Get the new user and return `userId`
   await connect();
-  const result: ResponseData<string> = await User.getByEmail(process.env.TEST_USER_EMAIL);
+  const result: ResponseData<string> = await User.getByEmail(process.env.TEST_USER_EMAIL!);
   if (!result.success) {
     await disconnect();
     throw new Error(" Could not locate User: " + result.message);
@@ -321,11 +322,23 @@ export const saveAndWait = async (page: Page): Promise<void> => {
 };
 
 /**
- * Select an option from a dropdown
+ * Select an option from a standard inline dropdown menu
  */
-export const selectDropdownOption = async (page: Page, triggerSelector: string, optionText: string): Promise<void> => {
+export const selectMenuOption = async (page: Page, triggerSelector: string, optionText: string): Promise<void> => {
   await page.click(triggerSelector);
   await page.locator(`[role="option"]:has-text("${optionText}")`).first().click();
+};
+
+/**
+ * Select an option from a Chakra v3 Select component
+ */
+export const selectChakraSelectOption = async (page: Page, trigger: Locator, optionValue: string): Promise<void> => {
+  await trigger.click();
+  const openContent = page.locator('[data-scope="select"][data-part="content"][data-state="open"]');
+  const item = openContent.locator(`[data-scope="select"][data-part="item"][data-value="${optionValue}"]`);
+  await item.waitFor({ state: "visible" });
+  await item.click();
+  await openContent.waitFor({ state: "hidden" });
 };
 
 /**
@@ -419,4 +432,25 @@ export const addAttributeValue = async (
   );
   await page.locator("[data-testid='save-add-attribute-button']").click();
   await page.locator("#addAttributeDialogButton").waitFor({ state: "visible", timeout: 10000 });
+};
+
+/**
+ * When on the Project view page, add an Entity to the Project
+ * @param {Page} page
+ * @param {string} entityName Name of the Entity to add to the Project
+ */
+export const addEntityToProject = async (page: Page, entityName: string): Promise<void> => {
+  await page.click("#addEntityButton");
+
+  // Fill the input directly to trigger the debounced search query rather than clicking the outer container
+  await page.locator("#entitySearchSelect input").fill(entityName);
+
+  // Results load after a 300ms debounce plus network round-trip
+  await page.locator("[data-testid='search-select-result']").first().waitFor({ state: "visible", timeout: 10000 });
+  await page.locator("[data-testid='search-select-result']").filter({ hasText: entityName }).first().click();
+
+  // The Done button enables once an entity is staged
+  await page.locator("#addEntityDoneButton:not([disabled])").waitFor({ state: "visible", timeout: 5000 });
+  await page.click("#addEntityDoneButton");
+  await saveAndWait(page);
 };

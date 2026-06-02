@@ -2,29 +2,34 @@
 import test, { expect } from "@playwright/test";
 
 // Test helper functions
-import { performLogin, selectDropdownOption, clickButtonWhenEnabled, setupEnvironment } from "../helpers";
+import {
+  selectMenuOption,
+  clickButtonWhenEnabled,
+  createTestUser,
+  createTestWorkspace,
+  switchWorkspace,
+  createTestProject,
+} from "../helpers";
 
 // Other imports
 import * as path from "path";
 
 test.describe("Import", () => {
-  test.beforeEach(async ({ page }) => {
-    // Increase timeouts for CI workflows
-    test.setTimeout(60000);
-
-    // Ensure the user is logged in
-    await performLogin(page);
-
-    // Perform setup of the test environment
-    await setupEnvironment(page, "import");
-
-    // Navigate to the dashboard
-    await page.goto("/");
-  });
-
   test.describe("Files", () => {
-    test("should import a CSV file successfully", async ({ page }) => {
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace
+      const workspace = await createTestWorkspace("Import-1", user);
+      await createTestProject("Test Project", user, workspace);
+
+      // Setup navigation
+      await switchWorkspace(page, "Import-1");
       await page.goto("/");
+    });
+
+    test("should import a CSV file successfully", async ({ page }) => {
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
       // Upload CSV file
@@ -39,8 +44,8 @@ test.describe("Import", () => {
       // Wait for details page to load before selecting columns
       await page.waitForLoadState("networkidle");
 
-      await selectDropdownOption(page, '[data-testid="import-column-select-trigger-name"]', "Name");
-      await selectDropdownOption(page, '[data-testid="import-column-select-trigger-project"]', "Example Project");
+      await selectMenuOption(page, '[data-testid="import-column-select-trigger-name"]', "Name");
+      await selectMenuOption(page, '[data-testid="import-column-select-trigger-project"]', "Test Project");
 
       // Continue through remaining steps
       await clickButtonWhenEnabled(page, "#importContinueButton"); // Attributes page
@@ -55,7 +60,6 @@ test.describe("Import", () => {
     });
 
     test("should import a JSON file successfully", async ({ page }) => {
-      await page.goto("/");
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
       // Upload JSON file
