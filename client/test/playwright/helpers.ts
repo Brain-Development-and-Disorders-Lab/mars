@@ -167,7 +167,8 @@ export const createTestUser = async (context: BrowserContext): Promise<string> =
   await connect();
 
   // Setup User
-  const ctx = await getAuth().$context;
+  const auth = await getAuth();
+  const ctx = await auth.$context;
   const testUtils = ctx.test;
 
   const user = testUtils.createUser({
