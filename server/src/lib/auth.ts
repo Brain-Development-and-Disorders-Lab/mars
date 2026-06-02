@@ -90,7 +90,7 @@ const getTrustedOrigins = () => {
 export const auth = betterAuth({
   advanced: {
     database: {
-      generateId: (_options) => nanoid(),
+      generateId: () => nanoid(),
     },
   },
   database: mongodbAdapter(getDatabase(), {
