@@ -204,7 +204,7 @@ export class User {
     return (
       users.find((user) => {
         if (!user.api_keys) return false;
-        const keys: APIKey[] = JSON.parse(user.api_keys as unknown as string);
+        const keys: APIKey[] = JSON.parse(user.api_keys);
         return keys.some((k) => k.value === api_key);
       }) ?? null
     );

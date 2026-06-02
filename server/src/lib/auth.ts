@@ -160,7 +160,7 @@ export const auth = betterAuth({
         defaultValue: false,
       },
       api_keys: {
-        type: "string[]",
+        type: "string",
       },
       account_orcid: {
         type: "string",

@@ -370,7 +370,7 @@ export const getAuth = async () => {
             defaultValue: false,
           },
           api_keys: {
-            type: "string[]",
+            type: "string",
           },
           account_orcid: {
             type: "string",

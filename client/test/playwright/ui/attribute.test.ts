@@ -104,12 +104,12 @@ test.describe("Template", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Templates-4", user);
+      const workspace = await createTestWorkspace("Template-4", user);
       await createTestTemplate("1-Template-Archive", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Templates-4");
+      await switchWorkspace(page, "Template-4");
     });
 
     test("archives and restores a Template", async ({ page }) => {
@@ -136,14 +136,14 @@ test.describe("Template", () => {
       const user = await createTestUser(context);
 
       // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Templates-5", user);
+      const workspace = await createTestWorkspace("Template-5", user);
       await createTestEntity("1-Attribute-Text-Entity", user, workspace);
       await createTestEntity("2-Attribute-Multi-Entity", user, workspace);
       await createTestEntity("3-Attribute-Delete-Entity", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Templates-5");
+      await switchWorkspace(page, "Template-5");
     });
 
     test("should add a text Attribute to an Entity and persist after reload", async ({ page }) => {
