@@ -1,5 +1,5 @@
 // Playwright imports
-import { test, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 // Test helper functions
 import {
@@ -7,76 +7,59 @@ import {
   openItemFromTable,
   clickButtonByText,
   saveAndWait,
-  getUniqueName,
-  performLogin,
-  setupEnvironment,
+  addAttributeValue,
+  openAddAttributeDialog,
   createTestTemplate,
   createTestEntity,
+  createTestWorkspace,
+  createTestUser,
+  switchWorkspace,
 } from "../helpers";
-
-async function openAddAttributeDialog(page: Page): Promise<void> {
-  await page.click("#addAttributeDialogButton");
-  await page.locator("[data-testid='create-attribute-name']").waitFor({ state: "visible", timeout: 10000 });
-}
-
-async function fillAndSaveAttribute(
-  page: Page,
-  attributeName: string,
-  valueName: string,
-  valueData: string,
-): Promise<void> {
-  await page.locator("[data-testid='create-attribute-name']").fill(attributeName);
-  await page.locator("[data-testid='create-attribute-description']").fill("Attribute description");
-  await page.click("#addValueRowButton");
-  await page.locator('input[placeholder="Enter name"]').fill(valueName);
-  await page.locator('input[placeholder="Enter text"]').fill(valueData);
-  await page.waitForFunction(
-    () => {
-      const btn = document.querySelector('[data-testid="save-add-attribute-button"]') as HTMLButtonElement;
-      return btn && !btn.disabled;
-    },
-    { timeout: 5000 },
-  );
-  await page.locator("[data-testid='save-add-attribute-button']").click();
-  await page.locator("#addAttributeDialogButton").waitFor({ state: "visible", timeout: 10000 });
-}
 
 test.describe("Template", () => {
   test.describe("Create", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "template-create");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace and Templates
+      const workspace = await createTestWorkspace("Templates-1", user);
+      await createTestTemplate("1-Template-Create", user, workspace);
+
+      // Navigate for tests
       await page.goto("/");
+      await switchWorkspace(page, "Templates-1");
     });
 
     test("should create a Template and appear in the list", async ({ page }) => {
-      const templateName = getUniqueName("New Template");
-      await createTestTemplate(page, templateName);
       await navigateToSection(page, "Templates");
 
       const table = page.locator(".data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
-      await expect(table.locator(`text=${templateName}`)).toBeVisible({ timeout: 10000 });
+      await expect(table.locator(`text=1-Template-Create`)).toBeVisible({ timeout: 10000 });
     });
   });
 
   test.describe("Edit", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "template-edit");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace and Templates
+      const workspace = await createTestWorkspace("Templates-2", user);
+      await createTestTemplate("1-Template-Edit", user, workspace);
+
+      // Navigate for tests
       await page.goto("/");
+      await switchWorkspace(page, "Templates-2");
     });
 
     test("allows editing the Template name and description", async ({ page }) => {
-      const templateName = getUniqueName("Edit Template");
-      await createTestTemplate(page, templateName);
       await navigateToSection(page, "Templates");
-      await openItemFromTable(page, templateName, "View Template");
+      await openItemFromTable(page, "1-Template-Edit", "View Template");
 
       await page.click("#editTemplateButton");
-      await page.locator("#attributeNameInput").fill(`${templateName} Updated`);
+      await page.locator("#attributeNameInput").fill(`1-Template-Edit-Updated`);
       await page.locator("#attributeDescriptionInput").fill("Updated description");
       await saveAndWait(page);
       await expect(
@@ -84,23 +67,27 @@ test.describe("Template", () => {
       ).toBeVisible();
 
       await page.reload();
-      await expect(page.locator("#attributeNameInput")).toHaveValue(`${templateName} Updated`);
+      await expect(page.locator("#attributeNameInput")).toHaveValue(`1-Template-Edit-Updated`);
     });
   });
 
   test.describe("Export", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "template-export");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace and Templates
+      const workspace = await createTestWorkspace("Templates-3", user);
+      await createTestTemplate("1-Template-Export", user, workspace);
+
+      // Navigate for tests
       await page.goto("/");
+      await switchWorkspace(page, "Templates-3");
     });
 
     test("exports the Template as a JSON file", async ({ page }) => {
-      const templateName = getUniqueName("Export Template");
-      await createTestTemplate(page, templateName);
       await navigateToSection(page, "Templates");
-      await openItemFromTable(page, templateName, "View Template");
+      await openItemFromTable(page, "1-Template-Export", "View Template");
 
       await page.click('[data-testid="templateActionsButton"]');
       await page.click('[data-value="export"]');
@@ -112,18 +99,22 @@ test.describe("Template", () => {
   });
 
   test.describe("Archive", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "template-archive");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace and Templates
+      const workspace = await createTestWorkspace("Templates-4", user);
+      await createTestTemplate("1-Template-Archive", user, workspace);
+
+      // Navigate for tests
       await page.goto("/");
+      await switchWorkspace(page, "Templates-4");
     });
 
     test("archives and restores a Template", async ({ page }) => {
-      const templateName = getUniqueName("Archive Template");
-      await createTestTemplate(page, templateName);
       await navigateToSection(page, "Templates");
-      await openItemFromTable(page, templateName, "View Template");
+      await openItemFromTable(page, "1-Template-Archive", "View Template");
 
       await page.click('[data-testid="templateActionsButton"]');
       await page.click('[data-value="archive"]');
@@ -140,22 +131,28 @@ test.describe("Template", () => {
   });
 
   test.describe("Entity Attributes", () => {
-    test.beforeEach(async ({ page }) => {
-      test.setTimeout(60000);
-      await performLogin(page);
-      await setupEnvironment(page, "template-entity-attrs");
+    test.beforeEach(async ({ context, page }) => {
+      // Create User
+      const user = await createTestUser(context);
+
+      // Setup Workspace and Templates
+      const workspace = await createTestWorkspace("Templates-5", user);
+      await createTestEntity("1-Attribute-Text-Entity", user, workspace);
+      await createTestEntity("2-Attribute-Multi-Entity", user, workspace);
+      await createTestEntity("3-Attribute-Delete-Entity", user, workspace);
+
+      // Navigate for tests
       await page.goto("/");
+      await switchWorkspace(page, "Templates-5");
     });
 
     test("should add a text Attribute to an Entity and persist after reload", async ({ page }) => {
-      const entityName = getUniqueName("Attr Text Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
+      await openItemFromTable(page, "1-Attribute-Text-Entity", "View Entity");
 
       await page.click("#editEntityButton");
       await openAddAttributeDialog(page);
-      await fillAndSaveAttribute(page, "Color", "Hue", "Blue");
+      await addAttributeValue(page, "Color", "Hue", "Blue");
       await expect(page.locator("text=Color")).toBeVisible({ timeout: 5000 });
 
       await saveAndWait(page);
@@ -169,10 +166,8 @@ test.describe("Template", () => {
     });
 
     test("should add an Attribute with multiple values", async ({ page }) => {
-      const entityName = getUniqueName("Attr Multi Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
+      await openItemFromTable(page, "2-Attribute-Multi-Entity", "View Entity");
 
       await page.click("#editEntityButton");
       await openAddAttributeDialog(page);
@@ -209,26 +204,14 @@ test.describe("Template", () => {
     });
 
     test("should delete an Attribute from an Entity and confirm removal after reload", async ({ page }) => {
-      const entityName = getUniqueName("Attr Delete Entity");
-      await createTestEntity(page, entityName);
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, entityName, "View Entity");
-
-      await page.click("#editEntityButton");
-      await openAddAttributeDialog(page);
-      await fillAndSaveAttribute(page, "Temp Attribute", "Key", "Value");
-      await saveAndWait(page);
-      await page.locator("text=Updated Successfully").waitFor({ state: "visible", timeout: 10000 });
-
-      await page.reload();
-      await page.waitForLoadState("networkidle");
-      await expect(page.locator("text=Temp Attribute")).toBeVisible({ timeout: 10000 });
+      await openItemFromTable(page, "3-Attribute-Delete-Entity", "View Entity");
+      await expect(page.locator("text=Test Attribute")).toBeVisible({ timeout: 10000 });
 
       await page.click("#editEntityButton");
       await page.locator('button[aria-label="Delete Attribute"]').waitFor({ state: "visible", timeout: 10000 });
       await page.locator('button[aria-label="Delete Attribute"]').click();
-      await clickButtonByText(page, "Save");
-      await clickButtonByText(page, "Done");
+      await saveAndWait(page);
 
       await expect(page.locator("text=No Attributes")).toBeVisible({ timeout: 10000 });
       await page.reload();

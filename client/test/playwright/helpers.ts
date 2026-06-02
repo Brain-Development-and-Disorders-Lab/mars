@@ -1,127 +1,262 @@
 // Playwright components
-import { Page } from "@playwright/test";
+import { BrowserContext, Page } from "@playwright/test";
 
 // Access environment variables
 import "dotenv/config";
 
-// Locator variables
+// Server functions
+import { connect, disconnect } from "../../../server/src/connectors/database";
+import { setupDatabase, teardownDatabase } from "../../../server/test/helpers";
+import { getAuth } from "../../../server/test/helpers";
+
+// Models
+import { Entities } from "../../../server/src/models/Entities";
+import { Projects } from "../../../server/src/models/Projects";
+import { Templates } from "../../../server/src/models/Templates";
+import { Workspaces } from "../../../server/src/models/Workspaces";
+import { User } from "../../../server/src/models/User";
+
+// Custom types
+import { IAttribute, IEntity, IProject, IWorkspace, ResponseData } from "../../../types";
+
+// Utility functions
+import dayjs from "dayjs";
+
+// Variables
 const TABLE_CONTAINER = ".data-table-scroll-container";
 
-// Server functions
-import { setupDatabase, teardownDatabase } from "../../../server/test/util";
+/**
+ * Create an Entity for use in testing
+ * @param {string} name The name of the Entity to create
+ * @param {string} owner The owner of the Entity
+ * @param {string} workspace The _id of the Workspace to contain the Entity
+ */
+export const createTestEntity = async (name: string, owner: string, workspace: string): Promise<void> => {
+  await connect();
+  const entity: IEntity = {
+    archived: false,
+    name: name,
+    created: dayjs("2023-10-01").toISOString(),
+    owner: owner,
+    description: "Test Entity",
+    relationships: [],
+    projects: [],
+    attributes: [
+      {
+        _id: "aTest01",
+        archived: false,
+        timestamp: dayjs("2023-10-01").toISOString(),
+        name: "Test Attribute",
+        owner: owner,
+        description: "Test Description",
+        values: [
+          { _id: "vTest00", name: "Test Value 00", type: "text", data: "Test Value" },
+          { _id: "vTest01", name: "Test Value 01", type: "number", data: "10" },
+        ],
+      },
+    ],
+    attachments: [],
+    history: [],
+  };
+  const result: ResponseData<string> = await Entities.create(entity);
+  if (!result.success) {
+    await disconnect();
+    throw new Error("Could not create Entity");
+  }
+
+  // Add the Entity to the Workspace
+  await Workspaces.addEntity(workspace, result.data);
+  await disconnect();
+};
 
 /**
- * Create a basic Entity via the create wizard
+ * Create a Project for use in testing
+ * @param {string} name The name of the Project to create
+ * @param {string} owner The owner of the Project
+ * @param {string} workspace The _id of the Workspace to contain the Project
  */
-export async function createTestEntity(page: Page, entityName: string): Promise<void> {
-  await page.goto("/create/entity");
-  await page.locator("[data-testid='create-entity-name']").waitFor({ state: "visible", timeout: 10000 });
-  await page.locator("[data-testid='create-entity-name']").fill(entityName);
-  await page.locator('input[type="date"]').fill("2023-10-01");
-  await page.locator("[data-testid='create-entity-description']").fill("Test entity");
-  await page.click("[data-testid='create-entity-continue']");
-  await page.click("[data-testid='create-entity-continue']");
-  await page.click("[data-testid='create-entity-finish']");
-  await page.waitForURL(/\/entities/, { timeout: 10000 });
-}
+export const createTestProject = async (name: string, owner: string, workspace: string): Promise<void> => {
+  await connect();
+  const project: IProject = {
+    name: name,
+    description: "Test Project",
+    owner: owner,
+    created: dayjs("2023-10-01").toISOString(),
+    archived: false,
+    collaborators: [],
+    entities: [],
+    history: [],
+  };
+  const result: ResponseData<string> = await Projects.create(project);
+  if (!result.success) {
+    await disconnect();
+    throw new Error("Could not create Project");
+  }
+
+  // Add the Project to the Workspace
+  await Workspaces.addProject(workspace, result.data);
+  await disconnect();
+};
 
 /**
- * Create a basic Template via the create form with one text value
+ * Create a Template for use in testing
+ * @param {string} name The name of the Template to create
+ * @param {string} owner The owner of the Template
+ * @param {string} workspace The _id of the Workspace to contain the Template
  */
-export async function createTestTemplate(page: Page, templateName: string): Promise<void> {
-  await page.goto("/create/template");
-  await page.locator('input[placeholder="Name"]').waitFor({ state: "visible", timeout: 10000 });
-  await page.locator('input[placeholder="Name"]').fill(templateName);
-  await page.locator("[data-testid='create-template-description']").first().click();
-  await page.locator("[data-testid='create-template-description']").first().fill("Test template description");
-  await page.click("#addValueRowButton");
-  await page.locator('input[placeholder="Enter name"]').fill("Test Value");
-  await page.waitForTimeout(500);
-  await clickButtonByText(page, "Finish");
-  await page.waitForURL(/\/templates/, { timeout: 10000 });
-}
+export const createTestTemplate = async (name: string, owner: string, workspace: string): Promise<void> => {
+  await connect();
+  const template: IAttribute = {
+    archived: false,
+    name: name,
+    description: "Test Attribute",
+    owner: owner,
+    values: [
+      { _id: "vTest00", name: "Test Value 00", type: "text", data: "Test Value" },
+      { _id: "vTest01", name: "Test Value 01", type: "number", data: "10" },
+    ],
+  };
+  const result: ResponseData<string> = await Templates.create(template);
+  if (!result.success) {
+    await disconnect();
+    throw new Error("Could not create Template");
+  }
+
+  // Add the Template to the Workspace
+  await Workspaces.addTemplate(workspace, result.data);
+  await disconnect();
+};
+
+/**
+ * Create a new Workspace for a specific test or test suite
+ * @param {string} name Workspace name
+ * @param {string} owner Workspace owner
+ * @return {Promise<string>} Created Workspace identifier
+ */
+export const createTestWorkspace = async (name: string, owner: string): Promise<string> => {
+  await connect();
+  const workspace: IWorkspace = {
+    name: name,
+    description: "Test Workspace",
+    owner: owner,
+    collaborators: [],
+    public: false,
+    entities: [],
+    projects: [],
+    templates: [],
+    activity: [],
+  };
+
+  const result: ResponseData<string> = await Workspaces.create(workspace);
+  if (!result.success) {
+    await disconnect();
+    throw new Error("Could not create Workspace");
+  }
+
+  await disconnect();
+  return result.data;
+};
+
+/**
+ * Create a new user account using the default test user information
+ * @param page
+ * @return {string} `userId` of the created test user
+ */
+export const createTestUser = async (context: BrowserContext): Promise<string> => {
+  await connect();
+
+  // Setup User
+  const ctx = await getAuth().$context;
+  const testUtils = ctx.test;
+
+  const user = testUtils.createUser({
+    email: process.env.TEST_USER_EMAIL,
+    name: "Test User",
+  });
+  await testUtils.saveUser(user);
+
+  const cookies = await testUtils.getCookies({
+    userId: user.id,
+    domain: "127.0.0.1",
+  });
+  await context.addCookies(cookies);
+  await disconnect();
+
+  return user.id;
+};
+
+export const getTestUser = async (): Promise<string> => {
+  // Get the new user and return `userId`
+  await connect();
+  const result: ResponseData<string> = await User.getByEmail(process.env.TEST_USER_EMAIL);
+  if (!result.success) {
+    await disconnect();
+    throw new Error(" Could not locate User: " + result.message);
+  }
+
+  await disconnect();
+  return result.data;
+};
 
 /**
  * Perform login using information stored in environment variables
  * @param page
  */
-export async function performLogin(page: Page): Promise<void> {
+export const performLogin = async (page: Page): Promise<void> => {
   await page.goto("/login");
   await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL);
   await page.locator("#userPasswordInput").fill(process.env.TEST_USER_PASSWORD);
   await page.locator("#userLoginButton").click();
   await page.waitForSelector("#workspaceSwitcherDesktop");
-}
-
-/**
- * Create a new Workspace for a specific test or test suite
- * @param page
- */
-export async function setupEnvironment(page: Page, testName: string): Promise<void> {
-  await page.goto("/create/workspace");
-  await page.locator("[data-testid='create-workspace-name']").waitFor({ state: "visible", timeout: 10000 });
-  await page.locator("[data-testid='create-workspace-name']").fill(`Test Workspace - ${testName}`);
-  await page.locator("[data-testid='create-workspace-description']").fill(`Test Workspace for test: ${testName}`);
-  await page.click("[data-testid='create-workspace-button']");
-  await page.waitForURL("/", { timeout: 10000 });
-}
+};
 
 /**
  * Reset function used prior to running tests and after test completion. Clears and resets the database
  * state, creates new user account with standard test credentials
  * @param page
  */
-export async function resetEnvironment(page: Page): Promise<void> {
+export const resetWorkspace = async (page: Page): Promise<void> => {
   // Setup database once before all tests
   await teardownDatabase();
   await setupDatabase();
 
-  // Access the baseURL from the config file if needed
+  // Clear all session and local storage
   await page.goto("/login");
   await page.evaluate(() => {
     sessionStorage.clear();
     localStorage.clear();
   });
   await page.waitForLoadState("networkidle");
+};
 
-  // Create user account
-  await page.locator("#createAccountButton").waitFor({ state: "visible", timeout: 10000 });
-  await page.click("#createAccountButton");
+/**
+ * Switch between Workspaces using the `WorkspaceSwitcher` component
+ * @param page
+ * @param workspace Name of the Workspace to switch to
+ */
+export const switchWorkspace = async (page: Page, workspace: string): Promise<void> => {
+  await page.click(`#workspaceSwitcherDesktop`);
+  await page.locator(`[role="menuitem"]:has-text("${workspace}")`).first().click();
   await page.waitForLoadState("networkidle");
-
-  // Populate user information (use environment variables for specific details)
-  await page.locator("#userFirstNameInput").fill("User");
-  await page.locator("#userLastNameInput").fill("Test");
-  await page.locator("#userEmailInput").fill(process.env.TEST_USER_EMAIL || "test@test.com");
-  await selectDropdownOption(page, '[data-testid="affiliation-select-trigger"]', "No Affiliation");
-  await page.locator("#userPasswordInputInitial").fill(process.env.TEST_USER_PASSWORD || "test_password123");
-  await page.locator("#userPasswordInputConfirm").fill(process.env.TEST_USER_PASSWORD || "test_password123");
-
-  // Finalize account creation
-  await page.locator("#createAccountButton").click();
-
-  // Create a Workspace
-  await page.locator("#dialogWorkspaceName").fill("Test Workspace");
-  await page.locator("#dialogWorkspaceCreateButton").click();
-}
+};
 
 /**
  * Navigate to a section (Entities, Projects, Templates)
  */
-export async function navigateToSection(page: Page, section: "Entities" | "Projects" | "Templates"): Promise<void> {
+export const navigateToSection = async (page: Page, section: "Entities" | "Projects" | "Templates"): Promise<void> => {
   await page.goto("/");
   await page.click(`button:has-text("${section}")`);
   await page.waitForLoadState("networkidle");
-}
+};
 
 /**
  * Find and click a table row by text, then click the view button
  */
-export async function openItemFromTable(
+export const openItemFromTable = async (
   page: Page,
   itemName: string,
   viewButtonLabel: "View Entity" | "View Project" | "View Template",
-): Promise<void> {
+): Promise<void> => {
   const table = page.locator(TABLE_CONTAINER);
   await table.waitFor({ state: "visible", timeout: 5000 });
 
@@ -182,39 +317,39 @@ export async function openItemFromTable(
     await buttons.first().scrollIntoViewIfNeeded();
     await buttons.first().click();
   }
-}
+};
 
 /**
  * Save changes and wait for completion
  */
-export async function saveAndWait(page: Page): Promise<void> {
+export const saveAndWait = async (page: Page): Promise<void> => {
   await clickButtonByText(page, "Save");
   await page.locator('button:has-text("Done")').waitFor({ state: "visible", timeout: 5000 });
   await clickButtonByText(page, "Done");
   await page.locator('button:has-text("Edit")').waitFor({ state: "visible", timeout: 10000 });
   await page.waitForLoadState("networkidle");
-}
+};
 
 /**
  * Select an option from a dropdown
  */
-export async function selectDropdownOption(page: Page, triggerSelector: string, optionText: string): Promise<void> {
+export const selectDropdownOption = async (page: Page, triggerSelector: string, optionText: string): Promise<void> => {
   await page.click(triggerSelector);
   await page.locator(`[role="option"]:has-text("${optionText}")`).first().click();
-}
+};
 
 /**
  * Generate a unique name with a short random suffix
  */
-export function getUniqueName(baseName: string): string {
+export const getUniqueName = (baseName: string): string => {
   const shortId = Math.random().toString(36).substring(2, 6);
   return `${baseName} ${shortId}`;
-}
+};
 
 /**
  * Wait for a button to be enabled (not disabled)
  */
-export async function waitForButtonEnabled(page: Page, selector: string, timeout = 10000): Promise<void> {
+export const waitForButtonEnabled = async (page: Page, selector: string, timeout = 10000): Promise<void> => {
   await page.waitForFunction(
     (sel) => {
       const btn = document.querySelector(sel);
@@ -223,12 +358,12 @@ export async function waitForButtonEnabled(page: Page, selector: string, timeout
     selector,
     { timeout },
   );
-}
+};
 
 /**
  * Click a button by text content
  */
-export async function clickButtonByText(page: Page, text: string, timeout = 10000): Promise<void> {
+export const clickButtonByText = async (page: Page, text: string, timeout = 10000): Promise<void> => {
   let button = page.locator(`button:has-text("${text}")`);
   const count = await button.count();
 
@@ -248,12 +383,50 @@ export async function clickButtonByText(page: Page, text: string, timeout = 1000
 
   await button.waitFor({ state: "visible", timeout });
   await button.click();
-}
+};
 
 /**
  * Wait for and click a button, ensuring it's enabled first
  */
-export async function clickButtonWhenEnabled(page: Page, selector: string, timeout = 10000): Promise<void> {
+export const clickButtonWhenEnabled = async (page: Page, selector: string, timeout = 10000): Promise<void> => {
   await waitForButtonEnabled(page, selector, timeout);
   await page.click(selector);
-}
+};
+
+/**
+ * Utility function to open the `AddAttributeDialog` component
+ * @param page
+ */
+export const openAddAttributeDialog = async (page: Page): Promise<void> => {
+  await page.click("#addAttributeDialogButton");
+  await page.locator("[data-testid='create-attribute-name']").waitFor({ state: "visible", timeout: 10000 });
+};
+
+/**
+ * Add a new Value to an existing Attribute
+ * @param page
+ * @param attributeName The name fo the Attribute to add a Value to
+ * @param valueName The name of the new Value
+ * @param valueData The data contained in the new Value
+ */
+export const addAttributeValue = async (
+  page: Page,
+  attributeName: string,
+  valueName: string,
+  valueData: string,
+): Promise<void> => {
+  await page.locator("[data-testid='create-attribute-name']").fill(attributeName);
+  await page.locator("[data-testid='create-attribute-description']").fill("Attribute description");
+  await page.click("#addValueRowButton");
+  await page.locator('input[placeholder="Enter name"]').fill(valueName);
+  await page.locator('input[placeholder="Enter text"]').fill(valueData);
+  await page.waitForFunction(
+    () => {
+      const btn = document.querySelector('[data-testid="save-add-attribute-button"]') as HTMLButtonElement;
+      return btn && !btn.disabled;
+    },
+    { timeout: 5000 },
+  );
+  await page.locator("[data-testid='save-add-attribute-button']").click();
+  await page.locator("#addAttributeDialogButton").waitFor({ state: "visible", timeout: 10000 });
+};
