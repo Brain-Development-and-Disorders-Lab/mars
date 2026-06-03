@@ -279,8 +279,13 @@ export class Search {
 
       // Handle case where key is `$regex`
       if (_.isString(key) && key === "$regex" && key !== value) {
-        const [pattern, flags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
-        value = new RegExp(pattern, flags);
+        const [pattern, rawFlags] = value.slice(value.startsWith("/") ? 1 : 0).split("/");
+        value = new RegExp(pattern, (rawFlags ?? "").replace(/[^imx]/g, ""));
+      }
+
+      // Handle case where key is `$options` (MongoDB-native regex flag field)
+      if (_.isString(key) && key === "$options" && _.isString(value)) {
+        value = value.replace(/[^imx]/g, "");
       }
 
       return value;

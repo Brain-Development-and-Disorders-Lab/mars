@@ -3,15 +3,6 @@ import { BoxProps } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
-// Utility type to standardize server response objects
-export type ServerResponse<T> = {
-  success: boolean;
-  message: string;
-  data: T;
-};
-
-export type ScannerStatus = "disconnected" | "connected" | "error";
-
 export namespace State.Entity {
   type Start = {
     location: "none" | "start" | "relationships" | "attributes";
@@ -322,17 +313,6 @@ export type EntityHistory = {
   attachments: IGenericItem[];
 };
 
-export type EntityImport = {
-  // Specific details
-  name: string;
-  created: string;
-  owner: string;
-  description: string;
-  projects: string;
-  relationships: IRelationship[];
-  attributes: AttributeModel[];
-};
-
 // Import review summary for Entities being imported
 export type EntityImportReview = {
   name: string;
@@ -353,28 +333,6 @@ export type IColumnMapping = Record<string, any>;
 // Import options for CSV files
 export type CSVImportOptions = {
   counters: { field: string; _id: string }[];
-};
-
-// Import data for CSV files, including mappings and options
-export type CSVImportData = {
-  columnMapping: IColumnMapping;
-  options: CSVImportOptions;
-  file: File;
-};
-
-// Import options for JSON files
-export type JSONImportOptions = {
-  project: string; // Project to add all Entities
-  attributes: AttributeModel[]; // Created attrbutes
-};
-
-// Attachment data
-export type AttachmentData = {
-  _id: string;
-  length: number;
-  chunkSize: number;
-  uploadDate: string;
-  filename: string;
 };
 
 // Counter types
@@ -426,11 +384,6 @@ export type ContentProps = {
   children: React.ReactElement | React.ReactElement[];
   isError?: boolean;
   isLoaded?: boolean;
-};
-
-// Page component
-export type PageProps = {
-  children: React.ReactElement | React.ReactElement[];
 };
 
 // `AlertDialog` component
@@ -489,24 +442,10 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// `RichTextEditor` props
-export interface RichTextEditorProps extends Omit<BoxProps, "onChange"> {
-  value: string;
-  onChange?: (value: string) => void;
-  readOnly?: boolean;
-}
-
 // `PreviewDialog` props
 export type PreviewDialogProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
-};
-
-// `PreviewDialog` support type
-export type PreviewDialogSupport = {
-  document: boolean;
-  image: boolean;
-  sequence: boolean;
 };
 
 // `ImportDialog` props
@@ -515,13 +454,11 @@ export type ImportDialogProps = {
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-export type ExportDataType = "entity" | "entities" | "project" | "template";
-
 // `ExportDialog` props
 export type ExportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
-  dataType: ExportDataType;
+  dataType: "entity" | "entities" | "project" | "template";
   // Single-item export (entity, project, or template)
   id?: string;
   // Multi-entity export; undefined means export all entities
@@ -657,11 +594,10 @@ export type IconNames =
 // SearchQuery types
 export type SearchCombinator = "and" | "or";
 export type SearchField = "name" | "description" | "projects" | "relationships" | "attributes";
-export type SearchAttributeDataOperator = "contains" | "does not contain" | "equals" | ">" | "<";
 
 export interface SearchAttributeValue {
   type: IValueType;
-  operator: SearchAttributeDataOperator;
+  operator: "contains" | "does not contain" | "equals" | ">" | "<";
   data: string;
 }
 
@@ -809,9 +745,7 @@ export type IContentMetrics = {
 };
 
 export type EntityMetrics = IContentMetrics;
-
 export type ProjectMetrics = IContentMetrics;
-
 export type TemplateMetrics = IContentMetrics;
 
 export type WorkspaceMetrics = {
@@ -851,10 +785,3 @@ export type AdminUser = {
   banned: boolean;
   lastLogin: string;
 };
-
-export interface Html5QrcodeScannerConfig {
-  fps?: number;
-  qrbox?: number;
-  aspectRatio?: number;
-  disableFlip?: boolean;
-}

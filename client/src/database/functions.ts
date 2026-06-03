@@ -2,12 +2,12 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Custom types
-import { ServerResponse } from "@types";
+import { ResponseData } from "@types";
 
 // Get the URL of the database
 import { STATIC_URL } from "src/variables";
 
-export const requestStatic = async <T>(path: string, options?: AxiosRequestConfig): Promise<ServerResponse<T>> => {
+export const requestStatic = async <T>(path: string, options?: AxiosRequestConfig): Promise<ResponseData<T>> => {
   // Merge in options if specified
   const requestOptions: AxiosRequestConfig = {
     ...options,
