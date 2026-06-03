@@ -151,6 +151,7 @@ const SearchBox = () => {
   `;
   const [runTranslateSearch] = useLazyQuery<{ translateSearch: string }>(TRANSLATE_SEARCH, {
     fetchPolicy: "network-only",
+    errorPolicy: "all",
   });
 
   const runSearch = async () => {
@@ -176,6 +177,7 @@ const SearchBox = () => {
           closable: true,
         });
         setIsSearching(false);
+        setIsError(true);
         return;
       }
 
@@ -314,7 +316,14 @@ const SearchBox = () => {
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}
             >
-              <Flex p={"1"} bg={"gray.100"} roundedTop={"md"} direction={"column"} gap={"1"}>
+              <Flex
+                p={"1"}
+                bg={"gray.100"}
+                roundedTop={"md"}
+                roundedBottom={!isSearching && hasSearched && results.length === 0 ? "md" : undefined}
+                direction={"column"}
+                gap={"1"}
+              >
                 <Flex width={"100%"} direction={"row"} gap={"1"} align={"center"}>
                   {isSearching ? (
                     <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} p={"2"}>
@@ -356,67 +365,69 @@ const SearchBox = () => {
                 </Flex>
               </Flex>
 
-              <Flex p={"1"} gap={"1"} py={"1"} roundedTop={"md"}>
-                {isSearching ? (
+              {isSearching && (
+                <Flex p={"1"} gap={"1"} py={"1"} roundedTop={"md"}>
                   <Stack w={"100%"}>
                     <Skeleton height={"30px"} />
                     <Skeleton height={"30px"} />
                     <Skeleton height={"30px"} />
                   </Stack>
-                ) : (
-                  hasSearched &&
-                  !isError && (
-                    <Stack gap={"1"} separator={<Separator />} w={"100%"}>
-                      {results.length > 0 ? (
-                        results.slice(0, MAX_RESULTS).map((result: IGenericItem) => {
-                          const resultType = (result as IGenericItem & { __typename?: string }).__typename || "Entity";
-                          return (
-                            <Flex
-                              key={result._id}
-                              direction={"row"}
-                              gap={"1"}
-                              w={"100%"}
-                              justify={"space-between"}
-                              align={"center"}
-                              p={"0"}
-                              pl={"2"}
-                            >
-                              <Flex direction={"column"} gap={"0.5"}>
-                                <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
-                                  {result.name}
+                </Flex>
+              )}
+
+              {/* Conditionally show search results */}
+              {hasSearched && results.length > 0 && !isError && (
+                <Flex p={"1"} gap={"1"} py={"1"} roundedTop={"md"}>
+                  <Stack gap={"1"} separator={<Separator />} w={"100%"}>
+                    {results.length > 0 ? (
+                      results.slice(0, MAX_RESULTS).map((result: IGenericItem) => {
+                        const resultType = (result as IGenericItem & { __typename?: string }).__typename || "Entity";
+                        return (
+                          <Flex
+                            key={result._id}
+                            direction={"row"}
+                            gap={"1"}
+                            w={"100%"}
+                            justify={"space-between"}
+                            align={"center"}
+                            p={"0"}
+                            pl={"2"}
+                          >
+                            <Flex direction={"column"} gap={"0.5"}>
+                              <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
+                                {result.name}
+                              </Text>
+                              <Flex direction={"row"} gap={"0.5"} align={"center"}>
+                                <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.color.icon} />
+                                <Text fontSize={"2xs"} color={"gray.500"}>
+                                  {resultType}
                                 </Text>
-                                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                  <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.color.icon} />
-                                  <Text fontSize={"2xs"} color={"gray.500"}>
-                                    {resultType}
-                                  </Text>
-                                </Flex>
                               </Flex>
-                              <Button
-                                size="2xs"
-                                mx={"2"}
-                                variant="subtle"
-                                colorPalette="gray"
-                                aria-label={`View ${resultType}`}
-                                onClick={() => handleResultClick(result._id, resultType)}
-                              >
-                                View
-                                <Icon name={"a_right"} color={"black"} size={"xs"} />
-                              </Button>
                             </Flex>
-                          );
-                        })
-                      ) : (
-                        <Flex m={"2"}>
-                          <Text fontWeight={"semibold"} fontSize={"xs"}>
-                            No results found.
-                          </Text>
-                        </Flex>
-                      )}
-                    </Stack>
-                  )
-                )}
-              </Flex>
+                            <Button
+                              size="2xs"
+                              mx={"2"}
+                              variant="subtle"
+                              colorPalette="gray"
+                              aria-label={`View ${resultType}`}
+                              onClick={() => handleResultClick(result._id, resultType)}
+                            >
+                              View
+                              <Icon name={"a_right"} color={"black"} size={"xs"} />
+                            </Button>
+                          </Flex>
+                        );
+                      })
+                    ) : (
+                      <Flex m={"2"}>
+                        <Text fontWeight={"semibold"} fontSize={"xs"}>
+                          No results found.
+                        </Text>
+                      </Flex>
+                    )}
+                  </Stack>
+                </Flex>
+              )}
             </Box>
           )}
         </Box>

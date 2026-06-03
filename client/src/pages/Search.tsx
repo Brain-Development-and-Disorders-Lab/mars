@@ -147,6 +147,7 @@ const Search = () => {
   `;
   const [runTranslateSearch] = useLazyQuery<{ translateSearch: string }>(TRANSLATE_SEARCH, {
     fetchPolicy: "network-only",
+    errorPolicy: "all",
   });
 
   const runSearch = async () => {
@@ -175,6 +176,7 @@ const Search = () => {
           closable: true,
         });
         setIsSearching(false);
+        setHasSearched(false);
         return;
       }
 
