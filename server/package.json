@@ -77,6 +77,6 @@
     "word-wrap": "^1.2.4"
   },
   "resolutions": {
-    "kysely": "0.28.1"
+    "kysely": "0.28.17"
   }
 }

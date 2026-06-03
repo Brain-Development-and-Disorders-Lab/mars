@@ -16,6 +16,7 @@
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "moduleResolution": "node",
+    "types": ["react", "react-dom", "node"],
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
