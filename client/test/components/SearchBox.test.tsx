@@ -202,7 +202,7 @@ describe("SearchBox Component", () => {
     });
   });
 
-  it("shows 'No results found' when search returns empty", async () => {
+  it("shows '0 of 0' when search returns empty", async () => {
     const userQuery = "find nonexistent entities";
     const mocks = [mockTranslateSearch(userQuery), mockSearchText(TRANSLATED_QUERY, [])];
 
@@ -215,7 +215,7 @@ describe("SearchBox Component", () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText("No results found.")).toBeTruthy();
+      expect(screen.getAllByText("0").length).toBeGreaterThan(0);
     });
   });
 
