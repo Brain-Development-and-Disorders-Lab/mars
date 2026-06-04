@@ -209,7 +209,7 @@ const Search = () => {
         });
         setIsError(true);
       } else {
-        posthog.capture("search_performed", {
+        posthog.capture("client.search.performed", {
           search_type: "ai",
           result_count: results.data.search.length,
           show_archived: showArchived,
@@ -263,7 +263,7 @@ const Search = () => {
       });
       setIsError(true);
     } else if (results.data.search) {
-      posthog.capture("search_performed", {
+      posthog.capture("client.search.performed", {
         search_type: "text",
         result_count: results.data.search.length,
         show_archived: showArchived,
@@ -523,7 +523,7 @@ const Search = () => {
       });
       setIsError(true);
     } else if (results.data.search) {
-      posthog.capture("search_performed", {
+      posthog.capture("client.search.performed", {
         search_type: "builder",
         result_count: results.data.search.length,
         show_archived: false,

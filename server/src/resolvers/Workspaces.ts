@@ -202,7 +202,7 @@ export const WorkspacesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_create_workspace",
+          event: "workspace.created",
         });
       }
 
@@ -247,7 +247,7 @@ export const WorkspacesResolvers = {
         if (process.env.DISABLE_CAPTURE !== "true") {
           PostHogClient?.capture({
             distinctId: context.user,
-            event: "server_update_workspace",
+            event: "workspace.updated",
           });
         }
 

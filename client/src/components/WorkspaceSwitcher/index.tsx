@@ -172,7 +172,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Logout` button
    */
   const handleLogoutClick = async () => {
-    posthog.capture("logout");
+    posthog.capture("client.auth.logout");
     posthog.reset();
     await auth.signOut();
     navigate("/login");

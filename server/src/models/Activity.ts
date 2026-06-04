@@ -45,7 +45,7 @@ export class Activity {
       ...activity,
     };
 
-    logger.debug("Activity:", activityModel.type, activityModel.target._id);
+    logger.debug({ type: activityModel.type, targetId: activityModel.target._id }, "Activity");
 
     const response = await getDatabase().collection<ActivityModel>(ACTIVITY_COLLECTION).insertOne(activityModel);
 

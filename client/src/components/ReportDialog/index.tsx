@@ -74,7 +74,7 @@ const ReportDialog = (props: ReportDialogProps) => {
         consoleErrors: getRecentErrors(),
       },
     });
-    posthog.capture("bug_report_submitted");
+    posthog.capture("client.bug.report_submitted");
     setDescription("");
     setOpen(false);
     toaster.create({

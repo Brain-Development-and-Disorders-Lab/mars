@@ -200,7 +200,7 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_create_template",
+          event: "template.created",
         });
       }
 
@@ -268,7 +268,7 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_update_template",
+          event: "template.updated",
         });
       }
 
@@ -308,7 +308,7 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_archive_template",
+          event: "template.archived",
         });
       }
 

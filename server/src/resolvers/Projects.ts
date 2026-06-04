@@ -11,8 +11,8 @@ import { Activity } from "@models/Activity";
 import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
 
-// Posthog
-import { PostHogClient } from "@lib/posthog";
+// Audit logging
+import { audit } from "@lib/audit";
 
 export const ProjectsResolvers = {
   Query: {
@@ -30,7 +30,7 @@ export const ProjectsResolvers = {
 
       // Filter by ownership and Workspace membership, sort by most recent first
       const projects = await Projects.all();
-      return projects
+      const result = projects
         .filter((project) => {
           if (args.archived === true) {
             return true;
@@ -46,6 +46,8 @@ export const ProjectsResolvers = {
           return timeB - timeA;
         })
         .slice(0, args.limit);
+      audit("project.listed", context.user, { workspaceId: context.workspace, count: result.length });
+      return result;
     },
 
     // Retrieve one Project by _id
@@ -71,6 +73,7 @@ export const ProjectsResolvers = {
       }
 
       if (_.includes(workspace.projects, project._id)) {
+        audit("project.read", context.user, { projectId: project._id, workspaceId: context.workspace });
         return project;
       } else {
         throw new GraphQLError("You do not have permission to access this Project", {
@@ -106,7 +109,13 @@ export const ProjectsResolvers = {
       }
 
       if (_.includes(workspace.projects, args._id)) {
-        return await Projects.export(args._id, args.format, args.fields, args.includeHistory ?? false);
+        const exportResult = await Projects.export(args._id, args.format, args.fields, args.includeHistory ?? false);
+        audit("project.exported", context.user, {
+          projectId: args._id,
+          workspaceId: context.workspace,
+          format: args.format,
+        });
+        return exportResult;
       } else {
         throw new GraphQLError("You do not have permission to access this Project", {
           extensions: {
@@ -141,7 +150,13 @@ export const ProjectsResolvers = {
       }
 
       if (_.includes(workspace.projects, args._id)) {
-        return await Projects.exportEntities(args._id, args.format);
+        const exportResult = await Projects.exportEntities(args._id, args.format);
+        audit("project.exported", context.user, {
+          projectId: args._id,
+          workspaceId: context.workspace,
+          format: args.format,
+        });
+        return exportResult;
       } else {
         throw new GraphQLError("You do not have permission to access this Project", {
           extensions: {
@@ -215,12 +230,8 @@ export const ProjectsResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
-      // Capture event
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_create_project",
-        });
+      if (result.success) {
+        audit("project.created", context.user, { projectId: result.data, workspaceId: context.workspace });
       }
 
       return result;
@@ -263,12 +274,8 @@ export const ProjectsResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
-      // Capture event
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_update_project",
-        });
+      if (result.success) {
+        audit("project.updated", context.user, { projectId: project._id, workspaceId: context.workspace });
       }
 
       return result;
@@ -302,14 +309,6 @@ export const ProjectsResolvers = {
         });
       }
 
-      // Capture event
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_archive_project",
-        });
-      }
-
       if (project.archived === args.state) {
         return {
           success: true,
@@ -333,6 +332,11 @@ export const ProjectsResolvers = {
 
           // Add Activity to Workspace
           await Workspaces.addActivity(context.workspace, activity.data);
+          audit("project.archived", context.user, {
+            projectId: project._id,
+            workspaceId: context.workspace,
+            archived: args.state,
+          });
         }
 
         return result;
@@ -380,6 +384,11 @@ export const ProjectsResolvers = {
         }
       }
 
+      audit("project.archived", context.user, {
+        workspaceId: context.workspace,
+        count: archiveCounter,
+        archived: args.state,
+      });
       return {
         success: args.toArchive.length === archiveCounter,
         message:
@@ -434,6 +443,7 @@ export const ProjectsResolvers = {
 
         // Add Activity to Workspace
         await Workspaces.addActivity(context.workspace, activity.data);
+        audit("project.deleted", context.user, { projectId: project._id, workspaceId: context.workspace });
       }
 
       return result;

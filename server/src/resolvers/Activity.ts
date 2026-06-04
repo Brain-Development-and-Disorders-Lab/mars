@@ -68,7 +68,7 @@ export const ActivityResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_create_activity",
+          event: "activity.created",
         });
       }
 

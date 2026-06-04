@@ -219,7 +219,7 @@ const Signup = () => {
         setIsAccountCreateLoading(false);
 
         if (result.data?.updateUser) {
-          posthog.capture("signup_complete", { method: "orcid" });
+          posthog.capture("client.auth.signup_complete", { method: "orcid" });
           toaster.create({
             title: "User Created",
             type: "success",
@@ -269,7 +269,7 @@ const Signup = () => {
           },
           onSuccess: () => {
             setIsAccountCreateLoading(false);
-            posthog.capture("signup_complete", { method: "email" });
+            posthog.capture("client.auth.signup_complete", { method: "email" });
             toaster.create({
               title: "Create Account",
               type: "success",

@@ -97,7 +97,7 @@ const ScanDialog = (props: ScanDialogProps) => {
    */
   const handleNavigate = (identifier: string) => {
     // Capture event
-    posthog.capture("scan_success", {
+    posthog.capture("client.scan.success", {
       target: identifier,
     });
 
@@ -129,7 +129,7 @@ const ScanDialog = (props: ScanDialogProps) => {
     });
 
     if (results.data && results.data.entity) {
-      posthog.capture("scan_scanner_input_success");
+      posthog.capture("client.scan.scanner_input.success");
       handleNavigate(results.data.entity._id);
     }
 
@@ -156,7 +156,7 @@ const ScanDialog = (props: ScanDialogProps) => {
     });
 
     if (results.data && results.data.entity) {
-      posthog.capture("scan_manual_input_success");
+      posthog.capture("client.scan.manual_input.success");
       handleNavigate(results.data.entity._id);
     }
 

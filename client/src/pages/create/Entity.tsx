@@ -192,7 +192,7 @@ const Entity = () => {
   }, [data]);
 
   useEffect(() => {
-    posthog?.capture("create_entity_start");
+    posthog?.capture("client.create.entity_start");
   }, [posthog]);
 
   useEffect(() => {
@@ -216,15 +216,15 @@ const Entity = () => {
 
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
-      posthog.capture("create_entity_relationships");
+      posthog.capture("client.create.entity_relationships");
       setPageState("relationships");
       setPageStep(1);
     } else if (_.isEqual("relationships", pageState)) {
-      posthog.capture("create_entity_attributes");
+      posthog.capture("client.create.entity_attributes");
       setPageState("attributes");
       setPageStep(2);
     } else if (_.isEqual("attributes", pageState)) {
-      posthog.capture("create_entity_finished");
+      posthog.capture("client.create.entity_finished");
       setIsSubmitting(true);
 
       let generatedName = name;
@@ -281,11 +281,11 @@ const Entity = () => {
 
   const onPageBack = () => {
     if (_.isEqual("relationships", pageState)) {
-      posthog.capture("create_entity_start");
+      posthog.capture("client.create.entity_start");
       setPageState("start");
       setPageStep(0);
     } else if (_.isEqual("attributes", pageState)) {
-      posthog.capture("create_entity_relationships");
+      posthog.capture("client.create.entity_relationships");
       setPageState("relationships");
       setPageStep(1);
     }

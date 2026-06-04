@@ -17,7 +17,7 @@ const Invalid = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    posthog.capture("invalid_shown");
+    posthog.capture("client.page.invalid_shown");
   }, []);
 
   return (

@@ -16,7 +16,20 @@ export type AuditEventName =
   | "admin.role_changed"
   | "admin.features_changed"
   | "admin.ban_changed"
-  | "permission.denied";
+  | "permission.denied"
+  | "entity.listed"
+  | "entity.read"
+  | "entity.created"
+  | "entity.updated"
+  | "entity.archived"
+  | "entity.exported"
+  | "project.listed"
+  | "project.read"
+  | "project.created"
+  | "project.updated"
+  | "project.archived"
+  | "project.exported"
+  | "project.deleted";
 
 export interface AuditEventProperties {
   userId?: string;
