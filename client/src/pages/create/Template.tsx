@@ -84,7 +84,7 @@ const Template = () => {
   }, [values]);
 
   useEffect(() => {
-    posthog?.capture("create_template_start");
+    posthog?.capture("client.create.template_start");
   }, [posthog]);
 
   const templateData: IAttribute = { name, owner, archived: false, description, values };
@@ -112,7 +112,7 @@ const Template = () => {
   const cancelBlockerRef = useRef(null);
 
   const onSubmit = async () => {
-    posthog?.capture("create_template_finish");
+    posthog?.capture("client.create.template_finish");
     setIsSubmitting(true);
     const response = await createTemplate({ variables: { template: templateData } });
 

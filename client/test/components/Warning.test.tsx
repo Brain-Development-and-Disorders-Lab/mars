@@ -2,7 +2,7 @@ import React from "react";
 
 // Test imports
 import { render, screen } from "@testing-library/react";
-import { expect } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 
 // Chakra UI
 import { ChakraProvider } from "@chakra-ui/react";

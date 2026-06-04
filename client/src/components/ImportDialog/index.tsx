@@ -1021,7 +1021,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     if (_.isEqual(importType, "entities")) {
       if (_.isEqual(entityInterfacePage, "upload")) {
         // Capture event
-        posthog.capture("import_continue", {
+        posthog.capture("client.import.continue", {
           importType: "entities",
           fromPage: "upload",
           toPage: "details",
@@ -1040,7 +1040,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         }
       } else if (_.isEqual(entityInterfacePage, "details")) {
         // Capture event
-        posthog.capture("import_continue", {
+        posthog.capture("client.import.continue", {
           importType: "entities",
           fromPage: "details",
           toPage: "mapping",
@@ -1066,7 +1066,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         }
 
         // Capture event
-        posthog.capture("import_continue", {
+        posthog.capture("client.import.continue", {
           importType: "entities",
           fromPage: "mapping",
           toPage: "review",
@@ -1092,7 +1092,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         }
 
         // Capture event
-        posthog.capture("import_finish", {
+        posthog.capture("client.import.finish", {
           importType: "entities",
         });
 
@@ -1108,7 +1108,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     } else if (_.isEqual(importType, "template")) {
       if (_.isEqual(templateInterfacePage, "upload")) {
         // Capture event
-        posthog.capture("import_continue", {
+        posthog.capture("client.import.continue", {
           importType: "template",
           fromPage: "upload",
           toPage: "review",
@@ -1122,7 +1122,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         setTemplateInterfacePage("review");
       } else if (_.isEqual(templateInterfacePage, "review")) {
         // Capture event
-        posthog.capture("import_finish", {
+        posthog.capture("client.import.finish", {
           importType: "template",
         });
 
@@ -1209,7 +1209,7 @@ const ImportDialog = (props: ImportDialogProps) => {
         rightButtonColor={"green"}
         rightButtonAction={async () => {
           setConfirmWarningsOpen(false);
-          posthog.capture("import_finish", { importType: "entities" });
+          posthog.capture("client.import.finish", { importType: "entities" });
           setImportLoading(true);
           if (fileType === JSON_MIME_TYPE) {
             await finishImportEntityJSON();
@@ -1483,7 +1483,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               _.includes([CSV_MIME_TYPE, XLSX_MIME_TYPE, JSON_MIME_TYPE], event.target.files[0].type)
                             ) {
                               // Capture event
-                              posthog.capture("import_upload_file", {
+                              posthog.capture("client.import.upload_file", {
                                 importType: importType,
                                 fileName: event.target.files[0].name,
                               });
@@ -1912,7 +1912,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   variant={"solid"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("import_cancelled", {
+                    posthog.capture("client.import.cancelled", {
                       importType: importType,
                     });
 

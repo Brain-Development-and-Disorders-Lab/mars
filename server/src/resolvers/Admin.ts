@@ -12,8 +12,12 @@ import { GraphQLError } from "graphql/index";
 // Models
 import { Admin } from "@models/Admin";
 
+// Audit logging
+import { audit } from "@lib/audit";
+
 const requireAdmin = (context: Context) => {
   if (context.userRole !== "admin") {
+    audit("permission.denied", context.user, { gqlOperation: "admin", errorCode: "FORBIDDEN" });
     throw new GraphQLError("You do not have permission to access this resource", {
       extensions: { code: "FORBIDDEN" },
     });
@@ -70,7 +74,11 @@ export const AdminResolvers = {
         return { success: false, message: "Invalid role" };
       }
 
-      return await Admin.setUserRole(args._id, args.role);
+      const result = await Admin.setUserRole(args._id, args.role);
+      if (result.success) {
+        audit("admin.role_changed", context.user, { targetUserId: args._id, role: args.role });
+      }
+      return result;
     },
 
     setUserFeatures: async (
@@ -79,7 +87,11 @@ export const AdminResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       requireAdmin(context);
-      return await Admin.setUserFeatures(args._id, args.features);
+      const result = await Admin.setUserFeatures(args._id, args.features);
+      if (result.success) {
+        audit("admin.features_changed", context.user, { targetUserId: args._id });
+      }
+      return result;
     },
 
     setBanStatus: async (
@@ -93,7 +105,11 @@ export const AdminResolvers = {
         return { success: false, message: "You cannot ban your own account" };
       }
 
-      return await Admin.setBanStatus(args._id, args.banned);
+      const result = await Admin.setBanStatus(args._id, args.banned);
+      if (result.success) {
+        audit("admin.ban_changed", context.user, { targetUserId: args._id, banned: args.banned });
+      }
+      return result;
     },
   },
 };

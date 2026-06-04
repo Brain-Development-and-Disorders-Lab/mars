@@ -6,6 +6,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import crypto from "crypto";
 
+// Audit logging
+import { audit } from "@lib/audit";
+
 // Custom types
 import { APIData, APIKey, EntityModel, ResponseData } from "@types";
 
@@ -40,6 +43,7 @@ export class API {
   static validateRequest = async (request: Request, response: Response): Promise<APIKey | null> => {
     // Check if API key provided
     if (_.isUndefined(request.headers["api_key"])) {
+      audit("api_key.rejected", "anonymous", { path: request.params.path, reason: "missing" });
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
@@ -58,6 +62,7 @@ export class API {
     // Validate that the API key exists and that the User has API permissions
     const apiUser = await User.findByKey(providedKey);
     if (_.isNull(apiUser)) {
+      audit("api_key.rejected", "anonymous", { path: request.params.path, reason: "invalid" });
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
@@ -68,6 +73,7 @@ export class API {
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
     } else if (_.isUndefined(apiUser.features.api) || apiUser.features.api === false) {
+      audit("api_key.rejected", apiUser._id, { path: request.params.path, reason: "api_access_disabled" });
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
@@ -109,6 +115,7 @@ export class API {
 
     // Compare the expiration date and the current system time
     if (dayjs(apiKey.expires).diff() < 0) {
+      audit("api_key.expired", response.locals.apiUser._id, { path: request.params.path, keyScope: apiKey.scope });
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
@@ -122,6 +129,11 @@ export class API {
 
     // Enforce scope: POST routes require an "edit" key
     if (request.method === "POST" && apiKey.scope !== "edit") {
+      audit("api_key.scope_violation", response.locals.apiUser._id, {
+        path: request.params.path,
+        method: request.method,
+        keyScope: apiKey.scope,
+      });
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
@@ -134,6 +146,11 @@ export class API {
     }
 
     // If all authentication checks pass, continue to the next middleware
+    audit("api_key.used", response.locals.apiUser._id, {
+      path: request.params.path,
+      method: request.method,
+      keyScope: apiKey.scope,
+    });
     next();
   };
 

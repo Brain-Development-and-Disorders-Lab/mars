@@ -119,7 +119,7 @@ const CreateWorkspace = () => {
 
   // Capture event
   useEffect(() => {
-    posthog?.capture("create_workspace_start");
+    posthog?.capture("client.create.workspace_start");
   }, [posthog]);
 
   /**
@@ -127,7 +127,7 @@ const CreateWorkspace = () => {
    */
   const handleCreateWorkspaceClick = async () => {
     // Capture event
-    posthog?.capture("create_workspace_finish");
+    posthog?.capture("client.create.workspace_finish");
 
     // Set submitting state
     setIsSubmitting(true);
@@ -190,7 +190,7 @@ const CreateWorkspace = () => {
    */
   const handleCancelClick = () => {
     // Capture event
-    posthog?.capture("create_workspace_cancel");
+    posthog?.capture("client.create.workspace_cancel");
 
     navigate("/");
   };

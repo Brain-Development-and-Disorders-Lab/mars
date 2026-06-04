@@ -27,7 +27,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import Papa from "papaparse";
 import XLSX from "xlsx";
-import consola from "consola";
+import { logger } from "@lib/logger";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -534,7 +534,7 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: historyEntity._id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Added history to Entity:", historyEntity._id);
+      logger.info({ entityId: historyEntity._id }, "Added history to Entity");
     }
 
     return {
@@ -550,10 +550,10 @@ export class Entities {
    * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
-    consola.debug("Setting archive state of Entity:", _id, "Archived:", state);
+    logger.debug({ entityId: _id, archived: state }, "Setting archive state of Entity");
     const entity = await Entities.getOne(_id);
     if (_.isNull(entity)) {
-      consola.error("Unable to retrieve Entity:", _id);
+      logger.error({ entityId: _id }, "Unable to retrieve Entity");
       return {
         success: false,
         message: "Error retrieving existing Entity",
@@ -570,7 +570,7 @@ export class Entities {
 
     const response = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Set archive state of Entity:", _id, "Archived:", state);
+      logger.info({ entityId: _id, archived: state }, "Set archive state of Entity");
     }
 
     return {

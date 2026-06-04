@@ -101,7 +101,7 @@ const Create = () => {
                   size={"xs"}
                   colorPalette={"green"}
                   onClick={() => {
-                    posthog.capture("create_entity_click");
+                    posthog.capture("client.create.entity_click");
                     navigate("/create/entity");
                   }}
                 >
@@ -168,7 +168,7 @@ const Create = () => {
                   rounded={"md"}
                   colorPalette={"green"}
                   onClick={() => {
-                    posthog.capture("create_project_click");
+                    posthog.capture("client.create.project_click");
                     navigate("/create/project");
                   }}
                 >
@@ -230,7 +230,7 @@ const Create = () => {
                   rounded={"md"}
                   colorPalette={"green"}
                   onClick={() => {
-                    posthog.capture("create_template_click");
+                    posthog.capture("client.create.template_click");
                     navigate("/create/template");
                   }}
                 >

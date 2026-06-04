@@ -1,7 +1,7 @@
 import { EmailClient } from "@azure/communication-email";
 
 // Utility functions
-import consola from "consola";
+import { logger } from "@lib/logger";
 
 // Email configuration
 const client = new EmailClient(process.env.AZURE_COMMUNICATION_CONNECTION_STRING!);
@@ -187,14 +187,14 @@ export const sendEmail = async ({ to, subject, html }: { to: string; subject: st
     content: { subject, html },
   };
 
-  consola.start(`Email sending: <${to}> "${subject}"`);
+  logger.info({ to, subject }, "Email sending");
   const poller = await client.beginSend(message);
   const pollerResponse = await poller.pollUntilDone();
 
   // Output status
   if (pollerResponse.error) {
-    consola.error(`Email error: "${subject}"\nDetails: ${pollerResponse.error.details}`);
+    logger.error({ subject, details: pollerResponse.error.details }, "Email error");
   } else {
-    consola.success(`Email sent: "${subject}"`);
+    logger.info({ subject }, "Email sent");
   }
 };

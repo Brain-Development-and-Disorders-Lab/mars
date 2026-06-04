@@ -10,7 +10,7 @@ import { Workspaces } from "@models/Workspaces";
 import { AI } from "@models/AI";
 
 // Analytics
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const SearchResolvers = {
   Query: {
@@ -54,7 +54,7 @@ export const SearchResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_search",
+          event: "search.performed",
           properties: {
             search_type: args.isBuilder ? "builder" : "text",
             result_type: args.resultType,
@@ -74,7 +74,7 @@ export const SearchResolvers = {
       }
       const result = await AI.translateSearch(args.query);
       if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({ distinctId: context.user, event: "server_translate_search" });
+        PostHogClient?.capture({ distinctId: context.user, event: "search.translated" });
       }
       return result;
     },
@@ -91,7 +91,7 @@ export const SearchResolvers = {
       }
       const result = await AI.suggestColumnMapping(args.columns);
       if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({ distinctId: context.user, event: "server_suggest_column_mapping" });
+        PostHogClient?.capture({ distinctId: context.user, event: "search.suggest_column_mapping" });
       }
       return result;
     },
@@ -108,7 +108,7 @@ export const SearchResolvers = {
       }
       const result = await AI.suggestTemplate(args.name, args.description ?? "", args.templates);
       if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({ distinctId: context.user, event: "server_suggest_template" });
+        PostHogClient?.capture({ distinctId: context.user, event: "search.suggest_template" });
       }
       return result;
     },

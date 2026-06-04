@@ -9,7 +9,7 @@ import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const ActivityResolvers = {
   Query: {
@@ -68,7 +68,7 @@ export const ActivityResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_create_activity",
+          event: "activity.created",
         });
       }
 

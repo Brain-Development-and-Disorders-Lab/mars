@@ -8,8 +8,8 @@ import { Activity } from "@models/Activity";
 import { Entities } from "@models/Entities";
 import { Workspaces } from "@models/Workspaces";
 
-// Posthog
-import { PostHogClient } from "src";
+// Audit logging
+import { audit } from "@lib/audit";
 
 export const EntitiesResolvers = {
   Query: {
@@ -89,6 +89,7 @@ export const EntitiesResolvers = {
         Entities.countMany(workspace.entities, archivedFilter, args.filter),
       ]);
 
+      audit("entity.listed", context.user, { workspaceId: context.workspace, count: total });
       return {
         entities,
         total,
@@ -129,6 +130,7 @@ export const EntitiesResolvers = {
 
       // Check that Entity is owned by the user and exists in the Workspace
       if (_.includes(workspace.entities, entity._id)) {
+        audit("entity.read", context.user, { entityId: entity._id, workspaceId: context.workspace });
         return entity;
       } else {
         throw new GraphQLError("You do not have permission to access this Entity", {
@@ -193,13 +195,11 @@ export const EntitiesResolvers = {
       // Check that Entity is owned by the user and exists in the Workspace
       if (_.includes(workspace.entities, entity._id)) {
         const exportResult = await Entities.export(args._id, args.format, args.fields, args.includeHistory ?? false);
-        if (process.env.DISABLE_CAPTURE !== "true") {
-          PostHogClient?.capture({
-            distinctId: context.user,
-            event: "server_export_entity",
-            properties: { format: args.format },
-          });
-        }
+        audit("entity.exported", context.user, {
+          entityId: args._id,
+          workspaceId: context.workspace,
+          format: args.format,
+        });
         return exportResult;
       } else {
         throw new GraphQLError("You do not have permission to access this Entity", {
@@ -252,13 +252,11 @@ export const EntitiesResolvers = {
         args.includeAttributes ?? true,
         args.includeHistory ?? false,
       );
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_export_entities",
-          properties: { format: args.format, count: authorizedEntities.length },
-        });
-      }
+      audit("entity.exported", context.user, {
+        workspaceId: context.workspace,
+        format: args.format,
+        count: authorizedEntities.length,
+      });
       return exportResult;
     },
 
@@ -294,13 +292,11 @@ export const EntitiesResolvers = {
         args.includeAttributes ?? true,
         args.includeHistory ?? false,
       );
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_export_entities",
-          properties: { format: args.format, count: workspace.entities.length },
-        });
-      }
+      audit("entity.exported", context.user, {
+        workspaceId: context.workspace,
+        format: args.format,
+        count: workspace.entities.length,
+      });
       return exportResult;
     },
 
@@ -388,8 +384,11 @@ export const EntitiesResolvers = {
       }
 
       if (_.includes(workspace.entities, args._id)) {
-        // Update description if Entity is in Workspace
-        return await Entities.setDescription(args._id, args.description);
+        const result = await Entities.setDescription(args._id, args.description);
+        if (result.success) {
+          audit("entity.updated", context.user, { entityId: args._id, workspaceId: context.workspace });
+        }
+        return result;
       } else {
         throw new GraphQLError("You do not have permission to modify this Entity", {
           extensions: {
@@ -439,12 +438,8 @@ export const EntitiesResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
-      // Capture event
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_create_entity",
-        });
+      if (result.success) {
+        audit("entity.created", context.user, { entityId: result.data, workspaceId: context.workspace });
       }
 
       return result;
@@ -510,12 +505,8 @@ export const EntitiesResolvers = {
           await Workspaces.addActivity(context.workspace, activity.data);
         }
 
-        // Capture event
-        if (process.env.DISABLE_CAPTURE !== "true") {
-          PostHogClient?.capture({
-            distinctId: context.user,
-            event: "server_update_entity",
-          });
+        if (result.success) {
+          audit("entity.updated", context.user, { entityId: args.entity._id, workspaceId: context.workspace });
         }
 
         return result;
@@ -592,6 +583,11 @@ export const EntitiesResolvers = {
 
           // Add Activity to Workspace
           await Workspaces.addActivity(context.workspace, activity.data);
+          audit("entity.archived", context.user, {
+            entityId: entity._id,
+            workspaceId: context.workspace,
+            archived: args.state,
+          });
         }
 
         return result;
@@ -652,13 +648,11 @@ export const EntitiesResolvers = {
         }
       }
 
-      // Capture event
-      if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({
-          distinctId: context.user,
-          event: "server_archive_entity",
-        });
-      }
+      audit("entity.archived", context.user, {
+        workspaceId: context.workspace,
+        count: archiveCounter,
+        archived: args.state,
+      });
 
       return {
         success: args.toArchive.length === archiveCounter,

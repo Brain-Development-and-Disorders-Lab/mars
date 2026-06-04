@@ -109,7 +109,7 @@ const Project = () => {
   }, [error]);
 
   useEffect(() => {
-    posthog?.capture("create_project_start");
+    posthog?.capture("client.create.project_start");
   }, [posthog]);
 
   const isNameError = name === "";
@@ -336,7 +336,7 @@ const Project = () => {
           rounded={"md"}
           colorPalette={"green"}
           onClick={async () => {
-            posthog.capture("create_project_finish");
+            posthog.capture("client.create.project_finish");
             setIsSubmitting(true);
             const response = await createProject({
               variables: {

@@ -75,7 +75,7 @@ const Collaborators = (props: CollaboratorsProps) => {
       } else if (result.data) {
         const collaborator = result.data.userByEmail.data;
         if (!_.includes(props.collaborators, collaborator)) {
-          posthog.capture("collaborator_added");
+          posthog.capture("client.collaborator.added");
           props.setCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
           toaster.create({
@@ -99,7 +99,7 @@ const Collaborators = (props: CollaboratorsProps) => {
   }, [newCollaborator]);
 
   const handleRemoveCollaborator = (collaborator: string) => {
-    posthog.capture("collaborator_removed");
+    posthog.capture("client.collaborator.removed");
     props.setCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator));
   };
 

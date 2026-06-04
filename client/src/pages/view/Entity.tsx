@@ -372,7 +372,7 @@ const Entity = () => {
   }, [data, editing]);
 
   useEffect(() => {
-    posthog.capture("entity_viewed");
+    posthog.capture("client.entity.viewed");
   }, [id]);
 
   // Display any GraphQL errors
@@ -1029,7 +1029,7 @@ const Entity = () => {
         closable: true,
       });
     } else if (response.data.createEntity.success) {
-      posthog.capture("entity_cloned");
+      posthog.capture("client.entity.cloned");
       setCloneOpen(false);
 
       toaster.create({
@@ -1062,7 +1062,7 @@ const Entity = () => {
         closable: true,
       });
     } else if (response.data.archiveEntity.success) {
-      posthog.capture("entity_archived");
+      posthog.capture("client.entity.archived");
       toaster.create({
         title: "Archived Successfully",
         type: "success",
@@ -2158,7 +2158,7 @@ const Entity = () => {
           </Flex>
 
           {/* Relationships and Attachments */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Relationships */}
             <Flex
               direction={"column"}

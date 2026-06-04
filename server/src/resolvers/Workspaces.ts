@@ -22,7 +22,7 @@ import { sendEmail, templates } from "@lib/email";
 const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const WorkspacesResolvers = {
   Query: {
@@ -202,7 +202,7 @@ export const WorkspacesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "server_create_workspace",
+          event: "workspace.created",
         });
       }
 
@@ -247,7 +247,7 @@ export const WorkspacesResolvers = {
         if (process.env.DISABLE_CAPTURE !== "true") {
           PostHogClient?.capture({
             distinctId: context.user,
-            event: "server_update_workspace",
+            event: "workspace.updated",
           });
         }
 

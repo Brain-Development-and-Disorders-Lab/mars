@@ -212,7 +212,7 @@ const Navigation = () => {
                   colorPalette={"blue"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("import_dialog_open");
+                    posthog.capture("client.import.dialog_open");
 
                     setImportOpen(true);
                   }}
@@ -233,7 +233,7 @@ const Navigation = () => {
                   colorPalette={"green"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_dialog_open");
+                    posthog.capture("client.scan.dialog_open");
 
                     setScanOpen(true);
                   }}
@@ -254,7 +254,7 @@ const Navigation = () => {
                 colorPalette={"red"}
                 onClick={() => {
                   // Capture event
-                  posthog.capture("bug_dialog_open");
+                  posthog.capture("client.bug.dialog_open");
 
                   setReportOpen(true);
                 }}
@@ -381,7 +381,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => {
                     // Capture event
-                    posthog.capture("scan_dialog_open");
+                    posthog.capture("client.scan.dialog_open");
 
                     setScanOpen(true);
                   }}
