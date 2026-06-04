@@ -12,7 +12,7 @@ import {
 import _ from "lodash";
 import { getDatabase } from "@connectors/database";
 import { getIdentifier } from "@lib/util";
-import consola from "consola";
+import { logger } from "@lib/logger";
 import dayjs from "dayjs";
 import { Workspaces } from "./Workspaces";
 
@@ -29,17 +29,17 @@ export class Templates {
    * @returns Collection of all Template entries
    */
   static all = async (): Promise<AttributeModel[]> => {
-    consola.debug("Retrieving all Templates...");
+    logger.debug("Retrieving all Templates...");
     return await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).find().toArray();
   };
 
   static getOne = async (_id: string): Promise<AttributeModel | null> => {
-    consola.debug("Retrieving Template:", _id);
+    logger.debug({ templateId: _id }, "Retrieving Template");
     return await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).findOne({ _id: _id });
   };
 
   static getMany = async (templates: string[]): Promise<AttributeModel[]> => {
-    consola.debug(`Retrieving ${templates.length} Templates...`);
+    logger.debug({ count: templates.length }, "Retrieving Templates...");
     return await getDatabase()
       .collection<AttributeModel>(TEMPLATES_COLLECTION)
       .find({ _id: { $in: templates } })
@@ -52,7 +52,7 @@ export class Templates {
    * @return {boolean}
    */
   static exists = async (_id: string): Promise<boolean> => {
-    consola.debug("Checking if Template exists:", _id);
+    logger.debug({ templateId: _id }, "Checking if Template exists");
     const response = await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).findOne({ _id: _id });
     return !_.isNull(response);
   };
@@ -63,19 +63,19 @@ export class Templates {
    * @return {ResponseData<string>}
    */
   static create = async (template: IAttribute): Promise<ResponseData<string>> => {
-    consola.debug(`Creating new Template...`);
+    logger.debug("Creating new Template...");
     // Add an identifier to the Template
     const joinedTemplate: AttributeModel = {
       _id: getIdentifier("template"),
       timestamp: dayjs(Date.now()).toISOString(),
       ...template,
     };
-    consola.debug("Template:", joinedTemplate._id, joinedTemplate.name);
+    logger.debug({ templateId: joinedTemplate._id, name: joinedTemplate.name }, "Template");
 
     const response = await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).insertOne(joinedTemplate);
     const successStatus = _.isEqual(response.insertedId, joinedTemplate._id);
     if (!successStatus) {
-      consola.error("Unable to create new Template entry:", joinedTemplate._id);
+      logger.error({ templateId: joinedTemplate._id }, "Unable to create new Template entry");
     }
 
     return {
@@ -86,10 +86,10 @@ export class Templates {
   };
 
   static update = async (updated: AttributeModel): Promise<IResponseMessage> => {
-    consola.debug("Updating Template:", updated._id);
+    logger.debug({ templateId: updated._id }, "Updating Template");
     const template = await Templates.getOne(updated._id);
     if (_.isNull(template)) {
-      consola.error("Unable to retrieve Template:", updated._id);
+      logger.error({ templateId: updated._id }, "Unable to retrieve Template");
       return {
         success: false,
         message: "Error retrieving existing Template",
@@ -121,7 +121,7 @@ export class Templates {
       .collection<AttributeModel>(TEMPLATES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Updated Template:", updated._id);
+      logger.info({ templateId: updated._id }, "Updated Template");
     }
 
     return {
@@ -285,7 +285,7 @@ export class Templates {
       .collection<AttributeModel>(TEMPLATES_COLLECTION)
       .updateOne({ _id: historyTemplate._id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Added history to Template:", historyTemplate._id);
+      logger.info({ templateId: historyTemplate._id }, "Added history to Template");
     }
 
     return {
@@ -301,10 +301,10 @@ export class Templates {
    * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
-    consola.debug("Setting archive state of Template:", _id, "Archived:", state);
+    logger.debug({ templateId: _id, archived: state }, "Setting archive state of Template");
     const template = await this.getOne(_id);
     if (_.isNull(template)) {
-      consola.error("Unable to retrieve Template:", _id);
+      logger.error({ templateId: _id }, "Unable to retrieve Template");
       return {
         success: false,
         message: "Error retrieving existing Template",
@@ -323,7 +323,7 @@ export class Templates {
       .collection<AttributeModel>(TEMPLATES_COLLECTION)
       .updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Set archive state of Template:", _id, "Archived:", state);
+      logger.info({ templateId: _id, archived: state }, "Set archive state of Template");
     }
 
     return {

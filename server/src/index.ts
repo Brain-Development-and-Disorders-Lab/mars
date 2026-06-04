@@ -2,7 +2,6 @@
 import "dotenv/config";
 
 // Libraries
-import consola, { LogLevels } from "consola";
 import cors from "cors";
 import express, { RequestHandler } from "express";
 import helmet from "helmet";
@@ -12,7 +11,7 @@ import "source-map-support/register";
 import _ from "lodash";
 
 // GraphQL
-import { ApolloServer } from "@apollo/server";
+import { ApolloServer, type ApolloServerPlugin, type GraphQLRequestContextWillSendResponse } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { typedefs } from "./typedefs";
@@ -48,20 +47,36 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 // Public REST API routers
 import APIRouter from "@models/API";
 
-// Set logging level
-consola.level = process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
+// Logging and audit
+import pinoHttp from "pino-http";
+import { logger } from "@lib/logger";
+import { audit } from "@lib/audit";
 
 // Posthog
-import { PostHog } from "posthog-node";
-export const PostHogClient =
-  process.env.DISABLE_CAPTURE !== "true"
-    ? new PostHog(process.env.POSTHOG_KEY as string, {
-        host: "https://us.i.posthog.com",
-      })
-    : undefined;
+export { PostHogClient } from "@lib/posthog";
 
 const port = process.env.PORT || 8000;
 const app = express();
+
+// Configure all HTTP logging
+app.use(
+  pinoHttp({
+    logger,
+    customProps: (_req, res) => ({
+      userId: (res.locals.session?.user?.id as string) ?? undefined,
+    }),
+    autoLogging: { ignore: (req) => req.url === "/health" },
+    customLogLevel: (_req, res, err) => {
+      if (err || res.statusCode >= 500) return "error";
+      if (res.statusCode >= 400) return "warn";
+      return "info";
+    },
+    serializers: {
+      req: (req) => ({ method: req.method, url: req.url, remoteAddress: req.remoteAddress }),
+      res: (res) => ({ statusCode: res.statusCode }),
+    },
+  }),
+);
 
 // Setup CORS origins
 const origins = process.env.NODE_ENV !== "production" ? ["http://127.0.0.1:8080"] : ["https://app.metadatify.com"];
@@ -71,9 +86,9 @@ const nonSecurePaths = ["/login"];
 
 // Start the GraphQL server
 const start = async () => {
-  consola.info("Environment:", process.env.NODE_ENV);
+  logger.info({ env: process.env.NODE_ENV }, "Environment");
   if (process.env.NODE_ENV !== "production") {
-    consola.warn("Server not secured!");
+    logger.warn("Server not secured!");
   }
 
   await connect();
@@ -92,6 +107,33 @@ const start = async () => {
     }
   };
 
+  // Configure auth audit interceptors for auth logging
+  app.post("/auth/sign-in/email", (req, res, next) => {
+    res.on("finish", () => {
+      audit(res.statusCode < 400 ? "auth.login.success" : "auth.login.failure", req.body?.email ?? "unknown", {
+        method: "email",
+        ip: req.ip,
+      });
+    });
+    next();
+  });
+
+  app.post("/auth/sign-out", (_req, res, next) => {
+    res.on("finish", () => {
+      audit("auth.logout", (res.locals.session?.user?.id as string) ?? "anonymous", {});
+    });
+    next();
+  });
+
+  app.post("/auth/forget-password", (req, res, next) => {
+    res.on("finish", () => {
+      if (res.statusCode < 400) {
+        audit("auth.password_reset_requested", req.body?.email ?? "unknown", {});
+      }
+    });
+    next();
+  });
+
   // Configure authentication routes after the database connection is ready
   app.all(
     "/auth/{*any}",
@@ -104,9 +146,37 @@ const start = async () => {
 
   // Create folder for serving static files
   if (!fs.existsSync(__dirname + "/public")) {
-    consola.info("Creating /public directory...");
+    logger.info("Creating /public directory...");
     fs.mkdirSync(__dirname + "/public");
   }
+
+  // Logging plugin for Apollo to surface GraphQL-level errors invisible to pino-http
+  const loggingPlugin: ApolloServerPlugin<Context> = {
+    async requestDidStart(requestContext) {
+      return {
+        async willSendResponse(responseContext: GraphQLRequestContextWillSendResponse<Context>) {
+          const body = responseContext.response.body;
+          if (body.kind !== "single") return;
+          const errors = body.singleResult.errors;
+          if (!errors?.length) return;
+          for (const err of errors) {
+            const code = err.extensions?.code;
+            const userId = responseContext.contextValue?.user;
+            const operationName = requestContext.request.operationName ?? undefined;
+            if (code === "FORBIDDEN" || code === "UNAUTHORIZED") {
+              logger.warn({ userId, operationName, errorCode: code }, "GraphQL permission denied");
+              audit("permission.denied", userId ?? "anonymous", {
+                gqlOperation: operationName,
+                errorCode: String(code),
+              });
+            } else {
+              logger.error({ userId, operationName, errorCode: code, message: err.message }, "GraphQL error");
+            }
+          }
+        },
+      };
+    },
+  };
 
   // Setup the GraphQL server
   const httpServer = http.createServer(app);
@@ -149,11 +219,11 @@ const start = async () => {
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), loggingPlugin],
   });
-  consola.start("Starting GraphQL server...");
+  logger.info("Starting GraphQL server...");
   await server.start();
-  consola.success("GraphQL server running!");
+  logger.info("GraphQL server running!");
 
   // Serve static resources
   app.use(
@@ -204,9 +274,9 @@ const start = async () => {
   );
 
   // Start the server
-  consola.start("Starting Express server...");
+  logger.info("Starting Express server...");
   httpServer.listen({ port: port });
-  consola.success(`Express server running at: http://127.0.0.1:${port}/`);
+  logger.info(`Express server running at: http://127.0.0.1:${port}/`);
 };
 
 start();

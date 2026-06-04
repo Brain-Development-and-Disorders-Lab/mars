@@ -9,7 +9,7 @@ import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const ActivityResolvers = {
   Query: {

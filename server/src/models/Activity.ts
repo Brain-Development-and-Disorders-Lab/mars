@@ -5,7 +5,7 @@ import { ActivityModel, IActivity, ResponseData } from "@types";
 import { getIdentifier } from "@lib/util";
 import { getDatabase } from "@connectors/database";
 import _ from "lodash";
-import consola from "consola";
+import { logger } from "@lib/logger";
 
 // Collection name
 const ACTIVITY_COLLECTION = "activity";
@@ -16,7 +16,7 @@ export class Activity {
    * @returns Collection of all Activity entries
    */
   static all = async (): Promise<ActivityModel[]> => {
-    consola.debug("Retrieving all Activity...");
+    logger.debug("Retrieving all Activity...");
     return await getDatabase().collection<ActivityModel>(ACTIVITY_COLLECTION).find().sort({ timestamp: -1 }).toArray();
   };
 
@@ -25,7 +25,7 @@ export class Activity {
    * @param activities Collection of multiple Activity entries
    */
   static getMany = async (activities: string[]): Promise<ActivityModel[]> => {
-    consola.debug(`Retrieving ${activities.length} Activity entries...`);
+    logger.debug(`Retrieving ${activities.length} Activity entries...`);
     return await getDatabase()
       .collection<ActivityModel>(ACTIVITY_COLLECTION)
       .find({ _id: { $in: activities } })
@@ -39,19 +39,22 @@ export class Activity {
    * @return {IResponseMessage}
    */
   static create = async (activity: IActivity): Promise<ResponseData<string>> => {
-    consola.debug(`Creating new Activity entry...`);
+    logger.debug(`Creating new Activity entry...`);
     const activityModel: ActivityModel = {
       _id: getIdentifier("activity"),
       ...activity,
     };
 
-    consola.debug("Activity:", activityModel.type, activityModel.target._id);
+    logger.debug("Activity:", activityModel.type, activityModel.target._id);
 
     const response = await getDatabase().collection<ActivityModel>(ACTIVITY_COLLECTION).insertOne(activityModel);
 
     const successStatus = _.isEqual(response.insertedId, activityModel._id);
     if (!successStatus) {
-      consola.error("Unable to create new Activity entry:", activityModel.type, activityModel.target._id);
+      logger.error(
+        { type: activityModel.type, targetId: activityModel.target._id },
+        "Unable to create new Activity entry",
+      );
     }
 
     return {

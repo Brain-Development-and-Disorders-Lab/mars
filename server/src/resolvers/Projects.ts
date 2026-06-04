@@ -12,7 +12,7 @@ import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const ProjectsResolvers = {
   Query: {

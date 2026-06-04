@@ -22,7 +22,7 @@ import { sendEmail, templates } from "@lib/email";
 const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const WorkspacesResolvers = {
   Query: {

@@ -10,7 +10,7 @@ import { getDatabase } from "@connectors/database";
 import { getIdentifier } from "@lib/util";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import consola from "consola";
+import { logger } from "@lib/logger";
 
 // Generate history version IDs
 import { customAlphabet } from "nanoid";
@@ -169,7 +169,7 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .updateOne({ _id: project._id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Added history to Project:", historyProject._id);
+      logger.info({ projectId: historyProject._id }, "Added history to Project");
     }
 
     return {
@@ -185,10 +185,10 @@ export class Projects {
    * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
-    consola.debug("Setting archive state of Project:", _id, "Archived:", state);
+    logger.debug({ projectId: _id, archived: state }, "Setting archive state of Project");
     const project = await Projects.getOne(_id);
     if (_.isNull(project)) {
-      consola.error("Unable to retrieve Project:", _id);
+      logger.error({ projectId: _id }, "Unable to retrieve Project");
       return {
         success: false,
         message: "Error retrieving existing Project",
@@ -205,7 +205,7 @@ export class Projects {
 
     const response = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
-      consola.info("Set archive state of Project:", _id, "Archived:", state);
+      logger.info({ projectId: _id, archived: state }, "Set archive state of Project");
     }
 
     return {

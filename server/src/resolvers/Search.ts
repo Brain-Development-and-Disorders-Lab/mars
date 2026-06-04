@@ -10,7 +10,7 @@ import { Workspaces } from "@models/Workspaces";
 import { AI } from "@models/AI";
 
 // Analytics
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const SearchResolvers = {
   Query: {

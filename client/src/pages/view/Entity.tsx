@@ -2158,7 +2158,7 @@ const Entity = () => {
           </Flex>
 
           {/* Relationships and Attachments */}
-          <Flex direction={"row"} gap={"1"} p={"0"} wrap={"wrap"} align={"stretch"}>
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Relationships */}
             <Flex
               direction={"column"}

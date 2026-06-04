@@ -1,12 +1,12 @@
 // Libraries
 import { Db, GridFSBucket, MongoClient } from "mongodb";
-import consola from "consola";
+import { logger } from "@lib/logger";
 import _ from "lodash";
 
 // Get the connection string from the environment variables
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
 if (_.isUndefined(CONNECTION_STRING)) {
-  consola.error(
+  logger.error(
     "Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server",
   );
   throw new Error("Connection string is not defined");
@@ -22,15 +22,15 @@ const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
  * Connect to the primary database storing metadata
  */
 export const connect = (): Promise<Db> => {
-  consola.start("Connecting to databases...");
+  logger.info("Connecting to databases...");
   return new Promise((resolve) => {
     client.connect().then((result) => {
       database = result.db("metadata");
-      consola.success('Connected to "metadata" database');
+      logger.info('Connected to "metadata" database');
 
       storage = result.db("storage");
       attachments = new GridFSBucket(storage, { bucketName: "attachments" });
-      consola.success('Connected to "attachments" storage bucket');
+      logger.info('Connected to "attachments" storage bucket');
 
       resolve(database);
     });

@@ -21,7 +21,7 @@ import dayjs from "dayjs";
 import { GraphQLError } from "graphql/index";
 
 // Posthog
-import { PostHogClient } from "src";
+import { PostHogClient } from "@lib/posthog";
 
 export const TemplatesResolvers = {
   Query: {
