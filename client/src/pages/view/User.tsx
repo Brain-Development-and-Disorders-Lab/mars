@@ -289,7 +289,7 @@ const User = () => {
     await updateUser({
       variables: {
         user: {
-          _id: userOrcid,
+          _id: user,
           email: userEmail,
           affiliation: userAffiliation,
         },

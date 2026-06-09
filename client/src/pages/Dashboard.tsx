@@ -456,6 +456,7 @@ const Dashboard = () => {
     const { action, type } = data;
     if ((action === ACTIONS.SKIP || type === EVENTS.TOUR_END) && session?.user) {
       updateUser({ variables: { user: { _id: session.user.id, hasSeenWalkthrough: true } } });
+      auth.updateUser({ hasSeenWalkthrough: true });
     }
   };
 
