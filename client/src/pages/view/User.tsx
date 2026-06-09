@@ -149,7 +149,7 @@ const User = () => {
       setUserEmail(data.user.email);
       setEmailVerified(data.user.emailVerified);
       setUserAffiliation(data.user.affiliation);
-      setUserKeys(JSON.parse(data.user.api_keys));
+      setUserKeys(data.user.api_keys ? JSON.parse(data.user.api_keys) : []);
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
 
       // Initialize email validation state
