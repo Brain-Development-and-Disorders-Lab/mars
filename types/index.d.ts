@@ -726,12 +726,13 @@ export type IUser = {
   image: string; // better-auth: Display image URL
   createdAt: string; // better-auth: Created
   updatedAt: string; // better-auth: Last updated
-  lastLogin: string;
-  hasSeenWalkthrough?: boolean;
+  lastLogin: string; // better-auth: Timestamp of last login
   api_keys: string; // better-auth: Stored as a JSON string
-  account_orcid: string;
   role: string; // better-auth admin: "user" or "admin"
-  features: UserFeatures;
+  features: UserFeatures; // Account features such as AI search or API access
+  account_orcid: string; // ORCiD if connected
+  hasSeenWalkthrough?: boolean; // If user has seen or skipped the initial walkthrough
+  completedProfile?: boolean; // `false` until third-party signup profile is completed
 };
 
 export type UserModel = IUser & {

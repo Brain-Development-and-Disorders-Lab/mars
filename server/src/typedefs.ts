@@ -111,6 +111,7 @@ export const typedefs = `#graphql
     api_keys: String
     account_orcid: String
     hasSeenWalkthrough: Boolean
+    completedProfile: Boolean
   }
 
   # "Project" type
