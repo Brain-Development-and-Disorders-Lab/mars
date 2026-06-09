@@ -113,7 +113,7 @@ const ActorTag = (props: ActorTagProps) => {
       bg={"white"}
       minW={"120px"}
       w={"fit-content"}
-      maxW={"180px"}
+      maxW={"200px"}
       h={"52px"}
     >
       <Avatar.Root
