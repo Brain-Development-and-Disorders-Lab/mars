@@ -177,6 +177,7 @@ jobs:
           echo "REACT_APP_PUBLIC_POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "REACT_APP_PUBLIC_POSTHOG_HOST=${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
+          echo "COLLEGE_SCORECARD_KEY=${{ secrets.COLLEGE_SCORECARD_KEY }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
           echo "BETTER_AUTH_URL=${{ env.BETTER_AUTH_URL }}" >> .env
           echo "TEST_USER_EMAIL=${{ env.TEST_USER_EMAIL }}" >> .env
