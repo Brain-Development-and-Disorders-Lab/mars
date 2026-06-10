@@ -10,13 +10,12 @@ import {
   Input,
   Fieldset,
   Field,
-  Select,
-  createListCollection,
   Text,
   Separator,
   Box,
   AbsoluteCenter,
 } from "@chakra-ui/react";
+import SearchSelect from "@components/SearchSelect";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -56,14 +55,6 @@ const UPDATE_USER = gql`
     }
   }
 `;
-
-// Available affiliation options for the selection dropdown
-const affiliationCollection = createListCollection({
-  items: [
-    { label: "No Affiliation", value: "No Affiliation" },
-    { label: "Washington University in St. Louis", value: "Washington University in St. Louis" },
-  ],
-});
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -398,33 +389,12 @@ const Signup = () => {
                     Affiliation
                     <Field.RequiredIndicator />
                   </Field.Label>
-                  <Select.Root
-                    collection={affiliationCollection}
-                    size={"xs"}
-                    rounded={"md"}
-                    value={affiliation ? [affiliation] : []}
-                    onValueChange={(details) => setAffiliation(details.value[0] || "")}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger data-testid="affiliation-select-trigger" rounded={"md"}>
-                        <Select.ValueText placeholder={"Select your affiliation"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {affiliationCollection.items.map((item) => (
-                          <Select.Item item={item} key={item.value}>
-                            {item.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Select.Root>
+                  <SearchSelect
+                    resultType="institution"
+                    value={{ _id: affiliation, name: affiliation }}
+                    onChange={(item) => setAffiliation(item.name)}
+                    defaultOption="Affiliation Not Shown"
+                  />
                 </Field.Root>
 
                 {mode === "signup" && (

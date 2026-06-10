@@ -75,6 +75,17 @@ export class User {
       };
     }
 
+    // Reject if another account already owns this email, regardless of update context
+    if (updated.email) {
+      const existingByEmail = await this.getByEmail(updated.email);
+      if (existingByEmail.success && existingByEmail.data !== updated._id) {
+        return {
+          success: false,
+          message: "EMAIL_EXISTS",
+        };
+      }
+    }
+
     // Profile completion validation
     if (updated.completedProfile === true) {
       // Ensure valid email is provided (catch instance of ORCiD placeholders too)
@@ -98,15 +109,6 @@ export class User {
         return {
           success: false,
           message: "A valid first and last name is required to complete your account",
-        };
-      }
-
-      // Detect duplicate email: reject if another account already owns this email
-      const existingByEmail = await this.getByEmail(updated.email);
-      if (existingByEmail.success && existingByEmail.data !== updated._id) {
-        return {
-          success: false,
-          message: "EMAIL_EXISTS",
         };
       }
     }
