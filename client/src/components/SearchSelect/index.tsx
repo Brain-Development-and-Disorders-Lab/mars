@@ -1,13 +1,13 @@
 // React imports
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Custom and existing components
-import { Input, Flex, InputGroup, Text, Spinner, Box } from "@chakra-ui/react";
+import { Input, Flex, InputGroup, Text, Spinner, Box, Separator } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
+import { EntityModel, IconNames, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import { debounce } from "lodash";
@@ -20,6 +20,9 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
+
+// College Scorecard API URL
+const SCORECARD_URL = "https://api.data.gov/ed/collegescorecard/v1/schools";
 
 const GET_ENTITIES = gql`
   query GetEntities($limit: Int, $archived: Boolean) {
@@ -65,18 +68,19 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const [getEntities, { loading: entitiesLoading, error: entitiesError }] = useLazyQuery<{
+  const [getEntities, { loading: entitiesLoading }] = useLazyQuery<{
     entities: { entities: IGenericItem[]; total: number };
   }>(GET_ENTITIES, { fetchPolicy: "network-only" });
 
-  const [getProjects, { loading: projectsLoading, error: projectsError }] = useLazyQuery<{
+  const [getProjects, { loading: projectsLoading }] = useLazyQuery<{
     projects: IGenericItem[];
   }>(GET_PROJECTS, { fetchPolicy: "network-only" });
 
-  const [searchText, { loading: searchLoading, error: searchError }] = useLazyQuery<{ search: EntityModel[] }>(
-    SEARCH_TEXT,
-    { fetchPolicy: "network-only" },
-  );
+  const [searchText, { loading: searchLoading }] = useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, {
+    fetchPolicy: "network-only",
+  });
+
+  const [institutionLoading, setInstitutionLoading] = useState(false);
 
   const [inputValue, setInputValue] = useState(props.value?.name || "");
   const [options, setOptions] = useState<IGenericItem[]>([]);
@@ -84,82 +88,164 @@ const SearchSelect = (props: SearchSelectProps) => {
   const [showResults, setShowResults] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const isLoading =
+    entitiesLoading || projectsLoading || searchLoading || institutionLoading || (isTyping && !hasSearched);
 
-  const placeholder =
-    props.placeholder ?? (props.resultType === "entity" ? "Search Entities..." : "Search Projects...");
+  // Setup default presentation parameters
+  let placeholder = "Search Entities...";
+  let iconName: IconNames = "entity";
+  let iconColor = GLOBAL_STYLES.entity.color.icon;
 
-  const isLoading = entitiesLoading || projectsLoading || searchLoading || (isTyping && !hasSearched);
-
-  const iconName = props.resultType === "entity" ? "entity" : "project";
-  const iconColor = props.resultType === "entity" ? GLOBAL_STYLES.entity.color.icon : GLOBAL_STYLES.project.color.icon;
+  switch (props.resultType) {
+    case "institution": {
+      placeholder = "Search Institutions...";
+      iconName = "institution";
+      iconColor = "gray.600";
+      break;
+    }
+    case "project": {
+      placeholder = "Search Projects...";
+      iconName = "project";
+      iconColor = GLOBAL_STYLES.project.color.icon;
+      break;
+    }
+  }
 
   useEffect(() => {
     setInputValue(props.value?.name || "");
   }, [props.value]);
 
+  /**
+   * Loads the initial dropdown options on mount and on workspace change
+   * Not used for institutions since those are fetched on demand
+   */
   const getSelectOptions = async () => {
-    if (props.resultType === "entity") {
-      const result = await getEntities({ variables: { limit: 20 } });
-      if (result.data?.entities?.entities) setOptions(result.data.entities.entities);
-    } else {
-      const result = await getProjects({ variables: { limit: 20 } });
-      if (result.data?.projects) setOptions(result.data.projects);
-    }
-
-    if (entitiesError || projectsError) {
-      toaster.create({
-        title: "Error",
-        type: "error",
-        description: "Error while retrieving options for selection",
-        duration: 4000,
-        closable: true,
-      });
+    switch (props.resultType) {
+      case "institution": {
+        return;
+      }
+      case "entity": {
+        const result = await getEntities({ variables: { limit: 20 } });
+        if (result.data?.entities?.entities) {
+          setOptions(result.data.entities.entities);
+        } else if (result.error) {
+          toaster.create({
+            title: "Error",
+            type: "error",
+            description: "Error while retrieving options for selection",
+            duration: 4000,
+            closable: true,
+          });
+        }
+        break;
+      }
+      case "project": {
+        const result = await getProjects({ variables: { limit: 20 } });
+        if (result.data?.projects) {
+          setOptions(result.data.projects);
+        } else if (result.error) {
+          toaster.create({
+            title: "Error",
+            type: "error",
+            description: "Error while retrieving options for selection",
+            duration: 4000,
+            closable: true,
+          });
+        }
+        break;
+      }
     }
   };
 
   const { workspace } = useWorkspace();
-
-  useEffect(() => {
-    getSelectOptions().catch(ignoreAbort);
-  }, []);
-
   useEffect(() => {
     getSelectOptions().catch(ignoreAbort);
   }, [workspace]);
 
+  // First item whose name starts with the current input, used for Tab-to-complete ghost text.
   const topSuggestion = useMemo(() => {
     if (!inputValue) return null;
     const list = hasSearched ? results : options;
     return list.find((item) => item.name.toLowerCase().startsWith(inputValue.toLowerCase())) || null;
   }, [inputValue, hasSearched, results, options]);
 
+  /**
+   * Queries the College Scorecard API and populates results with matching institution names
+   */
+  const fetchInstitutionResults = useCallback(async (query: string) => {
+    setInstitutionLoading(true);
+    try {
+      const params = new URLSearchParams({
+        api_key: process.env.COLLEGE_SCORECARD_KEY || "",
+        "school.name": query,
+        fields: "school.name",
+        per_page: "20",
+        "school.operating": "1",
+      });
+      const res = await fetch(`${SCORECARD_URL}?${params}`);
+      const data = await res.json();
+      setResults(
+        (data.results || [])
+          .map((r: Record<string, string>) => r["school.name"])
+          .filter(Boolean)
+          .map((name: string) => ({ _id: name, name })),
+      );
+      setHasSearched(true);
+      setShowResults(true);
+    } catch {
+      toaster.create({
+        title: "Error",
+        type: "error",
+        description: "Failed to load institutions",
+        duration: 4000,
+        closable: true,
+      });
+    } finally {
+      setInstitutionLoading(false);
+    }
+  }, []);
+
+  /**
+   * Runs the GraphQL search query and populates results for entities or projects
+   */
+  const fetchGraphQLResults = useCallback(
+    async (query: string) => {
+      const response = await searchText({
+        variables: { query, resultType: props.resultType, isBuilder: false, showArchived: false },
+      }).catch(ignoreAbort);
+      if (!response) return;
+
+      if (response.data?.search) {
+        setResults(response.data.search);
+        setHasSearched(true);
+        setShowResults(true);
+      } else {
+        setResults([]);
+        toaster.create({
+          title: "Error",
+          type: "error",
+          description: "Unable to retrieve search results",
+          duration: 4000,
+          closable: true,
+        });
+      }
+    },
+    [searchText, props.resultType],
+  );
+
+  /**
+   * Debounced dispatcher that routes to the appropriate fetch helper based on `resultType`
+   */
   const fetchResults = useMemo(
     () =>
-      debounce(async (query: string) => {
-        const response = await searchText({
-          variables: { query, resultType: props.resultType, isBuilder: false, showArchived: false },
-        }).catch(ignoreAbort);
-        if (!response) return;
-
-        if (response.data?.search) {
-          setResults(response.data.search);
-          setHasSearched(true);
-          setShowResults(true);
+      debounce((query: string) => {
+        if (props.resultType === "institution") {
+          fetchInstitutionResults(query);
         } else {
-          setResults([]);
-        }
-
-        if (searchError || !response.data?.search) {
-          toaster.create({
-            title: "Error",
-            type: "error",
-            description: searchError || "Unable to retrieve search results",
-            duration: 4000,
-            closable: true,
-          });
+          fetchGraphQLResults(query);
         }
       }, 300),
-    [searchText],
+    [fetchInstitutionResults, fetchGraphQLResults, props.resultType],
   );
 
   const updateDropdownPosition = () => {
@@ -215,28 +301,38 @@ const SearchSelect = (props: SearchSelectProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Tab completes the ghost suggestion inline rather than moving focus
     if (e.key === "Tab" && topSuggestion) {
       e.preventDefault();
       handleSelectResult(topSuggestion);
     }
   };
 
+  const defaultItem: IGenericItem | null = props.defaultOption
+    ? { _id: props.defaultOption, name: props.defaultOption }
+    : null;
+  // Puts the default option at the top, deduplicating it from the rest of the list
+  const prependDefault = (items: IGenericItem[]) =>
+    defaultItem ? [defaultItem, ...items.filter((i) => i._id !== defaultItem._id)] : items;
+
   const renderItems = (items: IGenericItem[]) => (
     <Flex direction={"column"} gap={"1"}>
       {items.map((item) => (
-        <Flex
-          key={item._id}
-          data-testid={"search-select-result"}
-          direction={"row"}
-          gap={"2"}
-          p={"1"}
-          align={"center"}
-          _hover={{ bg: "gray.100", cursor: "pointer" }}
-          onClick={() => handleSelectResult(item)}
-        >
-          <Icon name={iconName} size={"xs"} color={iconColor} />
-          <Text fontSize={"xs"}>{item.name}</Text>
-        </Flex>
+        <React.Fragment key={item._id}>
+          <Flex
+            data-testid={"search-select-result"}
+            direction={"row"}
+            gap={"2"}
+            p={"1"}
+            align={"center"}
+            _hover={{ bg: "gray.100", cursor: "pointer" }}
+            onClick={() => handleSelectResult(item)}
+          >
+            <Icon name={iconName} size={"xs"} color={iconColor} />
+            <Text fontSize={"xs"}>{item.name}</Text>
+          </Flex>
+          {defaultItem && item._id === defaultItem._id && items.length > 1 && <Separator />}
+        </React.Fragment>
       ))}
     </Flex>
   );
@@ -251,7 +347,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           endElement={showResults ? <Icon name={"c_up"} size={"xs"} /> : <Icon name={"c_down"} size={"xs"} />}
         >
           <Input
-            placeholder={placeholder}
+            placeholder={props.placeholder ?? placeholder}
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -267,32 +363,34 @@ const SearchSelect = (props: SearchSelectProps) => {
             disabled={props?.disabled || false}
           />
         </InputGroup>
+
         {props.value?._id && !showResults && (
           <Box
-            position="absolute"
-            left="2"
-            top="0"
-            bottom="0"
-            display="flex"
-            alignItems="center"
-            pointerEvents="none"
+            position={"absolute"}
+            left={"2"}
+            top={"0"}
+            bottom={"0"}
+            display={"flex"}
+            alignItems={"center"}
+            pointerEvents={"none"}
             zIndex={1}
           >
             <Icon name={iconName} size={"xs"} color={iconColor} />
           </Box>
         )}
+
         {topSuggestion && (
           <Box
-            position="absolute"
-            inset="0"
-            display="flex"
-            alignItems="center"
-            px="2"
-            fontSize="xs"
-            pointerEvents="none"
-            overflow="hidden"
-            whiteSpace="nowrap"
-            bg="white"
+            position={"absolute"}
+            inset={"0"}
+            display={"flex"}
+            alignItems={"center"}
+            px={"2"}
+            fontSize={"xs"}
+            pointerEvents={"none"}
+            overflow={"hidden"}
+            whiteSpace={"nowrap"}
+            bg={"white"}
             zIndex={-1}
           >
             <Text as="span" opacity={0} whiteSpace="pre">
@@ -304,31 +402,32 @@ const SearchSelect = (props: SearchSelectProps) => {
           </Box>
         )}
       </Box>
+
       {showResults && (
-        <>
+        <React.Fragment>
           <Box
-            position="fixed"
-            top="0"
-            left="0"
-            right="0"
-            bottom="0"
-            zIndex="9998"
+            position={"fixed"}
+            top={"0"}
+            left={"0"}
+            right={"0"}
+            bottom={"0"}
+            zIndex={"9998"}
             onClick={closeDropdown}
             opacity={isAnimating ? 1 : 0}
-            transition="opacity 0.15s ease-in-out"
+            transition={"opacity 0.15s ease-in-out"}
           />
           <Box
-            position="fixed"
+            position={"fixed"}
             top={dropdownPosition.top - 5}
             left={dropdownPosition.left}
             width={dropdownPosition.width}
             bg="white"
             border={GLOBAL_STYLES.border.style}
             borderColor={GLOBAL_STYLES.border.color}
-            borderRadius="sm"
-            shadow="md"
-            zIndex="9999"
-            p="1"
+            borderRadius={"md"}
+            shadow={"md"}
+            zIndex={"9999"}
+            p={"1"}
             opacity={isAnimating ? 1 : 0}
             transform={isAnimating ? "translateY(0)" : "translateY(-8px)"}
             transition="all 0.15s ease-in-out"
@@ -339,18 +438,22 @@ const SearchSelect = (props: SearchSelectProps) => {
                   <Spinner />
                 </Flex>
               )}
-              {!isLoading && hasSearched && results.length > 0 && renderItems(results)}
-              {!isLoading && hasSearched && results.length === 0 && (
+              {!isLoading && hasSearched && prependDefault(results).length > 0 && renderItems(prependDefault(results))}
+              {!isLoading && hasSearched && results.length === 0 && !defaultItem && (
                 <Flex w="100%" minH="100px" align="center" justify="center">
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     No Results
                   </Text>
                 </Flex>
               )}
-              {!isLoading && !hasSearched && !isTyping && options.length > 0 && renderItems(options)}
+              {!isLoading &&
+                !hasSearched &&
+                !isTyping &&
+                prependDefault(options).length > 0 &&
+                renderItems(prependDefault(options))}
             </Box>
           </Box>
-        </>
+        </React.Fragment>
       )}
     </Box>
   );

@@ -526,6 +526,7 @@ export type IconNames =
   | "grid"
   | "upload"
   | "cross"
+  | "institution"
   | "list"
   | "save"
   | "logout"
@@ -636,8 +637,9 @@ export type SearchRuleSelectProps = {
 export type SearchSelectProps = {
   id?: string;
   value: IGenericItem;
-  resultType: "entity" | "project";
+  resultType: "entity" | "project" | "institution";
   placeholder?: string;
+  defaultOption?: string;
   onChange?: (value: any) => void;
   disabled?: boolean;
   isEmbedded?: boolean;
