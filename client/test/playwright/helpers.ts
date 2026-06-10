@@ -174,6 +174,7 @@ export const createTestUser = async (context: BrowserContext): Promise<string> =
   const user = testUtils.createUser({
     email: process.env.TEST_USER_EMAIL,
     name: "Test User",
+    completedProfile: true,
   });
   await testUtils.saveUser(user);
 
