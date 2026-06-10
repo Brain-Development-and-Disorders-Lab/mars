@@ -117,11 +117,33 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   /**
    * Loads the initial dropdown options on mount and on workspace change
-   * Not used for institutions since those are fetched on demand
    */
   const getSelectOptions = async () => {
     switch (props.resultType) {
       case "institution": {
+        // Pre-poll a handful of large institutions so the dropdown isn't empty on first open.
+        setInstitutionLoading(true);
+        try {
+          const params = new URLSearchParams({
+            api_key: process.env.COLLEGE_SCORECARD_KEY || "",
+            fields: "school.name",
+            per_page: "5",
+            "school.operating": "1",
+            _sort: "latest.student.size:desc",
+          });
+          const res = await fetch(`${SCORECARD_URL}?${params}`);
+          const data = await res.json();
+          setOptions(
+            (data.results || [])
+              .map((r: Record<string, string>) => r["school.name"])
+              .filter(Boolean)
+              .map((name: string) => ({ _id: name, name })),
+          );
+        } catch {
+          // Non-critical, user can still type to search.
+        } finally {
+          setInstitutionLoading(false);
+        }
         return;
       }
       case "entity": {
@@ -260,6 +282,7 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   const openDropdown = () => {
     updateDropdownPosition();
+    setInputValue("");
     setShowResults(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -267,6 +290,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   const closeDropdown = () => {
     setIsAnimating(false);
     setIsTyping(false);
+    setInputValue(props.value?.name || "");
     setTimeout(() => setShowResults(false), 150);
   };
 

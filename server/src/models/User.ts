@@ -162,7 +162,7 @@ export class User {
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .updateOne({ _id: updated._id }, update);
-    const successStatus = response.modifiedCount == 1;
+    const successStatus = response.modifiedCount === 1 || response.matchedCount === 1;
 
     return {
       success: successStatus,
