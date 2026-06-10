@@ -105,7 +105,7 @@ const Signup = () => {
         setMode("signup");
         return;
       }
-      if (data.user.completedProfile !== false) {
+      if (data.user.completedProfile) {
         navigate("/");
         return;
       }

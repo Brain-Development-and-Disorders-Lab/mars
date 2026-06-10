@@ -6,6 +6,7 @@ import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -31,7 +32,6 @@ import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
-import ActorTag from "@components/ActorTag";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
@@ -292,6 +292,9 @@ const User = () => {
           _id: user,
           email: userEmail,
           affiliation: userAffiliation,
+          name: `${userFirstName} ${userLastName}`,
+          firstName: userFirstName,
+          lastName: userLastName,
         },
       },
     });
@@ -307,6 +310,14 @@ const User = () => {
     } else {
       // Update the displayed name
       setStaticName(`${userFirstName} ${userLastName}`);
+
+      toaster.create({
+        title: "Updated User",
+        description: "User information successfully updated",
+        type: "success",
+        duration: 2000,
+        closable: true,
+      });
     }
 
     setEditing(false);
@@ -758,7 +769,13 @@ const User = () => {
                 >
                   Avatar
                 </Text>
-                <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
+                <ActorTag
+                  key={staticName}
+                  identifier={`${userModel._id}`}
+                  fallback={"Unknown User"}
+                  size={"md"}
+                  avatarOnly
+                />
               </Flex>
 
               {/* Name */}
@@ -784,7 +801,10 @@ const User = () => {
                         value={userFirstName}
                         mt={"0.5"}
                         bg={"white"}
-                        disabled
+                        disabled={!editing}
+                        onChange={(event) => {
+                          setUserFirstName(event.target.value);
+                        }}
                       />
                     </Field.Root>
                     <Field.Root gap={"0"}>
@@ -806,7 +826,10 @@ const User = () => {
                         value={userLastName}
                         mt={"0.5"}
                         bg={"white"}
-                        disabled
+                        disabled={!editing}
+                        onChange={(event) => {
+                          setUserLastName(event.target.value);
+                        }}
                       />
                     </Field.Root>
                   </Flex>

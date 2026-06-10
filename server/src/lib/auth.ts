@@ -60,7 +60,7 @@ const getOAuthConfig = () => {
         return {
           account_orcid: sub,
           email: existingUser?.email,
-          emailVerified: true,
+          emailVerified: existingUser?.emailVerified || false,
           name: `${given_name} ${family_name}`.trim(),
         };
       }
@@ -171,7 +171,7 @@ export const auth = betterAuth({
       },
       completedProfile: {
         type: "boolean",
-        defaultValue: true,
+        defaultValue: false,
       },
     },
   },
