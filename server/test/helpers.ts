@@ -375,6 +375,10 @@ export const getAuth = async () => {
           account_orcid: {
             type: "string",
           },
+          completedProfile: {
+            type: "boolean",
+            defaultValue: false,
+          },
         },
       },
     });

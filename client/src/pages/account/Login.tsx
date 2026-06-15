@@ -55,19 +55,12 @@ const Login = () => {
 
       if (session?.user) {
         // User is logged in, check if profile is complete
-        if (session.user.email?.endsWith("@orcid.placeholder")) {
-          // ORCiD login found no existing account, so delete the orphaned
-          // placeholder account
-          await auth.deleteUser();
+        if (session.user.email?.endsWith("@orcid.placeholder") || !session.user.completedProfile) {
+          // ORCiD login with incomplete profile: redirect to complete profile
+          // rather than deleting the account, which would erase existing users
+          // whose accounts have a placeholder email due to prior signup errors
           window.history.replaceState({}, document.title, "/login");
-          toaster.create({
-            title: "No Account Found",
-            description:
-              "No account is linked to this ORCiD. Please sign up first, or log in with email and password and link ORCiD from Account Settings.",
-            type: "error",
-            duration: 6000,
-            closable: true,
-          });
+          navigate("/signup");
         } else {
           // Profile complete, redirect to dashboard
           window.history.replaceState({}, document.title, "/login");

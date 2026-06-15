@@ -66,8 +66,11 @@ const Page: FC = () => {
   // Error state
   const [sessionError, setSessionError] = useState(false);
 
+  // `true` when the user authenticated via a third-party but hasn't completed their profile
+  const [incompleteProfile, setIncompleteProfile] = useState(false);
+
   /**
-   * Helper function to validate session
+   * Helper function to validate session and check profile completion state
    */
   const getSession = async () => {
     // Retrieve the session information
@@ -89,12 +92,21 @@ const Page: FC = () => {
         email: sessionResponse.data.user.email,
         name: sessionResponse.data.user.name,
       });
+
+      // Force user to the profile completion page if required
+      if (sessionResponse.data.user.completedProfile === false) {
+        setIncompleteProfile(true);
+      }
     }
   };
 
   useEffect(() => {
     getSession();
   }, []);
+
+  if (incompleteProfile) {
+    return <Navigate to={"/signup"} />;
+  }
 
   if (session) {
     // Display content

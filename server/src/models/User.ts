@@ -75,18 +75,60 @@ export class User {
       };
     }
 
+    // Reject if another account already owns this email, regardless of update context
+    if (updated.email) {
+      const existingByEmail = await this.getByEmail(updated.email);
+      if (existingByEmail.success && existingByEmail.data !== updated._id) {
+        return {
+          success: false,
+          message: "EMAIL_EXISTS",
+        };
+      }
+    }
+
+    // Profile completion validation
+    if (updated.completedProfile === true) {
+      // Ensure valid email is provided (catch instance of ORCiD placeholders too)
+      if (!updated.email || updated.email.endsWith("@orcid.placeholder")) {
+        return {
+          success: false,
+          message: "A valid email address is required to complete your account",
+        };
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(updated.email)) {
+        return {
+          success: false,
+          message: "A valid email address is required to complete your account",
+        };
+      }
+
+      // Ensure valid name
+      if (!updated.firstName || updated.firstName === "null" || !updated.lastName || updated.lastName === "null") {
+        return {
+          success: false,
+          message: "A valid first and last name is required to complete your account",
+        };
+      }
+    }
+
     const update: { $set: UserModel } = {
       $set: {
         ...user,
       },
     };
 
-    if (updated.firstName) {
+    if (updated.firstName && updated.firstName !== "null") {
       update.$set.firstName = updated.firstName;
     }
 
-    if (updated.lastName) {
+    if (updated.lastName && updated.lastName !== "null") {
       update.$set.lastName = updated.lastName;
+    }
+
+    if (updated.name) {
+      update.$set.name = updated.name;
     }
 
     if (updated.email) {
@@ -113,10 +155,14 @@ export class User {
       update.$set.hasSeenWalkthrough = updated.hasSeenWalkthrough;
     }
 
+    if (!_.isUndefined(updated.completedProfile)) {
+      update.$set.completedProfile = updated.completedProfile;
+    }
+
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .updateOne({ _id: updated._id }, update);
-    const successStatus = response.modifiedCount == 1;
+    const successStatus = response.modifiedCount === 1 || response.matchedCount === 1;
 
     return {
       success: successStatus,

@@ -33,6 +33,9 @@ export const auth = createAuthClient({
         account_orcid: {
           type: "string",
         },
+        completedProfile: {
+          type: "boolean",
+        },
       },
     }),
   ],

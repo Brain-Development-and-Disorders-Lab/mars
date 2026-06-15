@@ -46,29 +46,32 @@ const getOAuthConfig = () => {
     mapProfileToUser: async (response: Record<string, unknown>) => {
       // ORCiD userinfo endpoint returns 'sub' as the ORCiD ID per OpenID Connect spec
       const sub = typeof response.sub === "string" ? response.sub : "";
-      const given_name = typeof response.given_name === "string" ? response.given_name : "";
-      const family_name = typeof response.family_name === "string" ? response.family_name : "";
 
-      // Note: Returning ORCiD user, look up their real email so better-auth can
-      // match the session correctly
+      // Guard against both JSON null and the literal string "null"
+      const given_name =
+        typeof response.given_name === "string" && response.given_name !== "null" ? response.given_name : "";
+      const family_name =
+        typeof response.family_name === "string" && response.family_name !== "null" ? response.family_name : "";
+
+      // Note: Returning ORCiD user, look up their real email so better-auth can match the session correctly
       const userIdResult = await User.getByOrcid(sub);
       if (userIdResult.success) {
         const existingUser = await User.getOne(userIdResult.data);
         return {
           account_orcid: sub,
           email: existingUser?.email,
-          emailVerified: true,
+          emailVerified: existingUser?.emailVerified || false,
           name: `${given_name} ${family_name}`.trim(),
         };
       }
 
-      // Note: New user or first-time link, better-auth requires an email, so use a
-      // placeholder
+      // Note: New user or first-time link, better-auth requires an email, so use a placeholder
       return {
         account_orcid: sub,
         email: `${sub.replace(/\//g, "-")}@orcid.placeholder`,
         emailVerified: false,
         name: `${given_name} ${family_name}`.trim(),
+        completedProfile: false, // `false` until information provided
       };
     },
   };
@@ -161,9 +164,14 @@ export const auth = betterAuth({
       },
       api_keys: {
         type: "string",
+        defaultValue: "[]",
       },
       account_orcid: {
         type: "string",
+      },
+      completedProfile: {
+        type: "boolean",
+        defaultValue: false,
       },
     },
   },

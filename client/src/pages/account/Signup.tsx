@@ -10,14 +10,12 @@ import {
   Input,
   Fieldset,
   Field,
-  Select,
-  createListCollection,
   Text,
   Separator,
   Box,
   AbsoluteCenter,
-  Spacer,
 } from "@chakra-ui/react";
+import SearchSelect from "@components/SearchSelect";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -45,7 +43,10 @@ import { IResponseMessage } from "@types";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 
-// GraphQL mutation to create user profile
+// "signup" for new email accounts, "complete" for third-party accounts that need profile info
+type SignupPageMode = "loading" | "signup" | "complete";
+
+// GraphQL mutation to update an existing user record during profile completion
 const UPDATE_USER = gql`
   mutation UpdateUser($user: UserInput) {
     updateUser(user: $user) {
@@ -57,122 +58,103 @@ const UPDATE_USER = gql`
 
 const Signup = () => {
   const navigate = useNavigate();
-  const isDevelopment = process.env.NODE_ENV === "development";
 
   // GraphQL mutation hook
   const [updateUser, { loading: updateUserLoading }] = useMutation<{
     updateUser: IResponseMessage;
   }>(UPDATE_USER);
 
+  // Page mode resolves from "loading" once the session check completes
+  const [mode, setMode] = useState<SignupPageMode>("loading");
+
+  // Session-derived identifiers, only populated in complete profile mode
+  const [userId, setUserId] = useState("");
+  const [provider, setProvider] = useState("");
+
   // User information state
-  const [userFirstName, setUserFirstName] = useState("");
-  const [userLastName, setUserLastName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userAffiliation, setUserAffiliation] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [affiliation, setAffiliation] = useState("");
 
   // Email validation state
   const [emailError, setEmailError] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
 
-  // Password validation state
+  // Password state, signup mode only
   const [initialPassword, setInitialPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordValid, setIsPasswordValid] = useState(false);
 
   // Loading state
-  const [isAccountCreateLoading, setIsAccountCreateLoading] = useState(false);
-  const [isOrcidLoading, setIsOrcidLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ORCiD state
-  const [orcidId, setOrcidId] = useState("");
-  const [isExistingUser, setIsExistingUser] = useState(false);
-  const [existingUserId, setExistingUserId] = useState("");
-
-  // Check if user already has a session (from ORCiD login)
+  // Determine the page mode from the current session state
   useEffect(() => {
-    auth.getSession().then(({ data: session }) => {
-      if (session?.user?.email?.endsWith("@orcid.placeholder")) {
-        // User logged in via ORCiD but needs to complete profile
-        setIsExistingUser(true);
-        setExistingUserId(session.user.id);
-        if (session.user.account_orcid) {
-          setOrcidId(session.user.account_orcid);
-        }
-        // Pre-fill name from ORCiD
-        if (session.user.name) {
-          const spaceIndex = session.user.name.indexOf(" ");
-          if (spaceIndex !== -1) {
-            setUserFirstName(session.user.name.slice(0, spaceIndex));
-            setUserLastName(session.user.name.slice(spaceIndex + 1));
-          } else {
-            setUserFirstName(session.user.name);
-          }
+    auth.getSession().then(({ data }) => {
+      if (!data) {
+        setMode("signup");
+        return;
+      }
+      if (data.user.completedProfile) {
+        navigate("/");
+        return;
+      }
+      setMode("complete");
+      setUserId(data.user.id);
+      if (data.user.account_orcid) {
+        setProvider("orcid");
+      }
+      // Pre-fill name from the third-party provider if available
+      if (data.user.name) {
+        const spaceIndex = data.user.name.indexOf(" ");
+        if (spaceIndex !== -1) {
+          setFirstName(data.user.name.slice(0, spaceIndex));
+          setLastName(data.user.name.slice(spaceIndex + 1));
+        } else {
+          setFirstName(data.user.name);
         }
       }
     });
   }, []);
 
-  const userComplete =
-    userFirstName !== "" &&
-    userLastName !== "" &&
-    userEmail !== "" &&
-    userAffiliation !== "" &&
-    isEmailValid &&
-    (isExistingUser || isPasswordValid); // Password only required for new users
-
-  // Affiliation options collection
-  const affiliationCollection = createListCollection({
-    items: [
-      { label: "No Affiliation", value: "No Affiliation" },
-      {
-        label: "Washington University in St. Louis",
-        value: "Washington University in St. Louis",
-      },
-    ],
-  });
-
   /**
    * Validate email format and update validation state
-   * @param {string} email Entered email address
+   * @param {string} value Entered email address
    */
-  const validateEmail = (email: string) => {
-    const isValid = isValidEmail(email);
+  const validateEmail = (value: string) => {
+    const isValid = isValidEmail(value);
     setIsEmailValid(isValid);
-
-    if (email === "") {
-      setEmailError("");
-    } else if (!isValid) {
-      setEmailError("Please enter a valid email address");
-    } else {
-      setEmailError("");
-    }
+    setEmailError(value === "" || isValid ? "" : "Please enter a valid email address");
   };
 
   /**
-   * Validate password and matching
+   * Validate password match and update validation state
    * @param {string} password Confirmed password string
    */
   const validatePassword = (password: string) => {
     setConfirmPassword(password);
-    if (password === "") {
-      setIsPasswordValid(false);
-    } else if (password !== initialPassword) {
-      setIsPasswordValid(false);
-    } else {
-      setIsPasswordValid(true);
-    }
+    setIsPasswordValid(password !== "" && password === initialPassword);
   };
 
+  // All required fields are populated and valid
+  const isFormComplete =
+    firstName !== "" &&
+    lastName !== "" &&
+    email !== "" &&
+    isEmailValid &&
+    affiliation !== "" &&
+    (mode === "complete" || isPasswordValid);
+
   /**
-   * Handle ORCiD signup button click
+   * Handle ORCiD signup button click, redirect to ORCiD authentication
    */
   const onOrcidSignupClick = async () => {
-    setIsOrcidLoading(true);
+    setIsLoading(true);
     const { error, data } = await auth.signIn.social({
       provider: "orcid",
       callbackURL: `${APP_URL}/signup`,
     });
-
     if (error) {
       toaster.create({
         title: "ORCiD Authentication Error",
@@ -181,118 +163,117 @@ const Signup = () => {
         duration: 4000,
         closable: true,
       });
-      setIsOrcidLoading(false);
+      setIsLoading(false);
     } else if (data?.url) {
       window.location.href = data.url;
     }
   };
 
   /**
-   * Handle the "Done" button being clicked after user information is entered
+   * Handle email and password signup form submission
    */
-  const onDoneClick = async () => {
-    setIsAccountCreateLoading(true);
-    const joinedName = `${userFirstName} ${userLastName}`;
-
-    if (isExistingUser) {
-      // User already has an account from ORCiD login
-      try {
-        const result = await updateUser({
-          variables: {
-            user: {
-              _id: existingUserId,
-              firstName: userFirstName,
-              lastName: userLastName,
-              name: `${userFirstName} ${userLastName}`,
-              affiliation: userAffiliation,
-              email: userEmail,
-              emailVerified: false,
-              image: "",
-              createdAt: dayjs(Date.now()).toISOString(),
-              updatedAt: dayjs(Date.now()).toISOString(),
-              api_keys: JSON.stringify([]),
-              account_orcid: orcidId,
-            },
-          },
-        });
-
-        setIsAccountCreateLoading(false);
-
-        if (result.data?.updateUser) {
-          posthog.capture("client.auth.signup_complete", { method: "orcid" });
+  const onSignupClick = async () => {
+    setIsLoading(true);
+    await auth.signUp.email(
+      {
+        email,
+        name: `${firstName} ${lastName}`,
+        password: initialPassword,
+        firstName,
+        lastName,
+        affiliation,
+        lastLogin: dayjs(Date.now()).toISOString(),
+        api_keys: JSON.stringify([]),
+        account_orcid: "",
+        completedProfile: true,
+        callbackURL: `${APP_URL}/login`,
+        hasSeenWalkthrough: false,
+      },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          posthog.capture("client.auth.signup_complete", { method: "email" });
           toaster.create({
-            title: "User Created",
+            title: "Create Account",
             type: "success",
-            description: "Your account has been created successfully!",
+            description: "Account created successfully!",
             duration: 4000,
             closable: true,
           });
-          navigate("/");
-        } else {
+          navigate("/login");
+        },
+        onError: (ctx) => {
+          setIsLoading(false);
           toaster.create({
-            title: "Failed to Create Account",
+            title: "Create Account",
             type: "error",
-            description: "Failed to create account. Please try again.",
+            description: ctx.error.message || "An unknown error occurred. Please try again.",
             duration: 4000,
             closable: true,
           });
-        }
-      } catch {
-        setIsAccountCreateLoading(false);
+        },
+      },
+    );
+  };
+
+  /**
+   * Handle profile completion form submission for third-party signups
+   */
+  const onCompleteClick = async () => {
+    setIsLoading(true);
+    try {
+      const result = await updateUser({
+        variables: {
+          user: {
+            _id: userId,
+            firstName,
+            lastName,
+            name: `${firstName} ${lastName}`,
+            email,
+            affiliation,
+            completedProfile: true,
+            updatedAt: dayjs(Date.now()).toISOString(),
+          },
+        },
+      });
+      setIsLoading(false);
+      if (result.data?.updateUser.success) {
+        await auth.updateUser({ completedProfile: true });
+        posthog.capture("client.auth.signup_complete", { method: provider || "third_party" });
+        navigate("/");
+      } else if (result.data?.updateUser.message === "EMAIL_EXISTS") {
         toaster.create({
-          title: "Failed to Create Account",
+          title: "Email Already in Use",
+          type: "warning",
+          description:
+            "An account with this email already exists. Sign in to your existing account and link your ORCiD from Settings.",
+          duration: 8000,
+          closable: true,
+        });
+      } else {
+        toaster.create({
+          title: "Failed to Complete Profile",
           type: "error",
-          description: "Failed to create account. Please try again.",
+          description: result.data?.updateUser.message || "Failed to complete profile. Please try again.",
           duration: 4000,
           closable: true,
         });
       }
-    } else {
-      // New user, create account
-      await auth.signUp.email(
-        {
-          email: userEmail,
-          name: joinedName,
-          password: initialPassword,
-          firstName: userFirstName,
-          lastName: userLastName,
-          affiliation: userAffiliation,
-          lastLogin: dayjs(Date.now()).toISOString(),
-          api_keys: JSON.stringify([]),
-          account_orcid: orcidId,
-          callbackURL: `${APP_URL}/login`,
-          hasSeenWalkthrough: false,
-        },
-        {
-          onRequest: () => {
-            setIsAccountCreateLoading(true);
-          },
-          onSuccess: () => {
-            setIsAccountCreateLoading(false);
-            posthog.capture("client.auth.signup_complete", { method: "email" });
-            toaster.create({
-              title: "Create Account",
-              type: "success",
-              description: "Account created successfully!",
-              duration: 4000,
-              closable: true,
-            });
-            navigate("/login");
-          },
-          onError: (ctx) => {
-            setIsAccountCreateLoading(false);
-            toaster.create({
-              title: "Create Account",
-              type: "error",
-              description: ctx.error.message || "An unknown error occurred. Please try again.",
-              duration: 4000,
-              closable: true,
-            });
-          },
-        },
-      );
+    } catch {
+      setIsLoading(false);
+      toaster.create({
+        title: "Failed to Complete Profile",
+        type: "error",
+        description: "Failed to complete profile. Please try again.",
+        duration: 4000,
+        closable: true,
+      });
     }
   };
+
+  if (mode === "loading") {
+    return null;
+  }
 
   return (
     <Content>
@@ -329,207 +310,156 @@ const Signup = () => {
           <Flex direction={"column"} gap={"2"} align={"center"}>
             <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
             <Heading size={"xl"} fontWeight={"semibold"}>
-              Create your Metadatify account
+              {mode === "complete" ? "Complete Profile" : "Create your Metadatify account"}
             </Heading>
+            {mode === "complete" && (
+              <Text fontSize={"sm"} color={"gray.500"} textAlign={"center"}>
+                Provide your name and email address to finish setting up your account.
+              </Text>
+            )}
           </Flex>
 
           <Fieldset.Root>
             <Fieldset.Content>
               <Flex direction={"column"} gap={"4"}>
                 <Flex direction={"row"} gap={"4"}>
-                  <Flex direction={"column"} w={"100%"}>
-                    <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                        First Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userFirstNameInput"}
-                        size={"xs"}
-                        rounded={"md"}
-                        borderColor={"gray.300"}
-                        _focus={{
-                          borderColor: "primary",
-                          boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
-                        }}
-                        value={userFirstName}
-                        onChange={(event) => setUserFirstName(event.target.value)}
-                      />
-                    </Field.Root>
-                  </Flex>
-                  <Flex direction={"column"} w={"100%"}>
-                    <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                        Last Name
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userLastNameInput"}
-                        size={"xs"}
-                        rounded={"md"}
-                        borderColor={"gray.300"}
-                        _focus={{
-                          borderColor: "primary",
-                          boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
-                        }}
-                        value={userLastName}
-                        onChange={(event) => setUserLastName(event.target.value)}
-                      />
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-                <Flex direction={"column"} gap={"4"}>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Field.Root gap={"0.5"} invalid={emailError !== ""} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                        Email
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Input
-                        id={"userEmailInput"}
-                        size={"xs"}
-                        rounded={"md"}
-                        type={"email"}
-                        borderColor={emailError ? "red.300" : "gray.300"}
-                        _focus={{
-                          borderColor: "primary",
-                          boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
-                        }}
-                        value={userEmail}
-                        onChange={(event) => {
-                          setUserEmail(event.target.value);
-                          validateEmail(event.target.value);
-                        }}
-                      />
-                      <Field.ErrorText color={"red.500"} fontSize={"xs"} mt={"1"}>
-                        {emailError}
-                      </Field.ErrorText>
-                    </Field.Root>
-                  </Flex>
-
-                  <Flex direction={"column"}>
-                    <Field.Root gap={"0.5"} required>
-                      <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                        Affiliation
-                        <Field.RequiredIndicator />
-                      </Field.Label>
-                      <Select.Root
-                        collection={affiliationCollection}
-                        size={"xs"}
-                        rounded={"md"}
-                        value={userAffiliation ? [userAffiliation] : []}
-                        onValueChange={(details) => setUserAffiliation(details.value[0] || "")}
-                      >
-                        <Select.HiddenSelect />
-                        <Select.Control>
-                          <Select.Trigger data-testid="affiliation-select-trigger" rounded={"md"}>
-                            <Select.ValueText placeholder={"Select your affiliation"} />
-                          </Select.Trigger>
-                          <Select.IndicatorGroup>
-                            <Select.Indicator />
-                          </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {affiliationCollection.items.map((affiliation) => (
-                              <Select.Item item={affiliation} key={affiliation.value}>
-                                {affiliation.label}
-                                <Select.ItemIndicator />
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Select.Root>
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-              </Flex>
-
-              {!isExistingUser && (
-                <Flex direction={"column"} gap={"1"} w={"100%"}>
-                  <Field.Root gap={"0.5"} required>
-                    <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                      Password
+                  <Field.Root gap={"0.5"} required w={"100%"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      First Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
-                      id={"userPasswordInputInitial"}
-                      type={"password"}
-                      rounded={"md"}
                       size={"xs"}
-                      value={initialPassword}
-                      placeholder={"Password"}
-                      disabled={isAccountCreateLoading}
-                      onChange={(event) => setInitialPassword(event.target.value)}
+                      rounded={"md"}
+                      borderColor={"gray.300"}
+                      _focus={{
+                        borderColor: "primary",
+                        boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                      }}
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
                     />
                   </Field.Root>
-                  <Field.Root gap={"0.5"} invalid={!isPasswordValid} required>
-                    <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
-                      Confirm Password
+                  <Field.Root gap={"0.5"} required w={"100%"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      Last Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
-                      id={"userPasswordInputConfirm"}
-                      type={"password"}
-                      rounded={"md"}
                       size={"xs"}
-                      value={confirmPassword}
-                      placeholder={"Confirm Password"}
-                      disabled={isAccountCreateLoading}
-                      onChange={(event) => validatePassword(event.target.value)}
+                      rounded={"md"}
+                      borderColor={"gray.300"}
+                      _focus={{
+                        borderColor: "primary",
+                        boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                      }}
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
                     />
-                    <Field.ErrorText fontSize={"xs"}>Passwords do not match</Field.ErrorText>
                   </Field.Root>
                 </Flex>
-              )}
 
-              {orcidId && (
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  gap={"2"}
-                  p={"2"}
-                  bg={"green.50"}
-                  rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={"green.200"}
-                >
-                  <Icon name={"check"} size={"xs"} color={"green.600"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"green.700"}>
-                    ORCiD {orcidId} will be linked to your account
-                  </Text>
-                </Flex>
-              )}
-
-              {!orcidId && (
-                <>
-                  <Box position={"relative"} p={"2"}>
-                    <Separator />
-                    <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Optional
-                      </Text>
-                    </AbsoluteCenter>
-                  </Box>
-
-                  <Button
-                    variant={"subtle"}
-                    onClick={onOrcidSignupClick}
-                    loading={isOrcidLoading}
-                    disabled={isDevelopment || isAccountCreateLoading}
-                    loadingText={"Redirecting to ORCiD..."}
+                <Field.Root gap={"0.5"} invalid={emailError !== ""} required>
+                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                    Email
+                    <Field.RequiredIndicator />
+                  </Field.Label>
+                  <Input
                     size={"xs"}
                     rounded={"md"}
-                    colorPalette={"green"}
-                  >
-                    <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
-                    Sign up with ORCiD
-                  </Button>
-                </>
-              )}
+                    type={"email"}
+                    borderColor={emailError ? "red.300" : "gray.300"}
+                    _focus={{
+                      borderColor: "primary",
+                      boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                    }}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      validateEmail(e.target.value);
+                    }}
+                  />
+                  <Field.ErrorText color={"red.500"} fontSize={"xs"} mt={"1"}>
+                    {emailError}
+                  </Field.ErrorText>
+                </Field.Root>
+
+                <Field.Root gap={"0.5"} required>
+                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                    Affiliation
+                    <Field.RequiredIndicator />
+                  </Field.Label>
+                  <SearchSelect
+                    resultType="institution"
+                    value={{ _id: affiliation, name: affiliation }}
+                    onChange={(item) => setAffiliation(item.name)}
+                    defaultOption="Affiliation Not Shown"
+                  />
+                </Field.Root>
+
+                {mode === "signup" && (
+                  <>
+                    <Flex direction={"column"} gap={"1"} w={"100%"}>
+                      <Field.Root gap={"0.5"} required>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          Password
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          type={"password"}
+                          rounded={"md"}
+                          size={"xs"}
+                          value={initialPassword}
+                          placeholder={"Password"}
+                          disabled={isLoading}
+                          onChange={(e) => setInitialPassword(e.target.value)}
+                        />
+                      </Field.Root>
+                      <Field.Root gap={"0.5"} invalid={confirmPassword !== "" && !isPasswordValid} required>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                          Confirm Password
+                          <Field.RequiredIndicator />
+                        </Field.Label>
+                        <Input
+                          type={"password"}
+                          rounded={"md"}
+                          size={"xs"}
+                          value={confirmPassword}
+                          placeholder={"Confirm Password"}
+                          disabled={isLoading}
+                          onChange={(e) => validatePassword(e.target.value)}
+                        />
+                        <Field.ErrorText fontSize={"xs"}>Passwords do not match</Field.ErrorText>
+                      </Field.Root>
+                    </Flex>
+
+                    <Box position={"relative"} p={"2"}>
+                      <Separator />
+                      <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Optional
+                        </Text>
+                      </AbsoluteCenter>
+                    </Box>
+
+                    <Button
+                      variant={"subtle"}
+                      onClick={onOrcidSignupClick}
+                      loading={isLoading}
+                      loadingText={"Redirecting to ORCiD..."}
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                    >
+                      <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
+                      Sign up with ORCiD
+                    </Button>
+                  </>
+                )}
+              </Flex>
 
               <Flex align={"center"} justify={"space-between"} w={"100%"}>
-                {!isExistingUser ? (
+                {mode === "signup" && (
                   <Button
                     id={"returnLoginButton"}
                     colorPalette={"orange"}
@@ -540,21 +470,19 @@ const Signup = () => {
                     Return to Login
                     <Icon name={"logout"} size={"xs"} />
                   </Button>
-                ) : (
-                  <Spacer />
                 )}
-
                 <Button
                   id={"createAccountButton"}
                   colorPalette={"green"}
                   size={"xs"}
                   rounded={"md"}
-                  onClick={() => onDoneClick()}
-                  disabled={!userComplete}
-                  loading={isAccountCreateLoading || updateUserLoading}
-                  loadingText={isExistingUser ? "Completing Account..." : "Creating Account..."}
+                  onClick={mode === "complete" ? onCompleteClick : onSignupClick}
+                  disabled={!isFormComplete}
+                  loading={isLoading || updateUserLoading}
+                  loadingText={mode === "complete" ? "Completing Profile..." : "Creating Account..."}
+                  ml={mode === "complete" ? "auto" : undefined}
                 >
-                  {isExistingUser ? "Complete" : "Create"} Account
+                  {mode === "complete" ? "Complete Profile" : "Create Account"}
                   <Icon name={"check"} size={"xs"} />
                 </Button>
               </Flex>

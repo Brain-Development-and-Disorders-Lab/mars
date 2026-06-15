@@ -1,11 +1,25 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import { Flex, Input, Button, Text, Heading, IconButton, Tag, Fieldset, Field, EmptyState } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Input,
+  Button,
+  Text,
+  Heading,
+  IconButton,
+  Tag,
+  Fieldset,
+  Field,
+  EmptyState,
+} from "@chakra-ui/react";
+import SearchSelect from "@components/SearchSelect";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -31,7 +45,6 @@ import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
-import ActorTag from "@components/ActorTag";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
@@ -149,7 +162,7 @@ const User = () => {
       setUserEmail(data.user.email);
       setEmailVerified(data.user.emailVerified);
       setUserAffiliation(data.user.affiliation);
-      setUserKeys(JSON.parse(data.user.api_keys));
+      setUserKeys(data.user.api_keys ? JSON.parse(data.user.api_keys) : []);
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
 
       // Initialize email validation state
@@ -171,8 +184,9 @@ const User = () => {
       }
     }
   `;
-  const [updateUser, { loading: userUpdateLoading, error: userUpdateError }] =
-    useMutation<IResponseMessage>(UPDATE_USER);
+  const [updateUser, { loading: userUpdateLoading, error: userUpdateError }] = useMutation<{
+    updateUser: IResponseMessage;
+  }>(UPDATE_USER);
 
   // Mutation to revoke an API key
   const REVOKE_KEY = gql`
@@ -286,28 +300,52 @@ const User = () => {
       return;
     }
 
-    await updateUser({
+    const result = await updateUser({
       variables: {
         user: {
-          _id: userOrcid,
+          _id: user,
           email: userEmail,
           affiliation: userAffiliation,
+          name: `${userFirstName} ${userLastName}`,
+          firstName: userFirstName,
+          lastName: userLastName,
         },
       },
     });
 
-    if (userUpdateError) {
-      toaster.create({
-        title: "Error",
-        description: "Unable to update User information",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    } else {
-      // Update the displayed name
-      setStaticName(`${userFirstName} ${userLastName}`);
+    if (userUpdateError || !result.data?.updateUser.success) {
+      if (result.data?.updateUser.message === "EMAIL_EXISTS") {
+        setEmailError("An account with this email already exists");
+        setIsEmailValid(false);
+        toaster.create({
+          title: "Email Already in Use",
+          description: "An account with this email already exists. Please use a different email address.",
+          type: "warning",
+          duration: 4000,
+          closable: true,
+        });
+      } else {
+        toaster.create({
+          title: "Error",
+          description: "Unable to update User information",
+          type: "error",
+          duration: 2000,
+          closable: true,
+        });
+      }
+      return;
     }
+
+    // Update the displayed name
+    setStaticName(`${userFirstName} ${userLastName}`);
+
+    toaster.create({
+      title: "Updated User",
+      description: "User information successfully updated",
+      type: "success",
+      duration: 2000,
+      closable: true,
+    });
 
     setEditing(false);
   };
@@ -758,7 +796,13 @@ const User = () => {
                 >
                   Avatar
                 </Text>
-                <ActorTag identifier={`${userModel._id}`} fallback={"Unknown User"} size={"md"} avatarOnly />
+                <ActorTag
+                  key={staticName}
+                  identifier={`${userModel._id}`}
+                  fallback={"Unknown User"}
+                  size={"md"}
+                  avatarOnly
+                />
               </Flex>
 
               {/* Name */}
@@ -784,7 +828,10 @@ const User = () => {
                         value={userFirstName}
                         mt={"0.5"}
                         bg={"white"}
-                        disabled
+                        disabled={!editing}
+                        onChange={(event) => {
+                          setUserFirstName(event.target.value);
+                        }}
                       />
                     </Field.Root>
                     <Field.Root gap={"0"}>
@@ -806,7 +853,10 @@ const User = () => {
                         value={userLastName}
                         mt={"0.5"}
                         bg={"white"}
-                        disabled
+                        disabled={!editing}
+                        onChange={(event) => {
+                          setUserLastName(event.target.value);
+                        }}
                       />
                     </Field.Root>
                   </Flex>
@@ -855,7 +905,7 @@ const User = () => {
                       }}
                     />
                     {emailError !== "" && (
-                      <Field.ErrorText fontSize={"xs"} mt={"1"}>
+                      <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
                         {emailError}
                       </Field.ErrorText>
                     )}
@@ -907,20 +957,18 @@ const User = () => {
                       Affiliation
                       <Field.RequiredIndicator />
                     </Field.Label>
-                    <Input
-                      id={"dialoglUserAffiliation"}
-                      size={"xs"}
-                      rounded={"md"}
-                      placeholder={"Affiliation"}
-                      value={userAffiliation}
-                      disabled={!editing}
-                      mt={"0.5"}
-                      bg={"white"}
-                      onChange={(event) => {
-                        setUserAffiliation(event.target.value);
-                        validateAffiliation(event.target.value);
-                      }}
-                    />
+                    <Box mt={"0.5"} minW={"sm"}>
+                      <SearchSelect
+                        resultType={"institution"}
+                        defaultOption={"Affiliation Not Shown"}
+                        value={{ _id: userAffiliation, name: userAffiliation }}
+                        onChange={(item) => {
+                          setUserAffiliation(item.name);
+                          validateAffiliation(item.name);
+                        }}
+                        disabled={!editing}
+                      />
+                    </Box>
                     {affiliationError !== "" && (
                       <Field.ErrorText fontSize={"xs"} mt={"1"}>
                         {affiliationError}
