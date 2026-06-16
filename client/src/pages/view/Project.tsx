@@ -22,6 +22,7 @@ import {
   Timeline,
   Collapsible,
   Textarea,
+  Breadcrumb,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
@@ -682,42 +683,59 @@ const Project = () => {
         )}
 
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
-            <Flex
-              id={"projectNameTag"}
-              align={"center"}
-              gap={"1"}
-              p={"1"}
-              border={"2px solid"}
-              borderColor={GLOBAL_STYLES.project.color.icon}
-              rounded={"md"}
-              bg={"blue.50"}
-            >
-              <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {displayProjectData.name}
-              </Heading>
-            </Flex>
+          {/* Breadcrumbs */}
+          <Flex align={"center"} gap={"2"} ml={"0.5"}>
+            <Breadcrumb.Root>
+              <Breadcrumb.List>
+                <Breadcrumb.Item
+                  onClick={() => navigate("/")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Dashboard
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+                <Breadcrumb.Item
+                  gap={"1"}
+                  onClick={() => navigate("/projects")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  <Icon size={"xs"} name={"project"} color={GLOBAL_STYLES.project.color.icon} />
+                  Projects
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </Breadcrumb.List>
+            </Breadcrumb.Root>
 
-            {displayProjectArchived && (
+            <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
               <Flex
-                id={"projectArchiveTag"}
+                id={"projectNameTag"}
                 align={"center"}
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={"gray.500"}
-                bg={GLOBAL_STYLES.card.bg}
+                borderColor={displayProjectArchived ? "gray.500" : GLOBAL_STYLES.project.color.icon}
+                bg={displayProjectArchived ? GLOBAL_STYLES.card.bg : "blue.50"}
                 rounded={"md"}
               >
-                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
-                <Tooltip content={"This Project has been archived"}>
+                <Icon
+                  name={"project"}
+                  size={"sm"}
+                  color={displayProjectArchived ? "gray.500" : GLOBAL_STYLES.project.color.icon}
+                />
+                <Tooltip content={`${displayProjectArchived ? "Archived: " : ""}${displayProjectData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    Archived
+                    {_.truncate(displayProjectData.name, { length: 30 })}
                   </Heading>
                 </Tooltip>
+                {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
               </Flex>
-            )}
+            </Flex>
           </Flex>
 
           {/* Buttons */}

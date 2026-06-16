@@ -24,8 +24,8 @@ import {
   EmptyState,
   Timeline,
   Collapsible,
-  Spacer,
   Textarea,
+  Breadcrumb,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -1215,44 +1215,59 @@ const Entity = () => {
         )}
 
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
-            <Flex
-              id={"entityNameTag"}
-              align={"center"}
-              gap={"1"}
-              p={"1"}
-              border={"2px solid"}
-              borderColor={GLOBAL_STYLES.entity.color.icon}
-              bg={"purple.50"}
-              rounded={"md"}
-            >
-              <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
-              <Tooltip content={displayEntityData.name}>
-                <Heading fontWeight={"semibold"} size={"sm"}>
-                  {_.truncate(displayEntityData.name, { length: 30 })}
-                </Heading>
-              </Tooltip>
-            </Flex>
+          {/* Breadcrumbs */}
+          <Flex align={"center"} gap={"2"} ml={"0.5"}>
+            <Breadcrumb.Root>
+              <Breadcrumb.List>
+                <Breadcrumb.Item
+                  onClick={() => navigate("/")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Dashboard
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+                <Breadcrumb.Item
+                  gap={"1"}
+                  onClick={() => navigate("/entities")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  <Icon size={"xs"} name={"entity"} color={GLOBAL_STYLES.entity.color.icon} />
+                  Entities
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </Breadcrumb.List>
+            </Breadcrumb.Root>
 
-            {displayEntityArchived && (
+            <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
               <Flex
-                id={"entityArchiveTag"}
+                id={"entityNameTag"}
                 align={"center"}
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={"gray.500"}
-                bg={GLOBAL_STYLES.card.bg}
+                borderColor={displayEntityArchived ? "gray.500" : GLOBAL_STYLES.entity.color.icon}
+                bg={displayEntityArchived ? GLOBAL_STYLES.card.bg : "purple.50"}
                 rounded={"md"}
               >
-                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
-                <Tooltip content={"This Entity has been archived"}>
+                <Icon
+                  name={"entity"}
+                  size={"sm"}
+                  color={displayEntityArchived ? "gray.500" : GLOBAL_STYLES.entity.color.icon}
+                />
+                <Tooltip content={`${displayEntityArchived ? "Archived: " : ""}${displayEntityData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    Archived
+                    {_.truncate(displayEntityData.name, { length: 30 })}
                   </Heading>
                 </Tooltip>
+                {displayEntityArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
               </Flex>
-            )}
+            </Flex>
           </Flex>
 
           {/* Buttons */}
@@ -1973,8 +1988,6 @@ const Entity = () => {
                   </Text>
                   <TimestampTag timestamp={entity.created} description={"Created"} />
                 </Flex>
-
-                <Spacer />
 
                 {/* Visibility */}
                 <Flex direction={"column"} gap={"2"}>

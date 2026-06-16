@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
+  Breadcrumb,
   Button,
   CloseButton,
   Collapsible,
@@ -555,41 +556,59 @@ const Template = () => {
         )}
 
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
-            <Flex
-              align={"center"}
-              gap={"1"}
-              p={"1"}
-              border={"2px solid"}
-              borderColor={GLOBAL_STYLES.template.color.icon}
-              bg={"teal.50"}
-              rounded={"md"}
-            >
-              <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {displayTemplateName}
-              </Heading>
-            </Flex>
+          {/* Breadcrumbs */}
+          <Flex align={"center"} gap={"2"} ml={"0.5"}>
+            <Breadcrumb.Root>
+              <Breadcrumb.List>
+                <Breadcrumb.Item
+                  onClick={() => navigate("/")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Dashboard
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+                <Breadcrumb.Item
+                  gap={"1"}
+                  onClick={() => navigate("/templates")}
+                  _hover={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  <Icon size={"xs"} name={"template"} color={GLOBAL_STYLES.template.color.icon} />
+                  Templates
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </Breadcrumb.List>
+            </Breadcrumb.Root>
 
-            {displayTemplateArchived && (
+            <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
               <Flex
-                id={"templateArchiveTag"}
+                id={"templateNameTag"}
                 align={"center"}
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={"gray.500"}
-                bg={GLOBAL_STYLES.card.bg}
+                borderColor={displayTemplateArchived ? "gray.500" : GLOBAL_STYLES.template.color.icon}
+                bg={displayTemplateArchived ? GLOBAL_STYLES.card.bg : "teal.50"}
                 rounded={"md"}
               >
-                <Icon name={"archive"} size={"sm"} color={"gray.500"} />
-                <Tooltip content={"This Template has been archived"}>
+                <Icon
+                  name={"template"}
+                  size={"sm"}
+                  color={displayTemplateArchived ? "gray.500" : GLOBAL_STYLES.template.color.icon}
+                />
+                <Tooltip content={`${displayTemplateArchived ? "Archived: " : ""}${displayTemplateName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    Archived
+                    {_.truncate(displayTemplateName, { length: 30 })}
                   </Heading>
                 </Tooltip>
+                {displayTemplateArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
               </Flex>
-            )}
+            </Flex>
           </Flex>
 
           {/* Buttons */}
