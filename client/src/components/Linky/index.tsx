@@ -268,7 +268,7 @@ const Linky = (props: LinkyProps) => {
               rounded={"md"}
               overflow={"hidden"}
               cursor={"pointer"}
-              onClick={() => setShowNavigator(!showNavigator)}
+              onClick={onClickHandler}
               flexShrink={0}
               _hover={{
                 borderColor: "blue.300",
@@ -311,7 +311,7 @@ const Linky = (props: LinkyProps) => {
           </HoverCard.Trigger>
           <Portal>
             <HoverCard.Positioner>
-              <HoverCard.Content p={"3"} gap={"2"} w={"xs"}>
+              <HoverCard.Content p={"3"} gap={"2"} w={"xs"} zIndex={"max"}>
                 <HoverCard.Arrow>
                   <HoverCard.ArrowTip />
                 </HoverCard.Arrow>

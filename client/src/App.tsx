@@ -3,7 +3,6 @@ import React, { ReactElement } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.scss";
-
 import "@fontsource/roboto";
 
 // Chakra provider component
@@ -57,8 +56,8 @@ import ForgotPassword from "@pages/account/ForgotPassword";
 import ResetPassword from "@pages/account/ResetPassword";
 
 // Providers
-import { WorkspaceProvider } from "./hooks/useWorkspace";
-import { FeaturesProvider } from "./hooks/useFeatures";
+import { WorkspaceProvider } from "@hooks/useWorkspace";
+import { FeaturesProvider } from "@hooks/useFeatures";
 
 // Theme extension
 import { theme } from "./styles/theme";
