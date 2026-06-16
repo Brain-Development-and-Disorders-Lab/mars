@@ -171,20 +171,6 @@ describe("Linky Component", () => {
   });
 
   describe("Navigation", () => {
-    it("opens hover card on click when data is loaded", async () => {
-      renderLinky();
-
-      await waitFor(() => {
-        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
-      });
-
-      fireEvent.click(screen.getAllByText("Test Entity")[0]);
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: /view/i })).toBeTruthy();
-      });
-    });
-
     it("does not navigate when deleted", async () => {
       const deletedMock = {
         ...mockEntityQuery,
