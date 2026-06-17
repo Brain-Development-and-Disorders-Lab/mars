@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 import "dotenv/config";
 
 export default defineConfig({
-  testDir: "./test/playwright",
+  testDir: "./test/integration",
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
   globalTimeout: process.env.CI ? 10 * 60 * 1000 : undefined,
