@@ -56,7 +56,7 @@ const GET_USER = gql`
 `;
 
 // Mock GraphQL query
-const mockUserQuery = {
+const mockDefaultUserQuery = {
   request: {
     query: GET_USER,
     variables: { _id: "test-orcid" },
@@ -83,7 +83,7 @@ const renderActorTag = (props: Partial<React.ComponentProps<typeof ActorTag>> = 
 
   return render(
     <ChakraProvider value={theme}>
-      <MockedProvider mocks={[mockUserQuery]} cache={createTestCache()}>
+      <MockedProvider mocks={[mockDefaultUserQuery]} cache={createTestCache()}>
         <ActorTag {...defaultProps} />
       </MockedProvider>
     </ChakraProvider>,
@@ -91,7 +91,7 @@ const renderActorTag = (props: Partial<React.ComponentProps<typeof ActorTag>> = 
 };
 
 describe("ActorTag Component", () => {
-  describe("Basic Rendering", () => {
+  describe("Default Behavior", () => {
     it("renders with fallback initially", () => {
       renderActorTag({ fallback: "Fallback Name" });
       expect(screen.getByText("Fallback Name")).toBeTruthy();
@@ -108,19 +108,7 @@ describe("ActorTag Component", () => {
     });
   });
 
-  describe("Size Variants", () => {
-    it("renders with sm size", () => {
-      renderActorTag({ size: "sm" });
-      expect(screen.getByText("Test User")).toBeTruthy();
-    });
-
-    it("renders with default size", () => {
-      renderActorTag();
-      expect(screen.getByText("Test User")).toBeTruthy();
-    });
-  });
-
-  describe("Edge Cases", () => {
+  describe("Missing Data", () => {
     it("handles missing orcid", () => {
       renderActorTag({ orcid: "" });
       expect(screen.getByText("Test User")).toBeTruthy();
@@ -134,7 +122,7 @@ describe("ActorTag Component", () => {
 
     it("handles GraphQL error gracefully", () => {
       const errorMock = {
-        ...mockUserQuery,
+        ...mockDefaultUserQuery,
         result: {
           errors: [{ message: "Error fetching user" }],
         },

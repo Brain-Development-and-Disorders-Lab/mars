@@ -31,7 +31,7 @@ const userMock = {
         name: "Test User",
         firstName: "Test",
         lastName: "User",
-        account_orcid: null,
+        account_orcid: "XXXX-0000-1111-YYYY",
       },
     },
   },
@@ -49,7 +49,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Default story
+// Story for "default" presentation
 export const Default: Story = {
   parameters: {
     apolloMocks: [userMock],
@@ -61,6 +61,7 @@ export const Default: Story = {
   },
 } satisfies Story;
 
+// Story for "inline" presentation, where the avatar is shrunk and text is constrained
 export const Inline: Story = {
   parameters: {
     apolloMocks: [userMock],
@@ -73,6 +74,7 @@ export const Inline: Story = {
   },
 } satisfies Story;
 
+// Story for "avatar-only" presentation, where the name and ORCiD are not shown
 export const AvatarOnly: Story = {
   parameters: {
     apolloMocks: [userMock],
