@@ -1,3 +1,6 @@
+// React imports
+import React from "react";
+
 // Storybook imports
 import type { Preview } from "@storybook/react";
 
