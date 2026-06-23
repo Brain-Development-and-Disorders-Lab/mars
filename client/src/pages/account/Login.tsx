@@ -25,6 +25,9 @@ import { auth } from "@lib/auth";
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
 
+// Static assets
+import favicon from "@img/Favicon.png";
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -127,7 +130,7 @@ const Login = () => {
     <Content>
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
-          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
+          <Image src={favicon} w={"25px"} h={"25px"} />
           <Heading size={"md"} color={"primary"}>
             Metadatify
           </Heading>
@@ -157,7 +160,7 @@ const Login = () => {
             shadow={"sm"}
           >
             <Flex direction={"column"} gap={"2"} align={"center"}>
-              <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
+              <Image src={favicon} w={"35px"} h={"35px"} />
               <Heading size={"2xl"} fontWeight={"semibold"}>
                 Sign in
               </Heading>
@@ -276,7 +279,7 @@ const Login = () => {
 
             <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                v{process.env.VERSION}
+                v{import.meta.env.VERSION}
               </Text>
             </Flex>
           </Flex>

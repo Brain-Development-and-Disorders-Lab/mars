@@ -1,13 +1,14 @@
 import React from "react";
 
 // Testing imports
-import { render, screen } from "@testing-library/react";
-import { expect, describe, it, jest } from "@jest/globals";
+import { screen } from "@testing-library/react";
+import { render } from "../render";
+import { describe, expect, it, vi } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { InMemoryCache } from "@apollo/client";
 import { gql } from "@apollo/client";
 
-// Chakra UI
+// Chakra UI imports
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "../../src/styles/theme";
 
@@ -38,9 +39,9 @@ const createTestCache = () => {
 };
 
 // Mock useBreakpoint hook
-jest.mock("../../src/hooks/useBreakpoint", () => ({
+vi.mock("../../src/hooks/useBreakpoint", () => ({
   useBreakpoint: () => ({
-    isBreakpointActive: jest.fn(() => false),
+    isBreakpointActive: vi.fn(() => false),
   }),
 }));
 
@@ -82,11 +83,9 @@ const renderActorTag = (props: Partial<React.ComponentProps<typeof ActorTag>> = 
   };
 
   return render(
-    <ChakraProvider value={theme}>
-      <MockedProvider mocks={[mockDefaultUserQuery]} cache={createTestCache()}>
-        <ActorTag {...defaultProps} />
-      </MockedProvider>
-    </ChakraProvider>,
+    <MockedProvider mocks={[mockDefaultUserQuery]} cache={createTestCache()}>
+      <ActorTag {...defaultProps} />
+    </MockedProvider>,
   );
 };
 

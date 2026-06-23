@@ -16,6 +16,9 @@ import { auth } from "@lib/auth";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Static assets
+import favicon from "@img/Favicon.png";
+
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -76,7 +79,7 @@ const ResetPassword = () => {
     <Content>
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
-          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
+          <Image src={favicon} w={"25px"} h={"25px"} />
           <Heading size={"md"} color={"primary"}>
             Metadatify
           </Heading>
@@ -106,7 +109,7 @@ const ResetPassword = () => {
           w={"sm"}
         >
           <Flex direction={"column"} gap={"2"} align={"center"}>
-            <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
+            <Image src={favicon} w={"35px"} h={"35px"} />
             <Heading size={"2xl"} fontWeight={"semibold"}>
               New Password
             </Heading>

@@ -84,7 +84,7 @@ const Providers = (): React.JSX.Element => {
  * @return {ReactElement}
  */
 const App = (): ReactElement => {
-  if (_.isEqual(process.env.NODE_ENV, "development")) {
+  if (_.isEqual(import.meta.env.NODE_ENV, "development")) {
     consola.debug("Running client in development mode");
   }
 

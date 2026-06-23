@@ -21,6 +21,9 @@ dayjs.extend(relativeTime);
 // Custom types
 import { EntityModel } from "@types";
 
+// Variables
+import { GLOBAL_STYLES } from "@variables";
+
 // Setup default data to be used in all stories
 const defaultData: Partial<EntityModel>[] = [
   {

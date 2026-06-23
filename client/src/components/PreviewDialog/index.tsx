@@ -18,7 +18,7 @@ import { TransformComponent, TransformWrapper, type ReactZoomPanPinchRef } from 
 
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { GLOBAL_STYLES, STATIC_URL } from "src/variables";
+import { GLOBAL_STYLES, STATIC_URL } from "@variables";
 
 import _ from "lodash";
 
