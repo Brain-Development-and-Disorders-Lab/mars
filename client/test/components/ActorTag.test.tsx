@@ -3,7 +3,7 @@ import React from "react";
 // Testing imports
 import { screen } from "@testing-library/react";
 import { render } from "../render";
-import { describe, expect, it, vi } from "vitest";
+import { vi } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { InMemoryCache } from "@apollo/client";
 import { gql } from "@apollo/client";

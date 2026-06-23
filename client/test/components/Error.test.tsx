@@ -1,28 +1,19 @@
-import React from "react";
-
 // Testing imports
-import { render, screen, fireEvent } from "@testing-library/react";
-import { expect, describe, it, beforeEach, jest } from "@jest/globals";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
+import { screen, fireEvent } from "@testing-library/react";
+import { render } from "../render";
 
 // Target component
 import Error from "../../src/components/Error";
+import { vi } from "vitest";
 
 // Mock useNavigate
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
 const renderError = () => {
-  return render(
-    <ChakraProvider value={theme}>
-      <Error />
-    </ChakraProvider>,
-  );
+  return render(<Error />);
 };
 
 describe("Error Component", () => {

@@ -1,7 +1,7 @@
 import React from "react";
 
 // Testing imports
-import { describe, expect, it, vi } from "vitest";
+import { vi } from "vitest";
 import { screen, fireEvent } from "@testing-library/react";
 import { render } from "../render";
 
