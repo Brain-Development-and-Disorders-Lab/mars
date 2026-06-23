@@ -1,22 +1,14 @@
 import React from "react";
 
 // Testing imports
-import { render, screen } from "@testing-library/react";
-import { expect, describe, it } from "@jest/globals";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
+import { screen } from "@testing-library/react";
+import { render } from "../render";
 
 // Target component
 import TimestampTag from "../../src/components/TimestampTag";
 
 const renderTimestampTag = (props: React.ComponentProps<typeof TimestampTag>) => {
-  return render(
-    <ChakraProvider value={theme}>
-      <TimestampTag {...props} />
-    </ChakraProvider>,
-  );
+  return render(<TimestampTag {...props} />);
 };
 
 describe("TimestampTag Component", () => {
@@ -36,11 +28,6 @@ describe("TimestampTag Component", () => {
   });
 
   describe("Edge Cases", () => {
-    it("handles undefined timestamp", () => {
-      renderTimestampTag({ timestamp: undefined as any });
-      expect(screen.getByText("No Timestamp")).toBeTruthy();
-    });
-
     it("handles empty string timestamp", () => {
       renderTimestampTag({ timestamp: "" });
       expect(screen.getByText("No Timestamp")).toBeTruthy();

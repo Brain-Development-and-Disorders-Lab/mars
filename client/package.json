@@ -15,7 +15,7 @@
     "clean": "rm -rf dist/ playwright-report/ test-results/ debug-storybook.log",
     "lint:check": "prettier . --check",
     "lint:fix": "prettier . --write",
-    "test:components": "vitest",
+    "test:components": "vitest components/",
     "test:ui": "playwright test"
   },
   "dependencies": {

@@ -258,7 +258,7 @@ describe("DataTable Component", () => {
       // Apply sorting tests if buttons located
       if (sortButtons.length > 0) {
         // Run initial sort, ascending order
-        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
+        fireEvent.click(sortButtons[nameSortIndex]);
 
         await waitFor(() => {
           // Verify that items are sorted by checking the name of the first item
@@ -268,7 +268,7 @@ describe("DataTable Component", () => {
         });
 
         // Run second sort, descending order
-        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
+        fireEvent.click(sortButtons[nameSortIndex]);
         await waitFor(() => {
           // Verify that items are sorted by checking the name of the first item
           // On the subsequent sort, descending, text values will place higher

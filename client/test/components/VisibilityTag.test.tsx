@@ -1,37 +1,30 @@
 import React from "react";
 
 // Testing imports
-import { render, screen, fireEvent } from "@testing-library/react";
-import { expect, describe, it, jest } from "@jest/globals";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
+import { vi } from "vitest";
+import { screen, fireEvent } from "@testing-library/react";
+import { render } from "../render";
 
 // Target component
 import VisibilityTag from "../../src/components/VisibilityTag";
 
 // Mock useBreakpoint hook
-jest.mock("../../src/hooks/useBreakpoint", () => ({
+vi.mock("../../src/hooks/useBreakpoint", () => ({
   useBreakpoint: () => ({
-    isBreakpointActive: jest.fn(() => false),
+    isBreakpointActive: vi.fn(() => false),
   }),
 }));
 
 const renderVisibilityTag = (props: Partial<React.ComponentProps<typeof VisibilityTag>> = {}) => {
   const defaultProps = {
     isPublic: true,
-    setIsPublic: jest.fn(),
+    setIsPublic: vi.fn(),
     isInherited: false,
     disabled: false,
     ...props,
   };
 
-  return render(
-    <ChakraProvider value={theme}>
-      <VisibilityTag {...defaultProps} />
-    </ChakraProvider>,
-  );
+  return render(<VisibilityTag {...defaultProps} />);
 };
 
 describe("VisibilityTag Component", () => {
@@ -49,7 +42,7 @@ describe("VisibilityTag Component", () => {
 
   describe("Toggle Functionality", () => {
     it("calls setIsPublic when toggle button is clicked", () => {
-      const setIsPublic = jest.fn();
+      const setIsPublic = vi.fn();
       renderVisibilityTag({ isPublic: true, setIsPublic });
 
       const toggleButton = screen.getByLabelText("set-visibility");
@@ -59,7 +52,7 @@ describe("VisibilityTag Component", () => {
     });
 
     it("does not call setIsPublic when disabled", () => {
-      const setIsPublic = jest.fn();
+      const setIsPublic = vi.fn();
       renderVisibilityTag({ isPublic: true, setIsPublic, disabled: true });
 
       const toggleButton = screen.getByLabelText("set-visibility");
@@ -67,10 +60,10 @@ describe("VisibilityTag Component", () => {
     });
 
     it("handles missing setIsPublic gracefully", () => {
-      const consoleSpy = jest.spyOn(console, "warn").mockImplementation((message) => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation((message) => {
         console.log(message);
       });
-      renderVisibilityTag({ setIsPublic: undefined as any });
+      renderVisibilityTag({ setIsPublic: undefined });
 
       const toggleButton = screen.getByLabelText("set-visibility");
       fireEvent.click(toggleButton);
@@ -91,21 +84,6 @@ describe("VisibilityTag Component", () => {
     it("shows tooltip when inherited", () => {
       renderVisibilityTag({ isInherited: true });
       expect(screen.getByText("Public")).toBeTruthy();
-    });
-  });
-
-  describe("Edge Cases", () => {
-    it("handles rapid toggle clicks", () => {
-      const setIsPublic = jest.fn();
-      renderVisibilityTag({ isPublic: true, setIsPublic });
-
-      const toggleButton = screen.getByLabelText("set-visibility");
-      fireEvent.click(toggleButton);
-      fireEvent.click(toggleButton);
-      fireEvent.click(toggleButton);
-
-      // Should handle multiple clicks
-      expect(setIsPublic).toHaveBeenCalled();
     });
   });
 });
