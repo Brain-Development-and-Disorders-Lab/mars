@@ -16,7 +16,7 @@
     "clean": "rm -rf dist/ playwright-report/ test-results/",
     "lint:check": "prettier . --check",
     "lint:fix": "prettier . --write",
-    "test:components": "jest  --verbose",
+    "test:components": "vitest",
     "test:ui": "playwright test"
   },
   "dependencies": {
