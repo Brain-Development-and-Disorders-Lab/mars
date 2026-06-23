@@ -63,6 +63,7 @@ const httpLink = new UploadHttpLink({
 /**
  * Authentication link to add headers to each request
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const authLink = new SetContextLink(async (previousContext, _operation) => {
   // Get session data
   const { data: sessionData } = await auth.getSession();
