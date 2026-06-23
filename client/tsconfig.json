@@ -31,6 +31,6 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["@testing-library/jest-dom", "node", "vitest", "vite/client"]
+    "types": ["@testing-library/jest-dom", "node", "vitest/globals", "vite/client"]
   }
 }

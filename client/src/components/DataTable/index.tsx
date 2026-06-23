@@ -908,6 +908,7 @@ const DataTable = (props: DataTableProps) => {
                       justify={"center"}
                       overflow={"hidden"}
                       flexShrink={0}
+                      data-testid={`datatable-header-${header.id}`}
                     >
                       {isSelectColumn ? (
                         flexRender(header.column.columnDef.header, header.getContext())

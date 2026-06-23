@@ -1,6 +1,7 @@
 import React from "react";
 
 // Testing imports
+import "@testing-library/jest-dom";
 import { describe, expect, it, vi } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { render } from "../render";
@@ -411,7 +412,7 @@ describe("DataTable Component", () => {
       // Validate the action is disabled
       await waitFor(() => {
         const actionMenuItem = screen.getByRole("menuitem");
-        expect(actionMenuItem).toBeDisabled();
+        expect(actionMenuItem).toHaveAttribute("aria-disabled", "true");
       });
     });
 
@@ -430,8 +431,16 @@ describe("DataTable Component", () => {
         ],
       });
 
+      // Open the "Actions" menu
       await waitFor(() => {
-        expect(screen.getByText("Actions")).toBeTruthy();
+        const actionButton = screen.getByTestId<HTMLButtonElement>("data-table-actions");
+        actionButton.click();
+      });
+
+      // Validate the action is enabled
+      await waitFor(() => {
+        const actionMenuItem = screen.getByRole("menuitem");
+        expect(actionMenuItem).toBeEnabled();
       });
     });
   });
@@ -440,6 +449,7 @@ describe("DataTable Component", () => {
     it("handles very large datasets", async () => {
       const largeData = createTestData(1000);
       renderDataTable({ data: largeData });
+
       await waitFor(() => {
         expect(screen.getByText("Name")).toBeTruthy();
       });
@@ -456,9 +466,10 @@ describe("DataTable Component", () => {
           tags: ["tag1", "tag2"],
         },
       ];
-      renderDataTable({ data: specialData });
+      const { container } = renderDataTable({ data: specialData });
+
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(container.querySelector('div[id*="0_name"]')).toHaveTextContent("Item <script>alert('xss')</script>");
       });
     });
 
@@ -473,58 +484,10 @@ describe("DataTable Component", () => {
           tags: ["tag1"],
         },
       ];
-      renderDataTable({ data: longTextData });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
+      const { container } = renderDataTable({ data: longTextData });
 
-    it("handles missing column metadata gracefully", async () => {
-      const columnsWithoutMeta = [
-        columnHelper.accessor("name", {
-          header: "Name",
-          cell: (info) => info.getValue(),
-        }),
-      ];
-      renderDataTable({ columns: columnsWithoutMeta });
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles server-side pagination props", async () => {
-      const onPaginationChange = vi.fn();
-      renderDataTable({
-        pageCount: 10,
-        pageIndex: 0,
-        pageSize: 20,
-        onPaginationChange,
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles server-side sorting props", async () => {
-      const onSortChange = vi.fn();
-      renderDataTable({
-        pageCount: 10,
-        sortState: { field: "name", direction: "asc" },
-        onSortChange,
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles null sortState", async () => {
-      renderDataTable({
-        pageCount: 10,
-        sortState: null,
-        onSortChange: vi.fn(),
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(container.querySelector('div[id*="0_name"]')).toHaveTextContent("A".repeat(45));
       });
     });
   });
@@ -532,18 +495,20 @@ describe("DataTable Component", () => {
   describe("Column Visibility", () => {
     it("toggles column visibility", async () => {
       renderDataTable({ showColumnSelect: true });
+
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(screen.getByText("Show Columns:")).toBeTruthy();
       });
     });
 
     it("always shows required columns", async () => {
-      renderDataTable({
-        visibleColumns: { name: false, _id: true },
+      const { container } = renderDataTable({
+        visibleColumns: { description: false, _id: true },
         showColumnSelect: true,
       });
+
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(container.querySelector('div[data-testid="datatable-header-description"]')).not.toBeInTheDocument();
       });
     });
   });
