@@ -24,7 +24,7 @@ jobs:
           touch .env
           echo "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" >> .env
-          echo "VITE_POSTHOG_DISABLE_CAPTURE=${{ env.VITE_POSTHOG_DISABLE_CAPTURE }}" >> .env
+          echo "VITE_POSTHOG_DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
           echo "VITE_COLLEGE_SCORECARD_KEY=${{ secrets.VITE_COLLEGE_SCORECARD_KEY }}" >> .env
           echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
           echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
