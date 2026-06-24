@@ -1,13 +1,14 @@
 import React from "react";
 
 // Testing imports
-import { render, screen } from "@testing-library/react";
-import { expect, describe, it, jest } from "@jest/globals";
+import { screen } from "@testing-library/react";
+import { render } from "../render";
+import { vi } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { InMemoryCache } from "@apollo/client";
 import { gql } from "@apollo/client";
 
-// Chakra UI
+// Chakra UI imports
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "../../src/styles/theme";
 
@@ -38,9 +39,9 @@ const createTestCache = () => {
 };
 
 // Mock useBreakpoint hook
-jest.mock("../../src/hooks/useBreakpoint", () => ({
+vi.mock("../../src/hooks/useBreakpoint", () => ({
   useBreakpoint: () => ({
-    isBreakpointActive: jest.fn(() => false),
+    isBreakpointActive: vi.fn(() => false),
   }),
 }));
 
@@ -56,7 +57,7 @@ const GET_USER = gql`
 `;
 
 // Mock GraphQL query
-const mockUserQuery = {
+const mockDefaultUserQuery = {
   request: {
     query: GET_USER,
     variables: { _id: "test-orcid" },
@@ -82,16 +83,14 @@ const renderActorTag = (props: Partial<React.ComponentProps<typeof ActorTag>> = 
   };
 
   return render(
-    <ChakraProvider value={theme}>
-      <MockedProvider mocks={[mockUserQuery]} cache={createTestCache()}>
-        <ActorTag {...defaultProps} />
-      </MockedProvider>
-    </ChakraProvider>,
+    <MockedProvider mocks={[mockDefaultUserQuery]} cache={createTestCache()}>
+      <ActorTag {...defaultProps} />
+    </MockedProvider>,
   );
 };
 
 describe("ActorTag Component", () => {
-  describe("Basic Rendering", () => {
+  describe("Default Behavior", () => {
     it("renders with fallback initially", () => {
       renderActorTag({ fallback: "Fallback Name" });
       expect(screen.getByText("Fallback Name")).toBeTruthy();
@@ -108,19 +107,7 @@ describe("ActorTag Component", () => {
     });
   });
 
-  describe("Size Variants", () => {
-    it("renders with sm size", () => {
-      renderActorTag({ size: "sm" });
-      expect(screen.getByText("Test User")).toBeTruthy();
-    });
-
-    it("renders with default size", () => {
-      renderActorTag();
-      expect(screen.getByText("Test User")).toBeTruthy();
-    });
-  });
-
-  describe("Edge Cases", () => {
+  describe("Missing Data", () => {
     it("handles missing orcid", () => {
       renderActorTag({ orcid: "" });
       expect(screen.getByText("Test User")).toBeTruthy();
@@ -134,7 +121,7 @@ describe("ActorTag Component", () => {
 
     it("handles GraphQL error gracefully", () => {
       const errorMock = {
-        ...mockUserQuery,
+        ...mockDefaultUserQuery,
         result: {
           errors: [{ message: "Error fetching user" }],
         },

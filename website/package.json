@@ -6,8 +6,8 @@
   "author": "Henry Burgess <henry.burgess@wustl.edu>",
   "license": "MIT",
   "scripts": {
-    "start": "webpack serve --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js",
+    "start": "vite",
+    "build": "vite build",
     "build:docs": "mkdocs build -d dist/docs",
     "clean": "rm -rf dist"
   },
@@ -25,15 +25,8 @@
   "devDependencies": {
     "@types/react": "^18.3.9",
     "@types/react-dom": "^18.3.0",
-    "copy-webpack-plugin": "^12.0.2",
-    "css-loader": "^7.1.2",
-    "html-webpack-plugin": "^5.6.0",
-    "style-loader": "^4.0.0",
-    "ts-loader": "^9.5.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "typescript": "^5.6.2",
-    "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0",
-    "webpack-merge": "^6.0.1"
+    "vite": "^8.1.0"
   }
 }

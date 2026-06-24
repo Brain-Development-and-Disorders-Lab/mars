@@ -24,6 +24,9 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Static assets
+import favicon from "@img/Favicon.png";
+
 const Navigation = () => {
   const posthog = usePostHog();
   const navigate = useNavigate();
@@ -43,7 +46,7 @@ const Navigation = () => {
       <Flex direction={"column"} display={{ base: "none", lg: "flex" }} gap={"2"} w={"100%"}>
         {/* Heading */}
         <Flex direction={"row"} gap={"2"} p={"1"} align={"center"} justify={"center"}>
-          <Image src="/Favicon.png" boxSize={"20px"} />
+          <Image src={favicon} boxSize={"20px"} />
           <Text fontWeight={"semibold"} fontSize={"lg"} color={"brand"}>
             Metadatify
           </Text>
@@ -271,7 +274,7 @@ const Navigation = () => {
         {/* Version number */}
         <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-            v{process.env.VERSION}
+            v{import.meta.env.VERSION}
           </Text>
         </Flex>
       </Flex>
@@ -395,7 +398,7 @@ const Navigation = () => {
               {/* Version number */}
               <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                  v{process.env.VERSION}
+                  v{import.meta.env.VERSION}
                 </Text>
               </Flex>
             </Menu.Content>

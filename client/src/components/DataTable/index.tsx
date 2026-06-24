@@ -908,6 +908,7 @@ const DataTable = (props: DataTableProps) => {
                       justify={"center"}
                       overflow={"hidden"}
                       flexShrink={0}
+                      data-testid={`datatable-header-${header.id}`}
                     >
                       {isSelectColumn ? (
                         flexRender(header.column.columnDef.header, header.getContext())
@@ -1013,7 +1014,7 @@ const DataTable = (props: DataTableProps) => {
       <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
         <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>
           {props.showPagination && (
-            <Flex direction={"row"} gap={2} align={"center"}>
+            <Flex direction={"row"} gap={2} align={"center"} data-testid={"data-table-pagination"}>
               <IconButton
                 variant={"outline"}
                 size={"xs"}
@@ -1075,7 +1076,7 @@ const DataTable = (props: DataTableProps) => {
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
+                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"} data-testid={"data-table-actions"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -1204,7 +1205,7 @@ const DataTable = (props: DataTableProps) => {
                   >
                     <Select.HiddenSelect />
                     <Select.Control>
-                      <Select.Trigger rounded={"md"}>
+                      <Select.Trigger rounded={"md"} data-testid={"data-table-page-size"}>
                         <Select.ValueText placeholder={"Page Size"} />
                       </Select.Trigger>
                       <Select.IndicatorGroup>

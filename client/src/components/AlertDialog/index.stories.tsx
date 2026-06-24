@@ -25,7 +25,7 @@ const AlertDialogWithTrigger = (props: Omit<React.ComponentProps<typeof AlertDia
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button size={"sm"} colorPalette={"orange"} onClick={() => setOpen(true)}>
+      <Button size={"sm"} colorPalette={"orange"} rounded={"md"} onClick={() => setOpen(true)}>
         Open Dialog
       </Button>
       <AlertDialog {...props} open={open} setOpen={setOpen} />

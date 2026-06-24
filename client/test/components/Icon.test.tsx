@@ -1,22 +1,13 @@
 import React from "react";
 
 // Testing imports
-import { render } from "@testing-library/react";
-import { expect, describe, it } from "@jest/globals";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
+import { render } from "../render";
 
 // Target component
 import Icon from "../../src/components/Icon";
 
 const renderIcon = (props: React.ComponentProps<typeof Icon>) => {
-  return render(
-    <ChakraProvider value={theme}>
-      <Icon {...props} />
-    </ChakraProvider>,
-  );
+  return render(<Icon {...props} />);
 };
 
 describe("Icon Component", () => {
@@ -27,7 +18,7 @@ describe("Icon Component", () => {
     });
 
     it("renders unknown icon for invalid icon name", () => {
-      const { container } = renderIcon({ name: "invalid-icon-name" as any });
+      const { container } = renderIcon({ name: "invalid-icon-name" });
       expect(container.firstChild).toBeTruthy();
     });
 
@@ -97,13 +88,13 @@ describe("Icon Component", () => {
       const iconNames = ["search", "entity", "project", "dashboard", "add", "delete", "edit", "close"];
 
       iconNames.forEach((name) => {
-        const { container } = renderIcon({ name: name as any });
+        const { container } = renderIcon({ name: name });
         expect(container.firstChild).toBeTruthy();
       });
     });
 
     it("handles empty string as icon name", () => {
-      const { container } = renderIcon({ name: "" as any });
+      const { container } = renderIcon({ name: "" });
       expect(container.firstChild).toBeTruthy();
     });
 

@@ -3,7 +3,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 // Components
-import { toaster } from "src/components/Toast";
+import { toaster } from "@components/Toast";
 
 // Apollo imports
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
@@ -17,11 +17,11 @@ import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
-posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
-  api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+posthog.init(import.meta.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
+  api_host: import.meta.env.REACT_APP_PUBLIC_POSTHOG_HOST,
   person_profiles: "always",
   loaded: (ph) => {
-    if (process.env.DISABLE_CAPTURE === "true") {
+    if (import.meta.env.DISABLE_CAPTURE === "true") {
       // Disable capture when in "development" mode
       ph.opt_out_capturing();
       ph.set_config({ disable_session_recording: true });
@@ -63,6 +63,7 @@ const httpLink = new UploadHttpLink({
 /**
  * Authentication link to add headers to each request
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const authLink = new SetContextLink(async (previousContext, _operation) => {
   // Get session data
   const { data: sessionData } = await auth.getSession();

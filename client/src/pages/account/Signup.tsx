@@ -43,6 +43,9 @@ import { IResponseMessage } from "@types";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 
+// Static assets
+import favicon from "@img/Favicon.png";
+
 // "signup" for new email accounts, "complete" for third-party accounts that need profile info
 type SignupPageMode = "loading" | "signup" | "complete";
 
@@ -279,7 +282,7 @@ const Signup = () => {
     <Content>
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
-          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
+          <Image src={favicon} w={"25px"} h={"25px"} />
           <Heading size={"md"} color={"primary"}>
             Metadatify
           </Heading>
@@ -308,7 +311,7 @@ const Signup = () => {
           shadow={"sm"}
         >
           <Flex direction={"column"} gap={"2"} align={"center"}>
-            <Image src={"/Favicon.png"} w={"35px"} h={"35px"} />
+            <Image src={favicon} w={"35px"} h={"35px"} />
             <Heading size={"xl"} fontWeight={"semibold"}>
               {mode === "complete" ? "Complete Profile" : "Create your Metadatify account"}
             </Heading>

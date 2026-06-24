@@ -4,15 +4,14 @@
     "module": "CommonJS",
     "target": "ES2016",
     "allowJs": true,
-    "baseUrl": "./",
     "paths": {
-      "@connectors/*": ["src/connectors/*"],
-      "@lib/*": ["src/lib/*"],
-      "@models/*": ["src/models/*"],
-      "@resolvers/*": ["src/resolvers/*"],
-      "@seed/*": ["src/seed/*"],
-      "@types": ["../types"],
-      "@variables": ["src/variables"]
+      "@connectors/*": ["./src/connectors/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@models/*": ["./src/models/*"],
+      "@resolvers/*": ["./src/resolvers/*"],
+      "@seed/*": ["./src/seed/*"],
+      "@variables": ["./src/variables"],
+      "@types": ["../types"]
     },
     "rootDirs": ["src"],
     "outDir": "dist",
@@ -22,7 +21,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true

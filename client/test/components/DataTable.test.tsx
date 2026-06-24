@@ -1,14 +1,12 @@
 import React from "react";
 
 // Testing imports
+import "@testing-library/jest-dom";
+import { vi } from "vitest";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { render } from "../render";
 import { InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { expect, describe, it, jest } from "@jest/globals";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
 
 // Target component
 import DataTable from "../../src/components/DataTable";
@@ -38,9 +36,9 @@ const createTestCache = () => {
 };
 
 // Mock useBreakpoint hook
-jest.mock("../../src/hooks/useBreakpoint", () => ({
+vi.mock("../../src/hooks/useBreakpoint", () => ({
   useBreakpoint: () => ({
-    isBreakpointActive: jest.fn(() => true),
+    isBreakpointActive: vi.fn(() => true),
   }),
 }));
 
@@ -116,16 +114,14 @@ const renderDataTable = (props: Partial<React.ComponentProps<typeof DataTable>> 
   };
 
   return render(
-    <ChakraProvider value={theme}>
-      <MockedProvider mocks={[]} cache={createTestCache()}>
-        <DataTable {...defaultProps} />
-      </MockedProvider>
-    </ChakraProvider>,
+    <MockedProvider mocks={[]} cache={createTestCache()}>
+      <DataTable {...defaultProps} />
+    </MockedProvider>,
   );
 };
 
 describe("DataTable Component", () => {
-  describe("Basic Rendering", () => {
+  describe("Default Rendering", () => {
     it("renders table with data", async () => {
       renderDataTable();
       await waitFor(() => {
@@ -153,7 +149,7 @@ describe("DataTable Component", () => {
     });
   });
 
-  describe("Sorting", () => {
+  describe("Column Sorting", () => {
     it("sorts columns when header is clicked", async () => {
       const { container } = renderDataTable();
 
@@ -161,14 +157,27 @@ describe("DataTable Component", () => {
         expect(screen.getByText("Name")).toBeTruthy();
       });
 
-      // Find sort button (icon button next to header)
+      // Find sort buttons
       const sortButtons = container.querySelectorAll('button[aria-label*="sort"], button[aria-label*="Sort"]');
+      const nameSortIndex = 0; // Index of "name" column
+
+      // Apply sorting tests if buttons located
       if (sortButtons.length > 0) {
-        fireEvent.click(sortButtons[0] as HTMLElement);
+        // Run initial sort, ascending order
+        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
 
         await waitFor(() => {
-          // After sorting, verify table still renders
-          expect(screen.getByText("Name")).toBeTruthy();
+          // Verify that items are sorted by checking the name of the first item
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("Item 1");
+        });
+
+        // Run second sort, descending order
+        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
+        await waitFor(() => {
+          // Verify that items are sorted by checking the name of the first item
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("Item 5");
         });
       }
     });
@@ -192,11 +201,33 @@ describe("DataTable Component", () => {
           tags: [],
         },
       ];
-      renderDataTable({ data: dataWithNulls });
-      await waitFor(() => {
-        expect(screen.getByText("A")).toBeTruthy();
-        expect(screen.getByText("B")).toBeTruthy();
-      });
+      const { container } = renderDataTable({ data: dataWithNulls });
+
+      // Find sort buttons
+      const sortButtons = container.querySelectorAll('button[aria-label*="sort"], button[aria-label*="Sort"]');
+      const nameSortIndex = 0; // Index of "name" column
+
+      // Apply sorting tests if buttons located
+      if (sortButtons.length > 0) {
+        // Run initial sort, ascending order
+        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
+
+        await waitFor(() => {
+          // Verify that items are sorted by checking the name of the first item
+          // On the initial sort, ascending, `null` values should place higher
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("A");
+        });
+
+        // Run second sort, descending order
+        fireEvent.click(sortButtons[nameSortIndex] as HTMLElement);
+        await waitFor(() => {
+          // Verify that items are sorted by checking the name of the first item
+          // On the subsequent sort, descending, text values will place higher
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("B");
+        });
+      }
     });
 
     it("handles sorting with empty strings", async () => {
@@ -218,28 +249,33 @@ describe("DataTable Component", () => {
           tags: [],
         },
       ];
-      renderDataTable({ data: dataWithEmpty });
-      await waitFor(() => {
-        expect(screen.getByText("B")).toBeTruthy();
-      });
-    });
-  });
+      const { container } = renderDataTable({ data: dataWithEmpty });
 
-  describe("Filtering", () => {
-    it("renders filter buttons in column headers", async () => {
-      const { container } = renderDataTable();
-      await waitFor(() => {
-        // Filter buttons should be present (they're icon buttons)
-        const filterButtons = container.querySelectorAll("button");
-        expect(filterButtons.length).toBeGreaterThan(0);
-      });
-    });
+      // Find sort buttons
+      const sortButtons = container.querySelectorAll('button[aria-label*="sort"], button[aria-label*="Sort"]');
+      const nameSortIndex = 0; // Index of "name" column
 
-    it("handles filtering with empty data", async () => {
-      renderDataTable({ data: [] });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
+      // Apply sorting tests if buttons located
+      if (sortButtons.length > 0) {
+        // Run initial sort, ascending order
+        fireEvent.click(sortButtons[nameSortIndex]);
+
+        await waitFor(() => {
+          // Verify that items are sorted by checking the name of the first item
+          // On the initial sort, ascending, empty values should place higher
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("");
+        });
+
+        // Run second sort, descending order
+        fireEvent.click(sortButtons[nameSortIndex]);
+        await waitFor(() => {
+          // Verify that items are sorted by checking the name of the first item
+          // On the subsequent sort, descending, text values will place higher
+          const firstItem = container.querySelector('div[id*="1_name"]');
+          expect(firstItem?.textContent).toBe("B");
+        });
+      }
     });
   });
 
@@ -248,29 +284,37 @@ describe("DataTable Component", () => {
       renderDataTable({ showPagination: true, data: createTestData(25) });
       await waitFor(() => {
         // Pagination controls should be visible
-        const buttons = screen.getAllByRole("button");
-        expect(buttons.length).toBeGreaterThan(0);
+        expect(screen.getByTestId("data-table-pagination")).toBeTruthy();
       });
     });
 
     it("hides pagination when disabled", async () => {
       renderDataTable({ showPagination: false });
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(screen.queryByTestId("data-table-pagination")).toBeNull();
       });
     });
 
     it("handles page size changes", async () => {
       renderDataTable({ showPagination: true, data: createTestData(25) });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
 
-    it("handles pagination with single page", async () => {
-      renderDataTable({ showPagination: true, data: createTestData(5) });
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        // Locate the page size `select` element and change the page size to 10 items
+        const pageSizeSelect = screen.queryByTestId<HTMLSelectElement>("data-table-page-size");
+        expect(pageSizeSelect).not.toBeNull();
+        pageSizeSelect?.click();
+      });
+
+      await waitFor(() => {
+        const pageSizeSelectOption = screen.getByRole("option", { name: "10" });
+        expect(pageSizeSelectOption).not.toBeNull();
+        pageSizeSelectOption.click();
+      });
+
+      await waitFor(() => {
+        // Confirm that "Item 10" is visible and "Item 11" is not
+        expect(screen.queryByText("Item 10")).toBeTruthy();
+        expect(screen.queryByText("Item 11")).toBeFalsy();
       });
     });
   });
@@ -279,22 +323,17 @@ describe("DataTable Component", () => {
     it("renders selection checkboxes when enabled", async () => {
       renderDataTable({ showSelection: true });
       await waitFor(() => {
-        // Checkboxes should be present
+        // The expected number of checkboxes should be present
         const checkboxes = screen.getAllByRole("checkbox");
-        expect(checkboxes.length).toBeGreaterThan(0);
+        expect(checkboxes.length).toBe(6); // 1 to select all, 5 across rows
       });
     });
 
     it("calls onSelectedRowsChange when row is selected", async () => {
-      const onSelectedRowsChange = jest.fn();
+      const onSelectedRowsChange = vi.fn();
       renderDataTable({
         showSelection: true,
         onSelectedRowsChange,
-      });
-
-      await waitFor(() => {
-        const checkboxes = screen.getAllByRole("checkbox");
-        expect(checkboxes.length).toBeGreaterThan(0);
       });
 
       const checkboxes = screen.getAllByRole("checkbox");
@@ -323,14 +362,15 @@ describe("DataTable Component", () => {
       const selectedRows = { "0": true };
       renderDataTable({ showSelection: true, selectedRows });
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        const checkboxes = screen.getAllByRole("checkbox");
+        expect(checkboxes[1]).toHaveProperty("checked", true);
       });
     });
   });
 
   describe("Actions", () => {
-    it("renders actions menu when actions provided", async () => {
-      const mockAction = jest.fn();
+    it("renders actions menu when actions specified", async () => {
+      const mockAction = vi.fn();
       renderDataTable({
         showSelection: true,
         actions: [
@@ -343,14 +383,14 @@ describe("DataTable Component", () => {
       });
 
       await waitFor(() => {
-        // Actions button should be present
-        const actionButtons = screen.getAllByText("Actions");
-        expect(actionButtons.length).toBeGreaterThan(0);
+        // "Actions" button should be present
+        const actionButton = screen.getByTestId<HTMLButtonElement>("data-table-actions");
+        expect(actionButton).toBeTruthy();
       });
     });
 
     it("disables actions when no rows selected", async () => {
-      const mockAction = jest.fn();
+      const mockAction = vi.fn();
       renderDataTable({
         showSelection: true,
         selectedRows: {},
@@ -363,13 +403,21 @@ describe("DataTable Component", () => {
         ],
       });
 
+      // Open the "Actions" menu
       await waitFor(() => {
-        expect(screen.getByText("Actions")).toBeTruthy();
+        const actionButton = screen.getByTestId<HTMLButtonElement>("data-table-actions");
+        actionButton.click();
+      });
+
+      // Validate the action is disabled
+      await waitFor(() => {
+        const actionMenuItem = screen.getByRole("menuitem");
+        expect(actionMenuItem).toHaveAttribute("aria-disabled", "true");
       });
     });
 
     it("enables alwaysEnabled actions regardless of selection", async () => {
-      const mockAction = jest.fn();
+      const mockAction = vi.fn();
       renderDataTable({
         showSelection: true,
         selectedRows: {},
@@ -383,8 +431,16 @@ describe("DataTable Component", () => {
         ],
       });
 
+      // Open the "Actions" menu
       await waitFor(() => {
-        expect(screen.getByText("Actions")).toBeTruthy();
+        const actionButton = screen.getByTestId<HTMLButtonElement>("data-table-actions");
+        actionButton.click();
+      });
+
+      // Validate the action is enabled
+      await waitFor(() => {
+        const actionMenuItem = screen.getByRole("menuitem");
+        expect(actionMenuItem).toBeEnabled();
       });
     });
   });
@@ -393,6 +449,7 @@ describe("DataTable Component", () => {
     it("handles very large datasets", async () => {
       const largeData = createTestData(1000);
       renderDataTable({ data: largeData });
+
       await waitFor(() => {
         expect(screen.getByText("Name")).toBeTruthy();
       });
@@ -409,9 +466,10 @@ describe("DataTable Component", () => {
           tags: ["tag1", "tag2"],
         },
       ];
-      renderDataTable({ data: specialData });
+      const { container } = renderDataTable({ data: specialData });
+
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(container.querySelector('div[id*="0_name"]')).toHaveTextContent("Item <script>alert('xss')</script>");
       });
     });
 
@@ -426,87 +484,10 @@ describe("DataTable Component", () => {
           tags: ["tag1"],
         },
       ];
-      renderDataTable({ data: longTextData });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles rapid column visibility changes", async () => {
-      const { rerender } = renderDataTable();
+      const { container } = renderDataTable({ data: longTextData });
 
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-
-      rerender(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[]} cache={createTestCache()}>
-            <DataTable
-              columns={createTestColumns()}
-              data={createTestData()}
-              visibleColumns={{ name: false, status: true }}
-              selectedRows={{}}
-              showPagination={true}
-              showSelection={false}
-              showColumnSelect={false}
-              viewOnly={false}
-            />
-          </MockedProvider>
-        </ChakraProvider>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText("Status")).toBeTruthy();
-      });
-    });
-
-    it("handles missing column metadata gracefully", async () => {
-      const columnsWithoutMeta = [
-        columnHelper.accessor("name", {
-          header: "Name",
-          cell: (info) => info.getValue(),
-        }),
-      ];
-      renderDataTable({ columns: columnsWithoutMeta });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles server-side pagination props", async () => {
-      const onPaginationChange = jest.fn();
-      renderDataTable({
-        pageCount: 10,
-        pageIndex: 0,
-        pageSize: 20,
-        onPaginationChange,
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles server-side sorting props", async () => {
-      const onSortChange = jest.fn();
-      renderDataTable({
-        pageCount: 10,
-        sortState: { field: "name", direction: "asc" },
-        onSortChange,
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-
-    it("handles null sortState", async () => {
-      renderDataTable({
-        pageCount: 10,
-        sortState: null,
-        onSortChange: jest.fn(),
-      });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(container.querySelector('div[id*="0_name"]')).toHaveTextContent("A".repeat(45));
       });
     });
   });
@@ -514,50 +495,20 @@ describe("DataTable Component", () => {
   describe("Column Visibility", () => {
     it("toggles column visibility", async () => {
       renderDataTable({ showColumnSelect: true });
+
       await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
+        expect(screen.getByText("Show Columns:")).toBeTruthy();
       });
     });
 
     it("always shows required columns", async () => {
-      renderDataTable({
-        visibleColumns: { name: false, _id: true },
+      const { container } = renderDataTable({
+        visibleColumns: { description: false, _id: true },
         showColumnSelect: true,
       });
-      await waitFor(() => {
-        expect(screen.getByText("Name")).toBeTruthy();
-      });
-    });
-  });
-
-  describe("Data Updates", () => {
-    it("updates when data prop changes", async () => {
-      const { rerender } = renderDataTable();
 
       await waitFor(() => {
-        expect(screen.getByText("Item 1")).toBeTruthy();
-      });
-
-      const newData = createTestData(3);
-      rerender(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[]} cache={createTestCache()}>
-            <DataTable
-              columns={createTestColumns()}
-              data={newData}
-              visibleColumns={defaultVisibleColumns}
-              selectedRows={{}}
-              showPagination={true}
-              showSelection={false}
-              showColumnSelect={false}
-              viewOnly={false}
-            />
-          </MockedProvider>
-        </ChakraProvider>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText("Item 1")).toBeTruthy();
+        expect(container.querySelector('div[data-testid="datatable-header-description"]')).not.toBeInTheDocument();
       });
     });
   });

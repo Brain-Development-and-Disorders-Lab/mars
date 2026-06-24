@@ -63,7 +63,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { requestStatic } from "src/database/functions";
+import { requestStatic } from "@database/functions";
 import { ignoreAbort, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";

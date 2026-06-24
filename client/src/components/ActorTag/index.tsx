@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Avatar, Badge, Flex, Skeleton, Text } from "@chakra-ui/react";
+import { Avatar, Badge, Flex, Skeleton, SkeletonText, Text } from "@chakra-ui/react";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
@@ -89,7 +89,7 @@ const ActorTag = (props: ActorTagProps) => {
 
   return props.inline || props.inlineNoAvatar ? (
     <Flex direction={"row"} gap={"0.5"} align={"center"} w={"fit-content"}>
-      {(_.isUndefined(props.inlineNoAvatar) || props.inlineNoAvatar === false) && (
+      {(_.isUndefined(props.inlineNoAvatar) || !props.inlineNoAvatar) && (
         <Avatar.Root size={"2xs"} key={actorLabel} colorPalette={loading ? "gray" : pickPalette(actorLabel)}>
           <Avatar.Fallback name={loading ? "" : actorLabel} />
         </Avatar.Root>
@@ -123,18 +123,20 @@ const ActorTag = (props: ActorTagProps) => {
       >
         <Avatar.Fallback name={loading ? "" : actorLabel} />
       </Avatar.Root>
-      <Skeleton loading={loading} asChild>
-        <Flex direction={"column"} gap={"0.5"} align={"left"} w={"100%"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-            {actorLabel}
-          </Text>
-          {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
-            <Text fontSize={"2xs"} fontWeight={"semibold"} color={"gray.500"}>
-              {actorOrcid}
+      <SkeletonText loading={loading} w={"100%"} noOfLines={actorOrcid !== "" ? 2 : 1} gap={"2"} asChild>
+        <Flex w={"100%"} align={"left"}>
+          <Flex direction={"column"} gap={"0.5"} align={"left"} w={"100%"} justify={"center"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"} ml={"0.5"}>
+              {actorLabel}
             </Text>
-          )}
+            {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
+              <Badge fontSize={"2xs"} fontWeight={"semibold"} variant={"subtle"}>
+                {actorOrcid}
+              </Badge>
+            )}
+          </Flex>
         </Flex>
-      </Skeleton>
+      </SkeletonText>
     </Flex>
   );
 };

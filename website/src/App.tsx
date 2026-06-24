@@ -14,6 +14,13 @@ import "./css/styles.css";
 // Utility imports
 import _ from "lodash";
 
+// Images
+import favicon from "./img/Favicon.png";
+import attributeImage from "./img/Attribute.png";
+import dashboardImage from "./img/Dashboard.png";
+import entityImage from "./img/Entity.png";
+import searchImage from "./img/Search.png";
+
 const App = () => {
   const featuresRef = useRef({} as HTMLDivElement);
   const getStartedRef = useRef({} as HTMLDivElement);
@@ -73,7 +80,7 @@ const App = () => {
             py={["", "2"]}
           >
             <Flex gap={"2"} align={"center"} rounded={"full"} p={"4"}>
-              <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
+              <Image src={favicon} w={"25px"} h={"25px"} />
               <Heading size={"md"} color={"#2E3192"}>
                 Metadatify
               </Heading>
@@ -134,7 +141,7 @@ const App = () => {
               </Flex>
             </Flex>
             <Flex direction={"column"} flex={["none", 1]} align={"center"} gap={"2"}>
-              <Image src={"Dashboard.png"} maxW={["90vw", "100%"]} rounded={"xl"} boxShadow={"lg"} />
+              <Image src={dashboardImage} maxW={["90vw", "100%"]} rounded={"xl"} boxShadow={"lg"} />
               <Text fontWeight={"semibold"} color={"gray.500"} fontSize={"sm"}>
                 Metadatify Dashboard
               </Text>
@@ -357,15 +364,15 @@ const App = () => {
             <Carousel
               images={[
                 {
-                  path: "Attribute.png",
+                  path: attributeImage,
                   caption: "Editing entity metadata attributes",
                 },
                 {
-                  path: "Entity.png",
+                  path: entityImage,
                   caption: "Viewing entity metadata",
                 },
                 {
-                  path: "Search.png",
+                  path: searchImage,
                   caption: "Natural language and advanced query search",
                 },
               ]}

@@ -1,15 +1,12 @@
 import React from "react";
 
 // Testing imports
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { expect, describe, it, jest } from "@jest/globals";
+import { vi } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
+import { render } from "../render";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { InMemoryCache } from "@apollo/client";
 import { gql } from "@apollo/client";
-
-// Chakra UI
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "../../src/styles/theme";
 
 // Target component
 import Linky from "../../src/components/Linky";
@@ -37,8 +34,8 @@ const createTestCache = () => {
 };
 
 // Mock useNavigate
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
@@ -70,7 +67,7 @@ const GET_PROJECT = gql`
 `;
 
 // Mock GraphQL queries
-const mockEntityQuery = {
+const mockDefaultEntityQuery = {
   request: {
     query: GET_ENTITY,
     variables: { _id: "test-id" },
@@ -93,6 +90,29 @@ const mockEntityQuery = {
   },
 };
 
+const mockLongNameEntityQuery = {
+  request: {
+    query: GET_ENTITY,
+    variables: { _id: "test-id-long-name" },
+  },
+  result: {
+    data: {
+      entity: {
+        __typename: "Entity",
+        _id: "test-id",
+        name: "Test Entity Long Name",
+        description: "Test Description",
+        attributes: [
+          {
+            _id: "test-attribute-id",
+          },
+        ],
+        archived: false,
+      },
+    },
+  },
+};
+
 const renderLinky = (props: Partial<React.ComponentProps<typeof Linky>> = {}) => {
   const defaultProps = {
     id: "test-id",
@@ -102,16 +122,14 @@ const renderLinky = (props: Partial<React.ComponentProps<typeof Linky>> = {}) =>
   };
 
   return render(
-    <ChakraProvider value={theme}>
-      <MockedProvider mocks={[mockEntityQuery]} cache={createTestCache()}>
-        <Linky {...defaultProps} />
-      </MockedProvider>
-    </ChakraProvider>,
+    <MockedProvider mocks={[mockDefaultEntityQuery, mockLongNameEntityQuery]} cache={createTestCache()}>
+      <Linky {...defaultProps} />
+    </MockedProvider>,
   );
 };
 
 describe("Linky Component", () => {
-  describe("Basic Rendering", () => {
+  describe("Default Rendering", () => {
     it("renders with loading state initially", () => {
       const { container } = renderLinky({ fallback: "Initial Fallback" });
       // Component shows a skeleton placeholder while the query is in flight
@@ -120,18 +138,16 @@ describe("Linky Component", () => {
 
     it("renders fallback when query fails", async () => {
       const errorMock = {
-        ...mockEntityQuery,
+        ...mockDefaultEntityQuery,
         result: {
           errors: [{ message: "Not found" }],
         },
       };
 
       render(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[errorMock]} cache={createTestCache()}>
-            <Linky id="test-id" type="entities" fallback="Initial Fallback" />
-          </MockedProvider>
-        </ChakraProvider>,
+        <MockedProvider mocks={[errorMock]} cache={createTestCache()}>
+          <Linky id={"test-id"} type={"entities"} fallback={"Initial Fallback"} />
+        </MockedProvider>,
       );
 
       await waitFor(() => {
@@ -149,16 +165,16 @@ describe("Linky Component", () => {
 
   describe("Truncation", () => {
     it("truncates by default", async () => {
-      renderLinky();
+      renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name" });
       await waitFor(() => {
-        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
+        expect(screen.getAllByText("Test Entity Lon...")[0]).toBeTruthy();
       });
     });
 
     it("does not truncate when truncate is false", async () => {
-      renderLinky({ truncate: false });
+      renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name", truncate: false });
       await waitFor(() => {
-        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
+        expect(screen.getAllByText("Test Entity Long Name")[0]).toBeTruthy();
       });
     });
 
@@ -173,18 +189,16 @@ describe("Linky Component", () => {
   describe("Navigation", () => {
     it("does not navigate when deleted", async () => {
       const deletedMock = {
-        ...mockEntityQuery,
+        ...mockDefaultEntityQuery,
         result: {
           errors: [{ message: "Not found" }],
         },
       };
 
       render(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[deletedMock]} cache={createTestCache()}>
-            <Linky id="test-id" type="entities" fallback="Deleted" />
-          </MockedProvider>
-        </ChakraProvider>,
+        <MockedProvider mocks={[deletedMock]} cache={createTestCache()}>
+          <Linky id={"test-id"} type={"entities"} fallback={"Deleted"} />
+        </MockedProvider>,
       );
 
       await waitFor(() => {
@@ -216,11 +230,9 @@ describe("Linky Component", () => {
       };
 
       render(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[projectMock]} cache={createTestCache()}>
-            <Linky id="project-id" type="projects" fallback="Project" />
-          </MockedProvider>
-        </ChakraProvider>,
+        <MockedProvider mocks={[projectMock]} cache={createTestCache()}>
+          <Linky id={"project-id"} type={"projects"} fallback={"Project"} />
+        </MockedProvider>,
       );
 
       // Initially shows fallback or loading state
@@ -251,11 +263,9 @@ describe("Linky Component", () => {
       };
 
       render(
-        <ChakraProvider value={theme}>
-          <MockedProvider mocks={[emptyIdMock]} cache={createTestCache()}>
-            <Linky id="" type="entities" fallback="Missing ID Fallback" />
-          </MockedProvider>
-        </ChakraProvider>,
+        <MockedProvider mocks={[emptyIdMock]} cache={createTestCache()}>
+          <Linky id={""} type={"entities"} fallback={"Missing ID Fallback"} />
+        </MockedProvider>,
       );
 
       // Initially shows loading, then shows truncated fallback when query returns no data
