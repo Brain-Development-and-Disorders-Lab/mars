@@ -17,11 +17,11 @@ import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
-posthog.init(import.meta.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
-  api_host: import.meta.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY as string, {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   person_profiles: "always",
   loaded: (ph) => {
-    if (import.meta.env.DISABLE_CAPTURE === "true") {
+    if (import.meta.env.VITE_POSTHOG_DISABLE_CAPTURE === "true") {
       // Disable capture when in "development" mode
       ph.opt_out_capturing();
       ph.set_config({ disable_session_recording: true });

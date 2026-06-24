@@ -125,7 +125,7 @@ const SearchSelect = (props: SearchSelectProps) => {
         setInstitutionLoading(true);
         try {
           const params = new URLSearchParams({
-            api_key: import.meta.env.COLLEGE_SCORECARD_KEY || "",
+            api_key: import.meta.env.VITE_COLLEGE_SCORECARD_KEY || "",
             fields: "school.name",
             per_page: "5",
             "school.operating": "1",
@@ -198,7 +198,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     setInstitutionLoading(true);
     try {
       const params = new URLSearchParams({
-        api_key: import.meta.env.COLLEGE_SCORECARD_KEY || "",
+        api_key: import.meta.env.VITE_COLLEGE_SCORECARD_KEY || "",
         "school.name": query,
         fields: "school.name",
         per_page: "20",
