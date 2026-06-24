@@ -104,6 +104,16 @@ export type ViewAttributeDialogProps = {
   cancelCallback?: () => void;
 };
 
+export type CompareAttributeDialogProps = {
+  // Dialog state
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+
+  // Dialog Attribute information
+  modifiedAttribute: AttributeModel;
+  templateAttributeId: string;
+};
+
 // Column descriptor returned by prepareEntityCSV
 export type ColumnInfo = {
   name: string;
@@ -511,11 +521,13 @@ export type IconNames =
   | "check"
   | "close"
   | "counter"
+  | "diff"
   | "info"
   | "search"
   | "search_query"
   | "bell"
   | "add"
+  | "remove"
   | "copy"
   | "edit"
   | "expand"
