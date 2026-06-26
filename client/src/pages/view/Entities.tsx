@@ -15,6 +15,7 @@ import {
   Input,
   Checkbox,
   Collapsible,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -25,13 +26,14 @@ import DataTable from "@components/DataTable";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { DataTableAction, EntityModel } from "@types";
+import { DataTableAction, EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -50,6 +52,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entities = () => {
   const navigate = useNavigate();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
@@ -101,7 +106,13 @@ const Entities = () => {
 
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($page: Int, $pageSize: Int, $filter: EntityFilterInput, $sort: EntitySortInput) {
+    query GetEntities(
+      $page: Int
+      $pageSize: Int
+      $filter: EntityFilterInput
+      $sort: EntitySortInput
+      $workspace: String
+    ) {
       entities(page: $page, pageSize: $pageSize, filter: $filter, sort: $sort) {
         entities {
           _id
@@ -124,6 +135,10 @@ const Entities = () => {
           }
         }
         total
+      }
+      workspace(_id: $workspace) {
+        _id
+        name
       }
     }
   `;
@@ -151,9 +166,11 @@ const Entities = () => {
 
   const { loading, error, data } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
+    workspace: IGenericItem;
   }>(GET_ENTITIES, {
     fetchPolicy: "network-only",
     variables: {
+      workspace,
       page,
       pageSize,
       filter: filterVariables,
@@ -166,6 +183,10 @@ const Entities = () => {
     if (data?.entities?.entities) {
       // Set the paginated Entity data (already filtered and sorted on server)
       setEntityData(data.entities.entities);
+    }
+    if (data?.workspace) {
+      // Store the Workspace name
+      setWorkspaceName(data.workspace.name);
     }
   }, [data]);
 
@@ -322,8 +343,17 @@ const Entities = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
-            <Heading size={"md"}>Entities</Heading>
+            <Flex direction={"column"} gap={"0"} align={"start"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Heading size={"xl"}>Entities</Heading>
+              </Flex>
+              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                  {workspaceName}
+                </Text>
+              </SkeletonText>
+            </Flex>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
               Create Entity

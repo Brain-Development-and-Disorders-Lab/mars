@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Text, Tag, Badge, EmptyState } from "@chakra-ui/react";
+import { Button, Flex, Heading, Text, Tag, Badge, EmptyState, SkeletonText } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -16,7 +16,15 @@ import SearchBox from "@components/SearchBox";
 import ActivityFeed from "@components/ActivityFeed";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, EntityMetrics, ProjectMetrics, TemplateMetrics, WorkspaceMetrics } from "@types";
+import {
+  ProjectModel,
+  EntityModel,
+  EntityMetrics,
+  ProjectMetrics,
+  TemplateMetrics,
+  WorkspaceMetrics,
+  IGenericItem,
+} from "@types";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -84,6 +92,10 @@ const GET_DASHBOARD = gql`
       }
       total
     }
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
     entityMetrics {
       all
       addedDay
@@ -130,6 +142,9 @@ const Dashboard = () => {
     [] as { _id: string; name: string; description: string; created: string }[],
   );
 
+  // Display state
+  const [workspaceName, setWorkspaceName] = useState<string>();
+
   // Metrics
   const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
   const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
@@ -162,6 +177,7 @@ const Dashboard = () => {
     projects: ProjectModel[];
     projectMetrics: ProjectMetrics;
     entities: { entities: EntityModel[]; total: number };
+    workspace: IGenericItem;
     entityMetrics: EntityMetrics;
     templateMetrics: TemplateMetrics;
     workspaceMetrics: WorkspaceMetrics;
@@ -183,6 +199,11 @@ const Dashboard = () => {
     }
     if (data?.projects) {
       setProjectData(data.projects);
+    }
+
+    // Display state
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
 
     // Metrics
@@ -475,11 +496,19 @@ const Dashboard = () => {
         )}
 
         {/* Header */}
-        <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"1"}>
-          <Flex direction={"row"} align={"center"} gap={"1"}>
-            <Icon name={"dashboard"} size={"sm"} />
-            <Heading size={"xl"}>Dashboard</Heading>
+        <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
+          <Flex direction={"column"} gap={"0"} align={"start"}>
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon name={"dashboard"} size={"sm"} />
+              <Heading size={"xl"}>Dashboard</Heading>
+            </Flex>
+            <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                {workspaceName}
+              </Text>
+            </SkeletonText>
           </Flex>
+
           <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
         </Flex>
 

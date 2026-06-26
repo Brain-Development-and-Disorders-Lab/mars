@@ -14,6 +14,7 @@ import {
   Checkbox,
   Collapsible,
   Field,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
@@ -24,7 +25,7 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { AttributeModel } from "@types";
+import { AttributeModel, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -43,12 +44,16 @@ import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
 const Templates = () => {
   const navigate = useNavigate();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Page state
   const [templates, setTemplates] = useState([] as AttributeModel[]);
@@ -76,7 +81,7 @@ const Templates = () => {
 
   // GraphQL operations
   const GET_TEMPLATES = gql`
-    query GetTemplates {
+    query GetTemplates($workspace: String) {
       templates {
         _id
         name
@@ -91,11 +96,21 @@ const Templates = () => {
           data
         }
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data } = useQuery<{
     templates: AttributeModel[];
-  }>(GET_TEMPLATES, { fetchPolicy: "network-only" });
+    workspace: IGenericItem;
+  }>(GET_TEMPLATES, {
+    variables: {
+      workspace: workspace,
+    },
+    fetchPolicy: "network-only",
+  });
 
   // Manage data once retrieved
   useEffect(() => {
@@ -103,6 +118,11 @@ const Templates = () => {
       // Unpack all the Template data
       setTemplates(data.templates);
       setFilteredTemplates(data.templates);
+    }
+
+    if (data?.workspace) {
+      // Store the Workspace name
+      setWorkspaceName(data.workspace.name);
     }
   }, [loading]);
 
@@ -274,8 +294,17 @@ const Templates = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
-            <Heading size={"md"}>Templates</Heading>
+            <Flex direction={"column"} gap={"0"} align={"start"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+                <Heading size={"xl"}>Templates</Heading>
+              </Flex>
+              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                  {workspaceName}
+                </Text>
+              </SkeletonText>
+            </Flex>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
               Create Template

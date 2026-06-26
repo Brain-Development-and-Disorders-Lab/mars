@@ -12,6 +12,7 @@ import {
   Checkbox,
   Collapsible,
   Field,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -22,7 +23,7 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { ProjectModel } from "@types";
+import { IGenericItem, ProjectModel } from "@types";
 
 // Utility functions and types
 import _ from "lodash";
@@ -37,6 +38,7 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -47,7 +49,7 @@ import { GLOBAL_STYLES } from "@variables";
 
 // Queries
 const GET_PROJECTS = gql`
-  query GetProjects {
+  query GetProjects($workspace: String) {
     projects {
       _id
       archived
@@ -57,11 +59,18 @@ const GET_PROJECTS = gql`
       owner
       entities
     }
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
   }
 `;
 
 const Projects = () => {
   const navigate = useNavigate();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Effect to adjust column visibility
   const { breakpoint } = useBreakpoint();
@@ -87,7 +96,13 @@ const Projects = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
-  }>(GET_PROJECTS, { fetchPolicy: "network-only" });
+    workspace: IGenericItem;
+  }>(GET_PROJECTS, {
+    variables: {
+      workspace: workspace,
+    },
+    fetchPolicy: "network-only",
+  });
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);
@@ -119,6 +134,9 @@ const Projects = () => {
     if (data?.projects) {
       setProjects(data.projects);
       setFilteredProjects(data.projects);
+    }
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data]);
 
@@ -269,10 +287,17 @@ const Projects = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
-            <Heading fontWeight={"bold"} size={"md"}>
-              Projects
-            </Heading>
+            <Flex direction={"column"} gap={"0"} align={"start"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
+                <Heading size={"xl"}>Projects</Heading>
+              </Flex>
+              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                  {workspaceName}
+                </Text>
+              </SkeletonText>
+            </Flex>
             <Spacer />
             <Button colorPalette={"green"} onClick={() => navigate("/create/project")} size={"xs"} rounded={"md"}>
               Create Project
