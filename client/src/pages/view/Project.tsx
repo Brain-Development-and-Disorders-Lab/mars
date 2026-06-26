@@ -23,6 +23,7 @@ import {
   Collapsible,
   Textarea,
   Breadcrumb,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
@@ -51,6 +52,9 @@ import { useQuery, useMutation } from "@apollo/client/react";
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
+// Hooks
+import { useWorkspace } from "@hooks/useWorkspace";
+
 // Authentication
 import { auth } from "@lib/auth";
 
@@ -64,6 +68,10 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Project = () => {
   const { id } = useParams();
+
+  // Workspace information
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -202,7 +210,7 @@ const Project = () => {
 
   // Execute GraphQL query both on page load and navigation
   const GET_PROJECT_WITH_ENTITIES = gql`
-    query GetProjectWithEntities($_id: String) {
+    query GetProjectWithEntities($_id: String, $workspace: String) {
       project(_id: $_id) {
         _id
         name
@@ -231,14 +239,20 @@ const Project = () => {
         }
         total
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data } = useQuery<{
     project: ProjectModel;
     entities: IGenericItem[];
+    workspace: IGenericItem;
   }>(GET_PROJECT_WITH_ENTITIES, {
     variables: {
       _id: id,
+      workspace: workspace,
     },
     fetchPolicy: "no-cache",
   });
@@ -289,6 +303,10 @@ const Project = () => {
       }
 
       setProjectHistory(data.project.history || []);
+    }
+
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data, editing]);
 
@@ -688,13 +706,19 @@ const Project = () => {
             <Breadcrumb.Root>
               <Breadcrumb.List>
                 <Breadcrumb.Item
+                  gap={"1"}
                   onClick={() => navigate("/")}
                   _hover={{
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Dashboard
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  {loading ? (
+                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
+                  ) : (
+                    workspaceName
+                  )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
                 <Breadcrumb.Item

@@ -152,7 +152,7 @@ const Linky = (props: LinkyProps) => {
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Template";
-          setTooltipLabel(`The Template (ID: ${props.id}) is either inaccessible or does not exist.`);
+          setTooltipLabel(`Template (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.template.name;
           setTooltipLabel(data.name);
@@ -165,7 +165,7 @@ const Linky = (props: LinkyProps) => {
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Entity";
-          setTooltipLabel(`The Entity (ID: ${props.id}) is either inaccessible or does not exist.`);
+          setTooltipLabel(`Entity (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.entity.name;
           setTooltipLabel(data.name);
@@ -178,7 +178,7 @@ const Linky = (props: LinkyProps) => {
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Project";
-          setTooltipLabel(`The Project (ID: ${props.id}) is either inaccessible or does not exist.`);
+          setTooltipLabel(`Project (ID: ${props.id}) is either inaccessible or does not exist.`);
         } else {
           data.name = response.data.project.name;
           setTooltipLabel(data.name);
@@ -190,7 +190,7 @@ const Linky = (props: LinkyProps) => {
     } catch (error) {
       // If query fails completely, use fallback
       setShowDeleted(true);
-      const tooltipLabel = `The ${_.capitalize(props.type.slice(0, -1))} (ID: ${props.id}) is either inaccessible or does not exist.`;
+      const tooltipLabel = `${_.capitalize(props.type.slice(0, -1))} (ID: ${props.id}) is either inaccessible or does not exist.`;
       setTooltipLabel(tooltipLabel);
     }
 
