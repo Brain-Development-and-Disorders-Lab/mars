@@ -54,7 +54,11 @@ test.describe("Import", () => {
 
       // Verify import success
       await page.click("#navProjectsButtonDesktop");
-      await page.locator(".data-table-scroll-container").locator('button[aria-label="View Project"]').first().click();
+      await page
+        .getByTestId("data-table-scroll-container")
+        .locator('button[aria-label="View Project"]')
+        .first()
+        .click();
 
       await expect(page.locator("text=Mini Box 1 (CSV)").first()).toBeVisible();
     });

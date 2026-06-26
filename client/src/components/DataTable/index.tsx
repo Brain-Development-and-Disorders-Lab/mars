@@ -16,6 +16,7 @@ import {
   Fieldset,
   Field,
   Input,
+  ScrollArea,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -846,170 +847,170 @@ const DataTable = (props: DataTableProps) => {
       flexDirection={"column"}
       css={{ WebkitOverflowScrolling: "touch" }}
     >
-      <Box
-        ref={containerRef}
-        w={"100%"}
-        maxW={"100%"}
-        flex={"1"}
-        minH={"0"}
-        minW={"0"}
-        overflowX={"auto"}
-        overflowY={"auto"}
-        position={"relative"}
-        className={"data-table-scroll-container"}
-      >
-        <Box
-          w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
-          minW={`${totalMinWidth}px`}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
-          borderRadius={"md"}
-          overflow={"hidden"}
-          display={"flex"}
-          flexDirection={"column"}
-        >
-          {headerGroups.length > 0 && (
-            <Flex
-              gap={0}
-              bg={"gray.100"}
-              borderBottom={"1px solid"}
-              borderColor={"gray.200"}
-              direction={"row"}
+      <ScrollArea.Root variant={"always"}>
+        <ScrollArea.Viewport>
+          <ScrollArea.Content pb={"4"} data-testid={"data-table-scroll-container"}>
+            <Box
               w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
+              minW={`${totalMinWidth}px`}
+              border={GLOBAL_STYLES.border.style}
+              borderColor={GLOBAL_STYLES.border.color}
+              borderRadius={"md"}
+              overflow={"hidden"}
+              display={"flex"}
+              flexDirection={"column"}
             >
-              {headerGroups[0].headers
-                .filter((header) => header.column.getIsVisible())
-                .map((header, headerIndex, visibleHeaders) => {
-                  const isSelectColumn = header.id === "select";
-                  const isLastColumn = headerIndex === visibleHeaders.length - 1;
-                  const columnWidth = getColumnWidth(header.id, isLastColumn);
-                  const columnMinWidth = getColumnMinWidth(header.id);
-                  const align = getColumnAlign(header.id);
-                  const headerMeta = header.column.columnDef.meta as ColumnMeta | undefined;
+              {headerGroups.length > 0 && (
+                <Flex
+                  gap={0}
+                  bg={"gray.100"}
+                  borderBottom={"1px solid"}
+                  borderColor={"gray.200"}
+                  direction={"row"}
+                  w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
+                >
+                  {headerGroups[0].headers
+                    .filter((header) => header.column.getIsVisible())
+                    .map((header, headerIndex, visibleHeaders) => {
+                      const isSelectColumn = header.id === "select";
+                      const isLastColumn = headerIndex === visibleHeaders.length - 1;
+                      const columnWidth = getColumnWidth(header.id, isLastColumn);
+                      const columnMinWidth = getColumnMinWidth(header.id);
+                      const align = getColumnAlign(header.id);
+                      const headerMeta = header.column.columnDef.meta as ColumnMeta | undefined;
+                      return (
+                        <Flex
+                          key={header.id}
+                          w={columnWidth}
+                          flex={isLastColumn ? "1 1 auto" : "0 0 auto"}
+                          minW={isLastColumn ? `${columnMinWidth}px` : columnWidth}
+                          maxW={isLastColumn && headerMeta?.maxWidth ? `${headerMeta.maxWidth}px` : undefined}
+                          px={1}
+                          py={1}
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          bg={"gray.100"}
+                          borderRight={!isLastColumn ? "1px solid" : "none"}
+                          borderColor={"gray.200"}
+                          position={"relative"}
+                          textAlign={align}
+                          lineHeight={"1.2"}
+                          align={"center"}
+                          justify={"center"}
+                          overflow={"hidden"}
+                          flexShrink={0}
+                          data-testid={`datatable-header-${header.id}`}
+                        >
+                          {isSelectColumn ? (
+                            flexRender(header.column.columnDef.header, header.getContext())
+                          ) : (
+                            <Flex direction={"row"} align={"center"} gap={1} justify={"space-between"} w={"100%"}>
+                              <Text textAlign={align}>
+                                {flexRender(header.column.columnDef.header, header.getContext())}
+                              </Text>
+                              <Flex direction={"row"} gap={1} align={"center"} justify={"center"}>
+                                {canSortColumn(header.id) && (
+                                  <Button
+                                    size={"xs"}
+                                    variant={"subtle"}
+                                    p={0}
+                                    minW={"auto"}
+                                    h={"auto"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      header.column.getToggleSortingHandler()?.(e);
+                                    }}
+                                  >
+                                    <Icon
+                                      name={
+                                        header.column.getIsSorted() === "desc"
+                                          ? "sort_up"
+                                          : header.column.getIsSorted() === "asc"
+                                            ? "sort_down"
+                                            : "sort"
+                                      }
+                                      color={
+                                        header.column.getIsSorted()
+                                          ? "blue.700"
+                                          : GLOBAL_STYLES.font.secondaryHeader.color
+                                      }
+                                      size={"xs"}
+                                    />
+                                  </Button>
+                                )}
+                                {canSortColumn(header.id) && props.showColumnFilters && (
+                                  <ColumnFilterMenu<RowData> columnId={header.id} data={props.data} table={table} />
+                                )}
+                              </Flex>
+                            </Flex>
+                          )}
+                        </Flex>
+                      );
+                    })}
+                </Flex>
+              )}
+
+              <Box overflowY={"auto"} overflowX={"hidden"} w={props.fill !== false ? "100%" : `${totalMinWidth}px`}>
+                {rows.map((row, rowIndex) => {
+                  const isSelected = row.getIsSelected();
+                  const visibleCells = row.getVisibleCells();
                   return (
                     <Flex
-                      key={header.id}
-                      w={columnWidth}
-                      flex={isLastColumn ? "1 1 auto" : "0 0 auto"}
-                      minW={isLastColumn ? `${columnMinWidth}px` : columnWidth}
-                      maxW={isLastColumn && headerMeta?.maxWidth ? `${headerMeta.maxWidth}px` : undefined}
-                      px={1}
-                      py={1}
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      bg={"gray.100"}
-                      borderRight={!isLastColumn ? "1px solid" : "none"}
+                      key={row.id}
+                      id={row.id}
+                      gap={0}
+                      w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
+                      borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
                       borderColor={"gray.200"}
-                      position={"relative"}
-                      textAlign={align}
-                      lineHeight={"1.2"}
-                      align={"center"}
-                      justify={"center"}
+                      _hover={{ bg: "gray.25" }}
                       overflow={"hidden"}
-                      flexShrink={0}
-                      data-testid={`datatable-header-${header.id}`}
+                      bg={isSelected ? "blue.50" : "white"}
                     >
-                      {isSelectColumn ? (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      ) : (
-                        <Flex direction={"row"} align={"center"} gap={1} justify={"space-between"} w={"100%"}>
-                          <Text textAlign={align}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </Text>
-                          <Flex direction={"row"} gap={1} align={"center"} justify={"center"}>
-                            {canSortColumn(header.id) && (
-                              <Button
-                                size={"xs"}
-                                variant={"subtle"}
-                                p={0}
-                                minW={"auto"}
-                                h={"auto"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  header.column.getToggleSortingHandler()?.(e);
-                                }}
-                              >
-                                <Icon
-                                  name={
-                                    header.column.getIsSorted() === "desc"
-                                      ? "sort_up"
-                                      : header.column.getIsSorted() === "asc"
-                                        ? "sort_down"
-                                        : "sort"
-                                  }
-                                  color={
-                                    header.column.getIsSorted() ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color
-                                  }
-                                  size={"xs"}
-                                />
-                              </Button>
-                            )}
-                            {canSortColumn(header.id) && props.showColumnFilters && (
-                              <ColumnFilterMenu<RowData> columnId={header.id} data={props.data} table={table} />
-                            )}
-                          </Flex>
-                        </Flex>
-                      )}
+                      {visibleCells.map((cell, cellIndex) => {
+                        const isLastCell = cellIndex === visibleCells.length - 1;
+                        const columnWidth = getColumnWidth(cell.column.id, isLastCell);
+                        const columnMinWidth = getColumnMinWidth(cell.column.id);
+                        const align = getColumnAlign(cell.column.id);
+                        const cellMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
+                        return (
+                          <Box
+                            key={cell.id}
+                            id={cell.id}
+                            w={columnWidth}
+                            flex={isLastCell ? "1 1 auto" : "0 0 auto"}
+                            minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
+                            maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
+                            h={"34px"}
+                            px={1}
+                            py={0.5}
+                            borderRight={!isLastCell ? "1px solid" : "none"}
+                            borderColor={"gray.200"}
+                            textAlign={align}
+                            overflow={"hidden"}
+                            display={"flex"}
+                            alignItems={"center"}
+                            justifyContent={
+                              align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"
+                            }
+                            bg={isSelected ? "blue.50" : "white"}
+                            flexShrink={0}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </Box>
+                        );
+                      })}
                     </Flex>
                   );
                 })}
-            </Flex>
-          )}
-
-          <Box overflowY={"auto"} overflowX={"hidden"} w={props.fill !== false ? "100%" : `${totalMinWidth}px`}>
-            {rows.map((row, rowIndex) => {
-              const isSelected = row.getIsSelected();
-              const visibleCells = row.getVisibleCells();
-              return (
-                <Flex
-                  key={row.id}
-                  id={row.id}
-                  gap={0}
-                  w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
-                  borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
-                  borderColor={"gray.200"}
-                  _hover={{ bg: "gray.25" }}
-                  overflow={"hidden"}
-                  bg={isSelected ? "blue.50" : "white"}
-                >
-                  {visibleCells.map((cell, cellIndex) => {
-                    const isLastCell = cellIndex === visibleCells.length - 1;
-                    const columnWidth = getColumnWidth(cell.column.id, isLastCell);
-                    const columnMinWidth = getColumnMinWidth(cell.column.id);
-                    const align = getColumnAlign(cell.column.id);
-                    const cellMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
-                    return (
-                      <Box
-                        key={cell.id}
-                        id={cell.id}
-                        w={columnWidth}
-                        flex={isLastCell ? "1 1 auto" : "0 0 auto"}
-                        minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
-                        maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
-                        h={"34px"}
-                        px={1}
-                        py={0.5}
-                        borderRight={!isLastCell ? "1px solid" : "none"}
-                        borderColor={"gray.200"}
-                        textAlign={align}
-                        overflow={"hidden"}
-                        display={"flex"}
-                        alignItems={"center"}
-                        justifyContent={align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"}
-                        bg={isSelected ? "blue.50" : "white"}
-                        flexShrink={0}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </Box>
-                    );
-                  })}
-                </Flex>
-              );
-            })}
-          </Box>
-        </Box>
-      </Box>
+              </Box>
+            </Box>
+          </ScrollArea.Content>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar orientation={"horizontal"} />
+        <ScrollArea.Corner />
+      </ScrollArea.Root>
+      {/* </Box> */}
 
       <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
         <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>

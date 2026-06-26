@@ -279,7 +279,7 @@ const Login = () => {
 
             <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-                v{import.meta.env.VERSION}
+                v{import.meta.env.VITE_VERSION}
               </Text>
             </Flex>
           </Flex>

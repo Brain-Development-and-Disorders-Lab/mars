@@ -8,44 +8,6 @@ a:hover {
   transition: 0.5s;
 }
 
-/* Custom scrollbar styles for DataTable */
-.data-table-scroll-container {
-  /* For Webkit browsers (Chrome, Safari, Edge) */
-  &::-webkit-scrollbar {
-    width: 3px;
-    height: 3px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
-    transition: background 0.2s ease;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
-  }
-
-  /* For Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-
-  /* Minimize spacing, remove any default margins/padding on scrollbar */
-  &::-webkit-scrollbar-corner {
-    background: transparent;
-  }
-
-  /* Reduce gap by making scrollbar track flush with content */
-  &::-webkit-scrollbar:horizontal {
-    margin-top: 0;
-  }
-}
-
 /* Custom scrollbar styles for Error component */
 .error-scroll-container {
   /* For Webkit browsers (Chrome, Safari, Edge) */
