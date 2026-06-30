@@ -8,6 +8,7 @@ import {
   BsArchiveFill,
   BsArrowCounterclockwise,
   BsArrowLeftCircleFill,
+  BsArrowLeftRight,
   BsArrowRight,
   BsArrowRightCircleFill,
   BsArrowUpRight,
@@ -174,6 +175,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   a_right: BsArrowRight,
   a_right_fill: BsArrowRightCircleFill,
   a_left_fill: BsArrowLeftCircleFill,
+  a_both: BsArrowLeftRight,
   a_both_fill: BsFillDashCircleFill,
 
   // Chevrons

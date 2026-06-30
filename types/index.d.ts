@@ -102,6 +102,9 @@ export type ViewAttributeDialogProps = {
   onAttributeUpdate: (updated: AttributeModel) => void;
   removeCallback?: () => void;
   cancelCallback?: () => void;
+
+  // Optional context for comparison display
+  entityName?: string;
 };
 
 export type CompareAttributeDialogProps = {
@@ -112,6 +115,33 @@ export type CompareAttributeDialogProps = {
   // Dialog Attribute information
   modifiedAttribute: AttributeModel;
   templateAttributeId: string;
+
+  // Optional callback to apply selected template changes back to the entity attribute
+  onUpdate?: (updated: AttributeModel) => void;
+
+  // When true, all changes are pre-selected
+  defaultApplyAll?: boolean;
+
+  // Optional context for comparison display
+  entityName?: string;
+};
+
+export type CompareAttributeDialogCollapsibleProps = {
+  sectionKey: string;
+  icon: IconNames;
+  color: string;
+  label: string;
+  count: number;
+  children: React.ReactNode;
+};
+
+export type CompareAttributeFieldDiffProps = {
+  label: string;
+  isDifferent: boolean;
+  currentValue: string;
+  originalValue: string;
+  useOriginal: boolean;
+  setUseOriginal: (v: boolean) => void;
 };
 
 // Column descriptor returned by prepareEntityCSV
@@ -584,6 +614,7 @@ export type IconNames =
   | "a_right"
   | "a_right_fill"
   | "a_left_fill"
+  | "a_both"
   | "a_both_fill"
 
   // Chevrons

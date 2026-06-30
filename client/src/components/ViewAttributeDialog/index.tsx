@@ -10,7 +10,7 @@ import Linky from "@components/Linky";
 import Values from "@components/Values";
 
 // Existing and custom types
-import { ViewAttributeDialogProps } from "@types";
+import { AttributeModel, ViewAttributeDialogProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -22,11 +22,29 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
   const isEditing = _.isBoolean(props.editing) ? props.editing : false;
 
   // State to be updated
-  const [attribute] = useState(props.attribute);
   const [name, setName] = useState(props.attribute.name);
   const [description, setDescription] = useState(props.attribute.description);
   const [values, setValues] = useState(props.attribute.values);
-  const [compareAttributesOpen, setCompareAttributesOpen] = useState(false);
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false);
+  const [compareDefaultApplyAll, setCompareDefaultApplyAll] = useState(false);
+
+  // Current working state, used to inform `CompareAttributeDialog` state
+  const currentAttribute: AttributeModel = {
+    ...props.attribute,
+    name,
+    description,
+    values,
+  };
+
+  /**
+   * Helper function to apply changes to the `AttributeModel` after the `CompareAttributeDialog` has been closed
+   * @param updated Update `AttributeModel` after comparison
+   */
+  const onUpdateAttribute = (updated: AttributeModel) => {
+    setName(updated.name);
+    setDescription(updated.description);
+    setValues(updated.values);
+  };
 
   return (
     <React.Fragment>
@@ -86,15 +104,38 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                         size={"xs"}
                         rounded={"md"}
                         colorPalette={"blue"}
-                        onClick={() => setCompareAttributesOpen(true)}
+                        disabled={!isEditing}
+                        onClick={() => {
+                          setCompareDefaultApplyAll(false);
+                          setCompareDialogOpen(true);
+                        }}
                       >
                         <Icon name={"diff"} />
                         Compare
                       </Button>
-                      <Button size={"xs"} rounded={"md"} colorPalette={"orange"} disabled>
+                      <Button
+                        size={"xs"}
+                        rounded={"md"}
+                        colorPalette={"orange"}
+                        disabled={!isEditing}
+                        onClick={() => {
+                          setCompareDefaultApplyAll(true);
+                          setCompareDialogOpen(true);
+                        }}
+                      >
                         <Icon name={"reload"} />
                         Reset
                       </Button>
+
+                      <CompareAttributeDialog
+                        open={compareDialogOpen}
+                        setOpen={setCompareDialogOpen}
+                        modifiedAttribute={currentAttribute}
+                        templateAttributeId={props.attribute._id.slice(0, 10)}
+                        onUpdate={onUpdateAttribute}
+                        defaultApplyAll={compareDefaultApplyAll}
+                        entityName={props.entityName}
+                      />
                     </Flex>
                   </Flex>
                 )}
@@ -211,8 +252,8 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                     variant={"solid"}
                     onClick={() => {
                       // Reset the changes made to the Attribute
-                      setDescription(attribute.description);
-                      setValues(attribute.values);
+                      setDescription(props.attribute.description);
+                      setValues(props.attribute.values);
 
                       // Close the dialog
                       props.setOpen(false);
@@ -255,12 +296,6 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>
-      <CompareAttributeDialog
-        open={compareAttributesOpen}
-        setOpen={setCompareAttributesOpen}
-        modifiedAttribute={attribute}
-        templateAttributeId={props.attribute._id.slice(0, 10)}
-      />
     </React.Fragment>
   );
 };

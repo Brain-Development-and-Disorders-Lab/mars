@@ -774,8 +774,9 @@ const Entity = () => {
               <ViewAttributeDialog
                 open={viewAttributeDialogOpen}
                 setOpen={setViewAttributeDialogOpen}
-                attribute={attribute}
                 editing={editing}
+                entityName={entityName}
+                attribute={attribute}
                 isTemplate={isKnownTemplate(attribute._id, templates)}
                 onAttributeUpdate={onAttributeUpdate}
                 removeCallback={() => {
