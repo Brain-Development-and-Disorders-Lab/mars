@@ -339,8 +339,8 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
     // Apply Values that are to be updated from the Template
     for (const value of templateAttribute.values) {
       if (mergedMap.has(value._id) && adoptModifiedValueIds.has(value._id)) {
-        const valueId = mergedValues.findIndex((mv) => mv._id === value._id);
-        if (valueId) {
+        const valueId = mergedValues.findIndex((mergedValue) => mergedValue._id === value._id);
+        if (valueId !== -1) {
           mergedValues[valueId] = { ...value };
         }
       }
