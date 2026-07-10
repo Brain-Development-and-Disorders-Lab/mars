@@ -116,7 +116,7 @@ export type CompareAttributeDialogProps = {
   modifiedAttribute: AttributeModel;
   templateAttributeId: string;
 
-  // Optional callback to apply selected template changes back to the entity attribute
+  // Optional callback to apply selected Template changes back to the Entity Attribute
   onUpdate?: (updated: AttributeModel) => void;
 
   // When true, all changes are pre-selected

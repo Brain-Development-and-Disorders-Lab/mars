@@ -253,20 +253,25 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
       </Flex>
 
       <Flex direction={"column"} gap={"1"} rounded={"sm"} bg={"white"}>
-        <Flex direction={"row"} gap={"1"} align={"center"}>
-          <Text fontSize={"xs"} color={"gray.500"}>
-            Modified:
-          </Text>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={props.isDifferent ? undefined : "blue.800"}>
-            {props.currentValue}
-          </Text>
-        </Flex>
+        {props.isDifferent && (
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontSize={"xs"} color={"gray.500"}>
+              Modified:
+            </Text>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
+              {props.currentValue}
+            </Text>
+          </Flex>
+        )}
         <Flex direction={"row"} gap={"1"} align={"center"}>
           <Text fontSize={"xs"} color={"gray.500"}>
             Template:
           </Text>
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             {props.originalValue}
+          </Text>
+          <Text fontSize={"xs"} color={"gray.500"}>
+            {!props.isDifferent && " (unchanged)"}
           </Text>
         </Flex>
       </Flex>
@@ -555,7 +560,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           icon={"add"}
                           color={"green"}
                           label={"Add or Remove"}
-                          count={entityOnlyValues.length + templateOnlyValues.length}
+                          count={entityOnlyValues.length}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
                             <Text fontSize={"xs"} color={"gray.400"}>
@@ -704,7 +709,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           icon={"add"}
                           color={"green"}
                           label={"Add or Remove"}
-                          count={entityOnlyValues.length + templateOnlyValues.length}
+                          count={templateOnlyValues.length}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
                             <Text fontSize={"xs"} color={"gray.400"}>
