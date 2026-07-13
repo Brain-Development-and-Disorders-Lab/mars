@@ -14,6 +14,9 @@ export const STATIC_URL =
 // Key for the local storage data
 export const STORAGE_KEY = "metadatify_storage";
 
+// Accepted MIME types for attachments
+export const ACCEPTED_ATTACHMENTS = ["image/jpeg", "image/png", "application/pdf", "application/vnd.dna"];
+
 // Default styling
 export const GLOBAL_STYLES = {
   font: {

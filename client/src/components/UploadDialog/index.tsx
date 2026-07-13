@@ -1,13 +1,28 @@
 // React
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, Dialog, CloseButton, Fieldset, Flex, Input, Tag, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Dialog,
+  CloseButton,
+  Fieldset,
+  Flex,
+  Text,
+  FileUpload,
+  Tag,
+  useFileUploadContext,
+  FormatByte,
+  Spacer,
+  IconButton,
+  useFileUpload,
+} from "@chakra-ui/react";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Utility functions and libraries
+import { getFileExtension } from "@lib/util";
 import _ from "lodash";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
@@ -16,7 +31,54 @@ import { useMutation } from "@apollo/client/react";
 import { ResponseData } from "@types";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { ACCEPTED_ATTACHMENTS, GLOBAL_STYLES } from "@variables";
+
+/**
+ * Custom `FileUploadList` component to better render the collection of uploaded files
+ */
+const FileUploadList = () => {
+  const fileUpload = useFileUploadContext();
+  const files = fileUpload.acceptedFiles;
+
+  if (files.length === 0) {
+    return null;
+  }
+
+  return (
+    <FileUpload.ItemGroup>
+      {files.map((file: File) => (
+        <FileUpload.Item w={"100%"} p={"2"} rounded={"md"} file={file} key={file.name}>
+          <Flex direction={"column"} gap={"1"} align={"start"}>
+            {/* File information */}
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Icon size={"xs"} name={"file"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {file.name}
+              </Text>
+            </Flex>
+            <Flex direction={"row"} align={"center"} gap={"1"}>
+              <Tag.Root key={getFileExtension(file.type)} size={"sm"} colorPalette={"gray"} variant={"outline"}>
+                <Tag.Label fontSize={"xs"}>{getFileExtension(file.type)}</Tag.Label>
+              </Tag.Root>
+              <Text fontSize={"xs"} color={"gray.600"}>
+                <FormatByte value={file.size} />
+              </Text>
+            </Flex>
+          </Flex>
+
+          <Spacer />
+
+          {/* `IconButton` to remove uploaded file */}
+          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"}>
+            <FileUpload.ItemDeleteTrigger asChild>
+              <Icon name={"delete"} size={"xs"} />
+            </FileUpload.ItemDeleteTrigger>
+          </IconButton>
+        </FileUpload.Item>
+      ))}
+    </FileUpload.ItemGroup>
+  );
+};
 
 const UploadDialog = (props: {
   open: boolean;
@@ -26,12 +88,14 @@ const UploadDialog = (props: {
   setUploads: React.Dispatch<React.SetStateAction<string[]>>;
   onUploadSuccess?: () => void;
 }) => {
-  const [file, setFile] = useState<File>({} as File);
-  const [displayName, setDisplayName] = useState<string>("");
-  const [displayType, setDisplayType] = useState<string>("");
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+    maxFileSize: 10 * 1024 * 1024,
+    accept: ACCEPTED_ATTACHMENTS,
+  });
+
   const [isLoaded, setIsLoaded] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const UPLOAD_ATTACHMENT = gql`
     mutation UploadAttachment($target: String!, $file: Upload!) {
@@ -46,25 +110,14 @@ const UploadDialog = (props: {
     uploadAttachment: ResponseData<string>;
   }>(UPLOAD_ATTACHMENT);
 
-  // Update display name and type when file changes
-  useEffect(() => {
-    if (!_.isEqual(file, {})) {
-      setDisplayName(file.name);
-      setDisplayType(file.type);
-    } else {
-      setDisplayName("");
-      setDisplayType("");
-    }
-  }, [file]);
-
   const performUpload = async () => {
-    if (_.isEqual(file, {})) return;
+    if (_.isUndefined(fileUpload.acceptedFiles)) return;
 
     try {
       const response = await uploadAttachment({
         variables: {
           target: props.target,
-          file: file,
+          file: fileUpload.acceptedFiles[0],
         },
       });
 
@@ -85,7 +138,6 @@ const UploadDialog = (props: {
         props.setUploads([...props.uploads, response.data?.uploadAttachment.data]);
 
         // Reset file upload state
-        setFile({} as File);
         props.setOpen(false);
 
         // Update state
@@ -116,40 +168,6 @@ const UploadDialog = (props: {
     }
   };
 
-  const handleDropZoneClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      const droppedFile = event.dataTransfer.files[0];
-
-      // Only accept image or PDF files
-      if (
-        _.includes(["image/jpeg", "image/png", "application/pdf"], droppedFile.type) ||
-        _.endsWith(droppedFile.name, ".dna")
-      ) {
-        setFile(droppedFile);
-      } else {
-        toaster.create({
-          title: "Warning",
-          type: "warning",
-          description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
-          duration: 4000,
-          closable: true,
-        });
-      }
-    }
-  };
-
   return (
     <>
       {isLoaded && isError ? (
@@ -159,14 +177,9 @@ const UploadDialog = (props: {
           open={props.open}
           onOpenChange={(details) => {
             props.setOpen(details.open);
-            if (!details.open) {
-              setFile({} as File);
-              setDisplayName("");
-              setDisplayType("");
-            }
           }}
           placement={"center"}
-          size={"xl"}
+          size={"lg"}
           scrollBehavior={"inside"}
           closeOnEscape
           closeOnInteractOutside
@@ -192,90 +205,40 @@ const UploadDialog = (props: {
                   <Flex w={"100%"} align={"center"} justify={"center"}>
                     <Fieldset.Root>
                       <Fieldset.Content h={"100%"} w={"100%"}>
-                        <Flex
-                          direction={"column"}
-                          minH={"50vh"}
-                          h={"100%"}
-                          w={"100%"}
-                          align={"center"}
-                          justify={"center"}
-                          border={GLOBAL_STYLES.border.style}
-                          borderStyle={_.isEqual(file, {}) ? "dashed" : "solid"}
-                          borderColor={!_.isEqual(file, {}) ? "blue.300" : GLOBAL_STYLES.border.color}
-                          bg={!_.isEqual(file, {}) ? GLOBAL_STYLES.card.bg : "white"}
-                          rounded={"md"}
-                          cursor={"pointer"}
-                          onClick={handleDropZoneClick}
-                          onDragOver={handleDragOver}
-                          onDrop={handleDrop}
-                        >
-                          {_.isEqual(file, {}) ? (
-                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
-                              <Icon name={"upload"} size={"xl"} color={"gray.300"} />
+                        <FileUpload.RootProvider w={"100%"} alignItems={"stretch"} gap={"2"} value={fileUpload}>
+                          <FileUpload.HiddenInput />
+                          <FileUpload.Dropzone>
+                            <Icon size={"lg"} name={"attachment"} color={"gray.400"} />
+                            <FileUpload.DropzoneContent gap={"0"}>
                               <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
-                                <Text fontWeight={"semibold"} fontSize={"xs"}>
-                                  Click to upload file
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  Click to upload attachment
                                 </Text>
                                 <Text fontSize={"xs"} color={"gray.500"}>
                                   or drag and drop
                                 </Text>
                                 <Flex direction={"row"} gap={"1"} mt={"1"}>
-                                  {["PDF", "JPEG", "PNG", "DNA"].map((fmt) => (
-                                    <Tag.Root key={fmt} size={"sm"} colorPalette={"gray"} variant={"outline"}>
-                                      <Tag.Label fontSize={"xs"}>{fmt}</Tag.Label>
-                                    </Tag.Root>
-                                  ))}
+                                  {ACCEPTED_ATTACHMENTS.map((format) => {
+                                    // Extract file type from MIME type
+                                    let fileType = _.upperCase(format.split("/")[1]);
+
+                                    // Handle unique MIME types
+                                    if (fileType.endsWith("DNA")) {
+                                      fileType = "DNA";
+                                    }
+
+                                    return (
+                                      <Tag.Root key={fileType} size={"sm"} colorPalette={"gray"} variant={"outline"}>
+                                        <Tag.Label fontSize={"xs"}>{fileType}</Tag.Label>
+                                      </Tag.Root>
+                                    );
+                                  })}
                                 </Flex>
                               </Flex>
-                            </Flex>
-                          ) : (
-                            <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
-                              <Icon name={"upload"} size={"xl"} color={"blue.300"} />
-                              <Flex direction={"column"} justify={"center"} align={"center"}>
-                                <Text fontWeight={"semibold"} fontSize={"xs"}>
-                                  {displayName}
-                                </Text>
-                                <Text fontSize={"xs"} color={"gray.500"}>
-                                  {displayType}
-                                </Text>
-                              </Flex>
-                            </Flex>
-                          )}
-                        </Flex>
-                        <Input
-                          ref={fileInputRef}
-                          type={"file"}
-                          h={"100%"}
-                          w={"100%"}
-                          rounded={"md"}
-                          position={"absolute"}
-                          top={"0"}
-                          left={"0"}
-                          opacity={"0"}
-                          aria-hidden={"true"}
-                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                            if (event.target.files && event.target.files.length > 0) {
-                              // Only accept image or PDF files
-                              if (
-                                _.includes(
-                                  ["image/jpeg", "image/png", "application/pdf"],
-                                  event.target.files[0].type,
-                                ) ||
-                                _.endsWith(event.target.files[0].name, ".dna")
-                              ) {
-                                setFile(event.target.files[0]);
-                              } else {
-                                toaster.create({
-                                  title: "Warning",
-                                  type: "warning",
-                                  description: "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
-                                  duration: 4000,
-                                  closable: true,
-                                });
-                              }
-                            }
-                          }}
-                        />
+                            </FileUpload.DropzoneContent>
+                          </FileUpload.Dropzone>
+                          <FileUploadList />
+                        </FileUpload.RootProvider>
                       </Fieldset.Content>
                     </Fieldset.Root>
                   </Flex>
@@ -290,7 +253,6 @@ const UploadDialog = (props: {
                     colorPalette={"red"}
                     variant={"solid"}
                     onClick={() => {
-                      setFile({} as File);
                       props.setOpen(false);
                     }}
                   >
@@ -302,7 +264,7 @@ const UploadDialog = (props: {
                     rounded={"md"}
                     colorPalette={"green"}
                     variant={"solid"}
-                    disabled={_.isEqual(file, {}) || loading}
+                    disabled={fileUpload.acceptedFiles.length === 0 || loading}
                     onClick={() => performUpload()}
                     loading={loading}
                   >

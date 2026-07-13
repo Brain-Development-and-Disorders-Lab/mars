@@ -16,6 +16,9 @@ import {
 // Utility functions
 import dayjs from "dayjs";
 
+// Variables
+import { ACCEPTED_ATTACHMENTS } from "@variables";
+
 export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
     return false;
@@ -94,6 +97,23 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+/**
+ * Get the 3- or 4-letter file extension for display based on a file's MIME type
+ * @param {string} mimeType File MIME type
+ */
+export const getFileExtension = (mimeType: string): string => {
+  if (ACCEPTED_ATTACHMENTS.includes(mimeType)) {
+    if (mimeType.endsWith(".dna")) {
+      // Handle unique MIME type for DNA files
+      return "DNA";
+    } else {
+      return _.upperCase(mimeType.split("/")[1]);
+    }
+  } else {
+    return "UNKNOWN";
+  }
 };
 
 /**
