@@ -27,6 +27,7 @@ const ALLOWED_OPERATORS = new Set([
 // Max regex pattern length
 const MAX_REGEX_LENGTH = 200;
 
+// Default system prompt to configure the LLM behavior and specify the output format
 const SYSTEM_PROMPT = `You translate natural language search requests into MongoDB query JSON for searching research entities.
 
 Return ONLY a valid MongoDB query object as JSON.
@@ -138,6 +139,8 @@ Attribute value:
 
 - attribute value
 - value
+- includes value
+- contains value
 - equals value
 
 → attributes.values.data
@@ -304,7 +307,6 @@ export class AI {
    * protection against malicious queries
    * @param node Current query node to validate
    * @param depth Current depth of query
-   * @return
    */
   private static validateQuery = (node: unknown, depth = 0): void => {
     if (depth > 20) throw new GraphQLError("Query structure too deeply nested");
@@ -349,8 +351,6 @@ export class AI {
    * @param query Natural language string provided by the user
    * @return {Promise<string>}
    */
-  // Minimum word-like tokens required before spending a token on the LLM.
-  // Rejects pure gibberish strings that contain no recognisable words.
   private static isPlausibleQuery = (query: string): boolean => {
     // Must contain at least one run of 2+ letters (rules out "1234", "!@#$", etc.)
     return /[a-zA-Z]{2,}/.test(query.trim());
@@ -416,7 +416,7 @@ export class AI {
    * @param name Entity name
    * @param description Entity description
    * @param templates Available templates (id, name, description only)
-   * @return Matched template _id, or null if none fit
+   * @return {Promise<string | null>} Matched template _id, or null if none fit
    */
   static suggestTemplate = async (
     name: string,
@@ -459,7 +459,15 @@ export class AI {
     return match ? match._id : null;
   };
 
+  /**
+   * Interact with a configured AI provider, passing the system prompt and translating the user-supplied natural
+   * language query into a MongoDB-compatible JSON search query. Performs validation of the natural language query
+   * and resulting JSON output.
+   * @param {string} query User-supplied natural language query
+   * @return {string} MongoDB-compatible JSON search query
+   */
   static translateSearch = async (query: string): Promise<string> => {
+    // Verify that query is plausible
     if (!AI.isPlausibleQuery(query)) {
       throw new GraphQLError("Query does not appear to be a valid search", {
         extensions: { code: "INVALID_QUERY" },
