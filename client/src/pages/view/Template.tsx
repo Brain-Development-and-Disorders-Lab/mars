@@ -17,6 +17,7 @@ import {
   Menu,
   Portal,
   Select,
+  SkeletonText,
   Tag,
   Text,
   Textarea,
@@ -38,7 +39,7 @@ import ExportDialog from "@components/ExportDialog";
 import SaveDialog from "@components/SaveDialog";
 
 // Existing and custom types
-import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData } from "@types";
+import { AttributeHistory, AttributeModel, AttributeUsage, IGenericItem, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -52,12 +53,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 
+// Hooks
+import { useWorkspace } from "@hooks/useWorkspace";
+
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
 const Template = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Workspace information
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   const [editing, setEditing] = useState(false);
 
@@ -139,7 +147,7 @@ const Template = () => {
 
   // GraphQL operations
   const GET_TEMPLATE = gql`
-    query GetTemplate($_id: String) {
+    query GetTemplate($_id: String, $workspace: String) {
       template(_id: $_id) {
         _id
         name
@@ -171,13 +179,19 @@ const Template = () => {
           }
         }
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data } = useQuery<{
     template: AttributeModel;
+    workspace: IGenericItem;
   }>(GET_TEMPLATE, {
     variables: {
       _id: id,
+      workspace: workspace,
     },
     fetchPolicy: "no-cache",
   });
@@ -244,6 +258,10 @@ const Template = () => {
       setTemplateDescription(data.template.description || "");
       setTemplateValues(data.template.values);
       setTemplateHistory(data.template.history || []);
+    }
+
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
 
     if (usageData?.templateUsage) {
@@ -561,13 +579,19 @@ const Template = () => {
             <Breadcrumb.Root>
               <Breadcrumb.List>
                 <Breadcrumb.Item
+                  gap={"1"}
                   onClick={() => navigate("/")}
                   _hover={{
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Dashboard
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  {loading ? (
+                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
+                  ) : (
+                    workspaceName
+                  )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
                 <Breadcrumb.Item

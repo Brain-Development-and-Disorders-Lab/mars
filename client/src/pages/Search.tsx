@@ -15,6 +15,7 @@ import {
   Checkbox,
   Collapsible,
   InputGroup,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -27,9 +28,10 @@ import { toaster } from "@components/Toast";
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useFeatures } from "@hooks/useFeatures";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Existing and custom types
-import { EntityModel, DataTableAction, SearchQuery } from "@types";
+import { EntityModel, DataTableAction, SearchQuery, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -40,7 +42,7 @@ import { useNavigate } from "react-router-dom";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Utility libraries and functions
 import { buildMongoQuery, ignoreAbort } from "@lib/util";
@@ -58,6 +60,9 @@ const Search = () => {
   const [query, setQuery] = useState("");
   const posthog = usePostHog();
   const { features } = useFeatures();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -96,6 +101,27 @@ const Search = () => {
 
   // Active filter count for text search filters
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+
+  // Query to get the Workspace name on load
+  const SEARCH_PAGE_LOAD = gql`
+    query SearchPageLoad($workspace: String) {
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
+    }
+  `;
+  const { data, loading } = useQuery<{ workspace: IGenericItem }>(SEARCH_PAGE_LOAD, {
+    variables: {
+      workspace: workspace,
+    },
+  });
+
+  useEffect(() => {
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
+    }
+  }, []);
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
@@ -569,11 +595,16 @@ const Search = () => {
   return (
     <Content isError={isError}>
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
-        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
+        <Flex direction={"column"} gap={"0"} align={"start"}>
+          <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"search"} size={"sm"} />
-            <Heading size={"md"}>Search</Heading>
+            <Heading size={"xl"}>Search</Heading>
           </Flex>
+          <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+              {workspaceName}
+            </Text>
+          </SkeletonText>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
           <Flex direction={"column"} ml={"0.5"} gap={"1"}>

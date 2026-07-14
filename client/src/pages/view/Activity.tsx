@@ -14,6 +14,8 @@ import {
   Input,
   Field,
   Collapsible,
+  SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -24,10 +26,11 @@ import ActivityGraph from "@components/ActivityGraph";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { ActivityModel } from "@types";
+import { ActivityModel, IGenericItem } from "@types";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { gql } from "@apollo/client";
@@ -43,6 +46,9 @@ dayjs.extend(isSameOrBefore);
 import { GLOBAL_STYLES } from "@variables";
 
 const Activity = () => {
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
+
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -93,7 +99,7 @@ const Activity = () => {
 
   // Query to retrieve Activity
   const GET_ACTIVITY = gql`
-    query GetActivity($limit: Int) {
+    query GetActivity($limit: Int, $workspace: String) {
       activity(limit: $limit) {
         _id
         timestamp
@@ -107,13 +113,19 @@ const Activity = () => {
           type
         }
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data } = useQuery<{
     activity: ActivityModel[];
+    workspace: IGenericItem;
   }>(GET_ACTIVITY, {
     variables: {
       limit: 10000, // High limit to get all activity
+      workspace: workspace,
     },
     fetchPolicy: "network-only",
     pollInterval: 5000, // Poll every 5 seconds to refresh activity
@@ -125,6 +137,9 @@ const Activity = () => {
       setActivityData(data.activity);
       setFilteredActivityData(data.activity);
       setInitialLoaded(true);
+    }
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data]);
 
@@ -279,11 +294,16 @@ const Activity = () => {
   return (
     <Content isError={!_.isUndefined(error) && !initialLoaded} isLoaded={initialLoaded || !loading}>
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
-        <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
-          <Flex align={"center"} gap={"1"} w={"100%"} minW="0">
+        <Flex direction={"column"} gap={"0"} align={"start"}>
+          <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"activity"} size={"sm"} />
-            <Heading size={"md"}>Workspace Activity</Heading>
+            <Heading size={"xl"}>Activity</Heading>
           </Flex>
+          <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+              {workspaceName}
+            </Text>
+          </SkeletonText>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
           <Text fontSize={"xs"} ml={"0.5"}>
@@ -385,6 +405,8 @@ const Activity = () => {
                         </Field.Root>
                       </Flex>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Checkbox Filters Group */}
                     <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
