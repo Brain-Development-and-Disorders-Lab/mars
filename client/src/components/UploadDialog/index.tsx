@@ -2,24 +2,11 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Dialog,
-  CloseButton,
-  Fieldset,
-  Flex,
-  Text,
-  FileUpload,
-  Tag,
-  useFileUploadContext,
-  FormatByte,
-  Spacer,
-  IconButton,
-  useFileUpload,
-} from "@chakra-ui/react";
+import { Button, Dialog, CloseButton, Fieldset, Flex, Text, FileUpload, Tag, useFileUpload } from "@chakra-ui/react";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
+import FileUploadList from "@components/UploadList";
 
 // Utility functions and libraries
 import { getFileExtension } from "@lib/util";
@@ -32,53 +19,6 @@ import { ResponseData } from "@types";
 
 // Variables
 import { ACCEPTED_ATTACHMENTS, GLOBAL_STYLES } from "@variables";
-
-/**
- * Custom `FileUploadList` component to better render the collection of uploaded files
- */
-const FileUploadList = () => {
-  const fileUpload = useFileUploadContext();
-  const files = fileUpload.acceptedFiles;
-
-  if (files.length === 0) {
-    return null;
-  }
-
-  return (
-    <FileUpload.ItemGroup>
-      {files.map((file: File) => (
-        <FileUpload.Item w={"100%"} p={"2"} rounded={"md"} file={file} key={file.name}>
-          <Flex direction={"column"} gap={"1"} align={"start"}>
-            {/* File information */}
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon size={"xs"} name={"file"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {file.name}
-              </Text>
-            </Flex>
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Tag.Root key={getFileExtension(file.type)} size={"sm"} colorPalette={"gray"} variant={"outline"}>
-                <Tag.Label fontSize={"xs"}>{getFileExtension(file.type)}</Tag.Label>
-              </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
-                <FormatByte value={file.size} />
-              </Text>
-            </Flex>
-          </Flex>
-
-          <Spacer />
-
-          {/* `IconButton` to remove uploaded file */}
-          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"}>
-            <FileUpload.ItemDeleteTrigger asChild>
-              <Icon name={"delete"} size={"xs"} />
-            </FileUpload.ItemDeleteTrigger>
-          </IconButton>
-        </FileUpload.Item>
-      ))}
-    </FileUpload.ItemGroup>
-  );
-};
 
 const UploadDialog = (props: {
   open: boolean;
@@ -219,17 +159,14 @@ const UploadDialog = (props: {
                                 </Text>
                                 <Flex direction={"row"} gap={"1"} mt={"1"}>
                                   {ACCEPTED_ATTACHMENTS.map((format) => {
-                                    // Extract file type from MIME type
-                                    let fileType = _.upperCase(format.split("/")[1]);
-
-                                    // Handle unique MIME types
-                                    if (fileType.endsWith("DNA")) {
-                                      fileType = "DNA";
-                                    }
-
                                     return (
-                                      <Tag.Root key={fileType} size={"sm"} colorPalette={"gray"} variant={"outline"}>
-                                        <Tag.Label fontSize={"xs"}>{fileType}</Tag.Label>
+                                      <Tag.Root
+                                        key={getFileExtension(format)}
+                                        size={"sm"}
+                                        colorPalette={"gray"}
+                                        variant={"outline"}
+                                      >
+                                        <Tag.Label fontSize={"xs"}>{getFileExtension(format)}</Tag.Label>
                                       </Tag.Root>
                                     );
                                   })}
