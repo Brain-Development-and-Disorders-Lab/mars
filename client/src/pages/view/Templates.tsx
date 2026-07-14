@@ -15,6 +15,7 @@ import {
   Collapsible,
   Field,
   SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
@@ -296,7 +297,7 @@ const Templates = () => {
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Flex direction={"column"} gap={"0"} align={"start"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                 <Heading size={"xl"}>Templates</Heading>
               </Flex>
               <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
@@ -391,6 +392,8 @@ const Templates = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                       <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -440,6 +443,8 @@ const Templates = () => {
                         )}
                       </Flex>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Value Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>

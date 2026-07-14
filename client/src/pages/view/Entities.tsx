@@ -16,6 +16,7 @@ import {
   Checkbox,
   Collapsible,
   SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -450,6 +451,8 @@ const Entities = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
                       <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -500,6 +503,8 @@ const Entities = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Has Attachments Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
                       <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -522,6 +527,8 @@ const Entities = () => {
                         <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
                       </Checkbox.Root>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Attribute Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>

@@ -13,6 +13,7 @@ import {
   Collapsible,
   Field,
   SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -396,6 +397,8 @@ const Projects = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
                       <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
@@ -445,6 +448,8 @@ const Projects = () => {
                         )}
                       </Flex>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Entity Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>

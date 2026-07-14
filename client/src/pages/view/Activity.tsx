@@ -15,6 +15,7 @@ import {
   Field,
   Collapsible,
   SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -404,6 +405,8 @@ const Activity = () => {
                         </Field.Root>
                       </Flex>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Checkbox Filters Group */}
                     <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
