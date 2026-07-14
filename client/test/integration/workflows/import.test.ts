@@ -32,12 +32,13 @@ test.describe("Import", () => {
     test("should import a CSV file successfully", async ({ page }) => {
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
+      // Select the import type first, which enables the `FileUpload` dropzone
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
+
       // Upload CSV file
       const csvPath = path.resolve(process.cwd(), "test/integration/export_entities.csv");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(csvPath);
-
-      await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
@@ -66,12 +67,13 @@ test.describe("Import", () => {
     test("should import a JSON file successfully", async ({ page }) => {
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
+      // Select the import type first, which enables the `FileUpload` dropzone
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
+
       // Upload JSON file
       const jsonPath = path.resolve(process.cwd(), "test/integration/export_entities.json");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(jsonPath);
-
-      await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       // Wait for continue button to be enabled
       await clickButtonWhenEnabled(page, "#importContinueButton");
