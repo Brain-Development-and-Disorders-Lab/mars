@@ -16,6 +16,9 @@ import {
 // Utility functions
 import dayjs from "dayjs";
 
+// Variables
+import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES } from "@variables";
+
 export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
     return false;
@@ -94,6 +97,35 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+/**
+ * Get the 3- or 4-letter file extension for display based on a file's MIME type
+ * @param {string} mimeType File MIME type
+ */
+export const getFileExtension = (mimeType: string): string => {
+  if (ACCEPTED_ATTACHMENTS.includes(mimeType)) {
+    // Handle attachment files
+    if (mimeType.endsWith(".dna")) {
+      // Handle unique MIME type for DNA files
+      return "DNA";
+    } else {
+      return _.upperCase(mimeType.split("/")[1]);
+    }
+  } else if (ACCEPTED_IMPORTS_ENTITIES.includes(mimeType)) {
+    // Handle imported Entities files
+    if (mimeType.endsWith(".sheet")) {
+      // Handle unique MIME type for Excel files
+      return "XLSX";
+    } else {
+      return _.upperCase(mimeType.split("/")[1]);
+    }
+  } else if (ACCEPTED_IMPORTS_TEMPLATES.includes(mimeType)) {
+    // Handle imported Templates files
+    return _.upperCase(mimeType.split("/")[1]);
+  } else {
+    return "UNKNOWN";
+  }
 };
 
 /**

@@ -22,9 +22,6 @@ import { IAttribute, IEntity, IProject, IWorkspace, ResponseData } from "../../.
 // Utility functions
 import dayjs from "dayjs";
 
-// Variables
-const TABLE_CONTAINER = ".data-table-scroll-container";
-
 /**
  * Create an Entity for use in testing
  * @param {string} name The name of the Entity to create
@@ -250,7 +247,7 @@ export const openItemFromTable = async (
   itemName: string,
   viewButtonLabel: "View Entity" | "View Project" | "View Template",
 ): Promise<void> => {
-  const table = page.locator(TABLE_CONTAINER);
+  const table = page.getByTestId("data-table-scroll-container");
   await table.waitFor({ state: "visible", timeout: 5000 });
 
   // Wait for table to be populated - check that at least one view button exists

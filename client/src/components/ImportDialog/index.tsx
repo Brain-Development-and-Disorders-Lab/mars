@@ -1,5 +1,5 @@
 // React
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -17,6 +17,8 @@ import {
   createListCollection,
   Steps,
   CloseButton,
+  FileUpload,
+  useFileUpload,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
@@ -28,6 +30,7 @@ import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
+import FileUploadList from "@components/UploadList";
 
 // Custom and existing types
 import {
@@ -51,7 +54,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { removeTypename, isValidValues, getValueTypeIconProps } from "@lib/util";
+import { removeTypename, isValidValues, getValueTypeIconProps, getFileExtension } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 
@@ -62,7 +65,7 @@ import { auth } from "@lib/auth";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, GLOBAL_STYLES } from "@variables";
 
 // Hooks
 import { useFeatures } from "@hooks/useFeatures";
@@ -198,11 +201,6 @@ const ImportDialog = (props: ImportDialogProps) => {
   const posthog = usePostHog();
   const { features } = useFeatures();
 
-  // File states
-  const [file, setFile] = useState({} as File);
-  const [fileType, setFileType] = useState(CSV_MIME_TYPE);
-  const [fileName, setFileName] = useState("");
-
   // Operation and button states
   const [importLoading, setImportLoading] = useState(false);
   const [continueDisabled, setContinueDisabled] = useState(true);
@@ -213,6 +211,32 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [importType, setImportType] = useState<"entities" | "template">();
   const [importTypeSelected, setImportTypeSelected] = useState(false);
   const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
+
+  // File states, kept in sync with `fileUpload` below so the rest of the dialog can react to it
+  const [fileType, setFileType] = useState("");
+  const [fileName, setFileName] = useState("");
+
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+    maxFileSize: 10 * 1024 * 1024,
+    accept: importType === "entities" ? ACCEPTED_IMPORTS_ENTITIES : ACCEPTED_IMPORTS_TEMPLATES,
+    // No file contents type selected yet, so the dropzone shouldn't accept anything
+    disabled: _.isUndefined(importType),
+    onFileChange: (details) => {
+      const file = details.acceptedFiles[0] as File | undefined;
+      setFileName(file?.name ?? "");
+      setFileType(file?.type ?? "");
+    },
+  });
+
+  /** Swaps between the Entity and Template upload contexts, discarding any file picked under the old type. */
+  const selectImportType = (type: "entities" | "template") => {
+    if (isTypeSelectDisabled) return;
+
+    fileUpload.clearFiles();
+    setImportType(type);
+    setImportTypeSelected(true);
+  };
 
   // State management to generate and present different pages
   const [entityInterfacePage, setEntityInterfacePage] = useState(
@@ -435,10 +459,11 @@ const ImportDialog = (props: ImportDialogProps) => {
     }),
   ];
 
-  // Effect to manipulate 'Continue' button state for 'upload' page
+  // Effect to manipulate 'Continue' button state for 'upload' page, also re-disabling it
+  // if the file is removed after being accepted
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload") && fileName !== "" && importTypeSelected) {
-      setContinueDisabled(false);
+    if (_.isEqual(entityInterfacePage, "upload")) {
+      setContinueDisabled(!(fileName !== "" && importTypeSelected));
     }
   }, [fileName, importTypeSelected]);
 
@@ -536,7 +561,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
       setImportLoading(true);
-      const data = await parseJSONFile(file);
+      const data = await parseJSONFile(fileUpload.acceptedFiles[0]);
       setImportLoading(false);
 
       // Validate the JSON data
@@ -546,7 +571,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       setImportLoading(true);
       const response = await prepareEntityCSV({
         variables: {
-          file: file,
+          file: fileUpload.acceptedFiles[0],
         },
       });
       setImportLoading(false);
@@ -634,7 +659,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(true);
     const response = await reviewEntityJSON({
       variables: {
-        file: file,
+        file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
@@ -673,7 +698,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     const reviewResponse = await reviewEntityCSV({
       variables: {
         columnMapping: removeTypename(columnMapping),
-        file: file,
+        file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
@@ -730,7 +755,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(true);
     const response = await reviewTemplateJSON({
       variables: {
-        file: file,
+        file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
@@ -755,7 +780,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(true);
     const response = await importEntityJSON({
       variables: {
-        file: file,
+        file: fileUpload.acceptedFiles[0],
         project: projectField,
         attributes: removeTypename(attributesField),
       },
@@ -789,7 +814,7 @@ const ImportDialog = (props: ImportDialogProps) => {
       variables: {
         columnMapping: removeTypename(columnMapping),
         options: removeTypename(options),
-        file: file,
+        file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
@@ -813,7 +838,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(true);
     await importTemplateJSON({
       variables: {
-        file: file,
+        file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
@@ -1148,7 +1173,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     setImportLoading(false);
     setIsTypeSelectDisabled(false);
 
-    setFile({} as File);
+    fileUpload.clearFiles();
     setFileType("");
     setFileName("");
 
@@ -1312,12 +1337,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                       flex={"1"}
                       variant={importType === type ? "solid" : "outline"}
                       colorPalette={importType === type ? "blue" : "gray"}
-                      onClick={() => {
-                        if (!isTypeSelectDisabled) {
-                          setImportType(type);
-                          setImportTypeSelected(true);
-                        }
-                      }}
+                      onClick={() => selectImportType(type)}
                       disabled={isTypeSelectDisabled}
                       data-testid={`import-type-select-trigger-${type}`}
                     >
@@ -1390,119 +1410,86 @@ const ImportDialog = (props: ImportDialogProps) => {
                 <Fieldset.Root>
                   <Fieldset.Content>
                     <Field.Root>
-                      <Flex
-                        direction={"column"}
-                        minH={"40vh"}
-                        w={"100%"}
-                        align={"center"}
-                        justify={"center"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderStyle={fileName === "" ? "dashed" : "solid"}
-                        borderColor={fileName !== "" ? "gray.300" : GLOBAL_STYLES.border.color}
-                        rounded={"md"}
-                        bg={fileName !== "" ? GLOBAL_STYLES.card.bg : "white"}
-                        cursor={"pointer"}
-                      >
-                        {/* Condition 1: File type not specified */}
-                        {_.isUndefined(importType) && (
-                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
-                            <Flex direction={"row"} align={"center"} justify={"center"} gap={"2"}>
-                              <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.light} />
-                              <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
-                            </Flex>
-                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                              Select File Contents
-                            </Text>
-                          </Flex>
-                        )}
-
-                        {/* Condition 2: File type specified, no file uploaded */}
-                        {_.isEqual(file, {}) && !_.isUndefined(importType) && (
-                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
-                            <Icon
-                              name={importType === "entities" ? "entity" : "template"}
-                              size={"xl"}
-                              color={
-                                importType === "entities"
-                                  ? GLOBAL_STYLES.entity.color.light
-                                  : GLOBAL_STYLES.template.color.light
-                              }
-                            />
-                            <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
-                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                Click to upload {_.capitalize(importType)} file
-                              </Text>
-                              <Text fontSize={"xs"} color={"gray.500"}>
-                                or drag and drop
-                              </Text>
-                              <Flex direction={"row"} gap={"1"} mt={"1"}>
-                                {(importType === "entities" ? ["JSON", "CSV", "XLSX"] : ["JSON"]).map((fmt) => (
-                                  <Tag.Root key={fmt} size={"sm"} colorPalette={"gray"} variant={"outline"}>
-                                    <Tag.Label fontSize={"xs"}>{fmt}</Tag.Label>
-                                  </Tag.Root>
-                                ))}
+                      <FileUpload.RootProvider w={"100%"} alignItems={"stretch"} gap={"2"} value={fileUpload}>
+                        <FileUpload.HiddenInput />
+                        <FileUpload.Dropzone>
+                          <FileUpload.DropzoneContent gap={"0"}>
+                            {/* Condition 1: File type not specified */}
+                            {_.isUndefined(importType) && (
+                              <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
+                                <Flex direction={"row"} align={"center"} justify={"center"} gap={"2"}>
+                                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.light} />
+                                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
+                                </Flex>
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  Select File Contents
+                                </Text>
                               </Flex>
-                            </Flex>
-                          </Flex>
-                        )}
+                            )}
 
-                        {/* Condition 3: File type specified, file uploaded */}
-                        {!_.isEqual(file, {}) && !_.isUndefined(importType) && (
-                          <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
-                            <Icon
-                              name={importType === "entities" ? "entity" : "template"}
-                              size={"xl"}
-                              color={
-                                importType === "entities"
-                                  ? GLOBAL_STYLES.entity.color.light
-                                  : GLOBAL_STYLES.template.color.light
-                              }
-                            />
-                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                              {file.name}
-                            </Text>
-                          </Flex>
-                        )}
-                      </Flex>
+                            {/* Condition 2: File type specified, no file uploaded */}
+                            {fileUpload.acceptedFiles.length === 0 && !_.isUndefined(importType) && (
+                              <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
+                                <Icon
+                                  name={importType === "entities" ? "entity" : "template"}
+                                  size={"lg"}
+                                  color={
+                                    importType === "entities"
+                                      ? GLOBAL_STYLES.entity.color.light
+                                      : GLOBAL_STYLES.template.color.light
+                                  }
+                                />
+                                <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                    Click to upload {_.capitalize(importType)} file
+                                  </Text>
+                                  <Text fontSize={"xs"} color={"gray.500"}>
+                                    or drag and drop
+                                  </Text>
+                                  <Flex direction={"row"} gap={"1"} mt={"1"}>
+                                    <Flex direction={"row"} gap={"1"} mt={"1"}>
+                                      {(importType === "entities"
+                                        ? ACCEPTED_IMPORTS_ENTITIES
+                                        : ACCEPTED_IMPORTS_TEMPLATES
+                                      ).map((format) => {
+                                        return (
+                                          <Tag.Root
+                                            key={getFileExtension(format)}
+                                            size={"sm"}
+                                            colorPalette={"gray"}
+                                            variant={"outline"}
+                                          >
+                                            <Tag.Label fontSize={"xs"}>{getFileExtension(format)}</Tag.Label>
+                                          </Tag.Root>
+                                        );
+                                      })}
+                                    </Flex>
+                                  </Flex>
+                                </Flex>
+                              </Flex>
+                            )}
 
-                      <Input
-                        type={"file"}
-                        h={"100%"}
-                        w={"100%"}
-                        position={"absolute"}
-                        rounded={"md"}
-                        top={"0"}
-                        left={"0"}
-                        opacity={"0"}
-                        aria-hidden={"true"}
-                        disabled={_.isUndefined(importType)}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                          if (event.target.files && event.target.files.length > 0) {
-                            // Only accept defined file types
-                            if (
-                              _.includes([CSV_MIME_TYPE, XLSX_MIME_TYPE, JSON_MIME_TYPE], event.target.files[0].type)
-                            ) {
-                              // Capture event
-                              posthog.capture("client.import.upload_file", {
-                                importType: importType,
-                                fileName: event.target.files[0].name,
-                              });
-
-                              setFileName(event.target.files[0].name);
-                              setFileType(event.target.files[0].type);
-                              setFile(event.target.files[0]);
-                            } else {
-                              toaster.create({
-                                title: "Warning",
-                                type: "warning",
-                                description: "Please upload a JSON, CSV, or XLSX file",
-                                duration: 2000,
-                                closable: true,
-                              });
-                            }
-                          }
-                        }}
-                      />
+                            {/* Condition 3: File type specified, file uploaded */}
+                            {fileUpload.acceptedFiles.length > 0 && !_.isUndefined(importType) && (
+                              <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
+                                <Icon
+                                  name={importType === "entities" ? "entity" : "template"}
+                                  size={"xl"}
+                                  color={
+                                    importType === "entities"
+                                      ? GLOBAL_STYLES.entity.color.light
+                                      : GLOBAL_STYLES.template.color.light
+                                  }
+                                />
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  {fileUpload.acceptedFiles.length > 0 && fileUpload.acceptedFiles[0].name}
+                                </Text>
+                              </Flex>
+                            )}
+                          </FileUpload.DropzoneContent>
+                        </FileUpload.Dropzone>
+                        <FileUploadList />
+                      </FileUpload.RootProvider>
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>

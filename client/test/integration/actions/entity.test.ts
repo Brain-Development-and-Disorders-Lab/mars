@@ -75,7 +75,7 @@ test.describe("Entity", () => {
     test("should appear in the Entities list after creation", async ({ page }) => {
       await navigateToSection(page, "Entities");
 
-      const table = page.locator(".data-table-scroll-container");
+      const table = page.getByTestId("data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
       await expect(table.locator(`text=1-Entity-List`)).toBeVisible({ timeout: 10000 });
     });

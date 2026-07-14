@@ -26,6 +26,7 @@ import {
   Collapsible,
   Textarea,
   Breadcrumb,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -80,6 +81,7 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Contexts and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -102,6 +104,10 @@ const Entity = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
+
+  // Workspace information
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Graph dialog
   const [graphOpen, setGraphOpen] = useState(false);
@@ -175,7 +181,7 @@ const Entity = () => {
 
   // Query to retrieve Entity data and associated data for editing
   const GET_ENTITY = gql`
-    query GetEntityData($_id: String) {
+    query GetEntityData($_id: String, $workspace: String) {
       entity(_id: $_id) {
         _id
         name
@@ -267,15 +273,21 @@ const Entity = () => {
           data
         }
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data, refetch } = useQuery<{
     entity: EntityModel;
     projects: IGenericItem[];
     templates: AttributeModel[];
+    workspace: IGenericItem;
   }>(GET_ENTITY, {
     variables: {
       _id: id,
+      workspace: workspace,
     },
     fetchPolicy: "no-cache",
   });
@@ -365,9 +377,15 @@ const Entity = () => {
       // Set the cloned Entity name
       setClonedEntityName(`${data.entity.name} (cloned)`);
     }
+
     // Unpack Template data
     if (data?.templates) {
       setTemplates(data.templates);
+    }
+
+    // Store Workspace information
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data, editing]);
 
@@ -1220,13 +1238,19 @@ const Entity = () => {
             <Breadcrumb.Root>
               <Breadcrumb.List>
                 <Breadcrumb.Item
+                  gap={"1"}
                   onClick={() => navigate("/")}
                   _hover={{
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Dashboard
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  {loading ? (
+                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
+                  ) : (
+                    workspaceName
+                  )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
                 <Breadcrumb.Item

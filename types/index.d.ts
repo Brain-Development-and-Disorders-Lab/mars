@@ -512,6 +512,7 @@ export type IconNames =
   | "close"
   | "counter"
   | "info"
+  | "file"
   | "search"
   | "search_query"
   | "bell"
