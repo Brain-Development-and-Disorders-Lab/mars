@@ -452,56 +452,57 @@ const Entities = () => {
 
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Owner
                       </Text>
                       <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
-                        {_.uniq(entityData.map((e) => e.owner))
-                          .filter((owner) => owner)
-                          .map((owner) => (
-                            <Checkbox.Root
-                              key={owner}
-                              size={"xs"}
-                              colorPalette={"blue"}
-                              checked={filterState.owners.includes(owner)}
-                              onCheckedChange={(details) => {
-                                const isChecked = details.checked as boolean;
-                                if (isChecked) {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: [...filterState.owners, owner],
-                                  });
-                                } else {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: filterState.owners.filter((o) => o !== owner),
-                                  });
-                                }
-                              }}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label fontSize={"xs"}>
-                                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                          ))}
+                        {entityData.length > 0 &&
+                          _.uniq(entityData.map((e) => e.owner))
+                            .filter((owner) => owner)
+                            .map((owner) => (
+                              <Checkbox.Root
+                                key={owner}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.owners.includes(owner)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: [...filterState.owners, owner],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: filterState.owners.filter((o) => o !== owner),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+
+                        {entityData.length === 0 && (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            No Entity Owners
+                          </Text>
+                        )}
                       </Flex>
                     </Flex>
 
                     {/* Has Attachments Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Attachments
                       </Text>
                       <Checkbox.Root
@@ -524,12 +525,7 @@ const Entities = () => {
 
                     {/* Attribute Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Attribute Count
                       </Text>
                       <Flex direction={"column"} gap={"2"} ml={"1"}>
