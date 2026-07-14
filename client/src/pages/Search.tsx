@@ -600,7 +600,7 @@ const Search = () => {
             <Icon name={"search"} size={"sm"} />
             <Heading size={"xl"}>Search</Heading>
           </Flex>
-          <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+          <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
               {workspaceName}
             </Text>

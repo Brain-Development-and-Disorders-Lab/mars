@@ -293,7 +293,7 @@ const Projects = () => {
                 <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
                 <Heading size={"xl"}>Projects</Heading>
               </Flex>
-              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
                 <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
                   {workspaceName}
                 </Text>

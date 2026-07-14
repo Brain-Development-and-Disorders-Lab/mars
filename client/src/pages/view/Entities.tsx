@@ -349,7 +349,7 @@ const Entities = () => {
                 <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Heading size={"xl"}>Entities</Heading>
               </Flex>
-              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
                 <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
                   {workspaceName}
                 </Text>

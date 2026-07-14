@@ -300,7 +300,7 @@ const Templates = () => {
                 <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
                 <Heading size={"xl"}>Templates</Heading>
               </Flex>
-              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
                 <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
                   {workspaceName}
                 </Text>

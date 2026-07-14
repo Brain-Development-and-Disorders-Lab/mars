@@ -279,7 +279,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               >
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"edit"} size={"xs"} />
-                  <Text fontSize={"xs"}>Edit workspace</Text>
+                  <Text fontSize={"xs"}>Manage workspace</Text>
                 </Flex>
               </Menu.Item>
               <Menu.Item value={"create"} onClick={() => handleCreateClick()} cursor={"pointer"}>
@@ -309,7 +309,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 >
                   <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
                     <Icon name={"settings"} size={"xs"} />
-                    <Text fontSize={"xs"}>Management</Text>
+                    <Text fontSize={"xs"}>Administration Tools</Text>
                   </Flex>
                 </Menu.Item>
               )}
