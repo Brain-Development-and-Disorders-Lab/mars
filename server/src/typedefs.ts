@@ -122,7 +122,6 @@ export const typedefs = `#graphql
     description: String
     timestamp: String
     owner: String
-    collaborators: [String]
     created: String
     entities: [String]
     history: [ProjectHistory]
@@ -138,7 +137,6 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     owner: String
-    collaborators: [String]
     archived: Boolean
     created: String
     description: String
@@ -153,7 +151,6 @@ export const typedefs = `#graphql
     owner: String!
     created: String!
     entities: [String]!
-    collaborators: [String]!
   }
 
   # "ProjectUpdateInput" type
@@ -163,7 +160,6 @@ export const typedefs = `#graphql
     archived: Boolean
     description: String
     owner: String
-    collaborators: [String]
     created: String
     entities: [String]
   }
@@ -604,6 +600,7 @@ export const typedefs = `#graphql
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
     project(_id: String): Project
+    projectEntities(_id: String): [Entity]
     projectMetrics: ProjectMetrics
 
     # Entity queries

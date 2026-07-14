@@ -84,6 +84,39 @@ export const ProjectsResolvers = {
       }
     },
 
+    // Retrieve all Entities within a single Project
+    projectEntities: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Check that Project exists
+      const project = await Projects.getOne(args._id);
+      if (_.isNull(project)) {
+        throw new GraphQLError("Project does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (_.includes(workspace.projects, project._id)) {
+        return await Projects.getEntities(args._id);
+      } else {
+        throw new GraphQLError("You do not have permission to access this Project", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+    },
+
     exportProject: async (
       _parent: IResolverParent,
       args: { _id: string; format: "json" | "csv"; fields?: string[]; includeHistory?: boolean },

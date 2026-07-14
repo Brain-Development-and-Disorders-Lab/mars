@@ -174,7 +174,6 @@ export type IProject = {
   owner: string;
   archived: boolean;
   created: string;
-  collaborators: string[];
   description: string;
   entities: string[];
   history: ProjectHistory[];
@@ -198,7 +197,6 @@ export type ProjectHistory = {
   name: string;
   description: string;
   entities: string[];
-  collaborators: string[];
 };
 
 // Utility type used across other types, typically in a list

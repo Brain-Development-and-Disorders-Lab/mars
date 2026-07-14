@@ -122,33 +122,38 @@ const Collaborators = (props: CollaboratorsProps) => {
             Collaborators ({props.collaborators.length})
           </Text>
         </Flex>
-        <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-          <Fieldset.Root>
-            <Fieldset.Content>
-              <Field.Root invalid={newCollaborator !== "" && !validEmail}>
-                <Input
-                  placeholder={"Email"}
-                  size={"xs"}
-                  rounded={"md"}
-                  value={newCollaborator}
-                  onChange={(event) => setNewCollaborator(event.target.value)}
-                  disabled={!props.editing}
-                />
-              </Field.Root>
-            </Fieldset.Content>
-          </Fieldset.Root>
-          <Button
-            colorPalette={"green"}
-            size={"xs"}
-            rounded={"md"}
-            disabled={!props.editing || !validEmail}
-            loading={addCollaboratorLoading || collaboratorQueryLoading}
-            loadingText={"Adding..."}
-            onClick={() => handleAddCollaborator()}
-          >
-            Add
-            <Icon name={"add"} size={"xs"} />
-          </Button>
+        <Flex direction={"column"} gap={"1"}>
+          <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            Add Collaborators to this Workspace via email
+          </Text>
+          <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+            <Fieldset.Root>
+              <Fieldset.Content>
+                <Field.Root invalid={newCollaborator !== "" && !validEmail}>
+                  <Input
+                    placeholder={"Email"}
+                    size={"xs"}
+                    rounded={"md"}
+                    value={newCollaborator}
+                    onChange={(event) => setNewCollaborator(event.target.value)}
+                    disabled={!props.editing}
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
+            <Button
+              colorPalette={"green"}
+              size={"xs"}
+              rounded={"md"}
+              disabled={!props.editing || !validEmail}
+              loading={addCollaboratorLoading || collaboratorQueryLoading}
+              loadingText={"Adding..."}
+              onClick={() => handleAddCollaborator()}
+            >
+              Add
+              <Icon name={"add"} size={"xs"} />
+            </Button>
+          </Flex>
         </Flex>
         <Flex
           w={"100%"}
