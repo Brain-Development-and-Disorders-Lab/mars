@@ -14,8 +14,14 @@ export const STATIC_URL =
 // Key for the local storage data
 export const STORAGE_KEY = "metadatify_storage";
 
-// Accepted MIME types for attachments
+// Accepted MIME types for attachments and imports
 export const ACCEPTED_ATTACHMENTS = ["image/jpeg", "image/png", "application/pdf", "application/vnd.dna"];
+export const ACCEPTED_IMPORTS_ENTITIES = [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+  "application/json",
+];
+export const ACCEPTED_IMPORTS_TEMPLATES = ["application/json"];
 
 // Default styling
 export const GLOBAL_STYLES = {
