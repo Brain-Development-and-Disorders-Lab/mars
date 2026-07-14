@@ -38,6 +38,9 @@ const Collaborators = (props: CollaboratorsProps) => {
   const [newCollaborator, setNewCollaborator] = useState("");
   const [validEmail, setValidEmail] = useState(false);
 
+  // Flag to enable owner-specific features
+  const isOwner = props.currentUser === props.owner;
+
   const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
 
   const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] = useLazyQuery<{
@@ -124,7 +127,7 @@ const Collaborators = (props: CollaboratorsProps) => {
         </Flex>
         <Flex direction={"column"} gap={"1"}>
           <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            Add Collaborators to this Workspace via email
+            Invite Collaborators to this Workspace via email
           </Text>
           <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
             <Fieldset.Root>
@@ -136,7 +139,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                     rounded={"md"}
                     value={newCollaborator}
                     onChange={(event) => setNewCollaborator(event.target.value)}
-                    disabled={!props.editing}
+                    disabled={!props.editing || !isOwner}
                   />
                 </Field.Root>
               </Fieldset.Content>
@@ -145,12 +148,12 @@ const Collaborators = (props: CollaboratorsProps) => {
               colorPalette={"green"}
               size={"xs"}
               rounded={"md"}
-              disabled={!props.editing || !validEmail}
+              disabled={!props.editing || !validEmail || !isOwner}
               loading={addCollaboratorLoading || collaboratorQueryLoading}
               loadingText={"Adding..."}
               onClick={() => handleAddCollaborator()}
             >
-              Add
+              Invite
               <Icon name={"add"} size={"xs"} />
             </Button>
           </Flex>
@@ -176,40 +179,75 @@ const Collaborators = (props: CollaboratorsProps) => {
             <Stack gap={"1"} separator={<Separator variant={"solid"} />} w={"100%"}>
               {props.collaborators.map((collaborator, index) => (
                 <Flex key={index} align={"center"} w={"100%"} justify={"space-between"}>
-                  <Flex gap={"2"} align={"center"}>
-                    <ActorTag identifier={collaborator} fallback={"New User"} size={"sm"} />
-                    <Tag.Root colorPalette={"green"}>
-                      <Tag.Label fontSize={"xs"}>Collaborator</Tag.Label>
-                    </Tag.Root>
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    {/* User Role Display */}
+                    <Flex gap={"2"} align={"center"}>
+                      <ActorTag identifier={collaborator} fallback={"New User"} size={"sm"} />
+                      <Flex direction={"column"} gap={"1"} align={"start"} minW={"100px"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Role
+                        </Text>
+                        <Tag.Root colorPalette={"blue"}>
+                          <Tag.Label fontSize={"xs"}>User</Tag.Label>
+                        </Tag.Root>
+                      </Flex>
+                    </Flex>
+
+                    {/* Permissions Display */}
+                    <Flex direction={"column"} gap={"1"} align={"start"} minW={"100px"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"}>
+                        Permissions
+                      </Text>
+                      <Flex direction={"row"} gap={"1"}>
+                        <Tag.Root colorPalette={"green"}>
+                          <Tag.Label fontSize={"xs"}>View</Tag.Label>
+                        </Tag.Root>
+                        <Tag.Root colorPalette={"green"}>
+                          <Tag.Label fontSize={"xs"}>Edit</Tag.Label>
+                        </Tag.Root>
+                      </Flex>
+                    </Flex>
                   </Flex>
-                  {props.editing &&
-                    (collaborator === props.currentUser && props.currentUser !== props.owner ? (
+
+                  {/* Action Buttons */}
+                  {props.editing && !isOwner && (
+                    <Button
+                      size={"xs"}
+                      colorPalette={"orange"}
+                      rounded={"md"}
+                      variant={"solid"}
+                      aria-label={"Leave workspace"}
+                      onClick={() => handleRemoveCollaborator(collaborator)}
+                    >
+                      Leave Workspace
+                      <Icon name={"logout"} size={"xs"} />
+                    </Button>
+                  )}
+
+                  {props.editing && isOwner && (
+                    <Flex gap={"2"} align={"center"}>
                       <Button
-                        size={"2xs"}
-                        colorPalette={"orange"}
+                        size={"xs"}
+                        colorPalette={"blue"}
                         rounded={"md"}
-                        variant={"subtle"}
-                        aria-label="Leave workspace"
+                        variant={"solid"}
+                        aria-label={"Modify permissions"}
+                      >
+                        Permissions
+                        <Icon name={"settings"} size={"xs"} />
+                      </Button>
+                      <Button
+                        size={"xs"}
+                        colorPalette={"red"}
+                        rounded={"md"}
+                        aria-label={"Remove collaborator"}
                         onClick={() => handleRemoveCollaborator(collaborator)}
                       >
-                        Leave
-                        <Icon name="logout" size={"xs"} />
+                        Remove
+                        <Icon name={"logout"} size={"xs"} />
                       </Button>
-                    ) : (
-                      collaborator !== props.owner && (
-                        <Button
-                          size={"2xs"}
-                          colorPalette={"red"}
-                          rounded={"md"}
-                          variant={"subtle"}
-                          aria-label="Remove collaborator"
-                          onClick={() => handleRemoveCollaborator(collaborator)}
-                        >
-                          Remove
-                          <Icon name="delete" size={"xs"} />
-                        </Button>
-                      )
-                    ))}
+                    </Flex>
+                  )}
                 </Flex>
               ))}
             </Stack>
