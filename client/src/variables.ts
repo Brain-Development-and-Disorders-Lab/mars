@@ -1,6 +1,47 @@
 /**
  * Specify important application-wide variables
  */
+
+// Custom types
+import { UserGlobalPermissions, UserWorkspacePermissions } from "@types";
+
+// Default Workspace permissions, mirrors server variables
+export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
+  workspaces: {
+    edit: false,
+    invite: false,
+  },
+  entities: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+  templates: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+  projects: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+};
+
+// Default global permissions, mirrors server variables
+export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
+  application: {
+    import: false,
+    scan: false,
+    ai: false,
+    api: false,
+  },
+  workspaces: {
+    create: false,
+    invite: false,
+  },
+};
+
 // URL of the client application
 export const APP_URL =
   import.meta.env.NODE_ENV !== "production" ? "http://127.0.0.1:8080" : "https://app.metadatify.com";

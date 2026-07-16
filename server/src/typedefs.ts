@@ -60,17 +60,127 @@ export const typedefs = `#graphql
     projects: Int
     templates: Int
   }
-
-  # "UserFeatures" type
-  type UserFeatures {
+  
+  # "UserGlobalApplicationPermissions" type
+  type UserGlobalApplicationPermissions {
+    import: Boolean
+    scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserFeaturesInput" type
-  input UserFeaturesInput {
+  # "UserGlobalApplicationPermissionsInput" type
+  input UserGlobalApplicationPermissionsInput {
+    import: Boolean
+    scan: Boolean
     ai: Boolean
     api: Boolean
+  }
+  
+  # "UserGlobalWorkspacePermissions" type
+  type UserGlobalWorkspacePermissions {
+    create: Boolean
+    invite: Boolean
+  }
+  
+  # "UserGlobalWorkspacePermissionsInput" type
+  input UserGlobalWorkspacePermissionsInput {
+    create: Boolean
+    invite: Boolean
+  }
+
+  # "UserGlobalPermissions" type
+  type UserGlobalPermissions {
+    application: UserGlobalApplicationPermissions
+    workspaces: UserGlobalWorkspacePermissions
+  }
+  
+  # "UserGlobalPermissionsInput" type
+  input UserGlobalPermissionsInput {
+    application: UserGlobalApplicationPermissionsInput
+    workspaces: UserGlobalWorkspacePermissionsInput
+  }
+  
+  # "UserWorkspaceWorkspacesPermissions" type
+  type UserWorkspaceWorkspacesPermissions {
+    edit: Boolean
+    invite: Boolean
+  }
+  
+  # "UserWorkspaceWorkspacesPermissionsInput" type
+  input UserWorkspaceWorkspacesPermissionsInput {
+    edit: Boolean
+    invite: Boolean
+  }
+  
+  # "UserWorkspaceEntitiesPermissions" type
+  type UserWorkspaceEntitiesPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceEntitiesPermissionsInput" type
+  input UserWorkspaceEntitiesPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceProjectsPermissions" type
+  type UserWorkspaceProjectsPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceProjectsPermissionsInput" type
+  input UserWorkspaceProjectsPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceTemplatesPermissions" type
+  type UserWorkspaceTemplatesPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceTemplatesPermissionsInput" type
+  input UserWorkspaceTemplatesPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+   # "UserWorkspacePermissions" type
+  type UserWorkspacePermissions {
+    workspaces: UserWorkspaceWorkspacesPermissions
+    entities: UserWorkspaceEntitiesPermissions
+    projects: UserWorkspaceProjectsPermissions
+    templates: UserWorkspaceTemplatesPermissions
+  }
+  
+  # "UserWorkspacePermissionsInput" type
+  input UserWorkspacePermissionsInput {
+    workspaces: UserWorkspaceWorkspacesPermissionsInput
+    entities: UserWorkspaceEntitiesPermissionsInput
+    projects: UserWorkspaceProjectsPermissionsInput
+    templates: UserWorkspaceTemplatesPermissionsInput
+  }
+  
+  # "UserAllPermissions" type
+  type UserAllPermissions {
+    workspace: UserWorkspacePermissions
+    global: UserGlobalPermissions
+  }
+  
+  # "UserAllPermissionsInput" type
+  input UserAllPermissionsInput {
+    workspace: UserWorkspacePermissionsInput
+    global: UserGlobalPermissionsInput
   }
 
   # "AdminWorkspace" type
@@ -91,7 +201,7 @@ export const typedefs = `#graphql
     email: String
     role: String
     workspaces: Int
-    features: UserFeatures
+    permissions: UserGlobalPermissions
     banned: Boolean
     lastLogin: String
   }
@@ -388,6 +498,18 @@ export const typedefs = `#graphql
     options: OptionsInput
     file: [Upload]!
   }
+  
+  # "Collaborator" type
+  type Collaborator {
+    _id: String
+    permissions: UserWorkspacePermissions
+  }
+  
+  # "CollaboratorInput" type
+  input CollaboratorInput {
+    _id: String
+    permissions: UserWorkspacePermissionsInput
+  }
 
   # "Workspace" type
   type Workspace {
@@ -397,7 +519,7 @@ export const typedefs = `#graphql
     public: Boolean
     description: String
     owner: String
-    collaborators: [String]
+    collaborators: [Collaborator]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -410,7 +532,7 @@ export const typedefs = `#graphql
     description: String
     public: Boolean
     owner: String
-    collaborators: [String]
+    collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -424,7 +546,7 @@ export const typedefs = `#graphql
     public: Boolean
     description: String
     owner: String
-    collaborators: [String]
+    collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -589,13 +711,13 @@ export const typedefs = `#graphql
     adminMetrics: AdminMetrics
     adminUsers: [AdminUser]
     adminWorkspaces: [AdminWorkspace]
-    currentUserFeatures: UserFeatures
 
     # User queries
     users: [User]
     user(_id: String): User
     userByEmail(email: String): ResponseDataString
     userByOrcid(orcid: String): ResponseDataString
+    userAllPermissions: UserAllPermissions
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
@@ -681,7 +803,7 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
-    setUserFeatures(_id: String, features: UserFeaturesInput): ResponseMessage
+    setUserPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations

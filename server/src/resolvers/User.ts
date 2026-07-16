@@ -1,6 +1,7 @@
-import { IResolverParent, IResponseMessage, ResponseData, UserModel } from "@types";
+import { Context, IResolverParent, IResponseMessage, ResponseData, UserAllPermissions, UserModel } from "@types";
 
 // Models
+import { Admin } from "@models/Admin";
 import { User } from "@models/User";
 
 // Email
@@ -26,6 +27,14 @@ export const UserResolvers = {
     // Retrieve one User by ORCiD
     userByOrcid: async (_parent: IResolverParent, args: { orcid: string }): Promise<ResponseData<string>> => {
       return await User.getByOrcid(args.orcid);
+    },
+
+    userAllPermissions: async (
+      _parent: IResolverParent,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<UserAllPermissions> => {
+      return await Admin.getCurrentUserPermissions(context.user, context.workspace);
     },
   },
   Mutation: {

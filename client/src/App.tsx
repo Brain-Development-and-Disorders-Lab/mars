@@ -57,7 +57,7 @@ import ResetPassword from "@pages/account/ResetPassword";
 
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
-import { FeaturesProvider } from "@hooks/useFeatures";
+import { PermissionsProvider } from "@hooks/usePermissions";
 
 // Theme extension
 import { theme } from "./styles/theme";
@@ -70,11 +70,11 @@ import { theme } from "./styles/theme";
 const Providers = (): React.JSX.Element => {
   return (
     <ChakraProvider value={theme}>
-      <FeaturesProvider>
-        <WorkspaceProvider>
+      <WorkspaceProvider>
+        <PermissionsProvider>
           <Outlet />
-        </WorkspaceProvider>
-      </FeaturesProvider>
+        </PermissionsProvider>
+      </WorkspaceProvider>
     </ChakraProvider>
   );
 };

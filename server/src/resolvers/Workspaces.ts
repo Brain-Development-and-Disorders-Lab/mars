@@ -8,6 +8,7 @@ import {
   WorkspaceMetrics,
   WorkspaceModel,
   IResolverParent,
+  Collaborator,
 } from "@types";
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -33,7 +34,10 @@ export const WorkspacesResolvers = {
       // Access control
       if (workspaces.length > 0) {
         return workspaces.filter((workspace) => {
-          return _.isEqual(workspace.owner, context.user) || _.includes(workspace.collaborators, context.user);
+          return (
+            _.isEqual(workspace.owner, context.user) ||
+            workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user)
+          );
         });
       }
 
@@ -59,7 +63,8 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
+          _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         return workspace;
@@ -90,7 +95,8 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
+          _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getEntities(args._id);
@@ -122,7 +128,8 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
+          _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getProjects(args._id);
@@ -154,7 +161,8 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
+          _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getActivity(args._id);
@@ -220,7 +228,8 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
+          _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);
@@ -230,13 +239,17 @@ export const WorkspacesResolvers = {
         if (newCollaborators.length > 0) {
           const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
           await Promise.allSettled(
-            newCollaborators.map(async (collaboratorId) => {
-              const collaborator = await User.getOne(collaboratorId);
-              if (collaborator) {
+            newCollaborators.map(async (collaborator) => {
+              const collaboratorResult = await User.getOne(collaborator._id);
+              if (collaboratorResult) {
                 await sendEmail({
-                  to: collaborator.email,
+                  to: collaboratorResult.email,
                   subject: `You've been added to "${args.workspace.name}" on Metadatify`,
-                  html: templates.workspaceCollaboratorAdded(collaborator.name, args.workspace.name, workspaceUrl),
+                  html: templates.workspaceCollaboratorAdded(
+                    collaboratorResult.name,
+                    args.workspace.name,
+                    workspaceUrl,
+                  ),
                 });
               }
             }),
