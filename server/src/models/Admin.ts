@@ -1,5 +1,16 @@
 // Custom types
-import { AdminMetrics, AdminUser, AdminWorkspace, IResponseMessage, UserFeatures } from "@types";
+import {
+  AdminMetrics,
+  AdminUser,
+  AdminWorkspace,
+  Collaborator,
+  IResponseMessage,
+  UserAllPermissions,
+  UserGlobalPermissions,
+  UserModel,
+  UserWorkspacePermissions,
+  WorkspaceModel,
+} from "@types";
 
 // Database
 import { getDatabase } from "@connectors/database";
@@ -10,6 +21,43 @@ const WORKSPACES_COLLECTION = "workspaces";
 const ENTITIES_COLLECTION = "entities";
 const PROJECTS_COLLECTION = "projects";
 const TEMPLATES_COLLECTION = "templates";
+
+// Default Workspace permissions
+export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
+  workspaces: {
+    edit: false,
+    invite: false,
+  },
+  entities: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+  templates: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+  projects: {
+    create: false,
+    edit: false,
+    archive: false,
+  },
+};
+
+// Default global permissions
+export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
+  application: {
+    import: false,
+    scan: false,
+    ai: false,
+    api: false,
+  },
+  workspaces: {
+    create: false,
+    invite: false,
+  },
+};
 
 export class Admin {
   static getMetrics = async (): Promise<AdminMetrics> => {
@@ -26,24 +74,38 @@ export class Admin {
 
   static getUsers = async (): Promise<AdminUser[]> => {
     const [users, workspaces] = await Promise.all([
-      getDatabase().collection(USERS_COLLECTION).find().toArray(),
+      getDatabase().collection<UserModel>(USERS_COLLECTION).find().toArray(),
       getDatabase()
-        .collection(WORKSPACES_COLLECTION)
+        .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
         .find({}, { projection: { owner: 1, collaborators: 1 } })
         .toArray(),
     ]);
 
     return users.map((user) => {
       const userId = String(user._id);
-      const workspaceCount = workspaces.filter(
-        (workspace) =>
-          workspace.owner === userId ||
-          (Array.isArray(workspace.collaborators) && workspace.collaborators.includes(userId)),
-      ).length;
 
-      const features: UserFeatures = {
-        ai: user.features?.ai ?? false,
-        api: user.features?.api ?? false,
+      // Count the number of Workspaces owned by the User
+      const workspaceOwnerCount = workspaces.filter((workspace: WorkspaceModel) => workspace.owner === userId).length;
+
+      // Count the number of Workspaces the User is a collaborator on
+      let workspaceCollaboratorCount = 0;
+      for (const workspace of workspaces) {
+        if (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === userId)) {
+          workspaceCollaboratorCount++;
+        }
+      }
+
+      const permissions: UserGlobalPermissions = {
+        application: {
+          ai: user.permissions.application.ai,
+          api: user.permissions.application.api,
+          import: user.permissions.application.import,
+          scan: user.permissions.application.scan,
+        },
+        workspaces: {
+          create: user.permissions.workspaces.create,
+          invite: user.permissions.workspaces.invite,
+        },
       };
 
       return {
@@ -51,8 +113,8 @@ export class Admin {
         name: user.name || "",
         email: user.email || "",
         role: user.role || "user",
-        workspaces: workspaceCount,
-        features,
+        workspaces: workspaceOwnerCount + workspaceCollaboratorCount,
+        permissions,
         banned: user.banned ?? false,
         lastLogin: user.lastLogin || "",
       };
@@ -88,29 +150,61 @@ export class Admin {
     });
   };
 
-  static getCurrentUserFeatures = async (_id: string): Promise<UserFeatures> => {
-    const user = await getDatabase().collection(USERS_COLLECTION).findOne({ _id: _id });
+  static getCurrentUserPermissions = async (_id: string, workspace: string): Promise<UserAllPermissions> => {
+    const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
+    const workspaceResult = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .findOne({ _id: workspace });
+
+    // Check that both the User and Workspace were located, if not return default permissions
+    if (!userResult || !workspaceResult) {
+      return {
+        workspace: DEFAULT_WORKSPACE_PERMISSIONS,
+        global: DEFAULT_GLOBAL_PERMISSIONS,
+      };
+    }
+
+    const workspacePermissions = workspaceResult.collaborators.filter((collaborator: Collaborator) => {
+      return collaborator._id === _id;
+    });
+
+    if (workspacePermissions.length !== 1) {
+      return {
+        workspace: DEFAULT_WORKSPACE_PERMISSIONS, // Replace with default permissions
+        global: userResult.permissions,
+      };
+    }
+
     return {
-      ai: user?.features?.ai ?? false,
-      api: user?.features?.api ?? false,
+      workspace: workspacePermissions[0].permissions,
+      global: userResult.permissions,
     };
   };
 
-  static setUserFeatures = async (_id: string, features: Partial<UserFeatures>): Promise<IResponseMessage> => {
+  static setUserGlobalPermissions = async (
+    _id: string,
+    permissions: Partial<UserGlobalPermissions>,
+  ): Promise<IResponseMessage> => {
     const update: Record<string, unknown> = {};
-    if (features.ai !== undefined) update["features.ai"] = features.ai;
-    if (features.api !== undefined) update["features.api"] = features.api;
+    if (permissions?.application?.ai !== undefined) update["applications.ai"] = permissions.application.ai;
+    if (permissions?.application?.api !== undefined) update["applications.api"] = permissions.application.api;
+    if (permissions?.application?.import !== undefined) update["applications.import"] = permissions.application.import;
+    if (permissions?.application?.scan !== undefined) update["applications.scan"] = permissions.application.scan;
 
-    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: update });
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: _id }, { $set: update });
 
     return {
       success: result.modifiedCount === 1,
-      message: result.modifiedCount === 1 ? "User features updated" : "Unable to update user features",
+      message: result.modifiedCount === 1 ? "User global permissions updated" : "Unable to update user features",
     };
   };
 
   static setBanStatus = async (_id: string, banned: boolean): Promise<IResponseMessage> => {
-    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: { banned } });
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: _id }, { $set: { banned } });
 
     return {
       success: result.modifiedCount === 1,
@@ -119,7 +213,9 @@ export class Admin {
   };
 
   static setUserRole = async (_id: string, role: string): Promise<IResponseMessage> => {
-    const result = await getDatabase().collection(USERS_COLLECTION).updateOne({ _id: _id }, { $set: { role } });
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: _id }, { $set: { role } });
 
     return {
       success: result.modifiedCount === 1,

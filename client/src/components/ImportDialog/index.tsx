@@ -68,7 +68,7 @@ import { usePostHog } from "posthog-js/react";
 import { ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, GLOBAL_STYLES } from "@variables";
 
 // Hooks
-import { useFeatures } from "@hooks/useFeatures";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Variables
 const JSON_MIME_TYPE = "application/json";
@@ -199,7 +199,9 @@ const IMPORT_TEMPLATE_JSON = gql`
 const ImportDialog = (props: ImportDialogProps) => {
   // Posthog
   const posthog = usePostHog();
-  const { features } = useFeatures();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
 
   // Operation and button states
   const [importLoading, setImportLoading] = useState(false);
@@ -859,7 +861,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fetch AI column mapping suggestions when columns become available
   useEffect(() => {
-    if (!features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
+    if (!globalPermissions.application.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
 
     const fetchSuggestions = async () => {
       setIsSuggesting(true);

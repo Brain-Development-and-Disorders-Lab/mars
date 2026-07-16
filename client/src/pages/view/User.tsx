@@ -31,9 +31,9 @@ import { APIKey, DataTableAction, IResponseMessage, ResponseData, UserModel, Wor
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
-// Context and hooks
+// Hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useFeatures } from "@hooks/useFeatures";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -48,7 +48,9 @@ import { APP_URL, GLOBAL_STYLES } from "@variables";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
-  const { features } = useFeatures();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
 
   // Authentication and user
   const [user, setUser] = useState("");
@@ -94,7 +96,9 @@ const User = () => {
         description
         public
         owner
-        collaborators
+        collaborators {
+          _id
+        }
       }
     }
   `;
@@ -1061,7 +1065,7 @@ const User = () => {
             </Flex>
           </Flex>
 
-          {features.api && (
+          {globalPermissions.application.api && (
             <Flex
               direction={"column"}
               p={"2"}

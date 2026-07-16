@@ -13,8 +13,11 @@ vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(() => vi.fn()),
 }));
 
-vi.mock("@hooks/useFeatures", () => ({
-  useFeatures: vi.fn(() => ({ features: { ai: true, api: false } })),
+vi.mock("@hooks/usePermissions", () => ({
+  usePermissions: vi.fn(() => ({
+    workspacePermissions: {},
+    globalPermissions: {},
+  })),
 }));
 
 const createTestCache = () => {
