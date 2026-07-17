@@ -164,7 +164,7 @@ const SearchBox = () => {
     let searchQuery = query;
     let isBuilder = false;
 
-    if (globalPermissions.application.ai) {
+    if (globalPermissions.features.ai) {
       const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
 
       if (!translation) {
@@ -257,9 +257,7 @@ const SearchBox = () => {
           <Flex gap={"2"} align={"center"} w={"100%"}>
             <InputGroup
               startElement={
-                globalPermissions.application.ai ? (
-                  <Icon name={"lightning"} size={"xs"} color={"purple.400"} />
-                ) : undefined
+                globalPermissions.features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined
               }
             >
               <Input
@@ -267,11 +265,11 @@ const SearchBox = () => {
                 value={query}
                 rounded={"md"}
                 size={"xs"}
-                placeholder={globalPermissions.application.ai ? "Describe what you're looking for..." : "Search..."}
+                placeholder={globalPermissions.features.ai ? "Describe what you're looking for..." : "Search..."}
                 background={"white"}
                 w={"100%"}
-                borderColor={globalPermissions.application.ai ? "purple.400" : undefined}
-                outlineColor={globalPermissions.application.ai ? "purple.400" : undefined}
+                borderColor={globalPermissions.features.ai ? "purple.400" : undefined}
+                outlineColor={globalPermissions.features.ai ? "purple.400" : undefined}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setOpen(false);
@@ -292,7 +290,7 @@ const SearchBox = () => {
               data-search-button
               size={"xs"}
               rounded={"md"}
-              colorPalette={globalPermissions.application.ai ? "purple" : "green"}
+              colorPalette={globalPermissions.features.ai ? "purple" : "green"}
               disabled={query === ""}
               loading={isSearching}
               loadingText={"Searching..."}

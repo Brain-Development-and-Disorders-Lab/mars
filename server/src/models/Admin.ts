@@ -5,7 +5,7 @@ import {
   AdminWorkspace,
   Collaborator,
   IResponseMessage,
-  UserAllPermissions,
+  UserCollatedPermissions,
   UserGlobalPermissions,
   UserModel,
   UserWorkspacePermissions,
@@ -24,7 +24,7 @@ const TEMPLATES_COLLECTION = "templates";
 
 // Default Workspace permissions
 export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
-  workspaces: {
+  administration: {
     edit: false,
     invite: false,
   },
@@ -47,7 +47,7 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
 
 // Default global permissions
 export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
-  application: {
+  features: {
     import: false,
     scan: false,
     ai: false,
@@ -95,11 +95,11 @@ export class Admin {
       }
 
       const permissions: UserGlobalPermissions = {
-        application: {
-          ai: user.permissions.application.ai,
-          api: user.permissions.application.api,
-          import: user.permissions.application.import,
-          scan: user.permissions.application.scan,
+        features: {
+          ai: user.permissions.features.ai,
+          api: user.permissions.features.api,
+          import: user.permissions.features.import,
+          scan: user.permissions.features.scan,
         },
         workspaces: {
           create: user.permissions.workspaces.create,
@@ -148,7 +148,7 @@ export class Admin {
     });
   };
 
-  static getUserAllPermissions = async (_id: string, workspace: string): Promise<UserAllPermissions> => {
+  static getUserCollatedPermissions = async (_id: string, workspace: string): Promise<UserCollatedPermissions> => {
     const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
     const workspaceResult = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
@@ -195,10 +195,10 @@ export class Admin {
     permissions: Partial<UserGlobalPermissions>,
   ): Promise<IResponseMessage> => {
     const update: Record<string, unknown> = {};
-    if (permissions?.application?.ai !== undefined) update["applications.ai"] = permissions.application.ai;
-    if (permissions?.application?.api !== undefined) update["applications.api"] = permissions.application.api;
-    if (permissions?.application?.import !== undefined) update["applications.import"] = permissions.application.import;
-    if (permissions?.application?.scan !== undefined) update["applications.scan"] = permissions.application.scan;
+    if (permissions?.features?.ai !== undefined) update["applications.ai"] = permissions.features.ai;
+    if (permissions?.features?.api !== undefined) update["applications.api"] = permissions.features.api;
+    if (permissions?.features?.import !== undefined) update["applications.import"] = permissions.features.import;
+    if (permissions?.features?.scan !== undefined) update["applications.scan"] = permissions.features.scan;
 
     const result = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)

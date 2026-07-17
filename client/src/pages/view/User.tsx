@@ -41,7 +41,7 @@ import { auth } from "@lib/auth";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail, ignoreAbort } from "@lib/util";
+import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
 
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
@@ -491,7 +491,7 @@ const User = () => {
           name: workspace.name,
           description: workspace.description,
           public: workspace.public,
-          collaborators: workspace.collaborators.filter((c) => c !== user),
+          collaborators: workspace.collaborators.filter((c) => !isCollaborator(c._id, workspace.collaborators)),
         },
       },
     });
@@ -525,7 +525,7 @@ const User = () => {
               name: w.name,
               description: w.description,
               public: w.public,
-              collaborators: w.collaborators.filter((c) => c !== user),
+              collaborators: w.collaborators.filter((c) => !isCollaborator(c._id, w.collaborators)),
             },
           },
         }),
@@ -1065,7 +1065,7 @@ const User = () => {
             </Flex>
           </Flex>
 
-          {globalPermissions.application.api && (
+          {globalPermissions.features.api && (
             <Flex
               direction={"column"}
               p={"2"}

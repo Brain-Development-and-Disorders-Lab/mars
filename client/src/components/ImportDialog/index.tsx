@@ -861,7 +861,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   // Fetch AI column mapping suggestions when columns become available
   useEffect(() => {
-    if (!globalPermissions.application.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
+    if (!globalPermissions.features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
 
     const fetchSuggestions = async () => {
       setIsSuggesting(true);

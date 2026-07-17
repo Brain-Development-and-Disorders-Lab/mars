@@ -84,8 +84,8 @@ const Search = () => {
   const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
-    if (!globalPermissions.application.ai) setIsAISearch(false);
-  }, [globalPermissions.application.ai]);
+    if (!globalPermissions.features.ai) setIsAISearch(false);
+  }, [globalPermissions.features.ai]);
 
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
@@ -873,7 +873,7 @@ const Search = () => {
                       }}
                     />
                   </InputGroup>
-                  {globalPermissions.application.ai && (
+                  {globalPermissions.features.ai && (
                     <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
                       <Button
                         size={"xs"}

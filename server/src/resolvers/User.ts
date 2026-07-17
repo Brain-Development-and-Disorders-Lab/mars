@@ -3,7 +3,7 @@ import {
   IResolverParent,
   IResponseMessage,
   ResponseData,
-  UserAllPermissions,
+  UserCollatedPermissions,
   UserGlobalPermissions,
   UserModel,
 } from "@types";
@@ -37,20 +37,20 @@ export const UserResolvers = {
       return await User.getByOrcid(args.orcid);
     },
 
-    userAllPermissions: async (
-      _parent: IResolverParent,
-      _args: Record<string, unknown>,
-      context: Context,
-    ): Promise<UserAllPermissions> => {
-      return await Admin.getUserAllPermissions(context.user, context.workspace);
-    },
-
     userGlobalPermissions: async (
       _parent: IResolverParent,
       args: { _id?: string },
       context: Context,
     ): Promise<UserGlobalPermissions> => {
       return await Admin.getUserGlobalPermissions(args._id ?? context.user);
+    },
+
+    userCollatedPermissions: async (
+      _parent: IResolverParent,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<UserCollatedPermissions> => {
+      return await Admin.getUserCollatedPermissions(context.user, context.workspace);
     },
   },
   Mutation: {

@@ -24,17 +24,17 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
   const { globalPermissions, workspacePermissions } = usePermissions();
 
   // Global permissions state for current user
-  const [applicationImport, setApplicationImport] = useState(globalPermissions.application.import);
-  const [applicationScan, setApplicationScan] = useState(globalPermissions.application.scan);
-  const [applicationAI, setApplicationAI] = useState(globalPermissions.application.ai);
-  const [applicationAPI, setApplicationAPI] = useState(globalPermissions.application.api);
+  const [applicationImport, setApplicationImport] = useState(globalPermissions.features.import);
+  const [applicationScan, setApplicationScan] = useState(globalPermissions.features.scan);
+  const [applicationAI, setApplicationAI] = useState(globalPermissions.features.ai);
+  const [applicationAPI, setApplicationAPI] = useState(globalPermissions.features.api);
   const [workspaceCreate, setWorkspaceCreate] = useState(globalPermissions.workspaces.create);
 
   // If `isGlobal`, get the permissions of the User we are modifying
   const GET_USER_GLOBAL_PERMISSIONS = gql`
     query GetUserGlobalPermissions($_id: String) {
       userGlobalPermissions(_id: $_id) {
-        application {
+        features {
           import
           scan
           ai
@@ -62,10 +62,10 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
     });
 
     if (result.data) {
-      setApplicationImport(result.data.userGlobalPermissions.application.import);
-      setApplicationScan(result.data.userGlobalPermissions.application.scan);
-      setApplicationAI(result.data.userGlobalPermissions.application.ai);
-      setApplicationAPI(result.data.userGlobalPermissions.application.api);
+      setApplicationImport(result.data.userGlobalPermissions.features.import);
+      setApplicationScan(result.data.userGlobalPermissions.features.scan);
+      setApplicationAI(result.data.userGlobalPermissions.features.ai);
+      setApplicationAPI(result.data.userGlobalPermissions.features.api);
     } else {
       toaster.create({
         title: "Could not retrieve User permissions",
@@ -109,7 +109,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
         variables: {
           _id: props.user,
           permissions: {
-            application: {
+            features: {
               import: applicationImport,
               scan: applicationScan,
               ai: applicationAI,
@@ -305,14 +305,14 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       >
                         Workspace Permissions
                       </Text>
-                      <Switch.Root checked={workspacePermissions.workspaces.edit} colorPalette={"green"}>
+                      <Switch.Root checked={workspacePermissions.administration.edit} colorPalette={"green"}>
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
                         <Switch.Label fontSize={"xs"}>Edit Workspace</Switch.Label>
                       </Switch.Root>
-                      <Switch.Root checked={workspacePermissions.workspaces.invite} colorPalette={"green"}>
+                      <Switch.Root checked={workspacePermissions.administration.invite} colorPalette={"green"}>
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />

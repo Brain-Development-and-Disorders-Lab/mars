@@ -61,52 +61,54 @@ export const typedefs = `#graphql
     templates: Int
   }
   
-  # "UserGlobalApplicationPermissions" type
-  type UserGlobalApplicationPermissions {
+  # All "Global" permissions ("features" and "workspaces")
+  # "UserFeaturesPermissions" type
+  type UserFeaturesPermissions {
     import: Boolean
     scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserGlobalApplicationPermissionsInput" type
-  input UserGlobalApplicationPermissionsInput {
+  # "UserFeaturesPermissionsInput" type
+  input UserFeaturesPermissionsInput {
     import: Boolean
     scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserGlobalWorkspacePermissions" type
-  type UserGlobalWorkspacePermissions {
+  # "UserWorkspacesPermissions" type
+  type UserWorkspacesPermissions {
     create: Boolean
   }
   
-  # "UserGlobalWorkspacePermissionsInput" type
-  input UserGlobalWorkspacePermissionsInput {
+  # "UserWorkspacesPermissionsInput" type
+  input UserWorkspacesPermissionsInput {
     create: Boolean
   }
-
+  
   # "UserGlobalPermissions" type
   type UserGlobalPermissions {
-    application: UserGlobalApplicationPermissions
-    workspaces: UserGlobalWorkspacePermissions
+    features: UserFeaturesPermissions
+    workspaces: UserWorkspacesPermissions
   }
   
   # "UserGlobalPermissionsInput" type
   input UserGlobalPermissionsInput {
-    application: UserGlobalApplicationPermissionsInput
-    workspaces: UserGlobalWorkspacePermissionsInput
+    features: UserFeaturesPermissionsInput
+    workspaces: UserWorkspacesPermissionsInput
   }
   
-  # "UserWorkspaceWorkspacesPermissions" type
-  type UserWorkspaceWorkspacesPermissions {
+  # All "Workspace" permissions ("administration", "entities", "projects", "templates")
+  # "UserWorkspaceAdministrationPermissions" type
+  type UserWorkspaceAdministrationPermissions {
     edit: Boolean
     invite: Boolean
   }
   
-  # "UserWorkspaceWorkspacesPermissionsInput" type
-  input UserWorkspaceWorkspacesPermissionsInput {
+  # "UserWorkspaceAdministrationPermissionsInput" type
+  input UserWorkspaceAdministrationPermissionsInput {
     edit: Boolean
     invite: Boolean
   }
@@ -155,7 +157,7 @@ export const typedefs = `#graphql
   
    # "UserWorkspacePermissions" type
   type UserWorkspacePermissions {
-    workspaces: UserWorkspaceWorkspacesPermissions
+    administration: UserWorkspaceAdministrationPermissions
     entities: UserWorkspaceEntitiesPermissions
     projects: UserWorkspaceProjectsPermissions
     templates: UserWorkspaceTemplatesPermissions
@@ -163,20 +165,21 @@ export const typedefs = `#graphql
   
   # "UserWorkspacePermissionsInput" type
   input UserWorkspacePermissionsInput {
-    workspaces: UserWorkspaceWorkspacesPermissionsInput
+    administration: UserWorkspaceAdministrationPermissionsInput
     entities: UserWorkspaceEntitiesPermissionsInput
     projects: UserWorkspaceProjectsPermissionsInput
     templates: UserWorkspaceTemplatesPermissionsInput
   }
   
-  # "UserAllPermissions" type
-  type UserAllPermissions {
+  # Collated permissions
+  # "UserCollatedPermissions" type
+  type UserCollatedPermissions {
     workspace: UserWorkspacePermissions
     global: UserGlobalPermissions
   }
   
-  # "UserAllPermissionsInput" type
-  input UserAllPermissionsInput {
+  # "UserCollatedPermissionsInput" type
+  input UserCollatedPermissionsInput {
     workspace: UserWorkspacePermissionsInput
     global: UserGlobalPermissionsInput
   }
@@ -715,8 +718,8 @@ export const typedefs = `#graphql
     user(_id: String): User
     userByEmail(email: String): ResponseDataString
     userByOrcid(orcid: String): ResponseDataString
-    userAllPermissions: UserAllPermissions
     userGlobalPermissions(_id: String): UserGlobalPermissions
+    userCollatedPermissions: UserCollatedPermissions
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
@@ -802,7 +805,6 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
-    setUserPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations

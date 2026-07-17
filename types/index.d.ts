@@ -748,7 +748,7 @@ export type UserModel = IUser & {
 
 // User Workspace permissions structure
 export type UserWorkspacePermissions = {
-  workspaces: {
+  administration: {
     edit: boolean;
     invite: boolean;
   };
@@ -771,7 +771,7 @@ export type UserWorkspacePermissions = {
 
 // User global permissions structure
 export type UserGlobalPermissions = {
-  application: {
+  features: {
     import: boolean;
     scan: boolean;
     ai: boolean;
@@ -782,7 +782,7 @@ export type UserGlobalPermissions = {
   };
 };
 
-export type UserAllPermissions = {
+export type UserCollatedPermissions = {
   workspace: UserWorkspacePermissions;
   global: UserGlobalPermissions;
 };

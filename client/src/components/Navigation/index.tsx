@@ -211,7 +211,7 @@ const Navigation = () => {
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
               <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.application.import} content={"Import is unavailable"} showArrow>
+                <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
                   <Button
                     id={"navImportButtonDesktop"}
                     w={"100%"}
@@ -225,7 +225,7 @@ const Navigation = () => {
 
                       setImportOpen(true);
                     }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.application.import}
+                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
                   >
                     <Icon name={"upload"} size={"xs"} />
                     Import
@@ -234,7 +234,7 @@ const Navigation = () => {
               </Flex>
 
               <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.application.scan} content={"Scan is unavailable"} showArrow>
+                <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
                   <Button
                     id={"navScanButtonDesktop"}
                     w={"100%"}
@@ -248,7 +248,7 @@ const Navigation = () => {
 
                       setScanOpen(true);
                     }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.application.scan}
+                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
                   >
                     <Icon name={"scan"} size={"xs"} />
                     Scan

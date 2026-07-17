@@ -41,7 +41,7 @@ const GET_ADMIN_DATA = gql`
       role
       workspaces
       permissions {
-        application {
+        features {
           ai
           api
           import
@@ -62,15 +62,6 @@ const GET_ADMIN_DATA = gql`
       entities
       templates
       attributes
-    }
-  }
-`;
-
-const SET_USER_FEATURES = gql`
-  mutation SetUserFeatures($_id: String, $features: UserFeaturesInput) {
-    setUserFeatures(_id: $_id, features: $features) {
-      success
-      message
     }
   }
 `;
@@ -126,10 +117,6 @@ const Admin = () => {
     adminUsers: AdminUser[];
     adminWorkspaces: AdminWorkspace[];
   }>(GET_ADMIN_DATA, { fetchPolicy: "network-only" });
-
-  const [setUserFeatures] = useMutation<{ setUserFeatures: IResponseMessage }>(SET_USER_FEATURES, {
-    onCompleted: () => refetch(),
-  });
 
   const [setBanStatus] = useMutation<{ setBanStatus: IResponseMessage }>(SET_BAN_STATUS, {
     onCompleted: () => refetch(),

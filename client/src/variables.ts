@@ -7,7 +7,7 @@ import { UserGlobalPermissions, UserWorkspacePermissions } from "@types";
 
 // Default Workspace permissions, mirrors server variables
 export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
-  workspaces: {
+  administration: {
     edit: false,
     invite: false,
   },
@@ -30,7 +30,7 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
 
 // Default global permissions, mirrors server variables
 export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
-  application: {
+  features: {
     import: false,
     scan: false,
     ai: false,

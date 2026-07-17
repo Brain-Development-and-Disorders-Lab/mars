@@ -5,16 +5,16 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Custom types
-import { UserAllPermissions, UserGlobalPermissions, UserWorkspacePermissions } from "@types";
+import { UserCollatedPermissions, UserGlobalPermissions, UserWorkspacePermissions } from "@types";
 
 // Variables
 import { DEFAULT_GLOBAL_PERMISSIONS, DEFAULT_WORKSPACE_PERMISSIONS } from "@variables";
 
 const GET_USER_PERMISSIONS = gql`
   query GetUserPermissions {
-    userAllPermissions {
+    userCollatedPermissions {
       workspace {
-        workspaces {
+        administration {
           edit
           invite
         }
@@ -35,7 +35,7 @@ const GET_USER_PERMISSIONS = gql`
         }
       }
       global {
-        application {
+        features {
           import
           scan
           ai
@@ -57,16 +57,16 @@ type PermissionsContextValue = {
 const PermissionsContext = createContext<PermissionsContextValue>({} as PermissionsContextValue);
 
 export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
-  const { data } = useQuery<{ userAllPermissions: UserAllPermissions }>(GET_USER_PERMISSIONS, {
+  const { data } = useQuery<{ userCollatedPermissions: UserCollatedPermissions }>(GET_USER_PERMISSIONS, {
     fetchPolicy: "network-only",
   });
 
   const value = useMemo<PermissionsContextValue>(
     () => ({
-      workspacePermissions: data?.userAllPermissions.workspace || DEFAULT_WORKSPACE_PERMISSIONS,
-      globalPermissions: data?.userAllPermissions.global || DEFAULT_GLOBAL_PERMISSIONS,
+      workspacePermissions: data?.userCollatedPermissions.workspace || DEFAULT_WORKSPACE_PERMISSIONS,
+      globalPermissions: data?.userCollatedPermissions.global || DEFAULT_GLOBAL_PERMISSIONS,
     }),
-    [data?.userAllPermissions],
+    [data?.userCollatedPermissions],
   );
 
   return <PermissionsContext.Provider value={value}>{props.children}</PermissionsContext.Provider>;
