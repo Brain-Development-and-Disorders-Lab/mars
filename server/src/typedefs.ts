@@ -719,6 +719,7 @@ export const typedefs = `#graphql
     userByEmail(email: String): ResponseDataString
     userByOrcid(orcid: String): ResponseDataString
     userGlobalPermissions(_id: String): UserGlobalPermissions
+    userWorkspacePermissions(_id: String, workspace: String): UserWorkspacePermissions
     userCollatedPermissions: UserCollatedPermissions
 
     # Project queries
@@ -805,12 +806,13 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
+    setUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
+    setUserWorkspacePermissions(_id: String, workspace: String permissions: UserWorkspacePermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations
     createUser(user: UserInput): ResponseMessage
     updateUser(user: UserInput): ResponseMessage
-    updateUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
     reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 
     # Template mutations

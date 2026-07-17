@@ -8,7 +8,7 @@ import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { IResponseMessage, PermissionsDialogProps, UserGlobalPermissions } from "@types";
+import { IResponseMessage, PermissionsDialogProps, UserGlobalPermissions, UserWorkspacePermissions } from "@types";
 
 // Hooks
 import { usePermissions } from "@hooks/usePermissions";
@@ -24,11 +24,24 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
   const { globalPermissions, workspacePermissions } = usePermissions();
 
   // Global permissions state for current user
-  const [applicationImport, setApplicationImport] = useState(globalPermissions.features.import);
-  const [applicationScan, setApplicationScan] = useState(globalPermissions.features.scan);
-  const [applicationAI, setApplicationAI] = useState(globalPermissions.features.ai);
-  const [applicationAPI, setApplicationAPI] = useState(globalPermissions.features.api);
+  const [featuresImport, setFeaturesImport] = useState(globalPermissions.features.import);
+  const [featuresScan, setFeaturesScan] = useState(globalPermissions.features.scan);
+  const [featuresAI, setFeaturesAI] = useState(globalPermissions.features.ai);
+  const [featuresAPI, setFeaturesAPI] = useState(globalPermissions.features.api);
   const [workspaceCreate, setWorkspaceCreate] = useState(globalPermissions.workspaces.create);
+
+  // Workspace-specific permissions for the specified user
+  const [workspaceEdit, setWorkspaceEdit] = useState(workspacePermissions.administration.edit);
+  const [workspaceInvite, setWorkspaceInvite] = useState(workspacePermissions.administration.invite);
+  const [entitiesCreate, setEntitiesCreate] = useState(workspacePermissions.entities.create);
+  const [entitiesEdit, setEntitiesEdit] = useState(workspacePermissions.entities.edit);
+  const [entitiesArchive, setEntitiesArchive] = useState(workspacePermissions.entities.archive);
+  const [projectsCreate, setProjectsCreate] = useState(workspacePermissions.projects.create);
+  const [projectsEdit, setProjectsEdit] = useState(workspacePermissions.projects.edit);
+  const [projectsArchive, setProjectsArchive] = useState(workspacePermissions.projects.archive);
+  const [templatesCreate, setTemplatesCreate] = useState(workspacePermissions.templates.create);
+  const [templatesEdit, setTemplatesEdit] = useState(workspacePermissions.templates.edit);
+  const [templatesArchive, setTemplatesArchive] = useState(workspacePermissions.templates.archive);
 
   // If `isGlobal`, get the permissions of the User we are modifying
   const GET_USER_GLOBAL_PERMISSIONS = gql`
@@ -62,10 +75,10 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
     });
 
     if (result.data) {
-      setApplicationImport(result.data.userGlobalPermissions.features.import);
-      setApplicationScan(result.data.userGlobalPermissions.features.scan);
-      setApplicationAI(result.data.userGlobalPermissions.features.ai);
-      setApplicationAPI(result.data.userGlobalPermissions.features.api);
+      setFeaturesImport(result.data.userGlobalPermissions.features.import);
+      setFeaturesScan(result.data.userGlobalPermissions.features.scan);
+      setFeaturesAI(result.data.userGlobalPermissions.features.ai);
+      setFeaturesAPI(result.data.userGlobalPermissions.features.api);
     } else {
       toaster.create({
         title: "Could not retrieve User permissions",
@@ -76,27 +89,111 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
     }
   };
 
+  // If `isGlobal` is `false`, get the Workspace permissions of the User we are modifying
+  const GET_USER_WORKSPACE_PERMISSIONS = gql`
+    query GetUserWorkspacePermissions($_id: String, $workspace: String) {
+      userWorkspacePermissions(_id: $_id, workspace: $workspace) {
+        administration {
+          edit
+          invite
+        }
+        entities {
+          create
+          edit
+          archive
+        }
+        projects {
+          create
+          edit
+          archive
+        }
+        templates {
+          create
+          edit
+          archive
+        }
+      }
+    }
+  `;
+
+  const [getUserWorkspacePermissions] = useLazyQuery<{ userWorkspacePermissions: UserWorkspacePermissions }>(
+    GET_USER_WORKSPACE_PERMISSIONS,
+    {
+      fetchPolicy: "network-only",
+    },
+  );
+
+  const refreshUserWorkspacePermissionsState = async (_id: string) => {
+    const result = await getUserWorkspacePermissions({
+      variables: {
+        _id: _id,
+        // Workspace ID passed through request `Context`
+      },
+    });
+
+    if (result.data) {
+      setWorkspaceEdit(result.data.userWorkspacePermissions.administration.edit);
+      setWorkspaceInvite(result.data.userWorkspacePermissions.administration.invite);
+      setEntitiesCreate(result.data.userWorkspacePermissions.entities.create);
+      setEntitiesEdit(result.data.userWorkspacePermissions.entities.edit);
+      setEntitiesArchive(result.data.userWorkspacePermissions.entities.archive);
+      setProjectsCreate(result.data.userWorkspacePermissions.projects.create);
+      setProjectsEdit(result.data.userWorkspacePermissions.projects.edit);
+      setProjectsArchive(result.data.userWorkspacePermissions.projects.archive);
+      setTemplatesCreate(result.data.userWorkspacePermissions.templates.create);
+      setTemplatesEdit(result.data.userWorkspacePermissions.templates.edit);
+      setTemplatesArchive(result.data.userWorkspacePermissions.templates.archive);
+    } else {
+      toaster.create({
+        title: "Could not retrieve User Workspace permissions",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    }
+  };
+
   useEffect(() => {
     if (props.isGlobal) {
       refreshUserGlobalPermissionsState(props.user);
+    } else {
+      refreshUserWorkspacePermissionsState(props.user);
     }
   }, [props.user]);
 
-  // Mutation to update User
-  const UPDATE_USER_GLOBAL_PERMISSIONS = gql`
-    mutation UpdateUserGlobalPermissions($_id: String, $permissions: UserGlobalPermissionsInput) {
-      updateUserGlobalPermissions(_id: $_id, permissions: $permissions) {
+  // Mutation to update User global permissions
+  const SET_USER_GLOBAL_PERMISSIONS = gql`
+    mutation UpdateSetGlobalPermissions($_id: String, $permissions: UserGlobalPermissionsInput) {
+      setUserGlobalPermissions(_id: $_id, permissions: $permissions) {
+        success
+        message
+      }
+    }
+  `;
+  const [setUserGlobalPermissions, { loading: userSetGlobalPermissionsLoading, error: userSetGlobalPermissionsError }] =
+    useMutation<{
+      setUserGlobalPermissions: IResponseMessage;
+    }>(SET_USER_GLOBAL_PERMISSIONS);
+
+  // Mutation to update User Workspace permissions
+  const SET_USER_WORKSPACE_PERMISSIONS = gql`
+    mutation SetUserWorkspacePermissions(
+      $_id: String
+      $workspace: String
+      $permissions: UserWorkspacePermissionsInput
+    ) {
+      setUserWorkspacePermissions(_id: $_id, workspace: $workspace, permissions: $permissions) {
         success
         message
       }
     }
   `;
   const [
-    updateUserGlobalPermissions,
-    { loading: userUpdateGlobalPermissionsLoading, error: userUpdateGlobalPermissionsError },
+    setUserWorkspacePermissions,
+    { loading: userSetWorkspacePermissionsLoading, error: userSetWorkspacePermissionsError },
   ] = useMutation<{
-    updateUserGlobalPermissions: IResponseMessage;
-  }>(UPDATE_USER_GLOBAL_PERMISSIONS);
+    setUserWorkspacePermissions: IResponseMessage;
+  }>(SET_USER_WORKSPACE_PERMISSIONS);
 
   /**
    * Utility function to execute GraphQL manipulations updating the User permissions
@@ -104,16 +201,16 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
   const applyPermissions = async () => {
     if (props.isGlobal) {
       // Execute GraphQL mutation
-      const result = await updateUserGlobalPermissions({
+      const result = await setUserGlobalPermissions({
         fetchPolicy: "network-only",
         variables: {
           _id: props.user,
           permissions: {
             features: {
-              import: applicationImport,
-              scan: applicationScan,
-              ai: applicationAI,
-              api: applicationAPI,
+              import: featuresImport,
+              scan: featuresScan,
+              ai: featuresAI,
+              api: featuresAPI,
             },
             workspaces: {
               create: workspaceCreate,
@@ -122,7 +219,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
         },
       });
 
-      if (userUpdateGlobalPermissionsError) {
+      if (userSetGlobalPermissionsError) {
         toaster.create({
           title: "Could not update User permissions",
           type: "error",
@@ -131,9 +228,59 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
         });
       }
 
-      if (result.data && result.data.updateUserGlobalPermissions.success) {
+      if (result.data && result.data.setUserGlobalPermissions.success) {
         toaster.create({
           title: "Updated User permissions",
+          type: "success",
+          duration: 2000,
+          closable: true,
+        });
+
+        // Close the dialog
+        props.setOpen(false);
+      }
+    } else {
+      // Execute GraphQL mutation
+      const result = await setUserWorkspacePermissions({
+        fetchPolicy: "network-only",
+        variables: {
+          _id: props.user,
+          permissions: {
+            administration: {
+              edit: workspaceEdit,
+              invite: workspaceInvite,
+            },
+            entities: {
+              create: entitiesCreate,
+              edit: entitiesEdit,
+              archive: entitiesArchive,
+            },
+            projects: {
+              create: projectsCreate,
+              edit: projectsEdit,
+              archive: projectsArchive,
+            },
+            templates: {
+              create: templatesCreate,
+              edit: templatesEdit,
+              archive: templatesArchive,
+            },
+          },
+        },
+      });
+
+      if (userSetWorkspacePermissionsError) {
+        toaster.create({
+          title: "Could not update User Workspace permissions",
+          type: "error",
+          duration: 2000,
+          closable: true,
+        });
+      }
+
+      if (result.data && result.data.setUserWorkspacePermissions.success) {
+        toaster.create({
+          title: "Updated User Workspace permissions",
           type: "success",
           duration: 2000,
           closable: true,
@@ -215,8 +362,8 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       Application Permissions
                     </Text>
                     <Switch.Root
-                      checked={applicationImport}
-                      onCheckedChange={(event) => setApplicationImport(event.checked)}
+                      checked={featuresImport}
+                      onCheckedChange={(event) => setFeaturesImport(event.checked)}
                       colorPalette={"green"}
                     >
                       <Switch.HiddenInput />
@@ -231,8 +378,8 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       </Switch.Label>
                     </Switch.Root>
                     <Switch.Root
-                      checked={applicationScan}
-                      onCheckedChange={(event) => setApplicationScan(event.checked)}
+                      checked={featuresScan}
+                      onCheckedChange={(event) => setFeaturesScan(event.checked)}
                       colorPalette={"green"}
                     >
                       <Switch.HiddenInput />
@@ -247,8 +394,8 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       </Switch.Label>
                     </Switch.Root>
                     <Switch.Root
-                      checked={applicationAI}
-                      onCheckedChange={(event) => setApplicationAI(event.checked)}
+                      checked={featuresAI}
+                      onCheckedChange={(event) => setFeaturesAI(event.checked)}
                       colorPalette={"green"}
                     >
                       <Switch.HiddenInput />
@@ -263,8 +410,8 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       </Switch.Label>
                     </Switch.Root>
                     <Switch.Root
-                      checked={applicationAPI}
-                      onCheckedChange={(event) => setApplicationAPI(event.checked)}
+                      checked={featuresAPI}
+                      onCheckedChange={(event) => setFeaturesAPI(event.checked)}
                       colorPalette={"green"}
                     >
                       <Switch.HiddenInput />
@@ -305,19 +452,37 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       >
                         Workspace Permissions
                       </Text>
-                      <Switch.Root checked={workspacePermissions.administration.edit} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={workspaceEdit}
+                        onCheckedChange={(event) => setWorkspaceEdit(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Edit Workspace</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"edit"} size={"xs"} />
+                            <Text fontSize={"xs"}>Edit Workspace Details</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
-                      <Switch.Root checked={workspacePermissions.administration.invite} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={workspaceInvite}
+                        onCheckedChange={(event) => setWorkspaceInvite(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Invite Collaborators</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"person"} size={"xs"} />
+                            <Text fontSize={"xs"}>Invite Collaborators</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
                     </Flex>
                   </Flex>
@@ -342,30 +507,57 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                         Entities
                       </Text>
                       {/* Create Entities */}
-                      <Switch.Root checked={workspacePermissions.entities.create} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={entitiesCreate}
+                        onCheckedChange={(event) => setEntitiesCreate(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Create Entities</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"add"} size={"xs"} />
+                            <Text fontSize={"xs"}>Create Entities</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
 
                       {/* Edit Entities */}
-                      <Switch.Root checked={workspacePermissions.entities.edit} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={entitiesEdit}
+                        onCheckedChange={(event) => setEntitiesEdit(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Edit Entities</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"edit"} size={"xs"} />
+                            <Text fontSize={"xs"}>Edit Entities</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
 
                       {/* Archive Entities */}
-                      <Switch.Root checked={workspacePermissions.entities.archive} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={entitiesArchive}
+                        onCheckedChange={(event) => setEntitiesArchive(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Archive Entities</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"archive"} size={"xs"} />
+                            <Text fontSize={"xs"}>Archive Entities</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
                     </Flex>
 
@@ -387,31 +579,131 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       >
                         Projects
                       </Text>
-                      {/* Create Entities */}
-                      <Switch.Root checked={workspacePermissions.projects.create} colorPalette={"green"}>
+                      {/* Create Projects */}
+                      <Switch.Root
+                        checked={projectsCreate}
+                        onCheckedChange={(event) => setProjectsCreate(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Create Projects</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"add"} size={"xs"} />
+                            <Text fontSize={"xs"}>Create Projects</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
 
                       {/* Edit Projects */}
-                      <Switch.Root checked={workspacePermissions.projects.edit} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={projectsEdit}
+                        onCheckedChange={(event) => setProjectsEdit(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Edit Projects</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"edit"} size={"xs"} />
+                            <Text fontSize={"xs"}>Edit Projects</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
 
                       {/* Archive Projects */}
-                      <Switch.Root checked={workspacePermissions.projects.archive} colorPalette={"green"}>
+                      <Switch.Root
+                        checked={projectsArchive}
+                        onCheckedChange={(event) => setProjectsArchive(event.checked)}
+                        colorPalette={"green"}
+                      >
                         <Switch.HiddenInput />
                         <Switch.Control>
                           <Switch.Thumb />
                         </Switch.Control>
-                        <Switch.Label fontSize={"xs"}>Archive Projects</Switch.Label>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"archive"} size={"xs"} />
+                            <Text fontSize={"xs"}>Archive Projects</Text>
+                          </Flex>
+                        </Switch.Label>
+                      </Switch.Root>
+                    </Flex>
+
+                    {/* Templates Permissions */}
+                    <Flex
+                      direction={"column"}
+                      p={"2"}
+                      gap={"2"}
+                      rounded={"md"}
+                      border={GLOBAL_STYLES.border.style}
+                      borderColor={GLOBAL_STYLES.border.color}
+                      w={"50%"}
+                    >
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        ml={"0.5"}
+                      >
+                        Templates
+                      </Text>
+                      {/* Create Templates */}
+                      <Switch.Root
+                        checked={templatesCreate}
+                        onCheckedChange={(event) => setTemplatesCreate(event.checked)}
+                        colorPalette={"green"}
+                      >
+                        <Switch.HiddenInput />
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"add"} size={"xs"} />
+                            <Text fontSize={"xs"}>Create Templates</Text>
+                          </Flex>
+                        </Switch.Label>
+                      </Switch.Root>
+
+                      {/* Edit Templates */}
+                      <Switch.Root
+                        checked={templatesEdit}
+                        onCheckedChange={(event) => setTemplatesEdit(event.checked)}
+                        colorPalette={"green"}
+                      >
+                        <Switch.HiddenInput />
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"edit"} size={"xs"} />
+                            <Text fontSize={"xs"}>Edit Templates</Text>
+                          </Flex>
+                        </Switch.Label>
+                      </Switch.Root>
+
+                      {/* Archive Templates */}
+                      <Switch.Root
+                        checked={templatesArchive}
+                        onCheckedChange={(event) => setTemplatesArchive(event.checked)}
+                        colorPalette={"green"}
+                      >
+                        <Switch.HiddenInput />
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        <Switch.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Icon name={"archive"} size={"xs"} />
+                            <Text fontSize={"xs"}>Archive Templates</Text>
+                          </Flex>
+                        </Switch.Label>
                       </Switch.Root>
                     </Flex>
                   </Flex>
@@ -447,7 +739,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                 colorPalette={"green"}
                 size={"xs"}
                 rounded={"md"}
-                loading={userUpdateGlobalPermissionsLoading}
+                loading={userSetGlobalPermissionsLoading || userSetWorkspacePermissionsLoading}
                 onClick={() => {
                   // Apply updated permissions
                   applyPermissions();

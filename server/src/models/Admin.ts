@@ -12,8 +12,14 @@ import {
   WorkspaceModel,
 } from "@types";
 
+// Models
+import { User } from "./User";
+
 // Database
 import { getDatabase } from "@connectors/database";
+
+// Utility functions and libraries
+import _ from "lodash";
 
 // Collection names
 const USERS_COLLECTION = "user";
@@ -148,6 +154,164 @@ export class Admin {
     });
   };
 
+  static getUserGlobalPermissions = async (_id: string): Promise<UserGlobalPermissions> => {
+    const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
+
+    // Check that the User was located, if not return default permissions
+    if (!userResult) {
+      return DEFAULT_GLOBAL_PERMISSIONS;
+    }
+
+    return userResult.permissions;
+  };
+
+  static setUserGlobalPermissions = async (
+    _id: string,
+    permissions: UserGlobalPermissions,
+  ): Promise<IResponseMessage> => {
+    const user = await User.getOne(_id);
+
+    if (_.isNull(user)) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const update: { $set: UserModel } = {
+      $set: {
+        ...user,
+        permissions,
+      },
+    };
+
+    const response = await getDatabase().collection<UserModel>(USERS_COLLECTION).updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount === 1 || response.matchedCount === 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Updated User permissions successfully" : "Unable to update User permissions",
+    };
+  };
+
+  static getUserWorkspacePermissions = async (_id: string, workspace: string): Promise<UserWorkspacePermissions> => {
+    const workspaceResult = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .findOne({ _id: workspace });
+
+    // Check that the Workspace was located, if not return default permissions
+    if (!workspaceResult) {
+      return DEFAULT_WORKSPACE_PERMISSIONS;
+    }
+
+    // Get the permissions of the User, assuming they are a collaborator
+    const collaboratorResult = workspaceResult.collaborators.find(
+      (collaborator: Collaborator) => collaborator._id === _id,
+    );
+    if (collaboratorResult) {
+      return collaboratorResult.permissions;
+    } else {
+      // In the case where the User is the owner, return all permissions enabled by default
+      return {
+        administration: {
+          edit: true,
+          invite: true,
+        },
+        entities: {
+          create: true,
+          edit: true,
+          archive: true,
+        },
+        projects: {
+          create: true,
+          edit: true,
+          archive: true,
+        },
+        templates: {
+          create: true,
+          edit: true,
+          archive: true,
+        },
+      };
+    }
+  };
+
+  static setUserWorkspacePermissions = async (
+    _id: string,
+    workspace: string,
+    permissions: Partial<UserWorkspacePermissions>,
+  ): Promise<IResponseMessage> => {
+    // Get the current User's Workspace permissions
+    const workspaceResult = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .findOne({ _id: workspace });
+    if (!workspaceResult) {
+      return {
+        success: false,
+        message: "Unable to locate Workspace",
+      };
+    }
+
+    console.info(_id, workspace, permissions);
+
+    const collaboratorResult = workspaceResult.collaborators.find(
+      (collaborator: Collaborator) => collaborator._id === _id,
+    );
+    if (!collaboratorResult) {
+      return {
+        success: false,
+        message: "Unable to locate Collaborator within Workspace",
+      };
+    }
+
+    // Create copy of permissions to update and copy any specified changes
+    const updatedPermissions = _.cloneDeep(collaboratorResult.permissions);
+    if (permissions?.administration?.edit !== undefined)
+      updatedPermissions.administration.edit = permissions.administration.edit;
+    if (permissions?.administration?.invite !== undefined)
+      updatedPermissions.administration.invite = permissions.administration.invite;
+    if (permissions?.entities?.create !== undefined) updatedPermissions.entities.create = permissions.entities.create;
+    if (permissions?.entities?.edit !== undefined) updatedPermissions.entities.edit = permissions.entities.edit;
+    if (permissions?.entities?.archive !== undefined)
+      updatedPermissions.entities.archive = permissions.entities.archive;
+    if (permissions?.projects?.create !== undefined) updatedPermissions.projects.create = permissions.projects.create;
+    if (permissions?.projects?.edit !== undefined) updatedPermissions.projects.edit = permissions.projects.edit;
+    if (permissions?.projects?.archive !== undefined)
+      updatedPermissions.projects.archive = permissions.projects.archive;
+    if (permissions?.templates?.create !== undefined)
+      updatedPermissions.templates.create = permissions.templates.create;
+    if (permissions?.templates?.edit !== undefined) updatedPermissions.templates.edit = permissions.templates.edit;
+    if (permissions?.templates?.archive !== undefined)
+      updatedPermissions.templates.archive = permissions.templates.archive;
+
+    // Apply update in-place in list of Collaborators
+    for (const collaborator of workspaceResult.collaborators) {
+      if (collaborator._id === _id) {
+        collaborator.permissions = _.cloneDeep(updatedPermissions);
+        break;
+      }
+    }
+
+    // Create and apply updated Collaborators
+    const update: Record<string, unknown> = {
+      $set: {
+        collaborators: workspaceResult.collaborators,
+      },
+    };
+
+    const result = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .updateOne({ _id: workspace }, update);
+
+    return {
+      success: result.modifiedCount === 1,
+      message:
+        result.modifiedCount === 1
+          ? "User Workspace permissions updated"
+          : "Unable to update User Workspace permissions",
+    };
+  };
+
   static getUserCollatedPermissions = async (_id: string, workspace: string): Promise<UserCollatedPermissions> => {
     const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
     const workspaceResult = await getDatabase()
@@ -162,52 +326,50 @@ export class Admin {
       };
     }
 
-    const workspacePermissions = workspaceResult.collaborators.filter((collaborator: Collaborator) => {
-      return collaborator._id === _id;
-    });
-
-    if (workspacePermissions.length !== 1) {
+    // Check if User is Workspace owner or Collaborator
+    if (workspaceResult.owner === _id) {
+      // If owner, all permissions granted
       return {
-        workspace: DEFAULT_WORKSPACE_PERMISSIONS, // Replace with default permissions
+        workspace: {
+          administration: {
+            edit: true,
+            invite: true,
+          },
+          entities: {
+            create: true,
+            edit: true,
+            archive: true,
+          },
+          projects: {
+            create: true,
+            edit: true,
+            archive: true,
+          },
+          templates: {
+            create: true,
+            edit: true,
+            archive: true,
+          },
+        },
+        global: userResult.permissions,
+      };
+    } else {
+      const workspacePermissions = workspaceResult.collaborators.filter((collaborator: Collaborator) => {
+        return collaborator._id === _id;
+      });
+
+      if (workspacePermissions.length !== 1) {
+        return {
+          workspace: DEFAULT_WORKSPACE_PERMISSIONS, // Replace with default permissions
+          global: userResult.permissions,
+        };
+      }
+
+      return {
+        workspace: workspacePermissions[0].permissions,
         global: userResult.permissions,
       };
     }
-
-    return {
-      workspace: workspacePermissions[0].permissions,
-      global: userResult.permissions,
-    };
-  };
-
-  static getUserGlobalPermissions = async (_id: string): Promise<UserGlobalPermissions> => {
-    const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
-
-    // Check that the User was located, if not return default permissions
-    if (!userResult) {
-      return DEFAULT_GLOBAL_PERMISSIONS;
-    }
-
-    return userResult.permissions;
-  };
-
-  static setUserGlobalPermissions = async (
-    _id: string,
-    permissions: Partial<UserGlobalPermissions>,
-  ): Promise<IResponseMessage> => {
-    const update: Record<string, unknown> = {};
-    if (permissions?.features?.ai !== undefined) update["applications.ai"] = permissions.features.ai;
-    if (permissions?.features?.api !== undefined) update["applications.api"] = permissions.features.api;
-    if (permissions?.features?.import !== undefined) update["applications.import"] = permissions.features.import;
-    if (permissions?.features?.scan !== undefined) update["applications.scan"] = permissions.features.scan;
-
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: _id }, { $set: update });
-
-    return {
-      success: result.modifiedCount === 1,
-      message: result.modifiedCount === 1 ? "User global permissions updated" : "Unable to update user features",
-    };
   };
 
   static setBanStatus = async (_id: string, banned: boolean): Promise<IResponseMessage> => {

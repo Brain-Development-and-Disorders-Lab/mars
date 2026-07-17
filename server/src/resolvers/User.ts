@@ -6,6 +6,7 @@ import {
   UserCollatedPermissions,
   UserGlobalPermissions,
   UserModel,
+  UserWorkspacePermissions,
 } from "@types";
 
 // Models
@@ -45,6 +46,14 @@ export const UserResolvers = {
       return await Admin.getUserGlobalPermissions(args._id ?? context.user);
     },
 
+    userWorkspacePermissions: async (
+      _parent: IResolverParent,
+      args: { _id?: string; workspace?: string },
+      context: Context,
+    ): Promise<UserWorkspacePermissions> => {
+      return await Admin.getUserWorkspacePermissions(args._id ?? context.user, args.workspace ?? context.workspace);
+    },
+
     userCollatedPermissions: async (
       _parent: IResolverParent,
       _args: Record<string, unknown>,
@@ -65,11 +74,20 @@ export const UserResolvers = {
     },
 
     // Update a User's global permissions
-    updateUserGlobalPermissions: async (
+    setUserGlobalPermissions: async (
       _parent: IResolverParent,
       args: { _id: string; permissions: UserGlobalPermissions },
     ): Promise<IResponseMessage> => {
-      return await User.updateGlobalPermissions(args._id, args.permissions);
+      return await Admin.setUserGlobalPermissions(args._id, args.permissions);
+    },
+
+    // Update a User's global permissions
+    setUserWorkspacePermissions: async (
+      _parent: IResolverParent,
+      args: { _id: string; permissions: UserWorkspacePermissions },
+      context: Context,
+    ): Promise<IResponseMessage> => {
+      return await Admin.setUserWorkspacePermissions(args._id, context.workspace, args.permissions);
     },
 
     // Send a report issue email to the admin

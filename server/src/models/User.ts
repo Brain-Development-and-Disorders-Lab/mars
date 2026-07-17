@@ -1,5 +1,5 @@
 // Custom types
-import { APIKey, IResponseMessage, ResponseData, UserGlobalPermissions, UserModel } from "@types";
+import { APIKey, IResponseMessage, ResponseData, UserModel } from "@types";
 
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -167,35 +167,6 @@ export class User {
     return {
       success: successStatus,
       message: successStatus ? "Updated User successfully" : "Unable to update User",
-    };
-  };
-
-  static updateGlobalPermissions = async (
-    _id: string,
-    permissions: UserGlobalPermissions,
-  ): Promise<IResponseMessage> => {
-    const user = await this.getOne(_id);
-
-    if (_.isNull(user)) {
-      return {
-        success: false,
-        message: "User not found",
-      };
-    }
-
-    const update: { $set: UserModel } = {
-      $set: {
-        ...user,
-        permissions,
-      },
-    };
-
-    const response = await getDatabase().collection<UserModel>(USERS_COLLECTION).updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount === 1 || response.matchedCount === 1;
-
-    return {
-      success: successStatus,
-      message: successStatus ? "Updated User permissions successfully" : "Unable to update User permissions",
     };
   };
 
