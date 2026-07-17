@@ -3,6 +3,7 @@ import _ from "lodash";
 
 // Custom types
 import {
+  Collaborator,
   IAttribute,
   ISelectOption,
   IValue,
@@ -72,6 +73,22 @@ export const isValidUser = (user: UserModel): boolean => {
     return false;
   }
   return true;
+};
+
+/**
+ * Utility function to search a list of `Collaborator` objects and locate a specific
+ * User identifier if it is present
+ * @param {string} _id Identifier of User to search for
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return `true` if located, `false` if not
+ */
+export const isCollaborator = (_id: string, collaborators: Collaborator[]): boolean => {
+  for (const collaborator of collaborators) {
+    if (collaborator._id === _id) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**

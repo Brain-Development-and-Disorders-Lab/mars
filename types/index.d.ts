@@ -779,7 +779,6 @@ export type UserGlobalPermissions = {
   };
   workspaces: {
     create: boolean;
-    invite: boolean;
   };
 };
 

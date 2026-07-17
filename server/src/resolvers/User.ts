@@ -1,4 +1,12 @@
-import { Context, IResolverParent, IResponseMessage, ResponseData, UserAllPermissions, UserModel } from "@types";
+import {
+  Context,
+  IResolverParent,
+  IResponseMessage,
+  ResponseData,
+  UserAllPermissions,
+  UserGlobalPermissions,
+  UserModel,
+} from "@types";
 
 // Models
 import { Admin } from "@models/Admin";
@@ -34,7 +42,15 @@ export const UserResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<UserAllPermissions> => {
-      return await Admin.getCurrentUserPermissions(context.user, context.workspace);
+      return await Admin.getUserAllPermissions(context.user, context.workspace);
+    },
+
+    userGlobalPermissions: async (
+      _parent: IResolverParent,
+      args: { _id?: string },
+      context: Context,
+    ): Promise<UserGlobalPermissions> => {
+      return await Admin.getUserGlobalPermissions(args._id ?? context.user);
     },
   },
   Mutation: {
@@ -46,6 +62,14 @@ export const UserResolvers = {
     // Update a User
     updateUser: async (_parent: IResolverParent, args: { user: UserModel }): Promise<IResponseMessage> => {
       return await User.update(args.user);
+    },
+
+    // Update a User's global permissions
+    updateUserGlobalPermissions: async (
+      _parent: IResolverParent,
+      args: { _id: string; permissions: UserGlobalPermissions },
+    ): Promise<IResponseMessage> => {
+      return await User.updateGlobalPermissions(args._id, args.permissions);
     },
 
     // Send a report issue email to the admin

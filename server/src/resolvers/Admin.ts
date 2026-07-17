@@ -47,19 +47,6 @@ export const AdminResolvers = {
   },
 
   Mutation: {
-    // setUserFeatures: async (
-    //   _parent: IResolverParent,
-    //   args: { _id: string; features: Partial<UserFeatures> },
-    //   context: Context,
-    // ): Promise<IResponseMessage> => {
-    //   requireAdmin(context);
-    //   const result = await Admin.setUserFeatures(args._id, args.features);
-    //   if (result.success) {
-    //     audit("admin.features_changed", context.user, { targetUserId: args._id });
-    //   }
-    //   return result;
-    // },
-
     setBanStatus: async (
       _parent: IResolverParent,
       args: { _id: string; banned: boolean },

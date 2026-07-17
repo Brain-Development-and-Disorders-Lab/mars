@@ -8,7 +8,6 @@ import {
   WorkspaceMetrics,
   WorkspaceModel,
   IResolverParent,
-  Collaborator,
 } from "@types";
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -20,10 +19,13 @@ import { User } from "@models/User";
 // Email
 import { sendEmail, templates } from "@lib/email";
 
-const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
-
 // Posthog
 import { PostHogClient } from "@lib/posthog";
+
+// Utility functions
+import { isCollaborator } from "@lib/util";
+
+const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 export const WorkspacesResolvers = {
   Query: {
@@ -34,10 +36,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (workspaces.length > 0) {
         return workspaces.filter((workspace) => {
-          return (
-            _.isEqual(workspace.owner, context.user) ||
-            workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user)
-          );
+          return _.isEqual(workspace.owner, context.user) || isCollaborator(context.user, workspace.collaborators);
         });
       }
 
@@ -63,8 +62,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         return workspace;
@@ -95,8 +93,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getEntities(args._id);
@@ -128,8 +125,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getProjects(args._id);
@@ -161,8 +157,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getActivity(args._id);
@@ -228,8 +223,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === context.user) ||
-          _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);

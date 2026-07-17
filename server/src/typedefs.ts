@@ -80,13 +80,11 @@ export const typedefs = `#graphql
   # "UserGlobalWorkspacePermissions" type
   type UserGlobalWorkspacePermissions {
     create: Boolean
-    invite: Boolean
   }
   
   # "UserGlobalWorkspacePermissionsInput" type
   input UserGlobalWorkspacePermissionsInput {
     create: Boolean
-    invite: Boolean
   }
 
   # "UserGlobalPermissions" type
@@ -718,6 +716,7 @@ export const typedefs = `#graphql
     userByEmail(email: String): ResponseDataString
     userByOrcid(orcid: String): ResponseDataString
     userAllPermissions: UserAllPermissions
+    userGlobalPermissions(_id: String): UserGlobalPermissions
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
@@ -809,6 +808,7 @@ export const typedefs = `#graphql
     # User mutations
     createUser(user: UserInput): ResponseMessage
     updateUser(user: UserInput): ResponseMessage
+    updateUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
     reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 
     # Template mutations

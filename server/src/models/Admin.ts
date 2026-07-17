@@ -55,7 +55,6 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   },
   workspaces: {
     create: false,
-    invite: false,
   },
 };
 
@@ -104,7 +103,6 @@ export class Admin {
         },
         workspaces: {
           create: user.permissions.workspaces.create,
-          invite: user.permissions.workspaces.invite,
         },
       };
 
@@ -150,7 +148,7 @@ export class Admin {
     });
   };
 
-  static getCurrentUserPermissions = async (_id: string, workspace: string): Promise<UserAllPermissions> => {
+  static getUserAllPermissions = async (_id: string, workspace: string): Promise<UserAllPermissions> => {
     const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
     const workspaceResult = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
@@ -179,6 +177,17 @@ export class Admin {
       workspace: workspacePermissions[0].permissions,
       global: userResult.permissions,
     };
+  };
+
+  static getUserGlobalPermissions = async (_id: string): Promise<UserGlobalPermissions> => {
+    const userResult = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
+
+    // Check that the User was located, if not return default permissions
+    if (!userResult) {
+      return DEFAULT_GLOBAL_PERMISSIONS;
+    }
+
+    return userResult.permissions;
   };
 
   static setUserGlobalPermissions = async (

@@ -4,18 +4,18 @@ import { Button, EmptyState, Field, Fieldset, Flex, Input, Separator, Stack, Tag
 // Custom components
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
+import PermissionsDialog from "@components/PermissionsDialog";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { CollaboratorsProps, ResponseData } from "@types";
+import { Collaborator, CollaboratorsProps, ResponseData } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions
-import _ from "lodash";
-import { isValidEmail, ignoreAbort } from "@lib/util";
+import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -43,6 +43,9 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
 
+  // `PermissionsDialog` state
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+
   const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] = useLazyQuery<{
     userByEmail: ResponseData<string>;
   }>(GET_USER_BY_EMAIL, {
@@ -52,7 +55,7 @@ const Collaborators = (props: CollaboratorsProps) => {
   const handleAddCollaborator = async () => {
     setAddCollaboratorLoading(true);
     // Prevent adding empty or duplicate collaborator
-    if (newCollaborator && !props.collaborators.includes(newCollaborator)) {
+    if (newCollaborator && !isCollaborator(newCollaborator, props.collaborators)) {
       const result = await getCollaboratorUserId({
         variables: {
           email: newCollaborator,
@@ -77,7 +80,9 @@ const Collaborators = (props: CollaboratorsProps) => {
         });
       } else if (result.data) {
         const collaborator = result.data.userByEmail.data;
-        if (!_.includes(props.collaborators, collaborator)) {
+        if (
+          !props.collaborators.find((existingCollaborator: Collaborator) => existingCollaborator._id === collaborator)
+        ) {
           posthog.capture("client.collaborator.added");
           props.setCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
@@ -180,21 +185,10 @@ const Collaborators = (props: CollaboratorsProps) => {
               {props.collaborators.map((collaborator, index) => (
                 <Flex key={index} align={"center"} w={"100%"} justify={"space-between"}>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
-                    {/* User Role Display */}
-                    <Flex gap={"2"} align={"center"}>
-                      <ActorTag identifier={collaborator} fallback={"New User"} size={"sm"} />
-                      <Flex direction={"column"} gap={"1"} align={"start"} minW={"100px"}>
-                        <Text fontSize={"xs"} fontWeight={"semibold"}>
-                          Role
-                        </Text>
-                        <Tag.Root colorPalette={"blue"}>
-                          <Tag.Label fontSize={"xs"}>User</Tag.Label>
-                        </Tag.Root>
-                      </Flex>
-                    </Flex>
+                    <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
 
                     {/* Permissions Display */}
-                    <Flex direction={"column"} gap={"1"} align={"start"} minW={"100px"}>
+                    <Flex direction={"column"} gap={"1"} align={"start"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Permissions
                       </Text>
@@ -217,7 +211,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                       rounded={"md"}
                       variant={"solid"}
                       aria-label={"Leave workspace"}
-                      onClick={() => handleRemoveCollaborator(collaborator)}
+                      onClick={() => handleRemoveCollaborator(collaborator._id)}
                     >
                       Leave Workspace
                       <Icon name={"logout"} size={"xs"} />
@@ -232,16 +226,25 @@ const Collaborators = (props: CollaboratorsProps) => {
                         rounded={"md"}
                         variant={"solid"}
                         aria-label={"Modify permissions"}
+                        onClick={() => setPermissionsDialogOpen(true)}
                       >
                         Permissions
                         <Icon name={"settings"} size={"xs"} />
                       </Button>
+
+                      <PermissionsDialog
+                        open={permissionsDialogOpen}
+                        setOpen={setPermissionsDialogOpen}
+                        user={collaborator._id}
+                        isGlobal={false}
+                      />
+
                       <Button
                         size={"xs"}
                         colorPalette={"red"}
                         rounded={"md"}
                         aria-label={"Remove collaborator"}
-                        onClick={() => handleRemoveCollaborator(collaborator)}
+                        onClick={() => handleRemoveCollaborator(collaborator._id)}
                       >
                         Remove
                         <Icon name={"logout"} size={"xs"} />

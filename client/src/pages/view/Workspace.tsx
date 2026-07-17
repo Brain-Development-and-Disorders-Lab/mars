@@ -15,7 +15,7 @@ import VisibilityTag from "@components/VisibilityTag";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
-import { CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
+import { Collaborator, CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -50,7 +50,9 @@ const Workspace = () => {
         public
         timestamp
         description
-        collaborators
+        collaborators {
+          _id
+        }
       }
     }
   `;
@@ -175,10 +177,10 @@ const Workspace = () => {
   }, []);
 
   // State for Workspace collaborators
-  const [collaborators, setCollaborators] = useState([] as string[]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
   // State for Workspace Counters
-  const [counters, setCounters] = useState([] as CounterModel[]);
+  const [counters, setCounters] = useState<CounterModel[]>([]);
 
   // State for Workspace privacy
   const [isPublic, setIsPublic] = useState(false);

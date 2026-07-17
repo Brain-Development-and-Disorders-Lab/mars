@@ -38,7 +38,6 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   },
   workspaces: {
     create: false,
-    invite: false,
   },
 };
 
