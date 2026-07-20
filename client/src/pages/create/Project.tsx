@@ -24,6 +24,7 @@ import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -340,30 +341,36 @@ const Project = () => {
           <Icon name={"cross"} size={"xs"} />
         </Button>
 
-        <Button
-          id={"finishCreateProjectButton"}
-          data-testid={"create-project-finish"}
-          size={"xs"}
-          rounded={"md"}
-          colorPalette={"green"}
-          onClick={async () => {
-            posthog.capture("client.create.project_finish");
-            setIsSubmitting(true);
-            const response = await createProject({
-              variables: {
-                project: { name, owner, archived: false, description, created, entities, collaborators: [] },
-              },
-            });
-            if (response.data?.createProject.success) {
-              navigate("/projects");
-            }
-            setIsSubmitting(false);
-          }}
-          disabled={isDetailsError && !isSubmitting}
+        <Tooltip
+          content={"Insufficient permissions in this Workspace"}
+          disabled={workspacePermissions.projects.create}
+          showArrow
         >
-          Finish
-          <Icon name={"check"} size={"xs"} />
-        </Button>
+          <Button
+            id={"finishCreateProjectButton"}
+            data-testid={"create-project-finish"}
+            size={"xs"}
+            rounded={"md"}
+            colorPalette={"green"}
+            onClick={async () => {
+              posthog.capture("client.create.project_finish");
+              setIsSubmitting(true);
+              const response = await createProject({
+                variables: {
+                  project: { name, owner, archived: false, description, created, entities, collaborators: [] },
+                },
+              });
+              if (response.data?.createProject.success) {
+                navigate("/projects");
+              }
+              setIsSubmitting(false);
+            }}
+            disabled={(isDetailsError && !isSubmitting) || !workspacePermissions.projects.create}
+          >
+            Finish
+            <Icon name={"check"} size={"xs"} />
+          </Button>
+        </Tooltip>
       </Flex>
 
       {/* Add Entities dialog */}
@@ -437,7 +444,7 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {/* Information modialogdal */}
+      {/* Information dialog */}
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}

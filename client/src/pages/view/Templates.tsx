@@ -45,6 +45,7 @@ import { useQuery } from "@apollo/client/react";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
@@ -52,6 +53,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Templates = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -307,10 +311,22 @@ const Templates = () => {
               </SkeletonText>
             </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/template")} size={"xs"} rounded={"md"}>
-              Create Template
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.templates.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/template")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.templates.create}
+              >
+                Create Template
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"}>

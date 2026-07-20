@@ -18,9 +18,10 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import Values from "@components/Values";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import Values from "@components/Values";
 
 // Existing and custom types
 import { IAttribute, IValue, ResponseData } from "@types";
@@ -39,6 +40,9 @@ import dayjs from "dayjs";
 // Authentication context
 import { auth } from "@lib/auth";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -47,6 +51,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Template = () => {
   const posthog = usePostHog();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
@@ -57,6 +64,11 @@ const Template = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getUser = async () => {
+    // If the User does not have Workspace permissions, direct to `/unauthorized`
+    if (!workspacePermissions.templates.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
       toaster.create({
@@ -483,16 +495,22 @@ const Template = () => {
           <Icon name={"cross"} size={"xs"} />
         </Button>
         <Spacer />
-        <Button
-          size={"xs"}
-          rounded={"md"}
-          colorPalette={"green"}
-          onClick={onSubmit}
-          disabled={isDetailsError || isValueError || isSubmitting}
+        <Tooltip
+          content={"Insufficient permissions in this Workspace"}
+          disabled={workspacePermissions.templates.create}
+          showArrow
         >
-          Finish
-          <Icon name={"check"} size={"xs"} />
-        </Button>
+          <Button
+            size={"xs"}
+            rounded={"md"}
+            colorPalette={"green"}
+            onClick={onSubmit}
+            disabled={isDetailsError || isValueError || isSubmitting || !workspacePermissions.templates.create}
+          >
+            Finish
+            <Icon name={"check"} size={"xs"} />
+          </Button>
+        </Tooltip>
       </Flex>
 
       <UnsavedChangesDialog

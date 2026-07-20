@@ -245,19 +245,26 @@ const Create = () => {
             </Card.Body>
             <Card.Footer>
               <Flex w={"100%"} justify={"center"}>
-                <Button
-                  id={"createTemplateButton"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    posthog.capture("client.create.template_click");
-                    navigate("/create/template");
-                  }}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.create}
+                  showArrow
                 >
-                  Start
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
+                  <Button
+                    id={"createTemplateButton"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    disabled={!workspacePermissions.templates.create}
+                    onClick={() => {
+                      posthog.capture("client.create.template_click");
+                      navigate("/create/template");
+                    }}
+                  >
+                    Start
+                    <Icon name={"a_right"} size={"xs"} />
+                  </Button>
+                </Tooltip>
               </Flex>
             </Card.Footer>
           </Card.Root>

@@ -54,6 +54,7 @@ import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 
 // Hooks
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
@@ -62,6 +63,9 @@ import { GLOBAL_STYLES } from "@variables";
 const Template = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   // Workspace information
   const { workspace } = useWorkspace();
@@ -545,20 +549,26 @@ const Template = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Button
-                size={"xs"}
-                variant={"solid"}
-                colorPalette={"orange"}
-                rounded={"md"}
-                onClick={async () => {
-                  await handleRestoreFromHistoryClick(previewVersion);
-                  setPreviewVersion(null);
-                }}
-                disabled={templateArchived}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.templates.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  size={"xs"}
+                  variant={"solid"}
+                  colorPalette={"orange"}
+                  rounded={"md"}
+                  onClick={async () => {
+                    await handleRestoreFromHistoryClick(previewVersion);
+                    setPreviewVersion(null);
+                  }}
+                  disabled={templateArchived || !workspacePermissions.templates.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -656,30 +666,43 @@ const Template = () => {
                     <Icon name={"download"} size={"xs"} />
                     Export
                   </Menu.Item>
-                  <Menu.Item
-                    fontSize={"xs"}
-                    value={"archive"}
-                    onClick={() => setArchiveDialogOpen(true)}
-                    disabled={templateArchived}
+                  <Tooltip
+                    content={"Insufficient permissions in this Workspace"}
+                    disabled={workspacePermissions.templates.archive}
+                    showArrow
                   >
-                    <Icon name={"archive"} size={"xs"} />
-                    Archive
-                  </Menu.Item>
+                    <Menu.Item
+                      fontSize={"xs"}
+                      value={"archive"}
+                      onClick={() => setArchiveDialogOpen(true)}
+                      disabled={templateArchived || !workspacePermissions.templates.archive}
+                    >
+                      <Icon name={"archive"} size={"xs"} />
+                      Archive
+                    </Menu.Item>
+                  </Tooltip>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
 
             {templateArchived ? (
-              <Button
-                id={"restoreTemplateButton"}
-                onClick={handleRestoreFromArchiveClick}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"orange"}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.templates.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  id={"restoreTemplateButton"}
+                  onClick={handleRestoreFromArchiveClick}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  disabled={!workspacePermissions.templates.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
             ) : (
               <Flex gap={"2"}>
                 {editing && (
@@ -688,19 +711,25 @@ const Template = () => {
                     <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
-                <Button
-                  id={"editTemplateButton"}
-                  colorPalette={editing ? "green" : "blue"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={handleEditClick}
-                  loadingText={"Saving..."}
-                  loading={updateLoading}
-                  disabled={!!previewVersion}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.templates.edit}
+                  showArrow
                 >
-                  {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
-                </Button>
+                  <Button
+                    id={"editTemplateButton"}
+                    colorPalette={editing ? "green" : "blue"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={handleEditClick}
+                    loadingText={"Saving..."}
+                    loading={updateLoading}
+                    disabled={!!previewVersion || !workspacePermissions.templates.edit}
+                  >
+                    {editing ? "Save" : "Edit"}
+                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
+                  </Button>
+                </Tooltip>
               </Flex>
             )}
 
@@ -990,17 +1019,27 @@ const Template = () => {
                                           Preview
                                           <Icon name={"expand"} size={"xs"} />
                                         </Button>
-                                        <Button
-                                          variant={"solid"}
-                                          size={"xs"}
-                                          rounded={"md"}
-                                          colorPalette={"orange"}
-                                          onClick={() => handleRestoreFromHistoryClick(templateVersion)}
-                                          disabled={templateArchived || !!previewVersion}
+                                        <Tooltip
+                                          content={"Insufficient permissions in this Workspace"}
+                                          disabled={workspacePermissions.templates.archive}
+                                          showArrow
                                         >
-                                          Restore
-                                          <Icon name={"rewind"} size={"xs"} />
-                                        </Button>
+                                          <Button
+                                            variant={"solid"}
+                                            size={"xs"}
+                                            rounded={"md"}
+                                            colorPalette={"orange"}
+                                            onClick={() => handleRestoreFromHistoryClick(templateVersion)}
+                                            disabled={
+                                              templateArchived ||
+                                              !!previewVersion ||
+                                              !workspacePermissions.templates.archive
+                                            }
+                                          >
+                                            Restore
+                                            <Icon name={"rewind"} size={"xs"} />
+                                          </Button>
+                                        </Tooltip>
                                       </Flex>
                                     </Flex>
 

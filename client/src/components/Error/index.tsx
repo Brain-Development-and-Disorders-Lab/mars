@@ -19,7 +19,7 @@ const Error = ({ error }: ErrorProps) => {
     <Flex direction={"column"} justify={"center"} align={"center"} h={"100%"} mt={{ base: "10%", lg: "0" }} p={"2"}>
       <Flex
         gap={"2"}
-        p={"2"}
+        p={"6"}
         direction={"column"}
         justify={"center"}
         align={"center"}
