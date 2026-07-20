@@ -54,6 +54,9 @@ import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -62,6 +65,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entity = () => {
   const posthog = usePostHog();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
   const pageSteps = [
@@ -98,6 +104,11 @@ const Entity = () => {
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
   const getUser = async () => {
+    // If the User does not have Workspace permissions, direct to `/unauthorized`
+    if (!workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
       toaster.create({

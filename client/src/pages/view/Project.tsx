@@ -60,6 +60,7 @@ import { useQuery, useMutation, useApolloClient } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Hooks
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
@@ -80,6 +81,9 @@ type EntityTableRow = {
 const Project = () => {
   const { id } = useParams();
   const client = useApolloClient();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   // Workspace information
   const { workspace } = useWorkspace();
@@ -745,20 +749,26 @@ const Project = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Button
-                size={"xs"}
-                variant={"solid"}
-                colorPalette={"orange"}
-                rounded={"md"}
-                onClick={async () => {
-                  await handleRestoreFromHistoryClick(previewVersion);
-                  setPreviewVersion(null);
-                }}
-                disabled={displayProjectArchived}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.create}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  size={"xs"}
+                  variant={"solid"}
+                  colorPalette={"orange"}
+                  rounded={"md"}
+                  onClick={async () => {
+                    await handleRestoreFromHistoryClick(previewVersion);
+                    setPreviewVersion(null);
+                  }}
+                  disabled={displayProjectArchived || !workspacePermissions.projects.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -871,24 +881,36 @@ const Project = () => {
                       Export Entities
                     </Menu.Item>
                   </Tooltip>
-                  <Menu.Item
-                    value={"archive"}
-                    onClick={() => setArchiveDialogOpen(true)}
-                    fontSize={"xs"}
-                    disabled={projectArchived || !!previewVersion}
+                  <Tooltip
+                    content={"Insufficient permissions in this Workspace"}
+                    disabled={workspacePermissions.projects.create}
+                    showArrow
                   >
-                    <Icon name={"archive"} size={"xs"} />
-                    Archive
-                  </Menu.Item>
+                    <Menu.Item
+                      value={"archive"}
+                      onClick={() => setArchiveDialogOpen(true)}
+                      fontSize={"xs"}
+                      disabled={projectArchived || !!previewVersion || !workspacePermissions.projects.archive}
+                    >
+                      <Icon name={"archive"} size={"xs"} />
+                      Archive
+                    </Menu.Item>
+                  </Tooltip>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
 
             {displayProjectArchived ? (
-              <Button onClick={handleRestoreClick} size={"xs"} rounded={"md"} colorPalette={"orange"}>
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.archive}
+                showArrow
+              >
+                <Button onClick={handleRestoreClick} size={"xs"} rounded={"md"} colorPalette={"orange"}>
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
             ) : (
               <Flex gap={"1"}>
                 {editing && (
@@ -897,19 +919,25 @@ const Project = () => {
                     <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
-                <Button
-                  id={"editProjectButton"}
-                  colorPalette={editing ? "green" : "blue"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={handleEditClick}
-                  loadingText={"Saving..."}
-                  loading={isUpdating}
-                  disabled={!!previewVersion}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.edit}
+                  showArrow
                 >
-                  {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
-                </Button>
+                  <Button
+                    id={"editProjectButton"}
+                    colorPalette={editing ? "green" : "blue"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={handleEditClick}
+                    loadingText={"Saving..."}
+                    loading={isUpdating}
+                    disabled={!!previewVersion || !workspacePermissions.projects.edit}
+                  >
+                    {editing ? "Save" : "Edit"}
+                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
+                  </Button>
+                </Tooltip>
               </Flex>
             )}
 
@@ -1198,17 +1226,27 @@ const Project = () => {
                                         Preview
                                         <Icon name={"expand"} size={"xs"} />
                                       </Button>
-                                      <Button
-                                        variant={"solid"}
-                                        size={"xs"}
-                                        rounded={"md"}
-                                        colorPalette={"orange"}
-                                        onClick={() => handleRestoreFromHistoryClick(projectVersion)}
-                                        disabled={projectArchived || !!previewVersion}
+                                      <Tooltip
+                                        content={"Insufficient permissions in this Workspace"}
+                                        disabled={workspacePermissions.projects.archive}
+                                        showArrow
                                       >
-                                        Restore
-                                        <Icon name={"rewind"} size={"xs"} />
-                                      </Button>
+                                        <Button
+                                          variant={"solid"}
+                                          size={"xs"}
+                                          rounded={"md"}
+                                          colorPalette={"orange"}
+                                          onClick={() => handleRestoreFromHistoryClick(projectVersion)}
+                                          disabled={
+                                            projectArchived ||
+                                            !!previewVersion ||
+                                            !workspacePermissions.projects.archive
+                                          }
+                                        >
+                                          Restore
+                                          <Icon name={"rewind"} size={"xs"} />
+                                        </Button>
+                                      </Tooltip>
                                     </Flex>
                                   </Flex>
 

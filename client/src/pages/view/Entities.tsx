@@ -35,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
+import { usePermissions } from "@hooks/usePermissions";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -53,6 +54,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entities = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -356,10 +360,22 @@ const Entities = () => {
               </SkeletonText>
             </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
-              Create Entity
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.entities.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/entity")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.entities.create}
+              >
+                Create Entity
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">

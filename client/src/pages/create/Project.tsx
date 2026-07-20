@@ -41,6 +41,9 @@ import { Cell } from "@tanstack/react-table";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -50,6 +53,9 @@ import { GLOBAL_STYLES } from "@variables";
 const Project = () => {
   const posthog = usePostHog();
 
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
   const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
@@ -57,6 +63,11 @@ const Project = () => {
   const [description, setDescription] = useState("");
 
   const getUser = async () => {
+    // If the User does not have Workspace permissions, direct to `/unauthorized`
+    if (!workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
       toaster.create({

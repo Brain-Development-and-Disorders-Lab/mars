@@ -252,8 +252,6 @@ export class Admin {
       };
     }
 
-    console.info(_id, workspace, permissions);
-
     const collaboratorResult = workspaceResult.collaborators.find(
       (collaborator: Collaborator) => collaborator._id === _id,
     );
