@@ -751,7 +751,7 @@ const Project = () => {
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Tooltip
                 content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.projects.create}
+                disabled={workspacePermissions.projects.archive}
                 showArrow
               >
                 <Button
@@ -906,7 +906,13 @@ const Project = () => {
                 disabled={workspacePermissions.projects.archive}
                 showArrow
               >
-                <Button onClick={handleRestoreClick} size={"xs"} rounded={"md"} colorPalette={"orange"}>
+                <Button
+                  onClick={handleRestoreClick}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  disabled={!workspacePermissions.projects.archive}
+                >
                   Restore
                   <Icon name={"rewind"} size={"xs"} />
                 </Button>

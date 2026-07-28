@@ -141,7 +141,7 @@ export type CollaboratorsProps = {
   currentUser: string;
   owner: string;
   collaborators: Collaborator[];
-  setCollaborators: (value: React.SetStateAction<string[]>) => void;
+  setCollaborators: (value: React.SetStateAction<Collaborator[]>) => void;
 };
 
 // "Linky" component props
@@ -794,6 +794,7 @@ export type PermissionsDialogProps = {
   user: string;
   isGlobal: boolean; // Define if modifying "global" permissions or just for the Workspace
   workspace?: string; // Specify the Workspace if modifying Workspace permissions
+  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
 };
 
 // Metrics

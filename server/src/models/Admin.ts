@@ -19,6 +19,7 @@ import { User } from "./User";
 import { getDatabase } from "@connectors/database";
 
 // Utility functions and libraries
+import { parseGlobalPermissions } from "@lib/util";
 import _ from "lodash";
 
 // Collection names
@@ -100,15 +101,16 @@ export class Admin {
         }
       }
 
+      const userPermissions = parseGlobalPermissions(user.permissions);
       const permissions: UserGlobalPermissions = {
         features: {
-          ai: user.permissions.features.ai,
-          api: user.permissions.features.api,
-          import: user.permissions.features.import,
-          scan: user.permissions.features.scan,
+          ai: userPermissions.features.ai,
+          api: userPermissions.features.api,
+          import: userPermissions.features.import,
+          scan: userPermissions.features.scan,
         },
         workspaces: {
-          create: user.permissions.workspaces.create,
+          create: userPermissions.workspaces.create,
         },
       };
 
@@ -162,7 +164,7 @@ export class Admin {
       return DEFAULT_GLOBAL_PERMISSIONS;
     }
 
-    return userResult.permissions;
+    return parseGlobalPermissions(userResult.permissions);
   };
 
   static setUserGlobalPermissions = async (
@@ -181,7 +183,7 @@ export class Admin {
     const update: { $set: UserModel } = {
       $set: {
         ...user,
-        permissions,
+        permissions: JSON.stringify(permissions) as unknown as UserGlobalPermissions,
       },
     };
 
@@ -324,6 +326,8 @@ export class Admin {
       };
     }
 
+    const globalPermissions = parseGlobalPermissions(userResult.permissions);
+
     // Check if User is Workspace owner or Collaborator
     if (workspaceResult.owner === _id) {
       // If owner, all permissions granted
@@ -349,7 +353,7 @@ export class Admin {
             archive: true,
           },
         },
-        global: userResult.permissions,
+        global: globalPermissions,
       };
     } else {
       const workspacePermissions = workspaceResult.collaborators.filter((collaborator: Collaborator) => {
@@ -359,13 +363,13 @@ export class Admin {
       if (workspacePermissions.length !== 1) {
         return {
           workspace: DEFAULT_WORKSPACE_PERMISSIONS, // Replace with default permissions
-          global: userResult.permissions,
+          global: globalPermissions,
         };
       }
 
       return {
         workspace: workspacePermissions[0].permissions,
-        global: userResult.permissions,
+        global: globalPermissions,
       };
     }
   };

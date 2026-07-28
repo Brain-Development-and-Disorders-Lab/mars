@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Dialog, Text, CloseButton, Switch } from "@chakra-ui/react";
+import { Button, Flex, Dialog, Text, CloseButton, Switch, Separator } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
+import { Information } from "@components/Label";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
@@ -20,15 +21,28 @@ import { gql } from "@apollo/client";
 import { GLOBAL_STYLES } from "@variables";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
+// Read-only display of a single permission, used when the Dialog is not `editable`
+const PermissionStatus = (props: { label: string; granted: boolean }) => (
+  <Flex direction={"row"} justify={"space-between"} align={"center"} gap={"2"}>
+    <Text fontSize={"xs"} color={"gray.500"}>
+      {props.label}
+    </Text>
+    <Icon name={props.granted ? "check" : "cross"} color={props.granted ? "green.600" : "red.600"} size={"xs"} />
+  </Flex>
+);
+
 const PermissionsDialog = (props: PermissionsDialogProps) => {
   const { globalPermissions, workspacePermissions } = usePermissions();
+
+  // Default to editable so existing callers (eg. Admin) are unaffected
+  const editable = props.editable ?? true;
 
   // Global permissions state for current user
   const [featuresImport, setFeaturesImport] = useState(globalPermissions.features.import);
   const [featuresScan, setFeaturesScan] = useState(globalPermissions.features.scan);
   const [featuresAI, setFeaturesAI] = useState(globalPermissions.features.ai);
   const [featuresAPI, setFeaturesAPI] = useState(globalPermissions.features.api);
-  const [workspaceCreate, setWorkspaceCreate] = useState(globalPermissions.workspaces.create);
+  const [workspaceCreate] = useState(globalPermissions.workspaces.create);
 
   // Workspace-specific permissions for the specified user
   const [workspaceEdit, setWorkspaceEdit] = useState(workspacePermissions.administration.edit);
@@ -298,7 +312,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
       scrollBehavior={"inside"}
       placement={"center"}
       onOpenChange={(event) => props.setOpen(event.open)}
-      size={"lg"}
+      size={!editable || props.isGlobal ? "md" : "lg"}
       closeOnEscape
       closeOnInteractOutside
     >
@@ -316,7 +330,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
               <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
                 <Icon name={"settings"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Edit {props.isGlobal ? "Global" : "Workspace"} Permissions
+                  {editable ? "Edit" : "View"} {props.isGlobal ? "Global" : "Workspace"} Permissions
                 </Text>
               </Flex>
             </Flex>
@@ -329,19 +343,18 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
             <Flex direction={"column"} p={"2"} gap={"2"}>
               <ActorTag identifier={props.user} fallback={"Unknown User"} size={"md"} />
               {props.isGlobal && (
-                <Text fontSize={"xs"} ml={"0.5"}>
-                  Permissions defined for this User will across all Workspaces.
-                </Text>
+                <Information text={"Permissions defined for this User will apply across all Workspaces."} />
               )}
-              {!props.isGlobal && (
-                <Text fontSize={"xs"} ml={"0.5"}>
-                  Permissions defined for this User will only apply to this Workspace.
-                </Text>
+              {!props.isGlobal && editable && (
+                <Information text={"Permissions defined for this User will only apply to this Workspace."} />
+              )}
+              {!editable && (
+                <Information text={"If you require additional permissions, contact the Workspace owner."} />
               )}
 
               {/* Global Permissions */}
               {props.isGlobal && (
-                <Flex direction={"row"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"} w={"100%"}>
                   {/* Application Permissions */}
                   <Flex
                     direction={"column"}
@@ -350,7 +363,6 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                     rounded={"md"}
                     border={GLOBAL_STYLES.border.style}
                     borderColor={GLOBAL_STYLES.border.color}
-                    w={"50%"}
                     h={"fit-content"}
                   >
                     <Text
@@ -429,8 +441,63 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                 </Flex>
               )}
 
+              {/* Workspace Permissions preview, shown instead of the toggles when not editable */}
+              {!props.isGlobal && !editable && (
+                <Flex
+                  direction={"row"}
+                  align={"start"}
+                  gap={"6"}
+                  wrap={"wrap"}
+                  rounded={"md"}
+                  border={GLOBAL_STYLES.border.style}
+                  borderColor={GLOBAL_STYLES.border.color}
+                  p={"2"}
+                >
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                      Workspace
+                    </Text>
+                    <PermissionStatus label={"Edit"} granted={workspaceEdit} />
+                    <PermissionStatus label={"Invite Collaborators"} granted={workspaceInvite} />
+                  </Flex>
+
+                  <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
+
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                      Entities
+                    </Text>
+                    <PermissionStatus label={"Create"} granted={entitiesCreate} />
+                    <PermissionStatus label={"Edit"} granted={entitiesEdit} />
+                    <PermissionStatus label={"Archive"} granted={entitiesArchive} />
+                  </Flex>
+
+                  <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
+
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                      Projects
+                    </Text>
+                    <PermissionStatus label={"Create"} granted={projectsCreate} />
+                    <PermissionStatus label={"Edit"} granted={projectsEdit} />
+                    <PermissionStatus label={"Archive"} granted={projectsArchive} />
+                  </Flex>
+
+                  <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
+
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                      Templates
+                    </Text>
+                    <PermissionStatus label={"Create"} granted={templatesCreate} />
+                    <PermissionStatus label={"Edit"} granted={templatesEdit} />
+                    <PermissionStatus label={"Archive"} granted={templatesArchive} />
+                  </Flex>
+                </Flex>
+              )}
+
               {/* Workspace Permissions */}
-              {!props.isGlobal && (
+              {!props.isGlobal && editable && (
                 <React.Fragment>
                   <Flex direction={"row"} gap={"2"}>
                     {/* Workspace Permissions */}
@@ -720,29 +787,36 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
             borderTop={"1px"}
             borderColor={"gray.200"}
           >
-            <Flex direction={"row"} justify={"space-between"} gap={"4"} w={"100%"}>
-              <Button
-                colorPalette={"red"}
-                size={"xs"}
-                rounded={"md"}
-                variant={"solid"}
-                onClick={() => {
-                  // Close the dialog
-                  props.setOpen(false);
-                }}
-              >
-                Cancel
-                <Icon name={"cross"} size={"xs"} />
-              </Button>
+            <Flex direction={"row"} justify={editable ? "space-between" : "end"} gap={"4"} w={"100%"}>
+              {editable && (
+                <Button
+                  colorPalette={"red"}
+                  size={"xs"}
+                  rounded={"md"}
+                  variant={"solid"}
+                  onClick={() => {
+                    // Close the dialog
+                    props.setOpen(false);
+                  }}
+                >
+                  Cancel
+                  <Icon name={"cross"} size={"xs"} />
+                </Button>
+              )}
 
               <Button
                 colorPalette={"green"}
                 size={"xs"}
                 rounded={"md"}
-                loading={userSetGlobalPermissionsLoading || userSetWorkspacePermissionsLoading}
+                loading={editable && (userSetGlobalPermissionsLoading || userSetWorkspacePermissionsLoading)}
                 onClick={() => {
-                  // Apply updated permissions
-                  applyPermissions();
+                  if (editable) {
+                    // Apply updated permissions
+                    applyPermissions();
+                  } else {
+                    // Read-only preview, just close the dialog
+                    props.setOpen(false);
+                  }
                 }}
               >
                 Done

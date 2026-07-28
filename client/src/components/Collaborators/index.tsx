@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, EmptyState, Field, Fieldset, Flex, Input, Separator, Stack, Tag, Text } from "@chakra-ui/react";
+import { Button, EmptyState, Field, Fieldset, Flex, Input, Link, Separator, Stack, Text } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -8,17 +8,20 @@ import PermissionsDialog from "@components/PermissionsDialog";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { Collaborator, CollaboratorsProps, ResponseData } from "@types";
+import { Collaborator, CollaboratorsProps, ResponseData, UserModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Utility functions
 import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { DEFAULT_WORKSPACE_PERMISSIONS, GLOBAL_STYLES } from "@variables";
+
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
 
 // Analytics
 import { usePostHog } from "posthog-js/react";
@@ -33,8 +36,36 @@ const GET_USER_BY_EMAIL = gql`
   }
 `;
 
+const GET_USER_EMAIL = gql`
+  query GetUserEmail($_id: String) {
+    user(_id: $_id) {
+      email
+    }
+  }
+`;
+
+// Displays a Collaborator's email address, filling the space beside their name and actions
+const CollaboratorEmail = (props: { userId: string }) => {
+  const { loading, data } = useQuery<{ user: Partial<UserModel> }>(GET_USER_EMAIL, {
+    variables: { _id: props.userId },
+    fetchPolicy: "network-only",
+  });
+
+  return (
+    <Link href={`mailto:${data?.user.email}`}>
+      <Text fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+        {loading ? "" : data?.user.email}
+      </Text>
+    </Link>
+  );
+};
+
 const Collaborators = (props: CollaboratorsProps) => {
   const posthog = usePostHog();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
   const [newCollaborator, setNewCollaborator] = useState("");
   const [validEmail, setValidEmail] = useState(false);
 
@@ -45,6 +76,7 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   // `PermissionsDialog` state
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [permissionsDialogUser, setPermissionsDialogUser] = useState("");
 
   const [getCollaboratorUserId, { loading: collaboratorQueryLoading, error }] = useLazyQuery<{
     userByEmail: ResponseData<string>;
@@ -79,10 +111,12 @@ const Collaborators = (props: CollaboratorsProps) => {
           closable: true,
         });
       } else if (result.data) {
-        const collaborator = result.data.userByEmail.data;
-        if (
-          !props.collaborators.find((existingCollaborator: Collaborator) => existingCollaborator._id === collaborator)
-        ) {
+        const collaborator: Collaborator = {
+          _id: result.data.userByEmail.data,
+          permissions: DEFAULT_WORKSPACE_PERMISSIONS,
+        };
+
+        if (!isCollaborator(collaborator._id, props.collaborators)) {
           posthog.capture("client.collaborator.added");
           props.setCollaborators((collaborators) => [...collaborators, collaborator]);
         } else {
@@ -108,7 +142,7 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   const handleRemoveCollaborator = (collaborator: string) => {
     posthog.capture("client.collaborator.removed");
-    props.setCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator));
+    props.setCollaborators((collaborators) => collaborators.filter((c) => c._id !== collaborator));
   };
 
   return (
@@ -130,39 +164,43 @@ const Collaborators = (props: CollaboratorsProps) => {
             Collaborators ({props.collaborators.length})
           </Text>
         </Flex>
-        <Flex direction={"column"} gap={"1"}>
-          <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            Invite Collaborators to this Workspace via email
-          </Text>
-          <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-            <Fieldset.Root>
-              <Fieldset.Content>
-                <Field.Root invalid={newCollaborator !== "" && !validEmail}>
-                  <Input
-                    placeholder={"Email"}
-                    size={"xs"}
-                    rounded={"md"}
-                    value={newCollaborator}
-                    onChange={(event) => setNewCollaborator(event.target.value)}
-                    disabled={!props.editing || !isOwner}
-                  />
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
-            <Button
-              colorPalette={"green"}
-              size={"xs"}
-              rounded={"md"}
-              disabled={!props.editing || !validEmail || !isOwner}
-              loading={addCollaboratorLoading || collaboratorQueryLoading}
-              loadingText={"Adding..."}
-              onClick={() => handleAddCollaborator()}
-            >
-              Invite
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+
+        {workspacePermissions.administration.invite && (
+          <Flex direction={"column"} gap={"1"}>
+            <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              Invite Collaborators to this Workspace via email
+            </Text>
+            <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root invalid={newCollaborator !== "" && !validEmail}>
+                    <Input
+                      placeholder={"Email"}
+                      size={"xs"}
+                      rounded={"md"}
+                      value={newCollaborator}
+                      onChange={(event) => setNewCollaborator(event.target.value)}
+                      disabled={!props.editing}
+                    />
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
+              <Button
+                colorPalette={"green"}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!props.editing || !validEmail}
+                loading={addCollaboratorLoading || collaboratorQueryLoading}
+                loadingText={"Adding..."}
+                onClick={() => handleAddCollaborator()}
+              >
+                Invite
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
+        )}
+
         <Flex
           w={"100%"}
           py={"1"}
@@ -181,82 +219,86 @@ const Collaborators = (props: CollaboratorsProps) => {
               </EmptyState.Content>
             </EmptyState.Root>
           ) : (
-            <Stack gap={"1"} separator={<Separator variant={"solid"} />} w={"100%"}>
+            <Stack gap={"2"} separator={<Separator variant={"solid"} />} w={"100%"}>
               {props.collaborators.map((collaborator, index) => (
-                <Flex key={index} align={"center"} w={"100%"} justify={"space-between"}>
-                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Flex key={index} align={"start"} justify={"space-between"} direction={"row"} w={"100%"}>
+                  <Flex direction={"column"} gap={"2"} align={"start"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      Collaborator
+                    </Text>
                     <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
-
-                    {/* Permissions Display */}
-                    <Flex direction={"column"} gap={"1"} align={"start"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Permissions
-                      </Text>
-                      <Flex direction={"row"} gap={"1"}>
-                        <Tag.Root colorPalette={"green"}>
-                          <Tag.Label fontSize={"xs"}>View</Tag.Label>
-                        </Tag.Root>
-                        <Tag.Root colorPalette={"green"}>
-                          <Tag.Label fontSize={"xs"}>Edit</Tag.Label>
-                        </Tag.Root>
-                      </Flex>
-                    </Flex>
                   </Flex>
 
-                  {/* Action Buttons */}
-                  {props.editing && !isOwner && (
-                    <Button
-                      size={"xs"}
-                      colorPalette={"orange"}
-                      rounded={"md"}
-                      variant={"solid"}
-                      aria-label={"Leave workspace"}
-                      onClick={() => handleRemoveCollaborator(collaborator._id)}
-                    >
-                      Leave Workspace
-                      <Icon name={"logout"} size={"xs"} />
-                    </Button>
-                  )}
+                  {/* Email, filling the space beside the Collaborator */}
+                  <Flex direction={"column"} gap={"2"} align={"start"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
+                      Email
+                    </Text>
+                    <CollaboratorEmail userId={collaborator._id} />
 
-                  {props.editing && isOwner && (
-                    <Flex gap={"2"} align={"center"}>
-                      <Button
-                        size={"xs"}
-                        colorPalette={"blue"}
-                        rounded={"md"}
-                        variant={"solid"}
-                        aria-label={"Modify permissions"}
-                        onClick={() => setPermissionsDialogOpen(true)}
-                      >
-                        Permissions
-                        <Icon name={"settings"} size={"xs"} />
-                      </Button>
+                    {/* Action Buttons */}
+                    {props.editing && (
+                      <Flex direction={"row"} gap={"2"} align={"end"} ml={"0.5"}>
+                        {!isOwner && props.currentUser === collaborator._id && (
+                          <Button
+                            size={"xs"}
+                            colorPalette={"orange"}
+                            rounded={"md"}
+                            variant={"solid"}
+                            aria-label={"Leave workspace"}
+                            onClick={() => handleRemoveCollaborator(collaborator._id)}
+                          >
+                            Leave Workspace
+                            <Icon name={"logout"} size={"xs"} />
+                          </Button>
+                        )}
 
-                      <PermissionsDialog
-                        open={permissionsDialogOpen}
-                        setOpen={setPermissionsDialogOpen}
-                        user={collaborator._id}
-                        isGlobal={false}
-                      />
+                        <Button
+                          size={"xs"}
+                          colorPalette={"blue"}
+                          rounded={"md"}
+                          variant={"solid"}
+                          aria-label={isOwner ? "Manage permissions" : "View permissions"}
+                          onClick={() => {
+                            setPermissionsDialogUser(collaborator._id);
+                            setPermissionsDialogOpen(true);
+                          }}
+                        >
+                          {isOwner ? "Manage Permissions" : "View Permissions"}
+                          <Icon name={"settings"} size={"xs"} />
+                        </Button>
 
-                      <Button
-                        size={"xs"}
-                        colorPalette={"red"}
-                        rounded={"md"}
-                        aria-label={"Remove collaborator"}
-                        onClick={() => handleRemoveCollaborator(collaborator._id)}
-                      >
-                        Remove
-                        <Icon name={"logout"} size={"xs"} />
-                      </Button>
-                    </Flex>
-                  )}
+                        {isOwner && (
+                          <Button
+                            size={"xs"}
+                            colorPalette={"red"}
+                            rounded={"md"}
+                            aria-label={"Remove collaborator"}
+                            onClick={() => handleRemoveCollaborator(collaborator._id)}
+                          >
+                            Remove
+                            <Icon name={"logout"} size={"xs"} />
+                          </Button>
+                        )}
+                      </Flex>
+                    )}
+                  </Flex>
                 </Flex>
               ))}
             </Stack>
           )}
         </Flex>
       </Flex>
+
+      {permissionsDialogUser && (
+        <PermissionsDialog
+          open={permissionsDialogOpen}
+          setOpen={setPermissionsDialogOpen}
+          user={permissionsDialogUser}
+          isGlobal={false}
+          editable={isOwner}
+        />
+      )}
     </Flex>
   );
 };

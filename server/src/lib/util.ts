@@ -1,5 +1,5 @@
 // Custom types
-import { Collaborator } from "@types";
+import { Collaborator, UserGlobalPermissions } from "@types";
 
 // Utility libraries and functions
 import { nanoid } from "nanoid";
@@ -31,4 +31,17 @@ export const isCollaborator = (_id: string, collaborators: Collaborator[]): bool
     }
   }
   return false;
+};
+
+/**
+ * Utility function to parse a JSON-formatted or expected `UserGlobalPermissions` object
+ * representing the user's global permissions.
+ *
+ * Note: Modifying outside of better-auth means that `permissions` is stored as a JSON string,
+ * mirroring `api_keys`
+ * @param {UserGlobalPermissions | string} permissions Either a JSON string or `UserGlobalPermissions` instance
+ * @return {UserGlobalPermissions}
+ */
+export const parseGlobalPermissions = (permissions: UserGlobalPermissions | string): UserGlobalPermissions => {
+  return typeof permissions === "string" ? JSON.parse(permissions) : permissions;
 };

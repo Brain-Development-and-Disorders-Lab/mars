@@ -246,21 +246,23 @@ const Admin = () => {
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
-          {info.getValue() || "—"}
-        </Text>
+        <Tooltip disabled={info.getValue().length <= 28} content={info.getValue()} showArrow>
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 28 })}
+          </Text>
+        </Tooltip>
       ),
       header: "Name",
-      meta: { minWidth: 180 } as ColumnMeta,
+      meta: { minWidth: 200 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("description", {
       cell: (info) => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
+            <Tooltip content={value} disabled={!value || value.length < 32} showArrow>
               <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 48 })}
+                {_.truncate(value, { length: 32 })}
               </Text>
             </Tooltip>
           );
