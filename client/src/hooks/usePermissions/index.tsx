@@ -59,6 +59,7 @@ const PermissionsContext = createContext<PermissionsContextValue>({} as Permissi
 export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
   const { data } = useQuery<{ userCollatedPermissions: UserCollatedPermissions }>(GET_USER_PERMISSIONS, {
     fetchPolicy: "network-only",
+    pollInterval: 1000, // Poll every seconds to pick up permission changes
   });
 
   const value = useMemo<PermissionsContextValue>(
