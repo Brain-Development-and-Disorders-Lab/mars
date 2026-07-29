@@ -839,3 +839,10 @@ export type AdminUser = {
   banned: boolean;
   lastLogin: string;
 };
+
+// Types to assist with test frameworks
+// A path on the client where a Workspace permission is enforced
+export type ClientPath = {
+  name: string;
+  verify: (page: Page, granted: boolean) => Promise<void>;
+};
