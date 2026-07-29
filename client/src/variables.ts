@@ -31,8 +31,8 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
 // Default global permissions, mirrors server variables
 export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   features: {
-    import: false,
-    scan: false,
+    import: true,
+    scan: true,
     ai: false,
     api: false,
   },

@@ -89,6 +89,7 @@ const User = () => {
         affiliation
         api_keys
         account_orcid
+        role
       }
       workspaces {
         _id
@@ -721,19 +722,53 @@ const User = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={"gray.700"}
-            bg={"gray.100"}
-            rounded={"md"}
-          >
-            <Icon name={"person"} size={"sm"} />
-            <Heading fontWeight={"semibold"} size={"sm"}>
-              {staticName}
-            </Heading>
+          <Flex direction={"row"} gap={"2"} align={"center"}>
+            <Flex
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={"gray.700"}
+              bg={"gray.100"}
+              rounded={"md"}
+            >
+              <Icon name={"person"} size={"sm"} />
+              <Heading fontWeight={"semibold"} size={"sm"}>
+                {staticName}
+              </Heading>
+            </Flex>
+
+            {userModel.role === "admin" && (
+              <Flex
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"yellow.700"}
+                bg={"yellow.100"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"sm"} color={"yellow.700"}>
+                  Administrator
+                </Heading>
+              </Flex>
+            )}
+
+            {userModel.role !== "admin" && (
+              <Flex
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"blue.700"}
+                bg={"blue.100"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"sm"} color={"blue.700"}>
+                  Standard User
+                </Heading>
+              </Flex>
+            )}
           </Flex>
           {editing ? (
             <Flex direction={"row"} align={"center"} gap={"2"}>

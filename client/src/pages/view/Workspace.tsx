@@ -299,47 +299,45 @@ const Workspace = () => {
       },
     });
 
-    // Update Entity archive state
-    await archiveEntitiesQuery({
-      variables: {
-        toArchive: entities.filter((entity) => entity.archived === true).map((entity) => entity._id),
-        state: true,
-      },
-    });
-    await archiveEntitiesQuery({
-      variables: {
-        toArchive: entities.filter((entity) => entity.archived === false).map((entity) => entity._id),
-        state: false,
-      },
-    });
-
-    // Update Project archive state
-    await archiveProjectsQuery({
-      variables: {
-        toArchive: projects.filter((project) => project.archived === true).map((project) => project._id),
-        state: true,
-      },
-    });
-    await archiveProjectsQuery({
-      variables: {
-        toArchive: projects.filter((project) => project.archived === false).map((project) => project._id),
-        state: false,
-      },
-    });
-
-    // Update Template archive state
-    await archiveTemplatesQuery({
-      variables: {
-        toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
-        state: true,
-      },
-    });
-    await archiveTemplatesQuery({
-      variables: {
-        toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
-        state: false,
-      },
-    });
+    // Update Entity, Project, and Template archive state; each pair of calls is mutually exclusive so all six can run concurrently
+    await Promise.all([
+      archiveEntitiesQuery({
+        variables: {
+          toArchive: entities.filter((entity) => entity.archived === true).map((entity) => entity._id),
+          state: true,
+        },
+      }),
+      archiveEntitiesQuery({
+        variables: {
+          toArchive: entities.filter((entity) => entity.archived === false).map((entity) => entity._id),
+          state: false,
+        },
+      }),
+      archiveProjectsQuery({
+        variables: {
+          toArchive: projects.filter((project) => project.archived === true).map((project) => project._id),
+          state: true,
+        },
+      }),
+      archiveProjectsQuery({
+        variables: {
+          toArchive: projects.filter((project) => project.archived === false).map((project) => project._id),
+          state: false,
+        },
+      }),
+      archiveTemplatesQuery({
+        variables: {
+          toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
+          state: true,
+        },
+      }),
+      archiveTemplatesQuery({
+        variables: {
+          toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
+          state: false,
+        },
+      }),
+    ]);
 
     if (workspaceUpdateError) {
       toaster.create({

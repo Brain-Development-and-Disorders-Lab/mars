@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, EmptyState, Field, Fieldset, Flex, Input, Link, Separator, Stack, Text } from "@chakra-ui/react";
+import { Button, EmptyState, Field, Fieldset, Flex, Input, Link, Separator, Stack, Tag, Text } from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
@@ -17,6 +17,7 @@ import { useLazyQuery, useQuery } from "@apollo/client/react";
 // Utility functions
 import {
   getCollaboratorPermissions,
+  getCollaboratorPermissionsLevel,
   ignoreAbort,
   isCollaborator,
   isValidEmail,
@@ -245,20 +246,6 @@ const Collaborators = (props: CollaboratorsProps) => {
                     {/* Action Buttons */}
                     {props.editing && (
                       <Flex direction={"row"} gap={"2"} align={"end"} ml={"0.5"}>
-                        {!isOwner && props.currentUser === collaborator._id && (
-                          <Button
-                            size={"xs"}
-                            colorPalette={"orange"}
-                            rounded={"md"}
-                            variant={"solid"}
-                            aria-label={"Leave workspace"}
-                            onClick={() => handleRemoveCollaborator(collaborator._id)}
-                          >
-                            Leave Workspace
-                            <Icon name={"logout"} size={"xs"} />
-                          </Button>
-                        )}
-
                         <Button
                           size={"xs"}
                           colorPalette={"blue"}
@@ -274,6 +261,20 @@ const Collaborators = (props: CollaboratorsProps) => {
                           <Icon name={"settings"} size={"xs"} />
                         </Button>
 
+                        {!isOwner && props.currentUser === collaborator._id && (
+                          <Button
+                            size={"xs"}
+                            colorPalette={"orange"}
+                            rounded={"md"}
+                            variant={"solid"}
+                            aria-label={"Leave workspace"}
+                            onClick={() => handleRemoveCollaborator(collaborator._id)}
+                          >
+                            Leave Workspace
+                            <Icon name={"logout"} size={"xs"} />
+                          </Button>
+                        )}
+
                         {isOwner && (
                           <Button
                             size={"xs"}
@@ -288,6 +289,17 @@ const Collaborators = (props: CollaboratorsProps) => {
                         )}
                       </Flex>
                     )}
+
+                    {/* Permissions Labels */}
+                    <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                      {getCollaboratorPermissionsLevel(collaborator.permissions).map((label) => {
+                        return (
+                          <Tag.Root colorPalette={label.includes("Partial") ? "orange" : "green"}>
+                            <Tag.Label fontSize={"xs"}>{label}</Tag.Label>
+                          </Tag.Root>
+                        );
+                      })}
+                    </Flex>
                   </Flex>
                 </Flex>
               ))}

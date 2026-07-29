@@ -123,6 +123,68 @@ export const setCollaboratorPermissions = (
 };
 
 /**
+ * Utility function to check if a User has permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyAll = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create && permissionsCategory.edit && permissionsCategory.archive;
+};
+
+/**
+ * Utility function to check if a User has some permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyPartial = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create || permissionsCategory.edit || permissionsCategory.archive;
+};
+
+/**
+ * Generate a set of strings ("View", "Modify (All)", "Modify (Partial)", "Administration")
+ * depending on the `UserWorkspacePermissions` object, used to generate tags or labels
+ * @param {UserWorkspacePermissions} permissions Set of User's Workspace permissions
+ * @return {string[]}
+ */
+export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermissions): string[] => {
+  const permissionsLabels = ["View"];
+
+  // "Modify (All)" only shown if all Entities, Projects, and Templates permissions enabled
+  if (
+    isModifyAll(permissions, "entities") &&
+    isModifyAll(permissions, "projects") &&
+    isModifyAll(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (All)");
+  } else if (
+    isModifyPartial(permissions, "entities") ||
+    isModifyPartial(permissions, "projects") ||
+    isModifyPartial(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (Partial)");
+  }
+
+  // Administration permissions
+  if (permissions.administration.edit || permissions.administration.invite) {
+    permissionsLabels.push("Administration");
+  }
+
+  return permissionsLabels;
+};
+
+/**
  * Check if an ORCID is a valid format
  * @param {string} orcid the ORCID to check
  * @returns {boolean}
