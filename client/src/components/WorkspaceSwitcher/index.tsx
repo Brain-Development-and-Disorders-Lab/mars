@@ -169,6 +169,14 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   };
 
   /**
+   * Handle click events within the `Admin` button
+   */
+  const handleAdminClick = () => {
+    navigate("/admin");
+    setOpen(false);
+  };
+
+  /**
    * Handle click events within the `Logout` button
    */
   const handleLogoutClick = async () => {
@@ -304,7 +312,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   id={"navAdminButtonMobile"}
                   value={"admin"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/admin")}
+                  onClick={() => handleAdminClick()}
                   cursor={"pointer"}
                 >
                   <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
