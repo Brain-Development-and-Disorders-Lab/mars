@@ -191,8 +191,8 @@ export const typedefs = `#graphql
     description: String
     owner: String
     entities: Int
+    projects: Int
     templates: Int
-    attributes: Int
   }
 
   # "AdminUser" type

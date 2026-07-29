@@ -60,8 +60,8 @@ const GET_ADMIN_DATA = gql`
       description
       owner
       entities
+      projects
       templates
-      attributes
     }
   }
 `;
@@ -170,7 +170,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("role", {
       cell: (info) => (
-        <Tag.Root colorPalette={info.getValue() === "admin" ? "red" : "blue"} size={"sm"}>
+        <Tag.Root colorPalette={info.getValue() === "admin" ? "yellow" : "blue"} size={"sm"}>
           <Tag.Label>{_.capitalize(info.getValue()) || "User"}</Tag.Label>
         </Tag.Root>
       ),
@@ -291,6 +291,15 @@ const Admin = () => {
       header: "Entities",
       meta: { fixedWidth: 90 } as ColumnMeta,
     }),
+    workspaceColumnHelper.accessor("projects", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          {info.getValue()}
+        </Text>
+      ),
+      header: "Projects",
+      meta: { fixedWidth: 100 } as ColumnMeta,
+    }),
     workspaceColumnHelper.accessor("templates", {
       cell: (info) => (
         <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
@@ -298,15 +307,6 @@ const Admin = () => {
         </Text>
       ),
       header: "Templates",
-      meta: { fixedWidth: 100 } as ColumnMeta,
-    }),
-    workspaceColumnHelper.accessor("attributes", {
-      cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-          {info.getValue()}
-        </Text>
-      ),
-      header: "Attributes",
       meta: { fixedWidth: 100 } as ColumnMeta,
     }),
   ];
@@ -333,7 +333,7 @@ const Admin = () => {
           >
             <Icon name={"settings"} size={"sm"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
-              Metadatify Admin Dashboard
+              Metadatify Administration
             </Heading>
           </Flex>
 

@@ -234,33 +234,25 @@ const Collaborators = (props: CollaboratorsProps) => {
                       Collaborator
                     </Text>
                     <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
+                    <CollaboratorEmail userId={collaborator._id} />
                   </Flex>
 
-                  {/* Email, filling the space beside the Collaborator */}
-                  <Flex direction={"column"} gap={"2"} align={"start"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                      Email
-                    </Text>
-                    <CollaboratorEmail userId={collaborator._id} />
+                  {/* Action Buttons, including Workspace remove / leave and permissions */}
+                  <Flex direction={"column"} gap={"2"} align={"center"}>
+                    {/* Permissions Labels */}
+                    <Flex direction={"row"} gap={"1"} w={"100%"} align={"center"} justify={"end"} mr={"0.5"}>
+                      {getCollaboratorPermissionsLevel(collaborator.permissions).map((label) => {
+                        return (
+                          <Tag.Root colorPalette={label.includes("Partial") ? "orange" : "green"}>
+                            <Tag.Label fontSize={"xs"}>{label}</Tag.Label>
+                          </Tag.Root>
+                        );
+                      })}
+                    </Flex>
 
                     {/* Action Buttons */}
                     {props.editing && (
-                      <Flex direction={"row"} gap={"2"} align={"end"} ml={"0.5"}>
-                        <Button
-                          size={"xs"}
-                          colorPalette={"blue"}
-                          rounded={"md"}
-                          variant={"solid"}
-                          aria-label={isOwner ? "Manage permissions" : "View permissions"}
-                          onClick={() => {
-                            setPermissionsDialogUser(collaborator._id);
-                            setPermissionsDialogOpen(true);
-                          }}
-                        >
-                          {isOwner ? "Manage Permissions" : "View Permissions"}
-                          <Icon name={"settings"} size={"xs"} />
-                        </Button>
-
+                      <Flex direction={"row"} gap={"2"} w={"100%"} justify={"end"} mr={"0.5"}>
                         {!isOwner && props.currentUser === collaborator._id && (
                           <Button
                             size={"xs"}
@@ -287,19 +279,23 @@ const Collaborators = (props: CollaboratorsProps) => {
                             <Icon name={"logout"} size={"xs"} />
                           </Button>
                         )}
+
+                        <Button
+                          size={"xs"}
+                          colorPalette={"blue"}
+                          rounded={"md"}
+                          variant={"solid"}
+                          aria-label={isOwner ? "Manage permissions" : "View permissions"}
+                          onClick={() => {
+                            setPermissionsDialogUser(collaborator._id);
+                            setPermissionsDialogOpen(true);
+                          }}
+                        >
+                          {isOwner ? "Manage Permissions" : "View Permissions"}
+                          <Icon name={"settings"} size={"xs"} />
+                        </Button>
                       </Flex>
                     )}
-
-                    {/* Permissions Labels */}
-                    <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                      {getCollaboratorPermissionsLevel(collaborator.permissions).map((label) => {
-                        return (
-                          <Tag.Root colorPalette={label.includes("Partial") ? "orange" : "green"}>
-                            <Tag.Label fontSize={"xs"}>{label}</Tag.Label>
-                          </Tag.Root>
-                        );
-                      })}
-                    </Flex>
                   </Flex>
                 </Flex>
               ))}

@@ -819,8 +819,8 @@ export type AdminWorkspace = {
   description: string;
   owner: string;
   entities: number;
+  projects: number;
   templates: number;
-  attributes: number;
 };
 
 export type AdminMetrics = {

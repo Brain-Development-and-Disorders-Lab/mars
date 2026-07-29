@@ -128,30 +128,17 @@ export class Admin {
   };
 
   static getWorkspaces = async (): Promise<AdminWorkspace[]> => {
-    const [workspaces, entityAttrCounts] = await Promise.all([
-      getDatabase().collection(WORKSPACES_COLLECTION).find().toArray(),
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .aggregate([{ $project: { attrCount: { $size: { $ifNull: ["$attributes", []] } } } }])
-        .toArray(),
-    ]);
-
-    const attrributeCountMap = new Map(
-      entityAttrCounts.map((entity) => [entity._id as string, entity.attrCount as number]),
-    );
+    const workspaces = await getDatabase().collection<WorkspaceModel>(WORKSPACES_COLLECTION).find().toArray();
 
     return workspaces.map((workspace) => {
-      const entityIds: string[] = workspace.entities || [];
-      const attributeCount = entityIds.reduce((sum, id) => sum + (attrributeCountMap.get(id) ?? 0), 0);
-
       return {
         _id: String(workspace._id),
         name: workspace.name || "",
         description: workspace.description || "",
         owner: workspace.owner || "",
-        entities: entityIds.length,
-        templates: (workspace.templates || []).length,
-        attributes: attributeCount,
+        entities: workspace.entities.length,
+        projects: workspace.projects.length,
+        templates: workspace.templates.length,
       };
     });
   };
