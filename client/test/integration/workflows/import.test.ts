@@ -9,7 +9,7 @@ import {
   createTestWorkspace,
   switchWorkspace,
   createTestProject,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 // Other imports
 import * as path from "path";

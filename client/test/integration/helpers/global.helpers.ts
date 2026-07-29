@@ -298,7 +298,6 @@ export const openItemFromTable = async (
     const allItems = await table.locator("text").allTextContents();
     throw new Error(`Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`);
   }
-  await textLocator.scrollIntoViewIfNeeded();
 
   // Find buttons with the correct aria-label
   const count = await buttons.count();
@@ -333,10 +332,8 @@ export const openItemFromTable = async (
       throw new Error(`Could not find button "${viewButtonLabel}" in row containing "${itemName}"`);
     }
 
-    await closestBtn.scrollIntoViewIfNeeded();
     await closestBtn.click();
   } else {
-    await buttons.first().scrollIntoViewIfNeeded();
     await buttons.first().click();
   }
 };

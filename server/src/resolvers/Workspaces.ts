@@ -229,7 +229,7 @@ export const WorkspacesResolvers = {
         const result = await Workspaces.update(args.workspace);
 
         // Notify any newly added collaborators
-        const newCollaborators = _.difference(args.workspace.collaborators, workspace.collaborators);
+        const newCollaborators = _.differenceBy(args.workspace.collaborators, workspace.collaborators, "_id");
         if (newCollaborators.length > 0) {
           const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
           await Promise.allSettled(
