@@ -55,7 +55,7 @@ const Project = () => {
   const posthog = usePostHog();
 
   // Permissions
-  const { workspacePermissions } = usePermissions();
+  const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
@@ -65,7 +65,7 @@ const Project = () => {
 
   const getUser = async () => {
     // If the User does not have Workspace permissions, direct to `/unauthorized`
-    if (!workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
+    if (!permissionsLoading && !workspacePermissions.projects.create && window.location.pathname !== "/unauthorized") {
       window.location.href = "/unauthorized";
     }
 
@@ -357,7 +357,7 @@ const Project = () => {
               setIsSubmitting(true);
               const response = await createProject({
                 variables: {
-                  project: { name, owner, archived: false, description, created, entities, collaborators: [] },
+                  project: { name, owner, archived: false, description, created, entities },
                 },
               });
               if (response.data?.createProject.success) {

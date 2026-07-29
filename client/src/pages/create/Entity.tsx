@@ -67,7 +67,7 @@ const Entity = () => {
   const posthog = usePostHog();
 
   // Permissions
-  const { workspacePermissions } = usePermissions();
+  const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
   const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
   const pageSteps = [
@@ -105,7 +105,7 @@ const Entity = () => {
 
   const getUser = async () => {
     // If the User does not have Workspace permissions, direct to `/unauthorized`
-    if (!workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
+    if (!permissionsLoading && !workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
       window.location.href = "/unauthorized";
     }
 

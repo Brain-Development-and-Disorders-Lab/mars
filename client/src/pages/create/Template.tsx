@@ -53,7 +53,7 @@ const Template = () => {
   const posthog = usePostHog();
 
   // Permissions
-  const { workspacePermissions } = usePermissions();
+  const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
@@ -65,7 +65,7 @@ const Template = () => {
 
   const getUser = async () => {
     // If the User does not have Workspace permissions, direct to `/unauthorized`
-    if (!workspacePermissions.templates.create && window.location.pathname !== "/unauthorized") {
+    if (!permissionsLoading && !workspacePermissions.templates.create && window.location.pathname !== "/unauthorized") {
       window.location.href = "/unauthorized";
     }
 

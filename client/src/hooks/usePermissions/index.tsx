@@ -52,12 +52,13 @@ const GET_USER_PERMISSIONS = gql`
 type PermissionsContextValue = {
   workspacePermissions: UserWorkspacePermissions;
   globalPermissions: UserGlobalPermissions;
+  loading: boolean;
 };
 
 const PermissionsContext = createContext<PermissionsContextValue>({} as PermissionsContextValue);
 
 export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
-  const { data } = useQuery<{ userCollatedPermissions: UserCollatedPermissions }>(GET_USER_PERMISSIONS, {
+  const { data, loading } = useQuery<{ userCollatedPermissions: UserCollatedPermissions }>(GET_USER_PERMISSIONS, {
     fetchPolicy: "network-only",
     pollInterval: 1000, // Poll every seconds to pick up permission changes
   });
@@ -66,8 +67,9 @@ export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
     () => ({
       workspacePermissions: data?.userCollatedPermissions.workspace || DEFAULT_WORKSPACE_PERMISSIONS,
       globalPermissions: data?.userCollatedPermissions.global || DEFAULT_GLOBAL_PERMISSIONS,
+      loading: loading && !data,
     }),
-    [data?.userCollatedPermissions],
+    [data?.userCollatedPermissions, loading, data],
   );
 
   return <PermissionsContext.Provider value={value}>{props.children}</PermissionsContext.Provider>;
