@@ -12,6 +12,7 @@ import {
   SearchAttributeValue,
   SearchQuery,
   UserModel,
+  UserWorkspacePermissions,
 } from "@types";
 
 // Utility functions
@@ -89,6 +90,36 @@ export const isCollaborator = (_id: string, collaborators: Collaborator[]): bool
     }
   }
   return false;
+};
+
+/**
+ * Get a specific Collaborator's Workspace permissions from a collection
+ * @param {string} _id Identifier of the Collaborator to locate
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {UserWorkspacePermissions | undefined} Permissions if the Collaborator is present
+ */
+export const getCollaboratorPermissions = (
+  _id: string,
+  collaborators: Collaborator[],
+): UserWorkspacePermissions | undefined => {
+  return collaborators.find((collaborator) => collaborator._id === _id)?.permissions;
+};
+
+/**
+ * Replace a specific Collaborator's Workspace permissions within a collection
+ * @param {string} _id Identifier of the Collaborator to update
+ * @param {UserWorkspacePermissions} permissions Updated permissions to apply
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {Collaborator[]} New collection with the matching Collaborator updated
+ */
+export const setCollaboratorPermissions = (
+  _id: string,
+  permissions: UserWorkspacePermissions,
+  collaborators: Collaborator[],
+): Collaborator[] => {
+  return collaborators.map((collaborator) =>
+    collaborator._id === _id ? { ...collaborator, permissions } : collaborator,
+  );
 };
 
 /**

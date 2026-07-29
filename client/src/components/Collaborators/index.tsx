@@ -15,7 +15,13 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Utility functions
-import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
+import {
+  getCollaboratorPermissions,
+  ignoreAbort,
+  isCollaborator,
+  isValidEmail,
+  setCollaboratorPermissions,
+} from "@lib/util";
 
 // Variables
 import { DEFAULT_WORKSPACE_PERMISSIONS, GLOBAL_STYLES } from "@variables";
@@ -297,6 +303,12 @@ const Collaborators = (props: CollaboratorsProps) => {
           user={permissionsDialogUser}
           isGlobal={false}
           editable={isOwner}
+          workspacePermissions={getCollaboratorPermissions(permissionsDialogUser, props.collaborators)}
+          onUpdateWorkspacePermissions={(permissions) =>
+            props.setCollaborators((collaborators) =>
+              setCollaboratorPermissions(permissionsDialogUser, permissions, collaborators),
+            )
+          }
         />
       )}
     </Flex>

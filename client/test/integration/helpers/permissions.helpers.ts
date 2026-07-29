@@ -78,7 +78,11 @@ export const toggleCollaboratorPermission = async (page: Page, switchLabel: stri
   await page.waitForLoadState("networkidle");
   await page.getByText(switchLabel, { exact: true }).click();
   await page.getByRole("button", { name: "Done" }).click();
-  await expect(page.getByText("Updated User Workspace permissions")).toBeVisible();
+  await expect(page.getByText("Permissions updated")).toBeVisible();
+
+  // The Dialog only updates local state, so the change must be persisted via the Workspace `Save` button
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page).toHaveURL("/");
 };
 
 /**

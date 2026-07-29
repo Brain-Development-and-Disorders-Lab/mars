@@ -792,9 +792,11 @@ export type PermissionsDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   user: string;
+  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
   isGlobal: boolean; // Define if modifying "global" permissions or just for the Workspace
   workspace?: string; // Specify the Workspace if modifying Workspace permissions
-  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
+  workspacePermissions?: UserWorkspacePermissions; // Current local Workspace permissions for `user`, used instead of fetching from the server
+  onUpdateWorkspacePermissions?: (permissions: UserWorkspacePermissions) => void; // Called with the edited permissions instead of persisting them immediately
 };
 
 // Metrics

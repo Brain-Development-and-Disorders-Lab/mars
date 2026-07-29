@@ -103,77 +103,30 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
     }
   };
 
-  // If `isGlobal` is `false`, get the Workspace permissions of the User we are modifying
-  const GET_USER_WORKSPACE_PERMISSIONS = gql`
-    query GetUserWorkspacePermissions($_id: String, $workspace: String) {
-      userWorkspacePermissions(_id: $_id, workspace: $workspace) {
-        administration {
-          edit
-          invite
-        }
-        entities {
-          create
-          edit
-          archive
-        }
-        projects {
-          create
-          edit
-          archive
-        }
-        templates {
-          create
-          edit
-          archive
-        }
-      }
-    }
-  `;
-
-  const [getUserWorkspacePermissions] = useLazyQuery<{ userWorkspacePermissions: UserWorkspacePermissions }>(
-    GET_USER_WORKSPACE_PERMISSIONS,
-    {
-      fetchPolicy: "network-only",
-    },
-  );
-
-  const refreshUserWorkspacePermissionsState = async (_id: string) => {
-    const result = await getUserWorkspacePermissions({
-      variables: {
-        _id: _id,
-        // Workspace ID passed through request `Context`
-      },
-    });
-
-    if (result.data) {
-      setWorkspaceEdit(result.data.userWorkspacePermissions.administration.edit);
-      setWorkspaceInvite(result.data.userWorkspacePermissions.administration.invite);
-      setEntitiesCreate(result.data.userWorkspacePermissions.entities.create);
-      setEntitiesEdit(result.data.userWorkspacePermissions.entities.edit);
-      setEntitiesArchive(result.data.userWorkspacePermissions.entities.archive);
-      setProjectsCreate(result.data.userWorkspacePermissions.projects.create);
-      setProjectsEdit(result.data.userWorkspacePermissions.projects.edit);
-      setProjectsArchive(result.data.userWorkspacePermissions.projects.archive);
-      setTemplatesCreate(result.data.userWorkspacePermissions.templates.create);
-      setTemplatesEdit(result.data.userWorkspacePermissions.templates.edit);
-      setTemplatesArchive(result.data.userWorkspacePermissions.templates.archive);
-    } else {
-      toaster.create({
-        title: "Could not retrieve User Workspace permissions",
-        type: "error",
-        duration: 2000,
-        closable: true,
-      });
-    }
+  // If `isGlobal` is `false`, seed the toggles from the collaborator's local (unsaved) permissions
+  const applyLocalWorkspacePermissions = (permissions: UserWorkspacePermissions) => {
+    setWorkspaceEdit(permissions.administration.edit);
+    setWorkspaceInvite(permissions.administration.invite);
+    setEntitiesCreate(permissions.entities.create);
+    setEntitiesEdit(permissions.entities.edit);
+    setEntitiesArchive(permissions.entities.archive);
+    setProjectsCreate(permissions.projects.create);
+    setProjectsEdit(permissions.projects.edit);
+    setProjectsArchive(permissions.projects.archive);
+    setTemplatesCreate(permissions.templates.create);
+    setTemplatesEdit(permissions.templates.edit);
+    setTemplatesArchive(permissions.templates.archive);
   };
 
   useEffect(() => {
+    if (!props.open) return;
+
     if (props.isGlobal) {
       refreshUserGlobalPermissionsState(props.user);
-    } else {
-      refreshUserWorkspacePermissionsState(props.user);
+    } else if (props.workspacePermissions) {
+      applyLocalWorkspacePermissions(props.workspacePermissions);
     }
-  }, [props.user]);
+  }, [props.user, props.open]);
 
   // Mutation to update User global permissions
   const SET_USER_GLOBAL_PERMISSIONS = gql`
@@ -188,26 +141,6 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
     useMutation<{
       setUserGlobalPermissions: IResponseMessage;
     }>(SET_USER_GLOBAL_PERMISSIONS);
-
-  // Mutation to update User Workspace permissions
-  const SET_USER_WORKSPACE_PERMISSIONS = gql`
-    mutation SetUserWorkspacePermissions(
-      $_id: String
-      $workspace: String
-      $permissions: UserWorkspacePermissionsInput
-    ) {
-      setUserWorkspacePermissions(_id: $_id, workspace: $workspace, permissions: $permissions) {
-        success
-        message
-      }
-    }
-  `;
-  const [
-    setUserWorkspacePermissions,
-    { loading: userSetWorkspacePermissionsLoading, error: userSetWorkspacePermissionsError },
-  ] = useMutation<{
-    setUserWorkspacePermissions: IResponseMessage;
-  }>(SET_USER_WORKSPACE_PERMISSIONS);
 
   /**
    * Utility function to execute GraphQL manipulations updating the User permissions
@@ -254,55 +187,32 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
         props.setOpen(false);
       }
     } else {
-      // Execute GraphQL mutation
-      const result = await setUserWorkspacePermissions({
-        fetchPolicy: "network-only",
-        variables: {
-          _id: props.user,
-          permissions: {
-            administration: {
-              edit: workspaceEdit,
-              invite: workspaceInvite,
-            },
-            entities: {
-              create: entitiesCreate,
-              edit: entitiesEdit,
-              archive: entitiesArchive,
-            },
-            projects: {
-              create: projectsCreate,
-              edit: projectsEdit,
-              archive: projectsArchive,
-            },
-            templates: {
-              create: templatesCreate,
-              edit: templatesEdit,
-              archive: templatesArchive,
-            },
-          },
+      // Update the collaborator's permissions in local state only, the Workspace `Save`
+      // action is responsible for persisting them to the server
+      props.onUpdateWorkspacePermissions?.({
+        administration: {
+          edit: workspaceEdit,
+          invite: workspaceInvite,
+        },
+        entities: {
+          create: entitiesCreate,
+          edit: entitiesEdit,
+          archive: entitiesArchive,
+        },
+        projects: {
+          create: projectsCreate,
+          edit: projectsEdit,
+          archive: projectsArchive,
+        },
+        templates: {
+          create: templatesCreate,
+          edit: templatesEdit,
+          archive: templatesArchive,
         },
       });
 
-      if (userSetWorkspacePermissionsError) {
-        toaster.create({
-          title: "Could not update User Workspace permissions",
-          type: "error",
-          duration: 2000,
-          closable: true,
-        });
-      }
-
-      if (result.data && result.data.setUserWorkspacePermissions.success) {
-        toaster.create({
-          title: "Updated User Workspace permissions",
-          type: "success",
-          duration: 2000,
-          closable: true,
-        });
-
-        // Close the dialog
-        props.setOpen(false);
-      }
+      // Close the dialog
+      props.setOpen(false);
     }
   };
 
@@ -808,7 +718,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                 colorPalette={"green"}
                 size={"xs"}
                 rounded={"md"}
-                loading={editable && (userSetGlobalPermissionsLoading || userSetWorkspacePermissionsLoading)}
+                loading={editable && props.isGlobal && userSetGlobalPermissionsLoading}
                 onClick={() => {
                   if (editable) {
                     // Apply updated permissions
