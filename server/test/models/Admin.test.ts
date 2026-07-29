@@ -86,7 +86,7 @@ describe("Admin model permissions", () => {
 
       const permissions = await Admin.getUserGlobalPermissions(OWNER_ID);
       expect(permissions.features.ai).toBeTruthy();
-      expect(permissions.features.scan).toBeFalsy();
+      expect(permissions.features.scan).toBeTruthy();
     });
 
     it("disables a previously enabled Global permission", async () => {

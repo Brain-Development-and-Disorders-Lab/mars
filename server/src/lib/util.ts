@@ -39,9 +39,15 @@ export const isCollaborator = (_id: string, collaborators: Collaborator[]): bool
  *
  * Note: Modifying outside of better-auth means that `permissions` is stored as a JSON string,
  * mirroring `api_keys`
- * @param {UserGlobalPermissions | string} permissions Either a JSON string or `UserGlobalPermissions` instance
+ * @param {UserGlobalPermissions | string | null | undefined} permissions Either a JSON string or `UserGlobalPermissions` instance,
+ * possibly not yet populated
+ * @param {UserGlobalPermissions} fallback Value to use when `permissions` has not been populated yet
  * @return {UserGlobalPermissions}
  */
-export const parseGlobalPermissions = (permissions: UserGlobalPermissions | string): UserGlobalPermissions => {
+export const parseGlobalPermissions = (
+  permissions: UserGlobalPermissions | string | null | undefined,
+  fallback: UserGlobalPermissions,
+): UserGlobalPermissions => {
+  if (!permissions) return fallback;
   return typeof permissions === "string" ? JSON.parse(permissions) : permissions;
 };

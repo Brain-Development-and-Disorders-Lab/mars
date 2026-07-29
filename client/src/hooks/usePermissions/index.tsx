@@ -77,6 +77,7 @@ const createPermissionsStore = (client: ApolloClient) => {
 
   const subscription = observable.subscribe((result) => {
     if (!result.data?.userCollatedPermissions) return;
+    if (!result.data.userCollatedPermissions.global || !result.data.userCollatedPermissions.workspace) return;
 
     const data = result.data as { userCollatedPermissions: UserCollatedPermissions };
     const next: PermissionsContextValue = {

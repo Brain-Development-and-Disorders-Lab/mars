@@ -101,7 +101,7 @@ export class Admin {
         }
       }
 
-      const userPermissions = parseGlobalPermissions(user.permissions);
+      const userPermissions = parseGlobalPermissions(user.permissions, DEFAULT_GLOBAL_PERMISSIONS);
       const permissions: UserGlobalPermissions = {
         features: {
           ai: userPermissions.features.ai,
@@ -151,7 +151,7 @@ export class Admin {
       return DEFAULT_GLOBAL_PERMISSIONS;
     }
 
-    return parseGlobalPermissions(userResult.permissions);
+    return parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS);
   };
 
   static setUserGlobalPermissions = async (
@@ -313,7 +313,7 @@ export class Admin {
       };
     }
 
-    const globalPermissions = parseGlobalPermissions(userResult.permissions);
+    const globalPermissions = parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS);
 
     // Check if User is Workspace owner or Collaborator
     if (workspaceResult.owner === _id) {
