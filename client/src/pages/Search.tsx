@@ -325,9 +325,12 @@ const Search = () => {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 48 })}
-            </Text>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Icon name={"entity"} color={STYLES.entity.color.default} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 48 })}
+              </Text>
+            </Flex>
           </Tooltip>
           <Button
             size="2xs"
@@ -344,7 +347,7 @@ const Search = () => {
       ),
       header: "Name",
       meta: {
-        minWidth: 400,
+        minWidth: 240,
       },
     }),
     searchResultColumnHelper.accessor("description", {
@@ -367,29 +370,67 @@ const Search = () => {
       header: "Description",
       enableHiding: true,
       meta: {
-        minWidth: 400,
+        minWidth: 240,
       },
     }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
-        return (
-          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
-          </Tag.Root>
-        );
+        const attributes = info.row.original.attributes;
+
+        // 0 Attributes
+        if (attributes.length === 0) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+            </Tag.Root>
+          );
+        }
+
+        // Multiple Attributes
+        if (attributes.length > 1) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.slice(0, 1).map((attribute) => (
+                <Tag.Root colorPalette={"template"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+              <Text fontSize={"xs"}>
+                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.map((attribute) => (
+                <Tag.Root colorPalette={"template"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Attributes",
       meta: {
-        minWidth: 120,
-        maxWidth: 120,
+        minWidth: 240,
       },
     }),
     searchResultColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
+          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+              {dayjs(info.getValue()).fromNow()}
+            </Text>
+          </Tooltip>
         );
       },
       header: "Created",
@@ -404,10 +445,10 @@ const Search = () => {
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Icon
               name={info.getValue() ? "archive" : "check"}
-              color={info.getValue() ? "gray.500" : "green.600"}
+              color={info.getValue() ? "gray.500" : "green"}
               size={"xs"}
             />
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green.600"}>
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green"}>
               {info.getValue() ? "Archived" : "Active"}
             </Text>
           </Flex>
