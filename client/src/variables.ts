@@ -42,14 +42,11 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
 };
 
 // URL of the client application
-export const APP_URL =
-  import.meta.env.NODE_ENV !== "production" ? "http://127.0.0.1:8080" : "https://app.metadatify.com";
+export const APP_URL = import.meta.env.PROD ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 // URL of the API server, either local or remote depending on deployment status
-export const API_URL =
-  import.meta.env.NODE_ENV !== "production" ? "http://127.0.0.1:8000" : "https://api.metadatify.com";
-export const STATIC_URL =
-  import.meta.env.NODE_ENV !== "production" ? "http://127.0.0.1:8000/static" : "https://api.metadatify.com/static";
+export const API_URL = import.meta.env.PROD ? "https://api.metadatify.com" : "http://127.0.0.1:8000";
+export const STATIC_URL = import.meta.env.PROD ? "https://api.metadatify.com/static" : "http://127.0.0.1:8000/static";
 
 // Key for the local storage data
 export const STORAGE_KEY = "metadatify_storage";
