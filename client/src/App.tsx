@@ -22,7 +22,6 @@ import {
 } from "react-router-dom";
 
 // Utility imports
-import _ from "lodash";
 import consola from "consola";
 
 // Pages
@@ -84,7 +83,7 @@ const Providers = (): React.JSX.Element => {
  * @return {ReactElement}
  */
 const App = (): ReactElement => {
-  if (_.isEqual(import.meta.env.NODE_ENV, "development")) {
+  if (import.meta.env.DEV) {
     consola.debug("Running client in development mode");
   }
 
