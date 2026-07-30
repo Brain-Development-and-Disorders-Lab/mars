@@ -293,7 +293,7 @@ const Activity = () => {
 
   return (
     <Content isError={!_.isUndefined(error) && !initialLoaded} isLoaded={initialLoaded || !loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} minW={"0"} maxW={"100%"}>
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"activity"} size={"sm"} />
@@ -341,6 +341,7 @@ const Activity = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -580,54 +581,70 @@ const Activity = () => {
             </Flex>
           </Collapsible.Root>
 
-          {/* Buttons and Live Indicator Row */}
           <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"space-between"}
-            data-timestamp-update={timestampUpdate}
+            direction={"column"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
-            {/* Live Indicator */}
-            <Flex align={"center"} gap={"1"} ml={"0.5"}>
-              <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"status.success.default"} className="live-indicator" />
-              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
-                Live
-              </Text>
+            {/* Buttons and Live Indicator Row */}
+            <Flex
+              direction={"row"}
+              gap={"1"}
+              align={"center"}
+              justify={"space-between"}
+              data-timestamp-update={timestampUpdate}
+            >
+              {/* Live Indicator */}
+              <Flex align={"center"} gap={"1"} ml={"0.5"}>
+                <Box
+                  w={"8px"}
+                  h={"8px"}
+                  borderRadius={"full"}
+                  bg={"status.success.default"}
+                  className="live-indicator"
+                />
+                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+                  Live
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
 
-          {filteredActivityData.length > 0 || activityData.length === 0 ? (
-            <Box w="100%" minW="0" maxW="100%">
-              <DataTable
-                columns={columns}
-                data={filteredActivityData}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                columnFilters={columnFilters}
-                onColumnFiltersChange={setColumnFilters}
-                showSelection
-                showColumnSelect
-                showPagination
-              />
-            </Box>
-          ) : (
-            <EmptyState.Root>
-              <EmptyState.Content>
-                <EmptyState.Indicator>
-                  <Icon name={"activity"} size={"lg"} />
-                </EmptyState.Indicator>
-                <EmptyState.Description>
-                  {appliedFilters.startDate ||
-                  appliedFilters.endDate ||
-                  appliedFilters.activityTypes.length > 0 ||
-                  appliedFilters.targetTypes.length > 0
-                    ? "No activity matches the selected filters"
-                    : "No Activity"}
-                </EmptyState.Description>
-              </EmptyState.Content>
-            </EmptyState.Root>
-          )}
+            {filteredActivityData.length > 0 || activityData.length === 0 ? (
+              <Box w="100%" minW="0" maxW="100%">
+                <DataTable
+                  columns={columns}
+                  data={filteredActivityData}
+                  visibleColumns={visibleColumns}
+                  selectedRows={{}}
+                  columnFilters={columnFilters}
+                  onColumnFiltersChange={setColumnFilters}
+                  showSelection
+                  showColumnSelect
+                  showPagination
+                />
+              </Box>
+            ) : (
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"activity"} size={"lg"} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>
+                    {appliedFilters.startDate ||
+                    appliedFilters.endDate ||
+                    appliedFilters.activityTypes.length > 0 ||
+                    appliedFilters.targetTypes.length > 0
+                      ? "No activity matches the selected filters"
+                      : "No Activity"}
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Content>

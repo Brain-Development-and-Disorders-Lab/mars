@@ -1058,6 +1058,7 @@ const User = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -1103,6 +1104,7 @@ const User = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}

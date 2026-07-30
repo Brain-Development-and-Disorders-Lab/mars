@@ -243,6 +243,7 @@ const Project = () => {
             rounded={"md"}
             border={STYLES.border.style}
             borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Field.Root required gap={"1"} h={"100%"}>
               <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
@@ -269,6 +270,7 @@ const Project = () => {
             rounded={"md"}
             border={STYLES.border.style}
             borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Flex justify={"space-between"} align={"center"}>
               <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>

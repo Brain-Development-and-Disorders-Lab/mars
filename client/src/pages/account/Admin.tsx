@@ -358,6 +358,7 @@ const Admin = () => {
           rounded={"md"}
           border={STYLES.border.style}
           borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
           <Text fontSize={"xs"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Overview
@@ -399,6 +400,7 @@ const Admin = () => {
           rounded={"md"}
           border={STYLES.border.style}
           borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
           <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"} py={"1.5"}>
             <Icon name={"person"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
@@ -422,6 +424,7 @@ const Admin = () => {
           rounded={"md"}
           border={STYLES.border.style}
           borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
           <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"} py={"1.5"}>
             <Icon name={"workspace"} size={"xs"} color={STYLES.font.secondaryHeader.color} />

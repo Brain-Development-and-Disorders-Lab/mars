@@ -859,6 +859,7 @@ const DataTable = (props: DataTableProps) => {
               overflow={"hidden"}
               display={"flex"}
               flexDirection={"column"}
+              bg={"surface.card"}
             >
               {headerGroups.length > 0 && (
                 <Flex

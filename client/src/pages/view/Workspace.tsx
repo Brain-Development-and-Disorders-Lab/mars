@@ -807,6 +807,7 @@ const Workspace = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -845,6 +846,7 @@ const Workspace = () => {
               gap={"1"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               minW={"0"}
@@ -895,6 +897,7 @@ const Workspace = () => {
               h={"fit-content"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               w={{ base: "100%", md: "50%" }}
               minW={"0"}
@@ -943,6 +946,7 @@ const Workspace = () => {
               gap={"1"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               minW={"0"}
@@ -993,6 +997,7 @@ const Workspace = () => {
               h={"fit-content"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               w={{ base: "100%", md: "50%" }}
               minW={"0"}

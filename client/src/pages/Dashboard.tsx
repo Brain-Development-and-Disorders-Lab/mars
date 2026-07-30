@@ -627,7 +627,7 @@ const Dashboard = () => {
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {entityMetrics.all ?? "–"}
+              {entityMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -658,7 +658,7 @@ const Dashboard = () => {
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {projectMetrics.all ?? "–"}
+              {projectMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -689,7 +689,7 @@ const Dashboard = () => {
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {templateMetrics.all ?? "–"}
+              {templateMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -721,7 +721,7 @@ const Dashboard = () => {
                 </Text>
               </Flex>
               <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-                {workspaceMetrics.collaborators ?? "–"}
+                {workspaceMetrics.collaborators ?? "-"}
               </Text>
               <Badge px={"0"} variant={"plain"} colorPalette={"gray"} fontSize={"xs"}>
                 No change
@@ -740,6 +740,7 @@ const Dashboard = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               minW={"0"}
               maxW={"100%"}
             >
@@ -793,6 +794,7 @@ const Dashboard = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               minW={"0"}
               maxW={"100%"}
             >
@@ -850,6 +852,7 @@ const Dashboard = () => {
             flex={{ base: "1 1 100%", lg: "0 0 30%" }}
             minW={"0"}
             pr={{ base: "", lg: "2" }}
+            bg={"surface.card"}
           >
             <Flex
               direction={"column"}

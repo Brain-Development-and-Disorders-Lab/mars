@@ -551,6 +551,7 @@ const Entity = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
@@ -577,6 +578,7 @@ const Entity = () => {
                 rounded={"md"}
                 border={STYLES.border.style}
                 borderColor={STYLES.border.color}
+                bg={STYLES.surface.card}
               >
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -615,6 +617,7 @@ const Entity = () => {
                 rounded={"md"}
                 border={STYLES.border.style}
                 borderColor={STYLES.border.color}
+                bg={STYLES.surface.card}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
@@ -663,10 +666,12 @@ const Entity = () => {
               direction={"column"}
               p={"2"}
               gap={"2"}
+              minH={selectedAttributes.length > 0 ? "fit-content" : "120px"}
               bg={STYLES.card.bg}
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              data-testid={"create-entity-attributes"}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
@@ -687,15 +692,7 @@ const Entity = () => {
                   <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
-            </Flex>
 
-            <Flex
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-              minH={selectedAttributes.length > 0 ? "fit-content" : "120px"}
-              data-testid={"create-entity-attributes"}
-            >
               {selectedAttributes.length > 0 ? (
                 <DataTable
                   data={selectedAttributes}

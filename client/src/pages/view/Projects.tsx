@@ -321,7 +321,7 @@ const Projects = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} justify={"center"}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Flex direction={"column"} gap={"0"} align={"start"}>
@@ -370,6 +370,7 @@ const Projects = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>

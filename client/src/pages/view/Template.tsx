@@ -1061,7 +1061,7 @@ const Template = () => {
                                           gap={"2"}
                                           mt={"1"}
                                           p={"2"}
-                                          bg={STYLES.card.bg}
+                                          bg={"surface.subtle"}
                                           rounded={"md"}
                                         >
                                           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1174,11 +1174,11 @@ const Template = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              bg={"surface.muted"}
               rounded={"md"}
               grow={"1"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
@@ -1235,6 +1235,7 @@ const Template = () => {
               gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -1265,6 +1266,7 @@ const Template = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -1289,6 +1291,7 @@ const Template = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}

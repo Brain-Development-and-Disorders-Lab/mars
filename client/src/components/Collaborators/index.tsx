@@ -161,6 +161,7 @@ const Collaborators = (props: CollaboratorsProps) => {
       rounded={"md"}
       border={STYLES.border.style}
       borderColor={STYLES.border.color}
+      bg={STYLES.surface.card}
       grow={"1"}
     >
       {/* Collaborators display */}

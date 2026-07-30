@@ -197,7 +197,7 @@ const CreateWorkspace = () => {
 
   return (
     <Content>
-      <Flex direction={"column"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"column"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         {/* Page header */}
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"} ml={"0.5"}>
           <Flex align={"center"} gap={"1"} w={"100%"} pt={"1"} minW="0">
@@ -279,6 +279,7 @@ const CreateWorkspace = () => {
               rounded={"md"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description

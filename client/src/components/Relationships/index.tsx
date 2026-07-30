@@ -19,9 +19,9 @@ import { ignoreAbort } from "@lib/util";
 import { STYLES } from "@variables";
 
 export const RELATIONSHIP_TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
-  parent: "orange.600",
-  child: "yellow.400",
-  general: "cyan.600",
+  parent: "relationship.parent",
+  child: "relationship.child",
+  general: "relationship.general",
 };
 
 export const RELATIONSHIP_TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {

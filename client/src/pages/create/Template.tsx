@@ -226,6 +226,7 @@ const Template = () => {
             rounded={"md"}
             border={STYLES.border.style}
             borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Field.Root required gap={"1"} h={"100%"}>
               <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
@@ -251,6 +252,7 @@ const Template = () => {
             gap={"2"}
             border={STYLES.border.style}
             borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
             rounded={"md"}
           >
             <Field.Root>

@@ -597,7 +597,7 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"search"} size={"sm"} />
@@ -625,14 +625,26 @@ const Search = () => {
             value={activeTab}
             onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
           >
-            <Flex bg={"surface.muted"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
+            <Flex
+              bg={"surface.muted"}
+              rounded={"md"}
+              p={"0.5"}
+              gap={"0.5"}
+              w={"fit-content"}
+              mb={"1"}
+              border={"1px solid"}
+              borderColor={"border.default"}
+            >
               <Button
                 size={"xs"}
                 rounded={"sm"}
                 variant={"ghost"}
                 colorPalette={"gray"}
                 bg={activeTab === "text" ? "white" : "transparent"}
+                color={"text.default"}
+                fontWeight={activeTab === "text" ? "semibold" : "medium"}
                 shadow={activeTab === "text" ? "xs" : "none"}
+                _hover={{ bg: activeTab === "text" ? "white" : "surface.card" }}
                 disabled={isSearching}
                 onClick={() => onTabChange("text")}
               >
@@ -645,7 +657,10 @@ const Search = () => {
                 variant={"ghost"}
                 colorPalette={"gray"}
                 bg={activeTab === "advanced" ? "white" : "transparent"}
+                color={"text.default"}
+                fontWeight={activeTab === "advanced" ? "semibold" : "medium"}
                 shadow={activeTab === "advanced" ? "xs" : "none"}
+                _hover={{ bg: activeTab === "advanced" ? "white" : "surface.card" }}
                 disabled={isSearching}
                 onClick={() => onTabChange("advanced")}
               >
@@ -666,6 +681,7 @@ const Search = () => {
                     rounded={"md"}
                     border={STYLES.border.style}
                     borderColor={STYLES.border.color}
+                    bg={"surface.card"}
                   >
                     <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>

@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { IconNames, IGenericItem, LinkyProps } from "@types";
+import { IconNames, IGenericItem, IValueType, LinkyProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { getValueTypeIconProps } from "@lib/util";
 
 // Variables
 import { STYLES } from "@variables";
@@ -34,23 +35,23 @@ const getTypeStyle = (
   if (type === "projects") {
     return {
       icon: "project",
-      badgeBg: "blue.50",
-      badgeBorder: "blue.100",
+      badgeBg: STYLES.project.color.light,
+      badgeBorder: STYLES.project.color.border,
       iconColor: STYLES.project.color.icon,
     };
   } else if (type === "templates") {
     return {
       icon: "template",
-      badgeBg: "teal.50",
-      badgeBorder: "teal.100",
+      badgeBg: STYLES.template.color.light,
+      badgeBorder: STYLES.template.color.border,
       iconColor: STYLES.template.color.icon,
     };
   }
   // entities
   return {
     icon: "entity",
-    badgeBg: "purple.50",
-    badgeBorder: "purple.100",
+    badgeBg: STYLES.entity.color.light,
+    badgeBorder: STYLES.entity.color.border,
     iconColor: STYLES.entity.color.icon,
   };
 };
@@ -67,7 +68,7 @@ const Linky = (props: LinkyProps) => {
   // Navigator state
   const [showNavigator, setShowNavigator] = useState(false);
   const [navigatorDescription, setNavigatorDescription] = useState("");
-  const [navigatorCount, setNavigatorCount] = useState(0);
+  const [navigatorItems, setNavigatorItems] = useState<{ _id: string; name: string; type?: IValueType }[]>([]);
 
   // GraphQL operations
   const GET_ENTITY = gql`
@@ -79,12 +80,13 @@ const Linky = (props: LinkyProps) => {
         description
         attributes {
           _id
+          name
         }
       }
     }
   `;
   const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
-    entity: IGenericItem & { archived: boolean; description: string; attributes: { _id: string }[] };
+    entity: IGenericItem & { archived: boolean; description: string; attributes: { _id: string; name: string }[] };
   }>(GET_ENTITY);
 
   const GET_PROJECT = gql`
@@ -96,10 +98,15 @@ const Linky = (props: LinkyProps) => {
         description
         entities
       }
+      projectEntities(_id: $_id) {
+        _id
+        name
+      }
     }
   `;
   const [getProject, { loading: loadingProject }] = useLazyQuery<{
     project: IGenericItem & { archived: boolean; description: string; entities: string[] };
+    projectEntities: { _id: string; name: string }[];
   }>(GET_PROJECT);
 
   const GET_TEMPLATE = gql`
@@ -111,12 +118,18 @@ const Linky = (props: LinkyProps) => {
         description
         values {
           _id
+          name
+          type
         }
       }
     }
   `;
   const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
-    template: IGenericItem & { archived: boolean; description: string; values: { _id: string }[] };
+    template: IGenericItem & {
+      archived: boolean;
+      description: string;
+      values: { _id: string; name: string; type: IValueType }[];
+    };
   }>(GET_TEMPLATE);
 
   /**
@@ -158,7 +171,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.template.archived);
           setNavigatorDescription(response.data.template.description);
-          setNavigatorCount(response.data.template.values.length);
+          setNavigatorItems(response.data.template.values);
         }
       } else if (props.type === "entities") {
         const response = await getEntity({ variables: { _id: props.id } });
@@ -171,7 +184,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.entity.archived);
           setNavigatorDescription(response.data.entity.description);
-          setNavigatorCount(response.data.entity.attributes.length);
+          setNavigatorItems(response.data.entity.attributes);
         }
       } else if (props.type === "projects") {
         const response = await getProject({ variables: { _id: props.id } });
@@ -184,7 +197,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.project.archived);
           setNavigatorDescription(response.data.project.description);
-          setNavigatorCount(response.data.project.entities.length);
+          setNavigatorItems(response.data.projectEntities);
         }
       }
     } catch (error) {
@@ -216,6 +229,24 @@ const Linky = (props: LinkyProps) => {
 
   const isLoading = loadingTemplate || loadingEntity || loadingProject;
   const { icon, badgeBg, badgeBorder, iconColor } = getTypeStyle(props.type);
+
+  /**
+   * Preview tag icon and color per item
+   * @param item Specific item being assigned a style
+   * @return {{ icon: IconNames; color: string; palette: string; }}
+   */
+  const getNavigatorItemStyle = (item: { type?: IValueType }): { icon: IconNames; color: string; palette: string } => {
+    if (props.type === "entities") {
+      return { icon: "attribute", color: STYLES.template.color.icon, palette: "template" };
+    }
+    if (props.type === "projects") {
+      return { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" };
+    }
+    const { name, color } = getValueTypeIconProps(item.type);
+    return { icon: name, color, palette: color.split(".")[0] };
+  };
+  const navigatorLabel = props.type === "entities" ? "Attributes" : props.type === "projects" ? "Entities" : "Values";
+  const NAVIGATOR_PREVIEW_COUNT = 2;
 
   if (isLoading) {
     return <Skeleton h={"22px"} w={"80px"} rounded={"md"} />;
@@ -265,14 +296,14 @@ const Linky = (props: LinkyProps) => {
               w={"fit-content"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
-              rounded={"md"}
+              rounded={"lg"}
               overflow={"hidden"}
               cursor={"pointer"}
               onClick={onClickHandler}
               flexShrink={0}
               _hover={{
-                borderColor: "blue.300",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                borderColor: iconColor,
+                boxShadow: `0 0 0 1px ${iconColor}4D`,
               }}
             >
               {/* Type icon badge */}
@@ -352,16 +383,38 @@ const Linky = (props: LinkyProps) => {
                   </Text>
                 </Flex>
 
-                {/* Count */}
+                {/* Preview */}
                 <Flex direction={"column"} gap={"0.5"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-                    {props.type === "entities" ? "Attributes" : props.type === "projects" ? "Entities" : "Values"}
+                    {navigatorLabel}
                   </Text>
-                  <Flex>
-                    <Tag.Root colorPalette={navigatorCount > 0 ? "green" : "orange"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>{navigatorCount}</Tag.Label>
-                    </Tag.Root>
-                  </Flex>
+                  {navigatorItems.length === 0 ? (
+                    <Flex>
+                      <Tag.Root colorPalette={"orange"} size={"sm"}>
+                        <Tag.Label fontSize={"xs"}>No {navigatorLabel}</Tag.Label>
+                      </Tag.Root>
+                    </Flex>
+                  ) : (
+                    <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
+                      {navigatorItems.slice(0, NAVIGATOR_PREVIEW_COUNT).map((item) => {
+                        const itemStyle = getNavigatorItemStyle(item);
+                        return (
+                          <Tag.Root key={item._id} colorPalette={itemStyle.palette} size={"sm"}>
+                            <Tag.StartElement>
+                              <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
+                            </Tag.StartElement>
+                            <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
+                          </Tag.Root>
+                        );
+                      })}
+                      {navigatorItems.length > NAVIGATOR_PREVIEW_COUNT && (
+                        <Text fontSize={"xs"} color={"gray.500"}>
+                          and {navigatorItems.length - NAVIGATOR_PREVIEW_COUNT} other
+                          {navigatorItems.length - NAVIGATOR_PREVIEW_COUNT !== 1 ? "s" : ""}
+                        </Text>
+                      )}
+                    </Flex>
+                  )}
                 </Flex>
               </HoverCard.Content>
             </HoverCard.Positioner>
