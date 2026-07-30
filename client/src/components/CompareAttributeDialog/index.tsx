@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Text, CloseButton, Spinner, Checkbox, Collapsible, Dialog } from "@chakra-ui/react";
+import { Button, Flex, Text, CloseButton, Spinner, Checkbox, Collapsible, Dialog, Spacer } from "@chakra-ui/react";
 import AlertDialog from "@components/AlertDialog";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import {
@@ -20,7 +21,8 @@ import { useLazyQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
 // Utility functions
-import { isValueEqual } from "@lib/util";
+import { getValueTypeIconProps, isValueEqual } from "@lib/util";
+import _ from "lodash";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -196,9 +198,10 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
       bg={`${props.color}.50`}
       p={"1"}
       rounded={"md"}
+      disabled={props.disabled}
     >
       <Collapsible.Trigger asChild>
-        <Flex direction={"row"} gap={"1"} align={"center"} cursor={"pointer"}>
+        <Flex direction={"row"} gap={"1"} align={"center"} cursor={props.disabled ? "not-allowed" : "pointer"}>
           <Icon
             size={"xs"}
             name={expandedSections.has(props.sectionKey) ? "c_up" : "c_down"}
@@ -247,7 +250,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
           >
             <Checkbox.HiddenInput />
             <Checkbox.Control />
-            <Checkbox.Label fontSize={"xs"}>Use Template</Checkbox.Label>
+            <Checkbox.Label fontSize={"xs"}>Reset to Template</Checkbox.Label>
           </Checkbox.Root>
         )}
       </Flex>
@@ -256,23 +259,32 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
         {props.isDifferent && (
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Text fontSize={"xs"} color={"gray.500"}>
-              Modified:
+              Current Entity:
             </Text>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
-              {props.currentValue}
-            </Text>
+            <Tooltip disabled={props.currentValue.length < 24} content={props.currentValue} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
+                {_.truncate(props.currentValue, { length: 24 })}
+              </Text>
+            </Tooltip>
+
+            <Spacer />
+
+            <Icon name={"edit"} color={"orange.600"} size={"xs"} />
           </Flex>
         )}
         <Flex direction={"row"} gap={"1"} align={"center"}>
           <Text fontSize={"xs"} color={"gray.500"}>
             Template:
           </Text>
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
-            {props.originalValue}
-          </Text>
-          <Text fontSize={"xs"} color={"gray.500"}>
-            {!props.isDifferent && " (unchanged)"}
-          </Text>
+          <Tooltip disabled={props.originalValue.length < 24} content={props.originalValue} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(props.originalValue, { length: 24 })}
+            </Text>
+          </Tooltip>
+
+          <Spacer />
+
+          {!props.isDifferent && <Icon name={"check"} color={"green.600"} size={"xs"} />}
         </Flex>
       </Flex>
     </Flex>
@@ -315,13 +327,6 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
 
   const nameIsDifferent = props.modifiedAttribute.name !== templateAttribute?.name;
   const descriptionIsDifferent = props.modifiedAttribute.description !== templateAttribute?.description;
-
-  const hasChanges =
-    modifiedValues.length > 0 ||
-    templateOnlyValues.length > 0 ||
-    entityOnlyValues.length > 0 ||
-    !!nameIsDifferent ||
-    !!descriptionIsDifferent;
 
   const hasSelection =
     useTemplateName ||
@@ -435,18 +440,6 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                 </Flex>
               ) : (
                 <Flex direction={"column"} gap={"2"}>
-                  {/* Notification if there are not changes to the Template */}
-                  {!hasChanges && templateAttribute && (
-                    <Flex w={"100%"} align={"center"} justify={"center"} minH={"120px"}>
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Icon size={"xs"} name={"check"} color={"green.500"} />
-                        <Text fontWeight={"semibold"} fontSize={"xs"} color={"green.700"}>
-                          {props.modifiedAttribute.name} matches Template {templateAttribute.name}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                  )}
-
                   <Flex direction={"row"} gap={"2"} align={"stretch"}>
                     {/* Template Name */}
                     <CompareAttributeFieldDiff
@@ -493,20 +486,21 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                         gap={"2"}
                       >
                         <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.entity.color.icon}>
+                            Current Entity
+                          </Text>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             {props.entityName}: {props.modifiedAttribute.name}
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"purple.500"}>
-                            Modified
                           </Text>
                         </Flex>
 
                         <CompareAttributeDialogCollapsible
                           sectionKey={"unmodified"}
                           icon={"check"}
-                          color={"blue"}
+                          color={unchangedValues.length === 0 ? "gray" : "green"}
                           label={"Unmodified"}
                           count={unchangedValues.length}
+                          disabled={unchangedValues.length === 0}
                         >
                           {unchangedValues.length === 0 && (
                             <Text fontSize={"xs"} color={"gray.500"}>
@@ -514,21 +508,43 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             </Text>
                           )}
                           {unchangedValues.map(({ entity }) => (
-                            <Text key={entity._id} fontSize={"xs"} color={"blue.800"} fontWeight={"semibold"}>
-                              {entity.name}
-                            </Text>
+                            <Flex
+                              key={entity._id}
+                              direction={"row"}
+                              gap={"1"}
+                              align={"center"}
+                              bg={"white"}
+                              p={"1"}
+                              rounded={"sm"}
+                              justify={"space-between"}
+                            >
+                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  Value:
+                                </Text>
+                                <Icon
+                                  name={getValueTypeIconProps(entity.type).name}
+                                  color={getValueTypeIconProps(entity.type).color}
+                                  size={"xs"}
+                                />
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  {entity.name}
+                                </Text>
+                              </Flex>
+                            </Flex>
                           ))}
                         </CompareAttributeDialogCollapsible>
 
                         <CompareAttributeDialogCollapsible
                           sectionKey={"modified"}
                           icon={"edit"}
-                          color={"orange"}
+                          color={modifiedValues.length === 0 ? "gray" : "orange"}
                           label={"Modified"}
                           count={modifiedValues.length}
+                          disabled={modifiedValues.length === 0}
                         >
                           {modifiedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"}>
+                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
                               No Modified Values
                             </Text>
                           )}
@@ -545,11 +561,26 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"gray.500"}>
-                                  Modified:
+                                  Value:
                                 </Text>
+                                <Icon
+                                  name={getValueTypeIconProps(entity.type).name}
+                                  color={getValueTypeIconProps(entity.type).color}
+                                  size={"xs"}
+                                />
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                                   {entity.name}
                                 </Text>
+                              </Flex>
+                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  Data:
+                                </Text>
+                                <Tooltip disabled={entity.data.length < 24} content={entity.data} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                    {_.truncate(entity.data, { length: 24 })}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                             </Flex>
                           ))}
@@ -557,13 +588,14 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
 
                         <CompareAttributeDialogCollapsible
                           sectionKey={"add-remove"}
-                          icon={"add"}
-                          color={"green"}
-                          label={"Add or Remove"}
+                          icon={"remove"}
+                          color={entityOnlyValues.length === 0 ? "gray" : "purple"}
+                          label={"Added or Removed"}
                           count={entityOnlyValues.length}
+                          disabled={entityOnlyValues.length === 0}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.400"}>
+                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
                           )}
@@ -575,9 +607,9 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               borderBottom={"1px"}
                               borderColor={"purple.200"}
                               pb={"0.5"}
+                              ml={"0.5"}
                             >
-                              Added to {props.modifiedAttribute.name}
-                              {props.entityName ? ` (${props.entityName})` : ""}
+                              Added to Current Entity
                             </Text>
                           )}
                           {entityOnlyValues.map((value) => (
@@ -593,8 +625,13 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"gray.500"}>
-                                  Added:
+                                  Value:
                                 </Text>
+                                <Icon
+                                  name={getValueTypeIconProps(value.type).name}
+                                  color={getValueTypeIconProps(value.type).color}
+                                  size={"xs"}
+                                />
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                                   {value.name}
                                 </Text>
@@ -607,11 +644,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  <Text fontSize={"xs"} color={"red.500"} fontWeight={"semibold"}>
-                                    Remove
-                                  </Text>
-                                </Checkbox.Label>
+                                <Checkbox.Label fontSize={"xs"}>Remove</Checkbox.Label>
                               </Checkbox.Root>
                             </Flex>
                           ))}
@@ -631,20 +664,21 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                         gap={"2"}
                       >
                         <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            {templateAttribute.name}
-                          </Text>
                           <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.template.color.icon}>
                             Template
+                          </Text>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            {templateAttribute.name}
                           </Text>
                         </Flex>
 
                         <CompareAttributeDialogCollapsible
                           sectionKey={"unmodified"}
                           icon={"check"}
-                          color={"blue"}
+                          color={unchangedValues.length === 0 ? "gray" : "green"}
                           label={"Unmodified"}
                           count={unchangedValues.length}
+                          disabled={unchangedValues.length === 0}
                         >
                           {unchangedValues.length === 0 && (
                             <Text fontSize={"xs"} color={"gray.500"}>
@@ -652,29 +686,50 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             </Text>
                           )}
                           {unchangedValues.map(({ template }) => (
-                            <Text key={template._id} fontSize={"xs"} color={"blue.800"} fontWeight={"semibold"}>
-                              {template.name}
-                            </Text>
+                            <Flex
+                              key={template._id}
+                              direction={"row"}
+                              gap={"1"}
+                              align={"center"}
+                              bg={"white"}
+                              p={"1"}
+                              rounded={"sm"}
+                              justify={"space-between"}
+                            >
+                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Text fontSize={"xs"} color={"gray.500"}>
+                                  Value:
+                                </Text>
+                                <Icon
+                                  name={getValueTypeIconProps(template.type).name}
+                                  color={getValueTypeIconProps(template.type).color}
+                                  size={"xs"}
+                                />
+                                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                  {template.name}
+                                </Text>
+                              </Flex>
+                            </Flex>
                           ))}
                         </CompareAttributeDialogCollapsible>
 
                         <CompareAttributeDialogCollapsible
                           sectionKey={"modified"}
                           icon={"edit"}
-                          color={"orange"}
+                          color={modifiedValues.length === 0 ? "gray" : "orange"}
                           label={"Modified"}
                           count={modifiedValues.length}
+                          disabled={modifiedValues.length === 0}
                         >
                           {modifiedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"}>
+                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
                               No Modified Values
                             </Text>
                           )}
                           {modifiedValues.map(({ template }) => (
                             <Flex
                               key={template._id}
-                              direction={"row"}
-                              justify={"space-between"}
+                              direction={"column"}
                               gap={"0.5"}
                               bg={"white"}
                               p={"1.5"}
@@ -682,24 +737,41 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               borderLeft={"3px"}
                               borderLeftColor={"orange.400"}
                             >
+                              <Flex direction={"row"} justify={"space-between"} gap={"0.5"}>
+                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                  <Text fontSize={"xs"} color={"gray.500"}>
+                                    Value:
+                                  </Text>
+                                  <Icon
+                                    name={getValueTypeIconProps(template.type).name}
+                                    color={getValueTypeIconProps(template.type).color}
+                                    size={"xs"}
+                                  />
+                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                    {template.name}
+                                  </Text>
+                                </Flex>
+                                <Checkbox.Root
+                                  size={"xs"}
+                                  colorPalette={"blue"}
+                                  checked={adoptModifiedValueIds.has(template._id)}
+                                  onCheckedChange={() => toggleSet(setAdoptModifiedValueIds, template._id)}
+                                >
+                                  <Checkbox.HiddenInput />
+                                  <Checkbox.Control />
+                                  <Checkbox.Label fontSize={"xs"}>Reset to Template</Checkbox.Label>
+                                </Checkbox.Root>
+                              </Flex>
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"gray.500"}>
-                                  Template:
+                                  Data:
                                 </Text>
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {template.name}
-                                </Text>
+                                <Tooltip disabled={template.data.length < 24} content={template.data} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                    {_.truncate(template.data, { length: 24 })}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
-                              <Checkbox.Root
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={adoptModifiedValueIds.has(template._id)}
-                                onCheckedChange={() => toggleSet(setAdoptModifiedValueIds, template._id)}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>Use Template</Checkbox.Label>
-                              </Checkbox.Root>
                             </Flex>
                           ))}
                         </CompareAttributeDialogCollapsible>
@@ -707,12 +779,13 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                         <CompareAttributeDialogCollapsible
                           sectionKey={"add-remove"}
                           icon={"add"}
-                          color={"green"}
-                          label={"Add or Remove"}
+                          color={templateOnlyValues.length === 0 ? "gray" : "teal"}
+                          label={"Added or Removed"}
                           count={templateOnlyValues.length}
+                          disabled={templateOnlyValues.length === 0}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.400"}>
+                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
                           )}
@@ -724,8 +797,9 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               borderBottom={"1px"}
                               borderColor={"teal.200"}
                               pb={"0.5"}
+                              ml={"0.5"}
                             >
-                              Available in Template ({templateAttribute.name})
+                              Available in Template
                             </Text>
                           )}
                           {templateOnlyValues.map((value) => (
@@ -741,8 +815,13 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"gray.500"}>
-                                  Template:
+                                  Value:
                                 </Text>
+                                <Icon
+                                  name={getValueTypeIconProps(value.type).name}
+                                  color={getValueTypeIconProps(value.type).color}
+                                  size={"xs"}
+                                />
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                                   {value.name}
                                 </Text>
@@ -755,11 +834,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  <Text fontSize={"xs"} color={"green.600"} fontWeight={"semibold"}>
-                                    Add
-                                  </Text>
-                                </Checkbox.Label>
+                                <Checkbox.Label fontSize={"xs"}>Add</Checkbox.Label>
                               </Checkbox.Root>
                             </Flex>
                           ))}

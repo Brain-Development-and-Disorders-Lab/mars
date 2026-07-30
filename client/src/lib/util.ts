@@ -11,7 +11,6 @@ import {
   IconNames,
   SearchAttributeValue,
   SearchQuery,
-  UserModel,
   UserWorkspacePermissions,
 } from "@types";
 

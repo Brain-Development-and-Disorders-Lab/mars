@@ -486,7 +486,7 @@ const Template = () => {
       },
       header: "Entity",
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
     }),
     usageColumnHelper.accessor("modifications", {
@@ -498,7 +498,7 @@ const Template = () => {
               {modifications.map((modification) => {
                 return (
                   <Tag.Root colorPalette={"orange"}>
-                    <Tag.Label fontSize={"xs"}>{modification}</Tag.Label>
+                    <Tag.Label fontSize={"xs"}>{_.capitalize(modification)}</Tag.Label>
                   </Tag.Root>
                 );
               })}
@@ -647,44 +647,6 @@ const Template = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {/* Actions Menu */}
-            <Menu.Root size={"sm"}>
-              <Menu.Trigger asChild>
-                <Button size={"xs"} rounded={"md"} colorPalette={"yellow"} data-testid={"templateActionsButton"}>
-                  Actions
-                  <Icon name={"lightning"} size={"xs"} />
-                </Button>
-              </Menu.Trigger>
-              <Menu.Positioner>
-                <Menu.Content>
-                  <Menu.Item
-                    fontSize={"xs"}
-                    value={"export"}
-                    onClick={() => setExportOpen(true)}
-                    disabled={templateArchived || !!previewVersion}
-                  >
-                    <Icon name={"download"} size={"xs"} />
-                    Export
-                  </Menu.Item>
-                  <Tooltip
-                    content={"Insufficient permissions in this Workspace"}
-                    disabled={workspacePermissions.templates.archive}
-                    showArrow
-                  >
-                    <Menu.Item
-                      fontSize={"xs"}
-                      value={"archive"}
-                      onClick={() => setArchiveDialogOpen(true)}
-                      disabled={templateArchived || !workspacePermissions.templates.archive}
-                    >
-                      <Icon name={"archive"} size={"xs"} />
-                      Archive
-                    </Menu.Item>
-                  </Tooltip>
-                </Menu.Content>
-              </Menu.Positioner>
-            </Menu.Root>
-
             {templateArchived ? (
               <Tooltip
                 content={"Insufficient permissions in this Workspace"}
@@ -732,6 +694,44 @@ const Template = () => {
                 </Tooltip>
               </Flex>
             )}
+
+            {/* Actions Menu */}
+            <Menu.Root size={"sm"}>
+              <Menu.Trigger asChild>
+                <Button size={"xs"} rounded={"md"} colorPalette={"yellow"} data-testid={"templateActionsButton"}>
+                  Actions
+                  <Icon name={"lightning"} size={"xs"} />
+                </Button>
+              </Menu.Trigger>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    fontSize={"xs"}
+                    value={"export"}
+                    onClick={() => setExportOpen(true)}
+                    disabled={templateArchived || !!previewVersion}
+                  >
+                    <Icon name={"download"} size={"xs"} />
+                    Export
+                  </Menu.Item>
+                  <Tooltip
+                    content={"Insufficient permissions in this Workspace"}
+                    disabled={workspacePermissions.templates.archive}
+                    showArrow
+                  >
+                    <Menu.Item
+                      fontSize={"xs"}
+                      value={"archive"}
+                      onClick={() => setArchiveDialogOpen(true)}
+                      disabled={templateArchived || !workspacePermissions.templates.archive}
+                    >
+                      <Icon name={"archive"} size={"xs"} />
+                      Archive
+                    </Menu.Item>
+                  </Tooltip>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
 
             {/* Version history */}
             <Drawer.Root

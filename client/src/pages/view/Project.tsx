@@ -247,6 +247,7 @@ const Project = () => {
         description
         attributes {
           _id
+          name
         }
       }
       workspace(_id: $workspace) {
@@ -665,7 +666,7 @@ const Project = () => {
         if (_.isEqual(description, "")) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -688,17 +689,52 @@ const Project = () => {
         const attributes = info.getValue();
         if (_.isUndefined(attributes)) {
           return <SkeletonText noOfLines={1} />;
+        } else {
+          // 0 Attributes
+          if (attributes.length === 0) {
+            return (
+              <Tag.Root colorPalette={"orange"}>
+                <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+              </Tag.Root>
+            );
+          }
+
+          // Multiple Attributes
+          if (attributes.length > 2) {
+            return (
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                {attributes.slice(0, 2).map((attribute) => (
+                  <Tag.Root colorPalette={"teal"}>
+                    <Tag.StartElement>
+                      <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    </Tag.StartElement>
+                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                  </Tag.Root>
+                ))}
+                <Text fontSize={"xs"}>
+                  and {attributes.length - 2} other{attributes.length - 2 !== 1 ? "s" : ""}
+                </Text>
+              </Flex>
+            );
+          } else {
+            return (
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                {attributes.map((attribute) => (
+                  <Tag.Root colorPalette={"teal"}>
+                    <Tag.StartElement>
+                      <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    </Tag.StartElement>
+                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                  </Tag.Root>
+                ))}
+              </Flex>
+            );
+          }
         }
-        return (
-          <Tag.Root colorPalette={attributes.length > 0 ? "green" : "orange"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{attributes.length > 0 ? attributes.length : "None"}</Tag.Label>
-          </Tag.Root>
-        );
       },
       header: "Attributes",
       meta: {
         minWidth: 120,
-        maxWidth: 120,
       },
     }),
   ];
@@ -847,6 +883,53 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+            {displayProjectArchived ? (
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.archive}
+                showArrow
+              >
+                <Button
+                  onClick={handleRestoreClick}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  disabled={!workspacePermissions.projects.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
+            ) : (
+              <Flex gap={"1"}>
+                {editing && (
+                  <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
+                    Cancel
+                    <Icon name={"cross"} size={"xs"} />
+                  </Button>
+                )}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.edit}
+                  showArrow
+                >
+                  <Button
+                    id={"editProjectButton"}
+                    colorPalette={editing ? "green" : "blue"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={handleEditClick}
+                    loadingText={"Saving..."}
+                    loading={isUpdating}
+                    disabled={!!previewVersion || !workspacePermissions.projects.edit}
+                  >
+                    {editing ? "Save" : "Edit"}
+                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
+                  </Button>
+                </Tooltip>
+              </Flex>
+            )}
+
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -899,53 +982,6 @@ const Project = () => {
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
-
-            {displayProjectArchived ? (
-              <Tooltip
-                content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.projects.archive}
-                showArrow
-              >
-                <Button
-                  onClick={handleRestoreClick}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"orange"}
-                  disabled={!workspacePermissions.projects.archive}
-                >
-                  Restore
-                  <Icon name={"rewind"} size={"xs"} />
-                </Button>
-              </Tooltip>
-            ) : (
-              <Flex gap={"1"}>
-                {editing && (
-                  <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
-                    Cancel
-                    <Icon name={"cross"} size={"xs"} />
-                  </Button>
-                )}
-                <Tooltip
-                  content={"Insufficient permissions in this Workspace"}
-                  disabled={workspacePermissions.projects.edit}
-                  showArrow
-                >
-                  <Button
-                    id={"editProjectButton"}
-                    colorPalette={editing ? "green" : "blue"}
-                    size={"xs"}
-                    rounded={"md"}
-                    onClick={handleEditClick}
-                    loadingText={"Saving..."}
-                    loading={isUpdating}
-                    disabled={!!previewVersion || !workspacePermissions.projects.edit}
-                  >
-                    {editing ? "Save" : "Edit"}
-                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
-                  </Button>
-                </Tooltip>
-              </Flex>
-            )}
 
             {/* Version history */}
             <Drawer.Root

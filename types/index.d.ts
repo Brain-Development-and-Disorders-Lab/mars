@@ -132,6 +132,7 @@ export type CompareAttributeDialogCollapsibleProps = {
   color: string;
   label: string;
   count: number;
+  disabled: boolean;
   children: React.ReactNode;
 };
 

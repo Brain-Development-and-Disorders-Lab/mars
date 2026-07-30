@@ -224,9 +224,12 @@ const Entities = () => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
-              </Text>
+              <Flex gap={"1"} align={"center"}>
+                <Icon name={"entity"} color={GLOBAL_STYLES.entity.color.icon} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 48 })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Button
               size="2xs"
@@ -244,7 +247,7 @@ const Entities = () => {
       },
       header: "Name",
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("description", {
@@ -252,7 +255,7 @@ const Entities = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -267,40 +270,82 @@ const Entities = () => {
       header: "Description",
       enableHiding: true,
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("attributes", {
-      cell: (info) => (
-        <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
-        </Tag.Root>
-      ),
+      cell: (info) => {
+        const attributes = info.row.original.attributes;
+
+        // 0 Attributes
+        if (attributes.length === 0) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+            </Tag.Root>
+          );
+        }
+
+        // Multiple Attributes
+        if (attributes.length > 1) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.slice(0, 1).map((attribute) => (
+                <Tag.Root colorPalette={"teal"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+              <Text fontSize={"xs"}>
+                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.map((attribute) => (
+                <Tag.Root colorPalette={"teal"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+            </Flex>
+          );
+        }
+      },
       header: "Attributes",
       enableHiding: true,
       meta: {
-        minWidth: 120,
-        maxWidth: 120,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("attachments", {
       cell: (info) => (
         <Tag.Root colorPalette={info.getValue().length > 0 ? "purple" : "orange"} size={"sm"}>
-          <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
+          <Tag.Label fontSize={"xs"}>
+            {info.getValue().length > 0 ? info.getValue().length : "No Attachments"}
+          </Tag.Label>
         </Tag.Root>
       ),
       header: "Attachments",
       enableHiding: true,
       meta: {
-        minWidth: 120,
-        maxWidth: 120,
+        minWidth: 180,
+        maxWidth: 180,
       },
     }),
     columnHelper.accessor("created", {
       cell: (info) => (
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-          {dayjs(info.getValue()).fromNow()}
-        </Text>
+        <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        </Tooltip>
       ),
       header: "Created",
       enableHiding: true,
