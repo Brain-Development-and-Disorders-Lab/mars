@@ -49,3 +49,22 @@ a:hover {
 .live-indicator {
   animation: pulse 2s ease-in-out infinite;
 }
+
+/* Decorative animated border for AI-powered search */
+@keyframes ai-border-glow {
+  0%,
+  100% {
+    border-color: #6f5ef9;
+    border-width: 1.5px;
+    border-style: solid;
+  }
+  50% {
+    border-color: #4fc8ff;
+    border-width: 1.5px;
+    border-style: solid;
+  }
+}
+
+.ai-search-border {
+  animation: ai-border-glow 3s ease-in-out infinite;
+}

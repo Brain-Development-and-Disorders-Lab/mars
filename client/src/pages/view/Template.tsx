@@ -58,7 +58,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Template = () => {
   const { id } = useParams();
@@ -544,7 +544,7 @@ const Template = () => {
                   <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
                 </Tag.Root>
               </Flex>
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -612,7 +612,7 @@ const Template = () => {
                     textDecoration: "underline",
                   }}
                 >
-                  <Icon size={"xs"} name={"template"} color={GLOBAL_STYLES.template.color.icon} />
+                  <Icon size={"xs"} name={"template"} color={STYLES.template.color.icon} />
                   Templates
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -626,21 +626,21 @@ const Template = () => {
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={displayTemplateArchived ? "gray.500" : GLOBAL_STYLES.template.color.icon}
-                bg={displayTemplateArchived ? GLOBAL_STYLES.card.bg : "teal.50"}
+                borderColor={displayTemplateArchived ? "gray.500" : STYLES.template.color.icon}
+                bg={displayTemplateArchived ? STYLES.card.bg : "teal.50"}
                 rounded={"md"}
               >
                 <Icon
                   name={"template"}
                   size={"sm"}
-                  color={displayTemplateArchived ? "gray.500" : GLOBAL_STYLES.template.color.icon}
+                  color={displayTemplateArchived ? "gray.500" : STYLES.template.color.icon}
                 />
                 <Tooltip content={`${displayTemplateArchived ? "Archived: " : ""}${displayTemplateName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
                     {_.truncate(displayTemplateName, { length: 30 })}
                   </Heading>
                 </Tooltip>
-                {displayTemplateArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
+                {displayTemplateArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
               </Flex>
             </Flex>
           </Flex>
@@ -698,7 +698,7 @@ const Template = () => {
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button size={"xs"} rounded={"md"} colorPalette={"yellow"} data-testid={"templateActionsButton"}>
+                <Button size={"xs"} rounded={"md"} colorPalette={"action"} data-testid={"templateActionsButton"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -760,7 +760,7 @@ const Template = () => {
                     <Drawer.CloseTrigger asChild>
                       <CloseButton top={"6px"} size={"2xs"} onClick={() => setHistoryOpen(false)} />
                     </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+                    <Drawer.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
                         <Icon name={"clock"} size={"xs"} />
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -794,7 +794,7 @@ const Template = () => {
                         gap={"2"}
                         align={"start"}
                         rounded={"md"}
-                        bg={"gray.100"}
+                        bg={"surface.muted"}
                         p={"2"}
                         justify={"space-between"}
                         wrap={"wrap"}
@@ -957,7 +957,7 @@ const Template = () => {
                                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                                             {templateVersion.name}
                                           </Text>
-                                          <Text fontSize={"xs"} color={"gray.500"}>
+                                          <Text fontSize={"xs"} color={"text.subtle"}>
                                             {dayjs(templateVersion.timestamp).fromNow()}
                                           </Text>
                                         </Flex>
@@ -968,7 +968,7 @@ const Template = () => {
                                               disabled={templateVersion.message.length <= 40}
                                               showArrow
                                             >
-                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                                              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                                                 {_.truncate(templateVersion.message, { length: 40 })}
                                               </Text>
                                             </Tooltip>
@@ -1061,7 +1061,7 @@ const Template = () => {
                                           gap={"2"}
                                           mt={"1"}
                                           p={"2"}
-                                          bg={GLOBAL_STYLES.card.bg}
+                                          bg={STYLES.card.bg}
                                           rounded={"md"}
                                         >
                                           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1095,8 +1095,8 @@ const Template = () => {
                                             gap={"1"}
                                             p={"2"}
                                             rounded={"md"}
-                                            border={GLOBAL_STYLES.border.style}
-                                            borderColor={GLOBAL_STYLES.border.color}
+                                            border={STYLES.border.style}
+                                            borderColor={STYLES.border.color}
                                             bg={"white"}
                                           >
                                             <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -1174,22 +1174,17 @@ const Template = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              bg={"gray.100"}
+              bg={"surface.muted"}
               rounded={"md"}
               grow={"1"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Name
                   </Text>
                   <Input
@@ -1202,44 +1197,29 @@ const Template = () => {
                     readOnly={!editing || !!previewVersion}
                     bg={"white"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   />
                 </Flex>
               </Flex>
 
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
                   <ActorTag identifier={template.owner} fallback={"No Owner"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={template.timestamp} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -1253,14 +1233,14 @@ const Template = () => {
               p={"2"}
               h={"100%"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <Textarea
@@ -1283,13 +1263,13 @@ const Template = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Values ({templateValues.length})
               </Text>
               <Values
@@ -1307,13 +1287,13 @@ const Template = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Usage ({templateUsage.length} {templateUsage.length !== 1 ? "Entities" : "Entity"})
               </Text>
               {templateUsage.length > 0 ? (
@@ -1330,7 +1310,7 @@ const Template = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
+                      <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Usage</EmptyState.Description>
                   </EmptyState.Content>

@@ -51,7 +51,7 @@ import slugify from "slugify";
 import dayjs from "dayjs";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -387,7 +387,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         );
@@ -604,7 +604,7 @@ const Search = () => {
             <Heading size={"xl"}>Search</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
               {workspaceName}
             </Text>
           </SkeletonText>
@@ -625,7 +625,7 @@ const Search = () => {
             value={activeTab}
             onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
           >
-            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
+            <Flex bg={"surface.muted"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
               <Button
                 size={"xs"}
                 rounded={"sm"}
@@ -664,8 +664,8 @@ const Search = () => {
                     gap={"2"}
                     p={"2"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   >
                     <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -697,7 +697,7 @@ const Search = () => {
                               fontSize={"xs"}
                               fontWeight={"semibold"}
                               ml={"0.5"}
-                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                              color={STYLES.font.secondaryHeader.color}
                             >
                               Search Options
                             </Text>
@@ -719,7 +719,7 @@ const Search = () => {
                               fontSize={"xs"}
                               fontWeight={"semibold"}
                               ml={"0.5"}
-                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                              color={STYLES.font.secondaryHeader.color}
                             >
                               Entity Filters
                             </Text>
@@ -732,7 +732,7 @@ const Search = () => {
                                     fontSize={"xs"}
                                     fontWeight={"semibold"}
                                     ml={"0.5"}
-                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                    color={STYLES.font.secondaryHeader.color}
                                   >
                                     Start
                                   </Text>
@@ -754,7 +754,7 @@ const Search = () => {
                                     fontSize={"xs"}
                                     fontWeight={"semibold"}
                                     ml={"0.5"}
-                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                    color={STYLES.font.secondaryHeader.color}
                                   >
                                     End
                                   </Text>
@@ -859,14 +859,14 @@ const Search = () => {
 
                 {/* Search input and submit */}
                 <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
+                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"ai.default"} />}>
                     <Input
                       size={"xs"}
                       rounded={"md"}
                       value={query}
                       placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
-                      borderColor={isAISearch ? "purple.400" : undefined}
-                      outlineColor={isAISearch ? "purple.400" : undefined}
+                      background={"white"}
+                      className={isAISearch ? "ai-search-border" : undefined}
                       onChange={(event) => setQuery(event.target.value)}
                       onKeyUp={(event) => {
                         if (event.key === "Enter" && query !== "") runSearch();
@@ -878,7 +878,7 @@ const Search = () => {
                       <Button
                         size={"xs"}
                         rounded={"md"}
-                        colorPalette={isAISearch ? "purple" : "gray"}
+                        colorPalette={isAISearch ? "ai" : "gray"}
                         variant={isAISearch ? "solid" : "outline"}
                         disabled={isSearching}
                         onClick={() => setIsAISearch((prev) => !prev)}
@@ -892,7 +892,7 @@ const Search = () => {
                     aria-label={"Search"}
                     size={"xs"}
                     rounded={"md"}
-                    colorPalette={isAISearch ? "purple" : "green"}
+                    colorPalette={isAISearch ? "ai" : "green"}
                     disabled={query === "" || isTranslating}
                     loading={isTranslating || isSearching}
                     loadingText={"Searching..."}
@@ -940,7 +940,7 @@ const Search = () => {
           <Flex gap={"1"} p={"0"} w={"100%"}>
             {isSearching && (
               <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
-                <Spinner size={"lg"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                <Spinner size={"lg"} color={STYLES.font.secondaryHeader.color} />
               </Flex>
             )}
 
@@ -964,7 +964,7 @@ const Search = () => {
                   </>
                 ) : (
                   <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       No results found
                     </Text>
                   </Flex>

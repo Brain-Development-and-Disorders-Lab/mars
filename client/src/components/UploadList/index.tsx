@@ -34,7 +34,7 @@ const FileUploadList = () => {
               <Tag.Root key={getFileExtension(file.type)} size={"sm"} colorPalette={"gray"} variant={"outline"}>
                 <Tag.Label fontSize={"xs"}>{getFileExtension(file.type)}</Tag.Label>
               </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+              <Text fontSize={"xs"} color={"text.muted"}>
                 <FormatByte value={file.size} />
               </Text>
             </Flex>

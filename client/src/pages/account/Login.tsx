@@ -23,7 +23,7 @@ import { toaster } from "@components/Toast";
 import { auth } from "@lib/auth";
 
 // Variables
-import { APP_URL, GLOBAL_STYLES } from "@variables";
+import { APP_URL, STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
@@ -154,8 +154,8 @@ const Login = () => {
             bg={"white"}
             align={"center"}
             justify={"center"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"lg"}
             shadow={"sm"}
           >
@@ -164,7 +164,7 @@ const Login = () => {
               <Heading size={"2xl"} fontWeight={"semibold"}>
                 Sign in
               </Heading>
-              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.subtle"}>
                 Use one of the sign in options below to get started.
               </Text>
             </Flex>
@@ -173,7 +173,7 @@ const Login = () => {
               <Flex direction={"column"} gap={"2"}>
                 <Fieldset.Root>
                   <Field.Root gap={"0.5"} required>
-                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"text.muted"}>
                       Email
                       <Field.RequiredIndicator />
                     </FieldLabel>
@@ -189,7 +189,7 @@ const Login = () => {
                   </Field.Root>
 
                   <Field.Root gap={"0.5"} required>
-                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"gray.600"}>
+                    <FieldLabel fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={"text.muted"}>
                       Password
                       <Field.RequiredIndicator />
                     </FieldLabel>
@@ -205,10 +205,10 @@ const Login = () => {
                     />
                     <Text
                       fontSize={"xs"}
-                      color={"gray.400"}
+                      color={"text.faint"}
                       fontWeight={"semibold"}
                       cursor={"pointer"}
-                      _hover={{ color: GLOBAL_STYLES.font.secondaryHeader.color }}
+                      _hover={{ color: STYLES.font.secondaryHeader.color }}
                       alignSelf={"flex-end"}
                       onClick={() => navigate("/forgot-password")}
                     >
@@ -220,7 +220,7 @@ const Login = () => {
                     id={"userLoginButton"}
                     size={"xs"}
                     rounded={"md"}
-                    colorScheme={"green"}
+                    colorPalette={"green"}
                     disabled={email === "" || password === "" || isOrcidLoading}
                     onClick={onEmailLoginClick}
                     loading={isEmailLoginLoading}
@@ -234,7 +234,7 @@ const Login = () => {
 
               <Box position={"relative"} p={"4"}>
                 <Separator />
-                <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                <AbsoluteCenter bg={"white"} color={"text.subtle"} px={"4"}>
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
                     or
                   </Text>
@@ -261,7 +261,7 @@ const Login = () => {
             <Spacer />
 
             <Flex direction={"column"} gap={"2"} align={"center"} w={"100%"}>
-              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.subtle"}>
                 Don't have an account yet?
               </Text>
               <Button
@@ -269,7 +269,7 @@ const Login = () => {
                 w={"100%"}
                 size={"xs"}
                 rounded={"md"}
-                colorScheme={"green"}
+                colorPalette={"green"}
                 onClick={() => navigate("/signup")}
               >
                 Create Account
@@ -278,7 +278,7 @@ const Login = () => {
             </Flex>
 
             <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                 v{import.meta.env.VITE_VERSION}
               </Text>
             </Flex>

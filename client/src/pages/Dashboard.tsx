@@ -58,7 +58,7 @@ const UPDATE_USER = gql`
 import { auth } from "@lib/auth";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -253,7 +253,7 @@ const Dashboard = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Flex gap={"1"} align={"center"}>
-              <Icon name={"entity"} color={GLOBAL_STYLES.entity.color.icon} size={"xs"} />
+              <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -288,7 +288,7 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
               {dayjs(info.getValue()).fromNow()}
             </Text>
           </Tooltip>
@@ -342,9 +342,9 @@ const Dashboard = () => {
           return (
             <Flex direction={"row"} gap={"1"} align={"center"}>
               {attributes.slice(0, 1).map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
+                <Tag.Root colorPalette={"template"}>
                   <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                   </Tag.StartElement>
                   <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                 </Tag.Root>
@@ -358,9 +358,9 @@ const Dashboard = () => {
           return (
             <Flex direction={"row"} gap={"1"} align={"center"}>
               {attributes.map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
+                <Tag.Root colorPalette={"template"}>
                   <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                   </Tag.StartElement>
                   <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                 </Tag.Root>
@@ -387,7 +387,7 @@ const Dashboard = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+                <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -423,7 +423,7 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
               {dayjs(info.getValue()).fromNow()}
             </Text>
           </Tooltip>
@@ -595,7 +595,7 @@ const Dashboard = () => {
               <Heading size={"xl"}>Dashboard</Heading>
             </Flex>
             <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
                 {workspaceName}
               </Text>
             </SkeletonText>
@@ -615,14 +615,14 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Entities
               </Text>
             </Flex>
@@ -646,14 +646,14 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Projects
               </Text>
             </Flex>
@@ -677,14 +677,14 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Templates
               </Text>
             </Flex>
@@ -709,14 +709,14 @@ const Dashboard = () => {
               minW={"120px"}
               p={"2"}
               gap={"1"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"person"} size={"xs"} color={"gray.500"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"person"} size={"xs"} color={"text.subtle"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Collaborators
                 </Text>
               </Flex>
@@ -738,14 +738,14 @@ const Dashboard = () => {
               p={"2"}
               rounded={"md"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Recent Projects
                 </Text>
               </Flex>
@@ -764,7 +764,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                      <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -791,14 +791,14 @@ const Dashboard = () => {
               p={"2"}
               rounded={"md"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               minW={"0"}
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"1.5"}>
-                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Recent Entities
                 </Text>
               </Flex>
@@ -821,7 +821,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
+                      <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -856,8 +856,8 @@ const Dashboard = () => {
               p={"2"}
               gap={"1"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               h={"fit-content"}
             >
               <ActivityFeed />

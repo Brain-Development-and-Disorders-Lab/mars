@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
 // Existing and custom components
-import { Button, Flex, Tag, Text } from "@chakra-ui/react";
+import { Button, Flex, Tag, Text, useToken } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -30,14 +30,7 @@ import _ from "lodash";
 import ELK, { ElkNode } from "elkjs";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
-
-// Actual CSS hex values for ReactFlow SVG — Chakra tokens don't apply in style objects
-const GRAPH_EDGE_COLORS: Record<string, string> = {
-  parent: "#DD6B20",
-  child: "#D69E2E",
-  general: "#00B5D8",
-};
+import { STYLES } from "@variables";
 
 const NODE_W = 185;
 const NODE_H = 85;
@@ -47,6 +40,22 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  // ReactFlow renders into SVG/inline style objects, where Chakra token
+  // strings don't resolve, so the actual CSS values are resolved once here
+  // via useToken, keeping STYLES as the single source for these colors.
+  const [edgeParent, edgeChild, edgeGeneral, nodePrimary, nodeSecondary, nodePrimaryBg, nodeCanvasBg, canvasDot] =
+    useToken("colors", [
+      "relationship.parent",
+      "relationship.child",
+      "relationship.general",
+      "graph.primary",
+      "graph.secondary",
+      "graph.primaryBg",
+      "surface.canvas",
+      "chart.canvasDot",
+    ]);
+  const edgeColors: Record<string, string> = { parent: edgeParent, child: edgeChild, general: edgeGeneral };
 
   const GET_ENTITY_DATA = gql`
     query GetEntityData($_id: String) {
@@ -80,7 +89,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   const createLabel = (id: string, name: string, isPrimary: boolean, relCount?: number): React.JSX.Element => (
     <Flex direction={"column"} w={"100%"} h={"100%"} justify={"center"} gap={"1.5"} px={"1"}>
       <Flex align={"center"} gap={"1.5"} w={"100%"}>
-        <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+        <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
         <Tooltip content={name} disabled={name.length < 22}>
           <Text fontWeight={"semibold"} fontSize={"xs"} truncate>
             {_.truncate(name, { length: 22 })}
@@ -89,12 +98,12 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       </Flex>
       <Flex align={"center"} w={"100%"} gap={"1"}>
         {relCount !== undefined && (
-          <Text fontSize={"xs"} color={"gray.500"}>
+          <Text fontSize={"xs"} color={"text.subtle"}>
             {relCount} relationship{relCount !== 1 ? "s" : ""}
           </Text>
         )}
         {isPrimary ? (
-          <Tag.Root size={"sm"} colorPalette={"teal"} ml={"auto"} flexShrink={0}>
+          <Tag.Root size={"sm"} colorPalette={"entity"} ml={"auto"} flexShrink={0}>
             <Tag.Label>Current</Tag.Label>
           </Tag.Root>
         ) : (
@@ -122,8 +131,8 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     position: { x: 0, y: 0 },
     style: {
       border: `2px ${dashed ? "dashed" : "solid"}`,
-      borderColor: isPrimary ? "#38B2AC" : "#A0AEC0",
-      backgroundColor: isPrimary ? "#E6FFFA" : "#FFFFFF",
+      borderColor: isPrimary ? nodePrimary : nodeSecondary,
+      backgroundColor: isPrimary ? nodePrimaryBg : nodeCanvasBg,
       width: `${NODE_W}px`,
       height: `${NODE_H}px`,
       borderRadius: "6px",
@@ -136,8 +145,8 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     id: `${source}_${target}`,
     source,
     target,
-    markerEnd: type !== "general" ? { type: MarkerType.ArrowClosed, color: GRAPH_EDGE_COLORS[type] } : undefined,
-    style: { stroke: GRAPH_EDGE_COLORS[type], strokeWidth: 2 },
+    markerEnd: type !== "general" ? { type: MarkerType.ArrowClosed, color: edgeColors[type] } : undefined,
+    style: { stroke: edgeColors[type], strokeWidth: 2 },
   });
 
   const generateLayout = async (layoutNodes: Node[], layoutEdges: Edge[]): Promise<ElkNode> => {
@@ -277,8 +286,8 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
         w={"100%"}
         h={"100%"}
         rounded={"md"}
-        border={GLOBAL_STYLES.border.style}
-        borderColor={GLOBAL_STYLES.border.color}
+        border={STYLES.border.style}
+        borderColor={STYLES.border.color}
         overflow={"hidden"}
         bg={"white"}
       >
@@ -296,13 +305,13 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
           >
             <MiniMap
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              nodeStrokeColor={(node: any) => node.style?.borderColor || "#A0AEC0"}
+              nodeStrokeColor={(node: any) => node.style?.borderColor || nodeSecondary}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              nodeColor={(node: any) => node.style?.backgroundColor || "#FFFFFF"}
+              nodeColor={(node: any) => node.style?.backgroundColor || nodeCanvasBg}
               nodeBorderRadius={4}
             />
             <Controls />
-            <Background color={"#aaa"} gap={16} />
+            <Background color={canvasDot} gap={16} />
           </ReactFlow>
         )}
       </Flex>

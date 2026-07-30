@@ -20,7 +20,7 @@ import { useLazyQuery } from "@apollo/client/react";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
 
@@ -36,14 +36,14 @@ const getTypeStyle = (
       icon: "project",
       badgeBg: "blue.50",
       badgeBorder: "blue.100",
-      iconColor: GLOBAL_STYLES.project.color.icon,
+      iconColor: STYLES.project.color.icon,
     };
   } else if (type === "templates") {
     return {
       icon: "template",
       badgeBg: "teal.50",
       badgeBorder: "teal.100",
-      iconColor: GLOBAL_STYLES.template.color.icon,
+      iconColor: STYLES.template.color.icon,
     };
   }
   // entities
@@ -51,7 +51,7 @@ const getTypeStyle = (
     icon: "entity",
     badgeBg: "purple.50",
     badgeBorder: "purple.100",
-    iconColor: GLOBAL_STYLES.entity.color.icon,
+    iconColor: STYLES.entity.color.icon,
   };
 };
 
@@ -229,7 +229,7 @@ const Linky = (props: LinkyProps) => {
           align={"center"}
           h={"22px"}
           w={"fit-content"}
-          border={GLOBAL_STYLES.border.style}
+          border={STYLES.border.style}
           borderColor={"orange.200"}
           rounded={"md"}
           overflow={"hidden"}
@@ -240,7 +240,7 @@ const Linky = (props: LinkyProps) => {
           <Flex
             align={"center"}
             justify={"center"}
-            bg={"orange.50"}
+            bg={"status.warning.subtle"}
             px={"1.5"}
             h={"100%"}
             borderRight={"1px solid"}
@@ -250,7 +250,7 @@ const Linky = (props: LinkyProps) => {
           </Flex>
           {/* Deleted label */}
           <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-            <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
               {linkLabel}
             </Text>
           </Flex>
@@ -263,8 +263,8 @@ const Linky = (props: LinkyProps) => {
               align={"center"}
               h={"22px"}
               w={"fit-content"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               overflow={"hidden"}
               cursor={"pointer"}
@@ -279,7 +279,7 @@ const Linky = (props: LinkyProps) => {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={showArchived ? GLOBAL_STYLES.card.bg : badgeBg}
+                bg={showArchived ? STYLES.card.bg : badgeBg}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -298,13 +298,13 @@ const Linky = (props: LinkyProps) => {
                 <Flex
                   align={"center"}
                   justify={"center"}
-                  bg={GLOBAL_STYLES.card.bg}
+                  bg={STYLES.card.bg}
                   px={"1.5"}
                   h={"100%"}
                   borderLeft={"1px solid"}
                   borderColor={"gray.100"}
                 >
-                  <Icon name={"archive"} size={"xs"} color={"gray.500"} />
+                  <Icon name={"archive"} size={"xs"} color={"text.subtle"} />
                 </Flex>
               )}
             </Flex>

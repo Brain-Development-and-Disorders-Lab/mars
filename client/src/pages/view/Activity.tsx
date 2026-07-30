@@ -43,7 +43,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Activity = () => {
   const { workspace } = useWorkspace();
@@ -245,7 +245,7 @@ const Activity = () => {
         const actor = info.getValue();
         if (!actor) {
           return (
-            <Text fontSize={"xs"} color={"gray.500"}>
+            <Text fontSize={"xs"} color={"text.subtle"}>
               Unknown
             </Text>
           );
@@ -275,10 +275,10 @@ const Activity = () => {
     columnHelper.accessor("timestamp", {
       cell: (info) => (
         <Flex direction={"row"} gap={"1"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).format("MMM D, YYYY h:mm A")}
           </Text>
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
             ({dayjs(info.getValue()).fromNow()})
           </Text>
         </Flex>
@@ -300,7 +300,7 @@ const Activity = () => {
             <Heading size={"xl"}>Activity</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
               {workspaceName}
             </Text>
           </SkeletonText>
@@ -339,8 +339,8 @@ const Activity = () => {
               gap={"1"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -370,7 +370,7 @@ const Activity = () => {
                       </Text>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             Start (optional)
                           </Field.Label>
                           <Input
@@ -387,7 +387,7 @@ const Activity = () => {
                           />
                         </Field.Root>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             End (optional)
                           </Field.Label>
                           <Input
@@ -420,7 +420,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Operation Type
                           </Text>
@@ -462,7 +462,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Target Type
                           </Text>
@@ -504,7 +504,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Medium
                           </Text>
@@ -590,8 +590,8 @@ const Activity = () => {
           >
             {/* Live Indicator */}
             <Flex align={"center"} gap={"1"} ml={"0.5"}>
-              <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+              <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"status.success.default"} className="live-indicator" />
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
                 Live
               </Text>
             </Flex>

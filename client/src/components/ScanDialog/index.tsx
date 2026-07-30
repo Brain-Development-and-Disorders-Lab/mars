@@ -23,7 +23,7 @@ import { usePostHog } from "posthog-js/react";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Constants
 const REGION_ID = "scanner-region";
@@ -288,7 +288,13 @@ const ScanDialog = (props: ScanDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+          <Dialog.Header
+            p={"2"}
+            fontWeight={"semibold"}
+            roundedTop={"md"}
+            bg={"surface.emphasized"}
+            color={"text.default"}
+          >
             <Flex direction={"row"} align={"center"} gap={"1"}>
               <Icon name={"scan"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -310,8 +316,8 @@ const ScanDialog = (props: ScanDialogProps) => {
                 h={"100%"}
                 justify={"center"}
                 align={"center"}
-                border={showCamera ? GLOBAL_STYLES.border.style : "none"}
-                borderColor={showCamera ? GLOBAL_STYLES.border.color : "transparent"}
+                border={showCamera ? STYLES.border.style : "none"}
+                borderColor={showCamera ? STYLES.border.color : "transparent"}
                 rounded={"md"}
               ></Flex>
             </Flex>

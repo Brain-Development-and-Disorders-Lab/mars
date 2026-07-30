@@ -16,7 +16,7 @@ import { IGenericItem, IRelationship, AddRelationshipDialogProps, RelationshipTy
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 import {
   RELATIONSHIP_TYPE_ARROW_COLOR,
   RELATIONSHIP_TYPE_ARROW_ICON,
@@ -107,7 +107,7 @@ const AddRelationshipDialog = ({
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content w={["lg", "xl", "2xl"]}>
-            <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+            <Dialog.Header p={"2"} bg={"entity.light"} color={"entity.dark"} roundedTop={"md"}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"graph"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -115,7 +115,7 @@ const AddRelationshipDialog = ({
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} colorPalette={"entity"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -128,12 +128,12 @@ const AddRelationshipDialog = ({
                   align={"center"}
                   p={"2"}
                   rounded={"md"}
-                  bg={GLOBAL_STYLES.card.bg}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
+                  bg={STYLES.card.bg}
+                  border={STYLES.border.style}
+                  borderColor={STYLES.border.color}
                 >
                   <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Source
                     </Text>
                     <Input size={"xs"} rounded={"md"} value={sourceName} readOnly disabled bg={"white"} />
@@ -144,7 +144,7 @@ const AddRelationshipDialog = ({
                     color={RELATIONSHIP_TYPE_ARROW_COLOR[selectedType]}
                   />
                   <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Target
                     </Text>
                     <SearchSelect resultType={"entity"} value={selectedTarget} onChange={setSelectedTarget} />
@@ -156,7 +156,7 @@ const AddRelationshipDialog = ({
                   <Text
                     fontSize={"xs"}
                     fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                    color={STYLES.font.secondaryHeader.color}
                     flexShrink={0}
                   >
                     Type
@@ -195,8 +195,8 @@ const AddRelationshipDialog = ({
                 <Flex
                   direction={"column"}
                   rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
+                  border={STYLES.border.style}
+                  borderColor={STYLES.border.color}
                   overflow={"hidden"}
                 >
                   {staged.length > 0 ? (
@@ -209,7 +209,7 @@ const AddRelationshipDialog = ({
                         px={"2"}
                         py={"1.5"}
                         borderBottom={index < staged.length - 1 ? "1px solid" : "none"}
-                        borderColor={"gray.200"}
+                        borderColor={"border.subtle"}
                         bg={"white"}
                       >
                         <Tooltip content={rel.source.name} disabled={rel.source.name.length < 18} showArrow>
@@ -243,7 +243,7 @@ const AddRelationshipDialog = ({
                   ) : (
                     <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"} grow={"1"}>
                       <Icon name={"graph"} size={"md"} color={"gray.300"} />
-                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                         No Relationships
                       </Text>
                     </Flex>
@@ -252,7 +252,7 @@ const AddRelationshipDialog = ({
               </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                 <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleClose}>
                   Cancel

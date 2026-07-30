@@ -17,7 +17,7 @@ import { useQuery } from "@apollo/client/react";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 
@@ -108,8 +108,8 @@ const ActorTag = (props: ActorTagProps) => {
       justify={"space-around"}
       p={props.size === "sm" ? "1" : "2"}
       rounded={"md"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       bg={"white"}
       minW={"120px"}
       w={"fit-content"}

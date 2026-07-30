@@ -16,7 +16,7 @@ import { AttributeModel, ViewAttributeDialogProps } from "@types";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
   const isEditing = _.isBoolean(props.editing) ? props.editing : false;
@@ -63,7 +63,8 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
             <Dialog.Header
               p={"1"}
               flexShrink={0}
-              bg={GLOBAL_STYLES.template.color.default}
+              bg={"template.light"}
+              color={"template.dark"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
@@ -76,7 +77,7 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"template"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -87,13 +88,13 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                     direction={"row"}
                     gap={"2"}
                     rounded={"md"}
-                    bg={"gray.100"}
+                    bg={"surface.muted"}
                     p={"1"}
                     ml={"0.5"}
                     justify={"space-between"}
                   >
                     <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                      <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                         Using:
                       </Text>
                       {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
@@ -147,16 +148,11 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                     gap={"2"}
                     w={{ base: "100%", md: "50%" }}
                     p={"1"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     rounded={"md"}
                   >
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Name
                     </Text>
                     <Input
@@ -170,7 +166,7 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                       <Text
                         fontWeight={"semibold"}
                         fontSize={"xs"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
                         Owner
@@ -186,16 +182,11 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                     gap={"1"}
                     grow={"1"}
                     p={"1"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     rounded={"md"}
                   >
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Description
                     </Text>
                     <Textarea
@@ -239,10 +230,10 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
               <Dialog.Footer
                 p={"1"}
                 flexShrink={0}
-                bg={"gray.100"}
+                bg={"surface.muted"}
                 roundedBottom={"md"}
                 borderTop={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"border.subtle"}
               >
                 <Flex direction={"row"} justify={"space-between"} gap={"4"} w={"100%"}>
                   <Button

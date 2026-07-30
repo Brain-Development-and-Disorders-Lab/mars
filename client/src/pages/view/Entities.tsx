@@ -50,7 +50,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -225,7 +225,7 @@ const Entities = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"entity"} color={GLOBAL_STYLES.entity.color.icon} size={"xs"} />
+                <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -291,9 +291,9 @@ const Entities = () => {
           return (
             <Flex direction={"row"} gap={"1"} align={"center"}>
               {attributes.slice(0, 1).map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
+                <Tag.Root colorPalette={"template"}>
                   <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                   </Tag.StartElement>
                   <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                 </Tag.Root>
@@ -307,9 +307,9 @@ const Entities = () => {
           return (
             <Flex direction={"row"} gap={"1"} align={"center"}>
               {attributes.map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
+                <Tag.Root colorPalette={"template"}>
                   <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                   </Tag.StartElement>
                   <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                 </Tag.Root>
@@ -342,7 +342,7 @@ const Entities = () => {
     columnHelper.accessor("created", {
       cell: (info) => (
         <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).fromNow()}
           </Text>
         </Tooltip>
@@ -395,11 +395,11 @@ const Entities = () => {
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
             <Flex direction={"column"} gap={"0"} align={"start"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
                 <Heading size={"xl"}>Entities</Heading>
               </Flex>
               <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
                   {workspaceName}
                 </Text>
               </SkeletonText>
@@ -436,8 +436,8 @@ const Entities = () => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -470,7 +470,7 @@ const Entities = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Start (optional)
                           </Field.Label>
@@ -492,7 +492,7 @@ const Entities = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             End (optional)
                           </Field.Label>
@@ -553,11 +553,7 @@ const Entities = () => {
                             ))}
 
                         {entityData.length === 0 && (
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
-                          >
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                             No Entity Owners
                           </Text>
                         )}
@@ -713,7 +709,7 @@ const Entities = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.icon} />
+                  <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.icon} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}

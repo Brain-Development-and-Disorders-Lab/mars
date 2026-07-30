@@ -57,7 +57,7 @@ import { getValueTypeIconProps } from "@lib/util";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 interface SelectOption extends OptionBase {
   label: string;
@@ -148,8 +148,8 @@ const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption
   return (
     <Flex
       direction={"column"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -238,8 +238,8 @@ const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
     <Flex
       direction={"column"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -452,7 +452,7 @@ const ValueDataSelect = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+            <Dialog.Header p={"0"} roundedTop={"md"} bg={"surface.emphasized"} color={"text.default"}>
               <Flex direction={"row"} align={"center"} gap={"1"} p={"2"}>
                 <Icon name={"v_select"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -531,10 +531,10 @@ const ValueDataSelect = (props: {
                         justify={"center"}
                         minH={"60px"}
                         rounded={"md"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderColor={GLOBAL_STYLES.border.color}
+                        border={STYLES.border.style}
+                        borderColor={STYLES.border.color}
                       >
-                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                           No Options added
                         </Text>
                       </Flex>
@@ -543,7 +543,7 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
@@ -593,8 +593,8 @@ const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<
 const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
   <components.Placeholder {...props}>
     <Flex direction={"row"} align={"center"} gap={"1"}>
-      <Icon name={"grid"} size={"xs"} color={"gray.400"} />
-      <Text fontSize={"xs"} color={"gray.400"}>
+      <Icon name={"grid"} size={"xs"} color={"text.faint"} />
+      <Text fontSize={"xs"} color={"text.faint"}>
         {props.children}
       </Text>
     </Flex>
@@ -628,7 +628,7 @@ const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) =
           {iconProps ? (
             <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
           ) : (
-            <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+            <Icon name={"grid"} size={"xs"} color={"text.faint"} />
           )}
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
@@ -831,13 +831,13 @@ const Values = (props: {
           ref={tableRef}
           minW={getResponsiveValue({ base: "360px", sm: "440px", md: "490px" }, "600px")}
           w={"100%"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           borderRadius={"md"}
           overflow={"hidden"}
         >
           {/* Header Row */}
-          <Flex gap={0} bg={"gray.100"} borderBottom={"1px solid"} borderColor={"gray.200"} direction={"row"}>
+          <Flex gap={0} bg={"surface.muted"} borderBottom={"1px solid"} borderColor={"border.subtle"} direction={"row"}>
             {/* Select Column Header */}
             {!props.viewOnly && (
               <Flex
@@ -848,9 +848,9 @@ const Values = (props: {
                 py={1}
                 align={"center"}
                 justify={"center"}
-                bg={"gray.100"}
+                bg={"surface.muted"}
                 borderRight={"1px solid"}
-                borderColor={"gray.200"}
+                borderColor={"border.subtle"}
                 overflow={"hidden"}
                 flexShrink={0}
               >
@@ -875,10 +875,10 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               borderRight={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -912,10 +912,10 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               borderRight={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -948,8 +948,8 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -996,11 +996,11 @@ const Values = (props: {
           {!props.viewOnly && (
             <Flex
               borderTop={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               p={0}
               justify={"center"}
               align={"center"}
-              bg={"gray.100"}
+              bg={"surface.muted"}
             >
               <Button
                 id={"addValueRowButton"}
@@ -1088,7 +1088,7 @@ const Values = (props: {
           {!props.viewOnly && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
+                <Button colorPalette={"action"} size={"xs"} rounded={"md"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -1258,19 +1258,19 @@ const ValueRow = (props: {
     let iconStyle: IconNames = "link";
     let badgeBg = "blue.50";
     let badgeBorder = "blue.100";
-    let iconColor = GLOBAL_STYLES.project.color.icon;
+    let iconColor = STYLES.project.color.icon;
 
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
         badgeBg = "blue.50";
         badgeBorder = "blue.100";
-        iconColor = GLOBAL_STYLES.project.color.icon;
+        iconColor = STYLES.project.color.icon;
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";
         badgeBorder = "gray.200";
-        iconColor = GLOBAL_STYLES.font.secondaryHeader.color;
+        iconColor = STYLES.font.secondaryHeader.color;
       }
     }
 
@@ -1295,8 +1295,8 @@ const ValueRow = (props: {
                 direction={"row"}
                 align={"center"}
                 h={"22px"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
                 rounded={"md"}
                 overflow={"hidden"}
                 _hover={{
@@ -1331,7 +1331,7 @@ const ValueRow = (props: {
               direction={"row"}
               align={"center"}
               h={"22px"}
-              border={GLOBAL_STYLES.border.style}
+              border={STYLES.border.style}
               borderColor={"orange.200"}
               rounded={"md"}
               overflow={"hidden"}
@@ -1341,7 +1341,7 @@ const ValueRow = (props: {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={"orange.50"}
+                bg={"status.warning.subtle"}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -1351,7 +1351,7 @@ const ValueRow = (props: {
               </Flex>
               {/* Truncated URL */}
               <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
                   {_.truncate(url, { length: 28 })}
                 </Text>
               </Flex>
@@ -1611,7 +1611,7 @@ const ValueRow = (props: {
     <Flex
       gap={0}
       borderBottom={props.hideBorder ? "none" : "1px solid"}
-      borderColor={"gray.200"}
+      borderColor={"border.subtle"}
       _hover={{ bg: "gray.25" }}
       overflow={"hidden"}
       bg={props.isSelected ? "blue.50" : "white"}
@@ -1628,7 +1628,7 @@ const ValueRow = (props: {
           alignItems={"center"}
           justifyContent={"center"}
           borderRight={"1px solid"}
-          borderColor={"gray.200"}
+          borderColor={"border.subtle"}
           bg={props.isSelected ? "blue.100" : "white"}
           _hover={{ bg: props.isSelected ? "blue.200" : "gray.100" }}
           cursor={props.viewOnly ? "default" : "pointer"}
@@ -1653,7 +1653,7 @@ const ValueRow = (props: {
         p={"0"}
         m={"0"}
         borderRight={"1px solid"}
-        borderColor={"gray.200"}
+        borderColor={"border.subtle"}
       >
         <Input
           value={valueName}
@@ -1691,7 +1691,7 @@ const ValueRow = (props: {
         alignItems={"center"}
         justifyContent={"center"}
         borderRight={"1px solid"}
-        borderColor={"gray.200"}
+        borderColor={"border.subtle"}
       >
         <ReactSelect
           options={valueTypeOptions}

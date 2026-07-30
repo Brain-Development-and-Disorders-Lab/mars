@@ -44,7 +44,7 @@ import dayjs from "dayjs";
 import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
 
 // Variables
-import { APP_URL, GLOBAL_STYLES } from "@variables";
+import { APP_URL, STYLES } from "@variables";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
@@ -546,7 +546,7 @@ const User = () => {
         return (
           <Flex direction={"row"} gap={"1"} align={"center"} w={"100%"}>
             {isRevoked ? (
-              <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.400"}>
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.faint"}>
                 Revoked
               </Text>
             ) : (
@@ -729,7 +729,7 @@ const User = () => {
               p={"1"}
               border={"2px solid"}
               borderColor={"gray.700"}
-              bg={"gray.100"}
+              bg={"surface.muted"}
               rounded={"md"}
             >
               <Icon name={"person"} size={"sm"} />
@@ -816,9 +816,9 @@ const User = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -828,7 +828,7 @@ const User = () => {
               <Flex direction={"column"} p={"0"} gap={"1"}>
                 <Text
                   ml={"0.5"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  color={STYLES.font.secondaryHeader.color}
                   textAlign={"left"}
                   fontSize={"xs"}
                   fontWeight={"semibold"}
@@ -853,7 +853,7 @@ const User = () => {
                         fontSize={"xs"}
                         fontWeight={"semibold"}
                         ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                       >
                         First Name
                         <Field.RequiredIndicator />
@@ -878,7 +878,7 @@ const User = () => {
                         fontSize={"xs"}
                         fontWeight={"semibold"}
                         ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                       >
                         Last Name
                         <Field.RequiredIndicator />
@@ -911,7 +911,7 @@ const User = () => {
                         fontSize={"xs"}
                         fontWeight={"semibold"}
                         ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                       >
                         Email
                         <Field.RequiredIndicator />
@@ -991,7 +991,7 @@ const User = () => {
                       fontSize={"xs"}
                       fontWeight={"semibold"}
                       ml={"0.5"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      color={STYLES.font.secondaryHeader.color}
                     >
                       Affiliation
                       <Field.RequiredIndicator />
@@ -1021,7 +1021,7 @@ const User = () => {
               <Flex direction={"column"} p={"0"} gap={"1"}>
                 <Text
                   ml={"0.5"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  color={STYLES.font.secondaryHeader.color}
                   textAlign={"left"}
                   fontSize={"xs"}
                   fontWeight={"semibold"}
@@ -1056,21 +1056,16 @@ const User = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} py={"1.5"} gap={"1"} align={"center"} ml={"0.5"}>
-                <Icon name={"workspace"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  ml={"0.5"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
-                >
+                <Icon name={"workspace"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                   Workspaces
                 </Text>
               </Flex>
@@ -1092,7 +1087,7 @@ const User = () => {
                     showSelection
                   />
                 ) : (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                  <Text color={"text.faint"} fontWeight={"semibold"}>
                     No Workspaces
                   </Text>
                 )}
@@ -1106,8 +1101,8 @@ const User = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -1115,13 +1110,8 @@ const User = () => {
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} py={"1.5"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"key"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    ml={"0.5"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                  >
+                  <Icon name={"key"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                     API Access
                   </Text>
                 </Flex>

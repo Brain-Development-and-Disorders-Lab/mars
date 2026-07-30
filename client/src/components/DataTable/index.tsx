@@ -40,7 +40,7 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -165,7 +165,7 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
           <Icon
             name={"filter"}
             size={"xs"}
-            color={currentFilter.length > 0 ? "blue.700" : GLOBAL_STYLES.font.secondaryHeader.color}
+            color={currentFilter.length > 0 ? "blue.700" : STYLES.font.secondaryHeader.color}
           />
         </Button>
       </Menu.Trigger>
@@ -226,7 +226,7 @@ const ColumnFilterMenu = <TData extends RowData>({ columnId, data, table }: Colu
                   </Menu.CheckboxItem>
                 ))}
                 {filtered.length === 0 && (
-                  <Text fontSize={"xs"} color={"gray.500"} p={"2"} textAlign={"center"}>
+                  <Text fontSize={"xs"} color={"text.subtle"} p={"2"} textAlign={"center"}>
                     No values found
                   </Text>
                 )}
@@ -853,8 +853,8 @@ const DataTable = (props: DataTableProps) => {
             <Box
               w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
               minW={`${totalMinWidth}px`}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               borderRadius={"md"}
               overflow={"hidden"}
               display={"flex"}
@@ -863,9 +863,9 @@ const DataTable = (props: DataTableProps) => {
               {headerGroups.length > 0 && (
                 <Flex
                   gap={0}
-                  bg={"gray.100"}
+                  bg={"surface.muted"}
                   borderBottom={"1px solid"}
-                  borderColor={"gray.200"}
+                  borderColor={"border.subtle"}
                   direction={"row"}
                   w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
                 >
@@ -889,10 +889,10 @@ const DataTable = (props: DataTableProps) => {
                           py={1}
                           fontSize={"xs"}
                           fontWeight={"semibold"}
-                          color={GLOBAL_STYLES.font.secondaryHeader.color}
-                          bg={"gray.100"}
+                          color={STYLES.font.secondaryHeader.color}
+                          bg={"surface.muted"}
                           borderRight={!isLastColumn ? "1px solid" : "none"}
-                          borderColor={"gray.200"}
+                          borderColor={"border.subtle"}
                           position={"relative"}
                           textAlign={align}
                           lineHeight={"1.2"}
@@ -931,9 +931,7 @@ const DataTable = (props: DataTableProps) => {
                                             : "sort"
                                       }
                                       color={
-                                        header.column.getIsSorted()
-                                          ? "blue.700"
-                                          : GLOBAL_STYLES.font.secondaryHeader.color
+                                        header.column.getIsSorted() ? "blue.700" : STYLES.font.secondaryHeader.color
                                       }
                                       size={"xs"}
                                     />
@@ -962,10 +960,10 @@ const DataTable = (props: DataTableProps) => {
                       gap={0}
                       w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
                       borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
-                      borderColor={"gray.200"}
-                      _hover={{ bg: "gray.25" }}
+                      borderColor={"border.subtle"}
+                      _hover={{ bg: "table.rowHover" }}
                       overflow={"hidden"}
-                      bg={isSelected ? "blue.50" : "white"}
+                      bg={isSelected ? "table.selectedRow" : "transparent"}
                     >
                       {visibleCells.map((cell, cellIndex) => {
                         const isLastCell = cellIndex === visibleCells.length - 1;
@@ -985,7 +983,7 @@ const DataTable = (props: DataTableProps) => {
                             px={1}
                             py={0.5}
                             borderRight={!isLastCell ? "1px solid" : "none"}
-                            borderColor={"gray.200"}
+                            borderColor={"border.subtle"}
                             textAlign={align}
                             overflow={"hidden"}
                             display={"flex"}
@@ -993,7 +991,7 @@ const DataTable = (props: DataTableProps) => {
                             justifyContent={
                               align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"
                             }
-                            bg={isSelected ? "blue.50" : "white"}
+                            bg={isSelected ? "table.selectedRow" : "transparent"}
                             flexShrink={0}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -1077,7 +1075,7 @@ const DataTable = (props: DataTableProps) => {
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"} data-testid={"data-table-actions"}>
+                <Button colorPalette={"action"} size={"xs"} rounded={"md"} data-testid={"data-table-actions"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>

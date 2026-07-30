@@ -24,7 +24,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const GET_ACTIVITY = gql`
   query GetActivity($limit: Int) {
@@ -82,8 +82,8 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
           </Text>
         </Flex>
         <Flex align={"center"} gap={"1"} mr={"0.5"}>
-          <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+          <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"status.success.default"} className="live-indicator" />
+          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Live
           </Text>
         </Flex>
@@ -93,7 +93,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
           Last Update:
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
           {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
         </Text>
       </Flex>
@@ -103,7 +103,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
           Activity Range:
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
           {dayjs().subtract(6, "day").format("MMM D, YYYY")} - {dayjs().format("MMM D, YYYY")}
         </Text>
       </Flex>
@@ -130,7 +130,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
                     <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                       <Text fontSize={"xs"}>{activity.details}:</Text>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
                         {dayjs(activity.timestamp).fromNow()}
                       </Text>
                     </Flex>

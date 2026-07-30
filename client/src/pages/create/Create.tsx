@@ -17,7 +17,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Create = () => {
   const posthog = usePostHog();
@@ -33,12 +33,7 @@ const Create = () => {
           <Icon name={"add"} size={"sm"} />
           <Heading size={"lg"}>Create</Heading>
         </Flex>
-        <Text
-          fontSize={"sm"}
-          fontWeight={"semibold"}
-          color={GLOBAL_STYLES.font.secondaryHeader.color}
-          textAlign={"center"}
-        >
+        <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} textAlign={"center"}>
           Create a new Entity, Template, or Project to continue building your metadata collection.
         </Text>
         <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"} justify={"center"}>
@@ -47,12 +42,12 @@ const Create = () => {
             maxW={"340px"}
             h={"380px"}
             variant={"outline"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
                 <Heading size={"md"}>Entity</Heading>
               </Flex>
             </Card.Header>
@@ -69,19 +64,19 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root colorPalette={"purple"}>
+                    <Tag.Root colorPalette={"entity"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root colorPalette={"purple"}>
+                    <Tag.Root colorPalette={"entity"}>
                       <Tag.Label>Created</Tag.Label>
                     </Tag.Root>
                   </Flex>
 
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -131,12 +126,12 @@ const Create = () => {
             maxW={"340px"}
             h={"380px"}
             variant={"outline"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
+                <Icon name={"project"} size={"sm"} color={STYLES.project.color.icon} />
                 <Heading size={"md"}>Project</Heading>
               </Flex>
             </Card.Header>
@@ -153,18 +148,18 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root colorPalette={"blue"}>
+                    <Tag.Root colorPalette={"project"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root colorPalette={"blue"}>
+                    <Tag.Root colorPalette={"project"}>
                       <Tag.Label>Description</Tag.Label>
                     </Tag.Root>
                   </Flex>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Optional:
                     </Text>
                     <Tag.Root>
@@ -205,12 +200,12 @@ const Create = () => {
             maxW={"340px"}
             h={"380px"}
             variant={"outline"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
           >
             <Card.Header>
               <Flex gap={"1"} w={"100%"} justify={"center"} align={"center"}>
-                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+                <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
                 <Heading size={"md"}>Template</Heading>
               </Flex>
             </Card.Header>
@@ -227,16 +222,16 @@ const Create = () => {
                     Fields
                   </Heading>
                   <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Required:
                     </Text>
-                    <Tag.Root colorPalette={"teal"}>
+                    <Tag.Root colorPalette={"template"}>
                       <Tag.Label>Name</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root colorPalette={"teal"}>
+                    <Tag.Root colorPalette={"template"}>
                       <Tag.Label>Description</Tag.Label>
                     </Tag.Root>
-                    <Tag.Root colorPalette={"teal"}>
+                    <Tag.Root colorPalette={"template"}>
                       <Tag.Label>Values</Tag.Label>
                     </Tag.Root>
                   </Flex>

@@ -50,7 +50,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -212,7 +212,7 @@ const Templates = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"template"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -322,7 +322,7 @@ const Templates = () => {
       cell: (info) => {
         return (
           <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
               {dayjs(info.getValue()).fromNow()}
             </Text>
           </Tooltip>
@@ -351,11 +351,11 @@ const Templates = () => {
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Flex direction={"column"} gap={"0"} align={"start"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+                <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
                 <Heading size={"xl"}>Templates</Heading>
               </Flex>
               <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
                   {workspaceName}
                 </Text>
               </SkeletonText>
@@ -392,8 +392,8 @@ const Templates = () => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -422,7 +422,7 @@ const Templates = () => {
                       </Text>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             Start (optional)
                           </Field.Label>
                           <Input
@@ -439,7 +439,7 @@ const Templates = () => {
                           />
                         </Field.Root>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             End (optional)
                           </Field.Label>
                           <Input
@@ -499,11 +499,7 @@ const Templates = () => {
                             ))}
 
                         {templates.length === 0 && (
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
-                          >
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                             No Template Owners
                           </Text>
                         )}
@@ -600,7 +596,7 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={GLOBAL_STYLES.template.color.default} />
+                  <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}

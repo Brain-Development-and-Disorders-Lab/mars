@@ -48,7 +48,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Queries
 const GET_PROJECTS = gql`
@@ -207,7 +207,7 @@ const Projects = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Flex gap={"1"} align={"center"}>
-              <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+              <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -298,7 +298,7 @@ const Projects = () => {
       cell: (info) => {
         return (
           <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
               {dayjs(info.getValue()).fromNow()}
             </Text>
           </Tooltip>
@@ -326,11 +326,11 @@ const Projects = () => {
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <Flex direction={"column"} gap={"0"} align={"start"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
+                <Icon name={"project"} size={"sm"} color={STYLES.project.color.icon} />
                 <Heading size={"xl"}>Projects</Heading>
               </Flex>
               <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
                   {workspaceName}
                 </Text>
               </SkeletonText>
@@ -368,8 +368,8 @@ const Projects = () => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -403,7 +403,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Start (optional)
                           </Field.Label>
@@ -425,7 +425,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             End (optional)
                           </Field.Label>
@@ -486,11 +486,7 @@ const Projects = () => {
                             ))}
 
                         {projects.length === 0 && (
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
-                          >
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                             No Project Owners
                           </Text>
                         )}
@@ -510,7 +506,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Minimum
                           </Field.Label>
@@ -534,7 +530,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Maximum
                           </Field.Label>
@@ -608,7 +604,7 @@ const Projects = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                  <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}

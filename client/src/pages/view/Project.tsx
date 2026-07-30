@@ -69,7 +69,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Row shape for the Entities table; description and attributes are undefined until fetched
 type EntityTableRow = {
@@ -704,9 +704,9 @@ const Project = () => {
             return (
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 {attributes.slice(0, 2).map((attribute) => (
-                  <Tag.Root colorPalette={"teal"}>
+                  <Tag.Root colorPalette={"template"}>
                     <Tag.StartElement>
-                      <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                     </Tag.StartElement>
                     <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                   </Tag.Root>
@@ -720,9 +720,9 @@ const Project = () => {
             return (
               <Flex direction={"row"} gap={"1"} align={"center"}>
                 {attributes.map((attribute) => (
-                  <Tag.Root colorPalette={"teal"}>
+                  <Tag.Root colorPalette={"template"}>
                     <Tag.StartElement>
-                      <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
                     </Tag.StartElement>
                     <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
                   </Tag.Root>
@@ -780,7 +780,7 @@ const Project = () => {
                   <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
                 </Tag.Root>
               </Flex>
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -848,7 +848,7 @@ const Project = () => {
                     textDecoration: "underline",
                   }}
                 >
-                  <Icon size={"xs"} name={"project"} color={GLOBAL_STYLES.project.color.icon} />
+                  <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
                   Projects
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -862,21 +862,21 @@ const Project = () => {
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={displayProjectArchived ? "gray.500" : GLOBAL_STYLES.project.color.icon}
-                bg={displayProjectArchived ? GLOBAL_STYLES.card.bg : "blue.50"}
+                borderColor={displayProjectArchived ? "gray.500" : STYLES.project.color.icon}
+                bg={displayProjectArchived ? STYLES.card.bg : "blue.50"}
                 rounded={"md"}
               >
                 <Icon
                   name={"project"}
                   size={"sm"}
-                  color={displayProjectArchived ? "gray.500" : GLOBAL_STYLES.project.color.icon}
+                  color={displayProjectArchived ? "gray.500" : STYLES.project.color.icon}
                 />
                 <Tooltip content={`${displayProjectArchived ? "Archived: " : ""}${displayProjectData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
                     {_.truncate(displayProjectData.name, { length: 30 })}
                   </Heading>
                 </Tooltip>
-                {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
+                {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
               </Flex>
             </Flex>
           </Flex>
@@ -933,7 +933,7 @@ const Project = () => {
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
+                <Button colorPalette={"action"} size={"xs"} rounded={"md"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -1009,7 +1009,7 @@ const Project = () => {
                   <Drawer.CloseTrigger asChild>
                     <CloseButton top={"6px"} size={"2xs"} onClick={() => setHistoryOpen(false)} />
                   </Drawer.CloseTrigger>
-                  <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+                  <Drawer.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Icon name={"clock"} size={"xs"} />
                       <Text fontSize={"sm"} fontWeight={"semibold"}>
@@ -1043,7 +1043,7 @@ const Project = () => {
                       gap={"2"}
                       align={"start"}
                       rounded={"md"}
-                      bg={"gray.100"}
+                      bg={"surface.muted"}
                       p={"2"}
                       justify={"space-between"}
                       wrap={"wrap"}
@@ -1206,7 +1206,7 @@ const Project = () => {
                                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                                           {projectVersion.name}
                                         </Text>
-                                        <Text fontSize={"xs"} color={"gray.500"}>
+                                        <Text fontSize={"xs"} color={"text.subtle"}>
                                           {dayjs(projectVersion.timestamp).fromNow()}
                                         </Text>
                                       </Flex>
@@ -1217,7 +1217,7 @@ const Project = () => {
                                             disabled={projectVersion.message.length <= 40}
                                             showArrow
                                           >
-                                            <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                                            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                                               {_.truncate(projectVersion.message, { length: 40 })}
                                             </Text>
                                           </Tooltip>
@@ -1310,7 +1310,7 @@ const Project = () => {
                                         gap={"2"}
                                         mt={"1"}
                                         p={"2"}
-                                        bg={GLOBAL_STYLES.card.bg}
+                                        bg={STYLES.card.bg}
                                         rounded={"md"}
                                       >
                                         <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -1345,8 +1345,8 @@ const Project = () => {
                                             gap={"1"}
                                             p={"2"}
                                             rounded={"md"}
-                                            border={GLOBAL_STYLES.border.style}
-                                            borderColor={GLOBAL_STYLES.border.color}
+                                            border={STYLES.border.style}
+                                            borderColor={STYLES.border.color}
                                             bg={"white"}
                                             grow={"1"}
                                           >
@@ -1422,23 +1422,18 @@ const Project = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              bg={"gray.100"}
+              bg={"surface.muted"}
               rounded={"md"}
               grow={"1"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Name
                   </Text>
                   <Input
@@ -1451,44 +1446,29 @@ const Project = () => {
                     }}
                     readOnly={!editing || !!previewVersion}
                     bg={"white"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   />
                 </Flex>
               </Flex>
 
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
                   <ActorTag identifier={project.owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={project.created} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -1502,14 +1482,14 @@ const Project = () => {
               p={"2"}
               h={"100%"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <Textarea
@@ -1532,8 +1512,8 @@ const Project = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -1541,8 +1521,8 @@ const Project = () => {
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                     Entities ({projectEntities.length})
                   </Text>
                 </Flex>
@@ -1579,7 +1559,7 @@ const Project = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
+                        <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Entities</EmptyState.Description>
                     </EmptyState.Content>
@@ -1608,7 +1588,8 @@ const Project = () => {
                 p={"2"}
                 fontWeight={"semibold"}
                 fontSize={"xs"}
-                bg={GLOBAL_STYLES.dialog.header.bg}
+                bg={"project.light"}
+                color={"project.dark"}
                 roundedTop={"md"}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
@@ -1625,6 +1606,7 @@ const Project = () => {
                       setSelectedEntities([]);
                       setEntitiesOpen(false);
                     }}
+                    colorPalette={"project"}
                   />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
@@ -1636,7 +1618,7 @@ const Project = () => {
                 />
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Button
                   colorPalette={"red"}
                   size={"xs"}

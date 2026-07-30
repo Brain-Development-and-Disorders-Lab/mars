@@ -18,7 +18,7 @@ import { TransformComponent, TransformWrapper, type ReactZoomPanPinchRef } from 
 
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { GLOBAL_STYLES, STATIC_URL } from "@variables";
+import { STYLES, STATIC_URL } from "@variables";
 
 import _ from "lodash";
 
@@ -83,13 +83,13 @@ const DocumentPreview = (props: {
         overflowY={"auto"}
         minH={"100px"}
         rounded={"md"}
-        border={GLOBAL_STYLES.border.style}
-        borderColor={GLOBAL_STYLES.border.color}
+        border={STYLES.border.style}
+        borderColor={STYLES.border.color}
         justify={"center"}
         align={"center"}
         fontSize={"sm"}
         fontWeight={"semibold"}
-        color={GLOBAL_STYLES.font.secondaryHeader.color}
+        color={STYLES.font.secondaryHeader.color}
       >
         <Document file={props.previewSource} onLoadSuccess={props.onLoadSuccess} loading={"Loading Page..."}>
           <Page pageNumber={props.previewIndex} width={containerWidth} />
@@ -153,8 +153,8 @@ const ImagePreview = (props: { previewSource: string }) => {
         position={"relative"}
         minH={0}
         rounded={"md"}
-        border={GLOBAL_STYLES.border.style}
-        borderColor={GLOBAL_STYLES.border.color}
+        border={STYLES.border.style}
+        borderColor={STYLES.border.color}
         boxSizing={"border-box"}
       >
         <TransformWrapper
@@ -316,8 +316,8 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   if (loading) {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"}>
-        <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} mt={"2"}>
+        <Spinner color={STYLES.font.secondaryHeader.color} />
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} mt={"2"}>
           Loading Sequence...
         </Text>
       </Flex>
@@ -327,10 +327,10 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   if (error) {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"} gap={"2"}>
-        <Text color={"red.500"} fontWeight={"semibold"} fontSize={"sm"}>
+        <Text color={"status.danger.default"} fontWeight={"semibold"} fontSize={"sm"}>
           Error displaying Sequence
         </Text>
-        <Text fontSize={"xs"} color={"gray.500"}>
+        <Text fontSize={"xs"} color={"text.subtle"}>
           {error}
         </Text>
       </Flex>
@@ -340,7 +340,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
   if (!sequenceData) {
     return (
       <Flex direction={"column"} h={"100%"} flex={"1"} minH={0} justify={"center"} align={"center"}>
-        <Text fontSize={"xs"} color={"gray.500"}>
+        <Text fontSize={"xs"} color={"text.subtle"}>
           No Sequence data available
         </Text>
       </Flex>
@@ -355,8 +355,8 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
       flex={"1"}
       minH={0}
       rounded={"md"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       overflow={"hidden"}
     >
       <SeqViz name={name} seq={sequenceData.seq} annotations={sequenceData.annotations} />
@@ -428,7 +428,7 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
     if (!props.attachment || !props.attachment._id) {
       return (
         <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
-          <Text fontSize={"sm"} color={"gray.400"} fontWeight={"semibold"}>
+          <Text fontSize={"sm"} color={"text.faint"} fontWeight={"semibold"}>
             Invalid attachment
           </Text>
         </Flex>
@@ -438,10 +438,10 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
     if (loading || !previewType || !previewSource) {
       return (
         <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
-          <Text fontSize={"sm"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+          <Text fontSize={"sm"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Preparing Preview
           </Text>
-          <Spinner color={GLOBAL_STYLES.font.secondaryHeader.color} />
+          <Spinner color={STYLES.font.secondaryHeader.color} />
         </Flex>
       );
     }
@@ -479,12 +479,12 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
           <Flex
             minH={"400px"}
             rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             align={"center"}
             justify={"center"}
           >
-            <Text color={"gray.400"} fontWeight={"semibold"}>
+            <Text color={"text.faint"} fontWeight={"semibold"}>
               Unable to load preview
             </Text>
           </Flex>
@@ -531,7 +531,8 @@ const PreviewDialog = (props: PreviewDialogProps) => {
             p={"2"}
             fontWeight={"semibold"}
             fontSize={"xs"}
-            bg={GLOBAL_STYLES.dialog.header.bg}
+            bg={"surface.emphasized"}
+            color={"text.default"}
             roundedTop={"md"}
             flexShrink={0}
           >

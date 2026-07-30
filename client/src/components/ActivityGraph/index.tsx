@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // Existing and custom components
-import { Flex, Text, Box } from "@chakra-ui/react";
+import { Flex, Text, Box, useToken } from "@chakra-ui/react";
 
 // Existing and custom types
 import { ActivityModel } from "@types";
@@ -14,7 +14,7 @@ import { ActivityModel } from "@types";
 import dayjs from "dayjs";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 interface ActivityGraphProps {
   activities: ActivityModel[];
@@ -29,6 +29,11 @@ interface ChartDataPoint {
 }
 
 const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphProps) => {
+  // recharts renders into SVG, where Chakra token strings don't resolve, so
+  // the actual CSS values are resolved once here via useToken, keeping
+  // STYLES as the single source for these colors.
+  const [chartAxis, chartGrid, chartLine] = useToken("colors", ["chart.axis", "chart.grid", "chart.line"]);
+
   // Process activity data to get daily counts for the last 7 days
   const chartData = useMemo(() => {
     const today = dayjs().startOf("day");
@@ -69,8 +74,8 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
       return (
         <Box
           bg={"white"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           rounded={"md"}
           p={"1"}
           boxShadow={"md"}
@@ -91,7 +96,7 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   const CustomXTick = (props: any) => {
     const { x, y, payload } = props;
     return (
-      <text x={x} y={y} dy={16} textAnchor="middle" fill="#52525b" style={{ fontSize: "12px", fontWeight: "normal" }}>
+      <text x={x} y={y} dy={16} textAnchor="middle" fill={chartAxis} style={{ fontSize: "12px", fontWeight: "normal" }}>
         {payload.value}
       </text>
     );
@@ -101,7 +106,7 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   const CustomYTick = (props: any) => {
     const { x, y, payload } = props;
     return (
-      <text x={x} y={y} dx={-4} textAnchor="end" fill="#52525b" style={{ fontSize: "12px", fontWeight: "normal" }}>
+      <text x={x} y={y} dx={-4} textAnchor="end" fill={chartAxis} style={{ fontSize: "12px", fontWeight: "normal" }}>
         {payload.value}
       </text>
     );
@@ -113,14 +118,14 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
       gap={"1"}
       p={"1"}
       rounded={"md"}
-      bg={GLOBAL_STYLES.card.bg}
+      bg={STYLES.card.bg}
       h={height}
       w={"100%"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
     >
       {title && (
-        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
           {title}
         </Text>
       )}
@@ -131,26 +136,16 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
           width={"100%"}
           height={"100%"}
         >
-          <XAxis
-            dataKey="dateLabel"
-            tick={<CustomXTick />}
-            stroke={"#52525b"} // gray.600
-            tickLine={true}
-          />
-          <YAxis
-            tick={<CustomYTick />}
-            stroke={"#52525b"} // gray.600
-            allowDecimals={false}
-            tickLine={true}
-          />
-          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+          <XAxis dataKey="dateLabel" tick={<CustomXTick />} stroke={chartAxis} tickLine={true} />
+          <YAxis tick={<CustomYTick />} stroke={chartAxis} allowDecimals={false} tickLine={true} />
+          <CartesianGrid stroke={chartGrid} strokeDasharray="5 5" />
           <Tooltip content={<CustomTooltip />} />
           <Line
             type="monotone"
             dataKey="count"
-            stroke="#60a5fa" // blue.400
+            stroke={chartLine}
             strokeWidth={2}
-            dot={{ r: 3, fill: "#60a5fa" }} // blue.400
+            dot={{ r: 3, fill: chartLine }}
             activeDot={{ r: 4 }}
           />
         </LineChart>

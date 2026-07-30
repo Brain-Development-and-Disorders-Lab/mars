@@ -33,7 +33,7 @@ import _ from "lodash";
 import { createSelectOptions, ignoreAbort } from "@lib/util";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const CounterSelect = (props: CounterProps) => {
   // Counter state
@@ -331,7 +331,7 @@ const CounterSelect = (props: CounterProps) => {
       <Flex w={"100%"} gap={"1"}>
         {!_.isUndefined(selected._id) ? (
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
               Next Value:
             </Text>
             <Text fontSize={"xs"} color={currentValueLoading ? "gray.400" : "black"}>
@@ -339,7 +339,7 @@ const CounterSelect = (props: CounterProps) => {
             </Text>
           </Flex>
         ) : (
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Select Counter to preview the next value
           </Text>
         )}
@@ -362,7 +362,8 @@ const CounterSelect = (props: CounterProps) => {
             <Dialog.Header
               p={"1"}
               flexShrink={0}
-              bg={GLOBAL_STYLES.template.color.default}
+              bg={"template.light"}
+              color={"template.dark"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
@@ -375,13 +376,13 @@ const CounterSelect = (props: CounterProps) => {
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} colorPalette={"template"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
             <Dialog.Body px={"1"} gap={"1"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"1.5"} ml={"0.5"}>
+                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"1.5"} ml={"0.5"}>
                   Counters are used to standardize name formats using letters and a number.
                   <br />
                   The format string must contain one "{"{}"}" marking the position of the numeric value.
@@ -476,8 +477,8 @@ const CounterSelect = (props: CounterProps) => {
                     gap={"0.5"}
                     direction={"column"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   >
                     <Flex direction={"row"} gap={"2"} align={"center"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -496,7 +497,7 @@ const CounterSelect = (props: CounterProps) => {
                 </Flex>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={"gray.100"} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={"surface.muted"} roundedBottom={"md"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
                   variant={"solid"}

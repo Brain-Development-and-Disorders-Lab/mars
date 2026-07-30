@@ -34,7 +34,7 @@ import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const SUGGEST_TEMPLATE = gql`
   query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
@@ -174,7 +174,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={"entity.light"} color={"entity.dark"}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"attribute"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -182,7 +182,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} colorPalette={"entity"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -233,8 +233,8 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                       )}
                       {!isSuggestingTemplate && suggestedTemplateId === null && (
                         <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"gray.400"} />
-                          <Text fontSize={"xs"} color={"gray.400"}>
+                          <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
+                          <Text fontSize={"xs"} color={"text.faint"}>
                             No Suggestions
                           </Text>
                         </Flex>
@@ -245,8 +245,8 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                   <Select.Control>
                     <Select.Trigger rounded={"md"} bg={"white"}>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.light} />
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Icon name={"template"} size={"xs"} color={STYLES.template.color.light} />
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           Select Template
                         </Text>
                       </Flex>
@@ -261,7 +261,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                         {templatesCollection.items.map((template: ISelectOption) => (
                           <Select.Item item={template} key={template.value} fontSize={"xs"}>
                             <Flex direction={"row"} gap={"2"} align={"center"}>
-                              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                               {template.label}
                             </Flex>
                             <Select.ItemIndicator />
@@ -289,13 +289,13 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     p={"2"}
                     gap={"2"}
                     rounded={"md"}
-                    bg={GLOBAL_STYLES.card.bg}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    bg={STYLES.card.bg}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     w={{ base: "100%", md: "calc(50% - 4px)" }}
                   >
                     <Field.Root required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                         Name
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -310,7 +310,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                       />
                     </Field.Root>
                     <Flex direction={"column"} gap={"1"}>
-                      <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Text fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                         Owner
                       </Text>
                       <ActorTag identifier={props.owner} fallback={"Unknown User"} size={"sm"} />
@@ -322,13 +322,13 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                     p={"2"}
                     gap={"2"}
                     rounded={"md"}
-                    bg={GLOBAL_STYLES.card.bg}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    bg={STYLES.card.bg}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     grow={"1"}
                   >
                     <Field.Root h={"100%"} required>
-                      <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                         Description
                         <Field.RequiredIndicator />
                       </Field.Label>
@@ -346,7 +346,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
 
                 {/* Values */}
                 <Field.Root required>
-                  <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                  <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                     Values
                     <Field.RequiredIndicator />
                   </Field.Label>
@@ -355,7 +355,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
               </Flex>
             </Dialog.Body>
 
-            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Flex direction={"row"} gap={"2"} justify={"space-between"} w={"100%"}>
                 <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleClose}>
                   Cancel

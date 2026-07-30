@@ -22,7 +22,7 @@ dayjs.extend(relativeTime);
 import { EntityModel } from "@types";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Setup default data to be used in all stories
 const defaultData: Partial<EntityModel>[] = [
@@ -163,7 +163,7 @@ const columns = [
   }),
   columnHelper.accessor("created", {
     cell: (info) => (
-      <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
         {dayjs(info.getValue()).fromNow()}
       </Text>
     ),

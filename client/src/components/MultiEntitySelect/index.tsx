@@ -12,7 +12,7 @@ import { toaster } from "@components/Toast";
 import { IGenericItem, MultiEntitySelectProps } from "@types";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const MultiEntitySelect = (props: MultiEntitySelectProps) => {
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
@@ -53,8 +53,8 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
         align={"center"}
         justify={"center"}
         rounded={"md"}
-        border={GLOBAL_STYLES.border.style}
-        borderColor={GLOBAL_STYLES.border.color}
+        border={STYLES.border.style}
+        borderColor={STYLES.border.color}
         minH={"60px"}
         wrap={"wrap"}
       >
@@ -75,8 +75,8 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
           ))
         ) : (
           <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-            <Icon name={"entity"} size={"md"} color={GLOBAL_STYLES.entity.color.light} />
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+            <Icon name={"entity"} size={"md"} color={STYLES.entity.color.light} />
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
               No Entities selected
             </Text>
           </Flex>

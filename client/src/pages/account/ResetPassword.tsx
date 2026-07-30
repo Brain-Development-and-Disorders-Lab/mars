@@ -14,7 +14,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { auth } from "@lib/auth";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
@@ -102,8 +102,8 @@ const ResetPassword = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
           w={"sm"}
@@ -113,14 +113,14 @@ const ResetPassword = () => {
             <Heading size={"2xl"} fontWeight={"semibold"}>
               New Password
             </Heading>
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"} textAlign={"center"}>
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.subtle"} textAlign={"center"}>
               Enter a new password for your account.
             </Text>
           </Flex>
 
           <Fieldset.Root w={"100%"}>
             <Field.Root gap={"0.5"} required>
-              <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
+              <Field.Label fontSize={"xs"} ml={"0.5"} color={"text.muted"} fontWeight={"semibold"}>
                 New Password
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -136,7 +136,7 @@ const ResetPassword = () => {
             </Field.Root>
 
             <Field.Root gap={"0.5"} invalid={confirmPassword !== "" && !passwordsMatch} required>
-              <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
+              <Field.Label fontSize={"xs"} ml={"0.5"} color={"text.muted"} fontWeight={"semibold"}>
                 Confirm Password
                 <Field.RequiredIndicator />
               </Field.Label>
