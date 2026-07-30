@@ -7,6 +7,7 @@ import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import ActorTag from "@components/ActorTag";
+import Linky from "@components/Linky";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
@@ -70,6 +71,7 @@ const GET_DASHBOARD = gql`
   ) {
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
+      owner
       name
       description
       created
@@ -83,11 +85,13 @@ const GET_DASHBOARD = gql`
       entities {
         _id
         archived
+        owner
         name
         description
         timestamp
         attributes {
           _id
+          name
         }
       }
       total
@@ -248,9 +252,12 @@ const Dashboard = () => {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 48 })}
-            </Text>
+            <Flex gap={"1"} align={"center"}>
+              <Icon name={"entity"} color={GLOBAL_STYLES.entity.color.icon} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 48 })}
+              </Text>
+            </Flex>
           </Tooltip>
           <Button
             size="2xs"
@@ -267,7 +274,31 @@ const Dashboard = () => {
       ),
       header: "Name",
       meta: {
-        minWidth: 400,
+        minWidth: 300,
+      },
+    }),
+    entityTableColumnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
+      enableHiding: true,
+    }),
+    entityTableColumnHelper.accessor("timestamp", {
+      cell: (info) => {
+        return (
+          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              {dayjs(info.getValue()).fromNow()}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Created",
+      enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
     }),
     entityTableColumnHelper.accessor("description", {
@@ -275,7 +306,7 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -290,37 +321,59 @@ const Dashboard = () => {
       header: "Description",
       enableHiding: true,
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
-    }),
-    entityTableColumnHelper.accessor("timestamp", {
-      cell: (info) => {
-        return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
-        );
-      },
-      header: "Created",
-      enableHiding: true,
     }),
     entityTableColumnHelper.accessor("attributes", {
       cell: (info) => {
-        if (_.isEqual(info.getValue().length, 0)) {
+        const attributes = info.row.original.attributes;
+
+        // 0 Attributes
+        if (attributes.length === 0) {
           return (
-            <Tag.Root colorPalette={"orange"} size={"sm"}>
-              <Tag.Label fontSize={"xs"}>None</Tag.Label>
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
             </Tag.Root>
           );
         }
-        return (
-          <Tag.Root colorPalette={"green"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+
+        // Multiple Attributes
+        if (attributes.length > 1) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.slice(0, 1).map((attribute) => (
+                <Tag.Root colorPalette={"teal"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+              <Text fontSize={"xs"}>
+                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {attributes.map((attribute) => (
+                <Tag.Root colorPalette={"teal"}>
+                  <Tag.StartElement>
+                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Attributes",
       enableHiding: true,
+      meta: {
+        minWidth: 300,
+      },
     }),
   ];
 
@@ -333,9 +386,12 @@ const Dashboard = () => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
-              </Text>
+              <Flex gap={"1"} align={"center"}>
+                <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 48 })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Button
               size="2xs"
@@ -353,7 +409,31 @@ const Dashboard = () => {
       },
       header: "Name",
       meta: {
-        minWidth: 400,
+        minWidth: 300,
+      },
+    }),
+    projectTableColumnHelper.accessor("owner", {
+      cell: (info) => {
+        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      },
+      header: "Owner",
+      enableHiding: true,
+    }),
+    projectTableColumnHelper.accessor("created", {
+      cell: (info) => {
+        return (
+          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              {dayjs(info.getValue()).fromNow()}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Created",
+      enableHiding: true,
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
       },
     }),
     projectTableColumnHelper.accessor("description", {
@@ -361,7 +441,7 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -376,37 +456,49 @@ const Dashboard = () => {
       header: "Description",
       enableHiding: true,
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
-    }),
-    projectTableColumnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
-        );
-      },
-      header: "Created",
-      enableHiding: true,
     }),
     projectTableColumnHelper.accessor("entities", {
       cell: (info) => {
-        if (_.isEqual(info.getValue().length, 0)) {
+        const entities = info.row.original.entities;
+
+        // 0 Entities
+        if (entities.length === 0) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label>None</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
             </Tag.Root>
           );
         }
-        return (
-          <Tag.Root colorPalette={"green"}>
-            <Tag.Label>{info.getValue().length}</Tag.Label>
-          </Tag.Root>
-        );
+
+        // Multiple Entities
+        if (entities.length > 1) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {entities.slice(0, 1).map((entity) => (
+                <Linky type={"entities"} id={entity} />
+              ))}
+              <Text fontSize={"xs"}>
+                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {entities.map((entity) => (
+                <Linky type={"entities"} id={entity} />
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Entities",
       enableHiding: true,
+      meta: {
+        minWidth: 300,
+      },
     }),
   ];
 

@@ -65,7 +65,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
-import { ignoreAbort, removeTypename } from "@lib/util";
+import { getValueTypeIconProps, ignoreAbort, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -796,8 +796,9 @@ const Entity = () => {
               <ViewAttributeDialog
                 open={viewAttributeDialogOpen}
                 setOpen={setViewAttributeDialogOpen}
-                attribute={attribute}
                 editing={editing}
+                entityName={entityName}
+                attribute={attribute}
                 isTemplate={isKnownTemplate(attribute._id, templates)}
                 onAttributeUpdate={onAttributeUpdate}
                 removeCallback={() => {
@@ -835,20 +836,55 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("values", {
       cell: (info) => {
         const values = info.row.original.values;
+
+        // 0 Values
         if (values.length === 0) {
           return (
-            <Text fontSize={"xs"} color={"gray.500"}>
-              No values
-            </Text>
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
+            </Tag.Root>
           );
         }
-        const valueNames = values.map((value) => value.name).join(", ");
-        const truncatedNames = valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames;
-        return (
-          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
-            <Text fontSize={"xs"}>{truncatedNames}</Text>
-          </Tooltip>
-        );
+
+        // Multiple Values
+        if (values.length > 2) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {values.slice(0, 2).map((value) => (
+                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
+                  <Tag.StartElement>
+                    <Icon
+                      name={getValueTypeIconProps(value.type).name}
+                      color={getValueTypeIconProps(value.type).color}
+                      size={"xs"}
+                    />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+              <Text fontSize={"xs"}>
+                and {values.length - 2} other{values.length - 2 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {values.map((value) => (
+                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
+                  <Tag.StartElement>
+                    <Icon
+                      name={getValueTypeIconProps(value.type).name}
+                      color={getValueTypeIconProps(value.type).color}
+                      size={"xs"}
+                    />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Values",
     }),
@@ -1306,6 +1342,60 @@ const Entity = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
+            {editing && (
+              <Button
+                id={"addProjectsDialogButton"}
+                variant={"solid"}
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"red"}
+                onClick={handleCancelClick}
+              >
+                Cancel
+                <Icon name={"cross"} size={"xs"} />
+              </Button>
+            )}
+            {entityArchived ? (
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.archive}
+                showArrow
+              >
+                <Button
+                  id={"restoreEntityButton"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  onClick={handleRestoreFromArchiveClick}
+                  disabled={!workspacePermissions.entities.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.edit}
+                showArrow
+              >
+                <Button
+                  id={"editEntityButton"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={editing ? "green" : "blue"}
+                  onClick={handleEditClick}
+                  loading={isUpdating}
+                  disabled={!!previewVersion || !workspacePermissions.entities.edit}
+                >
+                  {editing ? "Save" : "Edit"}
+                  <Icon name={editing ? "save" : "edit"} size={"xs"} />
+                </Button>
+              </Tooltip>
+            )}
+
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
@@ -1378,60 +1468,6 @@ const Entity = () => {
                 </Menu.Positioner>
               </Portal>
             </Menu.Root>
-
-            {editing && (
-              <Button
-                id={"addProjectsDialogButton"}
-                variant={"solid"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"red"}
-                onClick={handleCancelClick}
-              >
-                Cancel
-                <Icon name={"cross"} size={"xs"} />
-              </Button>
-            )}
-            {entityArchived ? (
-              <Tooltip
-                content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.entities.archive}
-                showArrow
-              >
-                <Button
-                  id={"restoreEntityButton"}
-                  variant={"solid"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"orange"}
-                  onClick={handleRestoreFromArchiveClick}
-                  disabled={!workspacePermissions.entities.archive}
-                >
-                  Restore
-                  <Icon name={"rewind"} size={"xs"} />
-                </Button>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.entities.edit}
-                showArrow
-              >
-                <Button
-                  id={"editEntityButton"}
-                  variant={"solid"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={editing ? "green" : "blue"}
-                  onClick={handleEditClick}
-                  loading={isUpdating}
-                  disabled={!!previewVersion || !workspacePermissions.entities.edit}
-                >
-                  {editing ? "Save" : "Edit"}
-                  <Icon name={editing ? "save" : "edit"} size={"xs"} />
-                </Button>
-              </Tooltip>
-            )}
 
             {/* Version history */}
             <Drawer.Root

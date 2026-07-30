@@ -11,7 +11,6 @@ import {
   IconNames,
   SearchAttributeValue,
   SearchQuery,
-  UserModel,
   UserWorkspacePermissions,
 } from "@types";
 
@@ -21,57 +20,33 @@ import dayjs from "dayjs";
 // Variables
 import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES } from "@variables";
 
+export const isValueEqual = (a: IValue, b: IValue): boolean => {
+  return a.name === b.name && a.type === b.type && a.data === b.data;
+};
+
+export const isValidValue = (value: IValue, allowEmptyValue = false) => {
+  // Check the name of the Value
+  if (_.isEqual(value.name, "")) {
+    return false;
+  }
+
+  // Check data if empty Values are not allowed
+  if (!allowEmptyValue) {
+    if (_.isUndefined(value.data) || _.isEqual(value.data, "")) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   if (values.length === 0) {
     return false;
   }
 
   for (const value of values) {
-    // Check the name of the Value
-    if (_.isEqual(value.name, "")) {
-      return false;
-    }
-
-    // Check data if empty values are not allowed
-    if (!allowEmptyValues) {
-      if (_.isUndefined(value.data) || _.isEqual(value.data, "")) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
-
-export const isValidAttributes = (attributes: IAttribute[]) => {
-  if (attributes.length === 0) return false;
-
-  for (const attribute of attributes) {
-    // Check the name and description
-    if (_.isEqual(attribute.name, "") || _.isEqual(attribute.description, "")) {
-      return false;
-    }
-
-    // Check the data
-    if (_.isEqual(isValidValues(attribute.values), false)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-export const isValidUser = (user: UserModel): boolean => {
-  if (
-    _.isUndefined(user.affiliation) ||
-    _.isUndefined(user.email) ||
-    _.isUndefined(user.firstName) ||
-    _.isUndefined(user.lastName) ||
-    user.affiliation === "" ||
-    user.email === "" ||
-    user.firstName === "" ||
-    user.lastName === ""
-  ) {
-    return false;
+    isValidValue(value, allowEmptyValues);
   }
   return true;
 };
@@ -189,11 +164,49 @@ export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermis
  * @param {string} orcid the ORCID to check
  * @returns {boolean}
  */
-export const isValidOrcid = (orcid: string): boolean => {
-  if (_.isUndefined(orcid) || _.isEqual(orcid, "")) {
+export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
+  switch (type) {
+    case "date":
+      return { name: "v_date", color: "orange.400" };
+    case "text":
+      return { name: "v_text", color: "blue.400" };
+    case "number":
+      return { name: "v_number", color: "green.400" };
+    case "url":
+      return { name: "v_url", color: "yellow.400" };
+    case "select":
+      return { name: "v_select", color: "teal.400" };
+    case "entity":
+      return { name: "entity", color: "purple.400" };
+    default:
+      return { name: "unknown", color: "red.400" };
+  }
+};
+
+export const isValidAttribute = (attribute: IAttribute) => {
+  // Check the name and description
+  if (_.isEqual(attribute.name, "") || _.isEqual(attribute.description, "")) {
     return false;
   }
-  return /^(\d{4}-){3}\d{3}(\d|X)$/.test(orcid);
+
+  // Check the data
+  if (_.isEqual(isValidValues(attribute.values), false)) {
+    return false;
+  }
+
+  return true;
+};
+
+export const isValidAttributes = (attributes: IAttribute[]) => {
+  if (attributes.length === 0) {
+    return false;
+  }
+
+  for (const attribute of attributes) {
+    isValidAttribute(attribute);
+  }
+
+  return true;
 };
 
 /**
@@ -339,53 +352,31 @@ export const ignoreAbort = (e: unknown): void => {
 };
 
 /**
- * Utility function to generate the corresponding `IconName` and color
- * for each `IValueType`
- * @param type `IValueType` representing the icon and color scheme
- * @return {{ icon: IconNames, color: string }}
- */
-export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
-  switch (type) {
-    case "date":
-      return { name: "v_date", color: "orange.400" };
-    case "text":
-      return { name: "v_text", color: "blue.400" };
-    case "number":
-      return { name: "v_number", color: "green.400" };
-    case "url":
-      return { name: "v_url", color: "yellow.400" };
-    case "select":
-      return { name: "v_select", color: "teal.400" };
-    case "entity":
-      return { name: "entity", color: "purple.400" };
-    default:
-      return { name: "unknown", color: "red.400" };
-  }
-};
-
-/**
  * Recursively remove __typename fields from an object or array.
  * Apollo Client v4 automatically adds __typename to query results, but these
  * fields are not allowed in GraphQL input types (mutations).
- * @param obj The object or array to clean
+ * @param toClean The object or array to clean
  * @returns A new object/array with all __typename fields removed
  */
-export const removeTypename = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return obj;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const removeTypename = (toClean: any): any => {
+  if (toClean === null || toClean === undefined) {
+    return toClean;
   }
-  if (Array.isArray(obj)) {
-    return obj.map(removeTypename);
+  if (Array.isArray(toClean)) {
+    return toClean.map(removeTypename);
   }
-  if (typeof obj === "object") {
-    const { __typename, ...rest } = obj;
+  if (typeof toClean === "object") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __typename, ...rest } = toClean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cleaned: any = {};
     for (const key in rest) {
       cleaned[key] = removeTypename(rest[key]);
     }
     return cleaned;
   }
-  return obj;
+  return toClean;
 };
 
 /**

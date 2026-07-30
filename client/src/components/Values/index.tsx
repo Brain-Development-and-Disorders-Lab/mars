@@ -1202,6 +1202,25 @@ const ValueRow = (props: {
     props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
   }, [valueName, valueType, valueData, source]);
 
+  // Sync local state when props change from an external source
+  useEffect(() => {
+    setValueName(props.value.name);
+    setValueType(props.value.type as IValueType);
+    setValueData(props.value.data);
+
+    // Adjust for Value sources
+    const valueSource = props.value.source ?? "column";
+    setSource(valueSource);
+    const columnMode = props.permittedValues !== undefined && valueSource === "column";
+
+    // Update Value types
+    const typeOptions: ValueTypeOption[] = columnMode
+      ? baseTypeOptions
+      : [...baseTypeOptions, { label: "Entity", value: "entity" }, { label: "Select", value: "select" }];
+    const valueType = typeOptions.find((option) => option.value === props.value.type) ?? baseTypeOptions[1];
+    setValueTypeOption(valueType);
+  }, [props.value.name, props.value.type, props.value.data, props.value.source, props.permittedValues]);
+
   /**
    * Utility function to generate default data when the `type` changes
    * @param valueType The new `IValueType` that has been selected

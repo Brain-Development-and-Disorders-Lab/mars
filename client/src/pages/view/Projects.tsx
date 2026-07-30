@@ -19,6 +19,7 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import Linky from "@components/Linky";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -205,9 +206,12 @@ const Projects = () => {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 48 })}
-            </Text>
+            <Flex gap={"1"} align={"center"}>
+              <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 48 })}
+              </Text>
+            </Flex>
           </Tooltip>
           <Button
             size="2xs"
@@ -224,7 +228,7 @@ const Projects = () => {
       ),
       header: "Name",
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("description", {
@@ -232,7 +236,7 @@ const Projects = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return (
             <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
             </Tag.Root>
           );
         }
@@ -247,29 +251,57 @@ const Projects = () => {
       header: "Description",
       enableHiding: true,
       meta: {
-        minWidth: 400,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("entities", {
       cell: (info) => {
-        return (
-          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"} size={"sm"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
-          </Tag.Root>
-        );
+        const entities = info.row.original.entities;
+
+        // 0 Entities
+        if (entities.length === 0) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
+            </Tag.Root>
+          );
+        }
+
+        // Multiple Entities
+        if (entities.length > 1) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {entities.slice(0, 1).map((entity) => (
+                <Linky type={"entities"} id={entity} />
+              ))}
+              <Text fontSize={"xs"}>
+                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {entities.map((entity) => (
+                <Linky type={"entities"} id={entity} />
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Entities",
       meta: {
-        minWidth: 120,
-        maxWidth: 120,
+        minWidth: 300,
       },
     }),
     columnHelper.accessor("created", {
       cell: (info) => {
         return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
+          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              {dayjs(info.getValue()).fromNow()}
+            </Text>
+          </Tooltip>
         );
       },
       header: "Created",
