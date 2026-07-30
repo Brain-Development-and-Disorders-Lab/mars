@@ -43,7 +43,6 @@ describe("Project model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
       entities: [],
-      collaborators: [],
       history: [],
     });
     expect(result.success).toBeTruthy();
@@ -63,7 +62,6 @@ describe("Project model", () => {
         owner: "henry.burgess@wustl.edu",
         description: `Test Project ${i}`,
         entities: [],
-        collaborators: [],
         history: [],
       });
     }
@@ -89,7 +87,6 @@ describe("Project model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
       entities: [],
-      collaborators: [],
       history: [],
     });
 

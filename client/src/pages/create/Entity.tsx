@@ -54,6 +54,9 @@ import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -62,6 +65,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entity = () => {
   const posthog = usePostHog();
+
+  // Permissions
+  const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
   const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
   const pageSteps = [
@@ -98,6 +104,11 @@ const Entity = () => {
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
   const getUser = async () => {
+    // If the User does not have Workspace permissions, direct to `/unauthorized`
+    if (!permissionsLoading && !workspacePermissions.entities.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
       toaster.create({
@@ -930,22 +941,28 @@ const Entity = () => {
           )}
         </Flex>
 
-        <Button
-          data-testid={_.isEqual("attributes", pageState) ? "create-entity-finish" : "create-entity-continue"}
-          size={"xs"}
-          rounded={"md"}
-          colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
-          onClick={onPageNext}
-          disabled={!isValidInput() || isNameError}
-          loading={isSubmitting}
+        <Tooltip
+          content={"Insufficient permissions in this Workspace"}
+          disabled={workspacePermissions.entities.create}
+          showArrow
         >
-          {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
-          {_.isEqual("attributes", pageState) ? (
-            <Icon name={"check"} size={"xs"} />
-          ) : (
-            <Icon name={"c_right"} size={"xs"} />
-          )}
-        </Button>
+          <Button
+            data-testid={_.isEqual("attributes", pageState) ? "create-entity-finish" : "create-entity-continue"}
+            size={"xs"}
+            rounded={"md"}
+            colorPalette={_.isEqual("attributes", pageState) ? "green" : "blue"}
+            onClick={onPageNext}
+            disabled={!isValidInput() || isNameError || !workspacePermissions.entities.create}
+            loading={isSubmitting}
+          >
+            {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
+            {_.isEqual("attributes", pageState) ? (
+              <Icon name={"check"} size={"xs"} />
+            ) : (
+              <Icon name={"c_right"} size={"xs"} />
+            )}
+          </Button>
+        </Tooltip>
       </Flex>
 
       <UnsavedChangesDialog

@@ -82,6 +82,7 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 // Contexts and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -96,6 +97,9 @@ const Entity = () => {
   const { id } = useParams();
   const { breakpoint } = useBreakpoint();
   const posthog = usePostHog();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -1204,20 +1208,26 @@ const Entity = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Button
-                size={"xs"}
-                variant={"solid"}
-                colorPalette={"orange"}
-                rounded={"md"}
-                onClick={async () => {
-                  await handleRestoreFromHistoryClick(previewVersion);
-                  setPreviewVersion(null);
-                }}
-                disabled={entityArchived}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  size={"xs"}
+                  variant={"solid"}
+                  colorPalette={"orange"}
+                  rounded={"md"}
+                  onClick={async () => {
+                    await handleRestoreFromHistoryClick(previewVersion);
+                    setPreviewVersion(null);
+                  }}
+                  disabled={entityArchived || !workspacePermissions.entities.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -1324,15 +1334,21 @@ const Entity = () => {
                       <Icon name={"graph"} size={"xs"} />
                       Visualize
                     </Menu.Item>
-                    <Menu.Item
-                      value={"clone"}
-                      onClick={() => setCloneOpen(true)}
-                      fontSize={"xs"}
-                      disabled={entityArchived || !!previewVersion}
+                    <Tooltip
+                      content={"Insufficient permissions in this Workspace"}
+                      disabled={workspacePermissions.entities.create}
+                      showArrow
                     >
-                      <Icon name={"copy"} size={"xs"} />
-                      Clone
-                    </Menu.Item>
+                      <Menu.Item
+                        value={"clone"}
+                        onClick={() => setCloneOpen(true)}
+                        fontSize={"xs"}
+                        disabled={entityArchived || !!previewVersion || !workspacePermissions.entities.create}
+                      >
+                        <Icon name={"copy"} size={"xs"} />
+                        Clone
+                      </Menu.Item>
+                    </Tooltip>
                     <Menu.Item
                       value={"export"}
                       onClick={handleExportClick}
@@ -1342,16 +1358,22 @@ const Entity = () => {
                       <Icon name={"download"} size={"xs"} />
                       Export
                     </Menu.Item>
-                    <Menu.Item
-                      id={"archiveEntityButton"}
-                      value={"archive"}
-                      onClick={() => setArchiveDialogOpen(true)}
-                      fontSize={"xs"}
-                      disabled={entityArchived}
+                    <Tooltip
+                      content={"Insufficient permissions in this Workspace"}
+                      disabled={workspacePermissions.entities.archive}
+                      showArrow
                     >
-                      <Icon name={"archive"} size={"xs"} />
-                      Archive
-                    </Menu.Item>
+                      <Menu.Item
+                        id={"archiveEntityButton"}
+                        value={"archive"}
+                        onClick={() => setArchiveDialogOpen(true)}
+                        fontSize={"xs"}
+                        disabled={entityArchived || !workspacePermissions.entities.archive}
+                      >
+                        <Icon name={"archive"} size={"xs"} />
+                        Archive
+                      </Menu.Item>
+                    </Tooltip>
                   </Menu.Content>
                 </Menu.Positioner>
               </Portal>
@@ -1371,31 +1393,44 @@ const Entity = () => {
               </Button>
             )}
             {entityArchived ? (
-              <Button
-                id={"restoreEntityButton"}
-                variant={"solid"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"orange"}
-                onClick={handleRestoreFromArchiveClick}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  id={"restoreEntityButton"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  onClick={handleRestoreFromArchiveClick}
+                  disabled={!workspacePermissions.entities.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
             ) : (
-              <Button
-                id={"editEntityButton"}
-                variant={"solid"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={editing ? "green" : "blue"}
-                onClick={handleEditClick}
-                loading={isUpdating}
-                disabled={!!previewVersion}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.edit}
+                showArrow
               >
-                {editing ? "Save" : "Edit"}
-                <Icon name={editing ? "save" : "edit"} size={"xs"} />
-              </Button>
+                <Button
+                  id={"editEntityButton"}
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={editing ? "green" : "blue"}
+                  onClick={handleEditClick}
+                  loading={isUpdating}
+                  disabled={!!previewVersion || !workspacePermissions.entities.edit}
+                >
+                  {editing ? "Save" : "Edit"}
+                  <Icon name={editing ? "save" : "edit"} size={"xs"} />
+                </Button>
+              </Tooltip>
             )}
 
             {/* Version history */}
@@ -1684,17 +1719,27 @@ const Entity = () => {
                                           Preview
                                           <Icon name={"expand"} size={"xs"} />
                                         </Button>
-                                        <Button
-                                          variant={"solid"}
-                                          size={"xs"}
-                                          rounded={"md"}
-                                          colorPalette={"orange"}
-                                          onClick={() => handleRestoreFromHistoryClick(entityVersion)}
-                                          disabled={entityArchived || !!previewVersion}
+                                        <Tooltip
+                                          content={"Insufficient permissions in this Workspace"}
+                                          disabled={workspacePermissions.entities.archive}
+                                          showArrow
                                         >
-                                          Restore
-                                          <Icon name={"rewind"} size={"xs"} />
-                                        </Button>
+                                          <Button
+                                            variant={"solid"}
+                                            size={"xs"}
+                                            rounded={"md"}
+                                            colorPalette={"orange"}
+                                            onClick={() => handleRestoreFromHistoryClick(entityVersion)}
+                                            disabled={
+                                              entityArchived ||
+                                              !!previewVersion ||
+                                              !workspacePermissions.entities.archive
+                                            }
+                                          >
+                                            Restore
+                                            <Icon name={"rewind"} size={"xs"} />
+                                          </Button>
+                                        </Tooltip>
                                       </Flex>
                                     </Flex>
 

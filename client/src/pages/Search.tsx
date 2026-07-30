@@ -25,9 +25,9 @@ import SearchQueryBuilder from "@components/SearchQueryBuilder";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
-// Custom hooks
+// Hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useFeatures } from "@hooks/useFeatures";
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Existing and custom types
@@ -57,9 +57,12 @@ import { GLOBAL_STYLES } from "@variables";
 import { usePostHog } from "posthog-js/react";
 
 const Search = () => {
-  const [query, setQuery] = useState("");
   const posthog = usePostHog();
-  const { features } = useFeatures();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
+
+  const [query, setQuery] = useState("");
 
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -81,8 +84,8 @@ const Search = () => {
   const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
-    if (!features.ai) setIsAISearch(false);
-  }, [features.ai]);
+    if (!globalPermissions.features.ai) setIsAISearch(false);
+  }, [globalPermissions.features.ai]);
 
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
@@ -600,7 +603,7 @@ const Search = () => {
             <Icon name={"search"} size={"sm"} />
             <Heading size={"xl"}>Search</Heading>
           </Flex>
-          <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+          <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
               {workspaceName}
             </Text>
@@ -870,7 +873,7 @@ const Search = () => {
                       }}
                     />
                   </InputGroup>
-                  {features.ai && (
+                  {globalPermissions.features.ai && (
                     <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
                       <Button
                         size={"xs"}

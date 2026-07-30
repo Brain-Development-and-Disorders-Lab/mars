@@ -3,6 +3,7 @@ import _ from "lodash";
 
 // Custom types
 import {
+  Collaborator,
   IAttribute,
   ISelectOption,
   IValue,
@@ -11,6 +12,7 @@ import {
   SearchAttributeValue,
   SearchQuery,
   UserModel,
+  UserWorkspacePermissions,
 } from "@types";
 
 // Utility functions
@@ -72,6 +74,114 @@ export const isValidUser = (user: UserModel): boolean => {
     return false;
   }
   return true;
+};
+
+/**
+ * Utility function to search a list of `Collaborator` objects and locate a specific
+ * User identifier if it is present
+ * @param {string} _id Identifier of User to search for
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return `true` if located, `false` if not
+ */
+export const isCollaborator = (_id: string, collaborators: Collaborator[]): boolean => {
+  for (const collaborator of collaborators) {
+    if (collaborator._id === _id) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Get a specific Collaborator's Workspace permissions from a collection
+ * @param {string} _id Identifier of the Collaborator to locate
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {UserWorkspacePermissions | undefined} Permissions if the Collaborator is present
+ */
+export const getCollaboratorPermissions = (
+  _id: string,
+  collaborators: Collaborator[],
+): UserWorkspacePermissions | undefined => {
+  return collaborators.find((collaborator) => collaborator._id === _id)?.permissions;
+};
+
+/**
+ * Replace a specific Collaborator's Workspace permissions within a collection
+ * @param {string} _id Identifier of the Collaborator to update
+ * @param {UserWorkspacePermissions} permissions Updated permissions to apply
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {Collaborator[]} New collection with the matching Collaborator updated
+ */
+export const setCollaboratorPermissions = (
+  _id: string,
+  permissions: UserWorkspacePermissions,
+  collaborators: Collaborator[],
+): Collaborator[] => {
+  return collaborators.map((collaborator) =>
+    collaborator._id === _id ? { ...collaborator, permissions } : collaborator,
+  );
+};
+
+/**
+ * Utility function to check if a User has permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyAll = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create && permissionsCategory.edit && permissionsCategory.archive;
+};
+
+/**
+ * Utility function to check if a User has some permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyPartial = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create || permissionsCategory.edit || permissionsCategory.archive;
+};
+
+/**
+ * Generate a set of strings ("View", "Modify (All)", "Modify (Partial)", "Administration")
+ * depending on the `UserWorkspacePermissions` object, used to generate tags or labels
+ * @param {UserWorkspacePermissions} permissions Set of User's Workspace permissions
+ * @return {string[]}
+ */
+export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermissions): string[] => {
+  const permissionsLabels = ["View"];
+
+  // "Modify (All)" only shown if all Entities, Projects, and Templates permissions enabled
+  if (
+    isModifyAll(permissions, "entities") &&
+    isModifyAll(permissions, "projects") &&
+    isModifyAll(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (All)");
+  } else if (
+    isModifyPartial(permissions, "entities") ||
+    isModifyPartial(permissions, "projects") ||
+    isModifyPartial(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (Partial)");
+  }
+
+  // Administration permissions
+  if (permissions.administration.edit || permissions.administration.invite) {
+    permissionsLabels.push("Administration");
+  }
+
+  return permissionsLabels;
 };
 
 /**

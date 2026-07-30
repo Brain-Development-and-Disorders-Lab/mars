@@ -35,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
+import { usePermissions } from "@hooks/usePermissions";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -53,6 +54,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entities = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -349,17 +353,29 @@ const Entities = () => {
                 <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
                 <Heading size={"xl"}>Entities</Heading>
               </Flex>
-              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
                 <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
                   {workspaceName}
                 </Text>
               </SkeletonText>
             </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
-              Create Entity
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.entities.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/entity")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.entities.create}
+              >
+                Create Entity
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">

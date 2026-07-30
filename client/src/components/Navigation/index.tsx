@@ -7,6 +7,7 @@ import Icon from "@components/Icon";
 import ImportDialog from "@components/ImportDialog";
 import ScanDialog from "@components/ScanDialog";
 import ReportDialog from "@components/ReportDialog";
+import Tooltip from "@components/Tooltip";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -18,8 +19,9 @@ import _ from "lodash";
 // Events
 import { usePostHog } from "posthog-js/react";
 
-// Workspace context
+// Hooks
 import { useWorkspace } from "@hooks/useWorkspace";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
@@ -31,6 +33,9 @@ const Navigation = () => {
   const posthog = usePostHog();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
 
   // Workspace context value
   const { workspace } = useWorkspace();
@@ -206,45 +211,49 @@ const Navigation = () => {
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
               <Flex w={"50%"}>
-                <Button
-                  id={"navImportButtonDesktop"}
-                  w={"100%"}
-                  key={"import"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"blue"}
-                  onClick={() => {
-                    // Capture event
-                    posthog.capture("client.import.dialog_open");
+                <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
+                  <Button
+                    id={"navImportButtonDesktop"}
+                    w={"100%"}
+                    key={"import"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"blue"}
+                    onClick={() => {
+                      // Capture event
+                      posthog.capture("client.import.dialog_open");
 
-                    setImportOpen(true);
-                  }}
-                  disabled={workspace === "" || _.isUndefined(workspace)}
-                >
-                  <Icon name={"upload"} size={"xs"} />
-                  Import
-                </Button>
+                      setImportOpen(true);
+                    }}
+                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
+                  >
+                    <Icon name={"upload"} size={"xs"} />
+                    Import
+                  </Button>
+                </Tooltip>
               </Flex>
 
               <Flex w={"50%"}>
-                <Button
-                  id={"navScanButtonDesktop"}
-                  w={"100%"}
-                  key={"scan"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    // Capture event
-                    posthog.capture("client.scan.dialog_open");
+                <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
+                  <Button
+                    id={"navScanButtonDesktop"}
+                    w={"100%"}
+                    key={"scan"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    onClick={() => {
+                      // Capture event
+                      posthog.capture("client.scan.dialog_open");
 
-                    setScanOpen(true);
-                  }}
-                  disabled={workspace === "" || _.isUndefined(workspace)}
-                >
-                  <Icon name={"scan"} size={"xs"} />
-                  Scan
-                </Button>
+                      setScanOpen(true);
+                    }}
+                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
+                  >
+                    <Icon name={"scan"} size={"xs"} />
+                    Scan
+                  </Button>
+                </Tooltip>
               </Flex>
             </Flex>
             <Flex>

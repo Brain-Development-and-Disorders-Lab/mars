@@ -11,7 +11,7 @@ import {
   createTestUser,
   createTestWorkspace,
   switchWorkspace,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Entity", () => {
   test.describe("Edit", () => {

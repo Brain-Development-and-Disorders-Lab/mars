@@ -13,7 +13,7 @@ import {
   createTestWorkspace,
   createTestUser,
   switchWorkspace,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Template", () => {
   test.describe("Create", () => {

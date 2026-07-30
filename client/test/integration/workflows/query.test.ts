@@ -8,7 +8,7 @@ import {
   createTestWorkspace,
   createTestUser,
   selectChakraSelectOption,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Search Query Builder", () => {
   test.beforeEach(async ({ context, page }) => {

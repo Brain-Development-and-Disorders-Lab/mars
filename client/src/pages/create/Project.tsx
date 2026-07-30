@@ -24,6 +24,7 @@ import Linky from "@components/Linky";
 import MultiEntitySelect from "@components/MultiEntitySelect";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -41,6 +42,9 @@ import { Cell } from "@tanstack/react-table";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Posthog
 import { usePostHog } from "posthog-js/react";
 
@@ -50,6 +54,9 @@ import { GLOBAL_STYLES } from "@variables";
 const Project = () => {
   const posthog = usePostHog();
 
+  // Permissions
+  const { workspacePermissions, loading: permissionsLoading } = usePermissions();
+
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
   const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
@@ -57,6 +64,11 @@ const Project = () => {
   const [description, setDescription] = useState("");
 
   const getUser = async () => {
+    // If the User does not have Workspace permissions, direct to `/unauthorized`
+    if (!permissionsLoading && !workspacePermissions.projects.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+
     const sessionResponse = await auth.getSession();
     if (sessionResponse.error || !sessionResponse.data) {
       toaster.create({
@@ -329,30 +341,36 @@ const Project = () => {
           <Icon name={"cross"} size={"xs"} />
         </Button>
 
-        <Button
-          id={"finishCreateProjectButton"}
-          data-testid={"create-project-finish"}
-          size={"xs"}
-          rounded={"md"}
-          colorPalette={"green"}
-          onClick={async () => {
-            posthog.capture("client.create.project_finish");
-            setIsSubmitting(true);
-            const response = await createProject({
-              variables: {
-                project: { name, owner, archived: false, description, created, entities, collaborators: [] },
-              },
-            });
-            if (response.data?.createProject.success) {
-              navigate("/projects");
-            }
-            setIsSubmitting(false);
-          }}
-          disabled={isDetailsError && !isSubmitting}
+        <Tooltip
+          content={"Insufficient permissions in this Workspace"}
+          disabled={workspacePermissions.projects.create}
+          showArrow
         >
-          Finish
-          <Icon name={"check"} size={"xs"} />
-        </Button>
+          <Button
+            id={"finishCreateProjectButton"}
+            data-testid={"create-project-finish"}
+            size={"xs"}
+            rounded={"md"}
+            colorPalette={"green"}
+            onClick={async () => {
+              posthog.capture("client.create.project_finish");
+              setIsSubmitting(true);
+              const response = await createProject({
+                variables: {
+                  project: { name, owner, archived: false, description, created, entities },
+                },
+              });
+              if (response.data?.createProject.success) {
+                navigate("/projects");
+              }
+              setIsSubmitting(false);
+            }}
+            disabled={(isDetailsError && !isSubmitting) || !workspacePermissions.projects.create}
+          >
+            Finish
+            <Icon name={"check"} size={"xs"} />
+          </Button>
+        </Tooltip>
       </Flex>
 
       {/* Add Entities dialog */}
@@ -426,7 +444,7 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {/* Information modialogdal */}
+      {/* Information dialog */}
       <Dialog.Root
         open={informationOpen}
         onOpenChange={(event) => setInformationOpen(event.open)}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@chakra-ui/react";
@@ -23,6 +23,7 @@ import _ from "lodash";
 
 // Variables
 import { GLOBAL_STYLES } from "@variables";
+import PermissionsDialog from "@components/PermissionsDialog";
 
 const GET_ADMIN_DATA = gql`
   query GetAdminData {
@@ -39,9 +40,16 @@ const GET_ADMIN_DATA = gql`
       email
       role
       workspaces
-      features {
-        ai
-        api
+      permissions {
+        features {
+          ai
+          api
+          import
+          scan
+        }
+        workspaces {
+          create
+        }
       }
       banned
       lastLogin
@@ -52,17 +60,8 @@ const GET_ADMIN_DATA = gql`
       description
       owner
       entities
+      projects
       templates
-      attributes
-    }
-  }
-`;
-
-const SET_USER_FEATURES = gql`
-  mutation SetUserFeatures($_id: String, $features: UserFeaturesInput) {
-    setUserFeatures(_id: $_id, features: $features) {
-      success
-      message
     }
   }
 `;
@@ -110,7 +109,6 @@ const StatCard = ({
   </Flex>
 );
 
-const userColumnHelper = createColumnHelper<AdminUser>();
 const workspaceColumnHelper = createColumnHelper<AdminWorkspace>();
 
 const Admin = () => {
@@ -120,14 +118,15 @@ const Admin = () => {
     adminWorkspaces: AdminWorkspace[];
   }>(GET_ADMIN_DATA, { fetchPolicy: "network-only" });
 
-  const [setUserFeatures] = useMutation<{ setUserFeatures: IResponseMessage }>(SET_USER_FEATURES, {
-    onCompleted: () => refetch(),
-  });
-
   const [setBanStatus] = useMutation<{ setBanStatus: IResponseMessage }>(SET_BAN_STATUS, {
     onCompleted: () => refetch(),
   });
 
+  // `PermissionsDialog` state
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [permissionsDialogUser, setPermissionsDialogUser] = useState("");
+
+  const userColumnHelper = createColumnHelper<AdminUser>();
   const usersTableColumns = [
     userColumnHelper.accessor("email", {
       cell: (info) => (
@@ -171,7 +170,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("role", {
       cell: (info) => (
-        <Tag.Root colorPalette={info.getValue() === "admin" ? "red" : "blue"} size={"sm"}>
+        <Tag.Root colorPalette={info.getValue() === "admin" ? "yellow" : "blue"} size={"sm"}>
           <Tag.Label>{_.capitalize(info.getValue()) || "User"}</Tag.Label>
         </Tag.Root>
       ),
@@ -218,74 +217,52 @@ const Admin = () => {
           </Text>
         </Flex>
       ),
-      header: "Status",
-      meta: { fixedWidth: 100 } as ColumnMeta,
+      header: "Account Status",
+      meta: { fixedWidth: 120 } as ColumnMeta,
     }),
-    userColumnHelper.display({
-      id: "features",
+    userColumnHelper.accessor("_id", {
       cell: (info) => (
         <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Flex direction={"row"} align={"center"} gap={"2"}>
-            <Switch.Root
-              size={"sm"}
-              colorPalette={"green"}
-              checked={info.row.original.features?.ai ?? false}
-              onCheckedChange={(event) =>
-                setUserFeatures({ variables: { _id: info.row.original._id, features: { ai: event.checked } } })
-              }
-            >
-              <Switch.HiddenInput />
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Root>
-            <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-              AI features
-            </Text>
-          </Flex>
-          <Flex direction={"row"} align={"center"} gap={"2"}>
-            <Switch.Root
-              size={"sm"}
-              colorPalette={"green"}
-              checked={info.row.original.features?.api ?? false}
-              onCheckedChange={(event) =>
-                setUserFeatures({ variables: { _id: info.row.original._id, features: { api: event.checked } } })
-              }
-            >
-              <Switch.HiddenInput />
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Root>
-            <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-              API access
-            </Text>
-          </Flex>
+          <Button
+            size={"2xs"}
+            mx={"1"}
+            colorPalette={"blue"}
+            aria-label={"Permissions"}
+            onClick={() => {
+              setPermissionsDialogUser(info.row.original._id);
+              setPermissionsDialogOpen(true);
+            }}
+          >
+            <Icon name={"settings"} />
+            Manage Permissions
+          </Button>
         </Flex>
       ),
       header: "Permissions",
-      meta: { minWidth: 300 } as ColumnMeta,
+      meta: { minWidth: 200 } as ColumnMeta,
     }),
   ];
 
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
-          {info.getValue() || "—"}
-        </Text>
+        <Tooltip disabled={info.getValue().length <= 28} content={info.getValue()} showArrow>
+          <Text fontSize={"xs"} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 28 })}
+          </Text>
+        </Tooltip>
       ),
       header: "Name",
-      meta: { minWidth: 180 } as ColumnMeta,
+      meta: { minWidth: 200 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("description", {
       cell: (info) => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
+            <Tooltip content={value} disabled={!value || value.length < 32} showArrow>
               <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 48 })}
+                {_.truncate(value, { length: 32 })}
               </Text>
             </Tooltip>
           );
@@ -314,6 +291,15 @@ const Admin = () => {
       header: "Entities",
       meta: { fixedWidth: 90 } as ColumnMeta,
     }),
+    workspaceColumnHelper.accessor("projects", {
+      cell: (info) => (
+        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          {info.getValue()}
+        </Text>
+      ),
+      header: "Projects",
+      meta: { fixedWidth: 100 } as ColumnMeta,
+    }),
     workspaceColumnHelper.accessor("templates", {
       cell: (info) => (
         <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
@@ -323,19 +309,16 @@ const Admin = () => {
       header: "Templates",
       meta: { fixedWidth: 100 } as ColumnMeta,
     }),
-    workspaceColumnHelper.accessor("attributes", {
-      cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-          {info.getValue()}
-        </Text>
-      ),
-      header: "Attributes",
-      meta: { fixedWidth: 100 } as ColumnMeta,
-    }),
   ];
 
   return (
     <Content isError={!!error} isLoaded={!loading}>
+      <PermissionsDialog
+        open={permissionsDialogOpen}
+        setOpen={setPermissionsDialogOpen}
+        user={permissionsDialogUser}
+        isGlobal
+      />
       <Flex direction={"column"} gap={"2"} p={"1"}>
         <Flex direction={"row"} align={"left"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Flex
@@ -350,7 +333,7 @@ const Admin = () => {
           >
             <Icon name={"settings"} size={"sm"} />
             <Heading fontWeight={"semibold"} size={"sm"}>
-              Metadatify Admin Dashboard
+              Metadatify Administration
             </Heading>
           </Flex>
 

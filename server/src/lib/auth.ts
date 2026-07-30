@@ -14,6 +14,9 @@ import { User } from "@models/User";
 // Email
 import { sendEmail, templates } from "./email";
 
+// Variables
+import { DEFAULT_GLOBAL_PERMISSIONS } from "@models/Admin";
+
 /**
  * Get ORCiD OAuth configuration based on environment
  */
@@ -172,6 +175,11 @@ export const auth = betterAuth({
       completedProfile: {
         type: "boolean",
         defaultValue: false,
+      },
+      permissions: {
+        type: "json",
+        defaultValue: DEFAULT_GLOBAL_PERMISSIONS,
+        input: false,
       },
     },
   },

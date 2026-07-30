@@ -5,19 +5,19 @@ import { BrowserContext, Locator, Page } from "@playwright/test";
 import "dotenv/config";
 
 // Server functions
-import { connect, disconnect } from "../../../server/src/connectors/database";
-import { setupDatabase, teardownDatabase } from "../../../server/test/helpers";
-import { getAuth } from "../../../server/test/helpers";
+import { connect, disconnect } from "../../../../server/src/connectors/database";
+import { setupDatabase, teardownDatabase } from "../../../../server/test/helpers";
+import { getAuth } from "../../../../server/test/helpers";
 
 // Models
-import { Entities } from "../../../server/src/models/Entities";
-import { Projects } from "../../../server/src/models/Projects";
-import { Templates } from "../../../server/src/models/Templates";
-import { Workspaces } from "../../../server/src/models/Workspaces";
-import { User } from "../../../server/src/models/User";
+import { Entities } from "../../../../server/src/models/Entities";
+import { Projects } from "../../../../server/src/models/Projects";
+import { Templates } from "../../../../server/src/models/Templates";
+import { Workspaces } from "../../../../server/src/models/Workspaces";
+import { User } from "../../../../server/src/models/User";
 
 // Custom types
-import { IAttribute, IEntity, IProject, IWorkspace, ResponseData } from "../../../types";
+import { Collaborator, IAttribute, IEntity, IProject, IWorkspace, ResponseData } from "../../../../types";
 
 // Utility functions
 import dayjs from "dayjs";
@@ -27,11 +27,18 @@ import dayjs from "dayjs";
  * @param {string} name The name of the Entity to create
  * @param {string} owner The owner of the Entity
  * @param {string} workspace The _id of the Workspace to contain the Entity
+ * @param {boolean} archived Whether the Entity should start archived
+ * @return {Promise<string>} Created Entity identifier
  */
-export const createTestEntity = async (name: string, owner: string, workspace: string): Promise<void> => {
+export const createTestEntity = async (
+  name: string,
+  owner: string,
+  workspace: string,
+  archived = false,
+): Promise<string> => {
   await connect();
   const entity: IEntity = {
-    archived: false,
+    archived: archived,
     name: name,
     created: dayjs("2023-10-01").toISOString(),
     owner: owner,
@@ -65,6 +72,7 @@ export const createTestEntity = async (name: string, owner: string, workspace: s
   // Add the Entity to the Workspace
   await Workspaces.addEntity(workspace, result.data);
   await disconnect();
+  return result.data;
 };
 
 /**
@@ -72,16 +80,22 @@ export const createTestEntity = async (name: string, owner: string, workspace: s
  * @param {string} name The name of the Project to create
  * @param {string} owner The owner of the Project
  * @param {string} workspace The _id of the Workspace to contain the Project
+ * @param {boolean} archived Whether the Project should start archived
+ * @return {Promise<string>} Created Project identifier
  */
-export const createTestProject = async (name: string, owner: string, workspace: string): Promise<void> => {
+export const createTestProject = async (
+  name: string,
+  owner: string,
+  workspace: string,
+  archived = false,
+): Promise<string> => {
   await connect();
   const project: IProject = {
     name: name,
     description: "Test Project",
     owner: owner,
     created: dayjs("2023-10-01").toISOString(),
-    archived: false,
-    collaborators: [],
+    archived: archived,
     entities: [],
     history: [],
   };
@@ -94,6 +108,7 @@ export const createTestProject = async (name: string, owner: string, workspace: 
   // Add the Project to the Workspace
   await Workspaces.addProject(workspace, result.data);
   await disconnect();
+  return result.data;
 };
 
 /**
@@ -101,11 +116,18 @@ export const createTestProject = async (name: string, owner: string, workspace: 
  * @param {string} name The name of the Template to create
  * @param {string} owner The owner of the Template
  * @param {string} workspace The _id of the Workspace to contain the Template
+ * @param {boolean} archived Whether the Template should start archived
+ * @return {Promise<string>} Created Template identifier
  */
-export const createTestTemplate = async (name: string, owner: string, workspace: string): Promise<void> => {
+export const createTestTemplate = async (
+  name: string,
+  owner: string,
+  workspace: string,
+  archived = false,
+): Promise<string> => {
   await connect();
   const template: IAttribute = {
-    archived: false,
+    archived: archived,
     name: name,
     description: "Test Attribute",
     owner: owner,
@@ -123,21 +145,27 @@ export const createTestTemplate = async (name: string, owner: string, workspace:
   // Add the Template to the Workspace
   await Workspaces.addTemplate(workspace, result.data);
   await disconnect();
+  return result.data;
 };
 
 /**
  * Create a new Workspace for a specific test or test suite
  * @param {string} name Workspace name
  * @param {string} owner Workspace owner
+ * @param {Collaborator[]} collaborators Collaborators to seed the Workspace with, used for permissions tests
  * @return {Promise<string>} Created Workspace identifier
  */
-export const createTestWorkspace = async (name: string, owner: string): Promise<string> => {
+export const createTestWorkspace = async (
+  name: string,
+  owner: string,
+  collaborators: Collaborator[] = [],
+): Promise<string> => {
   await connect();
   const workspace: IWorkspace = {
     name: name,
     description: "Test Workspace",
     owner: owner,
-    collaborators: [],
+    collaborators: collaborators,
     public: false,
     entities: [],
     projects: [],
@@ -156,11 +184,15 @@ export const createTestWorkspace = async (name: string, owner: string): Promise<
 };
 
 /**
- * Create a new user account using the default test user information
- * @param page
+ * Create a new user account, defaulting to the standard test user credentials
+ * @param context Browser context to receive the session cookies, use a separate context per User
+ * @param options Override the default email/name, needed when a test requires more than one User
  * @return {string} `userId` of the created test user
  */
-export const createTestUser = async (context: BrowserContext): Promise<string> => {
+export const createTestUser = async (
+  context: BrowserContext,
+  options?: { email?: string; name?: string },
+): Promise<string> => {
   await connect();
 
   // Setup User
@@ -169,8 +201,8 @@ export const createTestUser = async (context: BrowserContext): Promise<string> =
   const testUtils = ctx.test;
 
   const user = testUtils.createUser({
-    email: process.env.TEST_USER_EMAIL,
-    name: "Test User",
+    email: options?.email ?? process.env.TEST_USER_EMAIL,
+    name: options?.name ?? "Test User",
     completedProfile: true,
   });
   await testUtils.saveUser(user);
@@ -266,7 +298,6 @@ export const openItemFromTable = async (
     const allItems = await table.locator("text").allTextContents();
     throw new Error(`Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`);
   }
-  await textLocator.scrollIntoViewIfNeeded();
 
   // Find buttons with the correct aria-label
   const count = await buttons.count();
@@ -301,10 +332,8 @@ export const openItemFromTable = async (
       throw new Error(`Could not find button "${viewButtonLabel}" in row containing "${itemName}"`);
     }
 
-    await closestBtn.scrollIntoViewIfNeeded();
     await closestBtn.click();
   } else {
-    await buttons.first().scrollIntoViewIfNeeded();
     await buttons.first().click();
   }
 };

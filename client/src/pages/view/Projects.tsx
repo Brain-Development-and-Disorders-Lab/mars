@@ -39,6 +39,7 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
@@ -69,6 +70,9 @@ const GET_PROJECTS = gql`
 
 const Projects = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -293,17 +297,29 @@ const Projects = () => {
                 <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
                 <Heading size={"xl"}>Projects</Heading>
               </Flex>
-              <SkeletonText noOfLines={1} w={"200px"} my={"0.5"} h={"22px"} loading={loading} asChild>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
                 <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
                   {workspaceName}
                 </Text>
               </SkeletonText>
             </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/project")} size={"xs"} rounded={"md"}>
-              Create Project
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.projects.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/project")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.projects.create}
+              >
+                Create Project
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
 

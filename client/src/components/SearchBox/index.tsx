@@ -35,13 +35,15 @@ import { ignoreAbort } from "@lib/util";
 import { GLOBAL_STYLES } from "@variables";
 
 // Hooks
-import { useFeatures } from "@hooks/useFeatures";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
 const SearchBox = () => {
-  const { features } = useFeatures();
+  // Permissions
+  const { globalPermissions } = usePermissions();
+
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [inputWidth, setInputWidth] = useState<number | undefined>(undefined);
@@ -162,7 +164,7 @@ const SearchBox = () => {
     let searchQuery = query;
     let isBuilder = false;
 
-    if (features.ai) {
+    if (globalPermissions.features.ai) {
       const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
 
       if (!translation) {
@@ -254,18 +256,20 @@ const SearchBox = () => {
         <Box position={"relative"} w={"100%"}>
           <Flex gap={"2"} align={"center"} w={"100%"}>
             <InputGroup
-              startElement={features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined}
+              startElement={
+                globalPermissions.features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined
+              }
             >
               <Input
                 data-search-input
                 value={query}
                 rounded={"md"}
                 size={"xs"}
-                placeholder={features.ai ? "Describe what you're looking for..." : "Search..."}
+                placeholder={globalPermissions.features.ai ? "Describe what you're looking for..." : "Search..."}
                 background={"white"}
                 w={"100%"}
-                borderColor={features.ai ? "purple.400" : undefined}
-                outlineColor={features.ai ? "purple.400" : undefined}
+                borderColor={globalPermissions.features.ai ? "purple.400" : undefined}
+                outlineColor={globalPermissions.features.ai ? "purple.400" : undefined}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setOpen(false);
@@ -286,7 +290,7 @@ const SearchBox = () => {
               data-search-button
               size={"xs"}
               rounded={"md"}
-              colorPalette={features.ai ? "purple" : "green"}
+              colorPalette={globalPermissions.features.ai ? "purple" : "green"}
               disabled={query === ""}
               loading={isSearching}
               loadingText={"Searching..."}

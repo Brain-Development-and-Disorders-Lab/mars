@@ -13,7 +13,7 @@ import {
   createTestWorkspace,
   switchWorkspace,
   addEntityToProject,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Project", () => {
   test.describe("Edit: Details", () => {

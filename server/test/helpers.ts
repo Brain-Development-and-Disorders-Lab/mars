@@ -129,7 +129,6 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     archived: false,
     created: dayjs(Date.now()).toISOString(),
-    collaborators: [],
     description: "Description for Test Project",
     entities: [],
     history: [],

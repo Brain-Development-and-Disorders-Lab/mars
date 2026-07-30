@@ -5,9 +5,13 @@ import React from "react";
 import { Button, Card, Flex, Heading, Separator, Stack, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import Tooltip from "@components/Tooltip";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
 
 // Posthog
 import { usePostHog } from "posthog-js/react";
@@ -18,6 +22,9 @@ import { GLOBAL_STYLES } from "@variables";
 const Create = () => {
   const posthog = usePostHog();
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   return (
     <Content>
@@ -95,19 +102,26 @@ const Create = () => {
             </Card.Body>
             <Card.Footer>
               <Flex w={"100%"} justify={"center"}>
-                <Button
-                  id={"createEntityButton"}
-                  rounded={"md"}
-                  size={"xs"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    posthog.capture("client.create.entity_click");
-                    navigate("/create/entity");
-                  }}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.entities.create}
+                  showArrow
                 >
-                  Start
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
+                  <Button
+                    id={"createEntityButton"}
+                    rounded={"md"}
+                    size={"xs"}
+                    colorPalette={"green"}
+                    disabled={!workspacePermissions.entities.create}
+                    onClick={() => {
+                      posthog.capture("client.create.entity_click");
+                      navigate("/create/entity");
+                    }}
+                  >
+                    Start
+                    <Icon name={"a_right"} size={"xs"} />
+                  </Button>
+                </Tooltip>
               </Flex>
             </Card.Footer>
           </Card.Root>
@@ -162,19 +176,26 @@ const Create = () => {
             </Card.Body>
             <Card.Footer>
               <Flex w={"100%"} justify={"center"}>
-                <Button
-                  id={"createProjectButton"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    posthog.capture("client.create.project_click");
-                    navigate("/create/project");
-                  }}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.create}
+                  showArrow
                 >
-                  Start
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
+                  <Button
+                    id={"createProjectButton"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    disabled={!workspacePermissions.projects.create}
+                    onClick={() => {
+                      posthog.capture("client.create.project_click");
+                      navigate("/create/project");
+                    }}
+                  >
+                    Start
+                    <Icon name={"a_right"} size={"xs"} />
+                  </Button>
+                </Tooltip>
               </Flex>
             </Card.Footer>
           </Card.Root>
@@ -224,19 +245,26 @@ const Create = () => {
             </Card.Body>
             <Card.Footer>
               <Flex w={"100%"} justify={"center"}>
-                <Button
-                  id={"createTemplateButton"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => {
-                    posthog.capture("client.create.template_click");
-                    navigate("/create/template");
-                  }}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.create}
+                  showArrow
                 >
-                  Start
-                  <Icon name={"a_right"} size={"xs"} />
-                </Button>
+                  <Button
+                    id={"createTemplateButton"}
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"green"}
+                    disabled={!workspacePermissions.templates.create}
+                    onClick={() => {
+                      posthog.capture("client.create.template_click");
+                      navigate("/create/template");
+                    }}
+                  >
+                    Start
+                    <Icon name={"a_right"} size={"xs"} />
+                  </Button>
+                </Tooltip>
               </Flex>
             </Card.Footer>
           </Card.Root>

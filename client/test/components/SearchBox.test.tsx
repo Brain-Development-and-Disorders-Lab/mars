@@ -9,12 +9,18 @@ import { render } from "../render";
 // Target component
 import SearchBox from "../../src/components/SearchBox";
 
+// Variables
+import { DEFAULT_GLOBAL_PERMISSIONS, DEFAULT_WORKSPACE_PERMISSIONS } from "../../src/variables";
+
 vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(() => vi.fn()),
 }));
 
-vi.mock("@hooks/useFeatures", () => ({
-  useFeatures: vi.fn(() => ({ features: { ai: true, api: false } })),
+vi.mock("../../src/hooks/usePermissions", () => ({
+  usePermissions: vi.fn(() => ({
+    workspacePermissions: DEFAULT_WORKSPACE_PERMISSIONS,
+    globalPermissions: DEFAULT_GLOBAL_PERMISSIONS,
+  })),
 }));
 
 const createTestCache = () => {

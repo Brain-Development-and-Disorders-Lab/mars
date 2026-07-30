@@ -2,7 +2,7 @@
 import test, { expect } from "@playwright/test";
 
 // Test helper functions
-import { getUniqueName, createTestUser, createTestWorkspace, switchWorkspace } from "../helpers";
+import { getUniqueName, createTestUser, createTestWorkspace, switchWorkspace } from "../helpers/global.helpers";
 
 test.describe("Project", () => {
   test.describe("Create", () => {
