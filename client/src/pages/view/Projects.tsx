@@ -12,6 +12,8 @@ import {
   Checkbox,
   Collapsible,
   Field,
+  SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -22,7 +24,7 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { ProjectModel } from "@types";
+import { IGenericItem, ProjectModel } from "@types";
 
 // Utility functions and types
 import _ from "lodash";
@@ -37,6 +39,8 @@ import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { usePermissions } from "@hooks/usePermissions";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -47,7 +51,7 @@ import { GLOBAL_STYLES } from "@variables";
 
 // Queries
 const GET_PROJECTS = gql`
-  query GetProjects {
+  query GetProjects($workspace: String) {
     projects {
       _id
       archived
@@ -57,11 +61,21 @@ const GET_PROJECTS = gql`
       owner
       entities
     }
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
   }
 `;
 
 const Projects = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Effect to adjust column visibility
   const { breakpoint } = useBreakpoint();
@@ -87,7 +101,13 @@ const Projects = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
-  }>(GET_PROJECTS, { fetchPolicy: "network-only" });
+    workspace: IGenericItem;
+  }>(GET_PROJECTS, {
+    variables: {
+      workspace: workspace,
+    },
+    fetchPolicy: "network-only",
+  });
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);
@@ -119,6 +139,9 @@ const Projects = () => {
     if (data?.projects) {
       setProjects(data.projects);
       setFilteredProjects(data.projects);
+    }
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data]);
 
@@ -269,15 +292,34 @@ const Projects = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
-            <Heading fontWeight={"bold"} size={"md"}>
-              Projects
-            </Heading>
+            <Flex direction={"column"} gap={"0"} align={"start"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
+                <Heading size={"xl"}>Projects</Heading>
+              </Flex>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                  {workspaceName}
+                </Text>
+              </SkeletonText>
+            </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/project")} size={"xs"} rounded={"md"}>
-              Create Project
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.projects.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/project")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.projects.create}
+              >
+                Create Project
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
 
@@ -371,49 +413,59 @@ const Projects = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Owner
                       </Text>
                       <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
-                        {_.uniq(projects.map((p) => p.owner))
-                          .filter((owner) => owner)
-                          .map((owner) => (
-                            <Checkbox.Root
-                              key={owner}
-                              size={"xs"}
-                              colorPalette={"blue"}
-                              checked={filterState.owners.includes(owner)}
-                              onCheckedChange={(details) => {
-                                const isChecked = details.checked as boolean;
-                                if (isChecked) {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: [...filterState.owners, owner],
-                                  });
-                                } else {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: filterState.owners.filter((o) => o !== owner),
-                                  });
-                                }
-                              }}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label fontSize={"xs"}>
-                                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                          ))}
+                        {projects.length > 0 &&
+                          _.uniq(projects.map((p) => p.owner))
+                            .filter((owner) => owner)
+                            .map((owner) => (
+                              <Checkbox.Root
+                                key={owner}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.owners.includes(owner)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: [...filterState.owners, owner],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: filterState.owners.filter((o) => o !== owner),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+
+                        {projects.length === 0 && (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            No Project Owners
+                          </Text>
+                        )}
                       </Flex>
                     </Flex>
+
+                    <Separator orientation={"vertical"} />
 
                     {/* Entity Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>

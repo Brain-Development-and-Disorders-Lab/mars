@@ -13,7 +13,7 @@ import {
   createTestWorkspace,
   createTestUser,
   switchWorkspace,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Template", () => {
   test.describe("Create", () => {
@@ -33,7 +33,7 @@ test.describe("Template", () => {
     test("should create a Template and appear in the list", async ({ page }) => {
       await navigateToSection(page, "Templates");
 
-      const table = page.locator(".data-table-scroll-container");
+      const table = page.getByTestId("data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
       await expect(table.locator(`text=1-Template-Create`)).toBeVisible({ timeout: 10000 });
     });

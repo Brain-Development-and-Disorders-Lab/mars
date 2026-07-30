@@ -15,6 +15,8 @@ import {
   Input,
   Checkbox,
   Collapsible,
+  SkeletonText,
+  Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -25,13 +27,15 @@ import DataTable from "@components/DataTable";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { DataTableAction, EntityModel } from "@types";
+import { DataTableAction, EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useWorkspace } from "@hooks/useWorkspace";
+import { usePermissions } from "@hooks/usePermissions";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -50,6 +54,12 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Entities = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
@@ -101,7 +111,13 @@ const Entities = () => {
 
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($page: Int, $pageSize: Int, $filter: EntityFilterInput, $sort: EntitySortInput) {
+    query GetEntities(
+      $page: Int
+      $pageSize: Int
+      $filter: EntityFilterInput
+      $sort: EntitySortInput
+      $workspace: String
+    ) {
       entities(page: $page, pageSize: $pageSize, filter: $filter, sort: $sort) {
         entities {
           _id
@@ -124,6 +140,10 @@ const Entities = () => {
           }
         }
         total
+      }
+      workspace(_id: $workspace) {
+        _id
+        name
       }
     }
   `;
@@ -151,9 +171,11 @@ const Entities = () => {
 
   const { loading, error, data } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
+    workspace: IGenericItem;
   }>(GET_ENTITIES, {
     fetchPolicy: "network-only",
     variables: {
+      workspace,
       page,
       pageSize,
       filter: filterVariables,
@@ -166,6 +188,10 @@ const Entities = () => {
     if (data?.entities?.entities) {
       // Set the paginated Entity data (already filtered and sorted on server)
       setEntityData(data.entities.entities);
+    }
+    if (data?.workspace) {
+      // Store the Workspace name
+      setWorkspaceName(data.workspace.name);
     }
   }, [data]);
 
@@ -322,13 +348,34 @@ const Entities = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
-            <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
-            <Heading size={"md"}>Entities</Heading>
+            <Flex direction={"column"} gap={"0"} align={"start"}>
+              <Flex direction={"row"} align={"center"} gap={"1"}>
+                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Heading size={"xl"}>Entities</Heading>
+              </Flex>
+              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                  {workspaceName}
+                </Text>
+              </SkeletonText>
+            </Flex>
             <Spacer />
-            <Button colorPalette={"green"} onClick={() => navigate("/create/entity")} size={"xs"} rounded={"md"}>
-              Create Entity
-              <Icon name={"add"} size={"xs"} />
-            </Button>
+            <Tooltip
+              content={"Insufficient permissions in this Workspace"}
+              disabled={workspacePermissions.entities.create}
+              showArrow
+            >
+              <Button
+                colorPalette={"green"}
+                onClick={() => navigate("/create/entity")}
+                size={"xs"}
+                rounded={"md"}
+                disabled={!workspacePermissions.entities.create}
+              >
+                Create Entity
+                <Icon name={"add"} size={"xs"} />
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"} minW="0" maxW="100%">
@@ -420,58 +467,63 @@ const Entities = () => {
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Owner Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Owner
                       </Text>
                       <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
-                        {_.uniq(entityData.map((e) => e.owner))
-                          .filter((owner) => owner)
-                          .map((owner) => (
-                            <Checkbox.Root
-                              key={owner}
-                              size={"xs"}
-                              colorPalette={"blue"}
-                              checked={filterState.owners.includes(owner)}
-                              onCheckedChange={(details) => {
-                                const isChecked = details.checked as boolean;
-                                if (isChecked) {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: [...filterState.owners, owner],
-                                  });
-                                } else {
-                                  setFilterState({
-                                    ...filterState,
-                                    owners: filterState.owners.filter((o) => o !== owner),
-                                  });
-                                }
-                              }}
-                            >
-                              <Checkbox.HiddenInput />
-                              <Checkbox.Control />
-                              <Checkbox.Label fontSize={"xs"}>
-                                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
-                              </Checkbox.Label>
-                            </Checkbox.Root>
-                          ))}
+                        {entityData.length > 0 &&
+                          _.uniq(entityData.map((e) => e.owner))
+                            .filter((owner) => owner)
+                            .map((owner) => (
+                              <Checkbox.Root
+                                key={owner}
+                                size={"xs"}
+                                colorPalette={"blue"}
+                                checked={filterState.owners.includes(owner)}
+                                onCheckedChange={(details) => {
+                                  const isChecked = details.checked as boolean;
+                                  if (isChecked) {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: [...filterState.owners, owner],
+                                    });
+                                  } else {
+                                    setFilterState({
+                                      ...filterState,
+                                      owners: filterState.owners.filter((o) => o !== owner),
+                                    });
+                                  }
+                                }}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control />
+                                <Checkbox.Label fontSize={"xs"}>
+                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            ))}
+
+                        {entityData.length === 0 && (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                          >
+                            No Entity Owners
+                          </Text>
+                        )}
                       </Flex>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Has Attachments Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Attachments
                       </Text>
                       <Checkbox.Root
@@ -492,14 +544,11 @@ const Entities = () => {
                       </Checkbox.Root>
                     </Flex>
 
+                    <Separator orientation={"vertical"} />
+
                     {/* Attribute Count Range Filter */}
                     <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        ml={"0.5"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      >
+                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                         Attribute Count
                       </Text>
                       <Flex direction={"column"} gap={"2"} ml={"1"}>

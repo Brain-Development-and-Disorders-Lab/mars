@@ -2,10 +2,24 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, ISelectOption, IValue, IValueType, IconNames, SearchAttributeValue, SearchQuery } from "@types";
+import {
+  Collaborator,
+  IAttribute,
+  ISelectOption,
+  IValue,
+  IValueType,
+  IconNames,
+  SearchAttributeValue,
+  SearchQuery,
+  UserModel,
+  UserWorkspacePermissions,
+} from "@types";
 
 // Utility functions
 import dayjs from "dayjs";
+
+// Variables
+import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES } from "@variables";
 
 export const isValueEqual = (a: IValue, b: IValue): boolean => {
   return a.name === b.name && a.type === b.type && a.data === b.data;
@@ -39,10 +53,117 @@ export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
 };
 
 /**
- * Utility function to generate the corresponding `IconName` and color
- * for each `IValueType`
- * @param type `IValueType` representing the icon and color scheme
- * @return {{ icon: IconNames, color: string }}
+ * Utility function to search a list of `Collaborator` objects and locate a specific
+ * User identifier if it is present
+ * @param {string} _id Identifier of User to search for
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return `true` if located, `false` if not
+ */
+export const isCollaborator = (_id: string, collaborators: Collaborator[]): boolean => {
+  for (const collaborator of collaborators) {
+    if (collaborator._id === _id) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Get a specific Collaborator's Workspace permissions from a collection
+ * @param {string} _id Identifier of the Collaborator to locate
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {UserWorkspacePermissions | undefined} Permissions if the Collaborator is present
+ */
+export const getCollaboratorPermissions = (
+  _id: string,
+  collaborators: Collaborator[],
+): UserWorkspacePermissions | undefined => {
+  return collaborators.find((collaborator) => collaborator._id === _id)?.permissions;
+};
+
+/**
+ * Replace a specific Collaborator's Workspace permissions within a collection
+ * @param {string} _id Identifier of the Collaborator to update
+ * @param {UserWorkspacePermissions} permissions Updated permissions to apply
+ * @param {Collaborator[]} collaborators Collection of `Collaborator` instances
+ * @return {Collaborator[]} New collection with the matching Collaborator updated
+ */
+export const setCollaboratorPermissions = (
+  _id: string,
+  permissions: UserWorkspacePermissions,
+  collaborators: Collaborator[],
+): Collaborator[] => {
+  return collaborators.map((collaborator) =>
+    collaborator._id === _id ? { ...collaborator, permissions } : collaborator,
+  );
+};
+
+/**
+ * Utility function to check if a User has permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyAll = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create && permissionsCategory.edit && permissionsCategory.archive;
+};
+
+/**
+ * Utility function to check if a User has some permissions across "create", "edit", and "archive" for
+ * a specific category of metadata
+ * @param permissions Set of User's Workspace permissions
+ * @param category Type of metadata category within the User's permissions
+ * @return {boolean}
+ */
+const isModifyPartial = (
+  permissions: UserWorkspacePermissions,
+  category: "entities" | "projects" | "templates",
+): boolean => {
+  const permissionsCategory = permissions[category];
+  return permissionsCategory.create || permissionsCategory.edit || permissionsCategory.archive;
+};
+
+/**
+ * Generate a set of strings ("View", "Modify (All)", "Modify (Partial)", "Administration")
+ * depending on the `UserWorkspacePermissions` object, used to generate tags or labels
+ * @param {UserWorkspacePermissions} permissions Set of User's Workspace permissions
+ * @return {string[]}
+ */
+export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermissions): string[] => {
+  const permissionsLabels = ["View"];
+
+  // "Modify (All)" only shown if all Entities, Projects, and Templates permissions enabled
+  if (
+    isModifyAll(permissions, "entities") &&
+    isModifyAll(permissions, "projects") &&
+    isModifyAll(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (All)");
+  } else if (
+    isModifyPartial(permissions, "entities") ||
+    isModifyPartial(permissions, "projects") ||
+    isModifyPartial(permissions, "templates")
+  ) {
+    permissionsLabels.push("Modify (Partial)");
+  }
+
+  // Administration permissions
+  if (permissions.administration.edit || permissions.administration.invite) {
+    permissionsLabels.push("Administration");
+  }
+
+  return permissionsLabels;
+};
+
+/**
+ * Check if an ORCID is a valid format
+ * @param {string} orcid the ORCID to check
+ * @returns {boolean}
  */
 export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
   switch (type) {
@@ -100,6 +221,35 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+/**
+ * Get the 3- or 4-letter file extension for display based on a file's MIME type
+ * @param {string} mimeType File MIME type
+ */
+export const getFileExtension = (mimeType: string): string => {
+  if (ACCEPTED_ATTACHMENTS.includes(mimeType)) {
+    // Handle attachment files
+    if (mimeType.endsWith(".dna")) {
+      // Handle unique MIME type for DNA files
+      return "DNA";
+    } else {
+      return _.upperCase(mimeType.split("/")[1]);
+    }
+  } else if (ACCEPTED_IMPORTS_ENTITIES.includes(mimeType)) {
+    // Handle imported Entities files
+    if (mimeType.endsWith(".sheet")) {
+      // Handle unique MIME type for Excel files
+      return "XLSX";
+    } else {
+      return _.upperCase(mimeType.split("/")[1]);
+    }
+  } else if (ACCEPTED_IMPORTS_TEMPLATES.includes(mimeType)) {
+    // Handle imported Templates files
+    return _.upperCase(mimeType.split("/")[1]);
+  } else {
+    return "UNKNOWN";
+  }
 };
 
 /**

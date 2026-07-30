@@ -242,7 +242,6 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
       entities: [],
-      collaborators: [],
       history: [],
     });
 
@@ -289,7 +288,6 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
       entities: [],
-      collaborators: [],
       history: [],
     });
 

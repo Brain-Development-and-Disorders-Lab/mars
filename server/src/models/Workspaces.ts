@@ -12,7 +12,7 @@ import {
 
 // Utility functions and libraries
 import { getDatabase } from "@connectors/database";
-import { getIdentifier } from "@lib/util";
+import { getIdentifier, isCollaborator } from "@lib/util";
 import dayjs from "dayjs";
 import _ from "lodash";
 
@@ -347,6 +347,6 @@ export class Workspaces {
       return false;
     }
 
-    return workspaceResult.owner === user || _.includes(workspaceResult.collaborators, user);
+    return workspaceResult.owner === user || isCollaborator(user, workspaceResult.collaborators);
   };
 }

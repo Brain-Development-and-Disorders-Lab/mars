@@ -15,7 +15,7 @@ import VisibilityTag from "@components/VisibilityTag";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
-import { CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
+import { Collaborator, CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -26,12 +26,14 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { removeTypename } from "@lib/util";
 
 // Authentication
 import { auth } from "@lib/auth";
 
 // Contexts and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
@@ -39,6 +41,9 @@ import { GLOBAL_STYLES } from "@variables";
 
 const Workspace = () => {
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -50,7 +55,30 @@ const Workspace = () => {
         public
         timestamp
         description
-        collaborators
+        collaborators {
+          _id
+          permissions {
+            administration {
+              edit
+              invite
+            }
+            entities {
+              create
+              edit
+              archive
+            }
+            projects {
+              create
+              edit
+              archive
+            }
+            templates {
+              create
+              edit
+              archive
+            }
+          }
+        }
       }
     }
   `;
@@ -175,10 +203,10 @@ const Workspace = () => {
   }, []);
 
   // State for Workspace collaborators
-  const [collaborators, setCollaborators] = useState([] as string[]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
   // State for Workspace Counters
-  const [counters, setCounters] = useState([] as CounterModel[]);
+  const [counters, setCounters] = useState<CounterModel[]>([]);
 
   // State for Workspace privacy
   const [isPublic, setIsPublic] = useState(false);
@@ -260,58 +288,56 @@ const Workspace = () => {
   const handleUpdateClick = async () => {
     await updateWorkspace({
       variables: {
-        workspace: {
+        workspace: removeTypename({
           _id: workspace,
           name: name,
           description: description,
           owner: owner,
           public: isPublic,
           collaborators: collaborators,
+        }),
+      },
+    });
+
+    // Update Entity, Project, and Template archive state; each pair of calls is mutually exclusive so all six can run concurrently
+    await Promise.all([
+      archiveEntitiesQuery({
+        variables: {
+          toArchive: entities.filter((entity) => entity.archived === true).map((entity) => entity._id),
+          state: true,
         },
-      },
-    });
-
-    // Update Entity archive state
-    await archiveEntitiesQuery({
-      variables: {
-        toArchive: entities.filter((entity) => entity.archived === true).map((entity) => entity._id),
-        state: true,
-      },
-    });
-    await archiveEntitiesQuery({
-      variables: {
-        toArchive: entities.filter((entity) => entity.archived === false).map((entity) => entity._id),
-        state: false,
-      },
-    });
-
-    // Update Project archive state
-    await archiveProjectsQuery({
-      variables: {
-        toArchive: projects.filter((project) => project.archived === true).map((project) => project._id),
-        state: true,
-      },
-    });
-    await archiveProjectsQuery({
-      variables: {
-        toArchive: projects.filter((project) => project.archived === false).map((project) => project._id),
-        state: false,
-      },
-    });
-
-    // Update Template archive state
-    await archiveTemplatesQuery({
-      variables: {
-        toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
-        state: true,
-      },
-    });
-    await archiveTemplatesQuery({
-      variables: {
-        toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
-        state: false,
-      },
-    });
+      }),
+      archiveEntitiesQuery({
+        variables: {
+          toArchive: entities.filter((entity) => entity.archived === false).map((entity) => entity._id),
+          state: false,
+        },
+      }),
+      archiveProjectsQuery({
+        variables: {
+          toArchive: projects.filter((project) => project.archived === true).map((project) => project._id),
+          state: true,
+        },
+      }),
+      archiveProjectsQuery({
+        variables: {
+          toArchive: projects.filter((project) => project.archived === false).map((project) => project._id),
+          state: false,
+        },
+      }),
+      archiveTemplatesQuery({
+        variables: {
+          toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
+          state: true,
+        },
+      }),
+      archiveTemplatesQuery({
+        variables: {
+          toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
+          state: false,
+        },
+      }),
+    ]);
 
     if (workspaceUpdateError) {
       toaster.create({
@@ -432,17 +458,24 @@ const Workspace = () => {
               </Text>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"} align={"center"}>
-              <Button
-                size={"2xs"}
-                rounded={"md"}
-                aria-label={"Restore"}
-                colorPalette={"orange"}
-                variant={"subtle"}
-                onClick={() => archiveEntity(info.row.original._id, false)}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.entities.archive}
+                showArrow
               >
-                Restore
-                {<Icon name={"rewind"} size={"xs"} />}
-              </Button>
+                <Button
+                  size={"2xs"}
+                  rounded={"md"}
+                  aria-label={"Restore"}
+                  colorPalette={"orange"}
+                  variant={"subtle"}
+                  disabled={!workspacePermissions.entities.archive}
+                  onClick={() => archiveEntity(info.row.original._id, false)}
+                >
+                  Restore
+                  {<Icon name={"rewind"} size={"xs"} />}
+                </Button>
+              </Tooltip>
               <Button
                 variant={"subtle"}
                 size={"2xs"}
@@ -488,17 +521,24 @@ const Workspace = () => {
               </Text>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
-              <Button
-                size={"2xs"}
-                rounded={"md"}
-                aria-label={"Restore Project"}
-                colorPalette={"orange"}
-                variant={"subtle"}
-                onClick={() => archiveProject(info.row.original._id, false)}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.archive}
+                showArrow
               >
-                Restore
-                {<Icon name={"rewind"} size={"xs"} />}
-              </Button>
+                <Button
+                  size={"2xs"}
+                  rounded={"md"}
+                  aria-label={"Restore Project"}
+                  colorPalette={"orange"}
+                  variant={"subtle"}
+                  disabled={!workspacePermissions.projects.archive}
+                  onClick={() => archiveProject(info.row.original._id, false)}
+                >
+                  Restore
+                  {<Icon name={"rewind"} size={"xs"} />}
+                </Button>
+              </Tooltip>
               <Button
                 variant={"subtle"}
                 size={"2xs"}
@@ -544,17 +584,24 @@ const Workspace = () => {
               </Text>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
-              <Button
-                size={"2xs"}
-                rounded={"md"}
-                aria-label={"Restore Template"}
-                colorPalette={"orange"}
-                variant={"subtle"}
-                onClick={() => archiveTemplate(info.row.original._id, false)}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.templates.archive}
+                showArrow
               >
-                Restore
-                {<Icon name={"rewind"} size={"xs"} />}
-              </Button>
+                <Button
+                  size={"2xs"}
+                  rounded={"md"}
+                  aria-label={"Restore Template"}
+                  colorPalette={"orange"}
+                  variant={"subtle"}
+                  disabled={!workspacePermissions.templates.archive}
+                  onClick={() => archiveTemplate(info.row.original._id, false)}
+                >
+                  Restore
+                  {<Icon name={"rewind"} size={"xs"} />}
+                </Button>
+              </Tooltip>
               <Button
                 variant={"subtle"}
                 size={"2xs"}
@@ -668,26 +715,28 @@ const Workspace = () => {
             </Flex>
           </Flex>
 
-          <Flex direction={"row"} align={"center"} gap={"2"}>
-            <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
-              Cancel
-              <Icon name={"cross"} size={"xs"} />
-            </Button>
-            <Button
-              id={"dialogWorkspaceCreateButton"}
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              disabled={name === ""}
-              loading={
-                workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
-              }
-              onClick={() => handleUpdateClick()}
-            >
-              Save
-              <Icon name={"save"} size={"xs"} />
-            </Button>
-          </Flex>
+          {workspacePermissions.administration.edit && (
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
+                Cancel
+                <Icon name={"cross"} size={"xs"} />
+              </Button>
+              <Button
+                id={"dialogWorkspaceCreateButton"}
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"green"}
+                disabled={name === ""}
+                loading={
+                  workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
+                }
+                onClick={() => handleUpdateClick()}
+              >
+                Save
+                <Icon name={"save"} size={"xs"} />
+              </Button>
+            </Flex>
+          )}
         </Flex>
 
         <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
@@ -724,6 +773,7 @@ const Workspace = () => {
                     rounded={"md"}
                     placeholder={"Name"}
                     value={name}
+                    disabled={!workspacePermissions.administration.edit}
                     onChange={(event) => setName(event.target.value)}
                   />
                 </Flex>
@@ -789,6 +839,7 @@ const Workspace = () => {
                 value={description}
                 size={"xs"}
                 h={"100%"}
+                disabled={!workspacePermissions.administration.edit}
                 onChange={(event) => setDescription(event.target.value)}
               />
             </Flex>

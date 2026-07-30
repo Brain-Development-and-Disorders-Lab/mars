@@ -2,7 +2,7 @@
 import test, { expect } from "@playwright/test";
 
 // Test helper functions
-import { createTestUser, createTestWorkspace, switchWorkspace } from "../helpers";
+import { createTestUser, createTestWorkspace, switchWorkspace } from "../helpers/global.helpers";
 
 test.describe("Dashboard", () => {
   test.beforeEach(async ({ context, page }) => {

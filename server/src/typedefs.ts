@@ -60,17 +60,128 @@ export const typedefs = `#graphql
     projects: Int
     templates: Int
   }
-
-  # "UserFeatures" type
-  type UserFeatures {
+  
+  # All "Global" permissions ("features" and "workspaces")
+  # "UserFeaturesPermissions" type
+  type UserFeaturesPermissions {
+    import: Boolean
+    scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserFeaturesInput" type
-  input UserFeaturesInput {
+  # "UserFeaturesPermissionsInput" type
+  input UserFeaturesPermissionsInput {
+    import: Boolean
+    scan: Boolean
     ai: Boolean
     api: Boolean
+  }
+  
+  # "UserWorkspacesPermissions" type
+  type UserWorkspacesPermissions {
+    create: Boolean
+  }
+  
+  # "UserWorkspacesPermissionsInput" type
+  input UserWorkspacesPermissionsInput {
+    create: Boolean
+  }
+  
+  # "UserGlobalPermissions" type
+  type UserGlobalPermissions {
+    features: UserFeaturesPermissions
+    workspaces: UserWorkspacesPermissions
+  }
+  
+  # "UserGlobalPermissionsInput" type
+  input UserGlobalPermissionsInput {
+    features: UserFeaturesPermissionsInput
+    workspaces: UserWorkspacesPermissionsInput
+  }
+  
+  # All "Workspace" permissions ("administration", "entities", "projects", "templates")
+  # "UserWorkspaceAdministrationPermissions" type
+  type UserWorkspaceAdministrationPermissions {
+    edit: Boolean
+    invite: Boolean
+  }
+  
+  # "UserWorkspaceAdministrationPermissionsInput" type
+  input UserWorkspaceAdministrationPermissionsInput {
+    edit: Boolean
+    invite: Boolean
+  }
+  
+  # "UserWorkspaceEntitiesPermissions" type
+  type UserWorkspaceEntitiesPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceEntitiesPermissionsInput" type
+  input UserWorkspaceEntitiesPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceProjectsPermissions" type
+  type UserWorkspaceProjectsPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceProjectsPermissionsInput" type
+  input UserWorkspaceProjectsPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceTemplatesPermissions" type
+  type UserWorkspaceTemplatesPermissions {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+  # "UserWorkspaceTemplatesPermissionsInput" type
+  input UserWorkspaceTemplatesPermissionsInput {
+    create: Boolean
+    edit: Boolean
+    archive: Boolean
+  }
+  
+   # "UserWorkspacePermissions" type
+  type UserWorkspacePermissions {
+    administration: UserWorkspaceAdministrationPermissions
+    entities: UserWorkspaceEntitiesPermissions
+    projects: UserWorkspaceProjectsPermissions
+    templates: UserWorkspaceTemplatesPermissions
+  }
+  
+  # "UserWorkspacePermissionsInput" type
+  input UserWorkspacePermissionsInput {
+    administration: UserWorkspaceAdministrationPermissionsInput
+    entities: UserWorkspaceEntitiesPermissionsInput
+    projects: UserWorkspaceProjectsPermissionsInput
+    templates: UserWorkspaceTemplatesPermissionsInput
+  }
+  
+  # Collated permissions
+  # "UserCollatedPermissions" type
+  type UserCollatedPermissions {
+    workspace: UserWorkspacePermissions
+    global: UserGlobalPermissions
+  }
+  
+  # "UserCollatedPermissionsInput" type
+  input UserCollatedPermissionsInput {
+    workspace: UserWorkspacePermissionsInput
+    global: UserGlobalPermissionsInput
   }
 
   # "AdminWorkspace" type
@@ -80,8 +191,8 @@ export const typedefs = `#graphql
     description: String
     owner: String
     entities: Int
+    projects: Int
     templates: Int
-    attributes: Int
   }
 
   # "AdminUser" type
@@ -91,7 +202,7 @@ export const typedefs = `#graphql
     email: String
     role: String
     workspaces: Int
-    features: UserFeatures
+    permissions: UserGlobalPermissions
     banned: Boolean
     lastLogin: String
   }
@@ -122,7 +233,6 @@ export const typedefs = `#graphql
     description: String
     timestamp: String
     owner: String
-    collaborators: [String]
     created: String
     entities: [String]
     history: [ProjectHistory]
@@ -138,7 +248,6 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     owner: String
-    collaborators: [String]
     archived: Boolean
     created: String
     description: String
@@ -153,7 +262,6 @@ export const typedefs = `#graphql
     owner: String!
     created: String!
     entities: [String]!
-    collaborators: [String]!
   }
 
   # "ProjectUpdateInput" type
@@ -163,7 +271,6 @@ export const typedefs = `#graphql
     archived: Boolean
     description: String
     owner: String
-    collaborators: [String]
     created: String
     entities: [String]
   }
@@ -392,6 +499,18 @@ export const typedefs = `#graphql
     options: OptionsInput
     file: [Upload]!
   }
+  
+  # "Collaborator" type
+  type Collaborator {
+    _id: String
+    permissions: UserWorkspacePermissions
+  }
+  
+  # "CollaboratorInput" type
+  input CollaboratorInput {
+    _id: String
+    permissions: UserWorkspacePermissionsInput
+  }
 
   # "Workspace" type
   type Workspace {
@@ -401,7 +520,7 @@ export const typedefs = `#graphql
     public: Boolean
     description: String
     owner: String
-    collaborators: [String]
+    collaborators: [Collaborator]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -414,7 +533,7 @@ export const typedefs = `#graphql
     description: String
     public: Boolean
     owner: String
-    collaborators: [String]
+    collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -428,7 +547,7 @@ export const typedefs = `#graphql
     public: Boolean
     description: String
     owner: String
-    collaborators: [String]
+    collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
     templates: [String]
@@ -593,17 +712,20 @@ export const typedefs = `#graphql
     adminMetrics: AdminMetrics
     adminUsers: [AdminUser]
     adminWorkspaces: [AdminWorkspace]
-    currentUserFeatures: UserFeatures
 
     # User queries
     users: [User]
     user(_id: String): User
     userByEmail(email: String): ResponseDataString
     userByOrcid(orcid: String): ResponseDataString
+    userGlobalPermissions(_id: String): UserGlobalPermissions
+    userWorkspacePermissions(_id: String, workspace: String): UserWorkspacePermissions
+    userCollatedPermissions: UserCollatedPermissions
 
     # Project queries
     projects(limit: Int, archived: Boolean): [Project]
     project(_id: String): Project
+    projectEntities(_id: String): [Entity]
     projectMetrics: ProjectMetrics
 
     # Entity queries
@@ -684,7 +806,8 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserRole(_id: String, role: String): ResponseMessage
-    setUserFeatures(_id: String, features: UserFeaturesInput): ResponseMessage
+    setUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
+    setUserWorkspacePermissions(_id: String, workspace: String permissions: UserWorkspacePermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations

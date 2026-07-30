@@ -23,9 +23,9 @@ import {
   Collapsible,
   Textarea,
   Breadcrumb,
+  SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
-import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import ExportDialog from "@components/ExportDialog";
 import Icon from "@components/Icon";
@@ -39,20 +39,29 @@ import Tooltip from "@components/Tooltip";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import SaveDialog from "@components/SaveDialog";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { ProjectHistory, ProjectModel, DataTableAction, IGenericItem, ResponseData } from "@types";
-import { Cell } from "@tanstack/react-table";
+import {
+  ProjectHistory,
+  ProjectModel,
+  DataTableAction,
+  IGenericItem,
+  ResponseData,
+  EntityModel,
+  AttributeModel,
+} from "@types";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery, useMutation, useApolloClient } from "@apollo/client/react";
 
 // Routing and navigation
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
-// Authentication
-import { auth } from "@lib/auth";
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -62,8 +71,23 @@ import dayjs from "dayjs";
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
+// Row shape for the Entities table; description and attributes are undefined until fetched
+type EntityTableRow = {
+  _id: string;
+  description?: string;
+  attributes?: AttributeModel[];
+};
+
 const Project = () => {
   const { id } = useParams();
+  const client = useApolloClient();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
+  // Workspace information
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -72,15 +96,6 @@ const Project = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
-
-  // State for current user
-  const [currentUser, setCurrentUser] = useState("");
-
-  useEffect(() => {
-    auth.getSession().then(({ data: session }) => {
-      if (session?.user) setCurrentUser(session.user.id);
-    });
-  }, []);
 
   // Add Entities
   const [entitiesOpen, setEntitiesOpen] = useState(false);
@@ -109,6 +124,7 @@ const Project = () => {
   const [projectName, setProjectName] = useState("");
   const [projectArchived, setProjectArchived] = useState(false);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
+  const [projectEntitiesData, setProjectEntitiesData] = useState<EntityModel[]>([]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
 
@@ -145,8 +161,6 @@ const Project = () => {
     }
   }, [projectHistory, historySortOrder, dateFilterApplied, appliedStartDate, appliedEndDate]);
 
-  const [projectCollaborators, setProjectCollaborators] = useState([] as string[]);
-
   // Computed values that use preview data when in preview mode
   const displayProjectName = useMemo(() => {
     return previewVersion ? previewVersion.name : projectName;
@@ -160,10 +174,6 @@ const Project = () => {
     return previewVersion ? previewVersion.entities : projectEntities;
   }, [previewVersion, projectEntities]);
 
-  const displayProjectCollaborators = useMemo(() => {
-    return previewVersion ? previewVersion.collaborators : projectCollaborators;
-  }, [previewVersion, projectCollaborators]);
-
   const displayProjectArchived = useMemo(() => {
     return previewVersion ? previewVersion.archived : projectArchived;
   }, [previewVersion, projectArchived]);
@@ -175,12 +185,21 @@ const Project = () => {
         name: previewVersion.name,
         description: previewVersion.description || "",
         entities: previewVersion.entities,
-        collaborators: previewVersion.collaborators,
         archived: previewVersion.archived,
       };
     }
     return project;
   }, [previewVersion, project]);
+
+  // Merge fetched Entity data into the displayed rows, keyed by identifier
+  const entitiesTableData = useMemo(() => {
+    const entitiesById = new Map(projectEntitiesData.map((entity) => [entity._id, entity]));
+    return displayProjectEntities.map((_id) => ({
+      _id,
+      description: entitiesById.get(_id)?.description,
+      attributes: entitiesById.get(_id)?.attributes,
+    }));
+  }, [displayProjectEntities, projectEntitiesData]);
 
   // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -202,7 +221,7 @@ const Project = () => {
 
   // Execute GraphQL query both on page load and navigation
   const GET_PROJECT_WITH_ENTITIES = gql`
-    query GetProjectWithEntities($_id: String) {
+    query GetProjectWithEntities($_id: String, $workspace: String) {
       project(_id: $_id) {
         _id
         name
@@ -211,37 +230,55 @@ const Project = () => {
         description
         owner
         entities
-        collaborators
         history {
           message
           author
           name
           timestamp
           version
-          collaborators
           created
           description
           entities
         }
       }
-      entities {
-        entities {
+      projectEntities(_id: $_id) {
+        _id
+        name
+        description
+        attributes {
           _id
-          name
         }
-        total
+      }
+      workspace(_id: $workspace) {
+        _id
+        name
       }
     }
   `;
   const { loading, error, data } = useQuery<{
     project: ProjectModel;
-    entities: IGenericItem[];
+    projectEntities: EntityModel[];
+    workspace: IGenericItem;
   }>(GET_PROJECT_WITH_ENTITIES, {
     variables: {
       _id: id,
+      workspace: workspace,
     },
     fetchPolicy: "no-cache",
   });
+
+  // Query for an Entity's table data, used to populate a row as soon as it's added
+  const GET_ENTITY_TABLE_DATA = gql`
+    query GetEntityTableData($_id: String) {
+      entity(_id: $_id) {
+        _id
+        description
+        attributes {
+          _id
+        }
+      }
+    }
+  `;
 
   // Mutation to update Project
   const UPDATE_PROJECT = gql`
@@ -285,10 +322,17 @@ const Project = () => {
         setProjectArchived(data.project.archived);
         setProjectDescription(data.project.description);
         setProjectEntities(data.project.entities);
-        setProjectCollaborators(data.project.collaborators || []);
       }
 
       setProjectHistory(data.project.history || []);
+    }
+
+    if (data?.projectEntities) {
+      setProjectEntitiesData(data.projectEntities);
+    }
+
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
   }, [data, editing]);
 
@@ -306,10 +350,22 @@ const Project = () => {
     }
   }, [loading, error]);
 
-  const addEntities = (): void => {
-    setProjectEntities([...projectEntities, ...selectedEntities.map((e) => e._id)]);
+  const addEntities = async (): Promise<void> => {
+    const addedEntityIds = selectedEntities.map((e) => e._id);
+    setProjectEntities([...projectEntities, ...addedEntityIds]);
     setSelectedEntities([]);
     setEntitiesOpen(false);
+
+    // Fetch table data for the newly added Entities so their rows aren't stuck loading
+    const results = await Promise.all(
+      addedEntityIds.map((_id) =>
+        client.query<{ entity: EntityModel }>({ query: GET_ENTITY_TABLE_DATA, variables: { _id } }),
+      ),
+    );
+    const fetchedEntities = results
+      .map((result) => result.data?.entity)
+      .filter((entity): entity is EntityModel => !_.isUndefined(entity));
+    setProjectEntitiesData((existing) => [...existing, ...fetchedEntities]);
   };
 
   /**
@@ -340,7 +396,6 @@ const Project = () => {
       archived: projectArchived,
       description: projectDescription,
       owner: project.owner,
-      collaborators: projectCollaborators || [],
       created: project.created,
       entities: projectEntities,
       history: projectHistory,
@@ -356,7 +411,6 @@ const Project = () => {
             archived: updateData.archived,
             created: updateData.created,
             owner: updateData.owner,
-            collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
           }),
@@ -458,7 +512,6 @@ const Project = () => {
     setProjectDescription(project.description);
     setProjectEntities(project.entities);
     setProjectHistory(project.history);
-    setProjectCollaborators(project.collaborators);
   };
 
   /**
@@ -474,7 +527,6 @@ const Project = () => {
       archived: project.archived,
       created: project.created,
       owner: project.owner,
-      collaborators: project.collaborators || [],
       description: projectVersion.description,
       entities: projectVersion.entities,
       history: project.history,
@@ -491,7 +543,6 @@ const Project = () => {
             archived: updateData.archived,
             created: updateData.created,
             owner: updateData.owner,
-            collaborators: updateData.collaborators,
             description: updateData.description,
             entities: updateData.entities,
           }),
@@ -523,7 +574,6 @@ const Project = () => {
     setProjectDescription(updateData.description);
     setProjectEntities(updateData.entities);
     setProjectHistory(updateData?.history || []);
-    setProjectCollaborators(updateData?.collaborators || []);
 
     setIsLoaded(true);
   };
@@ -563,17 +613,14 @@ const Project = () => {
   };
 
   // Define the columns for Entities listing
+  const columnHelper = createColumnHelper<EntityTableRow>();
   const entitiesColumns = [
-    {
-      id: "entityId",
-      accessorFn: (row: string) => row,
-      cell: (info: Cell<string, string>) => {
+    columnHelper.accessor("_id", {
+      cell: (info) => {
         const entityId = info.getValue();
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={entityId} disabled={entityId.length < 20} showArrow>
-              <Linky id={entityId} type={"entities"} size={"xs"} />
-            </Tooltip>
+            <Linky id={entityId} type={"entities"} />
             {editing ? (
               <Button
                 size="2xs"
@@ -605,7 +652,55 @@ const Project = () => {
         );
       },
       header: "Name",
-    },
+      meta: {
+        minWidth: 360,
+      },
+    }),
+    columnHelper.accessor("description", {
+      cell: (info) => {
+        const description = info.getValue();
+        if (_.isUndefined(description)) {
+          return <SkeletonText noOfLines={1} />;
+        }
+        if (_.isEqual(description, "")) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+            </Tag.Root>
+          );
+        }
+        return (
+          <Flex>
+            <Tooltip content={description} disabled={description.length < 64} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(description, { length: 64 })}</Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Description",
+      enableHiding: true,
+      meta: {
+        minWidth: 400,
+      },
+    }),
+    columnHelper.accessor("attributes", {
+      cell: (info) => {
+        const attributes = info.getValue();
+        if (_.isUndefined(attributes)) {
+          return <SkeletonText noOfLines={1} />;
+        }
+        return (
+          <Tag.Root colorPalette={attributes.length > 0 ? "green" : "orange"} size={"sm"}>
+            <Tag.Label fontSize={"xs"}>{attributes.length > 0 ? attributes.length : "None"}</Tag.Label>
+          </Tag.Root>
+        );
+      },
+      header: "Attributes",
+      meta: {
+        minWidth: 120,
+        maxWidth: 120,
+      },
+    }),
   ];
   const entitiesTableActions: DataTableAction[] = [
     {
@@ -614,7 +709,7 @@ const Project = () => {
       action(table, rows) {
         const entitiesToRemove: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          entitiesToRemove.push(table.getRow(rowIndex).original);
+          entitiesToRemove.push(table.getRow(rowIndex).original._id);
         }
         handleRemoveEntities(entitiesToRemove);
       },
@@ -654,20 +749,26 @@ const Project = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Button
-                size={"xs"}
-                variant={"solid"}
-                colorPalette={"orange"}
-                rounded={"md"}
-                onClick={async () => {
-                  await handleRestoreFromHistoryClick(previewVersion);
-                  setPreviewVersion(null);
-                }}
-                disabled={displayProjectArchived}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  size={"xs"}
+                  variant={"solid"}
+                  colorPalette={"orange"}
+                  rounded={"md"}
+                  onClick={async () => {
+                    await handleRestoreFromHistoryClick(previewVersion);
+                    setPreviewVersion(null);
+                  }}
+                  disabled={displayProjectArchived || !workspacePermissions.projects.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -688,13 +789,19 @@ const Project = () => {
             <Breadcrumb.Root>
               <Breadcrumb.List>
                 <Breadcrumb.Item
+                  gap={"1"}
                   onClick={() => navigate("/")}
                   _hover={{
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Dashboard
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  {loading ? (
+                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
+                  ) : (
+                    workspaceName
+                  )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
                 <Breadcrumb.Item
@@ -774,24 +881,42 @@ const Project = () => {
                       Export Entities
                     </Menu.Item>
                   </Tooltip>
-                  <Menu.Item
-                    value={"archive"}
-                    onClick={() => setArchiveDialogOpen(true)}
-                    fontSize={"xs"}
-                    disabled={projectArchived || !!previewVersion}
+                  <Tooltip
+                    content={"Insufficient permissions in this Workspace"}
+                    disabled={workspacePermissions.projects.create}
+                    showArrow
                   >
-                    <Icon name={"archive"} size={"xs"} />
-                    Archive
-                  </Menu.Item>
+                    <Menu.Item
+                      value={"archive"}
+                      onClick={() => setArchiveDialogOpen(true)}
+                      fontSize={"xs"}
+                      disabled={projectArchived || !!previewVersion || !workspacePermissions.projects.archive}
+                    >
+                      <Icon name={"archive"} size={"xs"} />
+                      Archive
+                    </Menu.Item>
+                  </Tooltip>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
 
             {displayProjectArchived ? (
-              <Button onClick={handleRestoreClick} size={"xs"} rounded={"md"} colorPalette={"orange"}>
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.projects.archive}
+                showArrow
+              >
+                <Button
+                  onClick={handleRestoreClick}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  disabled={!workspacePermissions.projects.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
             ) : (
               <Flex gap={"1"}>
                 {editing && (
@@ -800,19 +925,25 @@ const Project = () => {
                     <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
-                <Button
-                  id={"editProjectButton"}
-                  colorPalette={editing ? "green" : "blue"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={handleEditClick}
-                  loadingText={"Saving..."}
-                  loading={isUpdating}
-                  disabled={!!previewVersion}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.projects.edit}
+                  showArrow
                 >
-                  {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
-                </Button>
+                  <Button
+                    id={"editProjectButton"}
+                    colorPalette={editing ? "green" : "blue"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={handleEditClick}
+                    loadingText={"Saving..."}
+                    loading={isUpdating}
+                    disabled={!!previewVersion || !workspacePermissions.projects.edit}
+                  >
+                    {editing ? "Save" : "Edit"}
+                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
+                  </Button>
+                </Tooltip>
               </Flex>
             )}
 
@@ -1101,17 +1232,27 @@ const Project = () => {
                                         Preview
                                         <Icon name={"expand"} size={"xs"} />
                                       </Button>
-                                      <Button
-                                        variant={"solid"}
-                                        size={"xs"}
-                                        rounded={"md"}
-                                        colorPalette={"orange"}
-                                        onClick={() => handleRestoreFromHistoryClick(projectVersion)}
-                                        disabled={projectArchived || !!previewVersion}
+                                      <Tooltip
+                                        content={"Insufficient permissions in this Workspace"}
+                                        disabled={workspacePermissions.projects.archive}
+                                        showArrow
                                       >
-                                        Restore
-                                        <Icon name={"rewind"} size={"xs"} />
-                                      </Button>
+                                        <Button
+                                          variant={"solid"}
+                                          size={"xs"}
+                                          rounded={"md"}
+                                          colorPalette={"orange"}
+                                          onClick={() => handleRestoreFromHistoryClick(projectVersion)}
+                                          disabled={
+                                            projectArchived ||
+                                            !!previewVersion ||
+                                            !workspacePermissions.projects.archive
+                                          }
+                                        >
+                                          Restore
+                                          <Icon name={"rewind"} size={"xs"} />
+                                        </Button>
+                                      </Tooltip>
                                     </Flex>
                                   </Flex>
 
@@ -1191,39 +1332,6 @@ const Project = () => {
                                               <Flex>
                                                 <Tag.Root size={"sm"} colorPalette={"orange"}>
                                                   <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
-                                                </Tag.Root>
-                                              </Flex>
-                                            )}
-                                          </Flex>
-
-                                          <Flex
-                                            direction={"column"}
-                                            gap={"1"}
-                                            p={"2"}
-                                            rounded={"md"}
-                                            border={GLOBAL_STYLES.border.style}
-                                            borderColor={GLOBAL_STYLES.border.color}
-                                            bg={"white"}
-                                            grow={"1"}
-                                          >
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Collaborators
-                                            </Text>
-                                            {projectVersion.collaborators.length > 0 ? (
-                                              <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                {projectVersion.collaborators.map((collaborator) => (
-                                                  <Tag.Root
-                                                    key={`v_c_${projectVersion.timestamp}_${collaborator}`}
-                                                    size={"sm"}
-                                                  >
-                                                    <Tag.Label fontSize={"xs"}>{collaborator}</Tag.Label>
-                                                  </Tag.Root>
-                                                ))}
-                                              </Flex>
-                                            ) : (
-                                              <Flex>
-                                                <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                  <Tag.Label fontSize={"xs"}>No Collaborators</Tag.Label>
                                                 </Tag.Root>
                                               </Flex>
                                             )}
@@ -1379,7 +1487,7 @@ const Project = () => {
             </Flex>
           </Flex>
 
-          {/* Project Entities and Collaborators */}
+          {/* Project Entities */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Entities */}
             <Flex
@@ -1422,7 +1530,7 @@ const Project = () => {
               >
                 {displayProjectEntities && displayProjectEntities.length > 0 ? (
                   <DataTable
-                    data={displayProjectEntities}
+                    data={entitiesTableData}
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     selectedRows={{}}
@@ -1442,26 +1550,6 @@ const Project = () => {
                   </EmptyState.Root>
                 )}
               </Flex>
-            </Flex>
-
-            {/* Collaborators */}
-            <Flex
-              direction={"column"}
-              p={"0"}
-              h={"fit-content"}
-              gap={"0"}
-              rounded={"md"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Collaborators
-                editing={editing && !previewVersion}
-                currentUser={currentUser}
-                owner={project.owner}
-                collaborators={displayProjectCollaborators}
-                setCollaborators={setProjectCollaborators}
-              />
             </Flex>
           </Flex>
         </Flex>

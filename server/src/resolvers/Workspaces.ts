@@ -19,10 +19,13 @@ import { User } from "@models/User";
 // Email
 import { sendEmail, templates } from "@lib/email";
 
-const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
-
 // Posthog
 import { PostHogClient } from "@lib/posthog";
+
+// Utility functions
+import { isCollaborator } from "@lib/util";
+
+const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 export const WorkspacesResolvers = {
   Query: {
@@ -33,7 +36,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (workspaces.length > 0) {
         return workspaces.filter((workspace) => {
-          return _.isEqual(workspace.owner, context.user) || _.includes(workspace.collaborators, context.user);
+          return _.isEqual(workspace.owner, context.user) || isCollaborator(context.user, workspace.collaborators);
         });
       }
 
@@ -59,7 +62,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         return workspace;
@@ -90,7 +93,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getEntities(args._id);
@@ -122,7 +125,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getProjects(args._id);
@@ -154,7 +157,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getActivity(args._id);
@@ -220,23 +223,27 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (_.includes(workspace.collaborators, context.user) || _.isEqual(workspace.owner, context.user))
+        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);
 
         // Notify any newly added collaborators
-        const newCollaborators = _.difference(args.workspace.collaborators, workspace.collaborators);
+        const newCollaborators = _.differenceBy(args.workspace.collaborators, workspace.collaborators, "_id");
         if (newCollaborators.length > 0) {
           const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
           await Promise.allSettled(
-            newCollaborators.map(async (collaboratorId) => {
-              const collaborator = await User.getOne(collaboratorId);
-              if (collaborator) {
+            newCollaborators.map(async (collaborator) => {
+              const collaboratorResult = await User.getOne(collaborator._id);
+              if (collaboratorResult) {
                 await sendEmail({
-                  to: collaborator.email,
+                  to: collaboratorResult.email,
                   subject: `You've been added to "${args.workspace.name}" on Metadatify`,
-                  html: templates.workspaceCollaboratorAdded(collaborator.name, args.workspace.name, workspaceUrl),
+                  html: templates.workspaceCollaboratorAdded(
+                    collaboratorResult.name,
+                    args.workspace.name,
+                    workspaceUrl,
+                  ),
                 });
               }
             }),

@@ -31,9 +31,9 @@ import { APIKey, DataTableAction, IResponseMessage, ResponseData, UserModel, Wor
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
-// Context and hooks
+// Hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useFeatures } from "@hooks/useFeatures";
+import { usePermissions } from "@hooks/usePermissions";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -41,14 +41,16 @@ import { auth } from "@lib/auth";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail, ignoreAbort } from "@lib/util";
+import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
 
 // Variables
 import { APP_URL, GLOBAL_STYLES } from "@variables";
 
 const User = () => {
   const { isBreakpointActive } = useBreakpoint();
-  const { features } = useFeatures();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
 
   // Authentication and user
   const [user, setUser] = useState("");
@@ -87,6 +89,7 @@ const User = () => {
         affiliation
         api_keys
         account_orcid
+        role
       }
       workspaces {
         _id
@@ -94,7 +97,9 @@ const User = () => {
         description
         public
         owner
-        collaborators
+        collaborators {
+          _id
+        }
       }
     }
   `;
@@ -487,7 +492,7 @@ const User = () => {
           name: workspace.name,
           description: workspace.description,
           public: workspace.public,
-          collaborators: workspace.collaborators.filter((c) => c !== user),
+          collaborators: workspace.collaborators.filter((c) => !isCollaborator(c._id, workspace.collaborators)),
         },
       },
     });
@@ -521,7 +526,7 @@ const User = () => {
               name: w.name,
               description: w.description,
               public: w.public,
-              collaborators: w.collaborators.filter((c) => c !== user),
+              collaborators: w.collaborators.filter((c) => !isCollaborator(c._id, w.collaborators)),
             },
           },
         }),
@@ -717,19 +722,53 @@ const User = () => {
           align={"center"}
           wrap={"wrap"}
         >
-          <Flex
-            align={"center"}
-            gap={"1"}
-            p={"1"}
-            border={"2px solid"}
-            borderColor={"gray.700"}
-            bg={"gray.100"}
-            rounded={"md"}
-          >
-            <Icon name={"person"} size={"sm"} />
-            <Heading fontWeight={"semibold"} size={"sm"}>
-              {staticName}
-            </Heading>
+          <Flex direction={"row"} gap={"2"} align={"center"}>
+            <Flex
+              align={"center"}
+              gap={"1"}
+              p={"1"}
+              border={"2px solid"}
+              borderColor={"gray.700"}
+              bg={"gray.100"}
+              rounded={"md"}
+            >
+              <Icon name={"person"} size={"sm"} />
+              <Heading fontWeight={"semibold"} size={"sm"}>
+                {staticName}
+              </Heading>
+            </Flex>
+
+            {userModel.role === "admin" && (
+              <Flex
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"yellow.700"}
+                bg={"yellow.100"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"sm"} color={"yellow.700"}>
+                  Administrator
+                </Heading>
+              </Flex>
+            )}
+
+            {userModel.role !== "admin" && (
+              <Flex
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"blue.700"}
+                bg={"blue.100"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"sm"} color={"blue.700"}>
+                  Standard User
+                </Heading>
+              </Flex>
+            )}
           </Flex>
           {editing ? (
             <Flex direction={"row"} align={"center"} gap={"2"}>
@@ -1061,7 +1100,7 @@ const User = () => {
             </Flex>
           </Flex>
 
-          {features.api && (
+          {globalPermissions.features.api && (
             <Flex
               direction={"column"}
               p={"2"}

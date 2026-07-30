@@ -13,7 +13,7 @@ import {
   createTestWorkspace,
   switchWorkspace,
   addEntityToProject,
-} from "../helpers";
+} from "../helpers/global.helpers";
 
 test.describe("Project", () => {
   test.describe("Edit: Details", () => {
@@ -86,7 +86,7 @@ test.describe("Project", () => {
       await addEntityToProject(page, "1-Entity-Project");
 
       // Check for the View button rather than the entity name since the table column truncates long names
-      const table = page.locator(".data-table-scroll-container");
+      const table = page.getByTestId("data-table-scroll-container");
       await expect(table.locator('button[aria-label="View Entity"]')).toBeVisible({ timeout: 10000 });
 
       await page.reload();
@@ -106,11 +106,11 @@ test.describe("Project", () => {
       await page.click("#editProjectButton");
       await addEntityToProject(page, "2-Project-Entity");
 
-      const table = page.locator(".data-table-scroll-container");
+      const table = page.getByTestId("data-table-scroll-container");
       await table.locator('button[aria-label="View Entity"]').first().click();
 
       await page.click("#editEntityButton");
-      const projectsTable = page.locator(".data-table-scroll-container").filter({ hasText: "2-Entity-Project" });
+      const projectsTable = page.getByTestId("data-table-scroll-container").filter({ hasText: "2-Entity-Project" });
       await projectsTable.locator('button[aria-label="Remove Project"]').first().click();
       await saveAndWait(page);
 
@@ -138,7 +138,7 @@ test.describe("Project", () => {
     test("should appear in the Projects list after creation", async ({ page }) => {
       await navigateToSection(page, "Projects");
 
-      const table = page.locator(".data-table-scroll-container");
+      const table = page.getByTestId("data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
       await expect(table.locator("text=1-Project-List")).toBeVisible({ timeout: 10000 });
     });

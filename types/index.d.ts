@@ -170,13 +170,18 @@ export type IValueSelectData = {
   options: string[];
 };
 
+export type Collaborator = {
+  _id: string;
+  permissions: UserWorkspacePermissions; // Workspace-scoped permissions
+};
+
 // "Collaborators" component props
 export type CollaboratorsProps = {
   editing: boolean;
   currentUser: string;
   owner: string;
-  collaborators: string[];
-  setCollaborators: (value: React.SetStateAction<string[]>) => void;
+  collaborators: Collaborator[];
+  setCollaborators: (value: React.SetStateAction<Collaborator[]>) => void;
 };
 
 // "Linky" component props
@@ -214,7 +219,6 @@ export type IProject = {
   owner: string;
   archived: boolean;
   created: string;
-  collaborators: string[];
   description: string;
   entities: string[];
   history: ProjectHistory[];
@@ -238,7 +242,6 @@ export type ProjectHistory = {
   name: string;
   description: string;
   entities: string[];
-  collaborators: string[];
 };
 
 // Utility type used across other types, typically in a list
@@ -300,7 +303,7 @@ export type IWorkspace = {
   owner: string;
   public: boolean;
   description: string;
-  collaborators: string[];
+  collaborators: Collaborator[];
   entities: string[];
   projects: string[];
   templates: string[];
@@ -553,6 +556,7 @@ export type IconNames =
   | "counter"
   | "diff"
   | "info"
+  | "file"
   | "search"
   | "search_query"
   | "bell"
@@ -773,8 +777,9 @@ export type IUser = {
   updatedAt: string; // better-auth: Last updated
   lastLogin: string; // better-auth: Timestamp of last login
   api_keys: string; // better-auth: Stored as a JSON string
-  role: string; // better-auth admin: "user" or "admin"
-  features: UserFeatures; // Account features such as AI search or API access
+  role: string; // better-auth: "user" or "admin"
+  banned: boolean; // better-auth: Overarching access status
+  permissions: UserGlobalPermissions; // Global permissions such as AI search or API access
   account_orcid: string; // ORCiD if connected
   hasSeenWalkthrough?: boolean; // If user has seen or skipped the initial walkthrough
   completedProfile?: boolean; // `false` until third-party signup profile is completed
@@ -782,6 +787,59 @@ export type IUser = {
 
 export type UserModel = IUser & {
   _id: string;
+};
+
+// User Workspace permissions structure
+export type UserWorkspacePermissions = {
+  administration: {
+    edit: boolean;
+    invite: boolean;
+  };
+  entities: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
+  projects: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
+  templates: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
+};
+
+// User global permissions structure
+export type UserGlobalPermissions = {
+  features: {
+    import: boolean;
+    scan: boolean;
+    ai: boolean;
+    api: boolean;
+  };
+  workspaces: {
+    create: boolean;
+  };
+};
+
+export type UserCollatedPermissions = {
+  workspace: UserWorkspacePermissions;
+  global: UserGlobalPermissions;
+};
+
+// Permissions Dialog props
+export type PermissionsDialogProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  user: string;
+  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
+  isGlobal: boolean; // Define if modifying "global" permissions or just for the Workspace
+  workspace?: string; // Specify the Workspace if modifying Workspace permissions
+  workspacePermissions?: UserWorkspacePermissions; // Current local Workspace permissions for `user`, used instead of fetching from the server
+  onUpdateWorkspacePermissions?: (permissions: UserWorkspacePermissions) => void; // Called with the edited permissions instead of persisting them immediately
 };
 
 // Metrics
@@ -804,8 +862,8 @@ export type AdminWorkspace = {
   description: string;
   owner: string;
   entities: number;
+  projects: number;
   templates: number;
-  attributes: number;
 };
 
 export type AdminMetrics = {
@@ -816,18 +874,20 @@ export type AdminMetrics = {
   templates: number;
 };
 
-export type UserFeatures = {
-  ai: boolean;
-  api: boolean;
-};
-
 export type AdminUser = {
   _id: string;
   name: string;
   email: string;
   role: string;
   workspaces: number;
-  features: UserFeatures;
+  permissions: UserGlobalPermissions;
   banned: boolean;
   lastLogin: string;
+};
+
+// Types to assist with test frameworks
+// A path on the client where a Workspace permission is enforced
+export type ClientPath = {
+  name: string;
+  verify: (page: Page, granted: boolean) => Promise<void>;
 };

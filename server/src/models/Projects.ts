@@ -44,6 +44,20 @@ export class Projects {
     return !_.isNull(project);
   };
 
+  /**
+   * Get all Entities present in a Project
+   * @param _id Project identifier
+   * @return {Promise<EntityModel[]>}
+   */
+  static getEntities = async (_id: string): Promise<EntityModel[]> => {
+    const project = await Projects.getOne(_id);
+    if (!_.isNull(project)) {
+      return await Entities.getMany(project.entities);
+    } else {
+      return [];
+    }
+  };
+
   static create = async (project: IProject): Promise<ResponseData<string>> => {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
@@ -92,11 +106,6 @@ export class Projects {
     // Description
     if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
-    }
-
-    // Collaborators
-    if (!_.isUndefined(updated.collaborators)) {
-      update.$set.collaborators = updated.collaborators;
     }
 
     // Entities to add and remove
@@ -152,7 +161,6 @@ export class Projects {
       _id: historyProject._id,
       name: historyProject.name,
       owner: historyProject.owner,
-      collaborators: historyProject.collaborators,
       archived: historyProject.archived,
       created: historyProject.created,
       description: historyProject.description,

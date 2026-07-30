@@ -17,6 +17,7 @@ import {
   Menu,
   Portal,
   Select,
+  SkeletonText,
   Tag,
   Text,
   Textarea,
@@ -38,7 +39,7 @@ import ExportDialog from "@components/ExportDialog";
 import SaveDialog from "@components/SaveDialog";
 
 // Existing and custom types
-import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData } from "@types";
+import { AttributeHistory, AttributeModel, AttributeUsage, IGenericItem, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -52,12 +53,23 @@ import { useNavigate, useParams } from "react-router-dom";
 import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+import { useWorkspace } from "@hooks/useWorkspace";
+
 // Variables
 import { GLOBAL_STYLES } from "@variables";
 
 const Template = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Permissions
+  const { workspacePermissions } = usePermissions();
+
+  // Workspace information
+  const { workspace } = useWorkspace();
+  const [workspaceName, setWorkspaceName] = useState("");
 
   const [editing, setEditing] = useState(false);
 
@@ -139,7 +151,7 @@ const Template = () => {
 
   // GraphQL operations
   const GET_TEMPLATE = gql`
-    query GetTemplate($_id: String) {
+    query GetTemplate($_id: String, $workspace: String) {
       template(_id: $_id) {
         _id
         name
@@ -171,13 +183,19 @@ const Template = () => {
           }
         }
       }
+      workspace(_id: $workspace) {
+        _id
+        name
+      }
     }
   `;
   const { loading, error, data } = useQuery<{
     template: AttributeModel;
+    workspace: IGenericItem;
   }>(GET_TEMPLATE, {
     variables: {
       _id: id,
+      workspace: workspace,
     },
     fetchPolicy: "no-cache",
   });
@@ -244,6 +262,10 @@ const Template = () => {
       setTemplateDescription(data.template.description || "");
       setTemplateValues(data.template.values);
       setTemplateHistory(data.template.history || []);
+    }
+
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
     }
 
     if (usageData?.templateUsage) {
@@ -527,20 +549,26 @@ const Template = () => {
               </Text>
             </Flex>
             <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Button
-                size={"xs"}
-                variant={"solid"}
-                colorPalette={"orange"}
-                rounded={"md"}
-                onClick={async () => {
-                  await handleRestoreFromHistoryClick(previewVersion);
-                  setPreviewVersion(null);
-                }}
-                disabled={templateArchived}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.templates.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  size={"xs"}
+                  variant={"solid"}
+                  colorPalette={"orange"}
+                  rounded={"md"}
+                  onClick={async () => {
+                    await handleRestoreFromHistoryClick(previewVersion);
+                    setPreviewVersion(null);
+                  }}
+                  disabled={templateArchived || !workspacePermissions.templates.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
               <Button
                 size={"xs"}
                 variant={"solid"}
@@ -561,13 +589,19 @@ const Template = () => {
             <Breadcrumb.Root>
               <Breadcrumb.List>
                 <Breadcrumb.Item
+                  gap={"1"}
                   onClick={() => navigate("/")}
                   _hover={{
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Dashboard
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  {loading ? (
+                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
+                  ) : (
+                    workspaceName
+                  )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
                 <Breadcrumb.Item
@@ -632,30 +666,43 @@ const Template = () => {
                     <Icon name={"download"} size={"xs"} />
                     Export
                   </Menu.Item>
-                  <Menu.Item
-                    fontSize={"xs"}
-                    value={"archive"}
-                    onClick={() => setArchiveDialogOpen(true)}
-                    disabled={templateArchived}
+                  <Tooltip
+                    content={"Insufficient permissions in this Workspace"}
+                    disabled={workspacePermissions.templates.archive}
+                    showArrow
                   >
-                    <Icon name={"archive"} size={"xs"} />
-                    Archive
-                  </Menu.Item>
+                    <Menu.Item
+                      fontSize={"xs"}
+                      value={"archive"}
+                      onClick={() => setArchiveDialogOpen(true)}
+                      disabled={templateArchived || !workspacePermissions.templates.archive}
+                    >
+                      <Icon name={"archive"} size={"xs"} />
+                      Archive
+                    </Menu.Item>
+                  </Tooltip>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
 
             {templateArchived ? (
-              <Button
-                id={"restoreTemplateButton"}
-                onClick={handleRestoreFromArchiveClick}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"orange"}
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.templates.archive}
+                showArrow
               >
-                Restore
-                <Icon name={"rewind"} size={"xs"} />
-              </Button>
+                <Button
+                  id={"restoreTemplateButton"}
+                  onClick={handleRestoreFromArchiveClick}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"orange"}
+                  disabled={!workspacePermissions.templates.archive}
+                >
+                  Restore
+                  <Icon name={"rewind"} size={"xs"} />
+                </Button>
+              </Tooltip>
             ) : (
               <Flex gap={"2"}>
                 {editing && (
@@ -664,19 +711,25 @@ const Template = () => {
                     <Icon name={"cross"} size={"xs"} />
                   </Button>
                 )}
-                <Button
-                  id={"editTemplateButton"}
-                  colorPalette={editing ? "green" : "blue"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={handleEditClick}
-                  loadingText={"Saving..."}
-                  loading={updateLoading}
-                  disabled={!!previewVersion}
+                <Tooltip
+                  content={"Insufficient permissions in this Workspace"}
+                  disabled={workspacePermissions.templates.edit}
+                  showArrow
                 >
-                  {editing ? "Save" : "Edit"}
-                  {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
-                </Button>
+                  <Button
+                    id={"editTemplateButton"}
+                    colorPalette={editing ? "green" : "blue"}
+                    size={"xs"}
+                    rounded={"md"}
+                    onClick={handleEditClick}
+                    loadingText={"Saving..."}
+                    loading={updateLoading}
+                    disabled={!!previewVersion || !workspacePermissions.templates.edit}
+                  >
+                    {editing ? "Save" : "Edit"}
+                    {editing ? <Icon name={"save"} size={"xs"} /> : <Icon name={"edit"} size={"xs"} />}
+                  </Button>
+                </Tooltip>
               </Flex>
             )}
 
@@ -966,17 +1019,27 @@ const Template = () => {
                                           Preview
                                           <Icon name={"expand"} size={"xs"} />
                                         </Button>
-                                        <Button
-                                          variant={"solid"}
-                                          size={"xs"}
-                                          rounded={"md"}
-                                          colorPalette={"orange"}
-                                          onClick={() => handleRestoreFromHistoryClick(templateVersion)}
-                                          disabled={templateArchived || !!previewVersion}
+                                        <Tooltip
+                                          content={"Insufficient permissions in this Workspace"}
+                                          disabled={workspacePermissions.templates.archive}
+                                          showArrow
                                         >
-                                          Restore
-                                          <Icon name={"rewind"} size={"xs"} />
-                                        </Button>
+                                          <Button
+                                            variant={"solid"}
+                                            size={"xs"}
+                                            rounded={"md"}
+                                            colorPalette={"orange"}
+                                            onClick={() => handleRestoreFromHistoryClick(templateVersion)}
+                                            disabled={
+                                              templateArchived ||
+                                              !!previewVersion ||
+                                              !workspacePermissions.templates.archive
+                                            }
+                                          >
+                                            Restore
+                                            <Icon name={"rewind"} size={"xs"} />
+                                          </Button>
+                                        </Tooltip>
                                       </Flex>
                                     </Flex>
 

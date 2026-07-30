@@ -36,6 +36,10 @@ export const auth = createAuthClient({
         completedProfile: {
           type: "boolean",
         },
+        permissions: {
+          type: "json",
+          input: false,
+        },
       },
     }),
   ],
