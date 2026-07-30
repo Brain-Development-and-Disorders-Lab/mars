@@ -246,8 +246,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                     >
                       <Flex direction={"row"} gap={"2"} w={"100%"} align={"center"}>
                         <Tooltip
-                          disabled={workspace === accessible._id}
-                          content={"Switch to " + accessible.name}
+                          content={`${workspace === accessible._id ? "Active: " : "Switch to: "} ${accessible.name}`}
                           showArrow
                         >
                           <Text fontSize={"xs"}>{_.truncate(accessible.name, { length: 24 })}</Text>
@@ -257,10 +256,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
                         {workspace === accessible._id && (
                           <Flex gap={"1"} align={"center"}>
-                            <Text color={"green.600"} fontWeight={"semibold"}>
-                              Active
-                            </Text>
-                            <Icon name={"check"} color={"green.600"} />
+                            <Icon name={"check"} color={"green"} />
                           </Flex>
                         )}
                       </Flex>

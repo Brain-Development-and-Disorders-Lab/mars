@@ -64,8 +64,8 @@ const Navigation = () => {
       {/* Desktop navigation group */}
       <Flex direction={"column"} display={{ base: "none", lg: "flex" }} gap={"2"} w={"100%"}>
         {/* Heading */}
-        <Flex direction={"row"} gap={"2"} p={"1"} align={"center"} justify={"center"}>
-          <Image src={favicon} boxSize={"20px"} />
+        <Flex direction={"row"} gap={"1"} p={"1"} align={"center"} justify={"center"}>
+          <Image src={favicon} boxSize={"32px"} />
           <Text fontWeight={"semibold"} fontSize={"lg"} color={"nav.text"}>
             Metadatify
           </Text>

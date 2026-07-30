@@ -77,7 +77,7 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
   const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <components.Option {...props}>
-      <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
+      <Flex direction={"row"} h={"8"} p={"1"} gap={"1"} m={"0.5"} align={"center"} _hover={{ bg: "gray.100" }}>
         <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
@@ -102,7 +102,7 @@ const ValueTypeSelectContainer = ({ children, ...props }: ContainerProps<ValueTy
 const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<ValueTypeOption>) => {
   return (
     <components.ValueContainer {...props}>
-      <Flex w={"100%"} h={"34px"}>
+      <Flex w={"100%"} h={"38px"}>
         {children}
       </Flex>
     </components.ValueContainer>
@@ -112,7 +112,7 @@ const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<Val
 const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
   return (
     <Box
-      pl={"1"}
+      pl={"2"}
       pr={"3"}
       border={"1px solid transparent"}
       _hover={{
@@ -1197,10 +1197,34 @@ const ValueRow = (props: {
   }
   const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
+  /**
+   * Update local state and immediately propagate the change to the parent within the
+   * same event handler. Keeping this synchronous (rather than reacting to local state
+   * changes via `useEffect`) ensures the local update and the parent's round-trip update
+   * land in a single React commit, preventing the sync-from-props effect below from ever
+   * observing a stale intermediate value and momentarily reverting fast keystrokes.
+   */
+  const commitChange = (updates: { name?: string; type?: IValueType; data?: string; source?: "column" | "value" }) => {
+    const nextName = updates.name ?? valueName;
+    const nextType = updates.type ?? valueType;
+    const nextData = updates.data ?? valueData;
+    const nextSource = updates.source ?? source;
+    if (updates.name !== undefined) setValueName(updates.name);
+    if (updates.type !== undefined) setValueType(updates.type);
+    if (updates.data !== undefined) setValueData(updates.data);
+    if (updates.source !== undefined) setSource(updates.source);
+    props.onValueChange(props.value._id, nextName, nextType, nextData, props.permittedValues ? nextSource : undefined);
+  };
+
+  // Persist any local normalization performed during initialization (e.g. clearing an
+  // invalid column reference) back to the parent once on mount
+  const didMountRef = useRef(false);
   useEffect(() => {
-    // Propagate changes to overall `Value` state, including source in import mode
-    props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
-  }, [valueName, valueType, valueData, source]);
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
+    }
+  }, []);
 
   // Sync local state when props change from an external source
   useEffect(() => {
@@ -1390,7 +1414,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1418,7 +1442,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1446,7 +1470,7 @@ const ValueRow = (props: {
         return (
           <Input
             value={valueData}
-            onChange={(e) => setValueData(e.target.value)}
+            onChange={(e) => commitChange({ data: e.target.value })}
             size={"xs"}
             h={"100%"}
             borderRadius={"none"}
@@ -1476,7 +1500,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1519,7 +1543,14 @@ const ValueRow = (props: {
             boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
           }}
         >
-          <ValueDataSelect valueData={valueData} setValueData={setValueData} viewOnly={props.viewOnly} />
+          <ValueDataSelect
+            valueData={valueData}
+            setValueData={(next) => {
+              const resolved = typeof next === "function" ? (next as (prev: string) => string)(valueData) : next;
+              commitChange({ data: resolved });
+            }}
+            viewOnly={props.viewOnly}
+          />
         </Flex>
       );
     } else if (valueType === "entity") {
@@ -1546,7 +1577,7 @@ const ValueRow = (props: {
               placeholder={"Select Entity"}
               resultType={"entity"}
               value={JSON.parse(valueData) || { _id: "", name: "" }}
-              onChange={(entity) => setValueData(JSON.stringify(entity))}
+              onChange={(entity) => commitChange({ data: JSON.stringify(entity) })}
               disabled={props.viewOnly}
               isEmbedded
             />
@@ -1580,7 +1611,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={props.viewOnly ? "34px" : "100%"}
           px={1}
@@ -1657,7 +1688,7 @@ const ValueRow = (props: {
       >
         <Input
           value={valueName}
-          onChange={(e) => setValueName(e.target.value)}
+          onChange={(e) => commitChange({ name: e.target.value })}
           size={"xs"}
           px={1}
           py={0}
@@ -1711,19 +1742,20 @@ const ValueRow = (props: {
           }}
           onChange={(event) => {
             if (event) {
-              setValueType(event.value);
               setValueTypeOption({ label: event.label, value: event.value });
               if (props.permittedValues) {
                 if (inColumnMode) {
                   // In column mode, keep the selected column only if it is still valid
                   if (!props.permittedValues.some((c) => c.name === valueData)) {
-                    setValueData("");
+                    commitChange({ type: event.value, data: "" });
+                  } else {
+                    commitChange({ type: event.value });
                   }
                 } else {
-                  setValueData(generateDefaultData(event.value));
+                  commitChange({ type: event.value, data: generateDefaultData(event.value) });
                 }
               } else {
-                setValueData(generateDefaultData(event.value));
+                commitChange({ type: event.value, data: generateDefaultData(event.value) });
               }
             }
           }}
@@ -1792,7 +1824,7 @@ const ValueRow = (props: {
                     }
                     isSearchable={false}
                     onChange={(event) => {
-                      if (event) setValueData(event.value);
+                      if (event) commitChange({ data: event.value });
                     }}
                     components={{
                       Control: ColumnPickerControl,
@@ -1830,8 +1862,10 @@ const ValueRow = (props: {
                 flexShrink={0}
                 onClick={() => {
                   const newSource = source === "column" ? "value" : "column";
-                  setSource(newSource);
-                  setValueData(newSource === "value" ? generateDefaultData(valueType) : "");
+                  commitChange({
+                    source: newSource,
+                    data: newSource === "value" ? generateDefaultData(valueType) : "",
+                  });
                 }}
               >
                 <Icon name={inColumnMode ? "grid" : "edit"} size={"xs"} />
