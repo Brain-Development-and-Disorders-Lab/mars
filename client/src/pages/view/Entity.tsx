@@ -763,9 +763,9 @@ const Entity = () => {
         const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 12} showArrow>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
               <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 12 })}
+                {_.truncate(info.getValue(), { length: 16 })}
               </Text>
             </Tooltip>
             <Flex direction={"row"} gap={"1"} align={"center"}>
