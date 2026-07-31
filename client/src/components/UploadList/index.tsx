@@ -43,7 +43,7 @@ const FileUploadList = () => {
           <Spacer />
 
           {/* `IconButton` to remove uploaded file */}
-          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"}>
+          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => fileUpload.clearFiles()}>
             <FileUpload.ItemDeleteTrigger asChild>
               <Icon name={"delete"} size={"xs"} />
             </FileUpload.ItemDeleteTrigger>

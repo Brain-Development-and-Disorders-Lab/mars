@@ -627,7 +627,7 @@ const Template = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={displayTemplateArchived ? "gray.500" : STYLES.template.color.icon}
-                bg={displayTemplateArchived ? STYLES.card.bg : "teal.50"}
+                bg={displayTemplateArchived ? STYLES.card.bg : STYLES.template.color.light}
                 rounded={"md"}
               >
                 <Icon

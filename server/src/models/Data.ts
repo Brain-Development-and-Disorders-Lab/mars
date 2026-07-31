@@ -194,6 +194,7 @@ export class Data {
     return sheet.map((row, rowIndex) => {
       const rowWarnings: string[] = [];
 
+      // Check the Attributes for warnings
       const attributes: AttributeModel[] = columnMapping.attributes.map((attribute: AttributeModel) => ({
         _id: attribute._id,
         name: attribute.name,
@@ -232,6 +233,11 @@ export class Data {
           return { _id: value._id, name: value.name, type: value.type, data: processedData };
         }),
       }));
+
+      // Check the Entity name for warnings
+      if (row[columnMapping.name] === "" || _.isUndefined(row[columnMapping.name])) {
+        rowWarnings.push("Entity has missing / invalid name");
+      }
 
       const entity: IEntity = {
         archived: false,

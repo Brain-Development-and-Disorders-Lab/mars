@@ -1322,7 +1322,7 @@ const Entity = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={displayEntityArchived ? "gray.500" : STYLES.entity.color.icon}
-                bg={displayEntityArchived ? STYLES.card.bg : "purple.50"}
+                bg={displayEntityArchived ? STYLES.card.bg : STYLES.entity.color.light}
                 rounded={"md"}
               >
                 <Icon

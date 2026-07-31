@@ -863,7 +863,7 @@ const Project = () => {
                 p={"1"}
                 border={"2px solid"}
                 borderColor={displayProjectArchived ? "gray.500" : STYLES.project.color.icon}
-                bg={displayProjectArchived ? STYLES.card.bg : "blue.50"}
+                bg={displayProjectArchived ? STYLES.card.bg : STYLES.project.color.light}
                 rounded={"md"}
               >
                 <Icon

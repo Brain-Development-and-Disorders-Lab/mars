@@ -24,6 +24,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
 import AddAttributeDialog from "@components/AddAttributeDialog";
+import { Information } from "@components/Label";
 import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
@@ -364,9 +365,12 @@ const ImportDialog = (props: ImportDialogProps) => {
         return (
           <Flex>
             <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 30 })}
-              </Text>
+              <Flex direction={"row"} gap={"1"} ml={"1"}>
+                <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 30 })}
+                </Text>
+              </Flex>
             </Tooltip>
           </Flex>
         );
@@ -435,9 +439,12 @@ const ImportDialog = (props: ImportDialogProps) => {
         return (
           <Flex>
             <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 30 })}
-              </Text>
+              <Flex direction={"row"} gap={"1"} ml={"1"}>
+                <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 30 })}
+                </Text>
+              </Flex>
             </Tooltip>
           </Flex>
         );
@@ -949,9 +956,12 @@ const ImportDialog = (props: ImportDialogProps) => {
         const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
         return (
           <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={info.getValue() !== "" ? "black" : "gray.400"}>
-              {info.getValue() !== "" ? info.getValue() : "Unnamed"}
-            </Text>
+            <Flex direction={"row"} gap={"1"} ml={"1"}>
+              <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={info.getValue() !== "" ? "black" : "gray.400"}>
+                {info.getValue() !== "" ? info.getValue() : "Unnamed"}
+              </Text>
+            </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Button
                 size="2xs"
@@ -1284,7 +1294,7 @@ const ImportDialog = (props: ImportDialogProps) => {
               >
                 <Steps.List>
                   {entitySteps.map((step, index) => (
-                    <Steps.Item key={index} index={index} title={step.title}>
+                    <Steps.Item key={index} index={index} title={step.title} gap={"1.5"}>
                       <Steps.Indicator />
                       <Steps.Title fontSize={"xs"} fontWeight={"semibold"}>
                         {step.title}
@@ -1767,9 +1777,15 @@ const ImportDialog = (props: ImportDialogProps) => {
                 rounded={"md"}
               >
                 <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                    Attributes
-                  </Text>
+                  <Flex direction={"column"} gap={"1"} ml={"0.5"}>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                        Attributes
+                      </Text>
+                    </Flex>
+                    <Information text={"Attributes created here will be appended to all imported Entities"} />
+                  </Flex>
                   <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setAddAttributeOpen(true)}>
                     Add
                     <Icon name={"add"} size={"xs"} />
@@ -1818,9 +1834,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
-                  bg={"purple.50"}
+                  bg={STYLES.entity.color.light}
                   border={"1px solid"}
-                  borderColor={"purple.200"}
+                  borderColor={STYLES.entity.color.border}
                 >
                   <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
@@ -1852,9 +1868,9 @@ const ImportDialog = (props: ImportDialogProps) => {
                   p={"2"}
                   align={"center"}
                   rounded={"md"}
-                  bg={"teal.50"}
+                  bg={STYLES.template.color.light}
                   border={"1px solid"}
-                  borderColor={"teal.200"}
+                  borderColor={STYLES.template.color.border}
                 >
                   <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
                   <Flex direction={"column"} gap={"0.5"}>
@@ -1939,7 +1955,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
                   {/* Template import type */}
-                  {_.isEqual(importType, "template") && _.isEqual(entityInterfacePage, "review") && "Finish"}
+                  {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && "Finish"}
 
                   {/* Icon */}
                   {_.includes(["upload", "details", "mapping"], entityInterfacePage) ? (
