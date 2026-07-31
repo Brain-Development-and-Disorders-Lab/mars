@@ -34,7 +34,7 @@ const Create = () => {
           <Heading size={"lg"}>Create</Heading>
         </Flex>
         <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} textAlign={"center"}>
-          Create a new Entity, Template, or Project to continue building your metadata collection.
+          Create a new Entity, Project, or Template in this Workspace.
         </Text>
         <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"} justify={"center"}>
           {/* Entity card */}

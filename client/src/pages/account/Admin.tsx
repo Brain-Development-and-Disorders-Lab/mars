@@ -246,30 +246,33 @@ const Admin = () => {
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip disabled={info.getValue().length <= 28} content={info.getValue()} showArrow>
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 28 })}
-          </Text>
+        <Tooltip disabled={info.getValue().length < 32} content={info.getValue()} showArrow>
+          <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+            <Icon name={"workspace"} size={"xs"} />
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 32 })}
+            </Text>
+          </Flex>
         </Tooltip>
       ),
       header: "Name",
-      meta: { minWidth: 200 } as ColumnMeta,
+      meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("description", {
       cell: (info) => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 32} showArrow>
+            <Tooltip content={value} disabled={!value || value.length < 40} showArrow>
               <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 32 })}
+                {_.truncate(value, { length: 40 })}
               </Text>
             </Tooltip>
           );
         } else {
           return (
             <Tag.Root colorPalette={"orange"} size={"sm"}>
-              <Tag.Label>None</Tag.Label>
+              <Tag.Label>No Description</Tag.Label>
             </Tag.Root>
           );
         }

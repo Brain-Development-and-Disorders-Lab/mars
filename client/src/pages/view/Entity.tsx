@@ -887,6 +887,9 @@ const Entity = () => {
         }
       },
       header: "Values",
+      meta: {
+        minWidth: 300,
+      },
     }),
   ];
   const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] = useState({});

@@ -373,14 +373,17 @@ const Linky = (props: LinkyProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Description
                   </Text>
-                  <Text
-                    fontSize={"xs"}
-                    color={navigatorDescription ? "gray.700" : "gray.400"}
-                    fontStyle={navigatorDescription ? "normal" : "italic"}
-                    lineClamp={3}
-                  >
-                    {navigatorDescription || "No description provided"}
-                  </Text>
+                  <Flex>
+                    {_.isUndefined(navigatorDescription) || navigatorDescription === "" ? (
+                      <Tag.Root colorPalette={"orange"}>
+                        <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
+                      </Tag.Root>
+                    ) : (
+                      <Tooltip disabled={navigatorDescription.length < 32} content={navigatorDescription}>
+                        <Text fontSize={"xs"}>{_.truncate(navigatorDescription, { length: 32 })}</Text>
+                      </Tooltip>
+                    )}
+                  </Flex>
                 </Flex>
 
                 {/* Preview */}

@@ -23,7 +23,7 @@ import {
   EntityMetrics,
   ProjectMetrics,
   TemplateMetrics,
-  WorkspaceMetrics,
+  CollaboratorMetrics,
   IGenericItem,
 } from "@types";
 
@@ -108,8 +108,9 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    workspaceMetrics(_id: $workspace) {
-      collaborators
+    collaboratorMetrics {
+      all
+      addedDay
     }
   }
 `;
@@ -150,10 +151,10 @@ const Dashboard = () => {
   const [workspaceName, setWorkspaceName] = useState<string>();
 
   // Metrics
-  const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
-  const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
-  const [templateMetrics, setTemplateMetrics] = useState({} as TemplateMetrics);
-  const [workspaceMetrics, setWorkspaceMetrics] = useState({} as WorkspaceMetrics);
+  const [entityMetrics, setEntityMetrics] = useState<EntityMetrics>({} as EntityMetrics);
+  const [projectMetrics, setProjectMetrics] = useState<ProjectMetrics>({} as ProjectMetrics);
+  const [templateMetrics, setTemplateMetrics] = useState<TemplateMetrics>({} as TemplateMetrics);
+  const [collaboratorMetrics, setCollaboratorMetrics] = useState<CollaboratorMetrics>({} as CollaboratorMetrics);
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -184,7 +185,7 @@ const Dashboard = () => {
     workspace: IGenericItem;
     entityMetrics: EntityMetrics;
     templateMetrics: TemplateMetrics;
-    workspaceMetrics: WorkspaceMetrics;
+    collaboratorMetrics: CollaboratorMetrics;
   }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,
@@ -220,8 +221,8 @@ const Dashboard = () => {
     if (data?.templateMetrics) {
       setTemplateMetrics(data.templateMetrics);
     }
-    if (data?.workspaceMetrics) {
-      setWorkspaceMetrics(data.workspaceMetrics);
+    if (data?.collaboratorMetrics) {
+      setCollaboratorMetrics(data.collaboratorMetrics);
     }
   }, [data]);
 
@@ -721,10 +722,16 @@ const Dashboard = () => {
                 </Text>
               </Flex>
               <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-                {workspaceMetrics.collaborators ?? "-"}
+                {collaboratorMetrics.all ?? "-"}
               </Text>
-              <Badge px={"0"} variant={"plain"} colorPalette={"gray"} fontSize={"xs"}>
-                No change
+              <Badge
+                px={"0"}
+                variant={"plain"}
+                colorPalette={collaboratorMetrics.addedDay > 0 ? "green" : "gray"}
+                fontSize={"xs"}
+              >
+                {collaboratorMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+                {collaboratorMetrics.addedDay > 0 ? `+${collaboratorMetrics.addedDay} today` : "No new today"}
               </Badge>
             </Flex>
           )}

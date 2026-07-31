@@ -16,7 +16,9 @@ import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+
+// Hooks
+import { useWatchQuery } from "@hooks/useWatchQuery";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -54,15 +56,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
     return () => clearInterval(interval);
   }, []);
 
-  const { data } = useQuery<{
-    activity: ActivityModel[];
-  }>(GET_ACTIVITY, {
-    variables: {
-      limit: 200,
-    },
-    fetchPolicy: "network-only",
-    pollInterval: 5000,
-  });
+  const { data } = useWatchQuery<{ activity: ActivityModel[] }>(GET_ACTIVITY, { limit: 200 });
 
   const activities = data?.activity ?? activitiesProp ?? [];
 

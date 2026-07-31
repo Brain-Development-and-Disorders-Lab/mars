@@ -577,11 +577,35 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
-                                <Tooltip disabled={entity.data.length < 24} content={entity.data} showArrow>
+                                {entity.type === "entity" && (
+                                  <Flex direction={"row"} gap={"1"}>
+                                    <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
+                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                      {JSON.parse(entity.data)["name"]}
+                                    </Text>
+                                  </Flex>
+                                )}
+                                {entity.type === "select" && (
+                                  <Flex direction={"row"} gap={"1"}>
+                                    <Icon name={"v_select"} color={"teal.400"} size={"xs"} />
+                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                      {JSON.parse(entity.data)["selected"]}
+                                    </Text>
+                                    <Text fontSize={"xs"}>
+                                      {_.truncate(`Options: ${JSON.parse(entity.data)["options"].join(", ")}`, {
+                                        length: 24,
+                                      })}
+                                    </Text>
+                                  </Flex>
+                                )}
+                                {(entity.type === "text" ||
+                                  entity.type === "number" ||
+                                  entity.type === "date" ||
+                                  entity.type === "url") && (
                                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {_.truncate(entity.data, { length: 24 })}
+                                    {entity.data}
                                   </Text>
-                                </Tooltip>
+                                )}
                               </Flex>
                             </Flex>
                           ))}

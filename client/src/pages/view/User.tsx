@@ -642,11 +642,14 @@ const User = () => {
       cell: (info) => {
         return (
           <Tooltip content={info.getValue()} showArrow>
-            <Text fontSize={"xs"}>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 24 : 36,
-              })}
-            </Text>
+            <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+              <Icon name={"workspace"} size={"xs"} />
+              <Text fontSize={"xs"}>
+                {_.truncate(info.getValue(), {
+                  length: truncateTableText ? 24 : 36,
+                })}
+              </Text>
+            </Flex>
           </Tooltip>
         );
       },
