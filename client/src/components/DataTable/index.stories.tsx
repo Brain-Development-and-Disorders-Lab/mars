@@ -136,7 +136,7 @@ const columns = [
       if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
         return (
           <Tag.Root colorPalette={"orange"}>
-            <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
+            <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
           </Tag.Root>
         );
       }

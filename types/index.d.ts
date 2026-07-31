@@ -423,6 +423,15 @@ export type ActivityFeedProps = {
   feedLimit?: number; // Number of activities to show in the feed (default: 5)
 };
 
+// RelativeTime component props
+export type RelativeTimeProps = {
+  value: string | number | Date;
+  format?: (relative: string) => string;
+  fontSize?: string;
+  fontWeight?: string;
+  color?: string;
+};
+
 // Content component
 export type ContentProps = {
   children: React.ReactElement | React.ReactElement[];

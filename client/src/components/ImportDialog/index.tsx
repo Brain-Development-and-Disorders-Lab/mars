@@ -1003,32 +1003,76 @@ const ImportDialog = (props: ImportDialogProps) => {
       },
     }),
     attributeColumnHelper.accessor("description", {
-      cell: (info) => (
-        <Tooltip content={info.getValue()} disabled={info.getValue().length < 40} showArrow>
-          <Text fontSize={"xs"} truncate maxW={"200px"}>
-            {_.truncate(info.getValue(), { length: 40 })}
-          </Text>
-        </Tooltip>
-      ),
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return (
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
+            </Tag.Root>
+          );
+        }
+        return (
+          <Flex>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
       header: "Description",
     }),
     attributeColumnHelper.accessor("values", {
       cell: (info) => {
         const values = info.row.original.values;
+
+        // 0 Values
         if (values.length === 0) {
           return (
-            <Text fontSize={"xs"} color={"text.subtle"}>
-              No values
-            </Text>
+            <Tag.Root colorPalette={"orange"}>
+              <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
+            </Tag.Root>
           );
         }
-        const valueNames = values.map((value) => value.name).join(", ");
-        const truncatedNames = valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames;
-        return (
-          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
-            <Text fontSize={"xs"}>{truncatedNames}</Text>
-          </Tooltip>
-        );
+
+        // Multiple Values
+        if (values.length > 2) {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {values.slice(0, 2).map((value) => (
+                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
+                  <Tag.StartElement>
+                    <Icon
+                      name={getValueTypeIconProps(value.type).name}
+                      color={getValueTypeIconProps(value.type).color}
+                      size={"xs"}
+                    />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+              <Text fontSize={"xs"}>
+                and {values.length - 2} other{values.length - 2 !== 1 ? "s" : ""}
+              </Text>
+            </Flex>
+          );
+        } else {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              {values.map((value) => (
+                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
+                  <Tag.StartElement>
+                    <Icon
+                      name={getValueTypeIconProps(value.type).name}
+                      color={getValueTypeIconProps(value.type).color}
+                      size={"xs"}
+                    />
+                  </Tag.StartElement>
+                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
+                </Tag.Root>
+              ))}
+            </Flex>
+          );
+        }
       },
       header: "Values",
     }),

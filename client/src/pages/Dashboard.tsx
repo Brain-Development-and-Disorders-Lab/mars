@@ -859,7 +859,6 @@ const Dashboard = () => {
             flex={{ base: "1 1 100%", lg: "0 0 30%" }}
             minW={"0"}
             pr={{ base: "", lg: "2" }}
-            bg={"surface.card"}
           >
             <Flex
               direction={"column"}
@@ -869,6 +868,7 @@ const Dashboard = () => {
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
               h={"fit-content"}
+              bg={"surface.card"}
             >
               <ActivityFeed />
             </Flex>

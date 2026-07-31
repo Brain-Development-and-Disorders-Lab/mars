@@ -23,6 +23,7 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import ActivityGraph from "@components/ActivityGraph";
+import RelativeTime from "@components/RelativeTime";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
@@ -32,10 +33,10 @@ import { ActivityModel, IGenericItem } from "@types";
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
+import { useWatchQuery } from "@hooks/useWatchQuery";
 
 // Utility functions and libraries
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
 import _ from "lodash";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -46,15 +47,35 @@ dayjs.extend(isSameOrBefore);
 // Variables
 import { STYLES } from "@variables";
 
+// Query to retrieve Activity
+const GET_ACTIVITY = gql`
+  query GetActivity($limit: Int, $workspace: String) {
+    activity(limit: $limit) {
+      _id
+      timestamp
+      type
+      actor
+      details
+      medium
+      target {
+        _id
+        name
+        type
+      }
+    }
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
+  }
+`;
+
 const Activity = () => {
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
 
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
   const [initialLoaded, setInitialLoaded] = useState(false);
-
-  // Timestamp update state to trigger re-renders for relative time display
-  const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
@@ -89,47 +110,12 @@ const Activity = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
-  // Update timestamp every 5 seconds to trigger relative time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimestampUpdate(Date.now());
-    }, 5000); // Update every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Query to retrieve Activity
-  const GET_ACTIVITY = gql`
-    query GetActivity($limit: Int, $workspace: String) {
-      activity(limit: $limit) {
-        _id
-        timestamp
-        type
-        actor
-        details
-        medium
-        target {
-          _id
-          name
-          type
-        }
-      }
-      workspace(_id: $workspace) {
-        _id
-        name
-      }
-    }
-  `;
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data } = useWatchQuery<{
     activity: ActivityModel[];
     workspace: IGenericItem;
   }>(GET_ACTIVITY, {
-    variables: {
-      limit: 10000, // High limit to get all activity
-      workspace: workspace,
-    },
-    fetchPolicy: "network-only",
-    pollInterval: 5000, // Poll every 5 seconds to refresh activity
+    limit: 10000, // High limit to get all activity
+    workspace: workspace,
   });
 
   // Manage data once retrieved
@@ -292,9 +278,12 @@ const Activity = () => {
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).format("MMM D, YYYY h:mm A")}
           </Text>
-          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-            ({dayjs(info.getValue()).fromNow()})
-          </Text>
+          <RelativeTime
+            value={info.getValue()}
+            format={(relative) => `(${relative})`}
+            fontSize={"xs"}
+            color={STYLES.font.secondaryHeader.color}
+          />
         </Flex>
       ),
       header: "Timestamp",
@@ -612,13 +601,7 @@ const Activity = () => {
             bg={STYLES.surface.card}
           >
             {/* Buttons and Live Indicator Row */}
-            <Flex
-              direction={"row"}
-              gap={"1"}
-              align={"center"}
-              justify={"space-between"}
-              data-timestamp-update={timestampUpdate}
-            >
+            <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
               {/* Live Indicator */}
               <Flex align={"center"} gap={"1"} ml={"0.5"}>
                 <Box

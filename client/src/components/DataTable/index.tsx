@@ -1097,6 +1097,7 @@ const DataTable = (props: DataTableProps) => {
                           onClick={() => {
                             if (!isDisabled && !action.disabled) {
                               action.action(table, selectedRows);
+                              setSelectedRows({});
                             }
                           }}
                           key={resolvedLabel}
