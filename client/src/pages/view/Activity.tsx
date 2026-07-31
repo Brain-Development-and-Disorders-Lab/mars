@@ -23,6 +23,7 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import ActivityGraph from "@components/ActivityGraph";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -229,11 +230,24 @@ const Activity = () => {
     columnHelper.accessor("target", {
       cell: (info) => {
         const target = info.getValue();
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
-          </Flex>
-        );
+        if (target.type !== "workspace") {
+          return (
+            <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+              <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
+            </Flex>
+          );
+        } else {
+          return (
+            <Tooltip content={target.name} disabled={target.name.length < 32}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"workspace"} size={"xs"} />
+                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                  {_.truncate(target.name, { length: 32 })}
+                </Text>
+              </Flex>
+            </Tooltip>
+          );
+        }
       },
       header: "Target",
       meta: {
@@ -327,6 +341,13 @@ const Activity = () => {
               <ActivityGraph
                 activities={activityData.filter((activity) => activity.target.type === "projects")}
                 title="Project Activity"
+                height="200px"
+              />
+            </Flex>
+            <Flex direction={"column"} flex={"1"} minW="0">
+              <ActivityGraph
+                activities={activityData.filter((activity) => activity.target.type === "workspace")}
+                title="Workspace Activity"
                 height="200px"
               />
             </Flex>

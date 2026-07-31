@@ -5,7 +5,7 @@ import {
   IWorkspace,
   ProjectModel,
   IResponseMessage,
-  WorkspaceMetrics,
+  CollaboratorMetrics,
   WorkspaceModel,
   IResolverParent,
 } from "@types";
@@ -13,6 +13,7 @@ import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
 // Models
+import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
 import { User } from "@models/User";
 
@@ -24,6 +25,7 @@ import { PostHogClient } from "@lib/posthog";
 
 // Utility functions
 import { isCollaborator } from "@lib/util";
+import dayjs from "dayjs";
 
 const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
@@ -172,12 +174,12 @@ export const WorkspacesResolvers = {
     },
 
     // Get collection of Workspace metrics
-    workspaceMetrics: async (
+    collaboratorMetrics: async (
       _parent: IResolverParent,
-      args: { _id?: string },
+      _args: any,
       context: Context,
-    ): Promise<WorkspaceMetrics> => {
-      const workspace = await Workspaces.getOne(args._id || context.workspace);
+    ): Promise<CollaboratorMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
           extensions: {
@@ -186,8 +188,21 @@ export const WorkspacesResolvers = {
         });
       }
 
+      // Filter Activity by Workspace and then timestamps (within last 24 hours)
+      const activity = await Activity.all();
+      const workspaceActivity = activity.filter((activity) => {
+        return (
+          _.includes(workspace.activity, activity._id) && // Activity in Workspace
+          activity.target.type === "workspace" && // Activity on Workspace
+          activity.type === "update" && // Activity is Workspace Updates
+          activity.details.includes("Added") &&
+          dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
+        );
+      });
+
       return {
-        collaborators: workspace.collaborators.length,
+        all: workspace.collaborators.length,
+        addedDay: workspaceActivity.length,
       };
     },
   },
@@ -228,34 +243,103 @@ export const WorkspacesResolvers = {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.update(args.workspace);
 
-        // Notify any newly added collaborators
-        const newCollaborators = _.differenceBy(args.workspace.collaborators, workspace.collaborators, "_id");
-        if (newCollaborators.length > 0) {
-          const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
-          await Promise.allSettled(
-            newCollaborators.map(async (collaborator) => {
-              const collaboratorResult = await User.getOne(collaborator._id);
-              if (collaboratorResult) {
-                await sendEmail({
-                  to: collaboratorResult.email,
-                  subject: `You've been added to "${args.workspace.name}" on Metadatify`,
-                  html: templates.workspaceCollaboratorAdded(
-                    collaboratorResult.name,
-                    args.workspace.name,
-                    workspaceUrl,
-                  ),
-                });
-              }
-            }),
-          );
-        }
+        if (result.success) {
+          // Notify any newly added collaborators
+          const newCollaborators = _.differenceBy(args.workspace.collaborators, workspace.collaborators, "_id");
+          if (newCollaborators.length > 0) {
+            const workspaceUrl = `${CLIENT_URL}/workspaces/${args.workspace._id}`;
+            await Promise.allSettled(
+              newCollaborators.map(async (collaborator) => {
+                const collaboratorResult = await User.getOne(collaborator._id);
+                if (collaboratorResult) {
+                  await sendEmail({
+                    to: collaboratorResult.email,
+                    subject: `You've been added to "${args.workspace.name}" on Metadatify`,
+                    html: templates.workspaceCollaboratorAdded(
+                      collaboratorResult.name,
+                      args.workspace.name,
+                      workspaceUrl,
+                    ),
+                  });
+                }
+              }),
+            );
 
-        // Capture event
-        if (process.env.DISABLE_CAPTURE !== "true") {
-          PostHogClient?.capture({
-            distinctId: context.user,
-            event: "workspace.updated",
-          });
+            // Create new Activity if successful
+            const activity = await Activity.create({
+              timestamp: dayjs(Date.now()).toISOString(),
+              type: "update",
+              actor: context.user,
+              details: `Added ${newCollaborators.length} Collaborator${newCollaborators.length !== 1 ? "s" : ""}`,
+              target: {
+                _id: workspace._id,
+                type: "workspace",
+                name: workspace.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.data);
+          } else if (args.workspace.collaborators.length < workspace.collaborators.length) {
+            const removedCollaborators = workspace.collaborators.length - args.workspace.collaborators.length;
+
+            // Create new Activity if successful
+            const activity = await Activity.create({
+              timestamp: dayjs(Date.now()).toISOString(),
+              type: "update",
+              actor: context.user,
+              details: `Removed ${removedCollaborators} Collaborator${removedCollaborators !== 1 ? "s" : ""}`,
+              target: {
+                _id: workspace._id,
+                type: "workspace",
+                name: workspace.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.data);
+          }
+
+          // Add Activity for other Workspace modifications
+          if (workspace.description !== args.workspace.description) {
+            const activity = await Activity.create({
+              timestamp: dayjs(Date.now()).toISOString(),
+              type: "update",
+              actor: context.user,
+              details: "Updated Workspace description",
+              target: {
+                _id: workspace._id,
+                type: "workspace",
+                name: workspace.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.data);
+          } else if (workspace.name !== args.workspace.name) {
+            const activity = await Activity.create({
+              timestamp: dayjs(Date.now()).toISOString(),
+              type: "update",
+              actor: context.user,
+              details: "Updated Workspace name",
+              target: {
+                _id: workspace._id,
+                type: "workspace",
+                name: workspace.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.data);
+          }
+
+          // Capture event
+          if (process.env.DISABLE_CAPTURE !== "true") {
+            PostHogClient?.capture({
+              distinctId: context.user,
+              event: "workspace.updated",
+            });
+          }
         }
 
         return result;

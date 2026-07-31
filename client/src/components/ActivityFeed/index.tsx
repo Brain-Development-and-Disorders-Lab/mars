@@ -129,21 +129,34 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                   )}
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
                     <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
-                      <Text fontSize={"xs"}>{activity.details}:</Text>
+                      <Text fontSize={"xs"}>
+                        {activity.details}
+                        {activity.target.type !== "workspace" ? ":" : ""}
+                      </Text>
                       <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
                         {dayjs(activity.timestamp).fromNow()}
                       </Text>
                     </Flex>
-                    <Flex>
-                      <Linky
-                        id={activity.target._id}
-                        type={activity.target.type}
-                        fallback={activity.target.name}
-                        justify={"left"}
-                        size={"xs"}
-                        truncate={20}
-                      />
-                    </Flex>
+                    {activity.target.type !== "workspace" && (
+                      <Flex>
+                        <Linky
+                          id={activity.target._id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                          justify={"left"}
+                          size={"xs"}
+                          truncate={20}
+                        />
+                      </Flex>
+                    )}
+                    {activity.target.type === "workspace" && (
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Icon name={"workspace"} size={"xs"} />
+                        <Text fontWeight={"semibold"} fontSize={"xs"}>
+                          {activity.target.name}
+                        </Text>
+                      </Flex>
+                    )}
                   </Flex>
                 </Flex>
               );

@@ -405,7 +405,7 @@ export type IActivity = {
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
-    type: "entities" | "projects" | "templates";
+    type: "entities" | "projects" | "templates" | "workspace";
     _id: string;
     name: string;
   };
@@ -852,10 +852,7 @@ export type IContentMetrics = {
 export type EntityMetrics = IContentMetrics;
 export type ProjectMetrics = IContentMetrics;
 export type TemplateMetrics = IContentMetrics;
-
-export type WorkspaceMetrics = {
-  collaborators: number;
-};
+export type CollaboratorMetrics = IContentMetrics;
 
 export type AdminWorkspace = {
   _id: string;
