@@ -18,7 +18,7 @@ import { useMutation } from "@apollo/client/react";
 import { ResponseData } from "@types";
 
 // Variables
-import { ACCEPTED_ATTACHMENTS, GLOBAL_STYLES } from "@variables";
+import { ACCEPTED_ATTACHMENTS, STYLES } from "@variables";
 
 const UploadDialog = (props: {
   open: boolean;
@@ -127,7 +127,13 @@ const UploadDialog = (props: {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+              <Dialog.Header
+                p={"2"}
+                fontWeight={"semibold"}
+                roundedTop={"md"}
+                bg={"surface.emphasized"}
+                color={"text.default"}
+              >
                 <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                   <Flex align={"center"} gap={"1"} border={"2px"} rounded={"md"}>
                     <Icon name={"upload"} size={"xs"} />
@@ -148,13 +154,13 @@ const UploadDialog = (props: {
                         <FileUpload.RootProvider w={"100%"} alignItems={"stretch"} gap={"2"} value={fileUpload}>
                           <FileUpload.HiddenInput />
                           <FileUpload.Dropzone>
-                            <Icon size={"lg"} name={"attachment"} color={"gray.400"} />
+                            <Icon size={"lg"} name={"attachment"} color={"text.faint"} />
                             <FileUpload.DropzoneContent gap={"0"}>
                               <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                                   Click to upload attachment
                                 </Text>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   or drag and drop
                                 </Text>
                                 <Flex direction={"row"} gap={"1"} mt={"1"}>
@@ -182,7 +188,7 @@ const UploadDialog = (props: {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     size={"xs"}

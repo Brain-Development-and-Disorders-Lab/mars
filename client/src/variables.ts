@@ -60,47 +60,5 @@ export const ACCEPTED_IMPORTS_ENTITIES = [
 ];
 export const ACCEPTED_IMPORTS_TEMPLATES = ["application/json"];
 
-// Default styling
-export const GLOBAL_STYLES = {
-  font: {
-    secondaryHeader: {
-      color: "gray.600",
-    },
-  },
-  border: {
-    style: "1px solid",
-    color: "gray.300",
-  },
-  card: {
-    bg: "gray.50",
-  },
-  dialog: {
-    header: {
-      bg: "gray.200",
-    },
-    footer: {
-      bg: "gray.100",
-    },
-  },
-  entity: {
-    color: {
-      default: "purple.400",
-      light: "purple.200",
-      icon: "purple.500",
-    },
-  },
-  project: {
-    color: {
-      default: "blue.400",
-      light: "blue.200",
-      icon: "blue.500",
-    },
-  },
-  template: {
-    color: {
-      default: "teal.400",
-      light: "teal.200",
-      icon: "teal.500",
-    },
-  },
-};
+// Default styling, canonical design tokens
+export { STYLES } from "./styles/styles";

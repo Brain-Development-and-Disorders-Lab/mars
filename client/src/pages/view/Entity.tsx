@@ -10,20 +10,15 @@ import {
   Text,
   useDisclosure,
   Tag,
-  Select,
-  Drawer,
   IconButton,
   Menu,
   Dialog,
   Fieldset,
   Field,
-  createListCollection,
   Portal,
   CloseButton,
   HStack,
   EmptyState,
-  Timeline,
-  Collapsible,
   Textarea,
   Breadcrumb,
   SkeletonText,
@@ -32,6 +27,9 @@ import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import ExportDialog from "@components/ExportDialog";
+import { EmptyTag, ValueTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
+import HistoryDrawer from "@components/HistoryDrawer";
 import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -65,7 +63,7 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
-import { getValueTypeIconProps, ignoreAbort, removeTypename } from "@lib/util";
+import { ignoreAbort, removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -88,7 +86,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { auth } from "@lib/auth";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -108,6 +106,9 @@ const Entity = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
+
+  // Breakpoint
+  const { isBreakpointActive } = useBreakpoint();
 
   // Workspace information
   const { workspace } = useWorkspace();
@@ -136,13 +137,6 @@ const Entity = () => {
 
   // History drawer
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set());
-  const [historySortOrder, setHistorySortOrder] = useState<"newest-first" | "oldest-first">("newest-first");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [appliedStartDate, setAppliedStartDate] = useState<string>("");
-  const [appliedEndDate, setAppliedEndDate] = useState<string>("");
-  const [dateFilterApplied, setDateFilterApplied] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<EntityHistory | null>(null);
 
   // Toggles
@@ -484,39 +478,6 @@ const Entity = () => {
   const [entityAttributes, setEntityAttributes] = useState<AttributeModel[]>([]);
   const [entityHistory, setEntityHistory] = useState<EntityHistory[]>([]);
 
-  // Sorted and filtered history based on sort order and date range
-  const sortedEntityHistory = useMemo(() => {
-    let filtered = [...entityHistory];
-
-    // Apply date filter if active
-    if (dateFilterApplied) {
-      filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.timestamp);
-        const itemDateOnly = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-
-        if (appliedStartDate) {
-          const start = new Date(appliedStartDate);
-          if (itemDateOnly < start) return false;
-        }
-
-        if (appliedEndDate) {
-          const end = new Date(appliedEndDate);
-          end.setHours(23, 59, 59, 999); // Include the entire end date
-          if (itemDateOnly > end) return false;
-        }
-
-        return true;
-      });
-    }
-
-    // Sort based on sort order
-    if (historySortOrder === "newest-first") {
-      return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    } else {
-      return filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-    }
-  }, [entityHistory, historySortOrder, dateFilterApplied, appliedStartDate, appliedEndDate]);
-
   const [entityAttachments, setEntityAttachments] = useState<IGenericItem[]>([]);
   const [toUploadAttachments, setToUploadAttachments] = useState<string[]>([]);
 
@@ -817,11 +778,7 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
-            </Tag.Root>
-          );
+          return <EmptyTag label={"Description"} />;
         }
         return (
           <Flex>
@@ -834,59 +791,19 @@ const Entity = () => {
       header: "Description",
     }),
     attributeTableColumnHelper.accessor("values", {
-      cell: (info) => {
-        const values = info.row.original.values;
-
-        // 0 Values
-        if (values.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Values
-        if (values.length > 2) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.slice(0, 2).map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {values.length - 2} other{values.length - 2 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.values}
+          max={2}
+          emptyLabel={"Values"}
+          getKey={(value) => value._id}
+          renderTag={(value) => <ValueTag value={value} />}
+        />
+      ),
       header: "Values",
+      meta: {
+        minWidth: 300,
+      },
     }),
   ];
   const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] = useState({});
@@ -1045,6 +962,14 @@ const Entity = () => {
         closable: true,
       });
     }
+  };
+
+  /**
+   * Preview an Entity as it was at an earlier point in time
+   */
+  const handlePreviewVersion = (entityVersion: EntityHistory) => {
+    setPreviewVersion(entityVersion);
+    setHistoryOpen(false);
   };
 
   // Handle clicking the "Share" button
@@ -1239,7 +1164,7 @@ const Entity = () => {
                   <Tag.Label fontSize={"xs"}>{previewVersion.version.slice(0, 6)}</Tag.Label>
                 </Tag.Root>
               </Flex>
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 {dayjs(previewVersion.timestamp).format("MMM D, YYYY h:mm A")}
               </Text>
             </Flex>
@@ -1295,7 +1220,7 @@ const Entity = () => {
                   {loading ? (
                     <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
                   ) : (
-                    workspaceName
+                    _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
                   )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -1307,7 +1232,7 @@ const Entity = () => {
                     textDecoration: "underline",
                   }}
                 >
-                  <Icon size={"xs"} name={"entity"} color={GLOBAL_STYLES.entity.color.icon} />
+                  <Icon size={"xs"} name={"entity"} color={STYLES.entity.color.icon} />
                   Entities
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -1321,21 +1246,21 @@ const Entity = () => {
                 gap={"1"}
                 p={"1"}
                 border={"2px solid"}
-                borderColor={displayEntityArchived ? "gray.500" : GLOBAL_STYLES.entity.color.icon}
-                bg={displayEntityArchived ? GLOBAL_STYLES.card.bg : "purple.50"}
+                borderColor={displayEntityArchived ? "gray.500" : STYLES.entity.color.icon}
+                bg={displayEntityArchived ? STYLES.card.bg : STYLES.entity.color.light}
                 rounded={"md"}
               >
                 <Icon
                   name={"entity"}
                   size={"sm"}
-                  color={displayEntityArchived ? "gray.500" : GLOBAL_STYLES.entity.color.icon}
+                  color={displayEntityArchived ? "gray.500" : STYLES.entity.color.icon}
                 />
                 <Tooltip content={`${displayEntityArchived ? "Archived: " : ""}${displayEntityData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
                     {_.truncate(displayEntityData.name, { length: 30 })}
                   </Heading>
                 </Tooltip>
-                {displayEntityArchived && <Icon name={"archive"} size={"sm"} color={"gray.500"} />}
+                {displayEntityArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
               </Flex>
             </Flex>
           </Flex>
@@ -1399,7 +1324,7 @@ const Entity = () => {
             {/* Actions Menu */}
             <Menu.Root size={"sm"}>
               <Menu.Trigger asChild>
-                <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"yellow"}>
+                <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"action"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -1470,536 +1395,17 @@ const Entity = () => {
             </Menu.Root>
 
             {/* Version history */}
-            <Drawer.Root
+            <HistoryDrawer
+              type={"entity"}
               open={historyOpen}
-              size={"lg"}
-              onOpenChange={(event) => setHistoryOpen(event.open)}
-              closeOnEscape
-              closeOnInteractOutside
-            >
-              <Drawer.Trigger asChild>
-                <Button
-                  id={"historyButton"}
-                  variant={"subtle"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={() => setHistoryOpen(true)}
-                >
-                  History
-                  <Icon name={"clock"} size={"xs"} />
-                </Button>
-              </Drawer.Trigger>
-              <Portal>
-                <Drawer.Backdrop />
-                <Drawer.Positioner padding={"4"}>
-                  <Drawer.Content rounded={"md"}>
-                    <Drawer.CloseTrigger asChild>
-                      <CloseButton size={"2xs"} top={"6px"} onClick={() => setHistoryOpen(false)} />
-                    </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Icon name={"clock"} size={"xs"} />
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          Entity History
-                        </Text>
-                      </Flex>
-                    </Drawer.Header>
-
-                    <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length > 0 ? dayjs(entityHistory[0].timestamp).fromNow() : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {entityHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
-
-                      <Flex
-                        direction={"row"}
-                        gap={"2"}
-                        align={"start"}
-                        rounded={"md"}
-                        bg={"gray.100"}
-                        p={"2"}
-                        justify={"space-between"}
-                        wrap={"wrap"}
-                      >
-                        <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Sort
-                          </Text>
-                          <Select.Root
-                            value={[historySortOrder]}
-                            w={"240px"}
-                            rounded={"md"}
-                            size={"xs"}
-                            bg={"white"}
-                            collection={createListCollection({
-                              items: [
-                                {
-                                  value: "newest-first",
-                                  label: "Newest → Oldest",
-                                },
-                                {
-                                  value: "oldest-first",
-                                  label: "Oldest → Newest",
-                                },
-                              ],
-                            })}
-                            onValueChange={(details) =>
-                              setHistorySortOrder(details.value[0] as "newest-first" | "oldest-first")
-                            }
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger rounded={"md"}>
-                                <Select.ValueText />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {createListCollection({
-                                  items: [
-                                    {
-                                      value: "newest-first",
-                                      label: "Newest → Oldest",
-                                    },
-                                    {
-                                      value: "oldest-first",
-                                      label: "Oldest → Newest",
-                                    },
-                                  ],
-                                }).items.map((item) => (
-                                  <Select.Item item={item} key={item.value}>
-                                    {item.label}
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Select.Root>
-                        </Flex>
-
-                        <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Edited Between
-                          </Text>
-
-                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Start
-                              </Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                              />
-                            </Field.Root>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                End
-                              </Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                              />
-                            </Field.Root>
-                          </Flex>
-                          <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
-                            <Button
-                              size={"xs"}
-                              rounded={"md"}
-                              variant={"solid"}
-                              colorPalette={"blue"}
-                              alignSelf={"end"}
-                              onClick={() => {
-                                if (startDate || endDate) {
-                                  setAppliedStartDate(startDate);
-                                  setAppliedEndDate(endDate);
-                                  setDateFilterApplied(true);
-                                }
-                              }}
-                            >
-                              Apply Filter
-                            </Button>
-                            <Button
-                              size={"xs"}
-                              rounded={"md"}
-                              variant={"outline"}
-                              alignSelf={"end"}
-                              bg={"white"}
-                              _hover={{ bg: "gray.50" }}
-                              onClick={() => {
-                                setStartDate("");
-                                setEndDate("");
-                                setAppliedStartDate("");
-                                setAppliedEndDate("");
-                                setDateFilterApplied(false);
-                              }}
-                            >
-                              Reset Filter
-                            </Button>
-                          </Flex>
-                        </Flex>
-                      </Flex>
-
-                      {sortedEntityHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle" mt={"2"}>
-                          {sortedEntityHistory.map((entityVersion) => {
-                            const isExpanded = expandedVersions.has(entityVersion.version);
-                            return (
-                              <Timeline.Item key={`v_${entityVersion.timestamp}`}>
-                                <Timeline.Connector>
-                                  <Timeline.Separator />
-                                  <Timeline.Indicator />
-                                </Timeline.Connector>
-                                <Timeline.Content>
-                                  <Flex direction={"column"} gap={"2"} w={"100%"}>
-                                    <Flex
-                                      direction={{ base: "column", sm: "row" }}
-                                      gap={"2"}
-                                      align={{ base: "start", sm: "center" }}
-                                      justify={"space-between"}
-                                    >
-                                      <Flex direction={"column"} gap={"0.5"} grow={"1"}>
-                                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                                          <Tag.Root size={"sm"} colorPalette={"green"}>
-                                            <Tag.Label fontSize={"xs"}>{entityVersion.version.slice(0, 6)}</Tag.Label>
-                                          </Tag.Root>
-                                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                            {entityVersion.name}
-                                          </Text>
-                                          <Text fontSize={"xs"} color={"gray.500"}>
-                                            {dayjs(entityVersion.timestamp).fromNow()}
-                                          </Text>
-                                        </Flex>
-                                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                                          {entityVersion.message && !_.isEqual(entityVersion.message, "") ? (
-                                            <Tooltip
-                                              content={entityVersion.message}
-                                              disabled={entityVersion.message.length <= 40}
-                                              showArrow
-                                            >
-                                              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                                                {_.truncate(entityVersion.message, { length: 40 })}
-                                              </Text>
-                                            </Tooltip>
-                                          ) : (
-                                            <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                              <Tag.Label fontSize={"xs"}>No message</Tag.Label>
-                                            </Tag.Root>
-                                          )}
-                                        </Flex>
-                                      </Flex>
-                                      <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-                                        <Collapsible.Root
-                                          open={isExpanded}
-                                          onOpenChange={(event) => {
-                                            const newExpanded = new Set(expandedVersions);
-                                            if (event.open) {
-                                              newExpanded.add(entityVersion.version);
-                                            } else {
-                                              newExpanded.delete(entityVersion.version);
-                                            }
-                                            setExpandedVersions(newExpanded);
-                                          }}
-                                        >
-                                          <Collapsible.Trigger asChild>
-                                            <Button
-                                              size={"xs"}
-                                              variant={"subtle"}
-                                              colorPalette={"gray"}
-                                              rounded={"md"}
-                                              aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                                            >
-                                              Details
-                                              <Icon name={isExpanded ? "c_up" : "c_down"} size={"xs"} />
-                                            </Button>
-                                          </Collapsible.Trigger>
-                                        </Collapsible.Root>
-                                        <Button
-                                          variant={"solid"}
-                                          size={"xs"}
-                                          rounded={"md"}
-                                          colorPalette={"blue"}
-                                          onClick={() => {
-                                            setPreviewVersion(entityVersion);
-                                            setHistoryOpen(false);
-                                          }}
-                                          disabled={entityArchived}
-                                        >
-                                          Preview
-                                          <Icon name={"expand"} size={"xs"} />
-                                        </Button>
-                                        <Tooltip
-                                          content={"Insufficient permissions in this Workspace"}
-                                          disabled={workspacePermissions.entities.archive}
-                                          showArrow
-                                        >
-                                          <Button
-                                            variant={"solid"}
-                                            size={"xs"}
-                                            rounded={"md"}
-                                            colorPalette={"orange"}
-                                            onClick={() => handleRestoreFromHistoryClick(entityVersion)}
-                                            disabled={
-                                              entityArchived ||
-                                              !!previewVersion ||
-                                              !workspacePermissions.entities.archive
-                                            }
-                                          >
-                                            Restore
-                                            <Icon name={"rewind"} size={"xs"} />
-                                          </Button>
-                                        </Tooltip>
-                                      </Flex>
-                                    </Flex>
-
-                                    <Collapsible.Root
-                                      open={isExpanded}
-                                      onOpenChange={(event) => {
-                                        const newExpanded = new Set(expandedVersions);
-                                        if (event.open) {
-                                          newExpanded.add(entityVersion.version);
-                                        } else {
-                                          newExpanded.delete(entityVersion.version);
-                                        }
-                                        setExpandedVersions(newExpanded);
-                                      }}
-                                    >
-                                      <Collapsible.Content>
-                                        <Flex
-                                          direction={"column"}
-                                          gap={"2"}
-                                          mt={"1"}
-                                          p={"2"}
-                                          bg={GLOBAL_STYLES.card.bg}
-                                          rounded={"md"}
-                                        >
-                                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Author:
-                                            </Text>
-                                            <ActorTag
-                                              identifier={entityVersion.author}
-                                              fallback={"Unknown User"}
-                                              size={"sm"}
-                                            />
-                                          </Flex>
-
-                                          <Flex direction={"column"} gap={"0.5"}>
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Description:
-                                            </Text>
-                                            {_.isEqual(entityVersion.description, "") ? (
-                                              <Flex>
-                                                <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                  <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-                                                </Tag.Root>
-                                              </Flex>
-                                            ) : (
-                                              <Text fontSize={"xs"}>{entityVersion.description}</Text>
-                                            )}
-                                          </Flex>
-
-                                          <Flex direction={"row"} gap={"1"}>
-                                            <Flex
-                                              direction={"column"}
-                                              gap={"1"}
-                                              p={"2"}
-                                              rounded={"md"}
-                                              border={GLOBAL_STYLES.border.style}
-                                              borderColor={GLOBAL_STYLES.border.color}
-                                              bg={"white"}
-                                              grow={"1"}
-                                            >
-                                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                                Projects
-                                              </Text>
-                                              {entityVersion.projects.length > 0 ? (
-                                                <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                  {entityVersion.projects.map((projectId) => (
-                                                    <Linky
-                                                      type={"projects"}
-                                                      id={projectId}
-                                                      size={"xs"}
-                                                      key={`p_${entityVersion}_${projectId}`}
-                                                    />
-                                                  ))}
-                                                </Flex>
-                                              ) : (
-                                                <Flex>
-                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                    <Tag.Label fontSize={"xs"}>No Projects</Tag.Label>
-                                                  </Tag.Root>
-                                                </Flex>
-                                              )}
-                                            </Flex>
-
-                                            <Flex
-                                              direction={"column"}
-                                              gap={"1"}
-                                              p={"2"}
-                                              rounded={"md"}
-                                              border={GLOBAL_STYLES.border.style}
-                                              borderColor={GLOBAL_STYLES.border.color}
-                                              bg={"white"}
-                                              grow={"1"}
-                                            >
-                                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                                Relationships
-                                              </Text>
-                                              <Flex direction={"row"} gap={"1"}>
-                                                <Tag.Root
-                                                  key={`v_o_${entityVersion.timestamp}`}
-                                                  size={"sm"}
-                                                  colorPalette={
-                                                    entityVersion.relationships.length > 0 ? undefined : "orange"
-                                                  }
-                                                >
-                                                  <Tag.Label fontSize={"xs"}>
-                                                    {entityVersion.relationships.length > 0
-                                                      ? entityVersion.relationships.length
-                                                      : "No Relationships"}
-                                                  </Tag.Label>
-                                                </Tag.Root>
-                                              </Flex>
-                                            </Flex>
-                                          </Flex>
-
-                                          <Flex direction={"row"} gap={"1"}>
-                                            <Flex
-                                              direction={"column"}
-                                              gap={"1"}
-                                              p={"2"}
-                                              rounded={"md"}
-                                              border={GLOBAL_STYLES.border.style}
-                                              borderColor={GLOBAL_STYLES.border.color}
-                                              bg={"white"}
-                                              grow={"1"}
-                                            >
-                                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                                Attributes
-                                              </Text>
-                                              {entityVersion.attributes.length > 0 ? (
-                                                <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                  {entityVersion.attributes.slice(0, 3).map((attr) => (
-                                                    <Tooltip
-                                                      key={`v_a_${entityVersion.timestamp}_${attr._id}`}
-                                                      content={"Values: " + attr.values.length}
-                                                      showArrow
-                                                    >
-                                                      <Tag.Root size={"sm"}>
-                                                        <Tag.Label fontSize={"xs"}>{attr.name}</Tag.Label>
-                                                      </Tag.Root>
-                                                    </Tooltip>
-                                                  ))}
-                                                  {entityVersion.attributes.length > 3 && (
-                                                    <Text fontSize={"xs"}>
-                                                      and {entityVersion.attributes.length - 3} more
-                                                    </Text>
-                                                  )}
-                                                </Flex>
-                                              ) : (
-                                                <Flex>
-                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                    <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-                                                  </Tag.Root>
-                                                </Flex>
-                                              )}
-                                            </Flex>
-
-                                            <Flex
-                                              direction={"column"}
-                                              gap={"1"}
-                                              p={"2"}
-                                              rounded={"md"}
-                                              border={GLOBAL_STYLES.border.style}
-                                              borderColor={GLOBAL_STYLES.border.color}
-                                              bg={"white"}
-                                              grow={"1"}
-                                            >
-                                              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                                Attachments
-                                              </Text>
-                                              {entityVersion.attachments.length > 0 ? (
-                                                <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                  {entityVersion.attachments.slice(0, 3).map((attachment) => (
-                                                    <Tooltip
-                                                      key={`v_at_${entityVersion.timestamp}_${attachment._id}`}
-                                                      content={attachment.name}
-                                                      showArrow
-                                                    >
-                                                      <Tag.Root size={"sm"}>
-                                                        <Tag.Label fontSize={"xs"}>
-                                                          {_.truncate(attachment.name, { length: 20 })}
-                                                        </Tag.Label>
-                                                      </Tag.Root>
-                                                    </Tooltip>
-                                                  ))}
-                                                  {entityVersion.attachments.length > 3 && (
-                                                    <Text fontSize={"xs"}>
-                                                      and {entityVersion.attachments.length - 3} more
-                                                    </Text>
-                                                  )}
-                                                </Flex>
-                                              ) : (
-                                                <Flex>
-                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                    <Tag.Label fontSize={"xs"}>No Attachments</Tag.Label>
-                                                  </Tag.Root>
-                                                </Flex>
-                                              )}
-                                            </Flex>
-                                          </Flex>
-                                        </Flex>
-                                      </Collapsible.Content>
-                                    </Collapsible.Root>
-                                  </Flex>
-                                </Timeline.Content>
-                              </Timeline.Item>
-                            );
-                          })}
-                        </Timeline.Root>
-                      ) : (
-                        <EmptyState.Root>
-                          <EmptyState.Content>
-                            <EmptyState.Indicator>
-                              <Icon name={"clock"} size={"lg"} />
-                            </EmptyState.Indicator>
-                            <EmptyState.Description>No History</EmptyState.Description>
-                          </EmptyState.Content>
-                        </EmptyState.Root>
-                      )}
-                    </Drawer.Body>
-                  </Drawer.Content>
-                </Drawer.Positioner>
-              </Portal>
-            </Drawer.Root>
+              onOpenChange={setHistoryOpen}
+              history={entityHistory}
+              archived={entityArchived}
+              previewActive={!!previewVersion}
+              canRestore={workspacePermissions.entities.archive}
+              onPreview={handlePreviewVersion}
+              onRestore={handleRestoreFromHistoryClick}
+            />
 
             {/* Archive Dialog */}
             <AlertDialog
@@ -2031,23 +1437,18 @@ const Entity = () => {
               p={"2"}
               h={"fit-content"}
               gap={"2"}
-              bg={"gray.100"}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Name
                   </Text>
                   <Input
@@ -2059,8 +1460,8 @@ const Entity = () => {
                     }}
                     readOnly={!editing || !!previewVersion}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     bg={"white"}
                   />
                 </Flex>
@@ -2070,12 +1471,7 @@ const Entity = () => {
               <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
                 {/* Owner */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
                   <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
@@ -2083,12 +1479,7 @@ const Entity = () => {
 
                 {/* Timestamp */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Timestamp
                   </Text>
                   <TimestampTag timestamp={entity.created} description={"Created"} />
@@ -2096,12 +1487,7 @@ const Entity = () => {
 
                 {/* Visibility */}
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
                   <VisibilityTag isPublic={false} isInherited />
@@ -2115,14 +1501,15 @@ const Entity = () => {
               p={"2"}
               h={"100%"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <Textarea
@@ -2145,21 +1532,17 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Icon name={"attribute"} size={"xs"} color={STYLES.template.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Attributes ({entityAttributes.length})
                   </Text>
                 </Flex>
@@ -2187,7 +1570,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"attribute"} size={"lg"} color={GLOBAL_STYLES.template.color.light} />
+                        <Icon name={"attribute"} size={"lg"} color={STYLES.template.color.light} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Attributes</EmptyState.Description>
                     </EmptyState.Content>
@@ -2213,21 +1596,17 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Projects ({entityProjects.length})
                   </Text>
                 </Flex>
@@ -2254,7 +1633,7 @@ const Entity = () => {
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                        <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                       </EmptyState.Indicator>
                       <EmptyState.Description>No Projects</EmptyState.Description>
                     </EmptyState.Content>
@@ -2284,8 +1663,9 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -2293,13 +1673,8 @@ const Entity = () => {
               <Flex gap={"2"} direction={"column"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"graph"} size={"xs"} />
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Icon name={"graph"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Relationships ({entityRelationships.length})
                     </Text>
                   </Flex>
@@ -2330,8 +1705,9 @@ const Entity = () => {
               h={"fit-content"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               grow={"1"}
               basis={{ base: "100%", md: "calc(50% - 4px)" }}
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
@@ -2339,13 +1715,8 @@ const Entity = () => {
               <Flex gap={"1"} direction={"column"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"attachment"} size={"xs"} />
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Icon name={"attachment"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Attachments ({entityAttachments.length})
                     </Text>
                   </Flex>
@@ -2419,7 +1790,7 @@ const Entity = () => {
             <Dialog.Backdrop />
             <Dialog.Positioner>
               <Dialog.Content w={["lg", "xl", "2xl"]}>
-                <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+                <Dialog.Header p={"2"} bg={"project.light"} color={"project.dark"} roundedTop={"md"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                     <Icon name={"project"} size={"xs"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2427,7 +1798,7 @@ const Entity = () => {
                     </Text>
                   </Flex>
                   <Dialog.CloseTrigger asChild>
-                    <CloseButton size={"2xs"} top={"6px"} onClick={onCancelAddProjectsClick} />
+                    <CloseButton size={"2xs"} top={"6px"} onClick={onCancelAddProjectsClick} colorPalette={"project"} />
                   </Dialog.CloseTrigger>
                 </Dialog.Header>
                 <Dialog.Body p={"2"} gap={"2"}>
@@ -2468,34 +1839,44 @@ const Entity = () => {
                       gap={"2"}
                       p={"1"}
                       align={"center"}
-                      justify={"center"}
+                      justify={selectedProjects.length > 0 ? "start" : "center"}
                       rounded={"md"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                       minH={"60px"}
                       wrap={"wrap"}
                     >
                       {selectedProjects.length > 0 ? (
                         selectedProjects.map((project) => (
-                          <Tag.Root key={project._id} bg={"white"} rounded={"md"} pl={"0"}>
-                            <Tag.Label p={"0"} fontSize={"xs"}>
-                              <Flex w={"100%"} justify={"left"}>
-                                <Linky id={project._id} type={"projects"} size={"xs"} />
+                          <Tag.Root
+                            key={entity._id}
+                            rounded={"xl"}
+                            border={STYLES.border.style}
+                            borderColor={STYLES.border.color}
+                            bg={"white"}
+                            p={"1"}
+                          >
+                            <Tag.Label fontSize={"xs"} bg={"white"} border={"0px 1px 0px 1px solid"}>
+                              <Flex h={"100%"} justify={"left"}>
+                                <Linky id={project._id} type={"projects"} />
                               </Flex>
                             </Tag.Label>
                             <Tag.EndElement mr={"0"}>
-                              <Tag.CloseTrigger
-                                onClick={() =>
-                                  setSelectedProjects(selectedProjects.filter((p) => p._id !== project._id))
-                                }
-                              />
+                              <Tooltip content={"Remove"} showArrow>
+                                <Tag.CloseTrigger
+                                  cursor={"pointer"}
+                                  onClick={() =>
+                                    setSelectedProjects((prev) => prev.filter((e) => e._id !== project._id))
+                                  }
+                                />
+                              </Tooltip>
                             </Tag.EndElement>
                           </Tag.Root>
                         ))
                       ) : (
                         <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"}>
-                          <Icon name={"project"} size={"md"} color={GLOBAL_STYLES.project.color.light} />
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                          <Icon name={"project"} size={"md"} color={STYLES.project.color.light} />
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                             No Projects selected
                           </Text>
                         </Flex>
@@ -2504,7 +1885,7 @@ const Entity = () => {
                   </Flex>
                 </Dialog.Body>
 
-                <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+                <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
                   <Flex direction={"row"} justify={"space-between"} w={"100%"}>
                     <Button
                       variant={"solid"}
@@ -2572,7 +1953,7 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"graph"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2602,7 +1983,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"share"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2687,19 +2068,14 @@ const Entity = () => {
                         QR Code:
                       </Text>
                     </Flex>
-                    <Flex
-                      p={"1"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
-                      rounded={"md"}
-                    >
+                    <Flex p={"1"} border={STYLES.border.style} borderColor={STYLES.border.color} rounded={"md"}>
                       <QRCode id={`${id}_qr`} value={`${id}`} size={80} />
                     </Flex>
                   </Flex>
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
                   <Button
                     variant={"solid"}
@@ -2729,7 +2105,7 @@ const Entity = () => {
           <Dialog.Positioner>
             <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
               {/* Heading and close button */}
-              <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+              <Dialog.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Icon name={"copy"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -2743,7 +2119,7 @@ const Entity = () => {
 
               <Dialog.Body p={"2"}>
                 <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                  <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                     By default, the cloned Entity will be created with the same name, but with "(cloned)" appended to
                     the end. You can modify the name below.
                   </Text>
@@ -2766,7 +2142,7 @@ const Entity = () => {
                 </Flex>
               </Dialog.Body>
 
-              <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
                 <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                   <Button
                     variant={"solid"}

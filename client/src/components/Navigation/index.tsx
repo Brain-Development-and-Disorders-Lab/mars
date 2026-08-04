@@ -24,7 +24,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 import { usePermissions } from "@hooks/usePermissions";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
@@ -45,14 +45,24 @@ const Navigation = () => {
   const [scanOpen, setScanOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
+  // Shared styling for the primary sidebar links
+  const navLinkStyle = (isActive: boolean) => ({
+    bg: isActive ? "nav.hoverBg" : "transparent",
+    color: "nav.text",
+    fontWeight: isActive ? "bold" : "medium",
+    borderLeft: isActive ? "8px solid" : "none",
+    borderLeftColor: isActive ? "white" : "transparent",
+    _hover: { bg: "nav.hoverBg" },
+  });
+
   return (
-    <Flex w={"100%"} p={"2"} bg={"gray.100"}>
+    <Flex w={"100%"} p={"2"} bg={"nav.bg"}>
       {/* Desktop navigation group */}
       <Flex direction={"column"} display={{ base: "none", lg: "flex" }} gap={"2"} w={"100%"}>
         {/* Heading */}
-        <Flex direction={"row"} gap={"2"} p={"1"} align={"center"} justify={"center"}>
-          <Image src={favicon} boxSize={"20px"} />
-          <Text fontWeight={"semibold"} fontSize={"lg"} color={"brand"}>
+        <Flex direction={"row"} gap={"1"} p={"1"} align={"center"} justify={"center"}>
+          <Image src={favicon} boxSize={"32px"} />
+          <Text fontWeight={"semibold"} fontSize={"lg"} color={"nav.text"}>
             Metadatify
           </Text>
         </Flex>
@@ -64,7 +74,7 @@ const Navigation = () => {
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               Workspace
             </Text>
 
@@ -75,9 +85,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "gray.100"}
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.isEqual(location.pathname, "/"))}
               onClick={() => navigate("/")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -92,9 +100,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={_.includes(location.pathname, "/activity") ? "#ffffff" : "gray.100"}
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/activity"))}
               onClick={() => navigate("/activity")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -109,9 +115,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={_.includes(location.pathname, "/search") ? "#ffffff" : "gray.100"}
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/search"))}
               onClick={() => navigate("/search")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -126,9 +130,7 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={_.includes(location.pathname, "/create") ? "#ffffff" : "gray.100"}
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/create"))}
               onClick={() => navigate("/create")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
@@ -136,7 +138,7 @@ const Navigation = () => {
               Create
             </Button>
 
-            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               View
             </Text>
 
@@ -146,17 +148,11 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create"))}
               onClick={() => navigate("/entities")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
               </Flex>
@@ -168,17 +164,11 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create"))}
               onClick={() => navigate("/projects")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+              <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
               </Flex>
@@ -190,23 +180,17 @@ const Navigation = () => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create")
-                  ? "#ffffff"
-                  : "gray.100"
-              }
-              _hover={{ bg: "gray.200" }}
-              color={"black"}
+              {...navLinkStyle(_.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create"))}
               onClick={() => navigate("/templates")}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
               Templates
             </Button>
           </Flex>
 
           <Flex direction={"column"} gap={"2"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               Tools
             </Text>
             <Flex direction={"row"} gap={"2"} w={"100%"}>
@@ -282,7 +266,7 @@ const Navigation = () => {
 
         {/* Version number */}
         <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"nav.textMuted"}>
             v{import.meta.env.VITE_VERSION}
           </Text>
         </Flex>
@@ -295,7 +279,7 @@ const Navigation = () => {
         align={"center"}
         h={"100%"}
         w={"100%"}
-        bg={"gray.100"}
+        bg={"nav.bg"}
         justify={"space-between"}
         gap={"1"}
       >
@@ -306,10 +290,13 @@ const Navigation = () => {
               aria-label={"Open Menu"}
               display={{ base: "flex", lg: "none" }}
               size={"xs"}
-              bg={"white"}
-              color={"gray.500"}
+              bg={"transparent"}
+              color={"nav.text"}
+              border={"1px solid"}
+              borderColor={"nav.textMuted"}
+              _hover={{ bg: "nav.hoverBg" }}
             >
-              <Icon name={"list"} size={"xs"} />
+              <Icon name={"list"} size={"xs"} color={"nav.text"} />
             </IconButton>
           </Menu.Trigger>
           <Menu.Positioner>
@@ -353,7 +340,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/entities")}
                 >
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                   Entities
                 </Menu.Item>
                 <Menu.Item
@@ -362,7 +349,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/projects")}
                 >
-                  <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                  <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
                   Projects
                 </Menu.Item>
                 <Menu.Item
@@ -371,7 +358,7 @@ const Navigation = () => {
                   fontSize={"xs"}
                   onClick={() => navigate("/templates")}
                 >
-                  <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                  <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>
@@ -406,7 +393,7 @@ const Navigation = () => {
 
               {/* Version number */}
               <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                   v{import.meta.env.VITE_VERSION}
                 </Text>
               </Flex>

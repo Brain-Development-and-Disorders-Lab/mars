@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useMemo, useSyncExternalStore } from "react";
-import _ from "lodash";
+import React, { createContext, useContext, useMemo } from "react";
 
 // GraphQL
-import { ApolloClient, gql } from "@apollo/client";
-import { useApolloClient } from "@apollo/client/react";
+import { gql } from "@apollo/client";
+
+// Hooks
+import { useWatchQuery } from "@hooks/useWatchQuery";
 
 // Custom types
 import { UserCollatedPermissions, UserGlobalPermissions, UserWorkspacePermissions } from "@types";
@@ -58,59 +59,29 @@ type PermissionsContextValue = {
 
 const PermissionsContext = createContext<PermissionsContextValue>({} as PermissionsContextValue);
 
-/**
- * Store that polls User permissions outside of React's render cycle
- */
-const createPermissionsStore = (client: ApolloClient) => {
-  let snapshot: PermissionsContextValue = {
-    workspacePermissions: DEFAULT_WORKSPACE_PERMISSIONS,
-    globalPermissions: DEFAULT_GLOBAL_PERMISSIONS,
-    loading: true,
-  };
-  const listeners = new Set<() => void>();
+export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
+  const { data } = useWatchQuery<{ userCollatedPermissions: UserCollatedPermissions }>(
+    GET_USER_PERMISSIONS,
+    {},
+    1000, // Poll every second to pick up permission changes made by other users
+  );
 
-  const observable = client.watchQuery<{ userCollatedPermissions: UserCollatedPermissions }>({
-    query: GET_USER_PERMISSIONS,
-    fetchPolicy: "network-only",
-    pollInterval: 1000, // Poll every second to pick up permission changes made by other users
-  });
+  const value = useMemo<PermissionsContextValue>(() => {
+    const permissions = data?.userCollatedPermissions;
+    if (!permissions?.workspace || !permissions?.global) {
+      return {
+        workspacePermissions: DEFAULT_WORKSPACE_PERMISSIONS,
+        globalPermissions: DEFAULT_GLOBAL_PERMISSIONS,
+        loading: true,
+      };
+    }
 
-  const subscription = observable.subscribe((result) => {
-    if (!result.data?.userCollatedPermissions) return;
-    if (!result.data.userCollatedPermissions.global || !result.data.userCollatedPermissions.workspace) return;
-
-    const data = result.data as { userCollatedPermissions: UserCollatedPermissions };
-    const next: PermissionsContextValue = {
-      workspacePermissions: data.userCollatedPermissions.workspace,
-      globalPermissions: data.userCollatedPermissions.global,
+    return {
+      workspacePermissions: permissions.workspace,
+      globalPermissions: permissions.global,
       loading: false,
     };
-
-    // Skip notifying subscribers entirely when nothing has actually changed
-    if (_.isEqual(next, snapshot)) return;
-
-    snapshot = next;
-    listeners.forEach((listener) => listener());
-  });
-
-  return {
-    subscribe: (listener: () => void) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-        if (listeners.size === 0) {
-          subscription.unsubscribe();
-        }
-      };
-    },
-    getSnapshot: () => snapshot,
-  };
-};
-
-export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
-  const client = useApolloClient();
-  const store = useMemo(() => createPermissionsStore(client), [client]);
-  const value = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  }, [data]);
 
   return <PermissionsContext.Provider value={value}>{props.children}</PermissionsContext.Provider>;
 };

@@ -13,6 +13,7 @@ import {
   Flex,
   IconButton,
   Input,
+  Link,
   Menu,
   Portal,
   Select,
@@ -21,7 +22,6 @@ import {
   Stack,
   Text,
   createListCollection,
-  Link,
 } from "@chakra-ui/react";
 
 import {
@@ -57,7 +57,7 @@ import { getValueTypeIconProps } from "@lib/util";
 import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 interface SelectOption extends OptionBase {
   label: string;
@@ -77,7 +77,7 @@ const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
   const iconProps = getValueTypeIconProps(props.data.value);
   return (
     <components.Option {...props}>
-      <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
+      <Flex direction={"row"} h={"8"} p={"1"} gap={"1"} m={"0.5"} align={"center"} _hover={{ bg: "gray.100" }}>
         <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
         <Text fontSize={"xs"}>{props.data.label}</Text>
       </Flex>
@@ -102,7 +102,7 @@ const ValueTypeSelectContainer = ({ children, ...props }: ContainerProps<ValueTy
 const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<ValueTypeOption>) => {
   return (
     <components.ValueContainer {...props}>
-      <Flex w={"100%"} h={"34px"}>
+      <Flex w={"100%"} h={"38px"}>
         {children}
       </Flex>
     </components.ValueContainer>
@@ -112,7 +112,7 @@ const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<Val
 const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
   return (
     <Box
-      pl={"1"}
+      pl={"2"}
       pr={"3"}
       border={"1px solid transparent"}
       _hover={{
@@ -148,8 +148,8 @@ const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption
   return (
     <Flex
       direction={"column"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -238,8 +238,8 @@ const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
   return (
     <Flex
       direction={"column"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
       bg={"white"}
       gap={"0.5"}
       p={"0.5"}
@@ -452,7 +452,7 @@ const ValueDataSelect = (props: {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header p={"0"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+            <Dialog.Header p={"0"} roundedTop={"md"} bg={"surface.emphasized"} color={"text.default"}>
               <Flex direction={"row"} align={"center"} gap={"1"} p={"2"}>
                 <Icon name={"v_select"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -531,10 +531,10 @@ const ValueDataSelect = (props: {
                         justify={"center"}
                         minH={"60px"}
                         rounded={"md"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderColor={GLOBAL_STYLES.border.color}
+                        border={STYLES.border.style}
+                        borderColor={STYLES.border.color}
                       >
-                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                           No Options added
                         </Text>
                       </Flex>
@@ -543,7 +543,7 @@ const ValueDataSelect = (props: {
                 </Box>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Dialog.Footer p={"1"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={cancelSelectOptions}>
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
@@ -593,8 +593,8 @@ const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<
 const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
   <components.Placeholder {...props}>
     <Flex direction={"row"} align={"center"} gap={"1"}>
-      <Icon name={"grid"} size={"xs"} color={"gray.400"} />
-      <Text fontSize={"xs"} color={"gray.400"}>
+      <Icon name={"grid"} size={"xs"} color={"text.faint"} />
+      <Text fontSize={"xs"} color={"text.faint"}>
         {props.children}
       </Text>
     </Flex>
@@ -628,7 +628,7 @@ const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) =
           {iconProps ? (
             <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
           ) : (
-            <Icon name={"grid"} size={"xs"} color={"gray.400"} />
+            <Icon name={"grid"} size={"xs"} color={"text.faint"} />
           )}
           <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
@@ -831,13 +831,13 @@ const Values = (props: {
           ref={tableRef}
           minW={getResponsiveValue({ base: "360px", sm: "440px", md: "490px" }, "600px")}
           w={"100%"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           borderRadius={"md"}
           overflow={"hidden"}
         >
           {/* Header Row */}
-          <Flex gap={0} bg={"gray.100"} borderBottom={"1px solid"} borderColor={"gray.200"} direction={"row"}>
+          <Flex gap={0} bg={"surface.muted"} borderBottom={"1px solid"} borderColor={"border.subtle"} direction={"row"}>
             {/* Select Column Header */}
             {!props.viewOnly && (
               <Flex
@@ -848,9 +848,9 @@ const Values = (props: {
                 py={1}
                 align={"center"}
                 justify={"center"}
-                bg={"gray.100"}
+                bg={"surface.muted"}
                 borderRight={"1px solid"}
-                borderColor={"gray.200"}
+                borderColor={"border.subtle"}
                 overflow={"hidden"}
                 flexShrink={0}
               >
@@ -875,10 +875,10 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               borderRight={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -912,10 +912,10 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               borderRight={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -948,8 +948,8 @@ const Values = (props: {
               py={1}
               fontSize={"xs"}
               fontWeight={"semibold"}
-              color={GLOBAL_STYLES.font.secondaryHeader.color}
-              bg={"gray.100"}
+              color={STYLES.font.secondaryHeader.color}
+              bg={"surface.muted"}
               position={"relative"}
               textAlign={"center"}
               lineHeight={"1.2"}
@@ -996,11 +996,11 @@ const Values = (props: {
           {!props.viewOnly && (
             <Flex
               borderTop={"1px solid"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               p={0}
               justify={"center"}
               align={"center"}
-              bg={"gray.100"}
+              bg={"surface.muted"}
             >
               <Button
                 id={"addValueRowButton"}
@@ -1088,7 +1088,7 @@ const Values = (props: {
           {!props.viewOnly && (
             <Menu.Root>
               <Menu.Trigger asChild>
-                <Button colorPalette={"yellow"} size={"xs"} rounded={"md"}>
+                <Button colorPalette={"action"} size={"xs"} rounded={"md"}>
                   Actions
                   <Icon name={"lightning"} size={"xs"} />
                 </Button>
@@ -1197,10 +1197,34 @@ const ValueRow = (props: {
   }
   const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
 
+  /**
+   * Update local state and immediately propagate the change to the parent within the
+   * same event handler. Keeping this synchronous (rather than reacting to local state
+   * changes via `useEffect`) ensures the local update and the parent's round-trip update
+   * land in a single React commit, preventing the sync-from-props effect below from ever
+   * observing a stale intermediate value and momentarily reverting fast keystrokes.
+   */
+  const commitChange = (updates: { name?: string; type?: IValueType; data?: string; source?: "column" | "value" }) => {
+    const nextName = updates.name ?? valueName;
+    const nextType = updates.type ?? valueType;
+    const nextData = updates.data ?? valueData;
+    const nextSource = updates.source ?? source;
+    if (updates.name !== undefined) setValueName(updates.name);
+    if (updates.type !== undefined) setValueType(updates.type);
+    if (updates.data !== undefined) setValueData(updates.data);
+    if (updates.source !== undefined) setSource(updates.source);
+    props.onValueChange(props.value._id, nextName, nextType, nextData, props.permittedValues ? nextSource : undefined);
+  };
+
+  // Persist any local normalization performed during initialization (e.g. clearing an
+  // invalid column reference) back to the parent once on mount
+  const didMountRef = useRef(false);
   useEffect(() => {
-    // Propagate changes to overall `Value` state, including source in import mode
-    props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
-  }, [valueName, valueType, valueData, source]);
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
+    }
+  }, []);
 
   // Sync local state when props change from an external source
   useEffect(() => {
@@ -1258,19 +1282,29 @@ const ValueRow = (props: {
     let iconStyle: IconNames = "link";
     let badgeBg = "blue.50";
     let badgeBorder = "blue.100";
-    let iconColor = GLOBAL_STYLES.project.color.icon;
+    let iconColor = STYLES.project.color.icon;
 
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
-        badgeBg = "blue.50";
+        badgeBg = "blue.100";
         badgeBorder = "blue.100";
-        iconColor = GLOBAL_STYLES.project.color.icon;
+        iconColor = "blue.600";
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";
         badgeBorder = "gray.200";
-        iconColor = GLOBAL_STYLES.font.secondaryHeader.color;
+        iconColor = STYLES.font.secondaryHeader.color;
+      } else if (urlObject.host === "labarchives.com" || urlObject.host.endsWith(".labarchives.com")) {
+        iconStyle = "l_labarchives";
+        badgeBg = "purple.100";
+        badgeBorder = "purple.200";
+        iconColor = "purple.600";
+      } else if (urlObject.host === "globus.org" || urlObject.host.endsWith(".globus.org")) {
+        iconStyle = "l_globus";
+        badgeBg = "teal.100";
+        badgeBorder = "teal.200";
+        iconColor = "teal.600";
       }
     }
 
@@ -1289,15 +1323,15 @@ const ValueRow = (props: {
         }}
       >
         {isValidUrl ? (
-          <Tooltip content={url} showArrow>
-            <Link href={url} _hover={{ textDecoration: "none" }}>
+          <Tooltip content={`Open in new tab: ${url}`} showArrow>
+            <Link href={url} _hover={{ textDecoration: "none" }} target={"_blank"} rel={"noopener noreferrer"}>
               <Flex
                 direction={"row"}
                 align={"center"}
                 h={"22px"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
-                rounded={"md"}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
+                rounded={"lg"}
                 overflow={"hidden"}
                 _hover={{
                   borderColor: "blue.300",
@@ -1317,10 +1351,14 @@ const ValueRow = (props: {
                   <Icon name={iconStyle} size={"xs"} color={iconColor} />
                 </Flex>
                 {/* Hostname */}
-                <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                <Flex px={"1"} align={"center"} h={"100%"} bg={"white"}>
                   <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
                     {urlObject.host}
                   </Text>
+                </Flex>
+                {/* Platform icon badge */}
+                <Flex align={"center"} justify={"center"} bg={"white"} mr={"1.5"} h={"100%"}>
+                  <Icon name={"external"} size={"xs"} color={"gray.600"} />
                 </Flex>
               </Flex>
             </Link>
@@ -1331,7 +1369,7 @@ const ValueRow = (props: {
               direction={"row"}
               align={"center"}
               h={"22px"}
-              border={GLOBAL_STYLES.border.style}
+              border={STYLES.border.style}
               borderColor={"orange.200"}
               rounded={"md"}
               overflow={"hidden"}
@@ -1341,7 +1379,7 @@ const ValueRow = (props: {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={"orange.50"}
+                bg={"status.warning.subtle"}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -1351,7 +1389,7 @@ const ValueRow = (props: {
               </Flex>
               {/* Truncated URL */}
               <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
                   {_.truncate(url, { length: 28 })}
                 </Text>
               </Flex>
@@ -1390,7 +1428,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1418,7 +1456,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1446,7 +1484,7 @@ const ValueRow = (props: {
         return (
           <Input
             value={valueData}
-            onChange={(e) => setValueData(e.target.value)}
+            onChange={(e) => commitChange({ data: e.target.value })}
             size={"xs"}
             h={"100%"}
             borderRadius={"none"}
@@ -1476,7 +1514,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={"100%"}
           borderRadius={"none"}
@@ -1519,7 +1557,14 @@ const ValueRow = (props: {
             boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
           }}
         >
-          <ValueDataSelect valueData={valueData} setValueData={setValueData} viewOnly={props.viewOnly} />
+          <ValueDataSelect
+            valueData={valueData}
+            setValueData={(next) => {
+              const resolved = typeof next === "function" ? (next as (prev: string) => string)(valueData) : next;
+              commitChange({ data: resolved });
+            }}
+            viewOnly={props.viewOnly}
+          />
         </Flex>
       );
     } else if (valueType === "entity") {
@@ -1546,7 +1591,7 @@ const ValueRow = (props: {
               placeholder={"Select Entity"}
               resultType={"entity"}
               value={JSON.parse(valueData) || { _id: "", name: "" }}
-              onChange={(entity) => setValueData(JSON.stringify(entity))}
+              onChange={(entity) => commitChange({ data: JSON.stringify(entity) })}
               disabled={props.viewOnly}
               isEmbedded
             />
@@ -1580,7 +1625,7 @@ const ValueRow = (props: {
       return (
         <Input
           value={valueData}
-          onChange={(e) => setValueData(e.target.value)}
+          onChange={(e) => commitChange({ data: e.target.value })}
           size={"xs"}
           h={props.viewOnly ? "34px" : "100%"}
           px={1}
@@ -1611,7 +1656,7 @@ const ValueRow = (props: {
     <Flex
       gap={0}
       borderBottom={props.hideBorder ? "none" : "1px solid"}
-      borderColor={"gray.200"}
+      borderColor={"border.subtle"}
       _hover={{ bg: "gray.25" }}
       overflow={"hidden"}
       bg={props.isSelected ? "blue.50" : "white"}
@@ -1628,7 +1673,7 @@ const ValueRow = (props: {
           alignItems={"center"}
           justifyContent={"center"}
           borderRight={"1px solid"}
-          borderColor={"gray.200"}
+          borderColor={"border.subtle"}
           bg={props.isSelected ? "blue.100" : "white"}
           _hover={{ bg: props.isSelected ? "blue.200" : "gray.100" }}
           cursor={props.viewOnly ? "default" : "pointer"}
@@ -1653,11 +1698,11 @@ const ValueRow = (props: {
         p={"0"}
         m={"0"}
         borderRight={"1px solid"}
-        borderColor={"gray.200"}
+        borderColor={"border.subtle"}
       >
         <Input
           value={valueName}
-          onChange={(e) => setValueName(e.target.value)}
+          onChange={(e) => commitChange({ name: e.target.value })}
           size={"xs"}
           px={1}
           py={0}
@@ -1691,7 +1736,7 @@ const ValueRow = (props: {
         alignItems={"center"}
         justifyContent={"center"}
         borderRight={"1px solid"}
-        borderColor={"gray.200"}
+        borderColor={"border.subtle"}
       >
         <ReactSelect
           options={valueTypeOptions}
@@ -1711,19 +1756,20 @@ const ValueRow = (props: {
           }}
           onChange={(event) => {
             if (event) {
-              setValueType(event.value);
               setValueTypeOption({ label: event.label, value: event.value });
               if (props.permittedValues) {
                 if (inColumnMode) {
                   // In column mode, keep the selected column only if it is still valid
                   if (!props.permittedValues.some((c) => c.name === valueData)) {
-                    setValueData("");
+                    commitChange({ type: event.value, data: "" });
+                  } else {
+                    commitChange({ type: event.value });
                   }
                 } else {
-                  setValueData(generateDefaultData(event.value));
+                  commitChange({ type: event.value, data: generateDefaultData(event.value) });
                 }
               } else {
-                setValueData(generateDefaultData(event.value));
+                commitChange({ type: event.value, data: generateDefaultData(event.value) });
               }
             }
           }}
@@ -1792,7 +1838,7 @@ const ValueRow = (props: {
                     }
                     isSearchable={false}
                     onChange={(event) => {
-                      if (event) setValueData(event.value);
+                      if (event) commitChange({ data: event.value });
                     }}
                     components={{
                       Control: ColumnPickerControl,
@@ -1830,8 +1876,10 @@ const ValueRow = (props: {
                 flexShrink={0}
                 onClick={() => {
                   const newSource = source === "column" ? "value" : "column";
-                  setSource(newSource);
-                  setValueData(newSource === "value" ? generateDefaultData(valueType) : "");
+                  commitChange({
+                    source: newSource,
+                    data: newSource === "value" ? generateDefaultData(valueType) : "",
+                  });
                 }}
               >
                 <Icon name={inColumnMode ? "grid" : "edit"} size={"xs"} />

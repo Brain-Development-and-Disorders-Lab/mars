@@ -23,6 +23,8 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import ActivityGraph from "@components/ActivityGraph";
+import RelativeTime from "@components/RelativeTime";
+import Tooltip from "@components/Tooltip";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -31,10 +33,10 @@ import { ActivityModel, IGenericItem } from "@types";
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
+import { useWatchQuery } from "@hooks/useWatchQuery";
 
 // Utility functions and libraries
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
 import _ from "lodash";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -43,7 +45,30 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
+
+// Query to retrieve Activity
+const GET_ACTIVITY = gql`
+  query GetActivity($limit: Int, $workspace: String) {
+    activity(limit: $limit) {
+      _id
+      timestamp
+      type
+      actor
+      details
+      medium
+      target {
+        _id
+        name
+        type
+      }
+    }
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
+  }
+`;
 
 const Activity = () => {
   const { workspace } = useWorkspace();
@@ -51,9 +76,6 @@ const Activity = () => {
 
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
   const [initialLoaded, setInitialLoaded] = useState(false);
-
-  // Timestamp update state to trigger re-renders for relative time display
-  const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
 
   const { breakpoint } = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({
@@ -88,47 +110,12 @@ const Activity = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
-  // Update timestamp every 5 seconds to trigger relative time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimestampUpdate(Date.now());
-    }, 5000); // Update every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Query to retrieve Activity
-  const GET_ACTIVITY = gql`
-    query GetActivity($limit: Int, $workspace: String) {
-      activity(limit: $limit) {
-        _id
-        timestamp
-        type
-        actor
-        details
-        medium
-        target {
-          _id
-          name
-          type
-        }
-      }
-      workspace(_id: $workspace) {
-        _id
-        name
-      }
-    }
-  `;
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data } = useWatchQuery<{
     activity: ActivityModel[];
     workspace: IGenericItem;
   }>(GET_ACTIVITY, {
-    variables: {
-      limit: 10000, // High limit to get all activity
-      workspace: workspace,
-    },
-    fetchPolicy: "network-only",
-    pollInterval: 5000, // Poll every 5 seconds to refresh activity
+    limit: 10000, // High limit to get all activity
+    workspace: workspace,
   });
 
   // Manage data once retrieved
@@ -229,11 +216,24 @@ const Activity = () => {
     columnHelper.accessor("target", {
       cell: (info) => {
         const target = info.getValue();
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
-          </Flex>
-        );
+        if (target.type !== "workspace") {
+          return (
+            <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+              <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
+            </Flex>
+          );
+        } else {
+          return (
+            <Tooltip content={target.name} disabled={target.name.length < 32}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"workspace"} size={"xs"} />
+                <Text fontWeight={"semibold"} fontSize={"xs"}>
+                  {_.truncate(target.name, { length: 32 })}
+                </Text>
+              </Flex>
+            </Tooltip>
+          );
+        }
       },
       header: "Target",
       meta: {
@@ -245,7 +245,7 @@ const Activity = () => {
         const actor = info.getValue();
         if (!actor) {
           return (
-            <Text fontSize={"xs"} color={"gray.500"}>
+            <Text fontSize={"xs"} color={"text.subtle"}>
               Unknown
             </Text>
           );
@@ -275,12 +275,15 @@ const Activity = () => {
     columnHelper.accessor("timestamp", {
       cell: (info) => (
         <Flex direction={"row"} gap={"1"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dayjs(info.getValue()).format("MMM D, YYYY h:mm A")}
           </Text>
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            ({dayjs(info.getValue()).fromNow()})
-          </Text>
+          <RelativeTime
+            value={info.getValue()}
+            format={(relative) => `(${relative})`}
+            fontSize={"xs"}
+            color={STYLES.font.secondaryHeader.color}
+          />
         </Flex>
       ),
       header: "Timestamp",
@@ -293,14 +296,14 @@ const Activity = () => {
 
   return (
     <Content isError={!_.isUndefined(error) && !initialLoaded} isLoaded={initialLoaded || !loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} minW={"0"} maxW={"100%"}>
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"activity"} size={"sm"} />
             <Heading size={"xl"}>Activity</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
               {workspaceName}
             </Text>
           </SkeletonText>
@@ -330,6 +333,13 @@ const Activity = () => {
                 height="200px"
               />
             </Flex>
+            <Flex direction={"column"} flex={"1"} minW="0">
+              <ActivityGraph
+                activities={activityData.filter((activity) => activity.target.type === "workspace")}
+                title="Workspace Activity"
+                height="200px"
+              />
+            </Flex>
           </Flex>
 
           {/* Filter Section */}
@@ -339,8 +349,9 @@ const Activity = () => {
               gap={"1"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -370,7 +381,7 @@ const Activity = () => {
                       </Text>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             Start (optional)
                           </Field.Label>
                           <Input
@@ -387,7 +398,7 @@ const Activity = () => {
                           />
                         </Field.Root>
                         <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                             End (optional)
                           </Field.Label>
                           <Input
@@ -420,7 +431,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Operation Type
                           </Text>
@@ -462,7 +473,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Target Type
                           </Text>
@@ -504,7 +515,7 @@ const Activity = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Medium
                           </Text>
@@ -580,54 +591,64 @@ const Activity = () => {
             </Flex>
           </Collapsible.Root>
 
-          {/* Buttons and Live Indicator Row */}
           <Flex
-            direction={"row"}
-            gap={"1"}
-            align={"center"}
-            justify={"space-between"}
-            data-timestamp-update={timestampUpdate}
+            direction={"column"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
-            {/* Live Indicator */}
-            <Flex align={"center"} gap={"1"} ml={"0.5"}>
-              <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
-                Live
-              </Text>
+            {/* Buttons and Live Indicator Row */}
+            <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
+              {/* Live Indicator */}
+              <Flex align={"center"} gap={"1"} ml={"0.5"}>
+                <Box
+                  w={"8px"}
+                  h={"8px"}
+                  borderRadius={"full"}
+                  bg={"status.success.default"}
+                  className="live-indicator"
+                />
+                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+                  Live
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
 
-          {filteredActivityData.length > 0 || activityData.length === 0 ? (
-            <Box w="100%" minW="0" maxW="100%">
-              <DataTable
-                columns={columns}
-                data={filteredActivityData}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                columnFilters={columnFilters}
-                onColumnFiltersChange={setColumnFilters}
-                showSelection
-                showColumnSelect
-                showPagination
-              />
-            </Box>
-          ) : (
-            <EmptyState.Root>
-              <EmptyState.Content>
-                <EmptyState.Indicator>
-                  <Icon name={"activity"} size={"lg"} />
-                </EmptyState.Indicator>
-                <EmptyState.Description>
-                  {appliedFilters.startDate ||
-                  appliedFilters.endDate ||
-                  appliedFilters.activityTypes.length > 0 ||
-                  appliedFilters.targetTypes.length > 0
-                    ? "No activity matches the selected filters"
-                    : "No Activity"}
-                </EmptyState.Description>
-              </EmptyState.Content>
-            </EmptyState.Root>
-          )}
+            {filteredActivityData.length > 0 || activityData.length === 0 ? (
+              <Box w="100%" minW="0" maxW="100%">
+                <DataTable
+                  columns={columns}
+                  data={filteredActivityData}
+                  visibleColumns={visibleColumns}
+                  selectedRows={{}}
+                  columnFilters={columnFilters}
+                  onColumnFiltersChange={setColumnFilters}
+                  showSelection
+                  showColumnSelect
+                  showPagination
+                />
+              </Box>
+            ) : (
+              <EmptyState.Root>
+                <EmptyState.Content>
+                  <EmptyState.Indicator>
+                    <Icon name={"activity"} size={"lg"} />
+                  </EmptyState.Indicator>
+                  <EmptyState.Description>
+                    {appliedFilters.startDate ||
+                    appliedFilters.endDate ||
+                    appliedFilters.activityTypes.length > 0 ||
+                    appliedFilters.targetTypes.length > 0
+                      ? "No activity matches the selected filters"
+                      : "No Activity"}
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState.Root>
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Content>

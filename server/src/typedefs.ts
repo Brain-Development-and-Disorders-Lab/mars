@@ -664,9 +664,10 @@ export const typedefs = `#graphql
     addedDay: Int
   }
 
-  # "WorkspaceMetrics" type
-  type WorkspaceMetrics {
-    collaborators: Int
+  # "CollaboratorMetrics" type
+  type CollaboratorMetrics {
+    all: Int
+    addedDay: Int
   }
 
   # "ColumnMappingSuggestion" type for AI-suggested column mappings
@@ -749,7 +750,7 @@ export const typedefs = `#graphql
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
     workspaceActivity(_id: String, limit: Int): [Activity]
-    workspaceMetrics(_id: String): WorkspaceMetrics
+    collaboratorMetrics(_id: String): CollaboratorMetrics
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String], includeHistory: Boolean): String

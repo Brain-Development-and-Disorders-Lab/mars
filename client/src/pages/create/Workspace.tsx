@@ -33,7 +33,7 @@ import { ignoreAbort } from "@lib/util";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const CreateWorkspace = () => {
   const posthog = usePostHog();
@@ -197,7 +197,7 @@ const CreateWorkspace = () => {
 
   return (
     <Content>
-      <Flex direction={"column"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
+      <Flex direction={"column"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"1"} minW="0" maxW="100%">
         {/* Page header */}
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"} ml={"0.5"}>
           <Flex align={"center"} gap={"1"} w={"100%"} pt={"1"} minW="0">
@@ -231,9 +231,9 @@ const CreateWorkspace = () => {
               h={"fit-content"}
               p={"2"}
               gap={"2"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
             >
               <Fieldset.Root>
@@ -242,7 +242,7 @@ const CreateWorkspace = () => {
                     <Field.Label
                       fontWeight={"semibold"}
                       fontSize={"xs"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
+                      color={STYLES.font.secondaryHeader.color}
                       ml={"0.5"}
                     >
                       Name
@@ -263,12 +263,7 @@ const CreateWorkspace = () => {
               </Fieldset.Root>
 
               <Flex direction={"column"} gap={"2"}>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
-                  ml={"0.5"}
-                >
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Owner
                 </Text>
                 <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
@@ -282,10 +277,11 @@ const CreateWorkspace = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <Textarea

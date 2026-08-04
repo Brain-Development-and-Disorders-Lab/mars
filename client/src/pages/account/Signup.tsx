@@ -31,7 +31,7 @@ import { isValidEmail } from "@lib/util";
 import dayjs from "dayjs";
 
 // Variables
-import { APP_URL, GLOBAL_STYLES } from "@variables";
+import { APP_URL, STYLES } from "@variables";
 
 // Analytics
 import posthog from "posthog-js";
@@ -305,8 +305,8 @@ const Signup = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
         >
@@ -316,7 +316,7 @@ const Signup = () => {
               {mode === "complete" ? "Complete Profile" : "Create your Metadatify account"}
             </Heading>
             {mode === "complete" && (
-              <Text fontSize={"sm"} color={"gray.500"} textAlign={"center"}>
+              <Text fontSize={"sm"} color={"text.subtle"} textAlign={"center"}>
                 Provide your name and email address to finish setting up your account.
               </Text>
             )}
@@ -327,14 +327,14 @@ const Signup = () => {
               <Flex direction={"column"} gap={"4"}>
                 <Flex direction={"row"} gap={"4"}>
                   <Field.Root gap={"0.5"} required w={"100%"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                       First Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       size={"xs"}
                       rounded={"md"}
-                      borderColor={"gray.300"}
+                      borderColor={"border.default"}
                       _focus={{
                         borderColor: "primary",
                         boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
@@ -344,14 +344,14 @@ const Signup = () => {
                     />
                   </Field.Root>
                   <Field.Root gap={"0.5"} required w={"100%"}>
-                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                    <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                       Last Name
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Input
                       size={"xs"}
                       rounded={"md"}
-                      borderColor={"gray.300"}
+                      borderColor={"border.default"}
                       _focus={{
                         borderColor: "primary",
                         boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
@@ -363,7 +363,7 @@ const Signup = () => {
                 </Flex>
 
                 <Field.Root gap={"0.5"} invalid={emailError !== ""} required>
-                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                     Email
                     <Field.RequiredIndicator />
                   </Field.Label>
@@ -382,13 +382,13 @@ const Signup = () => {
                       validateEmail(e.target.value);
                     }}
                   />
-                  <Field.ErrorText color={"red.500"} fontSize={"xs"} mt={"1"}>
+                  <Field.ErrorText color={"status.danger.default"} fontSize={"xs"} mt={"1"}>
                     {emailError}
                   </Field.ErrorText>
                 </Field.Root>
 
                 <Field.Root gap={"0.5"} required>
-                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                  <Field.Label fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                     Affiliation
                     <Field.RequiredIndicator />
                   </Field.Label>
@@ -404,7 +404,7 @@ const Signup = () => {
                   <>
                     <Flex direction={"column"} gap={"1"} w={"100%"}>
                       <Field.Root gap={"0.5"} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                           Password
                           <Field.RequiredIndicator />
                         </Field.Label>
@@ -419,7 +419,7 @@ const Signup = () => {
                         />
                       </Field.Root>
                       <Field.Root gap={"0.5"} invalid={confirmPassword !== "" && !isPasswordValid} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"}>
+                        <Field.Label fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                           Confirm Password
                           <Field.RequiredIndicator />
                         </Field.Label>
@@ -438,7 +438,7 @@ const Signup = () => {
 
                     <Box position={"relative"} p={"2"}>
                       <Separator />
-                      <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                      <AbsoluteCenter bg={"white"} color={"text.subtle"} px={"4"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Optional
                         </Text>

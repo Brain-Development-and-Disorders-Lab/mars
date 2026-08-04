@@ -4,22 +4,22 @@ import {
   Button,
   EmptyState,
   Flex,
-  Heading,
   Spacer,
-  Tag,
   Text,
   Input,
   Checkbox,
   Collapsible,
   Field,
-  SkeletonText,
   Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import PageHeader from "@components/PageHeader";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -48,7 +48,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Queries
 const GET_PROJECTS = gql`
@@ -207,7 +207,7 @@ const Projects = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Flex gap={"1"} align={"center"}>
-              <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+              <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -222,7 +222,7 @@ const Projects = () => {
             onClick={() => navigate(`/projects/${info.row.original._id}`)}
           >
             View
-            <Icon name={"a_right"} />
+            <Icon name={"a_right"} size={"xs"} />
           </Button>
         </Flex>
       ),
@@ -232,22 +232,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -255,55 +240,22 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("entities", {
-      cell: (info) => {
-        const entities = info.row.original.entities;
-
-        // 0 Entities
-        if (entities.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Entities
-        if (entities.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.slice(0, 1).map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-              <Text fontSize={"xs"}>
-                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.entities}
+          max={1}
+          emptyLabel={"Entities"}
+          getKey={(entity) => entity}
+          renderTag={(entity) => <Linky type={"entities"} id={entity} />}
+        />
+      ),
       header: "Entities",
       meta: {
         minWidth: 300,
       },
     }),
     columnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -312,29 +264,23 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
     }),
   ];
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} justify={"center"}>
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Flex direction={"column"} gap={"0"} align={"start"}>
-              <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
-                <Heading size={"xl"}>Projects</Heading>
-              </Flex>
-              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
-                  {workspaceName}
-                </Text>
-              </SkeletonText>
-            </Flex>
+            <PageHeader
+              icon={"project"}
+              iconColor={STYLES.project.color.icon}
+              title={"Projects"}
+              subtitle={workspaceName}
+              loading={loading}
+            />
             <Spacer />
             <Tooltip
               content={"Insufficient permissions in this Workspace"}
@@ -368,8 +314,9 @@ const Projects = () => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -403,7 +350,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Start (optional)
                           </Field.Label>
@@ -425,7 +372,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             End (optional)
                           </Field.Label>
@@ -486,11 +433,7 @@ const Projects = () => {
                             ))}
 
                         {projects.length === 0 && (
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
-                          >
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                             No Project Owners
                           </Text>
                         )}
@@ -510,7 +453,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Minimum
                           </Field.Label>
@@ -534,7 +477,7 @@ const Projects = () => {
                             fontSize={"xs"}
                             fontWeight={"semibold"}
                             ml={"0.5"}
-                            color={GLOBAL_STYLES.font.secondaryHeader.color}
+                            color={STYLES.font.secondaryHeader.color}
                           >
                             Maximum
                           </Field.Label>
@@ -608,7 +551,7 @@ const Projects = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                  <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
                   {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}

@@ -49,6 +49,7 @@ const GET_ENTITY = gql`
       description
       attributes {
         _id
+        name
       }
     }
   }
@@ -62,6 +63,10 @@ const GET_PROJECT = gql`
       archived
       description
       entities
+    }
+    projectEntities(_id: $_id) {
+      _id
+      name
     }
   }
 `;
@@ -82,6 +87,7 @@ const mockDefaultEntityQuery = {
         attributes: [
           {
             _id: "test-attribute-id",
+            name: "Test Attribute",
           },
         ],
         archived: false,
@@ -105,6 +111,7 @@ const mockLongNameEntityQuery = {
         attributes: [
           {
             _id: "test-attribute-id",
+            name: "Test Attribute",
           },
         ],
         archived: false,
@@ -225,6 +232,7 @@ describe("Linky Component", () => {
               description: "Test Project Description",
               entities: [],
             },
+            projectEntities: [],
           },
         },
       };

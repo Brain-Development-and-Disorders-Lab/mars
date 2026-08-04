@@ -214,6 +214,54 @@ export type VisibilityTagProps = {
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
+// "FieldTag" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
+export type EmptyTagProps = {
+  label: string; // Noun describing the missing content, rendered as "No {label}"
+  size?: "sm" | "md";
+};
+
+export type ValueTagProps = {
+  value: IValue;
+  size?: "sm" | "md";
+};
+
+export type AttributeTagProps = {
+  attribute: IGenericItem;
+  size?: "sm" | "md";
+};
+
+// "FieldTagList" component props, renders up to `max` `FieldTag`s followed by an "and N more" summary
+export type FieldTagListProps = {
+  items: any[];
+  max: number;
+  getKey: (item: any) => string;
+  renderTag: (item: any) => React.ReactNode;
+  emptyLabel?: string; // When set, an `EmptyTag` is shown in place of an empty list
+};
+
+// "PageHeader" component props, the icon, title, and Workspace subtitle shown atop list pages
+export type PageHeaderProps = {
+  icon: IconNames;
+  iconColor?: string;
+  title: string;
+  subtitle: string; // Workspace name
+  loading: boolean;
+};
+
+// "TableCell" component props, shared `DataTable` cell renderers repeated across list pages
+export type CreatedCellProps = {
+  value: string;
+};
+
+export type OwnerCellProps = {
+  value: string;
+};
+
+export type DescriptionCellProps = {
+  value: string | null | undefined;
+  maxLength?: number;
+};
+
 // Project types
 export type IProject = {
   name: string;
@@ -405,7 +453,7 @@ export type IActivity = {
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
-    type: "entities" | "projects" | "templates";
+    type: "entities" | "projects" | "templates" | "workspace";
     _id: string;
     name: string;
   };
@@ -421,6 +469,15 @@ export type ActivityModel = IActivity & {
 export type ActivityFeedProps = {
   activities?: ActivityModel[];
   feedLimit?: number; // Number of activities to show in the feed (default: 5)
+};
+
+// RelativeTime component props
+export type RelativeTimeProps = {
+  value: string | number | Date;
+  format?: (relative: string) => string;
+  fontSize?: string;
+  fontWeight?: string;
+  color?: string;
 };
 
 // Content component
@@ -558,8 +615,6 @@ export type IconNames =
   | "diff"
   | "info"
   | "file"
-  | "search"
-  | "search_query"
   | "bell"
   | "add"
   | "remove"
@@ -569,6 +624,7 @@ export type IconNames =
   | "delete"
   | "download"
   | "email"
+  | "external"
   | "filter"
   | "grid"
   | "upload"
@@ -594,8 +650,9 @@ export type IconNames =
   | "settings"
   | "power"
   | "print"
-  | "text"
-  | "view"
+  | "search"
+  | "search_query"
+  | "search_text"
   | "visibility_show"
   | "visibility_hide"
   | "workspace"
@@ -604,7 +661,7 @@ export type IconNames =
 
   // Logos
   | "l_box"
-  | "l_labArchives"
+  | "l_labarchives"
   | "l_globus"
   | "l_github"
 
@@ -629,11 +686,6 @@ export type IconNames =
   | "c_double_right"
   | "c_up"
   | "c_down"
-  | "c_expand"
-
-  // Density
-  | "d_low"
-  | "d_high"
 
   // Sorting
   | "sort"
@@ -711,6 +763,21 @@ export type SaveDialogProps = {
   placeholder?: string;
   showCloseButton?: boolean;
   modifiedType?: "Entity" | "Project" | "Template";
+};
+
+// "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Template detail pages.
+// `type` selects both the drawer title and which type-specific detail panel (Attributes/Attachments, Entities, or
+// Values) is rendered for each version
+export type HistoryDrawerProps = {
+  type: "entity" | "project" | "template";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  history: (EntityHistory | ProjectHistory | AttributeHistory)[];
+  archived: boolean; // Disables Preview while the current item is archived
+  previewActive: boolean; // Whether a version is currently being previewed, disables Restore
+  canRestore: boolean; // Workspace permission to restore a version
+  onPreview: (version: any) => void;
+  onRestore: (version: any) => void | Promise<void>;
 };
 
 // Generic ResponseMessage type
@@ -852,10 +919,7 @@ export type IContentMetrics = {
 export type EntityMetrics = IContentMetrics;
 export type ProjectMetrics = IContentMetrics;
 export type TemplateMetrics = IContentMetrics;
-
-export type WorkspaceMetrics = {
-  collaborators: number;
-};
+export type CollaboratorMetrics = IContentMetrics;
 
 export type AdminWorkspace = {
   _id: string;

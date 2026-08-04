@@ -18,7 +18,7 @@ import {
 import dayjs from "dayjs";
 
 // Variables
-import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES } from "@variables";
+import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, STYLES } from "@variables";
 
 export const isValueEqual = (a: IValue, b: IValue): boolean => {
   return a.name === b.name && a.type === b.type && a.data === b.data;
@@ -167,17 +167,17 @@ export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermis
 export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
   switch (type) {
     case "date":
-      return { name: "v_date", color: "orange.400" };
+      return { name: "v_date", color: "yellow.400" };
     case "text":
-      return { name: "v_text", color: "blue.400" };
+      return { name: "v_text", color: "gray.400" };
     case "number":
       return { name: "v_number", color: "green.400" };
     case "url":
-      return { name: "v_url", color: "yellow.400" };
+      return { name: "v_url", color: "orange.400" };
     case "select":
       return { name: "v_select", color: "teal.400" };
     case "entity":
-      return { name: "entity", color: "purple.400" };
+      return { name: "entity", color: STYLES.entity.color.icon };
     default:
       return { name: "unknown", color: "red.400" };
   }

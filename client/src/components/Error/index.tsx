@@ -58,7 +58,7 @@ const Error = ({ error }: ErrorProps) => {
             pr={"3"}
             className={"error-scroll-container"}
           >
-            <Text fontSize={"xs"} fontFamily={"monospace"} whiteSpace={"pre-wrap"} color={"red.900"}>
+            <Text fontSize={"xs"} fontFamily={"mono"} whiteSpace={"pre-wrap"} color={"red.900"}>
               {error?.stack || error?.message || "No error details available"}
             </Text>
           </Flex>

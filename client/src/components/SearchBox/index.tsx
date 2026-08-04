@@ -32,7 +32,7 @@ import { useLazyQuery } from "@apollo/client/react";
 import { ignoreAbort } from "@lib/util";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Hooks
 import { usePermissions } from "@hooks/usePermissions";
@@ -257,7 +257,7 @@ const SearchBox = () => {
           <Flex gap={"2"} align={"center"} w={"100%"}>
             <InputGroup
               startElement={
-                globalPermissions.features.ai ? <Icon name={"lightning"} size={"xs"} color={"purple.400"} /> : undefined
+                globalPermissions.features.ai ? <Icon name={"lightning"} size={"xs"} color={"ai.default"} /> : undefined
               }
             >
               <Input
@@ -268,8 +268,7 @@ const SearchBox = () => {
                 placeholder={globalPermissions.features.ai ? "Describe what you're looking for..." : "Search..."}
                 background={"white"}
                 w={"100%"}
-                borderColor={globalPermissions.features.ai ? "purple.400" : undefined}
-                outlineColor={globalPermissions.features.ai ? "purple.400" : undefined}
+                className={globalPermissions.features.ai ? "ai-search-border" : undefined}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setOpen(false);
@@ -290,7 +289,7 @@ const SearchBox = () => {
               data-search-button
               size={"xs"}
               rounded={"md"}
-              colorPalette={globalPermissions.features.ai ? "purple" : "green"}
+              colorPalette={globalPermissions.features.ai ? "ai" : "green"}
               disabled={query === ""}
               loading={isSearching}
               loadingText={"Searching..."}
@@ -314,15 +313,15 @@ const SearchBox = () => {
               mt={"1"}
               zIndex={1000}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               bg={"white"}
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}
             >
               <Flex
                 p={"1"}
-                bg={"gray.100"}
+                bg={"surface.muted"}
                 roundedTop={"md"}
                 roundedBottom={!isSearching && hasSearched && results.length === 0 ? "md" : undefined}
                 direction={"column"}
@@ -402,8 +401,8 @@ const SearchBox = () => {
                                 {result.name}
                               </Text>
                               <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                <Icon name={"entity"} size={"xxs"} color={GLOBAL_STYLES.entity.color.icon} />
-                                <Text fontSize={"2xs"} color={"gray.500"}>
+                                <Icon name={"entity"} size={"xxs"} color={STYLES.entity.color.icon} />
+                                <Text fontSize={"2xs"} color={"text.subtle"}>
                                   {resultType}
                                 </Text>
                               </Flex>

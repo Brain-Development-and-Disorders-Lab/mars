@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "@lib/auth";
 
 // Variables
-import { APP_URL, GLOBAL_STYLES } from "@variables";
+import { APP_URL, STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
@@ -79,8 +79,8 @@ const ForgotPassword = () => {
           bg={"white"}
           align={"center"}
           justify={"center"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           rounded={"lg"}
           shadow={"sm"}
           w={"sm"}
@@ -90,7 +90,7 @@ const ForgotPassword = () => {
             <Heading size={"2xl"} fontWeight={"semibold"}>
               Reset Password
             </Heading>
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.500"} textAlign={"center"}>
+            <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.subtle"} textAlign={"center"}>
               {submitted
                 ? "If an account exists for that email, a reset link has been sent."
                 : "Enter your email and we'll send you a link to reset your password."}
@@ -100,7 +100,7 @@ const ForgotPassword = () => {
           {!submitted && (
             <Fieldset.Root w={"100%"}>
               <Field.Root gap={"0.5"} required>
-                <Field.Label fontSize={"xs"} ml={"0.5"} color={"gray.600"} fontWeight={"semibold"}>
+                <Field.Label fontSize={"xs"} ml={"0.5"} color={"text.muted"} fontWeight={"semibold"}>
                   Email
                   <Field.RequiredIndicator />
                 </Field.Label>

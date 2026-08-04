@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const TimestampTag = (props: { timestamp: string; description?: string }) => {
   // Handle improperly formed timestamps
@@ -25,7 +25,7 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
       align={"center"}
       h={"52px"}
       w={"fit-content"}
-      border={GLOBAL_STYLES.border.style}
+      border={STYLES.border.style}
       borderColor={"blue.200"}
       rounded={"md"}
       overflow={"hidden"}
@@ -42,15 +42,15 @@ const TimestampTag = (props: { timestamp: string; description?: string }) => {
         borderRight={"1px solid"}
         borderColor={"blue.200"}
       >
-        <Icon name={"clock"} size={"xs"} color={"blue.500"} />
+        <Icon name={"clock"} size={"xs"} color={"status.info.default"} />
       </Flex>
 
       {/* Timestamp label */}
       <Flex direction={"column"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
           {dateString}
         </Text>
-        <Text fontSize={"xs"} fontWeight={"medium"} mr={"0.5"} color={"gray.400"}>
+        <Text fontSize={"xs"} fontWeight={"medium"} mr={"0.5"} color={"text.faint"}>
           {_.isUndefined(props.description) ? "Timestamp" : props.description}
         </Text>
       </Flex>

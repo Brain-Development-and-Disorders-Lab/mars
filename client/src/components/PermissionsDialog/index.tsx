@@ -18,13 +18,13 @@ import { usePermissions } from "@hooks/usePermissions";
 import { gql } from "@apollo/client";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Read-only display of a single permission, used when the Dialog is not `editable`
 const PermissionStatus = (props: { label: string; granted: boolean }) => (
   <Flex direction={"row"} justify={"space-between"} align={"center"} gap={"2"}>
-    <Text fontSize={"xs"} color={"gray.500"}>
+    <Text fontSize={"xs"} color={"text.subtle"}>
       {props.label}
     </Text>
     <Icon name={props.granted ? "check" : "cross"} color={props.granted ? "green.600" : "red.600"} size={"xs"} />
@@ -232,7 +232,8 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
           <Dialog.Header
             p={"1"}
             flexShrink={0}
-            bg={GLOBAL_STYLES.dialog.header.bg}
+            bg={props.isGlobal ? "surface.emphasized" : "workspace.light"}
+            color={props.isGlobal ? "text.default" : "workspace.dark"}
             borderBottom={"2px"}
             roundedTop={"md"}
           >
@@ -245,7 +246,12 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
               </Flex>
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} />
+              <CloseButton
+                size={"2xs"}
+                top={"6px"}
+                onClick={() => props.setOpen(false)}
+                colorPalette={props.isGlobal ? "gray" : "workspace"}
+              />
             </Dialog.CloseTrigger>
           </Dialog.Header>
 
@@ -271,16 +277,11 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                     p={"2"}
                     gap={"2"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                     h={"fit-content"}
                   >
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Application Permissions
                     </Text>
                     <Switch.Root
@@ -359,12 +360,12 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                   gap={"6"}
                   wrap={"wrap"}
                   rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
+                  border={STYLES.border.style}
+                  borderColor={STYLES.border.color}
                   p={"2"}
                 >
                   <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
                       Workspace
                     </Text>
                     <PermissionStatus label={"Edit"} granted={workspaceEdit} />
@@ -374,7 +375,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                   <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
 
                   <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
                       Entities
                     </Text>
                     <PermissionStatus label={"Create"} granted={entitiesCreate} />
@@ -385,7 +386,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                   <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
 
                   <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
                       Projects
                     </Text>
                     <PermissionStatus label={"Create"} granted={projectsCreate} />
@@ -396,7 +397,7 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                   <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
 
                   <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"xs"} color={"gray.600"} fontWeight={"semibold"}>
+                    <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
                       Templates
                     </Text>
                     <PermissionStatus label={"Create"} granted={templatesCreate} />
@@ -416,15 +417,15 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       p={"2"}
                       gap={"2"}
                       rounded={"md"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                       w={"50%"}
                       h={"fit-content"}
                     >
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
                         Workspace Permissions
@@ -471,14 +472,14 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       p={"2"}
                       gap={"2"}
                       rounded={"md"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                       w={"50%"}
                     >
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
                         Entities
@@ -544,14 +545,14 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       p={"2"}
                       gap={"2"}
                       rounded={"md"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                       w={"50%"}
                     >
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
                         Projects
@@ -617,14 +618,14 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
                       p={"2"}
                       gap={"2"}
                       rounded={"md"}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                       w={"50%"}
                     >
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
-                        color={GLOBAL_STYLES.font.secondaryHeader.color}
+                        color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
                         Templates
@@ -692,10 +693,10 @@ const PermissionsDialog = (props: PermissionsDialogProps) => {
           <Dialog.Footer
             p={"1"}
             flexShrink={0}
-            bg={"gray.100"}
+            bg={"surface.muted"}
             roundedBottom={"md"}
             borderTop={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"border.subtle"}
           >
             <Flex direction={"row"} justify={editable ? "space-between" : "end"} gap={"4"} w={"100%"}>
               {editable && (

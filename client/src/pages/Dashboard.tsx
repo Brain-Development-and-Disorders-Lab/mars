@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Text, Tag, Badge, EmptyState, SkeletonText } from "@chakra-ui/react";
+import { Button, Flex, Text, Badge, EmptyState } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import { AttributeTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import ActorTag from "@components/ActorTag";
 import Linky from "@components/Linky";
+import PageHeader from "@components/PageHeader";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
@@ -23,7 +27,7 @@ import {
   EntityMetrics,
   ProjectMetrics,
   TemplateMetrics,
-  WorkspaceMetrics,
+  CollaboratorMetrics,
   IGenericItem,
 } from "@types";
 
@@ -58,7 +62,7 @@ const UPDATE_USER = gql`
 import { auth } from "@lib/auth";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -108,8 +112,9 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    workspaceMetrics(_id: $workspace) {
-      collaborators
+    collaboratorMetrics {
+      all
+      addedDay
     }
   }
 `;
@@ -150,10 +155,10 @@ const Dashboard = () => {
   const [workspaceName, setWorkspaceName] = useState<string>();
 
   // Metrics
-  const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
-  const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
-  const [templateMetrics, setTemplateMetrics] = useState({} as TemplateMetrics);
-  const [workspaceMetrics, setWorkspaceMetrics] = useState({} as WorkspaceMetrics);
+  const [entityMetrics, setEntityMetrics] = useState<EntityMetrics>({} as EntityMetrics);
+  const [projectMetrics, setProjectMetrics] = useState<ProjectMetrics>({} as ProjectMetrics);
+  const [templateMetrics, setTemplateMetrics] = useState<TemplateMetrics>({} as TemplateMetrics);
+  const [collaboratorMetrics, setCollaboratorMetrics] = useState<CollaboratorMetrics>({} as CollaboratorMetrics);
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -184,7 +189,7 @@ const Dashboard = () => {
     workspace: IGenericItem;
     entityMetrics: EntityMetrics;
     templateMetrics: TemplateMetrics;
-    workspaceMetrics: WorkspaceMetrics;
+    collaboratorMetrics: CollaboratorMetrics;
   }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,
@@ -220,8 +225,8 @@ const Dashboard = () => {
     if (data?.templateMetrics) {
       setTemplateMetrics(data.templateMetrics);
     }
-    if (data?.workspaceMetrics) {
-      setWorkspaceMetrics(data.workspaceMetrics);
+    if (data?.collaboratorMetrics) {
+      setCollaboratorMetrics(data.collaboratorMetrics);
     }
   }, [data]);
 
@@ -253,7 +258,7 @@ const Dashboard = () => {
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
             <Flex gap={"1"} align={"center"}>
-              <Icon name={"entity"} color={GLOBAL_STYLES.entity.color.icon} size={"xs"} />
+              <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
                 {_.truncate(info.getValue(), { length: 48 })}
               </Text>
@@ -268,7 +273,7 @@ const Dashboard = () => {
             onClick={() => navigate(`/entities/${info.row.original._id}`)}
           >
             View
-            <Icon name={"a_right"} />
+            <Icon name={"a_right"} size={"xs"} />
           </Button>
         </Flex>
       ),
@@ -278,22 +283,12 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("timestamp", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -302,22 +297,7 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -325,50 +305,15 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("attributes", {
-      cell: (info) => {
-        const attributes = info.row.original.attributes;
-
-        // 0 Attributes
-        if (attributes.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Attributes
-        if (attributes.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.slice(0, 1).map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.map((attribute) => (
-                <Tag.Root colorPalette={"teal"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={GLOBAL_STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.attributes}
+          max={1}
+          emptyLabel={"Attributes"}
+          getKey={(attribute) => attribute._id}
+          renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+        />
+      ),
       header: "Attributes",
       enableHiding: true,
       meta: {
@@ -387,7 +332,7 @@ const Dashboard = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"project"} color={GLOBAL_STYLES.project.color.icon} size={"xs"} />
+                <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -402,7 +347,7 @@ const Dashboard = () => {
               onClick={() => navigate(`/projects/${info.row.original._id}`)}
             >
               View
-              <Icon name={"a_right"} />
+              <Icon name={"a_right"} size={"xs"} />
             </Button>
           </Flex>
         );
@@ -413,22 +358,12 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -437,22 +372,7 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -460,40 +380,15 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("entities", {
-      cell: (info) => {
-        const entities = info.row.original.entities;
-
-        // 0 Entities
-        if (entities.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Entities
-        if (entities.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.slice(0, 1).map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-              <Text fontSize={"xs"}>
-                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.entities}
+          max={1}
+          emptyLabel={"Entities"}
+          getKey={(entity) => entity}
+          renderTag={(entity) => <Linky type={"entities"} id={entity} />}
+        />
+      ),
       header: "Entities",
       enableHiding: true,
       meta: {
@@ -589,17 +484,7 @@ const Dashboard = () => {
 
         {/* Header */}
         <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
-          <Flex direction={"column"} gap={"0"} align={"start"}>
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"dashboard"} size={"sm"} />
-              <Heading size={"xl"}>Dashboard</Heading>
-            </Flex>
-            <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
-                {workspaceName}
-              </Text>
-            </SkeletonText>
-          </Flex>
+          <PageHeader icon={"dashboard"} title={"Dashboard"} subtitle={workspaceName ?? ""} loading={loading} />
 
           <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
         </Flex>
@@ -615,19 +500,19 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Entities
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {entityMetrics.all ?? "–"}
+              {entityMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -646,19 +531,19 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Projects
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {projectMetrics.all ?? "–"}
+              {projectMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -677,19 +562,19 @@ const Dashboard = () => {
             minW={"120px"}
             p={"2"}
             gap={"1"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Templates
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {templateMetrics.all ?? "–"}
+              {templateMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
@@ -709,22 +594,28 @@ const Dashboard = () => {
               minW={"120px"}
               p={"2"}
               gap={"1"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"person"} size={"xs"} color={"gray.500"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"person"} size={"xs"} color={"text.subtle"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Collaborators
                 </Text>
               </Flex>
               <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-                {workspaceMetrics.collaborators ?? "–"}
+                {collaboratorMetrics.all ?? "-"}
               </Text>
-              <Badge px={"0"} variant={"plain"} colorPalette={"gray"} fontSize={"xs"}>
-                No change
+              <Badge
+                px={"0"}
+                variant={"plain"}
+                colorPalette={collaboratorMetrics.addedDay > 0 ? "green" : "gray"}
+                fontSize={"xs"}
+              >
+                {collaboratorMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+                {collaboratorMetrics.addedDay > 0 ? `+${collaboratorMetrics.addedDay} today` : "No new today"}
               </Badge>
             </Flex>
           )}
@@ -738,14 +629,15 @@ const Dashboard = () => {
               p={"2"}
               rounded={"md"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               minW={"0"}
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"0.5"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Recent Projects
                 </Text>
               </Flex>
@@ -764,7 +656,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                      <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Projects</EmptyState.Description>
                   </EmptyState.Content>
@@ -791,14 +683,15 @@ const Dashboard = () => {
               p={"2"}
               rounded={"md"}
               gap={"2"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"surface.card"}
               minW={"0"}
               maxW={"100%"}
             >
               <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"1.5"}>
-                <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Recent Entities
                 </Text>
               </Flex>
@@ -821,7 +714,7 @@ const Dashboard = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
+                      <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -856,9 +749,10 @@ const Dashboard = () => {
               p={"2"}
               gap={"1"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               h={"fit-content"}
+              bg={"surface.card"}
             >
               <ActivityFeed />
             </Flex>

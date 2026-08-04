@@ -22,7 +22,7 @@ import {
 import { nanoid } from "nanoid";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const FIELDS = createListCollection({
   items: ["name", "description", "projects", "relationships", "attributes"],
@@ -143,14 +143,14 @@ const RuleRow = React.memo(
         gap={"2"}
         p={"2"}
         rounded={"md"}
-        border={GLOBAL_STYLES.border.style}
-        borderColor={GLOBAL_STYLES.border.color}
+        border={STYLES.border.style}
+        borderColor={STYLES.border.color}
         bg={"white"}
         wrap={"wrap"}
       >
         {/* Field selector */}
         <Flex w={{ base: "100%", sm: "auto" }} direction={"column"} gap={"2"}>
-          <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
             Entity Field
           </Text>
           <SearchRuleSelect
@@ -164,7 +164,7 @@ const RuleRow = React.memo(
 
         {/* Operator selector */}
         <Flex w={{ base: "100%", sm: "auto" }} direction={"column"} gap={"2"}>
-          <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
             Operator
           </Text>
           <SearchRuleSelect
@@ -178,7 +178,7 @@ const RuleRow = React.memo(
 
         {/* Value input, shape determined by field type */}
         <Flex flex={"1"} direction={"column"} minW={"180px"} w={{ base: "100%", sm: "auto" }} gap={"2"}>
-          <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
             Value
           </Text>
 
@@ -227,9 +227,9 @@ const RuleRow = React.memo(
               align={"center"}
               p={"1.5"}
               rounded={"md"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
               <SearchRuleSelect
                 value={attrVal.type}
@@ -344,12 +344,12 @@ const SearchQueryBuilder = ({ query, onQueryChange, isValid, onSearch, onClear }
           p={"2"}
           py={"4"}
           rounded={"md"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
-          bg={GLOBAL_STYLES.card.bg}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
+          bg={STYLES.card.bg}
           wrap={"wrap"}
         >
-          <Text fontWeight={"semibold"} fontSize={"xs"} color={"gray.600"}>
+          <Text fontWeight={"semibold"} fontSize={"xs"} color={"text.muted"}>
             No Rules
           </Text>
         </Flex>

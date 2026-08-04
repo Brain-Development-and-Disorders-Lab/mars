@@ -16,7 +16,6 @@ import {
   Spacer,
   Stack,
   Steps,
-  Tag,
   Text,
   Textarea,
   useDisclosure,
@@ -24,6 +23,8 @@ import {
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
 import DataTable from "@components/DataTable";
+import { EmptyTag, ValueTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import ActorTag from "@components/ActorTag";
@@ -61,7 +62,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -329,9 +330,12 @@ const Entity = () => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 16 })}
-              </Text>
+              <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+                <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 16 })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Button
@@ -375,11 +379,7 @@ const Entity = () => {
     attributeColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>Empty</Tag.Label>
-            </Tag.Root>
-          );
+          return <EmptyTag label={"Description"} />;
         }
         return (
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
@@ -390,22 +390,15 @@ const Entity = () => {
       header: "Description",
     }),
     attributeColumnHelper.accessor("values", {
-      cell: (info) => {
-        const values = info.row.original.values;
-        if (values.length === 0) {
-          return (
-            <Text fontSize={"xs"} color={"gray.500"}>
-              No values
-            </Text>
-          );
-        }
-        const valueNames = values.map((v) => v.name).join(", ");
-        return (
-          <Tooltip content={valueNames} showArrow disabled={valueNames.length <= 50}>
-            <Text fontSize={"xs"}>{valueNames.length > 50 ? `${valueNames.substring(0, 50)}...` : valueNames}</Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.values}
+          max={2}
+          emptyLabel={"Values"}
+          getKey={(value) => value._id}
+          renderTag={(value) => <ValueTag value={value} />}
+        />
+      ),
       header: "Values",
     }),
   ];
@@ -415,7 +408,7 @@ const Entity = () => {
       <Flex direction={"column"} gap={"2"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+          <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
           <Heading size={"md"}>Create Entity</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -456,16 +449,16 @@ const Entity = () => {
               h={"fit-content"}
               p={"2"}
               gap={"2"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
               rounded={"md"}
             >
               <Field.Root required gap={"1"}>
                 <Field.Label
                   fontSize={"xs"}
                   fontWeight={"semibold"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  color={STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
                   Name
@@ -513,7 +506,7 @@ const Entity = () => {
                 <Field.Label
                   fontSize={"xs"}
                   fontWeight={"semibold"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  color={STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
                   Created
@@ -534,7 +527,7 @@ const Entity = () => {
                 <Field.Label
                   fontSize={"xs"}
                   fontWeight={"semibold"}
-                  color={GLOBAL_STYLES.font.secondaryHeader.color}
+                  color={STYLES.font.secondaryHeader.color}
                   ml={"0.5"}
                 >
                   Owner
@@ -549,10 +542,11 @@ const Entity = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Description
               </Text>
               <Textarea
@@ -575,13 +569,14 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
+                bg={STYLES.surface.card}
               >
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Icon size={"xs"} name={"graph"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Icon size={"xs"} name={"graph"} color={STYLES.font.secondaryHeader.color} />
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       Relationships
                     </Text>
                   </Flex>
@@ -613,12 +608,13 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
+                bg={STYLES.surface.card}
               >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon size={"xs"} name={"project"} color={GLOBAL_STYLES.project.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                  <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                     Projects
                   </Text>
                 </Flex>
@@ -643,7 +639,7 @@ const Entity = () => {
                       <EmptyState.Root>
                         <EmptyState.Content>
                           <EmptyState.Indicator>
-                            <Icon name={"project"} size={"lg"} color={GLOBAL_STYLES.project.color.default} />
+                            <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                           </EmptyState.Indicator>
                           <EmptyState.Description>No Projects</EmptyState.Description>
                         </EmptyState.Content>
@@ -663,20 +659,17 @@ const Entity = () => {
               direction={"column"}
               p={"2"}
               gap={"2"}
-              bg={GLOBAL_STYLES.card.bg}
+              minH={selectedAttributes.length > 0 ? "fit-content" : "120px"}
+              bg={STYLES.card.bg}
               rounded={"md"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              data-testid={"create-entity-attributes"}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                    ml={"0.5"}
-                  >
+                  <Icon name={"attribute"} size={"xs"} color={STYLES.template.color.icon} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Attributes
                   </Text>
                 </Flex>
@@ -692,15 +685,7 @@ const Entity = () => {
                   <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
-            </Flex>
 
-            <Flex
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-              minH={selectedAttributes.length > 0 ? "fit-content" : "120px"}
-              data-testid={"create-entity-attributes"}
-            >
               {selectedAttributes.length > 0 ? (
                 <DataTable
                   data={selectedAttributes}
@@ -748,15 +733,26 @@ const Entity = () => {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header p={"2"} fontWeight={"semibold"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+              <Dialog.Header
+                p={"2"}
+                fontWeight={"semibold"}
+                roundedTop={"md"}
+                bg={"entity.light"}
+                color={"entity.dark"}
+              >
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"entity"} size={"xs"} color={GLOBAL_STYLES.entity.color.icon} />
+                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Entities
                   </Text>
                 </Flex>
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
+                  <CloseButton
+                    size={"2xs"}
+                    top={"6px"}
+                    onClick={() => setInformationOpen(false)}
+                    colorPalette={"entity"}
+                  />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"} gap={"0"}>
@@ -764,19 +760,19 @@ const Entity = () => {
                   <Flex
                     direction={"column"}
                     gap={"1"}
-                    bg={GLOBAL_STYLES.card.bg}
+                    bg={STYLES.card.bg}
                     p={"2"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   >
                     <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                      <Icon name={"info"} size={"xs"} color={"text.subtle"} />
                       <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                         What is an Entity?
                       </Text>
                     </Flex>
-                    <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
+                    <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                       Entities represent the things you want to track: samples, datasets, protocols, instruments, and so
                       on. Each Entity stores structured metadata through Attributes, and can be linked to other Entities
                       or organised into Projects.
@@ -784,12 +780,7 @@ const Entity = () => {
                   </Flex>
 
                   <Flex direction={"column"} gap={"2"}>
-                    <Text
-                      fontSize={"xs"}
-                      fontWeight={"semibold"}
-                      color={GLOBAL_STYLES.font.secondaryHeader.color}
-                      ml={"0.5"}
-                    >
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Creation Steps
                     </Text>
                     <Flex direction={"column"} gap={"2"}>
@@ -807,7 +798,7 @@ const Entity = () => {
                           w={"18px"}
                           h={"18px"}
                           rounded={"full"}
-                          bg={"blue.500"}
+                          bg={"status.info.default"}
                           align={"center"}
                           justify={"center"}
                           shrink={"0"}
@@ -821,7 +812,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Start - Basic Details
                           </Text>
-                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                             Set the Entity's name, description, and visibility.
                           </Text>
                         </Flex>
@@ -832,7 +823,7 @@ const Entity = () => {
                         align={"start"}
                         p={"2"}
                         rounded={"md"}
-                        bg={"orange.50"}
+                        bg={"status.warning.subtle"}
                         border={"1px solid"}
                         borderColor={"orange.100"}
                       >
@@ -854,7 +845,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Relationships - Link to Other Entities
                           </Text>
-                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                             Define how this Entity relates to others and assign it to Projects.
                           </Text>
                         </Flex>
@@ -873,7 +864,7 @@ const Entity = () => {
                           w={"18px"}
                           h={"18px"}
                           rounded={"full"}
-                          bg={"green.500"}
+                          bg={"status.success.default"}
                           align={"center"}
                           justify={"center"}
                           shrink={"0"}
@@ -887,7 +878,7 @@ const Entity = () => {
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
                             Attributes - Attach Metadata
                           </Text>
-                          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                             Select Attribute Templates and add Values to describe this Entity's metadata.
                           </Text>
                         </Flex>

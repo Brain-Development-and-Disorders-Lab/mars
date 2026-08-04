@@ -18,7 +18,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import { ignoreAbort } from "@lib/util";
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -343,7 +343,7 @@ const ExportDialog = (props: ExportDialogProps) => {
       <Dialog.Positioner>
         <Dialog.Content w={["lg", "xl", "2xl"]} gap={"0"}>
           {/* Header */}
-          <Dialog.Header p={"2"} bg={GLOBAL_STYLES.dialog.header.bg} roundedTop={"md"}>
+          <Dialog.Header p={"2"} bg={"surface.emphasized"} color={"text.default"} roundedTop={"md"}>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"download"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -358,7 +358,7 @@ const ExportDialog = (props: ExportDialogProps) => {
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} gap={"2"}>
             {/* Format */}
             <Flex direction={"column"} gap={"1.5"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                 Format
               </Text>
               <Flex gap={"1"}>
@@ -387,15 +387,15 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={GLOBAL_STYLES.card.bg}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                bg={STYLES.card.bg}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !entity ? (
-                  <Text fontSize={"xs"} color={"gray.500"}>
+                  <Text fontSize={"xs"} color={"text.subtle"}>
                     Loading fields...
                   </Text>
                 ) : (
@@ -496,7 +496,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                             ))}
                           </Stack>
                         ) : (
-                          <Text fontSize={"xs"} color={"gray.500"}>
+                          <Text fontSize={"xs"} color={"text.subtle"}>
                             No projects
                           </Text>
                         )}
@@ -591,12 +591,12 @@ const ExportDialog = (props: ExportDialogProps) => {
                 border={"1px solid"}
                 borderColor={"purple.200"}
               >
-                <Icon name={"entity"} size={"sm"} color={GLOBAL_STYLES.entity.color.icon} />
+                <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
                 <Flex direction={"column"} gap={"0.5"} grow={"1"}>
                   <Text fontSize={"xs"} fontWeight={"bold"}>
                     {ids !== undefined ? `${ids.length} ${ids.length === 1 ? "Entity" : "Entities"}` : "All Entities"}
                   </Text>
-                  <Text fontSize={"xs"} color={"gray.500"}>
+                  <Text fontSize={"xs"} color={"text.subtle"}>
                     {ids !== undefined
                       ? "Selected entities will be exported"
                       : "All entities in this workspace will be exported"}
@@ -612,15 +612,15 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={GLOBAL_STYLES.card.bg}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                bg={STYLES.card.bg}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !project ? (
-                  <Text fontSize={"xs"} color={"gray.500"}>
+                  <Text fontSize={"xs"} color={"text.subtle"}>
                     Loading fields...
                   </Text>
                 ) : (
@@ -741,15 +741,15 @@ const ExportDialog = (props: ExportDialogProps) => {
                 gap={"2"}
                 p={"2"}
                 rounded={"md"}
-                bg={GLOBAL_STYLES.card.bg}
-                border={GLOBAL_STYLES.border.style}
-                borderColor={GLOBAL_STYLES.border.color}
+                bg={STYLES.card.bg}
+                border={STYLES.border.style}
+                borderColor={STYLES.border.color}
               >
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
                 {dataLoading || !template ? (
-                  <Text fontSize={"xs"} color={"gray.500"}>
+                  <Text fontSize={"xs"} color={"text.subtle"}>
                     Loading fields...
                   </Text>
                 ) : (
@@ -866,11 +866,11 @@ const ExportDialog = (props: ExportDialogProps) => {
               gap={"2"}
               p={"2"}
               rounded={"md"}
-              bg={GLOBAL_STYLES.card.bg}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
+              bg={STYLES.card.bg}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
             >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Options
               </Text>
               <Tooltip content={"History is only included in JSON exports"} disabled={format === "json"} showArrow>
@@ -904,7 +904,7 @@ const ExportDialog = (props: ExportDialogProps) => {
           </Dialog.Body>
 
           {/* Footer */}
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"} gap={"2"}>
               {dataType === "template" && (
                 <Button

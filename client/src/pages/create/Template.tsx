@@ -47,7 +47,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Template = () => {
   const posthog = usePostHog();
@@ -154,7 +154,7 @@ const Template = () => {
       <Flex direction={"column"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"template"} size={"sm"} color={GLOBAL_STYLES.template.color.icon} />
+          <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
           <Heading size={"md"}>Create Template</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -170,18 +170,13 @@ const Template = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Field.Root required gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Name
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -199,12 +194,7 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Owner
               </Field.Label>
               <Flex>
@@ -213,12 +203,7 @@ const Template = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Created
               </Field.Label>
               <Input
@@ -239,16 +224,12 @@ const Template = () => {
             p={"2"}
             gap={"2"}
             rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Field.Root required gap={"1"} h={"100%"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Description
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -269,12 +250,13 @@ const Template = () => {
             direction={"column"}
             p={"2"}
             gap={"2"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
             rounded={"md"}
           >
             <Field.Root>
-              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Values
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -298,17 +280,23 @@ const Template = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"2xs"} top={"6px"} onClick={() => setInformationOpen(false)} />
+              <CloseButton
+                size={"2xs"}
+                top={"6px"}
+                onClick={() => setInformationOpen(false)}
+                colorPalette={"template"}
+              />
             </Dialog.CloseTrigger>
             <Dialog.Header
               p={"2"}
               fontWeight={"semibold"}
               fontSize={"xs"}
-              bg={GLOBAL_STYLES.dialog.header.bg}
+              bg={"template.light"}
+              color={"template.dark"}
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} color={GLOBAL_STYLES.template.color.icon} />
+                <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                 Template Attributes
               </Flex>
             </Dialog.Header>
@@ -317,19 +305,19 @@ const Template = () => {
                 <Flex
                   direction={"column"}
                   gap={"1"}
-                  bg={GLOBAL_STYLES.card.bg}
+                  bg={STYLES.card.bg}
                   p={"2"}
                   rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
+                  border={STYLES.border.style}
+                  borderColor={STYLES.border.color}
                 >
                   <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                    <Icon name={"info"} size={"xs"} color={"text.subtle"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                       What is a Template?
                     </Text>
                   </Flex>
-                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
+                  <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                     Templates define a set of metadata fields that can be applied to Entities during creation. Use them
                     to pre-populate Attributes and keep metadata consistent across similar Entities.
                   </Text>
@@ -346,7 +334,7 @@ const Template = () => {
                       align={"center"}
                       p={"2"}
                       rounded={"md"}
-                      bg={"orange.50"}
+                      bg={"status.warning.subtle"}
                       border={"1px solid"}
                       borderColor={"orange.100"}
                       flex={"1"}
@@ -357,7 +345,7 @@ const Template = () => {
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Date
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           A point in time.
                         </Text>
                       </Flex>
@@ -379,7 +367,7 @@ const Template = () => {
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Text
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           Free-form text content.
                         </Text>
                       </Flex>
@@ -401,7 +389,7 @@ const Template = () => {
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Number
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           A numerical measurement.
                         </Text>
                       </Flex>
@@ -423,7 +411,7 @@ const Template = () => {
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           URL
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           A link to a web resource.
                         </Text>
                       </Flex>
@@ -440,12 +428,12 @@ const Template = () => {
                       flex={"1"}
                       minW={"200px"}
                     >
-                      <Icon name={"entity"} color={"purple.400"} size={"sm"} />
+                      <Icon name={"entity"} color={"entity.default"} size={"sm"} />
                       <Flex direction={"column"} gap={"0"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Entity
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           A reference to another Entity.
                         </Text>
                       </Flex>
@@ -462,12 +450,12 @@ const Template = () => {
                       flex={"1"}
                       minW={"200px"}
                     >
-                      <Icon name={"v_select"} color={"teal.400"} size={"sm"} />
+                      <Icon name={"v_select"} color={"template.default"} size={"sm"} />
                       <Flex direction={"column"} gap={"0"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Select
                         </Text>
-                        <Text fontSize={"xs"} color={"gray.500"}>
+                        <Text fontSize={"xs"} color={"text.subtle"}>
                           A choice from a defined set of options.
                         </Text>
                       </Flex>

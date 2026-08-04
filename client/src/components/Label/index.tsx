@@ -20,7 +20,7 @@ const Warning = (props: { text: string }) => {
   return (
     <Tag.Root colorPalette={"orange"} w={"fit-content"} alignContent={"center"}>
       <Tag.StartElement alignContent={"center"}>
-        <Icon name={"warning"} size={"xs"} color={"orange.600"} />
+        <Icon name={"warning"} size={"xs"} color={"status.warning.emphasized"} />
       </Tag.StartElement>
       <Tag.Label fontSize={"xs"}>{props.text}</Tag.Label>
     </Tag.Root>

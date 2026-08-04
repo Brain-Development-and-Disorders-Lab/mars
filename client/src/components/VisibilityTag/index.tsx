@@ -16,7 +16,7 @@ import { VisibilityTagProps } from "@types";
 import consola from "consola";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
@@ -39,7 +39,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       align={"center"}
       h={"52px"}
       w={"fit-content"}
-      border={GLOBAL_STYLES.border.style}
+      border={STYLES.border.style}
       borderColor={"green.200"}
       rounded={"md"}
       overflow={"hidden"}
@@ -61,11 +61,11 @@ const VisibilityTag = (props: VisibilityTagProps) => {
 
       <Flex direction={"row"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
         <Flex direction={"column"} gap={"0"} alignSelf={"center"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {props.isPublic ? "Public" : "Private"}
           </Text>
           {isBreakpointActive("xl", "up") && (
-            <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.400"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"text.faint"}>
               {props.isPublic ? "Everyone" : "Workspace Users only"}
             </Text>
           )}

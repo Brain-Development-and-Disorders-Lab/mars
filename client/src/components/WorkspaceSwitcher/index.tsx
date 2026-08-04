@@ -201,17 +201,22 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
             p={"0"}
             size={"xs"}
             rounded={"md"}
-            bg={"white"}
-            variant={"surface"}
+            bg={"transparent"}
+            color={"nav.text"}
+            border={"1px solid"}
+            borderColor={"nav.textMuted"}
+            _hover={{ bg: "nav.hoverBg" }}
             onClick={() => setOpen(!open)}
           >
-            <Flex direction={"row"} gap={"1"} align={"center"} p={"1"} w={"100%"}>
-              <Icon name={"workspace"} size={"sm"} />
+            <Flex direction={"row"} gap={"1"} align={"center"} p={"1"} w={"100%"} ml={"0.5"}>
+              <Icon name={"workspace"} size={"xs"} color={"nav.text"} />
               <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"}>
-                {_.truncate(label, { length: 18 })}
+                {_.truncate(label, { length: 22 })}
               </Text>
               <Spacer />
-              <Icon name={"c_expand"} size={"sm"} />
+              <Flex mr={"1"}>
+                <Icon name={open ? "c_up" : "c_down"} size={"xs"} color={"nav.text"} />
+              </Flex>
             </Flex>
           </Button>
         </Menu.Trigger>
@@ -243,8 +248,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                     >
                       <Flex direction={"row"} gap={"2"} w={"100%"} align={"center"}>
                         <Tooltip
-                          disabled={workspace === accessible._id}
-                          content={"Switch to " + accessible.name}
+                          content={`${workspace === accessible._id ? "Active: " : "Switch to: "} ${accessible.name}`}
                           showArrow
                         >
                           <Text fontSize={"xs"}>{_.truncate(accessible.name, { length: 24 })}</Text>
@@ -254,10 +258,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
 
                         {workspace === accessible._id && (
                           <Flex gap={"1"} align={"center"}>
-                            <Text color={"green.600"} fontWeight={"semibold"}>
-                              Active
-                            </Text>
-                            <Icon name={"check"} color={"green.600"} />
+                            <Icon name={"check"} color={"green"} />
                           </Flex>
                         )}
                       </Flex>

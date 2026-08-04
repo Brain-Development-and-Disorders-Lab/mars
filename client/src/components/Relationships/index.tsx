@@ -16,12 +16,12 @@ import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 export const RELATIONSHIP_TYPE_ARROW_COLOR: Record<RelationshipType, string> = {
-  parent: "orange.600",
-  child: "yellow.400",
-  general: "cyan.600",
+  parent: "relationship.parent",
+  child: "relationship.child",
+  general: "relationship.general",
 };
 
 export const RELATIONSHIP_TYPE_ARROW_ICON: Record<RelationshipType, IconNames> = {
@@ -31,9 +31,9 @@ export const RELATIONSHIP_TYPE_ARROW_ICON: Record<RelationshipType, IconNames> =
 };
 
 export const RELATIONSHIP_TYPE_PALETTE: Record<RelationshipType, string> = {
-  parent: "orange",
-  child: "yellow",
-  general: "cyan",
+  parent: "blue",
+  child: "teal",
+  general: "purple",
 };
 
 const Relationships = (props: RelationshipsProps) => {
@@ -101,8 +101,8 @@ const Relationships = (props: RelationshipsProps) => {
       {props.relationships.length > 0 ? (
         <Flex
           direction={"column"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
           rounded={"md"}
           overflow={"hidden"}
         >
@@ -117,7 +117,7 @@ const Relationships = (props: RelationshipsProps) => {
                 px={"2"}
                 py={"1.5"}
                 borderBottom={index < props.relationships.length - 1 ? "1px solid" : "none"}
-                borderColor={"gray.200"}
+                borderColor={"border.subtle"}
                 bg={"white"}
                 _hover={{ bg: "gray.25" }}
                 wrap={"wrap"}

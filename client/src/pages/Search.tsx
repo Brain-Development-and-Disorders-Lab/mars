@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -10,7 +10,6 @@ import {
   Input,
   Spinner,
   Tabs,
-  Tag,
   Text,
   Checkbox,
   Collapsible,
@@ -20,8 +19,11 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
+import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import { CreatedCell } from "@components/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -51,10 +53,13 @@ import slugify from "slugify";
 import dayjs from "dayjs";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
+
+// Stable reference so `DataTable` (memoized) doesn't see a new prop on every render
+const EMPTY_SELECTED_ROWS = {};
 
 const Search = () => {
   const posthog = usePostHog();
@@ -320,112 +325,109 @@ const Search = () => {
   }, [breakpoint]);
 
   const searchResultColumnHelper = createColumnHelper<EntityModel>();
-  const searchResultColumns = [
-    searchResultColumnHelper.accessor("name", {
-      cell: (info) => (
-        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 48 })}
-            </Text>
-          </Tooltip>
-          <Button
-            size="2xs"
-            mx={"1"}
-            variant="subtle"
-            colorPalette="gray"
-            aria-label={"View Entity"}
-            onClick={() => navigate(`/entities/${info.row.original._id}`)}
-          >
-            View
-            <Icon name={"a_right"} size={"xs"} />
-          </Button>
-        </Flex>
-      ),
-      header: "Name",
-      meta: {
-        minWidth: 400,
-      },
-    }),
-    searchResultColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
-            <Text fontSize={"xs"} lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 64 })}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Description",
-      enableHiding: true,
-      meta: {
-        minWidth: 400,
-      },
-    }),
-    searchResultColumnHelper.accessor("attributes", {
-      cell: (info) => {
-        return (
-          <Tag.Root colorPalette={info.getValue().length > 0 ? "green" : "orange"}>
-            <Tag.Label fontSize={"xs"}>{info.getValue().length > 0 ? info.getValue().length : "None"}</Tag.Label>
-          </Tag.Root>
-        );
-      },
-      header: "Attributes",
-      meta: {
-        minWidth: 120,
-        maxWidth: 120,
-      },
-    }),
-    searchResultColumnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-            {dayjs(info.getValue()).fromNow()}
-          </Text>
-        );
-      },
-      header: "Created",
-      meta: {
-        minWidth: 120,
-        maxWidth: 120,
-      },
-    }),
-    searchResultColumnHelper.accessor("archived", {
-      cell: (info) => {
-        return (
-          <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Icon
-              name={info.getValue() ? "archive" : "check"}
-              color={info.getValue() ? "gray.500" : "green.600"}
-              size={"xs"}
-            />
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green.600"}>
-              {info.getValue() ? "Archived" : "Active"}
-            </Text>
+  const searchResultColumns = useMemo(
+    () => [
+      searchResultColumnHelper.accessor("name", {
+        cell: (info) => (
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"entity"} color={STYLES.entity.color.default} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 48 })}
+                </Text>
+              </Flex>
+            </Tooltip>
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="subtle"
+              colorPalette="gray"
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} size={"xs"} />
+            </Button>
           </Flex>
-        );
-      },
-      header: "Status",
-      meta: {
-        minWidth: 120,
-        maxWidth: 120,
-      },
-    }),
-    searchResultColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
-      header: "Owner",
-    }),
-  ];
+        ),
+        header: "Name",
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("description", {
+        cell: (info) => {
+          if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+            return <EmptyTag label={"Description"} />;
+          }
+          return (
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
+              <Text fontSize={"xs"} lineClamp={1}>
+                {_.truncate(info.getValue(), { length: 64 })}
+              </Text>
+            </Tooltip>
+          );
+        },
+        header: "Description",
+        enableHiding: true,
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("attributes", {
+        cell: (info) => (
+          <FieldTagList
+            items={info.row.original.attributes}
+            max={1}
+            emptyLabel={"Attributes"}
+            getKey={(attribute) => attribute._id}
+            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+          />
+        ),
+        header: "Attributes",
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("created", {
+        cell: (info) => <CreatedCell value={info.getValue()} />,
+        header: "Created",
+        meta: {
+          minWidth: 120,
+          maxWidth: 120,
+        },
+      }),
+      searchResultColumnHelper.accessor("archived", {
+        cell: (info) => {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Icon
+                name={info.getValue() ? "archive" : "check"}
+                color={info.getValue() ? "gray.500" : "green"}
+                size={"xs"}
+              />
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green"}>
+                {info.getValue() ? "Archived" : "Active"}
+              </Text>
+            </Flex>
+          );
+        },
+        header: "Status",
+        meta: {
+          minWidth: 120,
+          maxWidth: 120,
+        },
+      }),
+      searchResultColumnHelper.accessor("owner", {
+        cell: (info) => {
+          return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        },
+        header: "Owner",
+      }),
+    ],
+    [navigate],
+  );
 
   const EXPORT_ENTITIES = gql`
     query ExportEntities($entities: [String], $format: String, $includeAttributes: Boolean) {
@@ -436,54 +438,57 @@ const Search = () => {
     fetchPolicy: "network-only",
   });
 
-  const searchResultActions: DataTableAction[] = [
-    {
-      label: (count) => `Export selection as CSV (${count})`,
-      icon: "download",
-      action: async (table, rows) => {
-        const toExport: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
-        }
+  const searchResultActions: DataTableAction[] = useMemo(
+    () => [
+      {
+        label: (count) => `Export selection as CSV (${count})`,
+        icon: "download",
+        action: async (table, rows) => {
+          const toExport: string[] = [];
+          for (const rowIndex of Object.keys(rows)) {
+            toExport.push(table.getRow(rowIndex).original._id);
+          }
 
-        const response = await exportEntities({
-          variables: { entities: toExport, format: "csv", includeAttributes: true },
-        }).catch(ignoreAbort);
+          const response = await exportEntities({
+            variables: { entities: toExport, format: "csv", includeAttributes: true },
+          }).catch(ignoreAbort);
 
-        if (response?.data?.exportEntities) {
-          FileSaver.saveAs(
-            new Blob([response.data.exportEntities]),
-            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
-          );
-        }
+          if (response?.data?.exportEntities) {
+            FileSaver.saveAs(
+              new Blob([response.data.exportEntities]),
+              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
+            );
+          }
 
-        table.resetRowSelection();
+          table.resetRowSelection();
+        },
       },
-    },
-    {
-      label: (count) => `Export selection as JSON (${count})`,
-      icon: "download",
-      action: async (table, rows: any) => {
-        const toExport: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
-        }
+      {
+        label: (count) => `Export selection as JSON (${count})`,
+        icon: "download",
+        action: async (table, rows: any) => {
+          const toExport: string[] = [];
+          for (const rowIndex of Object.keys(rows)) {
+            toExport.push(table.getRow(rowIndex).original._id);
+          }
 
-        const response = await exportEntities({
-          variables: { entities: toExport, format: "json", includeAttributes: true },
-        }).catch(ignoreAbort);
+          const response = await exportEntities({
+            variables: { entities: toExport, format: "json", includeAttributes: true },
+          }).catch(ignoreAbort);
 
-        if (response?.data?.exportEntities) {
-          FileSaver.saveAs(
-            new Blob([response.data.exportEntities]),
-            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
-          );
-        }
+          if (response?.data?.exportEntities) {
+            FileSaver.saveAs(
+              new Blob([response.data.exportEntities]),
+              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
+            );
+          }
 
-        table.resetRowSelection();
+          table.resetRowSelection();
+        },
       },
-    },
-  ];
+    ],
+    [exportEntities],
+  );
 
   const initialAdvancedQuery: SearchQuery = { combinator: "and", rules: [] };
 
@@ -597,14 +602,14 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"row"} p={"1"} rounded={"md"} bg={"white"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
+      <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"search"} size={"sm"} />
             <Heading size={"xl"}>Search</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
               {workspaceName}
             </Text>
           </SkeletonText>
@@ -625,18 +630,30 @@ const Search = () => {
             value={activeTab}
             onValueChange={(details) => onTabChange(details.value as "text" | "advanced")}
           >
-            <Flex bg={"gray.100"} rounded={"md"} p={"0.5"} gap={"0.5"} w={"fit-content"} mb={"1"}>
+            <Flex
+              bg={"surface.muted"}
+              rounded={"md"}
+              p={"0.5"}
+              gap={"0.5"}
+              w={"fit-content"}
+              mb={"1"}
+              border={"1px solid"}
+              borderColor={"border.default"}
+            >
               <Button
                 size={"xs"}
                 rounded={"sm"}
                 variant={"ghost"}
                 colorPalette={"gray"}
                 bg={activeTab === "text" ? "white" : "transparent"}
+                color={"text.default"}
+                fontWeight={activeTab === "text" ? "semibold" : "medium"}
                 shadow={activeTab === "text" ? "xs" : "none"}
+                _hover={{ bg: activeTab === "text" ? "white" : "surface.card" }}
                 disabled={isSearching}
                 onClick={() => onTabChange("text")}
               >
-                <Icon name={"text"} size={"xs"} />
+                <Icon name={"search_text"} size={"xs"} />
                 Text
               </Button>
               <Button
@@ -645,7 +662,10 @@ const Search = () => {
                 variant={"ghost"}
                 colorPalette={"gray"}
                 bg={activeTab === "advanced" ? "white" : "transparent"}
+                color={"text.default"}
+                fontWeight={activeTab === "advanced" ? "semibold" : "medium"}
                 shadow={activeTab === "advanced" ? "xs" : "none"}
+                _hover={{ bg: activeTab === "advanced" ? "white" : "surface.card" }}
                 disabled={isSearching}
                 onClick={() => onTabChange("advanced")}
               >
@@ -664,8 +684,9 @@ const Search = () => {
                     gap={"2"}
                     p={"2"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
+                    bg={"surface.card"}
                   >
                     <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
                       <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -697,7 +718,7 @@ const Search = () => {
                               fontSize={"xs"}
                               fontWeight={"semibold"}
                               ml={"0.5"}
-                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                              color={STYLES.font.secondaryHeader.color}
                             >
                               Search Options
                             </Text>
@@ -719,7 +740,7 @@ const Search = () => {
                               fontSize={"xs"}
                               fontWeight={"semibold"}
                               ml={"0.5"}
-                              color={GLOBAL_STYLES.font.secondaryHeader.color}
+                              color={STYLES.font.secondaryHeader.color}
                             >
                               Entity Filters
                             </Text>
@@ -732,7 +753,7 @@ const Search = () => {
                                     fontSize={"xs"}
                                     fontWeight={"semibold"}
                                     ml={"0.5"}
-                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                    color={STYLES.font.secondaryHeader.color}
                                   >
                                     Start
                                   </Text>
@@ -754,7 +775,7 @@ const Search = () => {
                                     fontSize={"xs"}
                                     fontWeight={"semibold"}
                                     ml={"0.5"}
-                                    color={GLOBAL_STYLES.font.secondaryHeader.color}
+                                    color={STYLES.font.secondaryHeader.color}
                                   >
                                     End
                                   </Text>
@@ -859,14 +880,14 @@ const Search = () => {
 
                 {/* Search input and submit */}
                 <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"purple.400"} />}>
+                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"ai.default"} />}>
                     <Input
                       size={"xs"}
                       rounded={"md"}
                       value={query}
                       placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
-                      borderColor={isAISearch ? "purple.400" : undefined}
-                      outlineColor={isAISearch ? "purple.400" : undefined}
+                      background={"white"}
+                      className={isAISearch ? "ai-search-border" : undefined}
                       onChange={(event) => setQuery(event.target.value)}
                       onKeyUp={(event) => {
                         if (event.key === "Enter" && query !== "") runSearch();
@@ -878,7 +899,7 @@ const Search = () => {
                       <Button
                         size={"xs"}
                         rounded={"md"}
-                        colorPalette={isAISearch ? "purple" : "gray"}
+                        colorPalette={isAISearch ? "ai" : "gray"}
                         variant={isAISearch ? "solid" : "outline"}
                         disabled={isSearching}
                         onClick={() => setIsAISearch((prev) => !prev)}
@@ -892,7 +913,7 @@ const Search = () => {
                     aria-label={"Search"}
                     size={"xs"}
                     rounded={"md"}
-                    colorPalette={isAISearch ? "purple" : "green"}
+                    colorPalette={isAISearch ? "ai" : "green"}
                     disabled={query === "" || isTranslating}
                     loading={isTranslating || isSearching}
                     loadingText={"Searching..."}
@@ -940,7 +961,7 @@ const Search = () => {
           <Flex gap={"1"} p={"0"} w={"100%"}>
             {isSearching && (
               <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
-                <Spinner size={"lg"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
+                <Spinner size={"lg"} color={STYLES.font.secondaryHeader.color} />
               </Flex>
             )}
 
@@ -955,7 +976,7 @@ const Search = () => {
                     <DataTable
                       columns={searchResultColumns}
                       visibleColumns={visibleColumns}
-                      selectedRows={{}}
+                      selectedRows={EMPTY_SELECTED_ROWS}
                       data={results}
                       showPagination
                       showSelection
@@ -964,7 +985,7 @@ const Search = () => {
                   </>
                 ) : (
                   <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
-                    <Text fontSize={"sm"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                       No results found
                     </Text>
                   </Flex>

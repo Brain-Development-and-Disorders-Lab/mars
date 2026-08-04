@@ -42,6 +42,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
       overflowY={"auto"}
       overflowX={"hidden"}
       p={"1.5"}
+      bg={"surface.subtle"}
     >
       {/* Toast notification provider */}
       <Toaster />
@@ -119,10 +120,7 @@ const Page: FC = () => {
           minW={{ lg: "200px" }}
           h={{ base: "8vh", lg: "100%" }}
           position={"fixed"}
-          borderRight={"1px"}
-          borderBottom={"1px"}
-          borderColor={"gray.300"}
-          bg={"white"}
+          bg={"nav.bg"}
           zIndex={2}
         >
           <Navigation />
@@ -137,6 +135,7 @@ const Page: FC = () => {
           ml={{ base: "0", lg: "200px" }}
           mt={{ base: "8vh", lg: "0" }}
           overflowX="hidden"
+          bg={"surface.subtle"}
         >
           {/* Main content components */}
           <ErrorBoundary>

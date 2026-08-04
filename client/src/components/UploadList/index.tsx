@@ -34,7 +34,7 @@ const FileUploadList = () => {
               <Tag.Root key={getFileExtension(file.type)} size={"sm"} colorPalette={"gray"} variant={"outline"}>
                 <Tag.Label fontSize={"xs"}>{getFileExtension(file.type)}</Tag.Label>
               </Tag.Root>
-              <Text fontSize={"xs"} color={"gray.600"}>
+              <Text fontSize={"xs"} color={"text.muted"}>
                 <FormatByte value={file.size} />
               </Text>
             </Flex>
@@ -43,7 +43,7 @@ const FileUploadList = () => {
           <Spacer />
 
           {/* `IconButton` to remove uploaded file */}
-          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"}>
+          <IconButton size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => fileUpload.clearFiles()}>
             <FileUpload.ItemDeleteTrigger asChild>
               <Icon name={"delete"} size={"xs"} />
             </FileUpload.ItemDeleteTrigger>

@@ -25,7 +25,7 @@ import { getValueTypeIconProps, isValueEqual } from "@lib/util";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
   const [templateAttribute, setTemplateAttribute] = useState<AttributeModel>();
@@ -234,11 +234,11 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
       rounded={"md"}
       w={"50%"}
       h={"100%"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
     >
       <Flex direction={"row"} justify={"space-between"} align={"center"}>
-        <Text fontWeight={"semibold"} fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontWeight={"semibold"} fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {props.label}
         </Text>
         {props.isDifferent && (
@@ -258,22 +258,22 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
       <Flex direction={"column"} gap={"1"} rounded={"sm"} bg={"white"}>
         {props.isDifferent && (
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Text fontSize={"xs"} color={"gray.500"}>
+            <Text fontSize={"xs"} color={"text.subtle"}>
               Current Entity:
             </Text>
             <Tooltip disabled={props.currentValue.length < 24} content={props.currentValue} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"status.warning.emphasized"}>
                 {_.truncate(props.currentValue, { length: 24 })}
               </Text>
             </Tooltip>
 
             <Spacer />
 
-            <Icon name={"edit"} color={"orange.600"} size={"xs"} />
+            <Icon name={"edit"} color={"status.warning.emphasized"} size={"xs"} />
           </Flex>
         )}
         <Flex direction={"row"} gap={"1"} align={"center"}>
-          <Text fontSize={"xs"} color={"gray.500"}>
+          <Text fontSize={"xs"} color={"text.subtle"}>
             Template:
           </Text>
           <Tooltip disabled={props.originalValue.length < 24} content={props.originalValue} showArrow>
@@ -393,7 +393,8 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
             <Dialog.Header
               p={"1"}
               flexShrink={0}
-              bg={GLOBAL_STYLES.dialog.header.bg}
+              bg={"template.light"}
+              color={"template.dark"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
@@ -410,7 +411,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"template"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -418,8 +419,8 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
               {loadingComparison ? (
                 <Flex w={"100%"} align={"center"} justify={"center"} minH={"240px"}>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
-                    <Spinner color={"gray.600"} />
-                    <Text fontWeight={"semibold"} color={"gray.600"} fontSize={"xs"}>
+                    <Spinner color={"text.muted"} />
+                    <Text fontWeight={"semibold"} color={"text.muted"} fontSize={"xs"}>
                       Preparing Comparison
                     </Text>
                   </Flex>
@@ -434,7 +435,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                   bg={"red.100"}
                   p={"4"}
                 >
-                  <Text fontWeight={"semibold"} fontSize={"xs"} color={"red.600"}>
+                  <Text fontWeight={"semibold"} fontSize={"xs"} color={"status.danger.emphasized"}>
                     Unable to load Template
                   </Text>
                 </Flex>
@@ -467,10 +468,10 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                     gap={"1"}
                     p={"2"}
                     rounded={"md"}
-                    border={GLOBAL_STYLES.border.style}
-                    borderColor={GLOBAL_STYLES.border.color}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.border.color}
                   >
-                    <Text fontWeight={"semibold"} fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                    <Text fontWeight={"semibold"} fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                       Values
                     </Text>
 
@@ -482,11 +483,11 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                         p={"2"}
                         rounded={"md"}
                         border={"1px solid"}
-                        borderColor={GLOBAL_STYLES.border.color}
+                        borderColor={STYLES.border.color}
                         gap={"2"}
                       >
                         <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.entity.color.icon}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.entity.color.icon}>
                             Current Entity
                           </Text>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -503,7 +504,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={unchangedValues.length === 0}
                         >
                           {unchangedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"}>
+                            <Text fontSize={"xs"} color={"text.subtle"}>
                               No Unmodified Values
                             </Text>
                           )}
@@ -519,7 +520,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               justify={"space-between"}
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
                                 <Icon
@@ -544,7 +545,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={modifiedValues.length === 0}
                         >
                           {modifiedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
+                            <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Modified Values
                             </Text>
                           )}
@@ -560,7 +561,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               borderLeftColor={"orange.400"}
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
                                 <Icon
@@ -573,14 +574,38 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                                 </Text>
                               </Flex>
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
-                                <Tooltip disabled={entity.data.length < 24} content={entity.data} showArrow>
+                                {entity.type === "entity" && (
+                                  <Flex direction={"row"} gap={"1"}>
+                                    <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
+                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                      {JSON.parse(entity.data)["name"]}
+                                    </Text>
+                                  </Flex>
+                                )}
+                                {entity.type === "select" && (
+                                  <Flex direction={"row"} gap={"1"}>
+                                    <Icon name={"v_select"} color={"teal.400"} size={"xs"} />
+                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                                      {JSON.parse(entity.data)["selected"]}
+                                    </Text>
+                                    <Text fontSize={"xs"}>
+                                      {_.truncate(`Options: ${JSON.parse(entity.data)["options"].join(", ")}`, {
+                                        length: 24,
+                                      })}
+                                    </Text>
+                                  </Flex>
+                                )}
+                                {(entity.type === "text" ||
+                                  entity.type === "number" ||
+                                  entity.type === "date" ||
+                                  entity.type === "url") && (
                                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {_.truncate(entity.data, { length: 24 })}
+                                    {entity.data}
                                   </Text>
-                                </Tooltip>
+                                )}
                               </Flex>
                             </Flex>
                           ))}
@@ -595,7 +620,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={entityOnlyValues.length === 0}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
+                            <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
                           )}
@@ -603,7 +628,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
-                              color={"gray.600"}
+                              color={"text.muted"}
                               borderBottom={"1px"}
                               borderColor={"purple.200"}
                               pb={"0.5"}
@@ -624,7 +649,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               justify={"space-between"}
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
                                 <Icon
@@ -659,12 +684,12 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                         w={"50%"}
                         p={"2"}
                         rounded={"md"}
-                        border={GLOBAL_STYLES.border.style}
-                        borderColor={GLOBAL_STYLES.border.color}
+                        border={STYLES.border.style}
+                        borderColor={STYLES.border.color}
                         gap={"2"}
                       >
                         <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.template.color.icon}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.template.color.icon}>
                             Template
                           </Text>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -681,7 +706,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={unchangedValues.length === 0}
                         >
                           {unchangedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"}>
+                            <Text fontSize={"xs"} color={"text.subtle"}>
                               No Unmodified Values
                             </Text>
                           )}
@@ -697,7 +722,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               justify={"space-between"}
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
                                 <Icon
@@ -722,7 +747,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={modifiedValues.length === 0}
                         >
                           {modifiedValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
+                            <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Modified Values
                             </Text>
                           )}
@@ -739,7 +764,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             >
                               <Flex direction={"row"} justify={"space-between"} gap={"0.5"}>
                                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                                  <Text fontSize={"xs"} color={"gray.500"}>
+                                  <Text fontSize={"xs"} color={"text.subtle"}>
                                     Value:
                                   </Text>
                                   <Icon
@@ -763,7 +788,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                                 </Checkbox.Root>
                               </Flex>
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
                                 <Tooltip disabled={template.data.length < 24} content={template.data} showArrow>
@@ -785,7 +810,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                           disabled={templateOnlyValues.length === 0}
                         >
                           {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
-                            <Text fontSize={"xs"} color={"gray.500"} ml={"0.5"}>
+                            <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
                           )}
@@ -793,7 +818,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
-                              color={"gray.600"}
+                              color={"text.muted"}
                               borderBottom={"1px"}
                               borderColor={"teal.200"}
                               pb={"0.5"}
@@ -814,7 +839,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                               justify={"space-between"}
                             >
                               <Flex direction={"row"} gap={"1"} align={"center"}>
-                                <Text fontSize={"xs"} color={"gray.500"}>
+                                <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
                                 <Icon
@@ -849,9 +874,9 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
             <Dialog.Footer
               p={"1"}
               flexShrink={0}
-              bg={GLOBAL_STYLES.dialog.footer.bg}
+              bg={STYLES.dialog.footer.bg}
               borderTop={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"border.subtle"}
               roundedBottom={"md"}
             >
               <Flex direction={"row"} justify={"space-between"} gap={"2"} w={"100%"}>
@@ -888,7 +913,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
         }}
       >
         <Flex direction={"column"} gap={"2"}>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"orange.600"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"status.warning.emphasized"}>
             These operations are potentially destructive!
           </Text>
           <Text fontSize={"xs"}>

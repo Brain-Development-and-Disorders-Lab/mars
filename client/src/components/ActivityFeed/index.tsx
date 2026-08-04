@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 
 // Existing and custom components
 import { Flex, Text, Button, Avatar, Stack, EmptyState, Box } from "@chakra-ui/react";
@@ -7,6 +7,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
 import ActivityGraph from "@components/ActivityGraph";
+import RelativeTime from "@components/RelativeTime";
 
 // Existing and custom types
 import { ActivityModel, ActivityFeedProps } from "@types";
@@ -16,15 +17,16 @@ import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+
+// Hooks
+import { useWatchQuery } from "@hooks/useWatchQuery";
+import { useTick } from "@hooks/useTick";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-dayjs.extend(relativeTime);
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const GET_ACTIVITY = gql`
   query GetActivity($limit: Int) {
@@ -43,26 +45,23 @@ const GET_ACTIVITY = gql`
   }
 `;
 
+/**
+ * Isolated so only this text re-renders on each tick, not the whole feed
+ */
+const LastUpdated = () => {
+  useTick();
+
+  return (
+    <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
+      {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
+    </Text>
+  );
+};
+
 const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFeedProps) => {
   const navigate = useNavigate();
-  const [timestampUpdate, setTimestampUpdate] = useState(Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimestampUpdate(Date.now());
-    }, 5000); // Update every 5 seconds
 
-    return () => clearInterval(interval);
-  }, []);
-
-  const { data } = useQuery<{
-    activity: ActivityModel[];
-  }>(GET_ACTIVITY, {
-    variables: {
-      limit: 200,
-    },
-    fetchPolicy: "network-only",
-    pollInterval: 5000,
-  });
+  const { data } = useWatchQuery<{ activity: ActivityModel[] }>(GET_ACTIVITY, { limit: 200 });
 
   const activities = data?.activity ?? activitiesProp ?? [];
 
@@ -72,7 +71,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
   }, [activities, feedLimit]);
 
   return (
-    <Flex direction={"column"} data-timestamp-update={timestampUpdate} gap={"2"}>
+    <Flex direction={"column"} gap={"2"}>
       {/* Activity heading */}
       <Flex id={"recentActivityHeader"} align={"center"} gap={"2"} ml={"0.5"} justify={"space-between"}>
         <Flex align={"center"} gap={"1"} py={"1.5"}>
@@ -82,8 +81,8 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
           </Text>
         </Flex>
         <Flex align={"center"} gap={"1"} mr={"0.5"}>
-          <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"green.500"} className="live-indicator" />
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
+          <Box w={"8px"} h={"8px"} borderRadius={"full"} bg={"status.success.default"} className="live-indicator" />
+          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Live
           </Text>
         </Flex>
@@ -93,9 +92,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
           Last Update:
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-          {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
-        </Text>
+        <LastUpdated />
       </Flex>
 
       {/* Activity Chart */}
@@ -103,7 +100,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
         <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
           Activity Range:
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
           {dayjs().subtract(6, "day").format("MMM D, YYYY")} - {dayjs().format("MMM D, YYYY")}
         </Text>
       </Flex>
@@ -129,21 +126,37 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                   )}
                   <Flex direction={"column"} w={"100%"} gap={"0.5"}>
                     <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
-                      <Text fontSize={"xs"}>{activity.details}:</Text>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-                        {dayjs(activity.timestamp).fromNow()}
+                      <Text fontSize={"xs"}>
+                        {activity.details}
+                        {activity.target.type !== "workspace" ? ":" : ""}
                       </Text>
-                    </Flex>
-                    <Flex>
-                      <Linky
-                        id={activity.target._id}
-                        type={activity.target.type}
-                        fallback={activity.target.name}
-                        justify={"left"}
-                        size={"xs"}
-                        truncate={20}
+                      <RelativeTime
+                        value={activity.timestamp}
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={"text.subtle"}
                       />
                     </Flex>
+                    {activity.target.type !== "workspace" && (
+                      <Flex>
+                        <Linky
+                          id={activity.target._id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                          justify={"left"}
+                          size={"xs"}
+                          truncate={20}
+                        />
+                      </Flex>
+                    )}
+                    {activity.target.type === "workspace" && (
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Icon name={"workspace"} size={"xs"} />
+                        <Text fontWeight={"semibold"} fontSize={"xs"}>
+                          {activity.target.name}
+                        </Text>
+                      </Flex>
+                    )}
                   </Flex>
                 </Flex>
               );

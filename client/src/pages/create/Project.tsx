@@ -49,7 +49,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const Project = () => {
   const posthog = usePostHog();
@@ -169,7 +169,7 @@ const Project = () => {
       <Flex direction={"column"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"project"} size={"sm"} color={GLOBAL_STYLES.project.color.icon} />
+          <Icon name={"project"} size={"sm"} color={STYLES.project.color.icon} />
           <Heading size={"md"}>Create Project</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
@@ -185,18 +185,13 @@ const Project = () => {
             flex={{ base: "0 0 100%", md: "1" }}
             p={"2"}
             gap={"2"}
-            bg={GLOBAL_STYLES.card.bg}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            bg={STYLES.card.bg}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             rounded={"md"}
           >
             <Field.Root required gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Name
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -216,12 +211,7 @@ const Project = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Owner
               </Field.Label>
               <Flex>
@@ -230,12 +220,7 @@ const Project = () => {
             </Field.Root>
 
             <Field.Root gap={"1"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Created
               </Field.Label>
               <Input
@@ -256,16 +241,12 @@ const Project = () => {
             p={"2"}
             gap={"2"}
             rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Field.Root required gap={"1"} h={"100%"}>
-              <Field.Label
-                fontSize={"xs"}
-                fontWeight={"semibold"}
-                ml={"0.5"}
-                color={GLOBAL_STYLES.font.secondaryHeader.color}
-              >
+              <Field.Label fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                 Description
                 <Field.RequiredIndicator />
               </Field.Label>
@@ -287,11 +268,12 @@ const Project = () => {
             p={"2"}
             gap={"2"}
             rounded={"md"}
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+            bg={STYLES.surface.card}
           >
             <Flex justify={"space-between"} align={"center"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Entities
               </Text>
               <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setEntitiesOpen(true)}>
@@ -314,7 +296,7 @@ const Project = () => {
                 <EmptyState.Root>
                   <EmptyState.Content>
                     <EmptyState.Indicator>
-                      <Icon name={"entity"} size={"lg"} color={GLOBAL_STYLES.entity.color.default} />
+                      <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
                     </EmptyState.Indicator>
                     <EmptyState.Description>No Entities</EmptyState.Description>
                   </EmptyState.Content>
@@ -388,7 +370,7 @@ const Project = () => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
-            <Dialog.Header p={"2"} roundedTop={"md"} bg={GLOBAL_STYLES.dialog.header.bg}>
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={"project.light"} color={"project.dark"}>
               <Flex direction={"row"} align={"center"} gap={"1"}>
                 <Icon name={"entity"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -403,6 +385,7 @@ const Project = () => {
                     setSelectedEntities([]);
                     setEntitiesOpen(false);
                   }}
+                  colorPalette={"project"}
                 />
               </Dialog.CloseTrigger>
             </Dialog.Header>
@@ -413,7 +396,7 @@ const Project = () => {
                 setSelectedEntities={setSelectedEntities}
               />
             </Dialog.Body>
-            <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+            <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
               <Button
                 colorPalette={"red"}
                 size={"xs"}
@@ -464,11 +447,11 @@ const Project = () => {
               p={"2"}
               fontWeight={"semibold"}
               fontSize={"xs"}
-              bg={GLOBAL_STYLES.dialog.header.bg}
+              bg={STYLES.dialog.header.bg}
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"project"} size={"xs"} color={GLOBAL_STYLES.project.color.icon} />
+                <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
                 Projects
               </Flex>
             </Dialog.Header>
@@ -477,31 +460,26 @@ const Project = () => {
                 <Flex
                   direction={"column"}
                   gap={"1"}
-                  bg={GLOBAL_STYLES.card.bg}
+                  bg={STYLES.card.bg}
                   p={"2"}
                   rounded={"md"}
-                  border={GLOBAL_STYLES.border.style}
-                  borderColor={GLOBAL_STYLES.border.color}
+                  border={STYLES.border.style}
+                  borderColor={STYLES.border.color}
                 >
                   <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Icon name={"info"} size={"xs"} color={"gray.500"} />
+                    <Icon name={"info"} size={"xs"} color={"text.subtle"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                       What is a Project?
                     </Text>
                   </Flex>
-                  <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
+                  <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
                     Projects group Entities together. Use them to represent an experiment, study, or any collection of
                     related work. Entities can be added or removed from a Project at any time.
                   </Text>
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    ml={"0.5"}
-                    color={GLOBAL_STYLES.font.secondaryHeader.color}
-                  >
+                  <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
                     Fields
                   </Text>
                   <Flex direction={"column"} gap={"2"}>
@@ -517,7 +495,7 @@ const Project = () => {
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Name
                       </Text>
-                      <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                         A unique, searchable identifier for this Project. Choose something descriptive and memorable.
                       </Text>
                     </Flex>
@@ -526,14 +504,14 @@ const Project = () => {
                       gap={"0.5"}
                       p={"2"}
                       rounded={"md"}
-                      bg={"orange.50"}
+                      bg={"status.warning.subtle"}
                       border={"1px solid"}
                       borderColor={"orange.100"}
                     >
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Created
                       </Text>
-                      <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                         A timestamp for the Project. This could mark when an experiment started, or simply when the
                         Project was added to Metadatify.
                       </Text>
@@ -543,14 +521,14 @@ const Project = () => {
                       gap={"0.5"}
                       p={"2"}
                       rounded={"md"}
-                      bg={GLOBAL_STYLES.card.bg}
-                      border={GLOBAL_STYLES.border.style}
-                      borderColor={GLOBAL_STYLES.border.color}
+                      bg={STYLES.card.bg}
+                      border={STYLES.border.style}
+                      borderColor={STYLES.border.color}
                     >
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Description
                       </Text>
-                      <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                         A brief summary of what this Project contains or represents.
                       </Text>
                     </Flex>

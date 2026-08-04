@@ -5,6 +5,7 @@ import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@cha
 import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
 import DataTable, { ColumnMeta } from "@components/DataTable";
+import { EmptyTag } from "@components/FieldTag";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
@@ -22,7 +23,7 @@ import dayjs from "dayjs";
 import _ from "lodash";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 import PermissionsDialog from "@components/PermissionsDialog";
 
 const GET_ADMIN_DATA = gql`
@@ -91,13 +92,13 @@ const StatCard = ({
     p={"1"}
     gap={"1"}
     rounded={"md"}
-    border={GLOBAL_STYLES.border.style}
-    borderColor={GLOBAL_STYLES.border.color}
+    border={STYLES.border.style}
+    borderColor={STYLES.border.color}
     minW={"140px"}
   >
     <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
       <Icon name={icon} size={"xs"} color={iconColor} />
-      <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
         {label}
       </Text>
     </Flex>
@@ -132,7 +133,7 @@ const Admin = () => {
       cell: (info) => (
         <Flex direction={"row"} gap={"2"} justify={"space-between"} w={"100%"} align={"center"}>
           <Tooltip content={info.getValue()} disabled={info.getValue().length < 24}>
-            <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
               {_.truncate(info.getValue(), { length: 24 })}
             </Text>
           </Tooltip>
@@ -179,7 +180,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("workspaces", {
       cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue()}
         </Text>
       ),
@@ -188,7 +189,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("lastLogin", {
       cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue() ? dayjs(info.getValue()).format("D MMM YYYY[ at ]h:mm A") : "Never"}
         </Text>
       ),
@@ -212,7 +213,7 @@ const Admin = () => {
               <Switch.Thumb />
             </Switch.Control>
           </Switch.Root>
-          <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
             {info.row.original.banned ? "Inactive" : "Active"}
           </Text>
         </Flex>
@@ -246,36 +247,35 @@ const Admin = () => {
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip disabled={info.getValue().length <= 28} content={info.getValue()} showArrow>
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 28 })}
-          </Text>
+        <Tooltip disabled={info.getValue().length < 48} content={info.getValue()} showArrow>
+          <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+            <Icon name={"workspace"} size={"xs"} />
+            <Text fontSize={"xs"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 48 })}
+            </Text>
+          </Flex>
         </Tooltip>
       ),
       header: "Name",
-      meta: { minWidth: 200 } as ColumnMeta,
+      meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("description", {
       cell: (info) => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 32} showArrow>
-              <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 32 })}
+            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                {_.truncate(value, { length: 48 })}
               </Text>
             </Tooltip>
           );
         } else {
-          return (
-            <Tag.Root colorPalette={"orange"} size={"sm"}>
-              <Tag.Label>None</Tag.Label>
-            </Tag.Root>
-          );
+          return <EmptyTag label={"Description"} size={"sm"} />;
         }
       },
       header: "Description",
-      meta: { minWidth: 220 } as ColumnMeta,
+      meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("owner", {
       cell: (info) => <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,
@@ -284,7 +284,7 @@ const Admin = () => {
     }),
     workspaceColumnHelper.accessor("entities", {
       cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue()}
         </Text>
       ),
@@ -293,7 +293,7 @@ const Admin = () => {
     }),
     workspaceColumnHelper.accessor("projects", {
       cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue()}
         </Text>
       ),
@@ -302,7 +302,7 @@ const Admin = () => {
     }),
     workspaceColumnHelper.accessor("templates", {
       cell: (info) => (
-        <Text fontSize={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue()}
         </Text>
       ),
@@ -327,7 +327,7 @@ const Admin = () => {
             p={"1"}
             border={"2px solid"}
             borderColor={"gray.700"}
-            bg={"gray.100"}
+            bg={"surface.muted"}
             rounded={"md"}
             w={"fit-content"}
           >
@@ -338,10 +338,10 @@ const Admin = () => {
           </Flex>
 
           <Flex direction={"row"} gap={"2"} align={"center"}>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.subtle"}>
               Last Updated:
             </Text>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
               {dayjs(Date.now()).format("D MMM YYYY[ at ]h:mm A")}
             </Text>
             <Button size={"xs"} rounded={"md"} colorPalette={"blue"} onClick={() => refetch()}>
@@ -356,10 +356,11 @@ const Admin = () => {
           gap={"2"}
           p={"2"}
           rounded={"md"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
-          <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+          <Text fontSize={"xs"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Overview
           </Text>
 
@@ -375,19 +376,19 @@ const Admin = () => {
               label={"Entities"}
               value={data?.adminMetrics?.entities}
               icon={"entity"}
-              iconColor={GLOBAL_STYLES.entity.color.icon}
+              iconColor={STYLES.entity.color.icon}
             />
             <StatCard
               label={"Projects"}
               value={data?.adminMetrics?.projects}
               icon={"project"}
-              iconColor={GLOBAL_STYLES.project.color.icon}
+              iconColor={STYLES.project.color.icon}
             />
             <StatCard
               label={"Templates"}
               value={data?.adminMetrics?.templates}
               icon={"template"}
-              iconColor={GLOBAL_STYLES.template.color.icon}
+              iconColor={STYLES.template.color.icon}
             />
           </Flex>
         </Flex>
@@ -397,12 +398,13 @@ const Admin = () => {
           gap={"1"}
           p={"1"}
           rounded={"md"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
           <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"} py={"1.5"}>
-            <Icon name={"person"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Icon name={"person"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+            <Text fontSize={"xs"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
               All Users
             </Text>
           </Flex>
@@ -420,12 +422,13 @@ const Admin = () => {
           gap={"2"}
           p={"2"}
           rounded={"md"}
-          border={GLOBAL_STYLES.border.style}
-          borderColor={GLOBAL_STYLES.border.color}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
+          bg={STYLES.surface.card}
         >
           <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"} py={"1.5"}>
-            <Icon name={"workspace"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-            <Text fontSize={"xs"} fontWeight={"bold"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Icon name={"workspace"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+            <Text fontSize={"xs"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
               All Workspaces
             </Text>
           </Flex>

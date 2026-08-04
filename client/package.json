@@ -6,7 +6,7 @@
   "author": "Henry Burgess <henry.burgess@wustl.edu>",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "start": "vite",
@@ -20,10 +20,11 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.0",
-    "@chakra-ui/react": "^3.34.0",
+    "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@fontsource/roboto": "^4.5.5",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@storybook/addon-themes": "^10.3.1",
     "@tanstack/react-table": "^8.8.5",
     "@tiptap/react": "^3.23.5",
@@ -32,7 +33,7 @@
     "apollo-upload-client": "^19.0.0",
     "axios": "^1.12.0",
     "better-auth": "^1.6.0",
-    "chakra-react-select": "^6.1.1",
+    "chakra-react-select": "^6.1.3",
     "consola": "^3.2.3",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.7",
@@ -47,7 +48,7 @@
     "posthog-js": "^1.184.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^5.5.0",
+    "react-icons": "^5.7.0",
     "react-joyride": "^2.9.3",
     "react-pdf": "^9.0.0",
     "react-qr-code": "^2.0.15",

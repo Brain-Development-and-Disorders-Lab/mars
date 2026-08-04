@@ -6,7 +6,7 @@ import Icon from "@components/Icon";
 import { AlertDialogProps } from "@types";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const AlertDialog = (props: AlertDialogProps) => {
   const header = props.header || "Alert";
@@ -36,7 +36,14 @@ const AlertDialog = (props: AlertDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"sm"} roundedTop={"md"} bg={"orange.400"}>
+          <Dialog.Header
+            p={"2"}
+            fontWeight={"semibold"}
+            fontSize={"sm"}
+            roundedTop={"md"}
+            bg={"status.warning.subtle"}
+            color={"status.warning.emphasized"}
+          >
             <Flex direction={"row"} align={"center"} gap={"1"} ml={"0.5"}>
               <Icon name={"warning"} />
               <Text fontWeight={"semibold"} fontSize={"xs"}>
@@ -45,7 +52,7 @@ const AlertDialog = (props: AlertDialogProps) => {
             </Flex>
           </Dialog.Header>
           <Dialog.Body p={"2"}>{props.children}</Dialog.Body>
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Button
               size={"xs"}
               rounded={"md"}

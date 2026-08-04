@@ -12,6 +12,19 @@ import { Workspaces } from "@models/Workspaces";
 import { audit } from "@lib/audit";
 
 export const EntitiesResolvers = {
+  Value: {
+    // Normalize legacy `Value.data` documents imported directly into MongoDB as extended
+    // JSON, where a date is stored as `{ $date: "..." }` instead of a plain string
+    data: (parent: { data: unknown }) => {
+      const raw = parent.data;
+      if (raw instanceof Date) return raw.toISOString();
+      if (_.isPlainObject(raw) && "$date" in (raw as Record<string, unknown>)) {
+        return (raw as { $date: string }).$date;
+      }
+      return raw;
+    },
+  },
+
   Query: {
     // Retrieve all Entities
     entities: async (

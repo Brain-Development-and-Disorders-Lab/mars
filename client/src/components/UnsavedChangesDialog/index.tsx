@@ -12,7 +12,7 @@ const UnsavedChangesDialog = (props: UnsavedChangesDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header p={"2"} roundedTop={"md"} bg={"orange.400"}>
+          <Dialog.Header p={"2"} roundedTop={"md"} bg={"status.warning.subtle"} color={"status.warning.emphasized"}>
             <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
               <Icon name={"warning"} size={"xs"} />
               <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -27,7 +27,7 @@ const UnsavedChangesDialog = (props: UnsavedChangesDialogProps) => {
             </Text>
           </Dialog.Body>
 
-          <Dialog.Footer p={"2"} bg={"gray.100"} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={"surface.muted"} roundedBottom={"md"}>
             <Flex w={"100%"} justify={"space-between"}>
               <Button
                 size={"xs"}

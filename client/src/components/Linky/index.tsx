@@ -3,11 +3,13 @@ import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Button, Flex, HoverCard, Portal, Separator, Skeleton, Tag, Text } from "@chakra-ui/react";
+import { EmptyTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { IconNames, IGenericItem, LinkyProps } from "@types";
+import { IconNames, IGenericItem, IValueType, LinkyProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -18,9 +20,10 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { getValueTypeIconProps } from "@lib/util";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
 
@@ -34,24 +37,24 @@ const getTypeStyle = (
   if (type === "projects") {
     return {
       icon: "project",
-      badgeBg: "blue.50",
-      badgeBorder: "blue.100",
-      iconColor: GLOBAL_STYLES.project.color.icon,
+      badgeBg: STYLES.project.color.light,
+      badgeBorder: STYLES.project.color.border,
+      iconColor: STYLES.project.color.icon,
     };
   } else if (type === "templates") {
     return {
       icon: "template",
-      badgeBg: "teal.50",
-      badgeBorder: "teal.100",
-      iconColor: GLOBAL_STYLES.template.color.icon,
+      badgeBg: STYLES.template.color.light,
+      badgeBorder: STYLES.template.color.border,
+      iconColor: STYLES.template.color.icon,
     };
   }
   // entities
   return {
     icon: "entity",
-    badgeBg: "purple.50",
-    badgeBorder: "purple.100",
-    iconColor: GLOBAL_STYLES.entity.color.icon,
+    badgeBg: STYLES.entity.color.light,
+    badgeBorder: STYLES.entity.color.border,
+    iconColor: STYLES.entity.color.icon,
   };
 };
 
@@ -67,7 +70,7 @@ const Linky = (props: LinkyProps) => {
   // Navigator state
   const [showNavigator, setShowNavigator] = useState(false);
   const [navigatorDescription, setNavigatorDescription] = useState("");
-  const [navigatorCount, setNavigatorCount] = useState(0);
+  const [navigatorItems, setNavigatorItems] = useState<{ _id: string; name: string; type?: IValueType }[]>([]);
 
   // GraphQL operations
   const GET_ENTITY = gql`
@@ -79,12 +82,13 @@ const Linky = (props: LinkyProps) => {
         description
         attributes {
           _id
+          name
         }
       }
     }
   `;
   const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
-    entity: IGenericItem & { archived: boolean; description: string; attributes: { _id: string }[] };
+    entity: IGenericItem & { archived: boolean; description: string; attributes: { _id: string; name: string }[] };
   }>(GET_ENTITY);
 
   const GET_PROJECT = gql`
@@ -96,10 +100,15 @@ const Linky = (props: LinkyProps) => {
         description
         entities
       }
+      projectEntities(_id: $_id) {
+        _id
+        name
+      }
     }
   `;
   const [getProject, { loading: loadingProject }] = useLazyQuery<{
     project: IGenericItem & { archived: boolean; description: string; entities: string[] };
+    projectEntities: { _id: string; name: string }[];
   }>(GET_PROJECT);
 
   const GET_TEMPLATE = gql`
@@ -111,12 +120,18 @@ const Linky = (props: LinkyProps) => {
         description
         values {
           _id
+          name
+          type
         }
       }
     }
   `;
   const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
-    template: IGenericItem & { archived: boolean; description: string; values: { _id: string }[] };
+    template: IGenericItem & {
+      archived: boolean;
+      description: string;
+      values: { _id: string; name: string; type: IValueType }[];
+    };
   }>(GET_TEMPLATE);
 
   /**
@@ -142,7 +157,7 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem & { description: string } = {
       _id: props.id,
-      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(-1))}`,
+      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(0, -1))}`,
       description: "",
     };
 
@@ -158,7 +173,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.template.archived);
           setNavigatorDescription(response.data.template.description);
-          setNavigatorCount(response.data.template.values.length);
+          setNavigatorItems(response.data.template.values);
         }
       } else if (props.type === "entities") {
         const response = await getEntity({ variables: { _id: props.id } });
@@ -171,7 +186,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.entity.archived);
           setNavigatorDescription(response.data.entity.description);
-          setNavigatorCount(response.data.entity.attributes.length);
+          setNavigatorItems(response.data.entity.attributes);
         }
       } else if (props.type === "projects") {
         const response = await getProject({ variables: { _id: props.id } });
@@ -184,7 +199,7 @@ const Linky = (props: LinkyProps) => {
           setTooltipLabel(data.name);
           setShowArchived(response.data.project.archived);
           setNavigatorDescription(response.data.project.description);
-          setNavigatorCount(response.data.project.entities.length);
+          setNavigatorItems(response.data.projectEntities);
         }
       }
     } catch (error) {
@@ -217,6 +232,24 @@ const Linky = (props: LinkyProps) => {
   const isLoading = loadingTemplate || loadingEntity || loadingProject;
   const { icon, badgeBg, badgeBorder, iconColor } = getTypeStyle(props.type);
 
+  /**
+   * Preview tag icon and color per item
+   * @param item Specific item being assigned a style
+   * @return {{ icon: IconNames; color: string; palette: string; }}
+   */
+  const getNavigatorItemStyle = (item: { type?: IValueType }): { icon: IconNames; color: string; palette: string } => {
+    if (props.type === "entities") {
+      return { icon: "attribute", color: STYLES.template.color.icon, palette: "template" };
+    }
+    if (props.type === "projects") {
+      return { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" };
+    }
+    const { name, color } = getValueTypeIconProps(item.type);
+    return { icon: name, color, palette: color.split(".")[0] };
+  };
+  const navigatorLabel = props.type === "entities" ? "Attributes" : props.type === "projects" ? "Entities" : "Values";
+  const NAVIGATOR_PREVIEW_COUNT = 2;
+
   if (isLoading) {
     return <Skeleton h={"22px"} w={"80px"} rounded={"md"} />;
   }
@@ -229,7 +262,7 @@ const Linky = (props: LinkyProps) => {
           align={"center"}
           h={"22px"}
           w={"fit-content"}
-          border={GLOBAL_STYLES.border.style}
+          border={STYLES.border.style}
           borderColor={"orange.200"}
           rounded={"md"}
           overflow={"hidden"}
@@ -240,7 +273,7 @@ const Linky = (props: LinkyProps) => {
           <Flex
             align={"center"}
             justify={"center"}
-            bg={"orange.50"}
+            bg={"status.warning.subtle"}
             px={"1.5"}
             h={"100%"}
             borderRight={"1px solid"}
@@ -250,7 +283,7 @@ const Linky = (props: LinkyProps) => {
           </Flex>
           {/* Deleted label */}
           <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-            <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.500"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
               {linkLabel}
             </Text>
           </Flex>
@@ -263,23 +296,23 @@ const Linky = (props: LinkyProps) => {
               align={"center"}
               h={"22px"}
               w={"fit-content"}
-              border={GLOBAL_STYLES.border.style}
-              borderColor={GLOBAL_STYLES.border.color}
-              rounded={"md"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              rounded={"lg"}
               overflow={"hidden"}
               cursor={"pointer"}
               onClick={onClickHandler}
               flexShrink={0}
               _hover={{
-                borderColor: "blue.300",
-                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+                borderColor: iconColor,
+                boxShadow: `0 0 0 1px ${iconColor}4D`,
               }}
             >
               {/* Type icon badge */}
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={showArchived ? GLOBAL_STYLES.card.bg : badgeBg}
+                bg={showArchived ? STYLES.card.bg : badgeBg}
                 px={"1.5"}
                 h={"100%"}
                 borderRight={"1px solid"}
@@ -298,13 +331,13 @@ const Linky = (props: LinkyProps) => {
                 <Flex
                   align={"center"}
                   justify={"center"}
-                  bg={GLOBAL_STYLES.card.bg}
+                  bg={STYLES.card.bg}
                   px={"1.5"}
                   h={"100%"}
                   borderLeft={"1px solid"}
                   borderColor={"gray.100"}
                 >
-                  <Icon name={"archive"} size={"xs"} color={"gray.500"} />
+                  <Icon name={"archive"} size={"xs"} color={"text.subtle"} />
                 </Flex>
               )}
             </Flex>
@@ -342,26 +375,39 @@ const Linky = (props: LinkyProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Description
                   </Text>
-                  <Text
-                    fontSize={"xs"}
-                    color={navigatorDescription ? "gray.700" : "gray.400"}
-                    fontStyle={navigatorDescription ? "normal" : "italic"}
-                    lineClamp={3}
-                  >
-                    {navigatorDescription || "No description provided"}
-                  </Text>
+                  <Flex>
+                    {_.isUndefined(navigatorDescription) || navigatorDescription === "" ? (
+                      <EmptyTag label={"Description"} />
+                    ) : (
+                      <Tooltip disabled={navigatorDescription.length < 32} content={navigatorDescription}>
+                        <Text fontSize={"xs"}>{_.truncate(navigatorDescription, { length: 32 })}</Text>
+                      </Tooltip>
+                    )}
+                  </Flex>
                 </Flex>
 
-                {/* Count */}
+                {/* Preview */}
                 <Flex direction={"column"} gap={"0.5"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-                    {props.type === "entities" ? "Attributes" : props.type === "projects" ? "Entities" : "Values"}
+                    {navigatorLabel}
                   </Text>
-                  <Flex>
-                    <Tag.Root colorPalette={navigatorCount > 0 ? "green" : "orange"} size={"sm"}>
-                      <Tag.Label fontSize={"xs"}>{navigatorCount}</Tag.Label>
-                    </Tag.Root>
-                  </Flex>
+                  <FieldTagList
+                    items={navigatorItems}
+                    max={NAVIGATOR_PREVIEW_COUNT}
+                    emptyLabel={navigatorLabel}
+                    getKey={(item) => item._id}
+                    renderTag={(item) => {
+                      const itemStyle = getNavigatorItemStyle(item);
+                      return (
+                        <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
+                          <Tag.StartElement>
+                            <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
+                          </Tag.StartElement>
+                          <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
+                        </Tag.Root>
+                      );
+                    }}
+                  />
                 </Flex>
               </HoverCard.Content>
             </HoverCard.Positioner>

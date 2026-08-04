@@ -3,7 +3,12 @@ import React, { ReactElement } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.scss";
-import "@fontsource/roboto";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 
 // Chakra provider component
 import { ChakraProvider } from "@chakra-ui/react";

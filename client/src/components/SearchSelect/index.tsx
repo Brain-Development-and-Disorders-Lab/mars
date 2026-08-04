@@ -19,7 +19,7 @@ import { useLazyQuery } from "@apollo/client/react";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 // College Scorecard API URL
 const SCORECARD_URL = "https://api.data.gov/ed/collegescorecard/v1/schools";
@@ -94,7 +94,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   // Setup default presentation parameters
   let placeholder = "Search Entities...";
   let iconName: IconNames = "entity";
-  let iconColor = GLOBAL_STYLES.entity.color.icon;
+  let iconColor = STYLES.entity.color.icon;
 
   switch (props.resultType) {
     case "institution": {
@@ -106,7 +106,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     case "project": {
       placeholder = "Search Projects...";
       iconName = "project";
-      iconColor = GLOBAL_STYLES.project.color.icon;
+      iconColor = STYLES.project.color.icon;
       break;
     }
   }
@@ -379,8 +379,8 @@ const SearchSelect = (props: SearchSelectProps) => {
             data-testid={"value-editor"}
             size={"xs"}
             rounded={props.isEmbedded ? "none" : "md"}
-            border={props.isEmbedded ? "none" : GLOBAL_STYLES.border.style}
-            borderColor={props.isEmbedded ? "" : GLOBAL_STYLES.border.color}
+            border={props.isEmbedded ? "none" : STYLES.border.style}
+            borderColor={props.isEmbedded ? "" : STYLES.border.color}
             _focusVisible={props.isEmbedded ? { boxShadow: "none", outline: "none" } : undefined}
             ps={props.value?._id && !showResults ? "6" : undefined}
             autoComplete="off"
@@ -446,8 +446,8 @@ const SearchSelect = (props: SearchSelectProps) => {
             left={dropdownPosition.left}
             width={dropdownPosition.width}
             bg="white"
-            border={GLOBAL_STYLES.border.style}
-            borderColor={GLOBAL_STYLES.border.color}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
             borderRadius={"md"}
             shadow={"md"}
             zIndex={"9999"}

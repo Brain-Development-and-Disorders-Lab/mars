@@ -25,7 +25,7 @@ import {
 } from "@lib/util";
 
 // Variables
-import { DEFAULT_WORKSPACE_PERMISSIONS, GLOBAL_STYLES } from "@variables";
+import { DEFAULT_WORKSPACE_PERMISSIONS, STYLES } from "@variables";
 
 // Hooks
 import { usePermissions } from "@hooks/usePermissions";
@@ -59,11 +59,14 @@ const CollaboratorEmail = (props: { userId: string }) => {
   });
 
   return (
-    <Link href={`mailto:${data?.user.email}`}>
-      <Text fontSize={"xs"} color={"gray.600"} ml={"0.5"}>
-        {loading ? "" : data?.user.email}
-      </Text>
-    </Link>
+    <Flex direction={"row"} gap={"1"}>
+      <Icon name={"email"} size={"xs"} color={"text.muted"} />
+      <Link href={`mailto:${data?.user.email}`}>
+        <Text fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
+          {loading ? "" : data?.user.email}
+        </Text>
+      </Link>
+    </Flex>
   );
 };
 
@@ -159,22 +162,23 @@ const Collaborators = (props: CollaboratorsProps) => {
       p={"2"}
       h={"fit-content"}
       rounded={"md"}
-      border={GLOBAL_STYLES.border.style}
-      borderColor={GLOBAL_STYLES.border.color}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
+      bg={STYLES.surface.card}
       grow={"1"}
     >
       {/* Collaborators display */}
       <Flex direction={"column"} gap={"2"}>
         <Flex direction={"row"} gap={"1"} py={"1.5"} align={"center"} ml={"0.5"}>
-          <Icon name={"person"} size={"xs"} color={GLOBAL_STYLES.font.secondaryHeader.color} />
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={GLOBAL_STYLES.font.secondaryHeader.color} ml={"0.5"}>
+          <Icon name={"person"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Collaborators ({props.collaborators.length})
           </Text>
         </Flex>
 
         {workspacePermissions.administration.invite && (
           <Flex direction={"column"} gap={"1"}>
-            <Text fontSize={"xs"} ml={"0.5"} color={GLOBAL_STYLES.font.secondaryHeader.color}>
+            <Text fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
               Invite Collaborators to this Workspace via email
             </Text>
             <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
@@ -234,7 +238,9 @@ const Collaborators = (props: CollaboratorsProps) => {
                       Collaborator
                     </Text>
                     <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
-                    <CollaboratorEmail userId={collaborator._id} />
+                    <Flex ml={"0.5"}>
+                      <CollaboratorEmail userId={collaborator._id} />
+                    </Flex>
                   </Flex>
 
                   {/* Action Buttons, including Workspace remove / leave and permissions */}

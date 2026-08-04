@@ -23,7 +23,7 @@ import { usePostHog } from "posthog-js/react";
 import { ReportDialogProps } from "@types";
 
 // Variables
-import { GLOBAL_STYLES } from "@variables";
+import { STYLES } from "@variables";
 
 const REPORT_ISSUE = gql`
   mutation ReportIssue(
@@ -90,15 +90,22 @@ const ReportDialog = (props: ReportDialogProps) => {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content gap={"0"} w={"sm"}>
-          <Dialog.Header p={"2"} fontWeight={"semibold"} fontSize={"xs"} bg={"red.500"} roundedTop={"md"}>
+          <Dialog.Header
+            p={"2"}
+            fontWeight={"semibold"}
+            fontSize={"xs"}
+            bg={"status.danger.subtle"}
+            color={"status.danger.emphasized"}
+            roundedTop={"md"}
+          >
             <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Icon name={"bug"} size={"xs"} color={"white"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"white"}>
+              <Icon name={"bug"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"}>
                 Report Issue
               </Text>
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"2xs"} top={"6px"} color={"white"} onClick={handleCancel} />
+              <CloseButton size={"2xs"} top={"6px"} onClick={handleCancel} colorPalette={"danger"} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"2"}>
@@ -123,7 +130,7 @@ const ReportDialog = (props: ReportDialogProps) => {
               />
             </Flex>
           </Dialog.Body>
-          <Dialog.Footer p={"2"} bg={GLOBAL_STYLES.dialog.footer.bg} roundedBottom={"md"}>
+          <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
               <Button variant={"solid"} size={"xs"} rounded={"md"} colorPalette={"red"} onClick={handleCancel}>
                 Cancel
