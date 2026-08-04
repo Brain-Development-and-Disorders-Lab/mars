@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Henry Burgess <henry.burgess@wustl.edu>",
   "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -19,6 +22,7 @@
     "@fontsource/inter": "^5.3.0",
     "consola": "^3.2.3",
     "framer-motion": "^11.8.0",
+    "lodash": "^4.18.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0"

@@ -67,7 +67,7 @@ import {
 } from "react-icons/fa6";
 
 // Existing and custom types
-import { IconNames } from "types";
+import { IconNames } from "../../../types";
 import { IconType } from "react-icons";
 
 // Utility functions and libraries
