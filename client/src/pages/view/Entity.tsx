@@ -109,6 +109,9 @@ const Entity = () => {
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
 
+  // Breakpoint
+  const { isBreakpointActive } = useBreakpoint();
+
   // Workspace information
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
@@ -1298,7 +1301,7 @@ const Entity = () => {
                   {loading ? (
                     <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
                   ) : (
-                    workspaceName
+                    _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
                   )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -1908,30 +1911,47 @@ const Entity = () => {
                                               <Text fontSize={"xs"} fontWeight={"semibold"}>
                                                 Attributes
                                               </Text>
-                                              {entityVersion.attributes.length > 0 ? (
-                                                <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                  {entityVersion.attributes.slice(0, 3).map((attr) => (
-                                                    <Tooltip
-                                                      key={`v_a_${entityVersion.timestamp}_${attr._id}`}
-                                                      content={"Values: " + attr.values.length}
-                                                      showArrow
-                                                    >
-                                                      <Tag.Root size={"sm"}>
-                                                        <Tag.Label fontSize={"xs"}>{attr.name}</Tag.Label>
-                                                      </Tag.Root>
-                                                    </Tooltip>
+                                              {entityVersion.attributes.length === 0 && (
+                                                <Tag.Root colorPalette={"orange"}>
+                                                  <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+                                                </Tag.Root>
+                                              )}
+
+                                              {entityVersion.attributes.length > 1 && (
+                                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                                  {entityVersion.attributes.slice(0, 1).map((attribute) => (
+                                                    <Tag.Root colorPalette={"template"}>
+                                                      <Tag.StartElement>
+                                                        <Icon
+                                                          name={"attribute"}
+                                                          color={STYLES.template.color.icon}
+                                                          size={"xs"}
+                                                        />
+                                                      </Tag.StartElement>
+                                                      <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                                                    </Tag.Root>
                                                   ))}
-                                                  {entityVersion.attributes.length > 3 && (
-                                                    <Text fontSize={"xs"}>
-                                                      and {entityVersion.attributes.length - 3} more
-                                                    </Text>
-                                                  )}
+                                                  <Text fontSize={"xs"}>
+                                                    and {entityVersion.attributes.length - 1} other
+                                                    {entityVersion.attributes.length - 1 !== 1 ? "s" : ""}
+                                                  </Text>
                                                 </Flex>
-                                              ) : (
-                                                <Flex>
-                                                  <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                    <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-                                                  </Tag.Root>
+                                              )}
+
+                                              {entityVersion.attributes.length === 1 && (
+                                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                                  {entityVersion.attributes.map((attribute) => (
+                                                    <Tag.Root colorPalette={"template"}>
+                                                      <Tag.StartElement>
+                                                        <Icon
+                                                          name={"attribute"}
+                                                          color={STYLES.template.color.icon}
+                                                          size={"xs"}
+                                                        />
+                                                      </Tag.StartElement>
+                                                      <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                                                    </Tag.Root>
+                                                  ))}
                                                 </Flex>
                                               )}
                                             </Flex>

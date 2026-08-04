@@ -45,16 +45,12 @@ const Navigation = () => {
   const [scanOpen, setScanOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
-  // Shared styling for the primary sidebar links: transparent by default so
-  // the dark nav background shows through, a solid (not translucent) lighter
-  // navy on hover so it's clearly visible, and for the current page, that
-  // same lighter navy plus a white accent stripe and bold text so it stays
-  // obviously "selected" without breaking out into a stark white pill.
+  // Shared styling for the primary sidebar links
   const navLinkStyle = (isActive: boolean) => ({
     bg: isActive ? "nav.hoverBg" : "transparent",
     color: "nav.text",
     fontWeight: isActive ? "bold" : "medium",
-    borderLeft: "3px solid",
+    borderLeft: isActive ? "8px solid" : "none",
     borderLeftColor: isActive ? "white" : "transparent",
     _hover: { bg: "nav.hoverBg" },
   });

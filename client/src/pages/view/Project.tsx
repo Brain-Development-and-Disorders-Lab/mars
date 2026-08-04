@@ -60,6 +60,7 @@ import { useQuery, useMutation, useApolloClient } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Hooks
+import { useBreakpoint } from "@hooks/useBreakpoint";
 import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
@@ -88,6 +89,9 @@ const Project = () => {
   // Workspace information
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
+
+  // Breakpoints
+  const { isBreakpointActive } = useBreakpoint();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -836,7 +840,7 @@ const Project = () => {
                   {loading ? (
                     <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
                   ) : (
-                    workspaceName
+                    _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
                   )}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
@@ -1355,7 +1359,7 @@ const Project = () => {
                                             </Text>
                                             {projectVersion.entities.length > 0 ? (
                                               <Flex direction={"row"} gap={"2"} align={"center"} wrap={"wrap"}>
-                                                {projectVersion.entities.map((entityId) => (
+                                                {projectVersion.entities.slice(0, 3).map((entityId) => (
                                                   <Linky
                                                     key={`v_e_${projectVersion.timestamp}_${entityId}`}
                                                     type={"entities"}
@@ -1363,6 +1367,11 @@ const Project = () => {
                                                     size={"xs"}
                                                   />
                                                 ))}
+                                                {projectVersion.entities.length > 3 && (
+                                                  <Text fontSize={"xs"}>
+                                                    and {projectVersion.entities.length - 3} more
+                                                  </Text>
+                                                )}
                                               </Flex>
                                             ) : (
                                               <Flex>

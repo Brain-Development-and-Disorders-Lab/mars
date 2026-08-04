@@ -37,7 +37,6 @@ import {
   FaUpload,
   FaCircleXmark,
   FaBuilding,
-  FaTableList,
   FaFloppyDisk,
   FaArrowRightToBracket,
   FaUser,
@@ -77,6 +76,7 @@ import {
   FaRightLeft,
   FaChevronUp,
   FaChevronDown,
+  FaBars,
 } from "react-icons/fa6";
 
 // Existing and custom types
@@ -124,7 +124,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   upload: FaUpload,
   cross: FaCircleXmark,
   institution: FaBuilding,
-  list: FaTableList,
+  list: FaBars,
   save: FaFloppyDisk,
   logout: FaArrowRightToBracket,
   person: FaUser,
