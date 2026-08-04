@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 @keyframes animateLeft {
   0% {
     transform: translateY(0) skewY(0);

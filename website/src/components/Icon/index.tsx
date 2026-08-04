@@ -2,68 +2,69 @@
 import React from "react";
 
 // Existing components and icons
-import { Icon as ChakraIcon } from "@chakra-ui/react";
+import { Icon as ChakraIcon, Flex } from "@chakra-ui/react";
 import {
-  BsActivity,
-  BsArchiveFill,
-  BsArrowCounterclockwise,
-  BsArrowRight,
-  BsBarChartFill,
-  BsBellFill,
-  BsBoxArrowRight,
-  BsBoxFill,
-  BsCalendarWeekFill,
-  BsCheckCircleFill,
   BsChevronDoubleLeft,
   BsChevronDoubleRight,
-  BsChevronDown,
   BsChevronExpand,
   BsChevronLeft,
   BsChevronRight,
-  BsChevronUp,
-  BsClockHistory,
-  BsCloudDownloadFill,
-  BsCollectionFill,
-  BsDatabaseFill,
-  BsDiagram2Fill,
-  BsExclamationOctagonFill,
-  BsFileCodeFill,
-  BsFileTextFill,
-  BsFillBookFill,
-  BsFillBookmarkFill,
-  BsFillCloudUploadFill,
-  BsFillExclamationTriangleFill,
-  BsFillEyeFill,
-  BsFillFileBinaryFill,
-  BsFillGearFill,
-  BsFillLightningChargeFill,
-  BsFillPersonFill,
-  BsGithub,
-  BsGlobe,
-  BsGlobeAmericas,
-  BsInfoCircleFill,
-  BsLink45Deg,
-  BsList,
-  BsLockFill,
-  BsPaperclip,
-  BsPencilFill,
-  BsPlusCircleFill,
-  BsPower,
-  BsPrinter,
-  BsQuestionOctagonFill,
-  BsSearch,
-  BsServer,
-  BsTagFill,
-  BsTrashFill,
-  BsUpcScan,
-  BsXCircleFill,
-  BsZoomIn,
-  BsZoomOut,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import { TbBaselineDensityMedium, TbBaselineDensitySmall, TbRefresh } from "react-icons/tb";
 import { IoCreateOutline } from "react-icons/io5";
+import { TbBaselineDensityMedium, TbBaselineDensitySmall } from "react-icons/tb";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import {
+  FaArrowRight,
+  FaArrowRightToBracket,
+  FaArrowsRotate,
+  FaBell,
+  FaBolt,
+  FaBook,
+  FaBoxArchive,
+  FaChartColumn,
+  FaChartLine,
+  FaChartSimple,
+  FaChevronDown,
+  FaChevronUp,
+  FaCircleCheck,
+  FaCircleExclamation,
+  FaCircleInfo,
+  FaCirclePlus,
+  FaCircleQuestion,
+  FaCircleXmark,
+  FaClockRotateLeft,
+  FaCloud,
+  FaCube,
+  FaDatabase,
+  FaDownload,
+  FaExpand,
+  FaGear,
+  FaGithub,
+  FaGlobe,
+  FaLayerGroup,
+  FaLink,
+  FaList,
+  FaLock,
+  FaMagnifyingGlass,
+  FaMagnifyingGlassMinus,
+  FaMagnifyingGlassPlus,
+  FaMobileScreen,
+  FaPaperclip,
+  FaPenToSquare,
+  FaPowerOff,
+  FaPrint,
+  FaRegCalendar,
+  FaRotateLeft,
+  FaServer,
+  FaSitemap,
+  FaT,
+  FaTable,
+  FaTableList,
+  FaTrash,
+  FaUpload,
+  FaUser,
+} from "react-icons/fa6";
 
 // Existing and custom types
 import { IconNames } from "types";
@@ -75,82 +76,82 @@ import _ from "lodash";
 // Define the icon set
 const SYSTEM_ICONS: Record<string, IconType> = {
   // Default
-  unknown: BsQuestionOctagonFill,
+  unknown: FaCircleQuestion,
 
   // Locations
-  dashboard: BsBarChartFill,
-  entity: BsBoxFill,
-  project: BsFillBookmarkFill,
-  attribute: BsTagFill,
+  dashboard: FaChartSimple,
+  entity: FaCube,
+  project: FaLayerGroup,
+  attribute: FaTable,
 
   // Signal and action icons
-  activity: BsActivity,
-  archive: BsArchiveFill,
-  attachment: BsPaperclip,
-  check: BsCheckCircleFill,
+  activity: FaChartLine,
+  archive: FaBoxArchive,
+  attachment: FaPaperclip,
+  check: FaCircleCheck,
   create: IoCreateOutline,
-  info: BsInfoCircleFill,
-  search: BsSearch,
-  bell: BsBellFill,
-  add: BsPlusCircleFill,
-  edit: BsPencilFill,
-  delete: BsTrashFill,
-  download: BsCloudDownloadFill,
-  upload: BsFillCloudUploadFill,
-  cross: BsXCircleFill,
-  list: BsList,
-  person: BsFillPersonFill,
-  warning: BsFillExclamationTriangleFill,
-  exclamation: BsExclamationOctagonFill,
-  lightning: BsFillLightningChargeFill,
-  reload: TbRefresh,
-  graph: BsDiagram2Fill,
-  clock: BsClockHistory,
-  rewind: BsArrowCounterclockwise,
-  link: BsLink45Deg,
-  scan: BsUpcScan,
-  lock: BsLockFill,
-  exit: BsPower,
-  settings: BsFillGearFill,
-  print: BsPrinter,
-  view: BsFillEyeFill,
-  workspace: BsDatabaseFill,
-  zoom_in: BsZoomIn,
-  zoom_out: BsZoomOut,
+  info: FaCircleInfo,
+  search: FaMagnifyingGlass,
+  bell: FaBell,
+  add: FaCirclePlus,
+  edit: FaPenToSquare,
+  delete: FaTrash,
+  download: FaDownload,
+  upload: FaUpload,
+  cross: FaCircleXmark,
+  list: FaTableList,
+  person: FaUser,
+  warning: FaCircleExclamation,
+  exclamation: FaCircleExclamation,
+  lightning: FaBolt,
+  reload: FaArrowsRotate,
+  graph: FaSitemap,
+  clock: FaClockRotateLeft,
+  rewind: FaRotateLeft,
+  link: FaLink,
+  scan: FaMobileScreen,
+  lock: FaLock,
+  exit: FaPowerOff,
+  settings: FaGear,
+  print: FaPrint,
+  expand: FaExpand,
+  workspace: FaDatabase,
+  zoom_in: FaMagnifyingGlassPlus,
+  zoom_out: FaMagnifyingGlassMinus,
 
   // Logos
   l_box: SiBox,
-  l_labArchives: BsFillBookFill,
-  l_globus: BsGlobe,
-  l_github: BsGithub,
+  l_labArchives: FaBook,
+  l_globus: FaGlobe,
+  l_github: FaGithub,
 
   // Values
-  v_date: BsCalendarWeekFill,
-  v_text: BsFileTextFill,
-  v_number: BsFillFileBinaryFill,
-  v_url: BsFileCodeFill,
-  v_select: BsCollectionFill,
+  v_date: FaRegCalendar,
+  v_text: FaT,
+  v_number: FaChartColumn,
+  v_url: FaLink,
+  v_select: FaList,
 
   // Arrows
-  a_right: BsArrowRight,
-  b_right: BsBoxArrowRight,
+  a_right: FaArrowRight,
+  b_right: FaArrowRightToBracket,
 
   // Chevrons
   c_left: BsChevronLeft,
   c_double_left: BsChevronDoubleLeft,
   c_right: BsChevronRight,
   c_double_right: BsChevronDoubleRight,
-  c_up: BsChevronUp,
-  c_down: BsChevronDown,
+  c_up: FaChevronUp,
+  c_down: FaChevronDown,
   c_expand: BsChevronExpand,
+
+  // Servers
+  serv_managed_hosted: FaCloud,
+  serv_self_hosted: FaServer,
 
   // Density
   d_low: TbBaselineDensityMedium,
   d_high: TbBaselineDensitySmall,
-
-  // Servers
-  serv_managed_hosted: BsGlobeAmericas,
-  serv_self_hosted: BsServer,
 
   // Sort
   sort: FaSort,
@@ -175,28 +176,39 @@ const Icon = (props: {
   // Set the icon color if specified
   const iconColor = !_.isUndefined(props.color) ? props.color : "";
 
+  let returned = <ChakraIcon as={iconComponent} color={iconColor} style={props.style} />;
+
   // Set the icon sizing if specified
   if (!_.isUndefined(props.size)) {
     switch (props.size) {
       case "xs":
-        return <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} style={props.style} />;
+        break;
       case "sm":
-        return <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} style={props.style} />;
+        break;
       case "md":
-        return <ChakraIcon as={iconComponent} w={"6"} h={"6"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"6"} h={"6"} color={iconColor} style={props.style} />;
+        break;
       case "lg":
-        return <ChakraIcon as={iconComponent} w={"8"} h={"8"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"8"} h={"8"} color={iconColor} style={props.style} />;
+        break;
       case "xl":
-        return <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} style={props.style} />;
+        returned = <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} style={props.style} />;
+        break;
       default:
-        return (
+        returned = (
           <ChakraIcon as={iconComponent} w={props.size[0]} h={props.size[1]} color={iconColor} style={props.style} />
         );
     }
   }
 
   // Return icon with default size
-  return <ChakraIcon as={iconComponent} color={iconColor} style={props.style} />;
+  return (
+    <Flex p={"0"} m={"0"} align={"center"} justify={"center"}>
+      {returned}
+    </Flex>
+  );
 };
 
 export default Icon;

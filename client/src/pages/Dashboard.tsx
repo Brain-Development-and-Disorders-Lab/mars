@@ -297,7 +297,7 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} />,
+      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -372,7 +372,7 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} />,
+      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
