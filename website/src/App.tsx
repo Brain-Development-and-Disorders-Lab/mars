@@ -183,7 +183,7 @@ const App = () => {
                 fontWeight={"semibold"}
               >
                 <Icon name={"lightning"} size={"xs"} color={"ai.default"} />
-                <Text>AI-assisted metadata management</Text>
+                <Text>New AI-powered features available</Text>
               </Flex>
               <Heading
                 size={"2xl"}
@@ -195,7 +195,8 @@ const App = () => {
               </Heading>
               <Text fontSize={"lg"} color={"text.muted"}>
                 Metadatify helps research teams create structured records for samples, specimens, and experiments.
-                Search in plain language or with a visual query builder, and keep your whole lab in sync using ORCiD.
+                Search in plain language or with a visual query builder, and keep your whole lab in sync with
+                collaboration features.
               </Text>
               <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
                 <Button
@@ -252,6 +253,83 @@ const App = () => {
             </Flex>
           </Flex>
 
+          {/* Core Features */}
+          <Flex
+            id={"product"}
+            style={{ scrollMarginTop: SECTION_OFFSET }}
+            direction={"column"}
+            gap={"8"}
+            py={"8"}
+            align={"center"}
+            ref={productRef}
+          >
+            <Flex direction={"column"} align={"center"} gap={"2"} textAlign={"center"}>
+              <Heading>Built for research teams</Heading>
+              <Text color={"text.muted"}>Core tools for creating, organizing, and tracking scientific metadata.</Text>
+            </Flex>
+            <Flex direction={"row"} justify={"center"} wrap={"wrap"} gap={["4", "6"]} w={"100%"} maxW={"5xl"}>
+              <FeatureCard
+                icon={"create"}
+                title={"Structured Metadata"}
+                description={
+                  "Define reusable Templates once and apply consistent Attribute structures across every Entity in your workspace."
+                }
+              />
+              <FeatureCard
+                icon={"project"}
+                title={"Projects"}
+                description={
+                  "Group Entities into Projects to track experimental cohorts, sample batches, or any collection your lab workflow requires."
+                }
+              />
+              <FeatureCard
+                icon={"person"}
+                title={"Collaboration"}
+                description={
+                  "Add collaborators via email. Everyone in a shared Workspace sees the same metadata, always current."
+                }
+              />
+              <FeatureCard
+                icon={"scan"}
+                title={"Physical Tracking"}
+                description={
+                  "Every Entity has a unique identifier compatible with USB barcode and QR code scanners. Point a scanner at a specimen label and jump straight to its metadata record."
+                }
+              />
+              <FeatureCard
+                icon={"clock"}
+                title={"Version History"}
+                description={
+                  "Every change is tracked. Browse the full edit history of any Entity, Project, or Template and restore earlier versions whenever needed."
+                }
+              />
+              <FeatureCard
+                icon={"download"}
+                title={"Multi-Format Export"}
+                description={
+                  "Export metadata as CSV or JSON from individual Entities, hand-picked selections, or entire Projects at any time."
+                }
+              />
+            </Flex>
+
+            <Carousel
+              images={[
+                {
+                  path: attributeImage,
+                  caption: "Editing an Entity Attribute",
+                },
+                {
+                  path: entityImage,
+                  caption: "Viewing Entity metadata",
+                },
+                {
+                  path: searchImage,
+                  caption: "Natural language and advanced query search",
+                },
+              ]}
+            />
+          </Flex>
+
           {/* AI Features */}
           <Flex
             id={"features"}
@@ -297,87 +375,10 @@ const App = () => {
                 icon={"lightning"}
                 title={"Template Matching"}
                 description={
-                  "Name and describe a new entity and Metadatify will suggest the best-fit metadata template from your library, keeping attribute structures consistent across similar entities."
+                  "Name and describe a new Entity and Metadatify will suggest the best-fit metadata Template from your library, keeping Attribute structures consistent across similar Entities."
                 }
               />
             </Flex>
-          </Flex>
-
-          {/* Core Features */}
-          <Flex
-            id={"product"}
-            style={{ scrollMarginTop: SECTION_OFFSET }}
-            direction={"column"}
-            gap={"8"}
-            py={"8"}
-            align={"center"}
-            ref={productRef}
-          >
-            <Flex direction={"column"} align={"center"} gap={"2"} textAlign={"center"}>
-              <Heading>Built for research teams</Heading>
-              <Text color={"text.muted"}>Core tools for creating, organizing, and tracking scientific metadata.</Text>
-            </Flex>
-            <Flex direction={"row"} justify={"center"} wrap={"wrap"} gap={["4", "6"]} w={"100%"} maxW={"5xl"}>
-              <FeatureCard
-                icon={"create"}
-                title={"Structured Metadata"}
-                description={
-                  "Define reusable Templates once and apply consistent attribute structures across every entity in your workspace."
-                }
-              />
-              <FeatureCard
-                icon={"project"}
-                title={"Projects"}
-                description={
-                  "Group entities into Projects to track experimental cohorts, sample batches, or any collection your lab workflow requires."
-                }
-              />
-              <FeatureCard
-                icon={"person"}
-                title={"Collaboration"}
-                description={
-                  "Add lab members by their ORCiD. Everyone in a shared Workspace sees the same metadata, always current."
-                }
-              />
-              <FeatureCard
-                icon={"scan"}
-                title={"Physical Tracking"}
-                description={
-                  "Every entity has a unique identifier compatible with USB barcode and QR code scanners. Point a scanner at a specimen label and jump straight to its metadata record."
-                }
-              />
-              <FeatureCard
-                icon={"clock"}
-                title={"Version History"}
-                description={
-                  "Every change is tracked. Browse the full edit history of any entity and restore earlier versions whenever needed."
-                }
-              />
-              <FeatureCard
-                icon={"download"}
-                title={"Multi-Format Export"}
-                description={
-                  "Export metadata as CSV or JSON from individual entities, hand-picked selections, or entire projects at any time."
-                }
-              />
-            </Flex>
-
-            <Carousel
-              images={[
-                {
-                  path: attributeImage,
-                  caption: "Editing entity metadata attributes",
-                },
-                {
-                  path: entityImage,
-                  caption: "Viewing entity metadata",
-                },
-                {
-                  path: searchImage,
-                  caption: "Natural language and advanced query search",
-                },
-              ]}
-            />
           </Flex>
 
           {/* Get Started */}
