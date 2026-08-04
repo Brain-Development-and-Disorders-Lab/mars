@@ -7,6 +7,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
 import { toaster } from "@components/Toast";
+import Tooltip from "@components/Tooltip";
 
 // Custom types
 import { IGenericItem, MultiEntitySelectProps } from "@types";
@@ -28,7 +29,7 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
     if (invalid) {
       toaster.create({
         title: "Cannot add Entity",
-        description: "Entity already staged or in Project already",
+        description: "Entity is already staged, or Entity already exists in Project!",
         type: "warning",
         duration: 2000,
         closable: true,
@@ -51,7 +52,7 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
         gap={"1"}
         p={"1"}
         align={"center"}
-        justify={"center"}
+        justify={props.selectedEntities.length > 0 ? "start" : "center"}
         rounded={"md"}
         border={STYLES.border.style}
         borderColor={STYLES.border.color}
@@ -60,16 +61,26 @@ const MultiEntitySelect = (props: MultiEntitySelectProps) => {
       >
         {props.selectedEntities.length > 0 ? (
           props.selectedEntities.map((entity) => (
-            <Tag.Root key={entity._id} bg={"white"} rounded={"md"} pl={"0"}>
-              <Tag.Label p={"0"} fontSize={"xs"}>
-                <Flex w={"100%"} justify={"left"}>
-                  <Linky id={entity._id} type={"entities"} size={"xs"} />
+            <Tag.Root
+              key={entity._id}
+              rounded={"xl"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={"white"}
+              p={"1"}
+            >
+              <Tag.Label fontSize={"xs"} bg={"white"} border={"0px 1px 0px 1px solid"}>
+                <Flex h={"100%"} justify={"left"}>
+                  <Linky id={entity._id} type={"entities"} />
                 </Flex>
               </Tag.Label>
               <Tag.EndElement mr={"0"}>
-                <Tag.CloseTrigger
-                  onClick={() => props.setSelectedEntities((prev) => prev.filter((e) => e._id !== entity._id))}
-                />
+                <Tooltip content={"Remove"} showArrow>
+                  <Tag.CloseTrigger
+                    cursor={"pointer"}
+                    onClick={() => props.setSelectedEntities((prev) => prev.filter((e) => e._id !== entity._id))}
+                  />
+                </Tooltip>
               </Tag.EndElement>
             </Tag.Root>
           ))

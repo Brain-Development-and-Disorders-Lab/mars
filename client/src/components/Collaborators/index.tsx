@@ -59,11 +59,14 @@ const CollaboratorEmail = (props: { userId: string }) => {
   });
 
   return (
-    <Link href={`mailto:${data?.user.email}`}>
-      <Text fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
-        {loading ? "" : data?.user.email}
-      </Text>
-    </Link>
+    <Flex direction={"row"} gap={"1"}>
+      <Icon name={"email"} size={"xs"} color={"text.muted"} />
+      <Link href={`mailto:${data?.user.email}`}>
+        <Text fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
+          {loading ? "" : data?.user.email}
+        </Text>
+      </Link>
+    </Flex>
   );
 };
 
@@ -235,7 +238,9 @@ const Collaborators = (props: CollaboratorsProps) => {
                       Collaborator
                     </Text>
                     <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
-                    <CollaboratorEmail userId={collaborator._id} />
+                    <Flex ml={"0.5"}>
+                      <CollaboratorEmail userId={collaborator._id} />
+                    </Flex>
                   </Flex>
 
                   {/* Action Buttons, including Workspace remove / leave and permissions */}

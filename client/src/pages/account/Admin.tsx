@@ -246,11 +246,11 @@ const Admin = () => {
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip disabled={info.getValue().length < 32} content={info.getValue()} showArrow>
+        <Tooltip disabled={info.getValue().length < 48} content={info.getValue()} showArrow>
           <Flex direction={"row"} gap={"1"} ml={"0.5"}>
             <Icon name={"workspace"} size={"xs"} />
             <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 32 })}
+              {_.truncate(info.getValue(), { length: 48 })}
             </Text>
           </Flex>
         </Tooltip>
@@ -263,9 +263,9 @@ const Admin = () => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 40} showArrow>
+            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
               <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 40 })}
+                {_.truncate(value, { length: 48 })}
               </Text>
             </Tooltip>
           );
@@ -278,7 +278,7 @@ const Admin = () => {
         }
       },
       header: "Description",
-      meta: { minWidth: 220 } as ColumnMeta,
+      meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("owner", {
       cell: (info) => <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,

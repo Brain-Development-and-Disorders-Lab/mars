@@ -2436,7 +2436,7 @@ const Entity = () => {
                       gap={"2"}
                       p={"1"}
                       align={"center"}
-                      justify={"center"}
+                      justify={selectedProjects.length > 0 ? "start" : "center"}
                       rounded={"md"}
                       border={STYLES.border.style}
                       borderColor={STYLES.border.color}
@@ -2445,18 +2445,28 @@ const Entity = () => {
                     >
                       {selectedProjects.length > 0 ? (
                         selectedProjects.map((project) => (
-                          <Tag.Root key={project._id} bg={"white"} rounded={"md"} pl={"0"}>
-                            <Tag.Label p={"0"} fontSize={"xs"}>
-                              <Flex w={"100%"} justify={"left"}>
-                                <Linky id={project._id} type={"projects"} size={"xs"} />
+                          <Tag.Root
+                            key={entity._id}
+                            rounded={"xl"}
+                            border={STYLES.border.style}
+                            borderColor={STYLES.border.color}
+                            bg={"white"}
+                            p={"1"}
+                          >
+                            <Tag.Label fontSize={"xs"} bg={"white"} border={"0px 1px 0px 1px solid"}>
+                              <Flex h={"100%"} justify={"left"}>
+                                <Linky id={project._id} type={"projects"} />
                               </Flex>
                             </Tag.Label>
                             <Tag.EndElement mr={"0"}>
-                              <Tag.CloseTrigger
-                                onClick={() =>
-                                  setSelectedProjects(selectedProjects.filter((p) => p._id !== project._id))
-                                }
-                              />
+                              <Tooltip content={"Remove"} showArrow>
+                                <Tag.CloseTrigger
+                                  cursor={"pointer"}
+                                  onClick={() =>
+                                    setSelectedProjects((prev) => prev.filter((e) => e._id !== project._id))
+                                  }
+                                />
+                              </Tooltip>
                             </Tag.EndElement>
                           </Tag.Root>
                         ))
