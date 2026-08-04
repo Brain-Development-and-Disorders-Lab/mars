@@ -13,6 +13,7 @@ import {
   Flex,
   IconButton,
   Input,
+  Link,
   Menu,
   Portal,
   Select,
@@ -21,7 +22,6 @@ import {
   Stack,
   Text,
   createListCollection,
-  Link,
 } from "@chakra-ui/react";
 
 import {
@@ -1287,14 +1287,24 @@ const ValueRow = (props: {
     if (isValidUrl) {
       if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
         iconStyle = "l_box";
-        badgeBg = "blue.50";
+        badgeBg = "blue.100";
         badgeBorder = "blue.100";
-        iconColor = STYLES.project.color.icon;
+        iconColor = "blue.600";
       } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
         iconStyle = "l_github";
         badgeBg = "gray.100";
         badgeBorder = "gray.200";
         iconColor = STYLES.font.secondaryHeader.color;
+      } else if (urlObject.host === "labarchives.com" || urlObject.host.endsWith(".labarchives.com")) {
+        iconStyle = "l_labarchives";
+        badgeBg = "purple.100";
+        badgeBorder = "purple.200";
+        iconColor = "purple.600";
+      } else if (urlObject.host === "globus.org" || urlObject.host.endsWith(".globus.org")) {
+        iconStyle = "l_globus";
+        badgeBg = "teal.100";
+        badgeBorder = "teal.200";
+        iconColor = "teal.600";
       }
     }
 
@@ -1313,15 +1323,15 @@ const ValueRow = (props: {
         }}
       >
         {isValidUrl ? (
-          <Tooltip content={url} showArrow>
-            <Link href={url} _hover={{ textDecoration: "none" }}>
+          <Tooltip content={`Open in new tab: ${url}`} showArrow>
+            <Link href={url} _hover={{ textDecoration: "none" }} target={"_blank"} rel={"noopener noreferrer"}>
               <Flex
                 direction={"row"}
                 align={"center"}
                 h={"22px"}
                 border={STYLES.border.style}
                 borderColor={STYLES.border.color}
-                rounded={"md"}
+                rounded={"lg"}
                 overflow={"hidden"}
                 _hover={{
                   borderColor: "blue.300",
@@ -1341,10 +1351,14 @@ const ValueRow = (props: {
                   <Icon name={iconStyle} size={"xs"} color={iconColor} />
                 </Flex>
                 {/* Hostname */}
-                <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+                <Flex px={"1"} align={"center"} h={"100%"} bg={"white"}>
                   <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
                     {urlObject.host}
                   </Text>
+                </Flex>
+                {/* Platform icon badge */}
+                <Flex align={"center"} justify={"center"} bg={"white"} mr={"1.5"} h={"100%"}>
+                  <Icon name={"external"} size={"xs"} color={"gray.600"} />
                 </Flex>
               </Flex>
             </Link>

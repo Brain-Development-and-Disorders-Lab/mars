@@ -12,6 +12,7 @@ import {
   BsArrowRight,
   BsArrowRightCircleFill,
   BsArrowUpRight,
+  BsArrowUpRightSquare,
   BsArrowsAngleExpand,
   BsBank2,
   BsBarChartFill,
@@ -127,6 +128,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   delete: BsTrashFill,
   download: BsCloudDownloadFill,
   email: BsEnvelope,
+  external: BsArrowUpRightSquare,
   filter: BsFilter,
   grid: BsGrid3X2,
   upload: BsFillCloudUploadFill,
@@ -162,9 +164,9 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
 
   // Logos
   l_box: SiBox,
-  l_labArchives: BsFillBookFill,
+  l_labarchives: BsFillBookFill,
   l_globus: BsGlobe,
-  l_gitHub: BsGithub,
+  l_github: BsGithub,
 
   // Values
   v_date: BsCalendarWeekFill,

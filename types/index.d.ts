@@ -578,6 +578,7 @@ export type IconNames =
   | "delete"
   | "download"
   | "email"
+  | "external"
   | "filter"
   | "grid"
   | "upload"
@@ -613,7 +614,7 @@ export type IconNames =
 
   // Logos
   | "l_box"
-  | "l_labArchives"
+  | "l_labarchives"
   | "l_globus"
   | "l_github"
 
