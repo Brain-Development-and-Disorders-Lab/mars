@@ -16,11 +16,11 @@ jobs:
     name: Build server
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.release.tag_name || github.ref }}
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
 
@@ -52,7 +52,7 @@ jobs:
         run: zip -r out.zip ./* .env
 
       - name: Upload build output for deployment
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: node-app
           path: ./server/out.zip
@@ -66,7 +66,7 @@ jobs:
       url: ${{ steps.deploy-webapp.outputs.webapp-url }}
     steps:
       - name: Download build output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: node-app
 
