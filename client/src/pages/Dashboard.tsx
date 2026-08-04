@@ -269,7 +269,7 @@ const Dashboard = () => {
             onClick={() => navigate(`/entities/${info.row.original._id}`)}
           >
             View
-            <Icon name={"a_right"} />
+            <Icon name={"a_right"} size={"xs"} />
           </Button>
         </Flex>
       ),
@@ -403,7 +403,7 @@ const Dashboard = () => {
               onClick={() => navigate(`/projects/${info.row.original._id}`)}
             >
               View
-              <Icon name={"a_right"} />
+              <Icon name={"a_right"} size={"xs"} />
             </Button>
           </Flex>
         );

@@ -222,7 +222,7 @@ const Projects = () => {
             onClick={() => navigate(`/projects/${info.row.original._id}`)}
           >
             View
-            <Icon name={"a_right"} />
+            <Icon name={"a_right"} size={"xs"} />
           </Button>
         </Flex>
       ),

@@ -208,13 +208,15 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
             _hover={{ bg: "nav.hoverBg" }}
             onClick={() => setOpen(!open)}
           >
-            <Flex direction={"row"} gap={"1"} align={"center"} p={"1"} w={"100%"}>
-              <Icon name={"workspace"} size={"sm"} color={"nav.text"} />
+            <Flex direction={"row"} gap={"1"} align={"center"} p={"1"} w={"100%"} ml={"0.5"}>
+              <Icon name={"workspace"} size={"xs"} color={"nav.text"} />
               <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"}>
-                {_.truncate(label, { length: 18 })}
+                {_.truncate(label, { length: 22 })}
               </Text>
               <Spacer />
-              <Icon name={"c_expand"} size={"sm"} color={"nav.text"} />
+              <Flex mr={"1"}>
+                <Icon name={open ? "c_up" : "c_down"} size={"xs"} color={"nav.text"} />
+              </Flex>
             </Flex>
           </Button>
         </Menu.Trigger>

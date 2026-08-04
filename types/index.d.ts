@@ -567,8 +567,6 @@ export type IconNames =
   | "diff"
   | "info"
   | "file"
-  | "search"
-  | "search_query"
   | "bell"
   | "add"
   | "remove"
@@ -604,8 +602,9 @@ export type IconNames =
   | "settings"
   | "power"
   | "print"
-  | "text"
-  | "view"
+  | "search"
+  | "search_query"
+  | "search_text"
   | "visibility_show"
   | "visibility_hide"
   | "workspace"
@@ -639,11 +638,6 @@ export type IconNames =
   | "c_double_right"
   | "c_up"
   | "c_down"
-  | "c_expand"
-
-  // Density
-  | "d_low"
-  | "d_high"
 
   // Sorting
   | "sort"

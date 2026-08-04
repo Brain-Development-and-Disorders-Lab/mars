@@ -689,7 +689,7 @@ const Search = () => {
                 disabled={isSearching}
                 onClick={() => onTabChange("text")}
               >
-                <Icon name={"text"} size={"xs"} />
+                <Icon name={"search_text"} size={"xs"} />
                 Text
               </Button>
               <Button
