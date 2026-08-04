@@ -6,21 +6,22 @@ import {
   Button,
   EmptyState,
   Flex,
-  Heading,
   Spacer,
-  Tag,
   Text,
   Input,
   Checkbox,
   Collapsible,
   Field,
-  SkeletonText,
   Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
+import { ValueTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
+import PageHeader from "@components/PageHeader";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -29,7 +30,6 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { AttributeModel, IGenericItem } from "@types";
 
 // Utility functions and libraries
-import { getValueTypeIconProps } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -238,22 +238,7 @@ const Templates = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -261,73 +246,22 @@ const Templates = () => {
       },
     }),
     columnHelper.accessor("values", {
-      cell: (info) => {
-        const values = info.row.original.values;
-
-        // 0 Values
-        if (values.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Values
-        if (values.length > 2) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.slice(0, 2).map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {values.length - 2} other{values.length - 2 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.values}
+          max={2}
+          emptyLabel={"Values"}
+          getKey={(value) => value._id}
+          renderTag={(value) => <ValueTag value={value} />}
+        />
+      ),
       header: "Values",
       meta: {
         minWidth: 300,
       },
     }),
     columnHelper.accessor("timestamp", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -336,9 +270,7 @@ const Templates = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
@@ -349,17 +281,13 @@ const Templates = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Flex direction={"column"} gap={"0"} align={"start"}>
-              <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
-                <Heading size={"xl"}>Templates</Heading>
-              </Flex>
-              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
-                  {workspaceName}
-                </Text>
-              </SkeletonText>
-            </Flex>
+            <PageHeader
+              icon={"template"}
+              iconColor={STYLES.template.color.icon}
+              title={"Templates"}
+              subtitle={workspaceName}
+              loading={loading}
+            />
             <Spacer />
             <Tooltip
               content={"Insufficient permissions in this Workspace"}

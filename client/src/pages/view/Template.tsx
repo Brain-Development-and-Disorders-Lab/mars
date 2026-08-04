@@ -5,26 +5,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   Button,
-  CloseButton,
-  Collapsible,
-  createListCollection,
-  Drawer,
   EmptyState,
-  Field,
   Flex,
   Heading,
   Input,
   Menu,
-  Portal,
-  Select,
   SkeletonText,
   Tag,
   Text,
   Textarea,
-  Timeline,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
+import HistoryDrawer from "@components/HistoryDrawer";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import AlertDialog from "@components/AlertDialog";
@@ -42,7 +35,7 @@ import SaveDialog from "@components/SaveDialog";
 import { AttributeHistory, AttributeModel, AttributeUsage, IGenericItem, IValue, ResponseData } from "@types";
 
 // Utility functions and libraries
-import { getValueTypeIconProps, removeTypename } from "@lib/util";
+import { removeTypename } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 
@@ -96,45 +89,7 @@ const Template = () => {
 
   // History drawer
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set());
-  const [historySortOrder, setHistorySortOrder] = useState<"newest-first" | "oldest-first">("newest-first");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [appliedStartDate, setAppliedStartDate] = useState<string>("");
-  const [appliedEndDate, setAppliedEndDate] = useState<string>("");
-  const [dateFilterApplied, setDateFilterApplied] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<AttributeHistory | null>(null);
-
-  // Sorted and filtered history based on sort order and date range
-  const sortedTemplateHistory = useMemo(() => {
-    let filtered = [...templateHistory];
-
-    if (dateFilterApplied) {
-      filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.timestamp);
-        const itemDateOnly = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-
-        if (appliedStartDate) {
-          const start = new Date(appliedStartDate);
-          if (itemDateOnly < start) return false;
-        }
-
-        if (appliedEndDate) {
-          const end = new Date(appliedEndDate);
-          end.setHours(23, 59, 59, 999);
-          if (itemDateOnly > end) return false;
-        }
-
-        return true;
-      });
-    }
-
-    if (historySortOrder === "newest-first") {
-      return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    } else {
-      return filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-    }
-  }, [templateHistory, historySortOrder, dateFilterApplied, appliedStartDate, appliedEndDate]);
 
   // Computed values that use preview data when in preview mode
   const displayTemplateArchived = useMemo(() => {
@@ -462,6 +417,14 @@ const Template = () => {
     }
   };
 
+  /**
+   * Preview a Template as it was at an earlier point in time
+   */
+  const handlePreviewVersion = (templateVersion: AttributeHistory) => {
+    setPreviewVersion(templateVersion);
+    setHistoryOpen(false);
+  };
+
   // Define the columns for Template usage
   const usageColumnHelper = createColumnHelper<AttributeUsage>();
   const usageColumns = [
@@ -738,449 +701,17 @@ const Template = () => {
             </Menu.Root>
 
             {/* Version history */}
-            <Drawer.Root
+            <HistoryDrawer
+              type={"template"}
               open={historyOpen}
-              size={"lg"}
-              onOpenChange={(event) => setHistoryOpen(event.open)}
-              closeOnEscape
-              closeOnInteractOutside
-            >
-              <Drawer.Trigger asChild>
-                <Button
-                  onClick={() => setHistoryOpen(true)}
-                  variant={"subtle"}
-                  colorPalette={"gray"}
-                  size={"xs"}
-                  rounded={"md"}
-                >
-                  History
-                  <Icon name={"clock"} size={"xs"} />
-                </Button>
-              </Drawer.Trigger>
-              <Portal>
-                <Drawer.Backdrop />
-                <Drawer.Positioner padding={"4"}>
-                  <Drawer.Content rounded={"md"}>
-                    <Drawer.CloseTrigger asChild>
-                      <CloseButton top={"6px"} size={"2xs"} onClick={() => setHistoryOpen(false)} />
-                    </Drawer.CloseTrigger>
-                    <Drawer.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Icon name={"clock"} size={"xs"} />
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          Template History
-                        </Text>
-                      </Flex>
-                    </Drawer.Header>
-
-                    <Drawer.Body pt={"0"} p={"2"} px={"2"} gap={"2"}>
-                      <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} mx={"0.5"} mb={"2"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Last modified:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length > 0 ? dayjs(templateHistory[0].timestamp).fromNow() : "never"}
-                          </Text>
-                        </Flex>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Versions:
-                          </Text>
-                          <Text fontSize={"xs"} fontWeight={"normal"}>
-                            {templateHistory.length}
-                          </Text>
-                        </Flex>
-                      </Flex>
-
-                      <Flex
-                        direction={"row"}
-                        gap={"2"}
-                        align={"start"}
-                        rounded={"md"}
-                        bg={"surface.muted"}
-                        p={"2"}
-                        justify={"space-between"}
-                        wrap={"wrap"}
-                      >
-                        <Flex direction={"column"} gap={"1"} align={"center"} justify={"left"} ml={"0.5"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Sort
-                          </Text>
-                          <Select.Root
-                            value={[historySortOrder]}
-                            w={"240px"}
-                            rounded={"md"}
-                            size={"xs"}
-                            bg={"white"}
-                            collection={createListCollection({
-                              items: [
-                                {
-                                  value: "newest-first",
-                                  label: "Newest → Oldest",
-                                },
-                                {
-                                  value: "oldest-first",
-                                  label: "Oldest → Newest",
-                                },
-                              ],
-                            })}
-                            onValueChange={(details) =>
-                              setHistorySortOrder(details.value[0] as "newest-first" | "oldest-first")
-                            }
-                          >
-                            <Select.HiddenSelect />
-                            <Select.Control>
-                              <Select.Trigger rounded={"md"}>
-                                <Select.ValueText />
-                              </Select.Trigger>
-                              <Select.IndicatorGroup>
-                                <Select.Indicator />
-                              </Select.IndicatorGroup>
-                            </Select.Control>
-                            <Select.Positioner>
-                              <Select.Content>
-                                {createListCollection({
-                                  items: [
-                                    {
-                                      value: "newest-first",
-                                      label: "Newest → Oldest",
-                                    },
-                                    {
-                                      value: "oldest-first",
-                                      label: "Oldest → Newest",
-                                    },
-                                  ],
-                                }).items.map((item) => (
-                                  <Select.Item item={item} key={item.value}>
-                                    {item.label}
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                ))}
-                              </Select.Content>
-                            </Select.Positioner>
-                          </Select.Root>
-                        </Flex>
-
-                        <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
-                            Edited Between
-                          </Text>
-
-                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                Start
-                              </Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                              />
-                            </Field.Root>
-                            <Field.Root gap={"0"}>
-                              <Field.Label fontSize={"xs"} ml={"0.5"}>
-                                End
-                              </Field.Label>
-                              <Input
-                                type={"date"}
-                                size={"xs"}
-                                rounded={"md"}
-                                w={"140px"}
-                                bg={"white"}
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                              />
-                            </Field.Root>
-                          </Flex>
-                          <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"} w={"100%"}>
-                            <Button
-                              size={"xs"}
-                              rounded={"md"}
-                              variant={"solid"}
-                              colorPalette={"blue"}
-                              alignSelf={"end"}
-                              onClick={() => {
-                                if (startDate || endDate) {
-                                  setAppliedStartDate(startDate);
-                                  setAppliedEndDate(endDate);
-                                  setDateFilterApplied(true);
-                                }
-                              }}
-                            >
-                              Apply Filter
-                            </Button>
-                            <Button
-                              size={"xs"}
-                              rounded={"md"}
-                              variant={"outline"}
-                              alignSelf={"end"}
-                              bg={"white"}
-                              _hover={{ bg: "gray.50" }}
-                              onClick={() => {
-                                setStartDate("");
-                                setEndDate("");
-                                setAppliedStartDate("");
-                                setAppliedEndDate("");
-                                setDateFilterApplied(false);
-                              }}
-                            >
-                              Reset Filter
-                            </Button>
-                          </Flex>
-                        </Flex>
-                      </Flex>
-
-                      {sortedTemplateHistory.length > 0 ? (
-                        <Timeline.Root size="sm" variant="subtle" mt={"2"}>
-                          {sortedTemplateHistory.map((templateVersion) => {
-                            const isExpanded = expandedVersions.has(templateVersion.version);
-                            return (
-                              <Timeline.Item key={`v_${templateVersion.timestamp}`}>
-                                <Timeline.Connector>
-                                  <Timeline.Separator />
-                                  <Timeline.Indicator />
-                                </Timeline.Connector>
-                                <Timeline.Content>
-                                  <Flex direction={"column"} gap={"1"} w={"100%"}>
-                                    <Flex
-                                      direction={{ base: "column", sm: "row" }}
-                                      gap={"2"}
-                                      align={{ base: "start", sm: "center" }}
-                                      justify={"space-between"}
-                                    >
-                                      <Flex direction={"column"} gap={"0.5"} grow={"1"}>
-                                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                                          <Tag.Root size={"sm"} colorPalette={"green"}>
-                                            <Tag.Label fontSize={"xs"}>{templateVersion.version.slice(0, 6)}</Tag.Label>
-                                          </Tag.Root>
-                                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                            {templateVersion.name}
-                                          </Text>
-                                          <Text fontSize={"xs"} color={"text.subtle"}>
-                                            {dayjs(templateVersion.timestamp).fromNow()}
-                                          </Text>
-                                        </Flex>
-                                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                                          {templateVersion.message && !_.isEqual(templateVersion.message, "") ? (
-                                            <Tooltip
-                                              content={templateVersion.message}
-                                              disabled={templateVersion.message.length <= 40}
-                                              showArrow
-                                            >
-                                              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                                                {_.truncate(templateVersion.message, { length: 40 })}
-                                              </Text>
-                                            </Tooltip>
-                                          ) : (
-                                            <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                              <Tag.Label fontSize={"xs"}>No message</Tag.Label>
-                                            </Tag.Root>
-                                          )}
-                                        </Flex>
-                                      </Flex>
-                                      <Flex direction={"row"} gap={"1"} wrap={"wrap"}>
-                                        <Collapsible.Root
-                                          open={isExpanded}
-                                          onOpenChange={(event) => {
-                                            const newExpanded = new Set(expandedVersions);
-                                            if (event.open) {
-                                              newExpanded.add(templateVersion.version);
-                                            } else {
-                                              newExpanded.delete(templateVersion.version);
-                                            }
-                                            setExpandedVersions(newExpanded);
-                                          }}
-                                        >
-                                          <Collapsible.Trigger asChild>
-                                            <Button
-                                              size={"xs"}
-                                              variant={"subtle"}
-                                              colorPalette={"gray"}
-                                              rounded={"md"}
-                                              aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                                            >
-                                              Details
-                                              <Icon name={isExpanded ? "c_up" : "c_down"} size={"xs"} />
-                                            </Button>
-                                          </Collapsible.Trigger>
-                                        </Collapsible.Root>
-                                        <Button
-                                          variant={"solid"}
-                                          size={"xs"}
-                                          rounded={"md"}
-                                          colorPalette={"blue"}
-                                          onClick={() => {
-                                            setPreviewVersion(templateVersion);
-                                            setHistoryOpen(false);
-                                          }}
-                                          disabled={templateArchived}
-                                        >
-                                          Preview
-                                          <Icon name={"expand"} size={"xs"} />
-                                        </Button>
-                                        <Tooltip
-                                          content={"Insufficient permissions in this Workspace"}
-                                          disabled={workspacePermissions.templates.archive}
-                                          showArrow
-                                        >
-                                          <Button
-                                            variant={"solid"}
-                                            size={"xs"}
-                                            rounded={"md"}
-                                            colorPalette={"orange"}
-                                            onClick={() => handleRestoreFromHistoryClick(templateVersion)}
-                                            disabled={
-                                              templateArchived ||
-                                              !!previewVersion ||
-                                              !workspacePermissions.templates.archive
-                                            }
-                                          >
-                                            Restore
-                                            <Icon name={"rewind"} size={"xs"} />
-                                          </Button>
-                                        </Tooltip>
-                                      </Flex>
-                                    </Flex>
-
-                                    <Collapsible.Root
-                                      open={isExpanded}
-                                      onOpenChange={(event) => {
-                                        const newExpanded = new Set(expandedVersions);
-                                        if (event.open) {
-                                          newExpanded.add(templateVersion.version);
-                                        } else {
-                                          newExpanded.delete(templateVersion.version);
-                                        }
-                                        setExpandedVersions(newExpanded);
-                                      }}
-                                    >
-                                      <Collapsible.Content>
-                                        <Flex
-                                          direction={"column"}
-                                          gap={"2"}
-                                          mt={"1"}
-                                          p={"2"}
-                                          bg={"surface.subtle"}
-                                          rounded={"md"}
-                                        >
-                                          <Flex direction={"row"} gap={"2"} align={"center"}>
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Author:
-                                            </Text>
-                                            <ActorTag
-                                              identifier={templateVersion.author}
-                                              fallback={"Unknown User"}
-                                              size={"sm"}
-                                            />
-                                          </Flex>
-
-                                          <Flex direction={"column"} gap={"0.5"}>
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Description:
-                                            </Text>
-                                            {_.isEqual(templateVersion.description, "") ? (
-                                              <Flex>
-                                                <Tag.Root size={"sm"} colorPalette={"orange"}>
-                                                  <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-                                                </Tag.Root>
-                                              </Flex>
-                                            ) : (
-                                              <Text fontSize={"xs"}>{templateVersion.description}</Text>
-                                            )}
-                                          </Flex>
-
-                                          <Flex
-                                            direction={"column"}
-                                            gap={"1"}
-                                            p={"2"}
-                                            rounded={"md"}
-                                            border={STYLES.border.style}
-                                            borderColor={STYLES.border.color}
-                                            bg={"white"}
-                                          >
-                                            <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                              Values
-                                            </Text>
-                                            {templateVersion.values.length > 2 && (
-                                              <Flex direction={"row"} gap={"1"} align={"center"}>
-                                                {templateVersion.values.slice(0, 2).map((value) => (
-                                                  <Tag.Root
-                                                    colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}
-                                                  >
-                                                    <Tag.StartElement>
-                                                      <Icon
-                                                        name={getValueTypeIconProps(value.type).name}
-                                                        color={getValueTypeIconProps(value.type).color}
-                                                        size={"xs"}
-                                                      />
-                                                    </Tag.StartElement>
-                                                    <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                                                  </Tag.Root>
-                                                ))}
-                                                <Text fontSize={"xs"}>
-                                                  and {templateVersion.values.length - 2} other
-                                                  {templateVersion.values.length - 2 !== 1 ? "s" : ""}
-                                                </Text>
-                                              </Flex>
-                                            )}
-                                            {templateVersion.values.length > 0 &&
-                                              templateVersion.values.length <= 2 && (
-                                                <Flex direction={"row"} gap={"1"} align={"center"}>
-                                                  {templateVersion.values.map((value) => (
-                                                    <Tag.Root
-                                                      colorPalette={
-                                                        getValueTypeIconProps(value.type).color.split(".")[0]
-                                                      }
-                                                    >
-                                                      <Tag.StartElement>
-                                                        <Icon
-                                                          name={getValueTypeIconProps(value.type).name}
-                                                          color={getValueTypeIconProps(value.type).color}
-                                                          size={"xs"}
-                                                        />
-                                                      </Tag.StartElement>
-                                                      <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                                                    </Tag.Root>
-                                                  ))}
-                                                </Flex>
-                                              )}
-                                            {templateVersion.values.length === 0 && (
-                                              <Flex>
-                                                <Tag.Root colorPalette={"orange"}>
-                                                  <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
-                                                </Tag.Root>
-                                              </Flex>
-                                            )}
-                                          </Flex>
-                                        </Flex>
-                                      </Collapsible.Content>
-                                    </Collapsible.Root>
-                                  </Flex>
-                                </Timeline.Content>
-                              </Timeline.Item>
-                            );
-                          })}
-                        </Timeline.Root>
-                      ) : (
-                        <EmptyState.Root>
-                          <EmptyState.Content>
-                            <EmptyState.Indicator>
-                              <Icon name={"clock"} size={"lg"} />
-                            </EmptyState.Indicator>
-                            <EmptyState.Description>No History</EmptyState.Description>
-                          </EmptyState.Content>
-                        </EmptyState.Root>
-                      )}
-                    </Drawer.Body>
-                  </Drawer.Content>
-                </Drawer.Positioner>
-              </Portal>
-            </Drawer.Root>
+              onOpenChange={setHistoryOpen}
+              history={templateHistory}
+              archived={templateArchived}
+              previewActive={!!previewVersion}
+              canRestore={workspacePermissions.templates.archive}
+              onPreview={handlePreviewVersion}
+              onRestore={handleRestoreFromHistoryClick}
+            />
 
             {/* Archive Dialog */}
             <AlertDialog

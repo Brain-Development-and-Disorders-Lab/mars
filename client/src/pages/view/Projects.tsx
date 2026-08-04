@@ -4,22 +4,22 @@ import {
   Button,
   EmptyState,
   Flex,
-  Heading,
   Spacer,
-  Tag,
   Text,
   Input,
   Checkbox,
   Collapsible,
   Field,
-  SkeletonText,
   Separator,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import PageHeader from "@components/PageHeader";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -232,22 +232,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -255,55 +240,22 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("entities", {
-      cell: (info) => {
-        const entities = info.row.original.entities;
-
-        // 0 Entities
-        if (entities.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Entities
-        if (entities.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.slice(0, 1).map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-              <Text fontSize={"xs"}>
-                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.entities}
+          max={1}
+          emptyLabel={"Entities"}
+          getKey={(entity) => entity}
+          renderTag={(entity) => <Linky type={"entities"} id={entity} />}
+        />
+      ),
       header: "Entities",
       meta: {
         minWidth: 300,
       },
     }),
     columnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -312,9 +264,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
     }),
   ];
@@ -324,17 +274,13 @@ const Projects = () => {
       <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
-            <Flex direction={"column"} gap={"0"} align={"start"}>
-              <Flex direction={"row"} align={"center"} gap={"1"}>
-                <Icon name={"project"} size={"sm"} color={STYLES.project.color.icon} />
-                <Heading size={"xl"}>Projects</Heading>
-              </Flex>
-              <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
-                  {workspaceName}
-                </Text>
-              </SkeletonText>
-            </Flex>
+            <PageHeader
+              icon={"project"}
+              iconColor={STYLES.project.color.icon}
+              title={"Projects"}
+              subtitle={workspaceName}
+              loading={loading}
+            />
             <Spacer />
             <Tooltip
               content={"Insufficient permissions in this Workspace"}

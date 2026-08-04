@@ -10,7 +10,6 @@ import {
   Input,
   Spinner,
   Tabs,
-  Tag,
   Text,
   Checkbox,
   Collapsible,
@@ -20,8 +19,11 @@ import {
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
+import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import { CreatedCell } from "@components/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -357,11 +359,7 @@ const Search = () => {
       searchResultColumnHelper.accessor("description", {
         cell: (info) => {
           if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-            return (
-              <Tag.Root colorPalette={"orange"}>
-                <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-              </Tag.Root>
-            );
+            return <EmptyTag label={"Description"} />;
           }
           return (
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
@@ -378,65 +376,22 @@ const Search = () => {
         },
       }),
       searchResultColumnHelper.accessor("attributes", {
-        cell: (info) => {
-          const attributes = info.row.original.attributes;
-
-          // 0 Attributes
-          if (attributes.length === 0) {
-            return (
-              <Tag.Root colorPalette={"orange"}>
-                <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-              </Tag.Root>
-            );
-          }
-
-          // Multiple Attributes
-          if (attributes.length > 1) {
-            return (
-              <Flex direction={"row"} gap={"1"} align={"center"}>
-                {attributes.slice(0, 1).map((attribute) => (
-                  <Tag.Root colorPalette={"template"}>
-                    <Tag.StartElement>
-                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                    </Tag.StartElement>
-                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                  </Tag.Root>
-                ))}
-                <Text fontSize={"xs"}>
-                  and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
-                </Text>
-              </Flex>
-            );
-          } else {
-            return (
-              <Flex direction={"row"} gap={"1"} align={"center"}>
-                {attributes.map((attribute) => (
-                  <Tag.Root colorPalette={"template"}>
-                    <Tag.StartElement>
-                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                    </Tag.StartElement>
-                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                  </Tag.Root>
-                ))}
-              </Flex>
-            );
-          }
-        },
+        cell: (info) => (
+          <FieldTagList
+            items={info.row.original.attributes}
+            max={1}
+            emptyLabel={"Attributes"}
+            getKey={(attribute) => attribute._id}
+            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+          />
+        ),
         header: "Attributes",
         meta: {
           minWidth: 240,
         },
       }),
       searchResultColumnHelper.accessor("created", {
-        cell: (info) => {
-          return (
-            <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                {dayjs(info.getValue()).fromNow()}
-              </Text>
-            </Tooltip>
-          );
-        },
+        cell: (info) => <CreatedCell value={info.getValue()} />,
         header: "Created",
         meta: {
           minWidth: 120,

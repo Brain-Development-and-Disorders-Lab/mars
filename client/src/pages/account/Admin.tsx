@@ -5,6 +5,7 @@ import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@cha
 import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
 import DataTable, { ColumnMeta } from "@components/DataTable";
+import { EmptyTag } from "@components/FieldTag";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
@@ -270,11 +271,7 @@ const Admin = () => {
             </Tooltip>
           );
         } else {
-          return (
-            <Tag.Root colorPalette={"orange"} size={"sm"}>
-              <Tag.Label>No Description</Tag.Label>
-            </Tag.Root>
-          );
+          return <EmptyTag label={"Description"} size={"sm"} />;
         }
       },
       header: "Description",

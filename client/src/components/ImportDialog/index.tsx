@@ -24,6 +24,8 @@ import { createColumnHelper } from "@tanstack/react-table";
 import ActorTag from "@components/ActorTag";
 import AlertDialog from "@components/AlertDialog";
 import AddAttributeDialog from "@components/AddAttributeDialog";
+import { EmptyTag, ValueTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import { Information } from "@components/Label";
 import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import CounterSelect from "@components/CounterSelect";
@@ -1005,11 +1007,7 @@ const ImportDialog = (props: ImportDialogProps) => {
     attributeColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
+          return <EmptyTag label={"Description"} />;
         }
         return (
           <Flex>
@@ -1022,58 +1020,15 @@ const ImportDialog = (props: ImportDialogProps) => {
       header: "Description",
     }),
     attributeColumnHelper.accessor("values", {
-      cell: (info) => {
-        const values = info.row.original.values;
-
-        // 0 Values
-        if (values.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Values</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Values
-        if (values.length > 2) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.slice(0, 2).map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {values.length - 2} other{values.length - 2 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {values.map((value) => (
-                <Tag.Root colorPalette={getValueTypeIconProps(value.type).color.split(".")[0]}>
-                  <Tag.StartElement>
-                    <Icon
-                      name={getValueTypeIconProps(value.type).name}
-                      color={getValueTypeIconProps(value.type).color}
-                      size={"xs"}
-                    />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{value.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.values}
+          max={2}
+          emptyLabel={"Values"}
+          getKey={(value) => value._id}
+          renderTag={(value) => <ValueTag value={value} />}
+        />
+      ),
       header: "Values",
     }),
   ];
@@ -1429,27 +1384,23 @@ const ImportDialog = (props: ImportDialogProps) => {
                     <Text fontWeight={"semibold"} fontSize={"xs"}>
                       Columns:
                     </Text>
-                    {columns.slice(0, MAX_DISPLAYED_COLUMNS).map((column) => {
-                      const iconProps = getValueTypeIconProps(column.inferredType);
-                      const used = columnSelected(column.name);
-                      return (
-                        <Tag.Root
-                          key={column.name}
-                          bg={used ? "green.100" : "white"}
-                          colorPalette={used ? "green" : "gray"}
-                        >
-                          <Tag.StartElement>
-                            <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
-                          </Tag.StartElement>
-                          <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
-                        </Tag.Root>
-                      );
-                    })}
-                    {columns.length > MAX_DISPLAYED_COLUMNS && (
-                      <Tag.Root>
-                        <Tag.Label fontSize={"xs"}>and {columns.length - MAX_DISPLAYED_COLUMNS} more</Tag.Label>
-                      </Tag.Root>
-                    )}
+                    <FieldTagList
+                      items={columns}
+                      max={MAX_DISPLAYED_COLUMNS}
+                      getKey={(column) => column.name}
+                      renderTag={(column) => {
+                        const iconProps = getValueTypeIconProps(column.inferredType);
+                        const used = columnSelected(column.name);
+                        return (
+                          <Tag.Root bg={used ? "green.100" : "white"} colorPalette={used ? "green" : "gray"}>
+                            <Tag.StartElement>
+                              <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
+                            </Tag.StartElement>
+                            <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
+                          </Tag.Root>
+                        );
+                      }}
+                    />
                   </Flex>
                 )}
               </Flex>

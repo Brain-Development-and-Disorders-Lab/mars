@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Text, Tag, Badge, EmptyState, SkeletonText } from "@chakra-ui/react";
+import { Button, Flex, Text, Badge, EmptyState } from "@chakra-ui/react";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
+import { AttributeTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import ActorTag from "@components/ActorTag";
 import Linky from "@components/Linky";
+import PageHeader from "@components/PageHeader";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
@@ -279,22 +283,12 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("timestamp", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -303,22 +297,7 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -326,50 +305,15 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("attributes", {
-      cell: (info) => {
-        const attributes = info.row.original.attributes;
-
-        // 0 Attributes
-        if (attributes.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Attributes
-        if (attributes.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.slice(0, 1).map((attribute) => (
-                <Tag.Root colorPalette={"template"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.map((attribute) => (
-                <Tag.Root colorPalette={"template"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.attributes}
+          max={1}
+          emptyLabel={"Attributes"}
+          getKey={(attribute) => attribute._id}
+          renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+        />
+      ),
       header: "Attributes",
       enableHiding: true,
       meta: {
@@ -414,22 +358,12 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
+      cell: (info) => <OwnerCell value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
+      cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -438,22 +372,7 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
+      cell: (info) => <DescriptionCell value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -461,40 +380,15 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("entities", {
-      cell: (info) => {
-        const entities = info.row.original.entities;
-
-        // 0 Entities
-        if (entities.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Entities</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Entities
-        if (entities.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.slice(0, 1).map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-              <Text fontSize={"xs"}>
-                and {entities.length - 1} other{entities.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {entities.map((entity) => (
-                <Linky type={"entities"} id={entity} />
-              ))}
-            </Flex>
-          );
-        }
-      },
+      cell: (info) => (
+        <FieldTagList
+          items={info.row.original.entities}
+          max={1}
+          emptyLabel={"Entities"}
+          getKey={(entity) => entity}
+          renderTag={(entity) => <Linky type={"entities"} id={entity} />}
+        />
+      ),
       header: "Entities",
       enableHiding: true,
       meta: {
@@ -590,17 +484,7 @@ const Dashboard = () => {
 
         {/* Header */}
         <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
-          <Flex direction={"column"} gap={"0"} align={"start"}>
-            <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"dashboard"} size={"sm"} />
-              <Heading size={"xl"}>Dashboard</Heading>
-            </Flex>
-            <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
-                {workspaceName}
-              </Text>
-            </SkeletonText>
-          </Flex>
+          <PageHeader icon={"dashboard"} title={"Dashboard"} subtitle={workspaceName ?? ""} loading={loading} />
 
           <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
         </Flex>

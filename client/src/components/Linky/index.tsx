@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Button, Flex, HoverCard, Portal, Separator, Skeleton, Tag, Text } from "@chakra-ui/react";
+import { EmptyTag } from "@components/FieldTag";
+import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
@@ -375,9 +377,7 @@ const Linky = (props: LinkyProps) => {
                   </Text>
                   <Flex>
                     {_.isUndefined(navigatorDescription) || navigatorDescription === "" ? (
-                      <Tag.Root colorPalette={"orange"}>
-                        <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-                      </Tag.Root>
+                      <EmptyTag label={"Description"} />
                     ) : (
                       <Tooltip disabled={navigatorDescription.length < 32} content={navigatorDescription}>
                         <Text fontSize={"xs"}>{_.truncate(navigatorDescription, { length: 32 })}</Text>
@@ -391,33 +391,23 @@ const Linky = (props: LinkyProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     {navigatorLabel}
                   </Text>
-                  {navigatorItems.length === 0 ? (
-                    <Flex>
-                      <Tag.Root colorPalette={"orange"} size={"sm"}>
-                        <Tag.Label fontSize={"xs"}>No {navigatorLabel}</Tag.Label>
-                      </Tag.Root>
-                    </Flex>
-                  ) : (
-                    <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
-                      {navigatorItems.slice(0, NAVIGATOR_PREVIEW_COUNT).map((item) => {
-                        const itemStyle = getNavigatorItemStyle(item);
-                        return (
-                          <Tag.Root key={item._id} colorPalette={itemStyle.palette} size={"sm"}>
-                            <Tag.StartElement>
-                              <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
-                            </Tag.StartElement>
-                            <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
-                          </Tag.Root>
-                        );
-                      })}
-                      {navigatorItems.length > NAVIGATOR_PREVIEW_COUNT && (
-                        <Text fontSize={"xs"} color={"gray.500"}>
-                          and {navigatorItems.length - NAVIGATOR_PREVIEW_COUNT} other
-                          {navigatorItems.length - NAVIGATOR_PREVIEW_COUNT !== 1 ? "s" : ""}
-                        </Text>
-                      )}
-                    </Flex>
-                  )}
+                  <FieldTagList
+                    items={navigatorItems}
+                    max={NAVIGATOR_PREVIEW_COUNT}
+                    emptyLabel={navigatorLabel}
+                    getKey={(item) => item._id}
+                    renderTag={(item) => {
+                      const itemStyle = getNavigatorItemStyle(item);
+                      return (
+                        <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
+                          <Tag.StartElement>
+                            <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
+                          </Tag.StartElement>
+                          <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
+                        </Tag.Root>
+                      );
+                    }}
+                  />
                 </Flex>
               </HoverCard.Content>
             </HoverCard.Positioner>
