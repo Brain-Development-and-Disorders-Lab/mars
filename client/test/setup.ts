@@ -1,10 +1,7 @@
 import "@testing-library/jest-dom/vitest";
-import { JSDOM } from "jsdom";
 import ResizeObserver from "resize-observer-polyfill";
 import { vi } from "vitest";
 import "vitest-axe/extend-expect";
-
-const { window } = new JSDOM();
 
 // ResizeObserver mock
 vi.stubGlobal("ResizeObserver", ResizeObserver);
@@ -49,13 +46,9 @@ window.URL.createObjectURL = () => "https://i.pravatar.cc/300";
 window.URL.revokeObjectURL = () => {};
 
 // navigator mock
-Object.defineProperty(window, "navigator", {
+Object.defineProperty(window.navigator, "clipboard", {
   value: {
-    clipboard: {
-      writeText: vi.fn(),
-    },
+    writeText: vi.fn(),
   },
+  configurable: true,
 });
-
-// Override globalThis
-Object.assign(global, { window, document: window.document });
