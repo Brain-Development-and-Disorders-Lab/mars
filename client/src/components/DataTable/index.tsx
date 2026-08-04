@@ -1236,4 +1236,4 @@ const DataTable = (props: DataTableProps) => {
   );
 };
 
-export default DataTable;
+export default React.memo(DataTable);

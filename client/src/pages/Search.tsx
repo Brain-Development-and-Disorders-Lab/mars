@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -55,6 +55,9 @@ import { STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
+
+// Stable reference so `DataTable` (memoized) doesn't see a new prop on every render
+const EMPTY_SELECTED_ROWS = {};
 
 const Search = () => {
   const posthog = usePostHog();
@@ -320,153 +323,156 @@ const Search = () => {
   }, [breakpoint]);
 
   const searchResultColumnHelper = createColumnHelper<EntityModel>();
-  const searchResultColumns = [
-    searchResultColumnHelper.accessor("name", {
-      cell: (info) => (
-        <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Icon name={"entity"} color={STYLES.entity.color.default} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
-              </Text>
-            </Flex>
-          </Tooltip>
-          <Button
-            size="2xs"
-            mx={"1"}
-            variant="subtle"
-            colorPalette="gray"
-            aria-label={"View Entity"}
-            onClick={() => navigate(`/entities/${info.row.original._id}`)}
-          >
-            View
-            <Icon name={"a_right"} size={"xs"} />
-          </Button>
-        </Flex>
-      ),
-      header: "Name",
-      meta: {
-        minWidth: 240,
-      },
-    }),
-    searchResultColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
-            </Tag.Root>
-          );
-        }
-        return (
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
-            <Text fontSize={"xs"} lineClamp={1}>
-              {_.truncate(info.getValue(), { length: 64 })}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Description",
-      enableHiding: true,
-      meta: {
-        minWidth: 240,
-      },
-    }),
-    searchResultColumnHelper.accessor("attributes", {
-      cell: (info) => {
-        const attributes = info.row.original.attributes;
-
-        // 0 Attributes
-        if (attributes.length === 0) {
-          return (
-            <Tag.Root colorPalette={"orange"}>
-              <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
-            </Tag.Root>
-          );
-        }
-
-        // Multiple Attributes
-        if (attributes.length > 1) {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.slice(0, 1).map((attribute) => (
-                <Tag.Root colorPalette={"template"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-              <Text fontSize={"xs"}>
-                and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
-              </Text>
-            </Flex>
-          );
-        } else {
-          return (
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              {attributes.map((attribute) => (
-                <Tag.Root colorPalette={"template"}>
-                  <Tag.StartElement>
-                    <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
-                  </Tag.StartElement>
-                  <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </Flex>
-          );
-        }
-      },
-      header: "Attributes",
-      meta: {
-        minWidth: 240,
-      },
-    }),
-    searchResultColumnHelper.accessor("created", {
-      cell: (info) => {
-        return (
-          <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              {dayjs(info.getValue()).fromNow()}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Created",
-      meta: {
-        minWidth: 120,
-        maxWidth: 120,
-      },
-    }),
-    searchResultColumnHelper.accessor("archived", {
-      cell: (info) => {
-        return (
-          <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Icon
-              name={info.getValue() ? "archive" : "check"}
-              color={info.getValue() ? "gray.500" : "green"}
-              size={"xs"}
-            />
-            <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green"}>
-              {info.getValue() ? "Archived" : "Active"}
-            </Text>
+  const searchResultColumns = useMemo(
+    () => [
+      searchResultColumnHelper.accessor("name", {
+        cell: (info) => (
+          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"entity"} color={STYLES.entity.color.default} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), { length: 48 })}
+                </Text>
+              </Flex>
+            </Tooltip>
+            <Button
+              size="2xs"
+              mx={"1"}
+              variant="subtle"
+              colorPalette="gray"
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            >
+              View
+              <Icon name={"a_right"} size={"xs"} />
+            </Button>
           </Flex>
-        );
-      },
-      header: "Status",
-      meta: {
-        minWidth: 120,
-        maxWidth: 120,
-      },
-    }),
-    searchResultColumnHelper.accessor("owner", {
-      cell: (info) => {
-        return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
-      },
-      header: "Owner",
-    }),
-  ];
+        ),
+        header: "Name",
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("description", {
+        cell: (info) => {
+          if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+            return (
+              <Tag.Root colorPalette={"orange"}>
+                <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
+              </Tag.Root>
+            );
+          }
+          return (
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
+              <Text fontSize={"xs"} lineClamp={1}>
+                {_.truncate(info.getValue(), { length: 64 })}
+              </Text>
+            </Tooltip>
+          );
+        },
+        header: "Description",
+        enableHiding: true,
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("attributes", {
+        cell: (info) => {
+          const attributes = info.row.original.attributes;
+
+          // 0 Attributes
+          if (attributes.length === 0) {
+            return (
+              <Tag.Root colorPalette={"orange"}>
+                <Tag.Label fontSize={"xs"}>No Attributes</Tag.Label>
+              </Tag.Root>
+            );
+          }
+
+          // Multiple Attributes
+          if (attributes.length > 1) {
+            return (
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                {attributes.slice(0, 1).map((attribute) => (
+                  <Tag.Root colorPalette={"template"}>
+                    <Tag.StartElement>
+                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                    </Tag.StartElement>
+                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                  </Tag.Root>
+                ))}
+                <Text fontSize={"xs"}>
+                  and {attributes.length - 1} other{attributes.length - 1 !== 1 ? "s" : ""}
+                </Text>
+              </Flex>
+            );
+          } else {
+            return (
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                {attributes.map((attribute) => (
+                  <Tag.Root colorPalette={"template"}>
+                    <Tag.StartElement>
+                      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+                    </Tag.StartElement>
+                    <Tag.Label fontSize={"xs"}>{attribute.name}</Tag.Label>
+                  </Tag.Root>
+                ))}
+              </Flex>
+            );
+          }
+        },
+        header: "Attributes",
+        meta: {
+          minWidth: 240,
+        },
+      }),
+      searchResultColumnHelper.accessor("created", {
+        cell: (info) => {
+          return (
+            <Tooltip content={dayjs(info.getValue()).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                {dayjs(info.getValue()).fromNow()}
+              </Text>
+            </Tooltip>
+          );
+        },
+        header: "Created",
+        meta: {
+          minWidth: 120,
+          maxWidth: 120,
+        },
+      }),
+      searchResultColumnHelper.accessor("archived", {
+        cell: (info) => {
+          return (
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Icon
+                name={info.getValue() ? "archive" : "check"}
+                color={info.getValue() ? "gray.500" : "green"}
+                size={"xs"}
+              />
+              <Text fontWeight={"semibold"} fontSize={"xs"} color={info.getValue() ? "gray.500" : "green"}>
+                {info.getValue() ? "Archived" : "Active"}
+              </Text>
+            </Flex>
+          );
+        },
+        header: "Status",
+        meta: {
+          minWidth: 120,
+          maxWidth: 120,
+        },
+      }),
+      searchResultColumnHelper.accessor("owner", {
+        cell: (info) => {
+          return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+        },
+        header: "Owner",
+      }),
+    ],
+    [navigate],
+  );
 
   const EXPORT_ENTITIES = gql`
     query ExportEntities($entities: [String], $format: String, $includeAttributes: Boolean) {
@@ -477,54 +483,57 @@ const Search = () => {
     fetchPolicy: "network-only",
   });
 
-  const searchResultActions: DataTableAction[] = [
-    {
-      label: (count) => `Export selection as CSV (${count})`,
-      icon: "download",
-      action: async (table, rows) => {
-        const toExport: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
-        }
+  const searchResultActions: DataTableAction[] = useMemo(
+    () => [
+      {
+        label: (count) => `Export selection as CSV (${count})`,
+        icon: "download",
+        action: async (table, rows) => {
+          const toExport: string[] = [];
+          for (const rowIndex of Object.keys(rows)) {
+            toExport.push(table.getRow(rowIndex).original._id);
+          }
 
-        const response = await exportEntities({
-          variables: { entities: toExport, format: "csv", includeAttributes: true },
-        }).catch(ignoreAbort);
+          const response = await exportEntities({
+            variables: { entities: toExport, format: "csv", includeAttributes: true },
+          }).catch(ignoreAbort);
 
-        if (response?.data?.exportEntities) {
-          FileSaver.saveAs(
-            new Blob([response.data.exportEntities]),
-            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
-          );
-        }
+          if (response?.data?.exportEntities) {
+            FileSaver.saveAs(
+              new Blob([response.data.exportEntities]),
+              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
+            );
+          }
 
-        table.resetRowSelection();
+          table.resetRowSelection();
+        },
       },
-    },
-    {
-      label: (count) => `Export selection as JSON (${count})`,
-      icon: "download",
-      action: async (table, rows: any) => {
-        const toExport: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
-        }
+      {
+        label: (count) => `Export selection as JSON (${count})`,
+        icon: "download",
+        action: async (table, rows: any) => {
+          const toExport: string[] = [];
+          for (const rowIndex of Object.keys(rows)) {
+            toExport.push(table.getRow(rowIndex).original._id);
+          }
 
-        const response = await exportEntities({
-          variables: { entities: toExport, format: "json", includeAttributes: true },
-        }).catch(ignoreAbort);
+          const response = await exportEntities({
+            variables: { entities: toExport, format: "json", includeAttributes: true },
+          }).catch(ignoreAbort);
 
-        if (response?.data?.exportEntities) {
-          FileSaver.saveAs(
-            new Blob([response.data.exportEntities]),
-            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
-          );
-        }
+          if (response?.data?.exportEntities) {
+            FileSaver.saveAs(
+              new Blob([response.data.exportEntities]),
+              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
+            );
+          }
 
-        table.resetRowSelection();
+          table.resetRowSelection();
+        },
       },
-    },
-  ];
+    ],
+    [exportEntities],
+  );
 
   const initialAdvancedQuery: SearchQuery = { combinator: "and", rules: [] };
 
@@ -1012,7 +1021,7 @@ const Search = () => {
                     <DataTable
                       columns={searchResultColumns}
                       visibleColumns={visibleColumns}
-                      selectedRows={{}}
+                      selectedRows={EMPTY_SELECTED_ROWS}
                       data={results}
                       showPagination
                       showSelection

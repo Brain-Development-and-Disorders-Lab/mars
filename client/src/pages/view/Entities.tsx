@@ -262,7 +262,7 @@ const Entities = () => {
         return (
           <Flex>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 64 })}</Text>
+              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 48 })}</Text>
             </Tooltip>
           </Flex>
         );

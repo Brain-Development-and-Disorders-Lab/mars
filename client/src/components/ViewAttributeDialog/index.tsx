@@ -111,8 +111,8 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                           setCompareDialogOpen(true);
                         }}
                       >
-                        <Icon name={"diff"} />
                         Compare
+                        <Icon name={"diff"} size={"xs"} />
                       </Button>
                       <Button
                         size={"xs"}
@@ -124,8 +124,8 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                           setCompareDialogOpen(true);
                         }}
                       >
-                        <Icon name={"reload"} />
                         Reset
+                        <Icon name={"reload"} size={"xs"} />
                       </Button>
 
                       <CompareAttributeDialog

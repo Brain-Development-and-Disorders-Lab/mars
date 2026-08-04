@@ -2270,7 +2270,7 @@ const Entity = () => {
               <Flex gap={"2"} direction={"column"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"graph"} size={"xs"} />
+                    <Icon name={"graph"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Relationships ({entityRelationships.length})
                     </Text>
@@ -2312,7 +2312,7 @@ const Entity = () => {
               <Flex gap={"1"} direction={"column"}>
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"attachment"} size={"xs"} />
+                    <Icon name={"attachment"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                       Attachments ({entityAttachments.length})
                     </Text>
