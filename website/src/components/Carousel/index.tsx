@@ -1,55 +1,22 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Existing components and icons
-import { Flex, IconButton, Image, Text } from "@chakra-ui/react";
-
-// Utility functions and libraries
-import _ from "lodash";
-import { consola } from "consola";
+import { Box, Flex, IconButton, Image, Text } from "@chakra-ui/react";
 import Icon from "../Icon";
 
 const Carousel = (props: { images: { path: string; caption: string }[] }) => {
-  const [imgPath, setImgPath] = useState("");
-  const [imgCaption, setImgCaption] = useState("");
   const [imgIndex, setImgIndex] = useState(0);
 
   // Handle clicking the previous image button
   const handlePreviousClick = () => {
-    if (imgIndex === 0) {
-      // Reset to last image
-      setImgIndex(props.images.length - 1);
-    } else {
-      setImgIndex(imgIndex - 1);
-    }
+    setImgIndex((current) => (current === 0 ? props.images.length - 1 : current - 1));
   };
 
   // Handle clicking the next image button
   const handleNextClick = () => {
-    if (imgIndex === props.images.length - 1) {
-      // Reset to first image
-      setImgIndex(0);
-    } else {
-      setImgIndex(imgIndex + 1);
-    }
+    setImgIndex((current) => (current === props.images.length - 1 ? 0 : current + 1));
   };
-
-  // Setup carousel state
-  useEffect(() => {
-    if (props.images.length > 0) {
-      setImgIndex(0);
-      setImgPath(props.images[0].path);
-      setImgCaption(props.images[0].caption);
-    } else {
-      consola.warn("No images provided for Carousel");
-    }
-  }, []);
-
-  // Update displayed image
-  useEffect(() => {
-    setImgPath(props.images[imgIndex].path);
-    setImgCaption(props.images[imgIndex].caption);
-  }, [imgIndex]);
 
   return (
     <Flex w={"100%"} direction={"column"} gap={"2"} align={"center"}>
@@ -60,10 +27,33 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
           icon={<Icon name={"c_left"} />}
           onClick={handlePreviousClick}
         />
-        <Flex h={"100%"} direction={"column"} gap={"4"}>
-          <Image src={imgPath} rounded={"xl"} maxH={"lg"} boxShadow={"lg"} />
-          <Text fontWeight={"semibold"} color={"gray.600"}>
-            {imgCaption}
+        <Flex direction={"column"} gap={"4"} align={"center"}>
+          <Box
+            position={"relative"}
+            w={["70vw", "60rem"]}
+            rounded={"xl"}
+            overflow={"hidden"}
+            boxShadow={"lg"}
+            bg={"white"}
+            // Locks the box to the screenshots' 1280x743 ratio so images fill it edge to edge
+            style={{ aspectRatio: "1280 / 743" }}
+          >
+            {props.images.map((image, index) => (
+              <Image
+                key={image.path}
+                src={image.path}
+                position={"absolute"}
+                inset={"0"}
+                w={"100%"}
+                h={"100%"}
+                objectFit={"cover"}
+                opacity={index === imgIndex ? 1 : 0}
+                transition={"opacity 0.5s ease"}
+              />
+            ))}
+          </Box>
+          <Text fontWeight={"semibold"} color={"text.muted"}>
+            {props.images[imgIndex].caption}
           </Text>
         </Flex>
         <IconButton
@@ -74,18 +64,18 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
         />
       </Flex>
       <Flex direction={"row"} justify={"space-around"} gap={"2"}>
-        {props.images.map((_image, index) => {
-          return (
-            <Flex
-              key={`img-indicator-${index}`}
-              rounded={"full"}
-              bg={index === imgIndex ? "gray.400" : "gray.200"}
-              h={"10px"}
-              w={"10px"}
-              onClick={() => setImgIndex(index)}
-            ></Flex>
-          );
-        })}
+        {props.images.map((_image, index) => (
+          <Flex
+            key={`img-indicator-${index}`}
+            rounded={"full"}
+            bg={index === imgIndex ? "blue.600" : "border.default"}
+            h={"10px"}
+            w={"10px"}
+            cursor={"pointer"}
+            transition={"background 0.2s ease"}
+            onClick={() => setImgIndex(index)}
+          />
+        ))}
       </Flex>
     </Flex>
   );
