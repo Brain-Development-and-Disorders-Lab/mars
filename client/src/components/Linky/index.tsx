@@ -155,7 +155,7 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem & { description: string } = {
       _id: props.id,
-      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(-1))}`,
+      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(0, -1))}`,
       description: "",
     };
 
