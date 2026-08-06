@@ -176,6 +176,9 @@ const Workspace = () => {
   const [updateWorkspace, { loading: workspaceUpdateLoading, error: workspaceUpdateError }] =
     useMutation<IResponseMessage>(UPDATE_WORKSPACE);
 
+  // State for Workspace editing
+  const [editing, setEditing] = useState(false);
+
   // State for Workspace details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -372,7 +375,7 @@ const Workspace = () => {
         closable: true,
       });
     } else {
-      navigate("/");
+      setEditing(false);
     }
   };
 
@@ -469,7 +472,7 @@ const Workspace = () => {
                   aria-label={"Restore"}
                   colorPalette={"orange"}
                   variant={"subtle"}
-                  disabled={!workspacePermissions.entities.archive}
+                  disabled={!workspacePermissions.entities.archive || !editing}
                   onClick={() => archiveEntity(info.row.original._id, false)}
                 >
                   Restore
@@ -497,6 +500,7 @@ const Workspace = () => {
     {
       label: "Restore Entities",
       icon: "rewind",
+      disabled: !workspacePermissions.entities.archive || !editing,
       action(table, rows) {
         const entitiesToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
@@ -532,7 +536,7 @@ const Workspace = () => {
                   aria-label={"Restore Project"}
                   colorPalette={"orange"}
                   variant={"subtle"}
-                  disabled={!workspacePermissions.projects.archive}
+                  disabled={!workspacePermissions.projects.archive || !editing}
                   onClick={() => archiveProject(info.row.original._id, false)}
                 >
                   Restore
@@ -560,6 +564,7 @@ const Workspace = () => {
     {
       label: "Restore Projects",
       icon: "rewind",
+      disabled: !workspacePermissions.projects.archive || !editing,
       action(table, rows) {
         const projectsToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
@@ -595,7 +600,7 @@ const Workspace = () => {
                   aria-label={"Restore Template"}
                   colorPalette={"orange"}
                   variant={"subtle"}
-                  disabled={!workspacePermissions.templates.archive}
+                  disabled={!workspacePermissions.templates.archive || !editing}
                   onClick={() => archiveTemplate(info.row.original._id, false)}
                 >
                   Restore
@@ -623,6 +628,7 @@ const Workspace = () => {
     {
       label: "Restore Templates",
       icon: "rewind",
+      disabled: !workspacePermissions.templates.archive || !editing,
       action(table, rows) {
         const templatesToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
@@ -715,14 +721,36 @@ const Workspace = () => {
             </Flex>
           </Flex>
 
-          {workspacePermissions.administration.edit && (
+          {!editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => navigate("/")}>
+              <Tooltip
+                content={"Insufficient permissions in this Workspace"}
+                disabled={workspacePermissions.administration.edit}
+                showArrow
+              >
+                <Button
+                  id={"dialogWorkspaceEditButton"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"blue"}
+                  disabled={!workspacePermissions.administration.edit}
+                  onClick={() => setEditing(!editing)}
+                >
+                  Edit
+                  <Icon name={"edit"} size={"xs"} />
+                </Button>
+              </Tooltip>
+            </Flex>
+          )}
+
+          {workspacePermissions.administration.edit && editing && (
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => setEditing(false)}>
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
               </Button>
               <Button
-                id={"dialogWorkspaceCreateButton"}
+                id={"dialogWorkspaceSaveButton"}
                 size={"xs"}
                 rounded={"md"}
                 colorPalette={"green"}
@@ -768,7 +796,7 @@ const Workspace = () => {
                     rounded={"md"}
                     placeholder={"Name"}
                     value={name}
-                    disabled={!workspacePermissions.administration.edit}
+                    disabled={!workspacePermissions.administration.edit || !editing}
                     onChange={(event) => setName(event.target.value)}
                   />
                 </Flex>
@@ -820,7 +848,7 @@ const Workspace = () => {
                 value={description}
                 size={"xs"}
                 h={"100%"}
-                disabled={!workspacePermissions.administration.edit}
+                disabled={!workspacePermissions.administration.edit || !editing}
                 onChange={(event) => setDescription(event.target.value)}
               />
             </Flex>
@@ -830,7 +858,7 @@ const Workspace = () => {
             {/* Workspace collaborators */}
             <Flex w={{ base: "100%", md: "50%" }}>
               <Collaborators
-                editing={true}
+                editing={editing}
                 currentUser={currentUser}
                 owner={owner}
                 collaborators={collaborators}
