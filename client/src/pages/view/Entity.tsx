@@ -22,6 +22,10 @@ import {
   Textarea,
   Breadcrumb,
   SkeletonText,
+  Select,
+  createListCollection,
+  Checkbox,
+  Link,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -154,6 +158,36 @@ const Entity = () => {
 
   // Authentication and user
   const [user, setUser] = useState("");
+
+  // Secondary identifier
+  const [showSecondaryIdentifier, setShowSecondaryIdentifier] = useState(false);
+  const secondaryIdentifierFormats = createListCollection({
+    items: [
+      { label: "GUID: NIH NIAA", value: "guid_nih_niaa" },
+      { label: "Internal", value: "internal" },
+    ],
+  });
+  const [secondaryIdentifierFormat, setSecondaryIdentifierFormat] = useState<string[]>([]);
+  const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
+  const isValidSecondaryIdentifierString = (identifier: string): boolean => {
+    if (secondaryIdentifierFormat[0] === "guid_nih_niaa") {
+      const regex = /^[A-Z0-9]{12}$/;
+      return regex.test(identifier);
+    }
+    return true;
+  };
+  const isValidSecondaryIdentifierField = () => {
+    if (secondaryIdentifierFormat.length === 1) {
+      if (secondaryIdentifierFormat[0] === "guid_nih_niaa") {
+        // NIH NIAA format
+        return isValidSecondaryIdentifierString(secondaryIdentifier);
+      } else if (secondaryIdentifier !== "") {
+        // Internal format
+        return true;
+      }
+    }
+    return false;
+  };
 
   /**
    * Helper function to get user information
@@ -1448,9 +1482,36 @@ const Entity = () => {
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Name
-                  </Text>
+                  <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                      Name
+                    </Text>
+                    <Tooltip
+                      content={
+                        "If your Entity has an external identifier (such as a GUID or other identifier) associated with it, you can specify it here."
+                      }
+                      showArrow
+                    >
+                      <Checkbox.Root
+                        size={"xs"}
+                        colorPalette={"blue"}
+                        checked={showSecondaryIdentifier}
+                        onCheckedChange={(event) => setShowSecondaryIdentifier(!!event.checked)}
+                        disabled={!editing || !!previewVersion}
+                      >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Checkbox.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                              Specify Secondary Identifier
+                            </Text>
+                            <Icon name={"info"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                          </Flex>
+                        </Checkbox.Label>
+                      </Checkbox.Root>
+                    </Tooltip>
+                  </Flex>
                   <Input
                     id={"entityNameInput"}
                     size={"xs"}
@@ -1466,6 +1527,126 @@ const Entity = () => {
                   />
                 </Flex>
               </Flex>
+
+              {/* Secondary Identifier */}
+              {showSecondaryIdentifier && (
+                <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+                  <Flex direction={"column"} gap={"2"} grow={"3"}>
+                    <Field.Root invalid={showSecondaryIdentifier && !isValidSecondaryIdentifierField()}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={STYLES.font.secondaryHeader.color}
+                        ml={"0.5"}
+                      >
+                        Secondary Identifier
+                      </Text>
+                      <Input
+                        id={"entitySecondaryIdentifierInput"}
+                        size={"xs"}
+                        value={secondaryIdentifier}
+                        onChange={(event) => setSecondaryIdentifier(event.target.value)}
+                        readOnly={!editing || !!previewVersion}
+                        rounded={"md"}
+                        border={STYLES.border.style}
+                        borderColor={STYLES.border.color}
+                        bg={"white"}
+                        disabled={secondaryIdentifierFormat.length === 0}
+                      />
+                      {secondaryIdentifierFormat.length === 1 &&
+                        secondaryIdentifierFormat[0] === "guid_nih_niaa" &&
+                        isValidSecondaryIdentifierField() && (
+                          <Field.HelperText>
+                            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                              Specify an identifier using the{" "}
+                              <Link
+                                href={"https://nda.nih.gov/niaaa/using-the-guid"}
+                                color={STYLES.font.secondaryHeader.color}
+                              >
+                                NIH NIAA
+                              </Link>{" "}
+                              format (e.g. INV123456789)
+                            </Text>
+                          </Field.HelperText>
+                        )}
+                      {secondaryIdentifierFormat.length === 1 &&
+                        secondaryIdentifierFormat[0] === "internal" &&
+                        isValidSecondaryIdentifierField() && (
+                          <Field.HelperText fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                            Specify an internal identifier, no validation will be performed
+                          </Field.HelperText>
+                        )}
+                      <Field.ErrorText>
+                        {secondaryIdentifierFormat[0] === "guid_nih_niaa" && (
+                          <Text fontSize={"xs"} ml={"0.5"}>
+                            Invalid identifier, specify an identifier using the{" "}
+                            <Link
+                              href={"https://nda.nih.gov/niaaa/using-the-guid"}
+                              fontWeight={"semibold"}
+                              color={"red.500"}
+                            >
+                              NIH NIAA
+                            </Link>{" "}
+                            format (e.g. INV123456789)
+                          </Text>
+                        )}
+                        {secondaryIdentifierFormat.length === 0 && (
+                          <Text fontSize={"xs"} ml={"0.5"}>
+                            Please select the Identifier Format
+                          </Text>
+                        )}
+                      </Field.ErrorText>
+                    </Field.Root>
+                  </Flex>
+
+                  <Flex direction={"column"} gap={"2"} grow={"1"}>
+                    <Field.Root invalid={showSecondaryIdentifier && secondaryIdentifierFormat.length === 0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={STYLES.font.secondaryHeader.color}
+                        ml={"0.5"}
+                      >
+                        Identifier Format
+                      </Text>
+                      <Select.Root
+                        value={secondaryIdentifierFormat}
+                        onValueChange={(event) => setSecondaryIdentifierFormat(event.value)}
+                        collection={secondaryIdentifierFormats}
+                        size={"xs"}
+                        width={"100%"}
+                      >
+                        <Select.HiddenSelect />
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText placeholder={"Select Identifier Format"} />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Portal>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {secondaryIdentifierFormats.items.map((format) => (
+                                <Select.Item item={format} key={format.value}>
+                                  {format.label}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Portal>
+                      </Select.Root>
+                      <Field.ErrorText>
+                        <Text fontSize={"xs"} ml={"0.5"}>
+                          Please select an Identifier Format
+                        </Text>
+                      </Field.ErrorText>
+                    </Field.Root>
+                  </Flex>
+                </Flex>
+              )}
 
               {/* "Owner", "Timestamp", and "Visibility" fields */}
               <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
