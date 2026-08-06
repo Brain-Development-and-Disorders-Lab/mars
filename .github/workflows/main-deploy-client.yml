@@ -22,6 +22,7 @@ jobs:
         working-directory: client
         run: |
           touch .env
+          echo "VITE_VERSION=$(node -p "require('./package.json').version")" >> .env
           echo "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" >> .env
           echo "VITE_POSTHOG_DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
