@@ -1,5 +1,5 @@
 // React and Chakra UI components
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Flex,
   Input,
@@ -12,6 +12,7 @@ import {
   Tabs,
   Breadcrumb,
   Tag,
+  useDisclosure,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -25,6 +26,7 @@ import DataTable from "@components/DataTable";
 import TimestampTag from "@components/TimestampTag";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
+import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import VisibilityTag from "@components/VisibilityTag";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -44,7 +46,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useBlocker } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -212,6 +214,13 @@ const Workspace = () => {
   // State for Workspace editing
   const [editing, setEditing] = useState(false);
 
+  // Navigation blocker to prompt for unsaved changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) => editing && currentLocation.pathname !== nextLocation.pathname,
+  );
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
+
   // State for Workspace details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -255,77 +264,86 @@ const Workspace = () => {
 
   const { workspace } = useWorkspace();
 
+  const refreshWorkspace = async () => {
+    // Get the Workspace information
+    const workspaceResult = await getWorkspace({
+      variables: {
+        _id: workspace,
+      },
+    });
+    if (workspaceResult.data?.workspace) {
+      setName(workspaceResult.data.workspace.name);
+      setOwner(workspaceResult.data.workspace.owner);
+      setCreated(workspaceResult.data.workspace.timestamp);
+      setDescription(workspaceResult.data.workspace.description);
+      setCollaborators(workspaceResult.data.workspace.collaborators);
+      setIsPublic(workspaceResult.data.workspace.public);
+    }
+
+    const workspaceData = await getWorkspaceData({
+      variables: {
+        projectsArchived: true,
+        entitiesArchived: true,
+      },
+    });
+    if (workspaceData.data?.entities?.entities) {
+      setEntities(workspaceData.data.entities.entities);
+      // Filter to only show archived Entities
+      setShownEntities([...workspaceData.data.entities.entities].filter((entity) => entity.archived === true));
+      setSelectedEntities({});
+    }
+    if (workspaceData.data?.projects) {
+      setProjects(workspaceData.data.projects);
+      // Filter to only show archived projects
+      setShownProjects([...workspaceData.data.projects.filter((project) => project.archived === true)]);
+      setSelectedProjects({});
+    }
+    if (workspaceData.data?.templates) {
+      setTemplates(workspaceData.data.templates);
+      // Filter to only show archived templates
+      setShownTemplates([...workspaceData.data.templates.filter((template) => template.archived === true)]);
+      setSelectedTemplates({});
+    }
+    if (workspaceData.data?.counters) {
+      setCounters(workspaceData.data.counters);
+    }
+    if (workspaceData.data?.identifierFormats) {
+      setIdentifierFormats(workspaceData.data.identifierFormats);
+    }
+
+    if (workspaceError || workspaceDataError || workspaceData.error) {
+      toaster.create({
+        title: "Error",
+        description: "Unable to refresh Workspace information",
+        type: "error",
+        duration: 2000,
+        closable: true,
+      });
+    }
+  };
+
   useEffect(() => {
-    const refreshWorkspace = async () => {
-      // Get the Workspace information
-      const workspaceResult = await getWorkspace({
-        variables: {
-          _id: workspace,
-        },
-      });
-      if (workspaceResult.data?.workspace) {
-        setName(workspaceResult.data.workspace.name);
-        setOwner(workspaceResult.data.workspace.owner);
-        setCreated(workspaceResult.data.workspace.timestamp);
-        setDescription(workspaceResult.data.workspace.description);
-        setCollaborators(workspaceResult.data.workspace.collaborators);
-        setIsPublic(workspaceResult.data.workspace.public);
-      }
-
-      const workspaceData = await getWorkspaceData({
-        variables: {
-          projectsArchived: true,
-          entitiesArchived: true,
-        },
-      });
-      if (workspaceData.data?.entities?.entities) {
-        setEntities(workspaceData.data.entities.entities);
-        setShownEntities([...workspaceData.data.entities.entities]);
-        setSelectedEntities({});
-      }
-      if (workspaceData.data?.projects) {
-        setProjects(workspaceData.data.projects);
-        // Filter to only show archived projects
-        setShownProjects([...workspaceData.data.projects.filter((project) => project.archived === true)]);
-        setSelectedProjects({});
-      }
-      if (workspaceData.data?.templates) {
-        setTemplates(workspaceData.data.templates);
-        // Filter to only show archived templates
-        setShownTemplates([...workspaceData.data.templates.filter((template) => template.archived === true)]);
-        setSelectedTemplates({});
-      }
-      if (workspaceData.data?.counters) {
-        setCounters(workspaceData.data.counters);
-      }
-      if (workspaceData.data?.identifierFormats) {
-        setIdentifierFormats(workspaceData.data.identifierFormats);
-      }
-
-      if (workspaceError || workspaceDataError || workspaceData.error) {
-        toaster.create({
-          title: "Error",
-          description: "Unable to refresh Workspace information",
-          type: "error",
-          duration: 2000,
-          closable: true,
-        });
-      }
-    };
-
     // Refresh the Workspace information when the identifier changes
     refreshWorkspace();
   }, [workspace]);
 
   // Effect to manage what contents are shown
   useEffect(() => {
-    setShownEntities([...entities]);
+    setShownEntities([...entities.filter((entity) => entity.archived === true)]);
     setSelectedEntities({});
     setShownProjects([...projects.filter((project) => project.archived === true)]);
     setSelectedProjects({});
     setShownTemplates([...templates.filter((template) => template.archived === true)]);
     setSelectedTemplates({});
   }, [entities, projects, templates]);
+
+  /**
+   * Handler function for the `Cancel` button, discard any unsaved edits by re-fetching the Workspace
+   */
+  const handleCancelClick = async () => {
+    await refreshWorkspace();
+    setEditing(false);
+  };
 
   /**
    * Handler function for dialog `Done` button, apply updates to the Workspace
@@ -833,10 +851,10 @@ const Workspace = () => {
           specifications.push("Alphanumeric");
         }
         if (formatOptions.lettersOnly) {
-          specifications.push("Letters Only");
+          specifications.push("Letters");
         }
         if (formatOptions.numbersOnly) {
-          specifications.push("Numbers Only");
+          specifications.push("Numbers");
         }
         if (formatOptions.allowSpecialCharacters) {
           specifications.push("Special Characters");
@@ -916,7 +934,7 @@ const Workspace = () => {
 
           {workspacePermissions.administration.edit && editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => setEditing(false)}>
+              <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
                 Cancel
                 <Icon name={"cross"} size={"xs"} />
               </Button>
@@ -1374,6 +1392,14 @@ const Workspace = () => {
         open={openCreateIdentifierFormat}
         onClose={() => setOpenCreateIdentifierFormat(false)}
         onCreated={handleIdentifierFormatCreated}
+      />
+
+      {/* Blocker warning message */}
+      <UnsavedChangesDialog
+        blocker={blocker}
+        cancelBlockerRef={cancelBlockerRef}
+        onClose={onBlockerClose}
+        callback={onBlockerClose}
       />
     </Content>
   );
