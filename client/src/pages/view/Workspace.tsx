@@ -863,18 +863,14 @@ const Workspace = () => {
           specifications.push("Uppercase");
         }
         return (
-          <Flex>
-            <Tooltip content={""} showArrow>
-              <Flex direction={"row"} gap={"1"}>
-                {specifications.map((specification) => {
-                  return (
-                    <Tag.Root colorPalette={"blue"}>
-                      <Tag.Label>{specification}</Tag.Label>
-                    </Tag.Root>
-                  );
-                })}
-              </Flex>
-            </Tooltip>
+          <Flex direction={"row"} gap={"1"}>
+            {specifications.map((specification) => {
+              return (
+                <Tag.Root colorPalette={"blue"}>
+                  <Tag.Label>{specification}</Tag.Label>
+                </Tag.Root>
+              );
+            })}
           </Flex>
         );
       },
