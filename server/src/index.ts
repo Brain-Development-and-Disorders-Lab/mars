@@ -24,6 +24,7 @@ import { CountersResolvers } from "@resolvers/Counters";
 import { DataResolvers } from "@resolvers/Data";
 import { DateResolver } from "@resolvers/Date";
 import { EntitiesResolvers } from "@resolvers/Entities";
+import { IdentifiersResolvers } from "@resolvers/Identifiers";
 import { ObjectResolver } from "@resolvers/Object";
 import { ProjectsResolvers } from "@resolvers/Projects";
 import { SearchResolvers } from "@resolvers/Search";
@@ -193,6 +194,7 @@ const start = async () => {
       DataResolvers,
       DateResolver,
       EntitiesResolvers,
+      IdentifiersResolvers,
       ObjectResolver,
       ProjectsResolvers,
       SearchResolvers,

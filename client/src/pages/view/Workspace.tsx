@@ -1,10 +1,24 @@
 // React and Chakra UI components
 import React, { useEffect, useState } from "react";
-import { Flex, Input, Button, Text, Heading, Code, EmptyState, Textarea } from "@chakra-ui/react";
+import {
+  Flex,
+  Input,
+  Button,
+  Text,
+  Heading,
+  Code,
+  EmptyState,
+  Textarea,
+  Tabs,
+  Breadcrumb,
+  Tag,
+} from "@chakra-ui/react";
 
 // Custom components
 import ActorTag from "@components/ActorTag";
 import Collaborators from "@components/Collaborators";
+import CreateCounterDialog from "@components/CreateCounterDialog";
+import CreateIdentifierFormatDialog from "@components/CreateIdentifierFormatDialog";
 import Icon from "@components/Icon";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -15,7 +29,15 @@ import VisibilityTag from "@components/VisibilityTag";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
-import { Collaborator, CounterModel, DataTableAction, IGenericItem, IResponseMessage, WorkspaceModel } from "@types";
+import {
+  Collaborator,
+  CounterModel,
+  DataTableAction,
+  IdentifierFormatModel,
+  IGenericItem,
+  IResponseMessage,
+  WorkspaceModel,
+} from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -114,6 +136,16 @@ const Workspace = () => {
         format
         increment
       }
+      identifierFormats {
+        _id
+        name
+        fixedLength
+        alphanumericOnly
+        lettersOnly
+        numbersOnly
+        allowSpecialCharacters
+        uppercaseRequired
+      }
     }
   `;
   const [getWorkspaceData, { loading: workspaceDataLoading, error: workspaceDataError }] = useLazyQuery<{
@@ -124,6 +156,7 @@ const Workspace = () => {
     projects: (IGenericItem & { archived: boolean })[];
     templates: (IGenericItem & { archived: boolean })[];
     counters: CounterModel[];
+    identifierFormats: IdentifierFormatModel[];
   }>(GET_WORKSPACE_DATA, {
     fetchPolicy: "network-only",
   });
@@ -186,6 +219,7 @@ const Workspace = () => {
   const [created, setCreated] = useState("");
 
   // State for Workspace contents
+  const [activeTab, setActiveTab] = useState<"entities" | "projects" | "templates">("entities");
   const [entities, setEntities] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [projects, setProjects] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [templates, setTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
@@ -210,6 +244,11 @@ const Workspace = () => {
 
   // State for Workspace Counters
   const [counters, setCounters] = useState<CounterModel[]>([]);
+  const [openCreateCounter, setOpenCreateCounter] = useState(false);
+
+  // State for Workspace Custom Identifier Formats
+  const [identifierFormats, setIdentifierFormats] = useState<IdentifierFormatModel[]>([]);
+  const [openCreateIdentifierFormat, setOpenCreateIdentifierFormat] = useState(false);
 
   // State for Workspace privacy
   const [isPublic, setIsPublic] = useState(false);
@@ -258,6 +297,9 @@ const Workspace = () => {
       }
       if (workspaceData.data?.counters) {
         setCounters(workspaceData.data.counters);
+      }
+      if (workspaceData.data?.identifierFormats) {
+        setIdentifierFormats(workspaceData.data.identifierFormats);
       }
 
       if (workspaceError || workspaceDataError || workspaceData.error) {
@@ -379,6 +421,36 @@ const Workspace = () => {
     }
   };
 
+  /**
+   * Handler function for the Counter creation dialog
+   */
+  const handleCounterCreated = async () => {
+    const workspaceData = await getWorkspaceData({
+      variables: {
+        projectsArchived: true,
+        entitiesArchived: true,
+      },
+    });
+    if (workspaceData.data?.counters) {
+      setCounters(workspaceData.data.counters);
+    }
+  };
+
+  /**
+   * Handler function for the Identifier Format creation dialog
+   */
+  const handleIdentifierFormatCreated = async () => {
+    const workspaceData = await getWorkspaceData({
+      variables: {
+        projectsArchived: true,
+        entitiesArchived: true,
+      },
+    });
+    if (workspaceData.data?.identifierFormats) {
+      setIdentifierFormats(workspaceData.data.identifierFormats);
+    }
+  };
+
   const { isBreakpointActive } = useBreakpoint();
   const truncateTableText = !isBreakpointActive("md", "up");
 
@@ -454,11 +526,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), {
-                  length: truncateTableText ? 12 : 24,
-                })}
-              </Text>
+              <Flex direction={"row"} gap={"1"}>
+                <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), {
+                    length: truncateTableText ? 12 : 24,
+                  })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"} align={"center"}>
               <Tooltip
@@ -518,11 +593,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), {
-                  length: truncateTableText ? 12 : 24,
-                })}
-              </Text>
+              <Flex direction={"row"} gap={"1"}>
+                <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), {
+                    length: truncateTableText ? 12 : 24,
+                  })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
               <Tooltip
@@ -582,11 +660,14 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), {
-                  length: truncateTableText ? 12 : 24,
-                })}
-              </Text>
+              <Flex direction={"row"} gap={"1"}>
+                <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), {
+                    length: truncateTableText ? 12 : 24,
+                  })}
+                </Text>
+              </Flex>
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
               <Tooltip
@@ -646,11 +727,14 @@ const Workspace = () => {
         return (
           <Flex p={"0.5"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), {
-                  length: truncateTableText ? 12 : 24,
-                })}
-              </Text>
+              <Flex direction={"row"} gap={"1"}>
+                <Icon name={"counter"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), {
+                    length: truncateTableText ? 12 : 24,
+                  })}
+                </Text>
+              </Flex>
             </Tooltip>
           </Flex>
         );
@@ -705,6 +789,84 @@ const Workspace = () => {
     }),
   ];
 
+  const identifierFormatsTableColumnHelper = createColumnHelper<IdentifierFormatModel>();
+  const identifierFormatTableColumns = [
+    identifierFormatsTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Flex p={"0.5"}>
+            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
+              <Flex direction={"row"} gap={"1"}>
+                <Icon name={"format"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  {_.truncate(info.getValue(), {
+                    length: truncateTableText ? 12 : 24,
+                  })}
+                </Text>
+              </Flex>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Name",
+    }),
+    identifierFormatsTableColumnHelper.accessor("fixedLength", {
+      cell: (info) => {
+        return (
+          <Flex>
+            <Tooltip content={"Required length of the identifier"} showArrow>
+              <Text fontSize={"xs"}>{info.getValue()}</Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Fixed Length",
+      meta: {
+        maxWidth: 20,
+      },
+    }),
+    identifierFormatsTableColumnHelper.accessor("alphanumericOnly", {
+      cell: (info) => {
+        const formatOptions = info.row.original;
+        const specifications = [];
+        if (formatOptions.alphanumericOnly) {
+          specifications.push("Alphanumeric");
+        }
+        if (formatOptions.lettersOnly) {
+          specifications.push("Letters Only");
+        }
+        if (formatOptions.numbersOnly) {
+          specifications.push("Numbers Only");
+        }
+        if (formatOptions.allowSpecialCharacters) {
+          specifications.push("Special Characters");
+        }
+        if (formatOptions.uppercaseRequired) {
+          specifications.push("Uppercase");
+        }
+        return (
+          <Flex>
+            <Tooltip content={""} showArrow>
+              <Flex direction={"row"} gap={"1"}>
+                {specifications.map((specification) => {
+                  return (
+                    <Tag.Root colorPalette={"blue"}>
+                      <Tag.Label>{specification}</Tag.Label>
+                    </Tag.Root>
+                  );
+                })}
+              </Flex>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Requirements",
+      meta: {
+        minWidth: 300,
+      },
+    }),
+  ];
+
   return (
     <Content
       isError={!_.isUndefined(workspaceDataError) || !_.isUndefined(workspaceError)}
@@ -712,7 +874,16 @@ const Workspace = () => {
     >
       <Flex direction={"column"}>
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} ml={"0.5"}>
+            <Breadcrumb.Root>
+              <Breadcrumb.List>
+                <Breadcrumb.Item gap={"1"}>
+                  <Icon name={"workspace"} size={"xs"} color={"black"} />
+                  Workspaces
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </Breadcrumb.List>
+            </Breadcrumb.Root>
             <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
               <Icon name={"workspace"} size={"sm"} />
               <Heading fontWeight={"semibold"} size={"sm"}>
@@ -866,7 +1037,6 @@ const Workspace = () => {
               />
             </Flex>
 
-            {/* Workspace Entities */}
             <Flex
               direction={"column"}
               p={"2"}
@@ -880,161 +1050,287 @@ const Workspace = () => {
               minW={"0"}
             >
               <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                <Icon name={"archive"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                  Archived Entities ({shownEntities.length})
+                  Archived
                 </Text>
               </Flex>
-              <Flex
+
+              <Tabs.Root
                 w={"100%"}
-                minW={"0"}
-                justify={"flex-start"}
-                align={shownEntities.length > 0 ? "" : "center"}
-                minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+                value={activeTab}
+                onValueChange={(details) => setActiveTab(details.value as "entities" | "projects" | "templates")}
               >
-                {shownEntities.length > 0 ? (
-                  <DataTable
-                    data={shownEntities}
-                    columns={entitiesTableColumns}
-                    visibleColumns={{}}
-                    selectedRows={selectedEntities}
-                    actions={entitiesTableActions}
-                    showPagination
-                    showSelection
-                  />
-                ) : (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Archived Entities</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                )}
-              </Flex>
+                <Flex
+                  bg={"surface.muted"}
+                  rounded={"md"}
+                  p={"0.5"}
+                  gap={"0.5"}
+                  w={"fit-content"}
+                  mb={"1"}
+                  border={"1px solid"}
+                  borderColor={"border.default"}
+                >
+                  <Button
+                    size={"xs"}
+                    rounded={"sm"}
+                    variant={"ghost"}
+                    colorPalette={"gray"}
+                    bg={activeTab === "entities" ? "white" : "transparent"}
+                    color={"text.default"}
+                    fontWeight={activeTab === "entities" ? "semibold" : "medium"}
+                    shadow={activeTab === "entities" ? "xs" : "none"}
+                    _hover={{ bg: activeTab === "entities" ? "white" : "surface.card" }}
+                    onClick={() => setActiveTab("entities")}
+                  >
+                    <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                    Archived Entities
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    rounded={"sm"}
+                    variant={"ghost"}
+                    colorPalette={"gray"}
+                    bg={activeTab === "projects" ? "white" : "transparent"}
+                    color={"text.default"}
+                    fontWeight={activeTab === "projects" ? "semibold" : "medium"}
+                    shadow={activeTab === "projects" ? "xs" : "none"}
+                    _hover={{ bg: activeTab === "projects" ? "white" : "surface.card" }}
+                    onClick={() => setActiveTab("projects")}
+                  >
+                    <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                    Archived Projects
+                  </Button>
+                  <Button
+                    size={"xs"}
+                    rounded={"sm"}
+                    variant={"ghost"}
+                    colorPalette={"gray"}
+                    bg={activeTab === "templates" ? "white" : "transparent"}
+                    color={"text.default"}
+                    fontWeight={activeTab === "templates" ? "semibold" : "medium"}
+                    shadow={activeTab === "templates" ? "xs" : "none"}
+                    _hover={{ bg: activeTab === "templates" ? "white" : "surface.card" }}
+                    onClick={() => setActiveTab("templates")}
+                  >
+                    <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+                    Archived Templates
+                  </Button>
+                </Flex>
+
+                {/* Archived Entities */}
+                <Tabs.Content value={"entities"} p={"0"} pt={"1"}>
+                  <Flex
+                    w={"100%"}
+                    minW={"0"}
+                    justify={"flex-start"}
+                    align={shownEntities.length > 0 ? "" : "center"}
+                    minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {shownEntities.length > 0 ? (
+                      <DataTable
+                        data={shownEntities}
+                        columns={entitiesTableColumns}
+                        visibleColumns={{}}
+                        selectedRows={selectedEntities}
+                        actions={entitiesTableActions}
+                        showPagination
+                        showSelection
+                      />
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>No Archived Entities</EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
+                  </Flex>
+                </Tabs.Content>
+
+                {/* Archived Projects */}
+                <Tabs.Content value={"projects"} p={"0"} pt={"1"}>
+                  <Flex
+                    w={"100%"}
+                    minW={"0"}
+                    justify={"flex-start"}
+                    align={shownProjects.length > 0 ? "" : "center"}
+                    minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {shownProjects.length > 0 ? (
+                      <DataTable
+                        data={shownProjects}
+                        columns={projectsTableColumns}
+                        visibleColumns={{}}
+                        selectedRows={selectedProjects}
+                        actions={projectsTableActions}
+                        showPagination
+                        showSelection
+                      />
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>No Archived Projects</EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
+                  </Flex>
+                </Tabs.Content>
+
+                {/* Archived Templates */}
+                <Tabs.Content value={"templates"} p={"0"} pt={"1"}>
+                  <Flex
+                    w={"100%"}
+                    minW={"0"}
+                    justify={"flex-start"}
+                    align={shownTemplates.length > 0 ? "" : "center"}
+                    minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {shownTemplates.length > 0 ? (
+                      <DataTable
+                        data={shownTemplates}
+                        columns={templatesTableColumns}
+                        visibleColumns={{}}
+                        selectedRows={selectedTemplates}
+                        actions={templatesTableActions}
+                        showPagination
+                        showSelection
+                      />
+                    ) : (
+                      <EmptyState.Root>
+                        <EmptyState.Content>
+                          <EmptyState.Indicator>
+                            <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
+                          </EmptyState.Indicator>
+                          <EmptyState.Description>No Archived Templates</EmptyState.Description>
+                        </EmptyState.Content>
+                      </EmptyState.Root>
+                    )}
+                  </Flex>
+                </Tabs.Content>
+              </Tabs.Root>
             </Flex>
           </Flex>
 
           <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
-            {/* Workspace Projects */}
+            {/* Workspace Identifier Formats */}
             <Flex
               direction={"column"}
-              p={"1"}
-              gap={"1"}
+              p={"2"}
               h={"fit-content"}
+              gap={"2"}
+              bg={STYLES.card.bg}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
-              bg={"surface.card"}
               rounded={"md"}
-              w={{ base: "100%", md: "50%" }}
-              minW={"0"}
+              grow={"1"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                  Archived Projects ({shownProjects.length})
-                </Text>
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                justify={"space-between"}
+                gap={"1"}
+                align={"center"}
+                ml={"0.5"}
+                p={"0"}
+              >
+                <Flex direction={"row"} align={"center"}>
+                  <Icon name={"format"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                    Custom Identifier Formats
+                  </Text>
+                </Flex>
+
+                <Button
+                  id={"dialogWorkspaceAddCustomIdentifierFormatButton"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  disabled={!editing}
+                  onClick={() => setOpenCreateIdentifierFormat(true)}
+                >
+                  Create
+                  <Icon name={"add"} size={"xs"} />
+                </Button>
               </Flex>
+
               <Flex
                 w={"100%"}
                 minW={"0"}
                 justify={"flex-start"}
-                align={shownProjects.length > 0 ? "" : "center"}
-                minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+                align={identifierFormats.length > 0 ? "" : "center"}
+                minH={identifierFormats.length > 0 ? "fit-content" : "200px"}
               >
-                {shownProjects.length > 0 ? (
+                {identifierFormats.length > 0 ? (
                   <DataTable
-                    data={shownProjects}
-                    columns={projectsTableColumns}
+                    data={identifierFormats}
+                    columns={identifierFormatTableColumns}
                     visibleColumns={{}}
-                    selectedRows={selectedProjects}
-                    actions={projectsTableActions}
+                    actions={[]}
+                    selectedRows={{}}
                     showPagination
-                    showSelection
                   />
                 ) : (
                   <EmptyState.Root>
                     <EmptyState.Content>
                       <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
+                        <Icon name={"format"} size={"lg"} />
                       </EmptyState.Indicator>
-                      <EmptyState.Description>No Archived Projects</EmptyState.Description>
+                      <EmptyState.Description>No Custom Identifier Formats</EmptyState.Description>
                     </EmptyState.Content>
                   </EmptyState.Root>
                 )}
               </Flex>
             </Flex>
 
-            {/* Workspace Templates */}
+            {/* Workspace Counters */}
             <Flex
               direction={"column"}
-              p={"1"}
+              p={"2"}
               h={"fit-content"}
-              gap={"1"}
+              gap={"2"}
               border={STYLES.border.style}
               borderColor={STYLES.border.color}
               bg={"surface.card"}
               rounded={"md"}
               grow={"1"}
-              minW={"0"}
+              basis={{ base: "100%", md: "calc(50% - 4px)" }}
+              minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
-              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                  Archived Templates ({shownTemplates.length})
-                </Text>
-              </Flex>
               <Flex
                 w={"100%"}
-                minW={"0"}
-                justify={"flex-start"}
-                align={shownTemplates.length > 0 ? "" : "center"}
-                minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+                direction={"row"}
+                gap={"1"}
+                align={"center"}
+                justify={"space-between"}
+                ml={"0.5"}
+                pb={"1"}
               >
-                {shownTemplates.length > 0 ? (
-                  <DataTable
-                    data={shownTemplates}
-                    columns={templatesTableColumns}
-                    visibleColumns={{}}
-                    selectedRows={selectedTemplates}
-                    actions={templatesTableActions}
-                    showPagination
-                    showSelection
-                  />
-                ) : (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Archived Templates</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                )}
-              </Flex>
-            </Flex>
-          </Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon name={"counter"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                    Counters
+                  </Text>
+                </Flex>
 
-          <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
-            {/* Workspace Counters */}
-            <Flex
-              direction={"column"}
-              p={"1"}
-              gap={"1"}
-              h={"fit-content"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              rounded={"md"}
-              w={{ base: "100%", md: "50%" }}
-              minW={"0"}
-            >
-              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"} ml={"0.5"} py={"1.5"}>
-                <Icon name={"counter"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                  Counters
-                </Text>
+                <Button
+                  id={"dialogWorkspaceAddCounterButton"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  disabled={!editing}
+                  onClick={() => setOpenCreateCounter(true)}
+                >
+                  Create
+                  <Icon name={"add"} size={"xs"} />
+                </Button>
               </Flex>
               <Flex
                 w={"100%"}
@@ -1067,6 +1363,18 @@ const Workspace = () => {
           </Flex>
         </Flex>
       </Flex>
+
+      <CreateCounterDialog
+        open={openCreateCounter}
+        onClose={() => setOpenCreateCounter(false)}
+        onCreated={handleCounterCreated}
+      />
+
+      <CreateIdentifierFormatDialog
+        open={openCreateIdentifierFormat}
+        onClose={() => setOpenCreateIdentifierFormat(false)}
+        onCreated={handleIdentifierFormatCreated}
+      />
     </Content>
   );
 };

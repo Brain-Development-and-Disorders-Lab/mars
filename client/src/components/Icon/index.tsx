@@ -19,7 +19,6 @@ import {
   FaPaperclip,
   FaBug,
   FaCircleCheck,
-  FaCalculator,
   FaCodeCompare,
   FaCircleInfo,
   FaFile,
@@ -77,6 +76,8 @@ import {
   FaChevronUp,
   FaChevronDown,
   FaBars,
+  FaHashtag,
+  FaCode,
 } from "react-icons/fa6";
 
 // Existing and custom types
@@ -104,11 +105,12 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   attachment: FaPaperclip,
   bug: FaBug,
   check: FaCircleCheck,
-  counter: FaCalculator,
+  counter: FaHashtag,
   close: AiOutlineClose,
   diff: FaCodeCompare,
   info: FaCircleInfo,
   file: FaFile,
+  format: FaCode,
   bell: FaBell,
   add: FaCirclePlus,
   remove: FaCircleMinus,

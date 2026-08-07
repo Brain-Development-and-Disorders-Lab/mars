@@ -164,7 +164,7 @@ const Entity = () => {
   const secondaryIdentifierFormats = createListCollection({
     items: [
       { label: "GUID: NIH NIAA", value: "guid_nih_niaa" },
-      { label: "Internal", value: "internal" },
+      { label: "Custom", value: "custom" },
     ],
   });
   const [secondaryIdentifierFormat, setSecondaryIdentifierFormat] = useState<string[]>([]);

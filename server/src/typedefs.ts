@@ -706,6 +706,33 @@ export const typedefs = `#graphql
     increment: Int
     created: String
   }
+  
+  # "IdentifierFormat" type
+  type IdentifierFormat {
+    _id: String!
+    workspace: String
+    name: String
+    created: String
+    fixedLength: Int
+    alphanumericOnly: Boolean
+    lettersOnly: Boolean
+    numbersOnly: Boolean
+    allowSpecialCharacters: Boolean
+    uppercaseRequired: Boolean
+  }
+
+  # "IdentifierFormatInput" type
+  input IdentifierFormatInput {
+    workspace: String
+    name: String
+    created: String
+    fixedLength: Int
+    alphanumericOnly: Boolean
+    lettersOnly: Boolean
+    numbersOnly: Boolean
+    allowSpecialCharacters: Boolean
+    uppercaseRequired: Boolean
+  }
 
   # Define query types
   type Query {
@@ -779,6 +806,10 @@ export const typedefs = `#graphql
     currentCounterValue(_id: String): ResponseDataString
     nextCounterValue(_id: String): ResponseDataString
     nextCounterValues(_id: String, count: Int): ResponseDataStringArray
+    
+    # Identifier Format queries
+    identifierFormat(_id: String): IdentifierFormat
+    identifierFormats: [IdentifierFormat]
   }
 
   # Define mutation types
@@ -842,5 +873,8 @@ export const typedefs = `#graphql
     # Counters mutations
     createCounter(counter: CounterInput): ResponseDataString
     incrementCounter(_id: String): ResponseDataString
+    
+    # Identifier Format mutations
+    createIdentifierFormat(format: IdentifierFormatInput): ResponseDataString
   }
 `;

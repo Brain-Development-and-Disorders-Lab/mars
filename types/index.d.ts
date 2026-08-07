@@ -447,6 +447,34 @@ export type CounterProps = {
   showCreate: boolean;
 };
 
+export type CreateCounterDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (_id: string) => void;
+};
+
+// Identifier format types
+export type IIdentifierFormat = {
+  name: string;
+  workspace: string;
+  fixedLength: number;
+  alphanumericOnly: boolean;
+  lettersOnly: boolean;
+  numbersOnly: boolean;
+  allowSpecialCharacters: boolean;
+  uppercaseRequired: boolean;
+};
+
+export type IdentifierFormatModel = IIdentifierFormat & {
+  _id: string;
+};
+
+export type CreateCustomIdentifierFormatDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (_id: string) => void;
+};
+
 // Activity types
 export type IActivity = {
   timestamp: string;
@@ -615,6 +643,7 @@ export type IconNames =
   | "diff"
   | "info"
   | "file"
+  | "format"
   | "bell"
   | "add"
   | "remove"
