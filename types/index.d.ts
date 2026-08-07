@@ -456,6 +456,7 @@ export type CreateCounterDialogProps = {
 // Identifier format types
 export type IIdentifierFormat = {
   name: string;
+  created: string;
   workspace: string;
   fixedLength: number;
   alphanumericOnly: boolean;

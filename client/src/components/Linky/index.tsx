@@ -391,23 +391,25 @@ const Linky = (props: LinkyProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     {navigatorLabel}
                   </Text>
-                  <FieldTagList
-                    items={navigatorItems}
-                    max={NAVIGATOR_PREVIEW_COUNT}
-                    emptyLabel={navigatorLabel}
-                    getKey={(item) => item._id}
-                    renderTag={(item) => {
-                      const itemStyle = getNavigatorItemStyle(item);
-                      return (
-                        <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
-                          <Tag.StartElement>
-                            <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
-                          </Tag.StartElement>
-                          <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
-                        </Tag.Root>
-                      );
-                    }}
-                  />
+                  <Flex>
+                    <FieldTagList
+                      items={navigatorItems}
+                      max={NAVIGATOR_PREVIEW_COUNT}
+                      emptyLabel={navigatorLabel}
+                      getKey={(item) => item._id}
+                      renderTag={(item) => {
+                        const itemStyle = getNavigatorItemStyle(item);
+                        return (
+                          <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
+                            <Tag.StartElement>
+                              <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
+                            </Tag.StartElement>
+                            <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
+                          </Tag.Root>
+                        );
+                      }}
+                    />
+                  </Flex>
                 </Flex>
               </HoverCard.Content>
             </HoverCard.Positioner>

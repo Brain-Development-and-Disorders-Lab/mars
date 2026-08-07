@@ -25,7 +25,7 @@ import {
   Select,
   createListCollection,
   Checkbox,
-  Link,
+  ListCollection,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -60,6 +60,7 @@ import {
   EntityHistory,
   EntityModel,
   IAttribute,
+  IdentifierFormatModel,
   IGenericItem,
   IRelationship,
   ResponseData,
@@ -67,8 +68,15 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
-import { ignoreAbort, removeTypename } from "@lib/util";
-import _ from "lodash";
+import {
+  getBaseIdentifierFormatHelperText,
+  getCustomIdentifierFormatHelperText,
+  ignoreAbort,
+  isValidBaseIdentifierFormat,
+  isValidCustomIdentifierFormat,
+  removeTypename,
+} from "@lib/util";
+import _, { groupBy } from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -90,7 +98,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { auth } from "@lib/auth";
 
 // Variables
-import { STYLES } from "@variables";
+import { BASE_IDENTIFIER_FORMATS, STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -161,32 +169,44 @@ const Entity = () => {
 
   // Secondary identifier
   const [showSecondaryIdentifier, setShowSecondaryIdentifier] = useState(false);
-  const secondaryIdentifierFormats = createListCollection({
-    items: [
-      { label: "GUID: NIH NIAA", value: "guid_nih_niaa" },
-      { label: "Custom", value: "custom" },
-    ],
-  });
-  const [secondaryIdentifierFormat, setSecondaryIdentifierFormat] = useState<string[]>([]);
+  const [identifierFormats, setIdentifierFormats] = useState<ListCollection>(
+    createListCollection({
+      items: BASE_IDENTIFIER_FORMATS,
+    }),
+  );
+  const [customIdentifierFormats, setCustomIdentifierFormats] = useState<IdentifierFormatModel[]>([]);
+  const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
   const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
-  const isValidSecondaryIdentifierString = (identifier: string): boolean => {
-    if (secondaryIdentifierFormat[0] === "guid_nih_niaa") {
-      const regex = /^[A-Z0-9]{12}$/;
-      return regex.test(identifier);
-    }
-    return true;
-  };
-  const isValidSecondaryIdentifierField = () => {
-    if (secondaryIdentifierFormat.length === 1) {
-      if (secondaryIdentifierFormat[0] === "guid_nih_niaa") {
-        // NIH NIAA format
-        return isValidSecondaryIdentifierString(secondaryIdentifier);
-      } else if (secondaryIdentifier !== "") {
-        // Internal format
-        return true;
+
+  const isValidSecondaryIdentifierField = (): boolean => {
+    if (identifierFormat.length > 0) {
+      if (
+        _.includes(
+          BASE_IDENTIFIER_FORMATS.map((format) => format.value),
+          identifierFormat[0],
+        )
+      ) {
+        return isValidBaseIdentifierFormat(secondaryIdentifier, identifierFormat[0]);
+      } else {
+        const formatParameters = customIdentifierFormats.filter((format) => format._id === identifierFormat[0]);
+        return isValidCustomIdentifierFormat(secondaryIdentifier, formatParameters[0]);
       }
     }
     return false;
+  };
+
+  const getIdentifierFormatHelperText = (format: string): string => {
+    if (
+      _.includes(
+        BASE_IDENTIFIER_FORMATS.map((baseFormat) => baseFormat.value),
+        format,
+      )
+    ) {
+      return getBaseIdentifierFormatHelperText(format);
+    } else {
+      const formatParameters = customIdentifierFormats.filter((customFormat) => customFormat._id === format);
+      return getCustomIdentifierFormatHelperText(formatParameters[0]);
+    }
   };
 
   /**
@@ -309,6 +329,16 @@ const Entity = () => {
         _id
         name
       }
+      identifierFormats {
+        _id
+        name
+        fixedLength
+        alphanumericOnly
+        lettersOnly
+        numbersOnly
+        allowSpecialCharacters
+        uppercaseRequired
+      }
     }
   `;
   const { loading, error, data, refetch } = useQuery<{
@@ -316,6 +346,7 @@ const Entity = () => {
     projects: IGenericItem[];
     templates: AttributeModel[];
     workspace: IGenericItem;
+    identifierFormats: IdentifierFormatModel[];
   }>(GET_ENTITY, {
     variables: {
       _id: id,
@@ -418,6 +449,22 @@ const Entity = () => {
     // Store Workspace information
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+    }
+
+    // Store Identifier Format information
+    if (data?.identifierFormats) {
+      setCustomIdentifierFormats(data.identifierFormats);
+      const customFormats = data.identifierFormats.map((format) => {
+        return {
+          label: format.name,
+          value: format._id,
+          category: "Custom",
+        };
+      });
+      const updatedIdentifierFormats = createListCollection({
+        items: [...BASE_IDENTIFIER_FORMATS, ...customFormats],
+      });
+      setIdentifierFormats(updatedIdentifierFormats);
     }
   }, [data, editing]);
 
@@ -1551,46 +1598,22 @@ const Entity = () => {
                         border={STYLES.border.style}
                         borderColor={STYLES.border.color}
                         bg={"white"}
-                        disabled={secondaryIdentifierFormat.length === 0}
+                        disabled={identifierFormat.length === 0}
                       />
-                      {secondaryIdentifierFormat.length === 1 &&
-                        secondaryIdentifierFormat[0] === "guid_nih_niaa" &&
-                        isValidSecondaryIdentifierField() && (
-                          <Field.HelperText>
-                            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                              Specify an identifier using the{" "}
-                              <Link
-                                href={"https://nda.nih.gov/niaaa/using-the-guid"}
-                                color={STYLES.font.secondaryHeader.color}
-                              >
-                                NIH NIAA
-                              </Link>{" "}
-                              format (e.g. INV123456789)
-                            </Text>
-                          </Field.HelperText>
-                        )}
-                      {secondaryIdentifierFormat.length === 1 &&
-                        secondaryIdentifierFormat[0] === "internal" &&
-                        isValidSecondaryIdentifierField() && (
-                          <Field.HelperText fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                            Specify an internal identifier, no validation will be performed
-                          </Field.HelperText>
-                        )}
+                      {isValidSecondaryIdentifierField() && (
+                        <Field.HelperText>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                            {getIdentifierFormatHelperText(identifierFormat[0])}
+                          </Text>
+                        </Field.HelperText>
+                      )}
                       <Field.ErrorText>
-                        {secondaryIdentifierFormat[0] === "guid_nih_niaa" && (
+                        {identifierFormat.length !== 0 && !isValidSecondaryIdentifierField() && (
                           <Text fontSize={"xs"} ml={"0.5"}>
-                            Invalid identifier, specify an identifier using the{" "}
-                            <Link
-                              href={"https://nda.nih.gov/niaaa/using-the-guid"}
-                              fontWeight={"semibold"}
-                              color={"red.500"}
-                            >
-                              NIH NIAA
-                            </Link>{" "}
-                            format (e.g. INV123456789)
+                            {getIdentifierFormatHelperText(identifierFormat[0])}
                           </Text>
                         )}
-                        {secondaryIdentifierFormat.length === 0 && (
+                        {identifierFormat.length === 0 && (
                           <Text fontSize={"xs"} ml={"0.5"}>
                             Please select the Identifier Format
                           </Text>
@@ -1600,7 +1623,7 @@ const Entity = () => {
                   </Flex>
 
                   <Flex direction={"column"} gap={"2"} grow={"1"}>
-                    <Field.Root invalid={showSecondaryIdentifier && secondaryIdentifierFormat.length === 0}>
+                    <Field.Root invalid={showSecondaryIdentifier && identifierFormat.length === 0}>
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
@@ -1610,9 +1633,9 @@ const Entity = () => {
                         Identifier Format
                       </Text>
                       <Select.Root
-                        value={secondaryIdentifierFormat}
-                        onValueChange={(event) => setSecondaryIdentifierFormat(event.value)}
-                        collection={secondaryIdentifierFormats}
+                        value={identifierFormat}
+                        onValueChange={(event) => setIdentifierFormat(event.value)}
+                        collection={identifierFormats}
                         size={"xs"}
                         width={"100%"}
                       >
@@ -1628,12 +1651,19 @@ const Entity = () => {
                         <Portal>
                           <Select.Positioner>
                             <Select.Content>
-                              {secondaryIdentifierFormats.items.map((format) => (
-                                <Select.Item item={format} key={format.value}>
-                                  {format.label}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ))}
+                              {Object.entries(groupBy(identifierFormats.items, (item) => item.category)).map(
+                                ([category, items]) => (
+                                  <Select.ItemGroup key={category}>
+                                    <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
+                                    {items.map((format) => (
+                                      <Select.Item item={format} key={format.value}>
+                                        {format.label}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))}
+                                  </Select.ItemGroup>
+                                ),
+                              )}
                             </Select.Content>
                           </Select.Positioner>
                         </Portal>

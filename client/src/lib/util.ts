@@ -9,6 +9,7 @@ import {
   IValue,
   IValueType,
   IconNames,
+  IdentifierFormatModel,
   SearchAttributeValue,
   SearchQuery,
   UserWorkspacePermissions,
@@ -220,6 +221,110 @@ export const isValidEmail = (email: string): boolean => {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+/**
+ * Helper function to validate an identifier against a base identifier format
+ * @param {string} value Identifier value
+ * @param {string} format Expected identifier format string
+ * @return {boolean}
+ */
+export const isValidBaseIdentifierFormat = (value: string, format: string): boolean => {
+  if (format === "guid_nih_niaa") {
+    // NIH NIAA format
+    const regex = /^[A-Z0-9]{12}$/;
+    return regex.test(value);
+  }
+  return false;
+};
+
+/**
+ * Helper function to validate an identifier against a custom identifier format
+ * @param {string} value Identifier value
+ * @param {IdentifierFormatModel} format Expected identifier format parameters
+ * @return {boolean}
+ */
+export const isValidCustomIdentifierFormat = (value: string, format: IdentifierFormatModel): boolean => {
+  if (value.length !== format.fixedLength) {
+    return false;
+  }
+
+  const validators = {
+    alphanumeric: /^[a-zA-Z0-9]+$/,
+    lettersOnly: /^[a-zA-Z]+$/,
+    numbersOnly: /^[0-9]+$/,
+    alphanumericSpecial: /^[a-zA-Z0-9!@#$%]+$/,
+    lettersSpecial: /^[a-zA-Z!@#$%]+$/,
+    numbersSpecial: /^[0-9!@#$%]+$/,
+    alphanumericUpper: /^[A-Z0-9]+$/,
+    lettersUpper: /^[A-Z]+$/,
+    alphanumericUpperSpecial: /^[A-Z0-9!@#$%]+$/,
+    lettersUpperSpecial: /^[A-Z!@#$%]+$/,
+  };
+
+  if (format.alphanumericOnly && !format.allowSpecialCharacters && !format.uppercaseRequired) {
+    // Alphanumeric only
+    return validators.alphanumeric.test(value);
+  } else if (format.lettersOnly && !format.allowSpecialCharacters && !format.uppercaseRequired) {
+    // Letters only
+    return validators.lettersOnly.test(value);
+  } else if (format.numbersOnly && !format.allowSpecialCharacters) {
+    // Numbers only
+    return validators.numbersOnly.test(value);
+  } else if (format.alphanumericOnly && format.allowSpecialCharacters && !format.uppercaseRequired) {
+    // Alphanumeric and special characters
+    return validators.alphanumericSpecial.test(value);
+  } else if (format.lettersOnly && format.allowSpecialCharacters && !format.uppercaseRequired) {
+    // Letters and special characters
+    return validators.lettersSpecial.test(value);
+  } else if (format.numbersOnly && format.allowSpecialCharacters) {
+    // Numbers and special characters
+    return validators.numbersSpecial.test(value);
+  } else if (format.alphanumericOnly && !format.allowSpecialCharacters && format.uppercaseRequired) {
+    // Alphanumeric and uppercase
+    return validators.alphanumericUpper.test(value);
+  } else if (format.lettersOnly && !format.allowSpecialCharacters && format.uppercaseRequired) {
+    // Letters and uppercase
+    return validators.lettersUpper.test(value);
+  } else if (format.alphanumericOnly && format.allowSpecialCharacters && format.uppercaseRequired) {
+    // Alphanumeric, special characters, and uppercase
+    return validators.alphanumericUpperSpecial.test(value);
+  } else if (format.lettersOnly && format.allowSpecialCharacters && format.uppercaseRequired) {
+    // Letters, special characters, and uppercase
+    return validators.lettersUpperSpecial.test(value);
+  }
+
+  return false;
+};
+
+export const getBaseIdentifierFormatHelperText = (format: string): string => {
+  if (format === "guid_nih_niaa") {
+    return "Specify an identifier using the NIH NIAA format (e.g. INV123456789)";
+  } else {
+    return "Unknown identifier format";
+  }
+};
+
+export const getCustomIdentifierFormatHelperText = (format: IdentifierFormatModel): string => {
+  const formatParameters: string[] = [];
+
+  if (format.alphanumericOnly && !format.uppercaseRequired) {
+    formatParameters.push(...["a-z", "A-Z", "0-9"]);
+  } else if (format.alphanumericOnly && format.uppercaseRequired) {
+    formatParameters.push(...["A-Z", "0-9"]);
+  } else if (format.lettersOnly && !format.uppercaseRequired) {
+    formatParameters.push(...["a-z", "A-Z"]);
+  } else if (format.lettersOnly && format.uppercaseRequired) {
+    formatParameters.push(...["A-Z"]);
+  } else if (format.numbersOnly) {
+    formatParameters.push(...["0-9"]);
+  }
+
+  if (format.allowSpecialCharacters) {
+    formatParameters.push(...["!", "@", "#", "$", "%"]);
+  }
+
+  return `Required length: ${format.fixedLength}, valid characters: ` + formatParameters.join(", ");
 };
 
 /**
