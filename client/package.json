@@ -16,6 +16,7 @@
     "lint:check": "prettier . --check",
     "lint:fix": "prettier . --write",
     "test:components": "vitest components/",
+    "test:lib": "vitest lib/",
     "test:ui": "playwright test"
   },
   "dependencies": {
