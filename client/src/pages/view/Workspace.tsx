@@ -69,6 +69,14 @@ const Workspace = () => {
   // Permissions
   const { workspacePermissions } = usePermissions();
 
+  // Enabling the "Edit" button requires one of the Workspace editing permissions
+  const canEditWorkspace =
+    workspacePermissions.administration.edit ||
+    workspacePermissions.administration.invite ||
+    workspacePermissions.entities.archive ||
+    workspacePermissions.projects.archive ||
+    workspacePermissions.templates.archive;
+
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
     query GetWorkspace($_id: String) {
@@ -786,7 +794,7 @@ const Workspace = () => {
           </Flex>
         );
       },
-      header: "Current",
+      header: "Current Value",
     }),
     countersTableColumnHelper.accessor("increment", {
       cell: (info) => {
@@ -908,17 +916,13 @@ const Workspace = () => {
 
           {!editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Tooltip
-                content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.administration.edit}
-                showArrow
-              >
+              <Tooltip content={"Insufficient permissions in this Workspace"} disabled={canEditWorkspace} showArrow>
                 <Button
                   id={"dialogWorkspaceEditButton"}
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={"blue"}
-                  disabled={!workspacePermissions.administration.edit}
+                  disabled={!canEditWorkspace}
                   onClick={() => setEditing(!editing)}
                 >
                   Edit
@@ -928,7 +932,7 @@ const Workspace = () => {
             </Flex>
           )}
 
-          {workspacePermissions.administration.edit && editing && (
+          {editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
                 Cancel

@@ -3,11 +3,13 @@ import { createTestEntity, createTestProject, createTestTemplate } from "../help
 import {
   clientPathArchive,
   clientPathDisabled,
+  clientPathEditingDisabled,
   clientPathVisible,
   openManageWorkspace,
   setupDefaultPermissions,
   test,
   toggleCollaboratorPermission,
+  toggleManageWorkspace,
   verifyClientPaths,
 } from "../helpers/permissions.helpers";
 
@@ -24,13 +26,16 @@ test.describe("Workspace Administration permissions", () => {
     const workspacePath = `/workspaces/${workspaceId}`;
 
     const clientPaths: ClientPath[] = [
-      clientPathDisabled("Workspace name field", workspacePath, (p) => p.locator("#dialogWorkspaceName")),
-      clientPathVisible("Workspace save button", workspacePath, (p) => p.locator("#dialogWorkspaceCreateButton")),
+      clientPathDisabled("Workspace view Edit button", workspacePath, (p) =>
+        p.getByRole("button", { name: "Edit", exact: true }),
+      ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Edit Workspace Details");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -44,7 +49,9 @@ test.describe("Workspace Administration permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Invite Collaborators");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 });
@@ -62,7 +69,9 @@ test.describe("Entity permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Create Entities");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -78,7 +87,9 @@ test.describe("Entity permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Edit Entities");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -90,14 +101,16 @@ test.describe("Entity permissions", () => {
 
     const clientPaths: ClientPath[] = [
       clientPathArchive("Entity view Archive menu item", `/entities/${entityId}`),
-      clientPathDisabled("Workspace archived Entities restore button", workspacePath, (p) =>
+      clientPathEditingDisabled("Workspace archived Entities restore button", workspacePath, (p) =>
         p.getByRole("button", { name: "Restore", exact: true }),
       ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Archive Entities");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 });
@@ -117,7 +130,9 @@ test.describe("Project permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Create Projects");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -133,7 +148,9 @@ test.describe("Project permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Edit Projects");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -145,14 +162,19 @@ test.describe("Project permissions", () => {
 
     const clientPaths: ClientPath[] = [
       clientPathArchive("Project view Archive menu item", `/projects/${projectId}`),
-      clientPathDisabled("Workspace archived Projects restore button", workspacePath, (p) =>
-        p.getByRole("button", { name: "Restore Project", exact: true }),
+      clientPathEditingDisabled(
+        "Workspace archived Projects restore button",
+        workspacePath,
+        (p) => p.getByRole("button", { name: "Restore Project", exact: true }),
+        "Archived Projects",
       ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Archive Projects");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 });
@@ -170,7 +192,9 @@ test.describe("Template permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Create Templates");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -186,7 +210,9 @@ test.describe("Template permissions", () => {
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Edit Templates");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
@@ -198,14 +224,19 @@ test.describe("Template permissions", () => {
 
     const clientPaths: ClientPath[] = [
       clientPathArchive("Template view Archive menu item", `/templates/${templateId}`),
-      clientPathDisabled("Workspace archived Templates restore button", workspacePath, (p) =>
-        p.getByRole("button", { name: "Restore Template", exact: true }),
+      clientPathEditingDisabled(
+        "Workspace archived Templates restore button",
+        workspacePath,
+        (p) => p.getByRole("button", { name: "Restore Template", exact: true }),
+        "Archived Templates",
       ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
+    await toggleManageWorkspace(page, "edit");
     await toggleCollaboratorPermission(page, "Archive Templates");
+    await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 });

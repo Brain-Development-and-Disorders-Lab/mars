@@ -69,6 +69,20 @@ export const openManageWorkspace = async (page: Page, workspaceId: string): Prom
 };
 
 /**
+ * Change the Workspace's management page to "Edit" or "Save" state
+ * @param {Page} page Current test Page
+ * @param {string} action Action type, differentiating between the "Save" and "Edit" buttons
+ */
+export const toggleManageWorkspace = async (page: Page, action: "save" | "edit"): Promise<void> => {
+  if (action === "edit") {
+    await page.getByRole("button", { name: "Edit", exact: true }).click();
+  } else {
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+  }
+  await page.waitForLoadState("networkidle");
+};
+
+/**
  * Toggle one of the Collaborator's Workspace permission switches by its label
  * @param {Page} page Current test Page
  * @param {string} switchLabel Text label of the `Switch` component to toggle
@@ -78,11 +92,6 @@ export const toggleCollaboratorPermission = async (page: Page, switchLabel: stri
   await page.waitForLoadState("networkidle");
   await page.getByText(switchLabel, { exact: true }).click();
   await page.getByRole("button", { name: "Done" }).click();
-
-  // The Dialog only updates local state, so the change must be persisted via the Workspace `Save` button
-  await page.getByRole("button", { name: "Save", exact: true }).click();
-  await page.waitForLoadState("networkidle");
-  await expect(page).toHaveURL("/");
 };
 
 /**
@@ -99,6 +108,39 @@ export const clientPathDisabled = (name: string, path: string, locator: (page: P
       await page.goto(path);
       await page.waitForLoadState("networkidle");
       if (granted) {
+        await expect(locator(page)).toBeEnabled();
+      } else {
+        await expect(locator(page)).toBeDisabled();
+      }
+    },
+  };
+};
+
+/**
+ * Access point state gated by a form control that only becomes enabled once the Workspace is in
+ * "editing" mode, entering that mode first when access is expected
+ * @param {string} name Path name
+ * @param {string} path Exact path
+ * @param {(page: Page) => Locator} locator Playwright `Locator` to establish gate form control
+ * @param {string} tab Optional tab label to select before checking the control
+ * @return {ClientPath}
+ */
+export const clientPathEditingDisabled = (
+  name: string,
+  path: string,
+  locator: (page: Page) => Locator,
+  tab?: string,
+): ClientPath => {
+  return {
+    name: name,
+    verify: async (page, granted) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      if (tab) {
+        await page.getByRole("button", { name: tab, exact: true }).click();
+      }
+      if (granted) {
+        await toggleManageWorkspace(page, "edit");
         await expect(locator(page)).toBeEnabled();
       } else {
         await expect(locator(page)).toBeDisabled();
