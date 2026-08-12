@@ -242,6 +242,10 @@ const Entity = () => {
         archived
         description
         projects
+        secondaryIdentifier {
+          value
+          format
+        }
         relationships {
           source {
             _id
@@ -281,6 +285,10 @@ const Entity = () => {
           owner
           description
           projects
+          secondaryIdentifier {
+            value
+            format
+          }
           relationships {
             source {
               _id
@@ -432,6 +440,9 @@ const Entity = () => {
         setEntityProjects(data.entity.projects || []);
         setEntityRelationships(data.entity.relationships || []);
         setEntityAttributes(data.entity.attributes || []);
+        setShowSecondaryIdentifier(!!data.entity.secondaryIdentifier?.value);
+        setSecondaryIdentifier(data.entity.secondaryIdentifier?.value || "");
+        setIdentifierFormat(data.entity.secondaryIdentifier?.format ? [data.entity.secondaryIdentifier.format] : []);
       }
 
       setEntityAttachments(data.entity.attachments);
@@ -591,6 +602,20 @@ const Entity = () => {
     return previewVersion ? previewVersion.archived : entityArchived;
   }, [previewVersion, entityArchived]);
 
+  const displayShowSecondaryIdentifier = useMemo(() => {
+    return previewVersion ? !!previewVersion.secondaryIdentifier?.value : showSecondaryIdentifier;
+  }, [previewVersion, showSecondaryIdentifier]);
+
+  const displaySecondaryIdentifierValue = useMemo(() => {
+    return previewVersion ? previewVersion.secondaryIdentifier?.value || "" : secondaryIdentifier;
+  }, [previewVersion, secondaryIdentifier]);
+
+  const displaySecondaryIdentifierFormat = useMemo(() => {
+    if (!previewVersion) return identifierFormat;
+    const format = previewVersion.secondaryIdentifier?.format;
+    return format ? [format] : [];
+  }, [previewVersion, identifierFormat]);
+
   const displayEntityData = useMemo(() => {
     if (previewVersion) {
       return {
@@ -645,6 +670,10 @@ const Entity = () => {
         relationships: entityRelationships,
         attributes: entityAttributes,
         attachments: entityAttachments,
+        secondaryIdentifier: {
+          value: showSecondaryIdentifier ? secondaryIdentifier : "",
+          format: showSecondaryIdentifier ? identifierFormat[0] || "" : "",
+        },
       });
       await updateEntity({
         variables: {
@@ -693,6 +722,9 @@ const Entity = () => {
     setEntityAttributes(entity.attributes);
     setEntityAttachments(entity.attachments);
     setEntityHistory(entity.history);
+    setShowSecondaryIdentifier(!!entity.secondaryIdentifier?.value);
+    setSecondaryIdentifier(entity.secondaryIdentifier?.value || "");
+    setIdentifierFormat(entity.secondaryIdentifier?.format ? [entity.secondaryIdentifier.format] : []);
   };
 
   /**
@@ -1010,6 +1042,7 @@ const Entity = () => {
         relationships: entityVersion.relationships || [],
         attributes: entityVersion.attributes || [],
         attachments: entityVersion.attachments || [],
+        secondaryIdentifier: entityVersion.secondaryIdentifier || { value: "", format: "" },
       });
       await updateEntity({
         variables: {
@@ -1031,6 +1064,9 @@ const Entity = () => {
       setEntityRelationships(entityVersion.relationships || []);
       setEntityAttributes(entityVersion.attributes || []);
       setEntityAttachments(entityVersion.attachments || []);
+      setShowSecondaryIdentifier(!!entityVersion.secondaryIdentifier?.value);
+      setSecondaryIdentifier(entityVersion.secondaryIdentifier?.value || "");
+      setIdentifierFormat(entityVersion.secondaryIdentifier?.format ? [entityVersion.secondaryIdentifier.format] : []);
 
       // Close the sidebar
       setHistoryOpen(false);
@@ -1080,6 +1116,7 @@ const Entity = () => {
           relationships: entity.relationships,
           attributes: entity.attributes,
           attachments: entity.attachments,
+          secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
         }),
       },
     });
@@ -1576,10 +1613,12 @@ const Entity = () => {
               </Flex>
 
               {/* Secondary Identifier */}
-              {showSecondaryIdentifier && (
+              {displayShowSecondaryIdentifier && (
                 <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                   <Flex direction={"column"} gap={"2"} grow={"3"}>
-                    <Field.Root invalid={showSecondaryIdentifier && !isValidSecondaryIdentifierField()}>
+                    <Field.Root
+                      invalid={!previewVersion && showSecondaryIdentifier && !isValidSecondaryIdentifierField()}
+                    >
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
@@ -1591,16 +1630,16 @@ const Entity = () => {
                       <Input
                         id={"entitySecondaryIdentifierInput"}
                         size={"xs"}
-                        value={secondaryIdentifier}
+                        value={displaySecondaryIdentifierValue}
                         onChange={(event) => setSecondaryIdentifier(event.target.value)}
                         readOnly={!editing || !!previewVersion}
                         rounded={"md"}
                         border={STYLES.border.style}
                         borderColor={STYLES.border.color}
                         bg={"white"}
-                        disabled={identifierFormat.length === 0}
+                        disabled={!previewVersion && identifierFormat.length === 0}
                       />
-                      {isValidSecondaryIdentifierField() && (
+                      {!previewVersion && isValidSecondaryIdentifierField() && (
                         <Field.HelperText>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                             {getIdentifierFormatHelperText(identifierFormat[0])}
@@ -1608,12 +1647,12 @@ const Entity = () => {
                         </Field.HelperText>
                       )}
                       <Field.ErrorText>
-                        {identifierFormat.length !== 0 && !isValidSecondaryIdentifierField() && (
+                        {!previewVersion && identifierFormat.length !== 0 && !isValidSecondaryIdentifierField() && (
                           <Text fontSize={"xs"} ml={"0.5"}>
                             {getIdentifierFormatHelperText(identifierFormat[0])}
                           </Text>
                         )}
-                        {identifierFormat.length === 0 && (
+                        {!previewVersion && identifierFormat.length === 0 && (
                           <Text fontSize={"xs"} ml={"0.5"}>
                             Please select the Identifier Format
                           </Text>
@@ -1623,7 +1662,7 @@ const Entity = () => {
                   </Flex>
 
                   <Flex direction={"column"} gap={"2"} grow={"1"}>
-                    <Field.Root invalid={showSecondaryIdentifier && identifierFormat.length === 0}>
+                    <Field.Root invalid={!previewVersion && showSecondaryIdentifier && identifierFormat.length === 0}>
                       <Text
                         fontSize={"xs"}
                         fontWeight={"semibold"}
@@ -1633,11 +1672,12 @@ const Entity = () => {
                         Identifier Format
                       </Text>
                       <Select.Root
-                        value={identifierFormat}
+                        value={displaySecondaryIdentifierFormat}
                         onValueChange={(event) => setIdentifierFormat(event.value)}
                         collection={identifierFormats}
                         size={"xs"}
                         width={"100%"}
+                        disabled={!editing || !!previewVersion}
                       >
                         <Select.HiddenSelect />
                         <Select.Control>

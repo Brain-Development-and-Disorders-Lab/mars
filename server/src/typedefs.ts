@@ -354,10 +354,23 @@ export const typedefs = `#graphql
     type: String
   }
 
+  # "SecondaryIdentifier" type storing a secondary identifier value and its format
+  type SecondaryIdentifier {
+    value: String
+    format: String
+  }
+
+  # "SecondaryIdentifierInput" input
+  input SecondaryIdentifierInput {
+    value: String
+    format: String
+  }
+
   # "Entity" type
   type Entity {
     _id: String!
     name: String
+    secondaryIdentifier: SecondaryIdentifier
     archived: Boolean
     timestamp: String
     created: String
@@ -373,6 +386,7 @@ export const typedefs = `#graphql
   # "EntityCreateInput" input, includes -"Input" types
   input EntityCreateInput {
     name: String!
+    secondaryIdentifier: SecondaryIdentifierInput
     archived: Boolean!
     created: String!
     owner: String!
@@ -387,6 +401,7 @@ export const typedefs = `#graphql
   input EntityUpdateInput {
     _id: String!
     name: String
+    secondaryIdentifier: SecondaryIdentifierInput
     archived: Boolean
     created: String
     timestamp: String
@@ -407,6 +422,7 @@ export const typedefs = `#graphql
 
     _id: String!
     name: String
+    secondaryIdentifier: SecondaryIdentifier
     owner: String
     archived: Boolean
     created: String
@@ -475,6 +491,7 @@ export const typedefs = `#graphql
   input ColumnMappingInput {
     namePrefix: String
     name: String
+    secondaryIdentifier: SecondaryIdentifierInput
     description: String
     created: String
     owner: String

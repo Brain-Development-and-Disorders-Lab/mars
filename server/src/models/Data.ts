@@ -242,6 +242,10 @@ export class Data {
       const entity: IEntity = {
         archived: false,
         name: `${columnMapping.namePrefix}${row[columnMapping.name]}`,
+        secondaryIdentifier: {
+          value: row[columnMapping.secondaryIdentifier?.value] || "",
+          format: columnMapping.secondaryIdentifier?.format || "",
+        },
         owner: columnMapping.owner,
         created: dayjs(Date.now()).toISOString(),
         description: row[columnMapping.description] || "",

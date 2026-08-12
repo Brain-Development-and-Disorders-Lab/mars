@@ -364,9 +364,16 @@ export type WorkspaceModel = IWorkspace & {
   timestamp: string;
 };
 
+// Secondary identifier assigned to an Entity
+export type SecondaryIdentifier = {
+  value: string; // Secondary identifier value
+  format: string; // Base format value or custom IdentifierFormat id
+};
+
 // Entity types
 export type IEntity = {
   name: string;
+  secondaryIdentifier?: SecondaryIdentifier;
   owner: string;
   archived: boolean;
   created: string;
@@ -395,6 +402,7 @@ export type EntityHistory = {
 
   _id: string;
   name: string;
+  secondaryIdentifier?: SecondaryIdentifier;
   owner: string;
   archived: boolean;
   created: string;
@@ -474,6 +482,15 @@ export type CreateCustomIdentifierFormatDialogProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
+};
+
+// "IdentifierFormatSelect" component props
+export type IdentifierFormatSelectProps = {
+  format: string[];
+  setFormat: (value: React.SetStateAction<string[]>) => void;
+  onFormatsChange?: (formats: IdentifierFormatModel[]) => void;
+  showCreate?: boolean;
+  disabled?: boolean;
 };
 
 // Activity types

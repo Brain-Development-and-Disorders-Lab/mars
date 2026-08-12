@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import CounterSelect from "@components/CounterSelect";
+import IdentifierFormatSelect from "@components/IdentifierFormatSelect";
 import DataTable from "@components/DataTable";
 import { EmptyTag, ValueTag } from "@components/FieldTag";
 import FieldTagList from "@components/FieldTagList";
@@ -37,13 +38,20 @@ import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { AttributeModel, IGenericItem, IRelationship, ResponseData } from "@types";
+import { AttributeModel, IdentifierFormatModel, IGenericItem, IRelationship, ResponseData } from "@types";
 
 // TanStack table
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Utility functions and libraries
-import { isValidAttributes, removeTypename } from "@lib/util";
+import {
+  getBaseIdentifierFormatHelperText,
+  getCustomIdentifierFormatHelperText,
+  isValidAttributes,
+  isValidBaseIdentifierFormat,
+  isValidCustomIdentifierFormat,
+  removeTypename,
+} from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 
@@ -62,7 +70,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { usePostHog } from "posthog-js/react";
 
 // Variables
-import { STYLES } from "@variables";
+import { BASE_IDENTIFIER_FORMATS, STYLES } from "@variables";
 
 const Entity = () => {
   const posthog = usePostHog();
@@ -98,6 +106,42 @@ const Entity = () => {
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
+
+  const [showSecondaryIdentifier, setShowSecondaryIdentifier] = useState(false);
+  const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
+  const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
+  const [customIdentifierFormats, setCustomIdentifierFormats] = useState<IdentifierFormatModel[]>([]);
+
+  const isValidSecondaryIdentifierField = (): boolean => {
+    if (identifierFormat.length > 0) {
+      if (
+        _.includes(
+          BASE_IDENTIFIER_FORMATS.map((format) => format.value),
+          identifierFormat[0],
+        )
+      ) {
+        return isValidBaseIdentifierFormat(secondaryIdentifier, identifierFormat[0]);
+      } else {
+        const formatParameters = customIdentifierFormats.filter((format) => format._id === identifierFormat[0]);
+        return isValidCustomIdentifierFormat(secondaryIdentifier, formatParameters[0]);
+      }
+    }
+    return false;
+  };
+
+  const getIdentifierFormatHelperText = (format: string): string => {
+    if (
+      _.includes(
+        BASE_IDENTIFIER_FORMATS.map((baseFormat) => baseFormat.value),
+        format,
+      )
+    ) {
+      return getBaseIdentifierFormatHelperText(format);
+    } else {
+      const formatParameters = customIdentifierFormats.filter((customFormat) => customFormat._id === format);
+      return getCustomIdentifierFormatHelperText(formatParameters[0]);
+    }
+  };
 
   const [relationships, setRelationships] = useState([] as IRelationship[]);
   const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
@@ -272,6 +316,10 @@ const Entity = () => {
         variables: {
           entity: removeTypename({
             name: generatedName,
+            secondaryIdentifier: {
+              value: showSecondaryIdentifier ? secondaryIdentifier : "",
+              format: showSecondaryIdentifier ? identifierFormat[0] || "" : "",
+            },
             owner,
             created,
             archived: false,
@@ -491,7 +539,7 @@ const Entity = () => {
                     }}
                   >
                     {useCounter ? "Use Text" : "Use Counter"}
-                    <Icon name={useCounter ? "text" : "counter"} size={"xs"} />
+                    <Icon name={useCounter ? "v_text" : "counter"} size={"xs"} />
                   </Button>
                 </Flex>
                 {isNameError && !useCounter && (
@@ -499,6 +547,63 @@ const Entity = () => {
                 )}
                 {isNameError && useCounter && (
                   <Field.ErrorText fontSize={"xs"}>A Counter must be selected or created.</Field.ErrorText>
+                )}
+              </Field.Root>
+
+              <Field.Root gap={"1"}>
+                <Checkbox.Root
+                  size={"xs"}
+                  colorPalette={"blue"}
+                  checked={showSecondaryIdentifier}
+                  onCheckedChange={(event) => setShowSecondaryIdentifier(!!event.checked)}
+                  ml={"0.5"}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label fontSize={"xs"}>Specify Secondary Identifier</Checkbox.Label>
+                </Checkbox.Root>
+
+                {showSecondaryIdentifier && (
+                  <Flex direction={"row"} gap={"2"} w={"100%"}>
+                    <Field.Root
+                      gap={"0.5"}
+                      invalid={identifierFormat.length !== 0 && !isValidSecondaryIdentifierField()}
+                    >
+                      <Field.Label fontSize={"xs"} ml={"0.5"}>
+                        Identifier
+                      </Field.Label>
+                      <Input
+                        size={"xs"}
+                        rounded={"md"}
+                        bg={"white"}
+                        value={secondaryIdentifier}
+                        disabled={identifierFormat.length === 0}
+                        onChange={(event) => setSecondaryIdentifier(event.target.value)}
+                      />
+                      {isValidSecondaryIdentifierField() && (
+                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
+                          {getIdentifierFormatHelperText(identifierFormat[0])}
+                        </Field.HelperText>
+                      )}
+                      <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
+                        {identifierFormat.length !== 0 &&
+                          !isValidSecondaryIdentifierField() &&
+                          getIdentifierFormatHelperText(identifierFormat[0])}
+                        {identifierFormat.length === 0 && "Please select the Identifier Format"}
+                      </Field.ErrorText>
+                    </Field.Root>
+                    <Field.Root gap={"0.5"}>
+                      <Field.Label fontSize={"xs"} ml={"0.5"}>
+                        Format
+                      </Field.Label>
+                      <IdentifierFormatSelect
+                        format={identifierFormat}
+                        setFormat={setIdentifierFormat}
+                        onFormatsChange={setCustomIdentifierFormats}
+                        showCreate
+                      />
+                    </Field.Root>
+                  </Flex>
                 )}
               </Field.Root>
 
