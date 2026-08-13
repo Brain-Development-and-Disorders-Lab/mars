@@ -130,11 +130,12 @@ jobs:
         with:
           node-version: 22.x
 
-      - name: Test client components
+      - name: Test lib functions and client components
         working-directory: client
         run: |
           yarn install
           yarn test:components
+          yarn test:lib
 
       - name: Start Docker containers
         run: docker compose -f "docker-compose.yml" up -d --build

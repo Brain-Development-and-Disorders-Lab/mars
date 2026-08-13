@@ -1,32 +1,18 @@
 // React
-import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  CloseButton,
-  createListCollection,
-  Dialog,
-  Field,
-  Fieldset,
-  Flex,
-  Input,
-  Portal,
-  Select,
-  Text,
-} from "@chakra-ui/react";
+import { Button, createListCollection, Flex, Portal, Select, Text } from "@chakra-ui/react";
+import CreateCounterDialog from "@components/CreateCounterDialog";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { CounterModel, CounterProps, ICounter, ISelectOption, ResponseData } from "@types";
-
-// Custom hooks
-import { useWorkspace } from "@hooks/useWorkspace";
+import { CounterModel, CounterProps, ISelectOption, ResponseData } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -41,24 +27,6 @@ const CounterSelect = (props: CounterProps) => {
   const [selected, setSelected] = useState({} as CounterModel);
   const [currentValue, setCurrentValue] = useState("");
 
-  // Counter creation state
-  const [counterName, setCounterName] = useState("");
-
-  // Counter format state
-  const [counterFormat, setCounterFormat] = useState("");
-  const [isValidFormat, setIsValidFormat] = useState(false);
-  const [formatErrorMessage, setFormatErrorMessage] = useState("Invalid format string");
-
-  // Counter numeric state
-  const [counterIncrement, setCounterIncrement] = useState(1);
-  const [isValidIncrement, setIsValidIncrement] = useState(false);
-  const [counterInitial, setCounterInitial] = useState(0);
-  const [isValidInitial, setIsValidInitial] = useState(false);
-
-  // Counter previews
-  const [currentCounterPreview, setCurrentCounterPreview] = useState("");
-  const [nextCounterPreview, setNextCounterPreview] = useState("");
-
   // Counter collection for `Select`
   const counterCollection = useMemo(() => {
     const items = createSelectOptions<CounterModel>(counters, "_id", "name");
@@ -67,14 +35,8 @@ const CounterSelect = (props: CounterProps) => {
     });
   }, [counters]);
 
-  // Overall error state
-  const isValidInput = counterName !== "" && isValidFormat && isValidInitial && isValidIncrement;
-
   // Create Counter dialog disclosure
   const [open, setOpen] = useState(false);
-
-  // Workspace context value
-  const { workspace } = useWorkspace();
 
   // GraphQL operations
   const GET_COUNTERS = gql`
@@ -107,19 +69,6 @@ const CounterSelect = (props: CounterProps) => {
     fetchPolicy: "network-only",
   });
 
-  const CREATE_COUNTER = gql`
-    mutation CreateCounter($counter: CounterInput) {
-      createCounter(counter: $counter) {
-        success
-        message
-        data
-      }
-    }
-  `;
-  const [createCounter, { loading: createCounterLoading, error: createCounterError }] = useMutation<{
-    createCounter: ResponseData<string>;
-  }>(CREATE_COUNTER);
-
   /**
    * Update operation when a Counter is selected from the drop-down menu
    * @param _id Counter identifier
@@ -139,6 +88,18 @@ const CounterSelect = (props: CounterProps) => {
   const handleSelectCounter = (details: { value: string[]; items: ISelectOption[] }) => {
     if (details.value.length > 0) {
       updateSelectedCounter(details.value[0]);
+    }
+  };
+
+  /**
+   * Handle creation of a new Counter, selecting it once the Counter list has been refreshed
+   * @param _id Identifier of the newly created Counter
+   */
+  const handleCounterCreated = async (_id: string) => {
+    const { data: refetchedData } = await refetchCounterData();
+    const createdCounter = refetchedData?.counters.find((counter) => counter._id === _id);
+    if (createdCounter) {
+      updateSelectedCounter(createdCounter._id);
     }
   };
 
@@ -168,118 +129,12 @@ const CounterSelect = (props: CounterProps) => {
     setCurrentValue(result.data?.currentCounterValue.data || "Invalid");
   };
 
-  const onNameInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCounterName(event.target.value);
-  };
-
-  const onFormatInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCounterFormat(event.target.value);
-  };
-
-  const onInitialInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCounterInitial(parseInt(event.target.value));
-  };
-
-  const onIncrementInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCounterIncrement(parseInt(event.target.value));
-  };
-
-  const onDoneClick = async () => {
-    // Create the ICounter object
-    const counter: ICounter = {
-      workspace: workspace,
-      name: counterName,
-      format: counterFormat,
-      current: counterInitial,
-      increment: counterIncrement,
-      created: "",
-    };
-
-    const result = await createCounter({
-      variables: {
-        counter: counter,
-      },
-    });
-
-    if (createCounterError) {
-      toaster.create({
-        title: "Error",
-        type: "error",
-        description: createCounterError.message,
-        duration: 4000,
-        closable: true,
-      });
-      return;
-    }
-
-    if (result.data?.createCounter) {
-      // Refetch the Counter data
-      const { data: refetchedData } = await refetchCounterData();
-
-      const selectedCounter = (refetchedData?.counters || counterData?.counters || []).find(
-        (counter: CounterModel) => counter._id === result.data?.createCounter.data,
-      );
-
-      // Update the selected Counter
-      if (selectedCounter) {
-        setSelected(selectedCounter);
-        setOpen(false);
-      }
-    }
-  };
-
   // Get the next Counter value when the selected Counter has been updated
   useEffect(() => {
     if (selected?._id) {
       getCounterPreview().catch(ignoreAbort);
     }
   }, [selected]);
-
-  useEffect(() => {
-    // Evaluate the format, initial value, and increment
-    let _isValidFormat = true;
-    let _isValidInitial = true;
-    let _isValidIncrement = true;
-    if (counterFormat.includes("{") && counterFormat.includes("}")) {
-      // Check the number of braces
-      let openingBraceCount = 0;
-      let closingBraceCount = 0;
-      for (const c of counterFormat) {
-        if (c === "{") openingBraceCount++;
-        if (c === "}") closingBraceCount++;
-      }
-      if (openingBraceCount !== 1 || closingBraceCount !== 1 || !counterFormat.includes("{}")) {
-        _isValidFormat = false;
-        setFormatErrorMessage('Invalid braces, braces must appear as "{}" in one location');
-      }
-    } else {
-      _isValidFormat = false;
-      setFormatErrorMessage('Missing braces "{}" to specify position of numeric value');
-    }
-
-    _isValidInitial = counterInitial >= 0 && !_.isNaN(counterInitial);
-    _isValidIncrement = counterIncrement >= 0 && !_.isNaN(counterIncrement);
-
-    // Update the Counter preview output
-    if (_isValidFormat && _isValidInitial && _isValidIncrement) {
-      setCurrentCounterPreview(counterFormat.replace("{}", counterInitial.toString()));
-      setNextCounterPreview(counterFormat.replace("{}", (counterInitial + counterIncrement).toString()));
-    } else if (!_isValidFormat) {
-      setCurrentCounterPreview("Invalid format string");
-      setNextCounterPreview("Invalid format string");
-    } else if (!_isValidInitial) {
-      setCurrentCounterPreview("Invalid initial value");
-      setNextCounterPreview("Invalid initial value");
-    } else if (!_isValidIncrement) {
-      setCurrentCounterPreview("Invalid increment");
-      setNextCounterPreview("Invalid increment");
-    }
-
-    // Store the valid state
-    setIsValidFormat(_isValidFormat);
-    setIsValidInitial(_isValidInitial);
-    setIsValidIncrement(_isValidIncrement);
-  }, [counterFormat, counterInitial, counterIncrement]);
 
   return (
     <Flex direction={"column"} gap={"1"} w={"100%"}>
@@ -345,193 +200,7 @@ const CounterSelect = (props: CounterProps) => {
         )}
       </Flex>
 
-      <Dialog.Root
-        open={open}
-        onOpenChange={(details) => setOpen(details.open)}
-        size={"lg"}
-        placement={"center"}
-        scrollBehavior={"inside"}
-        closeOnEscape
-        closeOnInteractOutside
-      >
-        <Dialog.Positioner />
-        <Dialog.Backdrop />
-
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header
-              p={"1"}
-              flexShrink={0}
-              bg={"template.light"}
-              color={"template.dark"}
-              borderBottom={"2px"}
-              roundedTop={"md"}
-            >
-              <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-                <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
-                  <Icon name={"counter"} />
-                  <Text fontWeight={"semibold"} fontSize={"xs"}>
-                    Create Counter
-                  </Text>
-                </Flex>
-              </Flex>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => setOpen(false)} colorPalette={"template"} />
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-
-            <Dialog.Body px={"1"} gap={"1"}>
-              <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"1.5"} ml={"0.5"}>
-                  Counters are used to standardize name formats using letters and a number.
-                  <br />
-                  The format string must contain one "{"{}"}" marking the position of the numeric value.
-                </Text>
-
-                <Flex>
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root gap={"0.5"} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
-                          Name
-                          <Field.RequiredIndicator />
-                        </Field.Label>
-                        <Input value={counterName} size={"xs"} rounded={"md"} onChange={onNameInputChange} />
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
-
-                <Flex>
-                  <Fieldset.Root invalid={!isValidFormat}>
-                    <Fieldset.Content>
-                      <Field.Root gap={"0.5"} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
-                          Format
-                          <Field.RequiredIndicator />
-                        </Field.Label>
-                        <Input value={counterFormat} size={"xs"} rounded={"md"} onChange={onFormatInputChange} />
-                        {!isValidFormat && (
-                          <Field.ErrorText fontSize={"xs"} ml={"0.5"}>
-                            {formatErrorMessage}
-                          </Field.ErrorText>
-                        )}
-                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          Example: "Counter_{"{}"}" generates "Counter_1", "Counter_2", etc.
-                        </Field.HelperText>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
-
-                <Flex direction={"row"} gap={"2"}>
-                  <Fieldset.Root invalid={!isValidInitial}>
-                    <Fieldset.Content>
-                      <Field.Root gap={"0.5"} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
-                          Initial Value
-                          <Field.RequiredIndicator />
-                        </Field.Label>
-                        <Input
-                          type={"number"}
-                          value={counterInitial}
-                          size={"xs"}
-                          rounded={"md"}
-                          onChange={onInitialInputChange}
-                        />
-                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          The initial value of the counter.
-                        </Field.HelperText>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-
-                  <Fieldset.Root invalid={!isValidIncrement}>
-                    <Fieldset.Content>
-                      <Field.Root gap={"0.5"} required>
-                        <Field.Label fontSize={"xs"} ml={"0.5"}>
-                          Increment
-                          <Field.RequiredIndicator />
-                        </Field.Label>
-                        <Input
-                          type={"number"}
-                          value={counterIncrement}
-                          size={"xs"}
-                          rounded={"md"}
-                          onChange={onIncrementInputChange}
-                        />
-                        <Field.HelperText fontSize={"xs"} ml={"0.5"}>
-                          The step size of the counter.
-                        </Field.HelperText>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Flex>
-
-                <Flex direction={"column"} gap={"0.5"}>
-                  <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"}>
-                    Counter Preview
-                  </Text>
-                  <Flex
-                    p={"1"}
-                    gap={"0.5"}
-                    direction={"column"}
-                    rounded={"md"}
-                    border={STYLES.border.style}
-                    borderColor={STYLES.border.color}
-                  >
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Initial Counter Value:
-                      </Text>
-                      <Text fontSize={"xs"}>{currentCounterPreview}</Text>
-                    </Flex>
-
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Next Counter Value:
-                      </Text>
-                      <Text fontSize={"xs"}>{nextCounterPreview}</Text>
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Dialog.Body>
-            <Dialog.Footer p={"1"} bg={"surface.muted"} roundedBottom={"md"}>
-              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                <Button
-                  variant={"solid"}
-                  colorPalette={"red"}
-                  size={"xs"}
-                  rounded={"md"}
-                  onClick={() => {
-                    setOpen(false);
-                    setCounterName("");
-                    setCounterFormat("");
-                    setCounterInitial(0);
-                    setCounterIncrement(1);
-                  }}
-                >
-                  Cancel
-                  <Icon name={"cross"} size={"xs"} />
-                </Button>
-
-                <Button
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  disabled={!isValidFormat || !isValidIncrement || !isValidInput || createCounterLoading}
-                  loading={createCounterLoading}
-                  onClick={onDoneClick}
-                >
-                  Done
-                  <Icon name="check" size={"xs"} />
-                </Button>
-              </Flex>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+      <CreateCounterDialog open={open} onClose={() => setOpen(false)} onCreated={handleCounterCreated} />
     </Flex>
   );
 };

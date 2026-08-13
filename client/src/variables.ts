@@ -41,6 +41,9 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   },
 };
 
+// Predefined Secondary Identifier formats, always present in the Select
+export const BASE_IDENTIFIER_FORMATS = [{ label: "GUID: NIH NIAA", value: "guid_nih_niaa", category: "Base" }];
+
 // URL of the client application
 export const APP_URL = import.meta.env.PROD ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 

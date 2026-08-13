@@ -337,6 +337,7 @@ export class Entities {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
+      secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
       timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
       history: [],
@@ -387,6 +388,7 @@ export class Entities {
     const update: { $set: IEntity } = {
       $set: {
         name: entity.name,
+        secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
         owner: entity.owner,
         created: entity.created,
         archived: entity.archived,
@@ -407,6 +409,11 @@ export class Entities {
     // Description
     if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
+    }
+
+    // Secondary Identifier
+    if (!_.isUndefined(updated.secondaryIdentifier)) {
+      update.$set.secondaryIdentifier = updated.secondaryIdentifier;
     }
 
     // Projects
@@ -514,6 +521,7 @@ export class Entities {
 
       _id: historyEntity._id,
       name: historyEntity.name,
+      secondaryIdentifier: historyEntity.secondaryIdentifier || { value: "", format: "" },
       owner: historyEntity.owner,
       archived: historyEntity.archived,
       created: historyEntity.created,

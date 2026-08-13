@@ -29,6 +29,7 @@ import FieldTagList from "@components/FieldTagList";
 import { Information } from "@components/Label";
 import ViewAttributeDialog from "@components/ViewAttributeDialog";
 import CounterSelect from "@components/CounterSelect";
+import IdentifierFormatSelect from "@components/IdentifierFormatSelect";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
@@ -301,6 +302,8 @@ const ImportDialog = (props: ImportDialogProps) => {
   const [ownerField, setOwnerField] = useState("");
   const [projectField, setProjectField] = useState("");
   const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
+  const [identifierField, setIdentifierField] = useState<ColumnInfo | undefined>(undefined);
+  const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
@@ -554,7 +557,7 @@ const ImportDialog = (props: ImportDialogProps) => {
 
   /** Returns true if `columnName` is already assigned to a field or an Attribute value. */
   const columnSelected = (columnName: string) => {
-    if (_.includes([nameField?.name, descriptionField?.name], columnName)) return true;
+    if (_.includes([nameField?.name, descriptionField?.name, identifierField?.name], columnName)) return true;
 
     for (const attribute of attributesField) {
       for (const value of attribute.values) {
@@ -694,6 +697,10 @@ const ImportDialog = (props: ImportDialogProps) => {
   const buildColumnMapping = (): IColumnMapping => ({
     namePrefix: namePrefixField,
     name: nameField?.name,
+    secondaryIdentifier: {
+      value: identifierField?.name,
+      format: identifierFormat[0] || "",
+    },
     description: descriptionField?.name,
     created: dayjs(Date.now()).toISOString(),
     owner: ownerField,
@@ -1204,6 +1211,8 @@ const ImportDialog = (props: ImportDialogProps) => {
     setCounter("");
     setDescriptionField(undefined);
     setProjectField("");
+    setIdentifierField(undefined);
+    setIdentifierFormat([]);
     setProjectsCollection(
       createListCollection({
         items: [] as IGenericItem[],
@@ -1559,7 +1568,7 @@ const ImportDialog = (props: ImportDialogProps) => {
                               }}
                             >
                               Use {nameUseCounter ? "Column" : "Counter"}
-                              <Icon name={nameUseCounter ? "text" : "counter"} size={"xs"} />
+                              <Icon name={nameUseCounter ? "v_text" : "counter"} size={"xs"} />
                             </Button>
                           </Flex>
                           {!nameUseCounter && (
@@ -1632,6 +1641,45 @@ const ImportDialog = (props: ImportDialogProps) => {
                     </Fieldset.Content>
                   </Fieldset.Root>
                 )}
+
+                <Flex direction={"row"} gap={"1"}>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Flex direction={"row"} gap={"1"}>
+                        {/* Secondary Identifier */}
+                        <Field.Root w={"50%"} gap={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
+                            Secondary Identifier
+                          </Field.Label>
+                          {isSpreadsheetFile(fileType) ? (
+                            getSelectComponent("identifier", identifierField, setIdentifierField)
+                          ) : (
+                            <Input
+                              size={"xs"}
+                              bg={"white"}
+                              rounded={"md"}
+                              placeholder={'JSON: "secondaryIdentifier.value"'}
+                              disabled
+                              readOnly
+                            />
+                          )}
+                        </Field.Root>
+
+                        {/* Identifier Format */}
+                        <Field.Root w={"50%"} gap={"0.5"}>
+                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
+                            Identifier Format
+                          </Field.Label>
+                          <IdentifierFormatSelect
+                            format={identifierFormat}
+                            setFormat={setIdentifierFormat}
+                            showCreate
+                          />
+                        </Field.Root>
+                      </Flex>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                </Flex>
 
                 <Flex direction={"row"} gap={"1"}>
                   <Fieldset.Root>

@@ -18,6 +18,7 @@ db.createCollection("entities");
 db.createCollection("projects");
 db.createCollection("workspaces");
 db.createCollection("counters");
+db.createCollection("identifiers");
 
 // Step 3: Setup "storage" database for GridFS attachments
 // Switch to the storage database

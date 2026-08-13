@@ -22,6 +22,10 @@ import {
   Textarea,
   Breadcrumb,
   SkeletonText,
+  Select,
+  createListCollection,
+  Checkbox,
+  ListCollection,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -56,6 +60,7 @@ import {
   EntityHistory,
   EntityModel,
   IAttribute,
+  IdentifierFormatModel,
   IGenericItem,
   IRelationship,
   ResponseData,
@@ -63,8 +68,15 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
-import { ignoreAbort, removeTypename } from "@lib/util";
-import _ from "lodash";
+import {
+  getBaseIdentifierFormatHelperText,
+  getCustomIdentifierFormatHelperText,
+  ignoreAbort,
+  isValidBaseIdentifierFormat,
+  isValidCustomIdentifierFormat,
+  removeTypename,
+} from "@lib/util";
+import _, { groupBy } from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -86,7 +98,7 @@ import { usePermissions } from "@hooks/usePermissions";
 import { auth } from "@lib/auth";
 
 // Variables
-import { STYLES } from "@variables";
+import { BASE_IDENTIFIER_FORMATS, STYLES } from "@variables";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -155,6 +167,48 @@ const Entity = () => {
   // Authentication and user
   const [user, setUser] = useState("");
 
+  // Secondary identifier
+  const [showSecondaryIdentifier, setShowSecondaryIdentifier] = useState(false);
+  const [identifierFormats, setIdentifierFormats] = useState<ListCollection>(
+    createListCollection({
+      items: BASE_IDENTIFIER_FORMATS,
+    }),
+  );
+  const [customIdentifierFormats, setCustomIdentifierFormats] = useState<IdentifierFormatModel[]>([]);
+  const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
+  const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
+
+  const isValidSecondaryIdentifierField = (): boolean => {
+    if (identifierFormat.length > 0) {
+      if (
+        _.includes(
+          BASE_IDENTIFIER_FORMATS.map((format) => format.value),
+          identifierFormat[0],
+        )
+      ) {
+        return isValidBaseIdentifierFormat(secondaryIdentifier, identifierFormat[0]);
+      } else {
+        const formatParameters = customIdentifierFormats.filter((format) => format._id === identifierFormat[0]);
+        return isValidCustomIdentifierFormat(secondaryIdentifier, formatParameters[0]);
+      }
+    }
+    return false;
+  };
+
+  const getIdentifierFormatHelperText = (format: string): string => {
+    if (
+      _.includes(
+        BASE_IDENTIFIER_FORMATS.map((baseFormat) => baseFormat.value),
+        format,
+      )
+    ) {
+      return getBaseIdentifierFormatHelperText(format);
+    } else {
+      const formatParameters = customIdentifierFormats.filter((customFormat) => customFormat._id === format);
+      return getCustomIdentifierFormatHelperText(formatParameters[0]);
+    }
+  };
+
   /**
    * Helper function to get user information
    */
@@ -188,6 +242,10 @@ const Entity = () => {
         archived
         description
         projects
+        secondaryIdentifier {
+          value
+          format
+        }
         relationships {
           source {
             _id
@@ -227,6 +285,10 @@ const Entity = () => {
           owner
           description
           projects
+          secondaryIdentifier {
+            value
+            format
+          }
           relationships {
             source {
               _id
@@ -275,6 +337,16 @@ const Entity = () => {
         _id
         name
       }
+      identifierFormats {
+        _id
+        name
+        fixedLength
+        alphanumericOnly
+        lettersOnly
+        numbersOnly
+        allowSpecialCharacters
+        uppercaseRequired
+      }
     }
   `;
   const { loading, error, data, refetch } = useQuery<{
@@ -282,6 +354,7 @@ const Entity = () => {
     projects: IGenericItem[];
     templates: AttributeModel[];
     workspace: IGenericItem;
+    identifierFormats: IdentifierFormatModel[];
   }>(GET_ENTITY, {
     variables: {
       _id: id,
@@ -367,6 +440,9 @@ const Entity = () => {
         setEntityProjects(data.entity.projects || []);
         setEntityRelationships(data.entity.relationships || []);
         setEntityAttributes(data.entity.attributes || []);
+        setShowSecondaryIdentifier(!!data.entity.secondaryIdentifier?.value);
+        setSecondaryIdentifier(data.entity.secondaryIdentifier?.value || "");
+        setIdentifierFormat(data.entity.secondaryIdentifier?.format ? [data.entity.secondaryIdentifier.format] : []);
       }
 
       setEntityAttachments(data.entity.attachments);
@@ -384,6 +460,22 @@ const Entity = () => {
     // Store Workspace information
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+    }
+
+    // Store Identifier Format information
+    if (data?.identifierFormats) {
+      setCustomIdentifierFormats(data.identifierFormats);
+      const customFormats = data.identifierFormats.map((format) => {
+        return {
+          label: format.name,
+          value: format._id,
+          category: "Custom",
+        };
+      });
+      const updatedIdentifierFormats = createListCollection({
+        items: [...BASE_IDENTIFIER_FORMATS, ...customFormats],
+      });
+      setIdentifierFormats(updatedIdentifierFormats);
     }
   }, [data, editing]);
 
@@ -510,6 +602,20 @@ const Entity = () => {
     return previewVersion ? previewVersion.archived : entityArchived;
   }, [previewVersion, entityArchived]);
 
+  const displayShowSecondaryIdentifier = useMemo(() => {
+    return previewVersion ? !!previewVersion.secondaryIdentifier?.value : showSecondaryIdentifier;
+  }, [previewVersion, showSecondaryIdentifier]);
+
+  const displaySecondaryIdentifierValue = useMemo(() => {
+    return previewVersion ? previewVersion.secondaryIdentifier?.value || "" : secondaryIdentifier;
+  }, [previewVersion, secondaryIdentifier]);
+
+  const displaySecondaryIdentifierFormat = useMemo(() => {
+    if (!previewVersion) return identifierFormat;
+    const format = previewVersion.secondaryIdentifier?.format;
+    return format ? [format] : [];
+  }, [previewVersion, identifierFormat]);
+
   const displayEntityData = useMemo(() => {
     if (previewVersion) {
       return {
@@ -564,6 +670,10 @@ const Entity = () => {
         relationships: entityRelationships,
         attributes: entityAttributes,
         attachments: entityAttachments,
+        secondaryIdentifier: {
+          value: showSecondaryIdentifier ? secondaryIdentifier : "",
+          format: showSecondaryIdentifier ? identifierFormat[0] || "" : "",
+        },
       });
       await updateEntity({
         variables: {
@@ -612,6 +722,9 @@ const Entity = () => {
     setEntityAttributes(entity.attributes);
     setEntityAttachments(entity.attachments);
     setEntityHistory(entity.history);
+    setShowSecondaryIdentifier(!!entity.secondaryIdentifier?.value);
+    setSecondaryIdentifier(entity.secondaryIdentifier?.value || "");
+    setIdentifierFormat(entity.secondaryIdentifier?.format ? [entity.secondaryIdentifier.format] : []);
   };
 
   /**
@@ -929,6 +1042,7 @@ const Entity = () => {
         relationships: entityVersion.relationships || [],
         attributes: entityVersion.attributes || [],
         attachments: entityVersion.attachments || [],
+        secondaryIdentifier: entityVersion.secondaryIdentifier || { value: "", format: "" },
       });
       await updateEntity({
         variables: {
@@ -950,6 +1064,9 @@ const Entity = () => {
       setEntityRelationships(entityVersion.relationships || []);
       setEntityAttributes(entityVersion.attributes || []);
       setEntityAttachments(entityVersion.attachments || []);
+      setShowSecondaryIdentifier(!!entityVersion.secondaryIdentifier?.value);
+      setSecondaryIdentifier(entityVersion.secondaryIdentifier?.value || "");
+      setIdentifierFormat(entityVersion.secondaryIdentifier?.format ? [entityVersion.secondaryIdentifier.format] : []);
 
       // Close the sidebar
       setHistoryOpen(false);
@@ -999,6 +1116,7 @@ const Entity = () => {
           relationships: entity.relationships,
           attributes: entity.attributes,
           attachments: entity.attachments,
+          secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
         }),
       },
     });
@@ -1448,9 +1566,36 @@ const Entity = () => {
               {/* "Name" field */}
               <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Name
-                  </Text>
+                  <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                      Name
+                    </Text>
+                    <Tooltip
+                      content={
+                        "If your Entity has an external identifier (such as a GUID or other identifier) associated with it, you can specify it here."
+                      }
+                      showArrow
+                    >
+                      <Checkbox.Root
+                        size={"xs"}
+                        colorPalette={"blue"}
+                        checked={showSecondaryIdentifier}
+                        onCheckedChange={(event) => setShowSecondaryIdentifier(!!event.checked)}
+                        disabled={!editing || !!previewVersion}
+                      >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Checkbox.Label>
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                              Specify Secondary Identifier
+                            </Text>
+                            <Icon name={"info"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
+                          </Flex>
+                        </Checkbox.Label>
+                      </Checkbox.Root>
+                    </Tooltip>
+                  </Flex>
                   <Input
                     id={"entityNameInput"}
                     size={"xs"}
@@ -1466,6 +1611,112 @@ const Entity = () => {
                   />
                 </Flex>
               </Flex>
+
+              {/* Secondary Identifier */}
+              {displayShowSecondaryIdentifier && (
+                <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+                  <Flex direction={"column"} gap={"2"} grow={"3"}>
+                    <Field.Root
+                      invalid={!previewVersion && showSecondaryIdentifier && !isValidSecondaryIdentifierField()}
+                    >
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={STYLES.font.secondaryHeader.color}
+                        ml={"0.5"}
+                      >
+                        Secondary Identifier
+                      </Text>
+                      <Input
+                        id={"entitySecondaryIdentifierInput"}
+                        size={"xs"}
+                        value={displaySecondaryIdentifierValue}
+                        onChange={(event) => setSecondaryIdentifier(event.target.value)}
+                        readOnly={!editing || !!previewVersion}
+                        rounded={"md"}
+                        border={STYLES.border.style}
+                        borderColor={STYLES.border.color}
+                        bg={"white"}
+                        disabled={!previewVersion && identifierFormat.length === 0}
+                      />
+                      {!previewVersion && isValidSecondaryIdentifierField() && (
+                        <Field.HelperText>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                            {getIdentifierFormatHelperText(identifierFormat[0])}
+                          </Text>
+                        </Field.HelperText>
+                      )}
+                      <Field.ErrorText>
+                        {!previewVersion && identifierFormat.length !== 0 && !isValidSecondaryIdentifierField() && (
+                          <Text fontSize={"xs"} ml={"0.5"}>
+                            {getIdentifierFormatHelperText(identifierFormat[0])}
+                          </Text>
+                        )}
+                        {!previewVersion && identifierFormat.length === 0 && (
+                          <Text fontSize={"xs"} ml={"0.5"}>
+                            Please select the Identifier Format
+                          </Text>
+                        )}
+                      </Field.ErrorText>
+                    </Field.Root>
+                  </Flex>
+
+                  <Flex direction={"column"} gap={"2"} grow={"1"}>
+                    <Field.Root invalid={!previewVersion && showSecondaryIdentifier && identifierFormat.length === 0}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={STYLES.font.secondaryHeader.color}
+                        ml={"0.5"}
+                      >
+                        Identifier Format
+                      </Text>
+                      <Select.Root
+                        value={displaySecondaryIdentifierFormat}
+                        onValueChange={(event) => setIdentifierFormat(event.value)}
+                        collection={identifierFormats}
+                        size={"xs"}
+                        width={"100%"}
+                        disabled={!editing || !!previewVersion}
+                      >
+                        <Select.HiddenSelect />
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText placeholder={"Select Identifier Format"} />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Portal>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {Object.entries(groupBy(identifierFormats.items, (item) => item.category)).map(
+                                ([category, items]) => (
+                                  <Select.ItemGroup key={category}>
+                                    <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
+                                    {items.map((format) => (
+                                      <Select.Item item={format} key={format.value}>
+                                        {format.label}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))}
+                                  </Select.ItemGroup>
+                                ),
+                              )}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Portal>
+                      </Select.Root>
+                      <Field.ErrorText>
+                        <Text fontSize={"xs"} ml={"0.5"}>
+                          Please select an Identifier Format
+                        </Text>
+                      </Field.ErrorText>
+                    </Field.Root>
+                  </Flex>
+                </Flex>
+              )}
 
               {/* "Owner", "Timestamp", and "Visibility" fields */}
               <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
