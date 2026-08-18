@@ -1011,7 +1011,7 @@ const Workspace = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
+                  <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} disabled={!editing} />
                 </Flex>
               </Flex>
             </Flex>
