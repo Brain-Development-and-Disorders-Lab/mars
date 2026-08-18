@@ -336,6 +336,13 @@ export const openItemFromTable = async (
   } else {
     await buttons.first().click();
   }
+
+  // Wait for the client-side route transition to the detail page to finish
+  const urlSegment =
+    viewButtonLabel === "View Entity" ? "entities" : viewButtonLabel === "View Project" ? "projects" : "templates";
+  await page.waitForURL(new RegExp(`/${urlSegment}/`), { timeout: 10000 });
+  await page.getByRole("heading", { name: itemName, level: 2 }).waitFor({ state: "visible", timeout: 10000 });
+  await page.waitForLoadState("networkidle");
 };
 
 /**
