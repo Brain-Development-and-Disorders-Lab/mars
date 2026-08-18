@@ -59,6 +59,9 @@ import Signup from "@pages/account/Signup";
 import ForgotPassword from "@pages/account/ForgotPassword";
 import ResetPassword from "@pages/account/ResetPassword";
 
+// Page type - Public
+import { Dashboard as PublicDashboard } from "@pages/public/Dashboard";
+
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
 import { PermissionsProvider } from "@hooks/usePermissions";
@@ -95,14 +98,14 @@ const App = (): ReactElement => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="" element={<Providers />}>
-        {/* Authentication not required */}
+        {/* Non-authenticated routes */}
         <Route path={"/signup"} element={<Signup />} />
         <Route path={"/login"} element={<Login />} />
         <Route path={"/forgot-password"} element={<ForgotPassword />} />
         <Route path={"/reset-password"} element={<ResetPassword />} />
 
-        {/* Authentication required */}
-        <Route element={<Page />}>
+        {/* Private routes */}
+        <Route element={<Page public={false} />}>
           <Route path={"/"} element={<Dashboard />} />
 
           {/* Create routes */}
@@ -143,6 +146,11 @@ const App = (): ReactElement => {
           <Route path={"/invalid"} element={<Invalid />} />
           <Route path={"/unauthorized"} element={<Unauthorized />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
+        </Route>
+
+        {/* Public routes */}
+        <Route element={<Page public={true} />}>
+          <Route path={"/public/:id"} element={<PublicDashboard />} />
         </Route>
       </Route>,
     ),

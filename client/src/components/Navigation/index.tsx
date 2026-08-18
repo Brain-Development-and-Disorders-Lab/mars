@@ -10,6 +10,9 @@ import ReportDialog from "@components/ReportDialog";
 import Tooltip from "@components/Tooltip";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
+// Custom types
+import { NavigationProps } from "@types";
+
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -29,7 +32,7 @@ import { STYLES } from "@variables";
 // Static assets
 import favicon from "@img/Favicon.png";
 
-const Navigation = () => {
+const Navigation = (props: NavigationProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,9 +72,11 @@ const Navigation = () => {
 
         {/* Workspace menu items */}
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <Flex direction={"column"} gap={"1"} w={"100%"}>
-            <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
-          </Flex>
+          {!props.public && (
+            <Flex direction={"column"} gap={"1"} w={"100%"}>
+              <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
+            </Flex>
+          )}
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
@@ -93,20 +98,22 @@ const Navigation = () => {
               Dashboard
             </Button>
 
-            <Button
-              id={"navActivityButtonDesktop"}
-              key={"activity"}
-              size={"xs"}
-              w={"100%"}
-              rounded={"md"}
-              justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/activity"))}
-              onClick={() => navigate("/activity")}
-              disabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              <Icon name={"activity"} size={"xs"} />
-              Activity
-            </Button>
+            {!props.public && (
+              <Button
+                id={"navActivityButtonDesktop"}
+                key={"activity"}
+                size={"xs"}
+                w={"100%"}
+                rounded={"md"}
+                justifyContent={"left"}
+                {...navLinkStyle(_.includes(location.pathname, "/activity"))}
+                onClick={() => navigate("/activity")}
+                disabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                <Icon name={"activity"} size={"xs"} />
+                Activity
+              </Button>
+            )}
 
             <Button
               id={"navSearchButtonDesktop"}
@@ -123,20 +130,22 @@ const Navigation = () => {
               Search
             </Button>
 
-            <Button
-              id={"navCreateButtonDesktop"}
-              key={"create"}
-              size={"xs"}
-              w={"100%"}
-              rounded={"md"}
-              justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/create")}
-              disabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              <Icon name={"add"} size={"xs"} />
-              Create
-            </Button>
+            {!props.public && (
+              <Button
+                id={"navCreateButtonDesktop"}
+                key={"create"}
+                size={"xs"}
+                w={"100%"}
+                rounded={"md"}
+                justifyContent={"left"}
+                {...navLinkStyle(_.includes(location.pathname, "/create"))}
+                onClick={() => navigate("/create")}
+                disabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                <Icon name={"add"} size={"xs"} />
+                Create
+              </Button>
+            )}
 
             <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               View
@@ -189,77 +198,79 @@ const Navigation = () => {
             </Button>
           </Flex>
 
-          <Flex direction={"column"} gap={"2"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
-              Tools
-            </Text>
-            <Flex direction={"row"} gap={"2"} w={"100%"}>
-              <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
-                  <Button
-                    id={"navImportButtonDesktop"}
-                    w={"100%"}
-                    key={"import"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      // Capture event
-                      posthog.capture("client.import.dialog_open");
+          {!props.public && (
+            <Flex direction={"column"} gap={"2"}>
+              <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
+                Tools
+              </Text>
+              <Flex direction={"row"} gap={"2"} w={"100%"}>
+                <Flex w={"50%"}>
+                  <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
+                    <Button
+                      id={"navImportButtonDesktop"}
+                      w={"100%"}
+                      key={"import"}
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        // Capture event
+                        posthog.capture("client.import.dialog_open");
 
-                      setImportOpen(true);
-                    }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
-                  >
-                    <Icon name={"upload"} size={"xs"} />
-                    Import
-                  </Button>
-                </Tooltip>
+                        setImportOpen(true);
+                      }}
+                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
+                    >
+                      <Icon name={"upload"} size={"xs"} />
+                      Import
+                    </Button>
+                  </Tooltip>
+                </Flex>
+
+                <Flex w={"50%"}>
+                  <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
+                    <Button
+                      id={"navScanButtonDesktop"}
+                      w={"100%"}
+                      key={"scan"}
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      onClick={() => {
+                        // Capture event
+                        posthog.capture("client.scan.dialog_open");
+
+                        setScanOpen(true);
+                      }}
+                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
+                    >
+                      <Icon name={"scan"} size={"xs"} />
+                      Scan
+                    </Button>
+                  </Tooltip>
+                </Flex>
               </Flex>
+              <Flex>
+                <Button
+                  id={"navBugButtonDesktop"}
+                  w={"100%"}
+                  key={"bug"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"red"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("client.bug.dialog_open");
 
-              <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
-                  <Button
-                    id={"navScanButtonDesktop"}
-                    w={"100%"}
-                    key={"scan"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      // Capture event
-                      posthog.capture("client.scan.dialog_open");
-
-                      setScanOpen(true);
-                    }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
-                  >
-                    <Icon name={"scan"} size={"xs"} />
-                    Scan
-                  </Button>
-                </Tooltip>
+                    setReportOpen(true);
+                  }}
+                >
+                  <Icon name={"bug"} size={"xs"} />
+                  Report Issue
+                </Button>
               </Flex>
             </Flex>
-            <Flex>
-              <Button
-                id={"navBugButtonDesktop"}
-                w={"100%"}
-                key={"bug"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"red"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("client.bug.dialog_open");
-
-                  setReportOpen(true);
-                }}
-              >
-                <Icon name={"bug"} size={"xs"} />
-                Report Issue
-              </Button>
-            </Flex>
-          </Flex>
+          )}
         </Flex>
 
         <Spacer />
@@ -312,15 +323,17 @@ const Navigation = () => {
                   <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
                 </Menu.Item>
-                <Menu.Item
-                  id={"navActivityButtonMobile"}
-                  value={"activity"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/activity")}
-                >
-                  <Icon name={"activity"} size={"xs"} />
-                  Activity
-                </Menu.Item>
+                {!props.public && (
+                  <Menu.Item
+                    id={"navActivityButtonMobile"}
+                    value={"activity"}
+                    fontSize={"xs"}
+                    onClick={() => navigate("/activity")}
+                  >
+                    <Icon name={"activity"} size={"xs"} />
+                    Activity
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   id={"navSearchButtonMobile"}
                   value={"search"}
@@ -363,33 +376,35 @@ const Navigation = () => {
                 </Menu.Item>
               </Menu.ItemGroup>
 
-              <Menu.ItemGroup title={"Tools"}>
-                <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
-                <Menu.Item
-                  id={"navCreateButtonMobile"}
-                  value={"create"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/create")}
-                >
-                  <Icon name={"add"} size={"xs"} />
-                  Create
-                </Menu.Item>
-                <Menu.Item
-                  id={"navScanButtonMobile"}
-                  value={"scan"}
-                  fontSize={"xs"}
-                  onClick={() => {
-                    // Capture event
-                    posthog.capture("client.scan.dialog_open");
+              {!props.public && (
+                <Menu.ItemGroup title={"Tools"}>
+                  <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
+                  <Menu.Item
+                    id={"navCreateButtonMobile"}
+                    value={"create"}
+                    fontSize={"xs"}
+                    onClick={() => navigate("/create")}
+                  >
+                    <Icon name={"add"} size={"xs"} />
+                    Create
+                  </Menu.Item>
+                  <Menu.Item
+                    id={"navScanButtonMobile"}
+                    value={"scan"}
+                    fontSize={"xs"}
+                    onClick={() => {
+                      // Capture event
+                      posthog.capture("client.scan.dialog_open");
 
-                    setScanOpen(true);
-                  }}
-                  disabled={workspace === "" || _.isUndefined(workspace)}
-                >
-                  <Icon name={"scan"} size={"xs"} />
-                  Scan
-                </Menu.Item>
-              </Menu.ItemGroup>
+                      setScanOpen(true);
+                    }}
+                    disabled={workspace === "" || _.isUndefined(workspace)}
+                  >
+                    <Icon name={"scan"} size={"xs"} />
+                    Scan
+                  </Menu.Item>
+                </Menu.ItemGroup>
+              )}
 
               {/* Version number */}
               <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
@@ -402,7 +417,7 @@ const Navigation = () => {
         </Menu.Root>
 
         {/* Workspace switcher */}
-        <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
+        {!props.public && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
       </Flex>
 
       {/* `ImportDialog` component */}

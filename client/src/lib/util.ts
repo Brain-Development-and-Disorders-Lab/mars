@@ -19,7 +19,16 @@ import {
 import dayjs from "dayjs";
 
 // Variables
-import { ACCEPTED_ATTACHMENTS, ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, STYLES } from "@variables";
+import {
+  ACCEPTED_ATTACHMENTS,
+  ACCEPTED_IMPORTS_ENTITIES,
+  ACCEPTED_IMPORTS_TEMPLATES,
+  API_URL,
+  STYLES,
+} from "@variables";
+
+// URL of the public, unauthenticated Workspace endpoint for a given Workspace ID
+export const getPublicWorkspaceUrl = (workspace: string): string => `${API_URL}/public/${workspace}`;
 
 export const isValueEqual = (a: IValue, b: IValue): boolean => {
   return a.name === b.name && a.type === b.type && a.data === b.data;
