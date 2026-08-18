@@ -43,11 +43,10 @@ test.describe("Project", () => {
       await page.locator("[data-testid='create-project-name']").fill(getUniqueName("Project Cancel"));
       await page.click("[data-testid='create-project-cancel']");
 
-      // A blocker dialog may appear when navigating away with unsaved changes
-      const continueButton = page.locator('button:has-text("Continue")');
-      if ((await continueButton.count()) > 0) {
-        await continueButton.click();
-      }
+      // The filled name field guarantees the router blocker fires
+      const continueButton = page.getByRole("button", { name: "Continue" });
+      await continueButton.waitFor({ state: "visible", timeout: 5000 });
+      await continueButton.click();
 
       await expect(page).toHaveURL(/\/projects/);
     });
