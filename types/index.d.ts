@@ -511,13 +511,13 @@ export type ActivityModel = IActivity & {
   _id: string;
 };
 
-// ActivityFeed component props
+// `ActivityFeed` component props
 export type ActivityFeedProps = {
   activities?: ActivityModel[];
   feedLimit?: number; // Number of activities to show in the feed (default: 5)
 };
 
-// RelativeTime component props
+// `RelativeTime` component props
 export type RelativeTimeProps = {
   value: string | number | Date;
   format?: (relative: string) => string;
@@ -526,11 +526,22 @@ export type RelativeTimeProps = {
   color?: string;
 };
 
-// Content component
+// `Content` component
 export type ContentProps = {
   children: React.ReactElement | React.ReactElement[];
   isError?: boolean;
   isLoaded?: boolean;
+};
+
+// `Page` component
+export type PageProps = {
+  children?: React.ReactElement | React.ReactElement[];
+  public: boolean;
+};
+
+// `Navigation` component
+export type NavigationProps = {
+  public: boolean;
 };
 
 // `AlertDialog` component

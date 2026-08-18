@@ -347,6 +347,10 @@ export class Workspaces {
       return false;
     }
 
-    return workspaceResult.owner === user || isCollaborator(user, workspaceResult.collaborators);
+    return (
+      workspaceResult.public === true ||
+      workspaceResult.owner === user ||
+      isCollaborator(user, workspaceResult.collaborators)
+    );
   };
 }
