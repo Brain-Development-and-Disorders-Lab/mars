@@ -306,30 +306,7 @@ export const Entities = () => {
     }),
   ];
 
-  const actions: DataTableAction[] = [
-    {
-      label: (count: number) => `Export Selected (${count})`,
-      icon: "download",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      action: async (table, rows: any) => {
-        const ids = Object.keys(rows).map((rowIndex) => table.getRow(rowIndex).original._id as string);
-        setExportIds(ids);
-        setExportOpen(true);
-        table.resetRowSelection();
-      },
-    },
-    {
-      label: () => `Export All (${data?.entities?.total ?? 0})`,
-      icon: "download",
-      alwaysEnabled: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-      action: async (table, _rows: any) => {
-        setExportIds(undefined);
-        setExportOpen(true);
-        table.resetRowSelection();
-      },
-    },
-  ];
+  const actions: DataTableAction[] = [];
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
@@ -470,7 +447,7 @@ export const Entities = () => {
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
                                 <Checkbox.Label fontSize={"xs"}>
-                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
+                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} isPublic inline />
                                 </Checkbox.Label>
                               </Checkbox.Root>
                             ))}

@@ -186,7 +186,13 @@ const Navigation = (props: NavigationProps) => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/projects")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/projects`);
+                } else {
+                  navigate("/projects");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />

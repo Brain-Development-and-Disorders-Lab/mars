@@ -98,7 +98,13 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                         Using:
                       </Text>
                       {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
-                      <Linky id={props.attribute._id.slice(0, 10)} type={"templates"} size={"xs"} />
+                      <Linky
+                        id={props.attribute._id.slice(0, 10)}
+                        type={"templates"}
+                        size={"xs"}
+                        workspace={props.workspace}
+                        isPublic={props.isPublic}
+                      />
                     </Flex>
                     <Flex gap={"2"} align={"center"}>
                       <Button
@@ -172,7 +178,12 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                         Owner
                       </Text>
                       <Flex>
-                        <ActorTag identifier={props.attribute.owner} fallback={"Unknown User"} size={"sm"} />
+                        <ActorTag
+                          identifier={props.attribute.owner}
+                          fallback={"Unknown User"}
+                          size={"sm"}
+                          isPublic={props.isPublic}
+                        />
                       </Flex>
                     </Flex>
                   </Flex>

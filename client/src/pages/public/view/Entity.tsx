@@ -352,6 +352,9 @@ export const Entity = () => {
       variables: {
         _id: _id,
       },
+      context: {
+        uri: getPublicWorkspaceUrl(workspace ?? ""),
+      },
     });
 
     if (!response.data?.downloadFile) {
@@ -404,7 +407,7 @@ export const Entity = () => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={projectId} disabled={projectId.length < 32} showArrow>
-              <Linky id={projectId} type={"projects"} size={"xs"} truncate={false} />
+              <Linky id={projectId} type={"projects"} size={"xs"} truncate={false} workspace={workspace} isPublic />
             </Tooltip>
             <Button
               size="2xs"
@@ -471,6 +474,8 @@ export const Entity = () => {
                 attribute={attribute}
                 isTemplate={isKnownTemplate(attribute._id, templates)}
                 onAttributeUpdate={() => {}}
+                workspace={workspace}
+                isPublic
               />
             </Flex>
           </Flex>
@@ -548,6 +553,8 @@ export const Entity = () => {
                   _id: attachmentId,
                   name: attachmentName,
                 }}
+                workspace={workspace}
+                isPublic
               />
               <IconButton
                 aria-label={"Download attachment"}

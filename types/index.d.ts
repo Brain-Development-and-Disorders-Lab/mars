@@ -105,6 +105,10 @@ export type ViewAttributeDialogProps = {
 
   // Optional context for comparison display
   entityName?: string;
+
+  // Optional fields for public view
+  workspace?: string;
+  isPublic?: boolean;
 };
 
 export type CompareAttributeDialogProps = {
@@ -194,6 +198,8 @@ export type LinkyProps = {
   justify?: string;
   size?: string;
   truncate?: boolean | number;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 // "Actor" component props
@@ -608,6 +614,8 @@ export type DataTableAction = {
 export type PreviewDialogProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
+  workspace?: string;
+  isPublic?: boolean;
 };
 
 // `ImportDialog` props

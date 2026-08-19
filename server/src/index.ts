@@ -233,7 +233,18 @@ const start = async () => {
   logger.info("GraphQL server running!");
 
   // Root Query fields reachable on the public endpoint
-  const PUBLIC_QUERY_FIELDS = ["workspace", "entities", "entity", "projects", "templates", "identifierFormats", "user"];
+  const PUBLIC_QUERY_FIELDS = [
+    "workspace",
+    "entity",
+    "entities",
+    "project",
+    "projects",
+    "projectEntities",
+    "templates",
+    "identifierFormats",
+    "downloadFile",
+    "user",
+  ];
 
   // Rejects mutations and any root selection outside PUBLIC_QUERY_FIELDS (including fragments)
   const publicAccessPlugin: ApolloServerPlugin<Context> = {
