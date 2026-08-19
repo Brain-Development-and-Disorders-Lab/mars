@@ -233,7 +233,7 @@ const start = async () => {
   logger.info("GraphQL server running!");
 
   // Root Query fields reachable on the public endpoint
-  const PUBLIC_QUERY_FIELDS = ["workspace", "entities"];
+  const PUBLIC_QUERY_FIELDS = ["workspace", "entities", "entity", "projects", "templates", "identifierFormats", "user"];
 
   // Rejects mutations and any root selection outside PUBLIC_QUERY_FIELDS (including fragments)
   const publicAccessPlugin: ApolloServerPlugin<Context> = {
@@ -241,14 +241,18 @@ const start = async () => {
       return {
         async didResolveOperation({ operation }) {
           if (!operation) return;
+
+          // Only "query" operations are permitted (read-only)
           if (operation.operation !== "query") {
             throw new GraphQLError("This operation is not available", {
               extensions: { code: "FORBIDDEN" },
             });
           }
+
+          // Limit the subset of "query"-able fields
           for (const selection of operation.selectionSet.selections) {
             if (selection.kind !== "Field" || !_.includes(PUBLIC_QUERY_FIELDS, selection.name.value)) {
-              throw new GraphQLError("This operation is not available", {
+              throw new GraphQLError("This field is not available", {
                 extensions: { code: "FORBIDDEN" },
               });
             }

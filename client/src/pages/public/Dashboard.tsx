@@ -14,7 +14,7 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -63,6 +63,7 @@ const GET_WORKSPACE = gql`
 
 export const Dashboard = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   // Display state
   const [workspaceName, setWorkspaceName] = useState<string>();
@@ -125,7 +126,14 @@ export const Dashboard = () => {
               </Text>
             </Flex>
           </Tooltip>
-          <Button size="2xs" mx={"1"} variant="subtle" colorPalette="gray" aria-label={"View Entity"} disabled>
+          <Button
+            size="2xs"
+            mx={"1"}
+            variant="subtle"
+            colorPalette="gray"
+            aria-label={"View Entity"}
+            onClick={() => navigate(`/public/${id}/entities/${info.row.original._id}`)}
+          >
             View
             <Icon name={"a_right"} size={"xs"} />
           </Button>
@@ -137,7 +145,7 @@ export const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
@@ -199,7 +207,7 @@ export const Dashboard = () => {
       <Flex direction={"column"} w={"100%"} p={"1"} gap={"2"}>
         {/* Header */}
         <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
-          <PageHeader icon={"dashboard"} title={"Dashboard"} subtitle={workspaceName} loading={loading} />
+          <PageHeader icon={"dashboard"} title={"Public Dashboard"} subtitle={workspaceName} loading={loading} />
         </Flex>
 
         {/* Recent Entities */}
@@ -243,7 +251,13 @@ export const Dashboard = () => {
           )}
 
           <Flex justify={"flex-end"}>
-            <Button size={"xs"} rounded={"md"} variant={"solid"} colorPalette={"blue"} disabled>
+            <Button
+              size={"xs"}
+              rounded={"md"}
+              variant={"solid"}
+              colorPalette={"blue"}
+              onClick={() => navigate(`/public/${id}/entities`)}
+            >
               All Entities
               <Icon name={"a_right"} size={"xs"} />
             </Button>

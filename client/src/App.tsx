@@ -61,6 +61,8 @@ import ResetPassword from "@pages/account/ResetPassword";
 
 // Page type - Public
 import { Dashboard as PublicDashboard } from "@pages/public/Dashboard";
+import { Entities as PublicEntities } from "@pages/public/view/Entities";
+import { Entity as PublicEntity } from "@pages/public/view/Entity";
 
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
@@ -105,7 +107,7 @@ const App = (): ReactElement => {
         <Route path={"/reset-password"} element={<ResetPassword />} />
 
         {/* Private routes */}
-        <Route element={<Page public={false} />}>
+        <Route element={<Page isPublic={false} />}>
           <Route path={"/"} element={<Dashboard />} />
 
           {/* Create routes */}
@@ -149,8 +151,10 @@ const App = (): ReactElement => {
         </Route>
 
         {/* Public routes */}
-        <Route element={<Page public={true} />}>
+        <Route element={<Page isPublic={true} />}>
           <Route path={"/public/:id"} element={<PublicDashboard />} />
+          <Route path={"/public/:id/entities"} element={<PublicEntities />} />
+          <Route path={"/public/:id/entities/:entity"} element={<PublicEntity />} />
         </Route>
       </Route>,
     ),
