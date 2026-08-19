@@ -204,6 +204,8 @@ export type ActorTagProps = {
   inline?: boolean;
   inlineNoAvatar?: boolean;
   avatarOnly?: boolean;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 // "VisibilityTagProps" component props
@@ -255,6 +257,8 @@ export type CreatedCellProps = {
 
 export type OwnerCellProps = {
   value: string;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 export type DescriptionCellProps = {
@@ -350,7 +354,7 @@ export type AddAttributeDialogProps = {
 export type IWorkspace = {
   name: string;
   owner: string;
-  public: boolean;
+  isPublic: boolean;
   description: string;
   collaborators: Collaborator[];
   entities: string[];
@@ -536,12 +540,12 @@ export type ContentProps = {
 // `Page` component
 export type PageProps = {
   children?: React.ReactElement | React.ReactElement[];
-  public: boolean;
+  isPublic: boolean;
 };
 
 // `Navigation` component
 export type NavigationProps = {
-  public: boolean;
+  isPublic: boolean;
 };
 
 // `AlertDialog` component

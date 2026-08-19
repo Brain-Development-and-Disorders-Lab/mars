@@ -84,7 +84,7 @@ const Workspace = () => {
         _id
         name
         owner
-        public
+        isPublic
         timestamp
         description
         collaborators {
@@ -285,7 +285,7 @@ const Workspace = () => {
       setCreated(workspaceResult.data.workspace.timestamp);
       setDescription(workspaceResult.data.workspace.description);
       setCollaborators(workspaceResult.data.workspace.collaborators);
-      setIsPublic(workspaceResult.data.workspace.public);
+      setIsPublic(workspaceResult.data.workspace.isPublic);
     }
 
     const workspaceData = await getWorkspaceData({
@@ -364,7 +364,7 @@ const Workspace = () => {
           name: name,
           description: description,
           owner: owner,
-          public: isPublic,
+          isPublic: isPublic,
           collaborators: collaborators,
         }),
       },

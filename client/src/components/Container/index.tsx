@@ -61,7 +61,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 
 // Page container
 const Page: FC<PageProps> = (props: PageProps) => {
-  if (!props.public) {
+  if (!props.isPublic) {
     // Authentication state
     const [session, setSession] = useState<Session>();
 
@@ -103,7 +103,9 @@ const Page: FC<PageProps> = (props: PageProps) => {
     };
 
     useEffect(() => {
-      getSession();
+      if (!props.isPublic) {
+        getSession();
+      }
     }, []);
 
     if (incompleteProfile) {
@@ -124,7 +126,7 @@ const Page: FC<PageProps> = (props: PageProps) => {
             bg={"nav.bg"}
             zIndex={2}
           >
-            <Navigation />
+            <Navigation isPublic={false} />
           </Flex>
 
           <Flex
@@ -166,7 +168,7 @@ const Page: FC<PageProps> = (props: PageProps) => {
           bg={"nav.bg"}
           zIndex={2}
         >
-          <Navigation public />
+          <Navigation isPublic={true} />
         </Flex>
 
         <Flex

@@ -72,7 +72,7 @@ const Navigation = (props: NavigationProps) => {
 
         {/* Workspace menu items */}
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {!props.public && (
+          {!props.isPublic && (
             <Flex direction={"column"} gap={"1"} w={"100%"}>
               <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             </Flex>
@@ -91,14 +91,20 @@ const Navigation = (props: NavigationProps) => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.isEqual(location.pathname, "/"))}
-              onClick={() => navigate("/")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}`);
+                } else {
+                  navigate("/");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"dashboard"} size={"xs"} />
               Dashboard
             </Button>
 
-            {!props.public && (
+            {!props.isPublic && (
               <Button
                 id={"navActivityButtonDesktop"}
                 key={"activity"}
@@ -130,7 +136,7 @@ const Navigation = (props: NavigationProps) => {
               Search
             </Button>
 
-            {!props.public && (
+            {!props.isPublic && (
               <Button
                 id={"navCreateButtonDesktop"}
                 key={"create"}
@@ -158,7 +164,13 @@ const Navigation = (props: NavigationProps) => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/entities")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/entities`);
+                } else {
+                  navigate("/entities");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
@@ -198,7 +210,7 @@ const Navigation = (props: NavigationProps) => {
             </Button>
           </Flex>
 
-          {!props.public && (
+          {!props.isPublic && (
             <Flex direction={"column"} gap={"2"}>
               <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
                 Tools
@@ -275,6 +287,23 @@ const Navigation = (props: NavigationProps) => {
 
         <Spacer />
 
+        {props.isPublic && (
+          <Flex>
+            <Button
+              id={"navLoginButtonDesktop"}
+              w={"100%"}
+              key={"login"}
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => navigate("/login")}
+            >
+              Login
+              <Icon name={"c_right"} size={"xs"} />
+            </Button>
+          </Flex>
+        )}
+
         {/* Version number */}
         <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={"nav.textMuted"}>
@@ -323,7 +352,7 @@ const Navigation = (props: NavigationProps) => {
                   <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
                 </Menu.Item>
-                {!props.public && (
+                {!props.isPublic && (
                   <Menu.Item
                     id={"navActivityButtonMobile"}
                     value={"activity"}
@@ -376,7 +405,7 @@ const Navigation = (props: NavigationProps) => {
                 </Menu.Item>
               </Menu.ItemGroup>
 
-              {!props.public && (
+              {!props.isPublic && (
                 <Menu.ItemGroup title={"Tools"}>
                   <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
                   <Menu.Item
@@ -417,7 +446,7 @@ const Navigation = (props: NavigationProps) => {
         </Menu.Root>
 
         {/* Workspace switcher */}
-        {!props.public && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
+        {!props.isPublic && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
       </Flex>
 
       {/* `ImportDialog` component */}

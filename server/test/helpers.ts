@@ -108,7 +108,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
   const workspaceResult: ResponseData<string> = await Workspaces.create({
     name: workspaceName,
     owner: TEST_USER_ID,
-    public: false,
+    isPublic: false,
     collaborators: [],
     description: `Test workspace: ${workspaceName}`,
     entities: [],

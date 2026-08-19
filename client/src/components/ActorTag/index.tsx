@@ -12,6 +12,7 @@ import { ActorTagProps, UserModel, WorkspaceModel } from "@types";
 import _ from "lodash";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
+import { getPublicWorkspaceUrl } from "@lib/util";
 
 // Custom hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
@@ -27,8 +28,9 @@ const ActorTag = (props: ActorTagProps) => {
   const [actorLabel, setActorLabel] = useState(props.fallback);
   const [actorOrcid, setActorOrcid] = useState("");
 
-  // Workspace state
-  const { workspace } = useWorkspace();
+  // Workspace state, overridden on unauthenticated public pages
+  const { workspace: activeWorkspace } = useWorkspace();
+  const workspace = props.workspace ?? activeWorkspace;
 
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
@@ -65,6 +67,8 @@ const ActorTag = (props: ActorTagProps) => {
       _id: props.identifier,
       workspace: workspace,
     },
+    // Send this query to the public Workspace endpoint when rendered on a public page
+    context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace) } : undefined,
     skip: !props.identifier || props.identifier.trim() === "",
     fetchPolicy: "network-only",
   });

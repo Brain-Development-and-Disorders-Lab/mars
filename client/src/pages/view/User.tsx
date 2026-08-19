@@ -95,7 +95,7 @@ const User = () => {
         _id
         name
         description
-        public
+        isPublic
         owner
         collaborators {
           _id
@@ -104,7 +104,7 @@ const User = () => {
     }
   `;
 
-  type WorkspacePartial = Pick<WorkspaceModel, "_id" | "name" | "description" | "public" | "owner" | "collaborators">;
+  type WorkspacePartial = Pick<WorkspaceModel, "_id" | "name" | "description" | "isPublic" | "owner" | "collaborators">;
 
   const { loading, data, error, refetch } = useQuery<{
     user: UserModel;
@@ -491,7 +491,7 @@ const User = () => {
           _id,
           name: workspace.name,
           description: workspace.description,
-          public: workspace.public,
+          isPublic: workspace.isPublic,
           collaborators: workspace.collaborators.filter((c) => !isCollaborator(c._id, workspace.collaborators)),
         },
       },
@@ -525,7 +525,7 @@ const User = () => {
               _id: w._id,
               name: w.name,
               description: w.description,
-              public: w.public,
+              isPublic: w.isPublic,
               collaborators: w.collaborators.filter((c) => !isCollaborator(c._id, w.collaborators)),
             },
           },

@@ -166,7 +166,7 @@ export const createTestWorkspace = async (
     description: "Test Workspace",
     owner: owner,
     collaborators: collaborators,
-    public: false,
+    isPublic: false,
     entities: [],
     projects: [],
     templates: [],

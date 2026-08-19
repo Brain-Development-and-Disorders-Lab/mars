@@ -28,7 +28,14 @@ export const CreatedCell = (props: CreatedCellProps) => (
 );
 
 export const OwnerCell = (props: OwnerCellProps) => (
-  <ActorTag identifier={props.value} fallback={"Unknown User"} size={"sm"} inline />
+  <ActorTag
+    identifier={props.value}
+    fallback={"Unknown User"}
+    size={"sm"}
+    inline
+    workspace={props.workspace}
+    isPublic={props.isPublic}
+  />
 );
 
 export const DescriptionCell = (props: DescriptionCellProps) => {

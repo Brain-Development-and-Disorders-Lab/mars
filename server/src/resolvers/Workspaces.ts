@@ -64,7 +64,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (
         workspace &&
-        (workspace.public ||
+        (workspace.isPublic ||
           isCollaborator(context.user, workspace.collaborators) ||
           _.isEqual(workspace.owner, context.user))
       ) {
