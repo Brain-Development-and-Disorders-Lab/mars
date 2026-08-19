@@ -1011,7 +1011,17 @@ const Workspace = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} disabled={!editing} />
+                  <Tooltip
+                    content={"Only Workspace owners can modify visibility"}
+                    disabled={currentUser === owner}
+                    showArrow
+                  >
+                    <VisibilityTag
+                      isPublic={isPublic}
+                      setIsPublic={setIsPublic}
+                      disabled={!editing || currentUser !== owner}
+                    />
+                  </Tooltip>
                 </Flex>
               </Flex>
             </Flex>
