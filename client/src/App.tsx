@@ -61,10 +61,13 @@ import ResetPassword from "@pages/account/ResetPassword";
 
 // Page type - Public
 import { Dashboard as PublicDashboard } from "@pages/public/Dashboard";
+import { Search as PublicSearch } from "@pages/public/Search";
 import { Entities as PublicEntities } from "@pages/public/view/Entities";
 import { Entity as PublicEntity } from "@pages/public/view/Entity";
 import { Projects as PublicProjects } from "@pages/public/view/Projects";
 import { Project as PublicProject } from "@pages/public/view/Project";
+import { Templates as PublicTemplates } from "@pages/public/view/Templates";
+import { Template as PublicTemplate } from "@pages/public/view/Template";
 
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
@@ -155,10 +158,13 @@ const App = (): ReactElement => {
         {/* Public routes */}
         <Route element={<Page isPublic={true} />}>
           <Route path={"/public/:id"} element={<PublicDashboard />} />
+          <Route path={"/public/:id/search"} element={<PublicSearch />} />
           <Route path={"/public/:id/entities"} element={<PublicEntities />} />
           <Route path={"/public/:id/entities/:entity"} element={<PublicEntity />} />
           <Route path={"/public/:id/projects"} element={<PublicProjects />} />
           <Route path={"/public/:id/projects/:project"} element={<PublicProject />} />
+          <Route path={"/public/:id/templates"} element={<PublicTemplates />} />
+          <Route path={"/public/:id/templates/:template"} element={<PublicTemplate />} />
         </Route>
       </Route>,
     ),

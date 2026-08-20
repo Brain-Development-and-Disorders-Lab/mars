@@ -654,6 +654,8 @@ const Values = (props: {
   setValues: (values: React.SetStateAction<IValue[]>) => void;
   viewOnly?: boolean;
   permittedValues?: ColumnInfo[];
+  workspace?: string;
+  isPublic?: boolean;
 }) => {
   // Local type for tracking column names
   type ValuesColumn = "name" | "type" | "value";
@@ -988,6 +990,8 @@ const Values = (props: {
                 hideBorder={index >= paginatedValues.length - 1}
                 viewOnly={props.viewOnly}
                 permittedValues={props.permittedValues}
+                workspace={props.workspace}
+                isPublic={props.isPublic}
               />
             ))}
           </Box>
@@ -1167,6 +1171,8 @@ const ValueRow = (props: {
   hideBorder?: boolean;
   viewOnly?: boolean;
   permittedValues?: ColumnInfo[];
+  workspace?: string;
+  isPublic?: boolean;
 }) => {
   // In import mode (permittedValues present), the source toggles between column reference and fixed value
   const [source, setSource] = useState<"column" | "value">(props.value.source ?? "column");
@@ -1617,7 +1623,13 @@ const ValueRow = (props: {
               boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
             }}
           >
-            <Linky type={"entities"} id={JSON.parse(valueData)._id || ""} size={"xs"} />
+            <Linky
+              type={"entities"}
+              id={JSON.parse(valueData)._id || ""}
+              size={"xs"}
+              workspace={props.workspace}
+              isPublic={props.isPublic}
+            />
           </Flex>
         );
       }

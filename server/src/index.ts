@@ -240,8 +240,11 @@ const start = async () => {
     "project",
     "projects",
     "projectEntities",
+    "template",
     "templates",
+    "templateUsage",
     "identifierFormats",
+    "search",
     "downloadFile",
     "user",
   ];
