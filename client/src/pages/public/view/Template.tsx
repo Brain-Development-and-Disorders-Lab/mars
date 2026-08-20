@@ -356,7 +356,7 @@ export const Template = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <VisibilityTag isPublic={true} isInherited />
                 </Flex>
               </Flex>
             </Flex>

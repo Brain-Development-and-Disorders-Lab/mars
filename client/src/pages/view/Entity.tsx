@@ -64,6 +64,7 @@ import {
   IGenericItem,
   IRelationship,
   ResponseData,
+  WorkspaceModel,
 } from "@types";
 
 // Utility functions and libraries
@@ -125,6 +126,7 @@ const Entity = () => {
   // Workspace information
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceIsPublic, setWorkspaceIsPublic] = useState(false);
 
   // Graph dialog
   const [graphOpen, setGraphOpen] = useState(false);
@@ -336,6 +338,7 @@ const Entity = () => {
       workspace(_id: $workspace) {
         _id
         name
+        isPublic
       }
       identifierFormats {
         _id
@@ -353,7 +356,7 @@ const Entity = () => {
     entity: EntityModel;
     projects: IGenericItem[];
     templates: AttributeModel[];
-    workspace: IGenericItem;
+    workspace: WorkspaceModel;
     identifierFormats: IdentifierFormatModel[];
   }>(GET_ENTITY, {
     variables: {
@@ -460,6 +463,7 @@ const Entity = () => {
     // Store Workspace information
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+      setWorkspaceIsPublic(data.workspace.isPublic);
     }
 
     // Store Identifier Format information
@@ -1741,7 +1745,7 @@ const Entity = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <VisibilityTag isPublic={workspaceIsPublic} isInherited />
                 </Flex>
               </Flex>
             </Flex>

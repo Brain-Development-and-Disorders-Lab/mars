@@ -72,9 +72,9 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         </Flex>
         <Spacer />
         {props.isInherited ? (
-          <Tooltip content={"This visibility state is inherited and cannot be changed directly"} showArrow>
-            <IconButton ml={"1"} aria-label={"set-visibility"} size={"xs"} disabled>
-              <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
+          <Tooltip content={"Visibility is inherited and cannot be changed directly"} showArrow>
+            <IconButton ml={"1"} aria-label={"set-visibility"} size={"xs"} colorPalette={"green"} disabled>
+              <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} />
             </IconButton>
           </Tooltip>
         ) : (
@@ -87,7 +87,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
               disabled={props.disabled}
               onClick={handleVisibilityClick}
             >
-              <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
+              <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} />
             </IconButton>
           </Tooltip>
         )}
