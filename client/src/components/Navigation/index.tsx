@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
@@ -11,13 +11,14 @@ import Tooltip from "@components/Tooltip";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Custom types
-import { NavigationProps } from "@types";
+import { NavigationProps, WorkspaceModel } from "@types";
 
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { useQuery } from "@apollo/client/react";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -26,11 +27,25 @@ import { usePostHog } from "posthog-js/react";
 import { useWorkspace } from "@hooks/useWorkspace";
 import { usePermissions } from "@hooks/usePermissions";
 
+// GraphQL
+import { gql } from "@apollo/client";
+
 // Variables
 import { STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
+import { getPublicWorkspaceUrl } from "@lib/util";
+
+// Queries
+const GET_WORKSPACE = gql`
+  query GetWorkspace($workspace: String) {
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
+  }
+`;
 
 const Navigation = (props: NavigationProps) => {
   const posthog = usePostHog();
@@ -43,6 +58,9 @@ const Navigation = (props: NavigationProps) => {
   // Workspace context value, overridden by the route param on unauthenticated public pages
   const { workspace: activeWorkspace } = useWorkspace();
   const workspace = props.isPublic ? props.workspace : activeWorkspace;
+
+  // Display state
+  const [workspaceName, setWorkspaceName] = useState<string>("");
 
   // Dialog open states
   const [importOpen, setImportOpen] = useState(false);
@@ -59,6 +77,28 @@ const Navigation = (props: NavigationProps) => {
     _hover: { bg: "nav.hoverBg" },
   });
 
+  // Execute GraphQL query both on page load and navigation
+  const { loading, error, data } = useQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, {
+    variables: {
+      workspace: workspace,
+    },
+    // Send this query to the public Workspace endpoint
+    context: {
+      uri: getPublicWorkspaceUrl(workspace ?? ""),
+    },
+    fetchPolicy: "network-only",
+    skip: !workspace,
+  });
+
+  // Assign data
+  useEffect(() => {
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
+    }
+  }, [data]);
+
   return (
     <Flex w={"100%"} p={"2"} bg={"nav.bg"}>
       {/* Desktop navigation group */}
@@ -72,7 +112,28 @@ const Navigation = (props: NavigationProps) => {
         </Flex>
 
         {props.isPublic && (
-          <Flex>
+          <Flex direction={"column"} gap={"2"}>
+            <Flex
+              direction={"column"}
+              rounded={"md"}
+              p={"2"}
+              gap={"1.5"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.card.bg}
+            >
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                <Icon name={"workspace"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} textAlign={"center"}>
+                  Public Workspace
+                </Text>
+              </Flex>
+              <Tooltip content={workspaceName} disabled={workspaceName.length <= 24} showArrow>
+                <Text fontSize={"xs"} textAlign={"center"}>
+                  {_.truncate(workspaceName, { length: 24 })}
+                </Text>
+              </Tooltip>
+            </Flex>
             <Button
               id={"navLoginButtonDesktop"}
               w={"100%"}

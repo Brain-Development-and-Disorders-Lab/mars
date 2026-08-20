@@ -501,6 +501,8 @@ const Search = () => {
           _id
           name
           owner
+          created
+          timestamp
           archived
           description
           projects

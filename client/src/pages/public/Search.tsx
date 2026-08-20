@@ -364,6 +364,8 @@ export const Search = () => {
           _id
           name
           owner
+          timestamp
+          created
           archived
           description
           projects
@@ -402,6 +404,9 @@ export const Search = () => {
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
+      },
+      context: {
+        uri: getPublicWorkspaceUrl(workspace ?? ""),
       },
     }).catch(ignoreAbort);
 
@@ -469,7 +474,7 @@ export const Search = () => {
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"search"} size={"sm"} />
-            <Heading size={"xl"}>Search</Heading>
+            <Heading size={"xl"}>Public Search</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
@@ -483,7 +488,7 @@ export const Search = () => {
               Search across Entities in the current Workspace
             </Text>
             <Text fontSize={"xs"}>
-              Use "Text" to search by keyword or with AI, build structured search queries using "Query Builder"
+              Use "Text" to search by keyword, build structured search queries using "Query Builder"
             </Text>
           </Flex>
 
