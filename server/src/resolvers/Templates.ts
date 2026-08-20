@@ -56,6 +56,16 @@ export const TemplatesResolvers = {
 
     // Retrieve one Template by _id
     template: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -93,6 +103,16 @@ export const TemplatesResolvers = {
       args: { _id: string },
       context: Context,
     ): Promise<AttributeUsage[]> => {
+      // Verify access to the Workspace
+      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
+      if (!hasAccess) {
+        throw new GraphQLError("User does not have access to this Workspace", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
       // Retrieve the Workspace to confirm it exists
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
