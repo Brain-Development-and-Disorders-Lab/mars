@@ -114,7 +114,7 @@ test.describe("Template", () => {
 
     test("should delete an Attribute from an Entity and confirm removal after reload", async ({ page }) => {
       await navigateToSection(page, "Entities");
-      await openItemFromTable(page, "3-Attribute-Delete-Entity", "View Entity");
+      await openItemFromTable(page, "3-Attribute-Delete-En", "View Entity");
       await expect(page.locator("text=Test Attribute")).toBeVisible({ timeout: 10000 });
 
       await page.click("#editEntityButton");

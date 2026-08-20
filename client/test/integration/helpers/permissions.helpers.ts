@@ -38,7 +38,7 @@ export const setupDefaultPermissions = async (
   collaborator: string;
   workspaceId: string;
 }> => {
-  const owner = await createTestUser(ownerContext);
+  const owner = await createTestUser(ownerContext, { name: "Test Owner" });
 
   const collaboratorEmail = `${getUniqueName("collaborator").replace(/\s+/g, "-").toLowerCase()}@test.com`;
   const collaborator = await createTestUser(collaboratorPage.context(), {

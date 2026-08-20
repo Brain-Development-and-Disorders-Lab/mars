@@ -84,10 +84,8 @@ const Navigation = (props: NavigationProps) => {
     variables: {
       workspace: workspace,
     },
-    // Send this query to the public Workspace endpoint
-    context: {
-      uri: getPublicWorkspaceUrl(workspace ?? ""),
-    },
+    // Only unauthenticated public pages need to reach the public Workspace endpoint
+    context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace ?? "") } : undefined,
     fetchPolicy: "network-only",
     skip: !workspace,
   });

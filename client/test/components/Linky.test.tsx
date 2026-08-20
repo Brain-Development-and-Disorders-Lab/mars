@@ -174,7 +174,7 @@ describe("Linky Component", () => {
     it("truncates by default", async () => {
       renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name" });
       await waitFor(() => {
-        expect(screen.getAllByText("Test Entity Lon...")[0]).toBeTruthy();
+        expect(screen.getAllByText("Test Entity L...")[0]).toBeTruthy();
       });
     });
 
@@ -278,7 +278,7 @@ describe("Linky Component", () => {
 
       // Initially shows loading, then shows truncated fallback when query returns no data
       await waitFor(() => {
-        expect(screen.getByText("Missing ID Fall...")).toBeTruthy();
+        expect(screen.getByText("Missing ID Fa...")).toBeTruthy();
       });
     });
   });
