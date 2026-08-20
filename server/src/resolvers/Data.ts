@@ -35,6 +35,17 @@ export const DataResolvers = {
         });
       }
 
+      // Verify the requested attachment belongs to an Entity within the Workspace
+      const entities = await Workspaces.getEntities(context.workspace);
+      const belongsToWorkspace = entities.some((entity) => _.some(entity.attachments, { _id: args._id }));
+      if (!belongsToWorkspace) {
+        throw new GraphQLError("You do not have permission to access this file", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
       const response = await Data.downloadFile(args._id);
       if (_.isNull(response)) {
         throw new GraphQLError("Unable to retrieve file for download", {
