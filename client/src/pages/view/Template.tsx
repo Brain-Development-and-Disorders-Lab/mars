@@ -908,6 +908,7 @@ const Template = () => {
         value={saveMessage}
         onChange={setSaveMessage}
         placeholder={"(Optional) Enter a description of the changes made to the Template."}
+        isPublic={workspaceIsPublic}
       />
     </Content>
   );

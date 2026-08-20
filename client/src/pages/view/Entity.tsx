@@ -2437,6 +2437,7 @@ const Entity = () => {
           placeholder={"(Optional) Enter a description of the changes made to the Entity."}
           showCloseButton={true}
           modifiedType={"Entity"}
+          isPublic={workspaceIsPublic}
         />
 
         {/* Blocker warning message */}

@@ -10,6 +10,7 @@ import { SaveDialogProps } from "@types";
 
 // Variables
 import { STYLES } from "@variables";
+import { Warning } from "@components/Label";
 
 const SaveDialog = (props: SaveDialogProps) => {
   const { open, onOpenChange, onDone, value, onChange, description, showCloseButton = false, modifiedType } = props;
@@ -46,8 +47,9 @@ const SaveDialog = (props: SaveDialogProps) => {
 
           <Dialog.Body p={"2"}>
             <Flex direction={"column"} gap={"2"}>
+              {props.isPublic && <Warning text={"This Workspace is public, all changes will be instantly visible."} />}
               {(description !== undefined ? description : defaultDescription) && (
-                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   {description !== undefined ? description : defaultDescription}
                 </Text>
               )}

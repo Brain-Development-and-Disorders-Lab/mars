@@ -1207,6 +1207,7 @@ const Project = () => {
           onChange={setSaveMessage}
           description={"Specify a description of the changes made to the Project."}
           modifiedType={"Project"}
+          isPublic={workspaceIsPublic}
         />
 
         {/* Blocker warning message */}

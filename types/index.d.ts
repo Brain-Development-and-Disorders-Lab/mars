@@ -834,6 +834,7 @@ export type SaveDialogProps = {
   placeholder?: string;
   showCloseButton?: boolean;
   modifiedType?: "Entity" | "Project" | "Template";
+  isPublic?: boolean;
 };
 
 // "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Template detail pages.
