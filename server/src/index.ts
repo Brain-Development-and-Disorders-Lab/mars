@@ -249,6 +249,9 @@ const start = async () => {
     "user",
   ];
 
+  // Subset of "User" fields safe to expose unauthenticated (excludes api_keys, token, email, role, etc.)
+  const PUBLIC_USER_FIELDS = ["_id", "name", "firstName", "lastName", "image", "account_orcid", "__typename"];
+
   // Rejects mutations and any root selection outside PUBLIC_QUERY_FIELDS (including fragments)
   const publicAccessPlugin: ApolloServerPlugin<Context> = {
     async requestDidStart() {
@@ -269,6 +272,17 @@ const start = async () => {
               throw new GraphQLError("This field is not available", {
                 extensions: { code: "FORBIDDEN" },
               });
+            }
+
+            // Restrict "user" sub-selections to a safe subset to avoid leaking credentials/PII
+            if (selection.name.value === "user" && selection.selectionSet) {
+              for (const userSelection of selection.selectionSet.selections) {
+                if (userSelection.kind !== "Field" || !_.includes(PUBLIC_USER_FIELDS, userSelection.name.value)) {
+                  throw new GraphQLError("This field is not available", {
+                    extensions: { code: "FORBIDDEN" },
+                  });
+                }
+              }
             }
           }
         },
