@@ -1,6 +1,6 @@
 // React
-import React from "react";
-import { Flex, IconButton, Spacer, Text } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { Button, Dialog, Flex, IconButton, Spacer, Text } from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
@@ -22,10 +22,15 @@ const VisibilityTag = (props: VisibilityTagProps) => {
   // Breakpoint state
   const { isBreakpointActive } = useBreakpoint();
 
+  // Warning dialog state
+  const [warningOpen, setWarningOpen] = useState(false);
+
   /**
    * Handler function for visibility toggle button
    */
   const handleVisibilityClick = () => {
+    setWarningOpen(false);
+
     if (props.setIsPublic) {
       props.setIsPublic(!props.isPublic);
     } else {
@@ -72,9 +77,9 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         </Flex>
         <Spacer />
         {props.isInherited ? (
-          <Tooltip content={"This visibility state is inherited and cannot be changed directly"} showArrow>
-            <IconButton ml={"1"} aria-label={"set-visibility"} size={"xs"} disabled>
-              <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
+          <Tooltip content={"Visibility is inherited and cannot be changed directly"} showArrow>
+            <IconButton ml={"1"} aria-label={"set-visibility"} size={"xs"} colorPalette={"green"} disabled>
+              <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} />
             </IconButton>
           </Tooltip>
         ) : (
@@ -85,13 +90,59 @@ const VisibilityTag = (props: VisibilityTagProps) => {
               size={"xs"}
               colorPalette={"green"}
               disabled={props.disabled}
-              onClick={handleVisibilityClick}
+              onClick={() => setWarningOpen(true)}
             >
-              <Icon name={props.isPublic ? "lock" : "l_globus"} size={"xs"} />
+              <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} />
             </IconButton>
           </Tooltip>
         )}
       </Flex>
+
+      <Dialog.Root open={warningOpen} placement={"center"} size={"xs"}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header p={"2"} roundedTop={"md"} bg={"status.warning.subtle"} color={"status.warning.emphasized"}>
+              <Flex w={"100%"} direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"warning"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Warning
+                </Text>
+              </Flex>
+            </Dialog.Header>
+
+            <Dialog.Body p={"2"}>
+              {props.isPublic && (
+                <Text fontSize={"xs"} ml={"0.5"}>
+                  You are about to set this Workspace to Private visibility. The publicly accessible link will no longer
+                  be available.
+                </Text>
+              )}
+
+              {!props.isPublic && (
+                <Text fontSize={"xs"} ml={"0.5"}>
+                  You are about to set this Workspace to Public visibility. All Entities, Projects, and Templates in
+                  this Workspace will become viewable via a public URL.
+                </Text>
+              )}
+            </Dialog.Body>
+
+            <Dialog.Footer p={"2"} bg={"surface.muted"} roundedBottom={"md"}>
+              <Flex w={"100%"} justify={"space-between"}>
+                <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => setWarningOpen(false)}>
+                  Cancel
+                  <Icon name={"cross"} size={"xs"} />
+                </Button>
+
+                <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={handleVisibilityClick} ml={3}>
+                  Continue
+                  <Icon name={"check"} size={"xs"} />
+                </Button>
+              </Flex>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Flex>
   );
 };

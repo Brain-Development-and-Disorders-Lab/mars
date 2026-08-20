@@ -20,12 +20,12 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { getValueTypeIconProps } from "@lib/util";
+import { getPublicWorkspaceUrl, getValueTypeIconProps } from "@lib/util";
 
 // Variables
 import { STYLES } from "@variables";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
 
 /**
  * Utility to get the icon name, badge background, border, and icon color
@@ -140,7 +140,8 @@ const Linky = (props: LinkyProps) => {
   const getLinkyData = async () => {
     // If id is empty or missing, just use fallback without making a query
     if (!props.id || props.id.trim() === "") {
-      const fallbackName = props.fallback || `Invalid ${_.capitalize(props.type).slice(0, -1)}`;
+      const fallbackName =
+        props.fallback || `Invalid ${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)}`;
       setTooltipLabel(fallbackName);
       setShowDeleted(true);
 
@@ -157,13 +158,17 @@ const Linky = (props: LinkyProps) => {
 
     const data: IGenericItem & { description: string } = {
       _id: props.id,
-      name: props.fallback || `Invalid ${_.capitalize(props.type.slice(0, -1))}`,
+      name:
+        props.fallback || `Invalid ${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)}`,
       description: "",
     };
 
     try {
       if (props.type === "templates") {
-        const response = await getTemplate({ variables: { _id: props.id } });
+        const response = await getTemplate({
+          variables: { _id: props.id },
+          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
+        });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Template";
@@ -176,7 +181,10 @@ const Linky = (props: LinkyProps) => {
           setNavigatorItems(response.data.template.values);
         }
       } else if (props.type === "entities") {
-        const response = await getEntity({ variables: { _id: props.id } });
+        const response = await getEntity({
+          variables: { _id: props.id },
+          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
+        });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Entity";
@@ -189,7 +197,10 @@ const Linky = (props: LinkyProps) => {
           setNavigatorItems(response.data.entity.attributes);
         }
       } else if (props.type === "projects") {
-        const response = await getProject({ variables: { _id: props.id } });
+        const response = await getProject({
+          variables: { _id: props.id },
+          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
+        });
         if (response.error || _.isUndefined(response.data)) {
           setShowDeleted(true);
           data.name = "Invalid Project";
@@ -205,7 +216,7 @@ const Linky = (props: LinkyProps) => {
     } catch (error) {
       // If query fails completely, use fallback
       setShowDeleted(true);
-      const tooltipLabel = `${_.capitalize(props.type.slice(0, -1))} (ID: ${props.id}) is either inaccessible or does not exist.`;
+      const tooltipLabel = `${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)} (ID: ${props.id}) is either inaccessible or does not exist.`;
       setTooltipLabel(tooltipLabel);
     }
 
@@ -221,7 +232,11 @@ const Linky = (props: LinkyProps) => {
 
   const onClickHandler = () => {
     if (!showDeleted && !loadingEntity && !loadingProject && !loadingTemplate) {
-      navigate(`/${props.type}/${props.id}`);
+      if (props.isPublic) {
+        navigate(`/public/${props.workspace}/${props.type}/${props.id}`);
+      } else {
+        navigate(`/${props.type}/${props.id}`);
+      }
     }
   };
 

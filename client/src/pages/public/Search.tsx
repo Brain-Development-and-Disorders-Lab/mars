@@ -13,7 +13,6 @@ import {
   Text,
   Checkbox,
   Collapsible,
-  InputGroup,
   SkeletonText,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
@@ -29,28 +28,23 @@ import { toaster } from "@components/Toast";
 
 // Hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { usePermissions } from "@hooks/usePermissions";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Existing and custom types
-import { EntityModel, DataTableAction, SearchQuery, IGenericItem } from "@types";
+import { EntityModel, SearchQuery, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
 
 // Utility libraries and functions
-import { buildMongoQuery, ignoreAbort } from "@lib/util";
-import FileSaver from "file-saver";
-import slugify from "slugify";
-import dayjs from "dayjs";
+import { buildMongoQuery, getPublicWorkspaceUrl, ignoreAbort } from "@lib/util";
 
 // Variables
 import { STYLES } from "@variables";
@@ -61,15 +55,12 @@ import { usePostHog } from "posthog-js/react";
 // Stable reference so `DataTable` (memoized) doesn't see a new prop on every render
 const EMPTY_SELECTED_ROWS = {};
 
-const Search = () => {
+export const Search = () => {
   const posthog = usePostHog();
-
-  // Permissions
-  const { globalPermissions } = usePermissions();
 
   const [query, setQuery] = useState("");
 
-  const { workspace } = useWorkspace();
+  const { id: workspace } = useParams();
   const [workspaceName, setWorkspaceName] = useState("");
 
   // Search status
@@ -84,13 +75,8 @@ const Search = () => {
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
   const [visibleColumns, setVisibleColumns] = useState({});
 
+  // Tab state
   const [activeTab, setActiveTab] = useState<"text" | "advanced">("text");
-  const [isAISearch, setIsAISearch] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
-
-  useEffect(() => {
-    if (!globalPermissions.features.ai) setIsAISearch(false);
-  }, [globalPermissions.features.ai]);
 
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
@@ -122,6 +108,9 @@ const Search = () => {
   const { data, loading } = useQuery<{ workspace: IGenericItem }>(SEARCH_PAGE_LOAD, {
     variables: {
       workspace: workspace,
+    },
+    context: {
+      uri: getPublicWorkspaceUrl(workspace ?? ""),
     },
   });
 
@@ -173,87 +162,10 @@ const Search = () => {
   `;
   const [searchText, { error }] = useLazyQuery<{ search: EntityModel[] }>(SEARCH_TEXT, { fetchPolicy: "network-only" });
 
-  // Query to translate the natural language to MongoDB JSON search
-  const TRANSLATE_SEARCH = gql`
-    query TranslateSearch($query: String!) {
-      translateSearch(query: $query)
-    }
-  `;
-  const [runTranslateSearch] = useLazyQuery<{ translateSearch: string }>(TRANSLATE_SEARCH, {
-    fetchPolicy: "network-only",
-    errorPolicy: "all",
-  });
-
   const runSearch = async () => {
     setIsSearching(true);
     setHasSearched(true);
     setResults([]);
-
-    // Translate natural language to a MongoDB query, then run as a builder query
-    if (isAISearch) {
-      setIsTranslating(true);
-      // useLazyQuery resolves (not rejects) on GraphQL errors
-      const translation = await runTranslateSearch({ variables: { query } }).catch(ignoreAbort);
-      setIsTranslating(false);
-
-      if (!translation) {
-        setIsSearching(false);
-        return;
-      }
-
-      if (translation.error) {
-        toaster.create({
-          title: "Error",
-          type: "error",
-          description: "Unable to translate query, please try again",
-          duration: 2000,
-          closable: true,
-        });
-        setIsSearching(false);
-        setHasSearched(false);
-        return;
-      }
-
-      if (!translation.data?.translateSearch) {
-        setIsSearching(false);
-        return;
-      }
-
-      const results = await searchText({
-        variables: {
-          query: translation.data.translateSearch,
-          resultType: "entity",
-          isBuilder: true,
-          showArchived,
-        },
-      }).catch(ignoreAbort);
-
-      if (!results) {
-        setIsSearching(false);
-        return;
-      }
-
-      if (!results.data?.search) {
-        toaster.create({
-          title: "Error",
-          type: "error",
-          description: "Unable to retrieve search results",
-          duration: 4000,
-          closable: true,
-        });
-        setIsError(true);
-      } else {
-        posthog.capture("client.search.performed", {
-          search_type: "ai",
-          result_count: results.data.search.length,
-          show_archived: showArchived,
-        });
-        setResults(results.data.search);
-      }
-
-      setIsSearching(false);
-      return;
-    }
 
     const hasFilters =
       textSearchFilters.startDate ||
@@ -279,6 +191,9 @@ const Search = () => {
         isBuilder: false,
         showArchived: showArchived,
         filters,
+      },
+      context: {
+        uri: getPublicWorkspaceUrl(workspace ?? ""),
       },
     }).catch(ignoreAbort);
 
@@ -344,7 +259,7 @@ const Search = () => {
               variant="subtle"
               colorPalette="gray"
               aria-label={"View Entity"}
-              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+              onClick={() => navigate(`/public/${workspace}/entities/${info.row.original._id}`)}
             >
               View
               <Icon name={"a_right"} size={"xs"} />
@@ -421,73 +336,21 @@ const Search = () => {
       }),
       searchResultColumnHelper.accessor("owner", {
         cell: (info) => {
-          return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+          return (
+            <ActorTag
+              identifier={info.getValue()}
+              fallback={"Unknown User"}
+              size={"sm"}
+              workspace={workspace}
+              isPublic
+              inline
+            />
+          );
         },
         header: "Owner",
       }),
     ],
     [navigate],
-  );
-
-  const EXPORT_ENTITIES = gql`
-    query ExportEntities($entities: [String], $format: String, $includeAttributes: Boolean) {
-      exportEntities(entities: $entities, format: $format, includeAttributes: $includeAttributes)
-    }
-  `;
-  const [exportEntities] = useLazyQuery<{ exportEntities: string }>(EXPORT_ENTITIES, {
-    fetchPolicy: "network-only",
-  });
-
-  const searchResultActions: DataTableAction[] = useMemo(
-    () => [
-      {
-        label: (count) => `Export selection as CSV (${count})`,
-        icon: "download",
-        action: async (table, rows) => {
-          const toExport: string[] = [];
-          for (const rowIndex of Object.keys(rows)) {
-            toExport.push(table.getRow(rowIndex).original._id);
-          }
-
-          const response = await exportEntities({
-            variables: { entities: toExport, format: "csv", includeAttributes: true },
-          }).catch(ignoreAbort);
-
-          if (response?.data?.exportEntities) {
-            FileSaver.saveAs(
-              new Blob([response.data.exportEntities]),
-              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`),
-            );
-          }
-
-          table.resetRowSelection();
-        },
-      },
-      {
-        label: (count) => `Export selection as JSON (${count})`,
-        icon: "download",
-        action: async (table, rows: any) => {
-          const toExport: string[] = [];
-          for (const rowIndex of Object.keys(rows)) {
-            toExport.push(table.getRow(rowIndex).original._id);
-          }
-
-          const response = await exportEntities({
-            variables: { entities: toExport, format: "json", includeAttributes: true },
-          }).catch(ignoreAbort);
-
-          if (response?.data?.exportEntities) {
-            FileSaver.saveAs(
-              new Blob([response.data.exportEntities]),
-              slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`),
-            );
-          }
-
-          table.resetRowSelection();
-        },
-      },
-    ],
-    [exportEntities],
   );
 
   const initialAdvancedQuery: SearchQuery = { combinator: "and", rules: [] };
@@ -501,8 +364,8 @@ const Search = () => {
           _id
           name
           owner
-          created
           timestamp
+          created
           archived
           description
           projects
@@ -541,6 +404,9 @@ const Search = () => {
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
+      },
+      context: {
+        uri: getPublicWorkspaceUrl(workspace ?? ""),
       },
     }).catch(ignoreAbort);
 
@@ -608,7 +474,7 @@ const Search = () => {
         <Flex direction={"column"} gap={"0"} align={"start"}>
           <Flex direction={"row"} align={"center"} gap={"1"}>
             <Icon name={"search"} size={"sm"} />
-            <Heading size={"xl"}>Search</Heading>
+            <Heading size={"xl"}>Public Search</Heading>
           </Flex>
           <SkeletonText noOfLines={1} my={"0.5"} h={"22px"} loading={loading} asChild>
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"text.subtle"}>
@@ -622,7 +488,7 @@ const Search = () => {
               Search across Entities in the current Workspace
             </Text>
             <Text fontSize={"xs"}>
-              Use "Text" to search by keyword or with AI, build structured search queries using "Query Builder"
+              Use "Text" to search by keyword, build structured search queries using "Query Builder"
             </Text>
           </Flex>
 
@@ -882,42 +748,24 @@ const Search = () => {
 
                 {/* Search input and submit */}
                 <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <InputGroup startElement={isAISearch && <Icon name={"lightning"} size={"xs"} color={"ai.default"} />}>
-                    <Input
-                      size={"xs"}
-                      rounded={"md"}
-                      value={query}
-                      placeholder={isAISearch ? "Describe what you're looking for..." : "Search..."}
-                      background={"white"}
-                      className={isAISearch ? "ai-search-border" : undefined}
-                      onChange={(event) => setQuery(event.target.value)}
-                      onKeyUp={(event) => {
-                        if (event.key === "Enter" && query !== "") runSearch();
-                      }}
-                    />
-                  </InputGroup>
-                  {globalPermissions.features.ai && (
-                    <Tooltip content={isAISearch ? "AI search on" : "Enable AI natural language search"} showArrow>
-                      <Button
-                        size={"xs"}
-                        rounded={"md"}
-                        colorPalette={isAISearch ? "ai" : "gray"}
-                        variant={isAISearch ? "solid" : "outline"}
-                        disabled={isSearching}
-                        onClick={() => setIsAISearch((prev) => !prev)}
-                      >
-                        <Icon name={"lightning"} size={"xs"} />
-                        AI
-                      </Button>
-                    </Tooltip>
-                  )}
+                  <Input
+                    size={"xs"}
+                    rounded={"md"}
+                    value={query}
+                    placeholder={"Search..."}
+                    background={"white"}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyUp={(event) => {
+                      if (event.key === "Enter" && query !== "") runSearch();
+                    }}
+                  />
                   <Button
                     aria-label={"Search"}
                     size={"xs"}
                     rounded={"md"}
-                    colorPalette={isAISearch ? "ai" : "green"}
-                    disabled={query === "" || isTranslating}
-                    loading={isTranslating || isSearching}
+                    colorPalette={"green"}
+                    disabled={query === ""}
+                    loading={isSearching}
                     loadingText={"Searching..."}
                     onClick={() => runSearch()}
                   >
@@ -982,7 +830,6 @@ const Search = () => {
                       data={results}
                       showPagination
                       showSelection
-                      actions={searchResultActions}
                     />
                   </>
                 ) : (

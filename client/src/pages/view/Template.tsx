@@ -32,7 +32,7 @@ import ExportDialog from "@components/ExportDialog";
 import SaveDialog from "@components/SaveDialog";
 
 // Existing and custom types
-import { AttributeHistory, AttributeModel, AttributeUsage, IGenericItem, IValue, ResponseData } from "@types";
+import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -64,6 +64,7 @@ const Template = () => {
   // Workspace information
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceIsPublic, setWorkspaceIsPublic] = useState(false);
 
   // Breakpoint
   const { isBreakpointActive } = useBreakpoint();
@@ -145,12 +146,13 @@ const Template = () => {
       workspace(_id: $workspace) {
         _id
         name
+        isPublic
       }
     }
   `;
   const { loading, error, data } = useQuery<{
     template: AttributeModel;
-    workspace: IGenericItem;
+    workspace: WorkspaceModel;
   }>(GET_TEMPLATE, {
     variables: {
       _id: id,
@@ -225,6 +227,7 @@ const Template = () => {
 
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+      setWorkspaceIsPublic(data.workspace.isPublic);
     }
 
     if (usageData?.templateUsage) {
@@ -604,7 +607,7 @@ const Template = () => {
                 />
                 <Tooltip content={`${displayTemplateArchived ? "Archived: " : ""}${displayTemplateName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayTemplateName, { length: 30 })}
+                    {_.truncate(displayTemplateName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {displayTemplateArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
@@ -785,7 +788,7 @@ const Template = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <VisibilityTag isPublic={workspaceIsPublic} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -897,6 +900,7 @@ const Template = () => {
         value={saveMessage}
         onChange={setSaveMessage}
         placeholder={"(Optional) Enter a description of the changes made to the Template."}
+        isPublic={workspaceIsPublic}
       />
     </Content>
   );

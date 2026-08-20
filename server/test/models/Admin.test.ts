@@ -48,7 +48,7 @@ const createWorkspace = async (collaboratorPermissions: UserWorkspacePermissions
   const result: ResponseData<string> = await Workspaces.create({
     name: "Test Workspace",
     owner: OWNER_ID,
-    public: false,
+    isPublic: false,
     description: "Workspace for permission tests",
     collaborators: [{ _id: COLLABORATOR_ID, permissions: collaboratorPermissions }],
     entities: [],

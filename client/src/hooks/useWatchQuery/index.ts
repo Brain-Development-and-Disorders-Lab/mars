@@ -59,6 +59,12 @@ const createWatchQueryStore = <TData, TVariables extends OperationVariables>(
   };
 };
 
+const skippedSnapshot = { data: undefined, loading: false, error: undefined };
+const skippedStore = {
+  subscribe: () => () => {},
+  getSnapshot: () => skippedSnapshot,
+};
+
 /**
  * Poll a GraphQL query outside of React's render cycle, re-rendering the
  * calling component only when the polled data actually changes
@@ -67,14 +73,15 @@ export const useWatchQuery = <TData, TVariables extends OperationVariables = Ope
   query: DocumentNode,
   variables: TVariables,
   pollInterval = 5000,
+  skip = false,
 ): WatchQueryState<TData> => {
   const client = useApolloClient();
   const variablesKey = JSON.stringify(variables);
 
-  const store = useMemo(
-    () => createWatchQueryStore<TData, TVariables>(client, query, variables, pollInterval),
-    [client, query, variablesKey, pollInterval],
-  );
+  const store = useMemo(() => {
+    if (skip) return skippedStore;
+    return createWatchQueryStore<TData, TVariables>(client, query, variables, pollInterval);
+  }, [client, query, variablesKey, pollInterval, skip]);
 
-  return useSyncExternalStore(store.subscribe, store.getSnapshot);
+  return useSyncExternalStore(store.subscribe, store.getSnapshot) as WatchQueryState<TData>;
 };

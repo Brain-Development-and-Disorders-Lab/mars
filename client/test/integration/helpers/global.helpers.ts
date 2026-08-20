@@ -166,7 +166,7 @@ export const createTestWorkspace = async (
     description: "Test Workspace",
     owner: owner,
     collaborators: collaborators,
-    public: false,
+    isPublic: false,
     entities: [],
     projects: [],
     templates: [],
@@ -201,7 +201,7 @@ export const createTestUser = async (
   const testUtils = ctx.test;
 
   const user = testUtils.createUser({
-    email: options?.email ?? process.env.TEST_USER_EMAIL,
+    email: options?.email ?? `${getUniqueName("user").replace(/\s+/g, "-").toLowerCase()}@test.com`,
     name: options?.name ?? "Test User",
     completedProfile: true,
   });

@@ -138,7 +138,7 @@ const CreateWorkspace = () => {
           name: name,
           description: description,
           owner: owner,
-          public: false,
+          isPublic: false,
           collaborators: collaborators,
           entities: [],
           projects: [],

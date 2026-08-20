@@ -12,6 +12,9 @@ import { UserCollatedPermissions, UserGlobalPermissions, UserWorkspacePermission
 // Variables
 import { DEFAULT_GLOBAL_PERMISSIONS, DEFAULT_WORKSPACE_PERMISSIONS } from "@variables";
 
+// Authentication
+import { auth } from "@lib/auth";
+
 const GET_USER_PERMISSIONS = gql`
   query GetUserPermissions {
     userCollatedPermissions {
@@ -60,10 +63,13 @@ type PermissionsContextValue = {
 const PermissionsContext = createContext<PermissionsContextValue>({} as PermissionsContextValue);
 
 export const PermissionsProvider = (props: { children: React.JSX.Element }) => {
+  const { data: session } = auth.useSession();
+
   const { data } = useWatchQuery<{ userCollatedPermissions: UserCollatedPermissions }>(
     GET_USER_PERMISSIONS,
     {},
     1000, // Poll every second to pick up permission changes made by other users
+    !session?.user, // Only poll while there's an active session
   );
 
   const value = useMemo<PermissionsContextValue>(() => {

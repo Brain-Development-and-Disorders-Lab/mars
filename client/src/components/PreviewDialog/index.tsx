@@ -16,11 +16,16 @@ import seqparse from "seqparse";
 // Zoom and pan controls
 import { TransformComponent, TransformWrapper, type ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 
+// GraphQL
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
+
+// Variables
 import { STYLES, STATIC_URL } from "@variables";
 
+// Utility functions and libraries
 import _ from "lodash";
+import { getPublicWorkspaceUrl } from "@lib/util";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -365,7 +370,11 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
 };
 
 /** Manages file URL resolution and preview type detection for a given attachment. */
-const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] }) => {
+const PreviewContent = (props: {
+  attachment: PreviewDialogProps["attachment"];
+  workspace?: PreviewDialogProps["workspace"];
+  isPublic?: PreviewDialogProps["isPublic"];
+}) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
   const [previewType, setPreviewType] = useState<"document" | "image" | "sequence" | null>(null);
@@ -381,6 +390,11 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
       _id: props.attachment._id,
     },
     skip: !props.attachment._id,
+    ...(props.isPublic && {
+      context: {
+        uri: getPublicWorkspaceUrl(props.workspace ?? ""),
+      },
+    }),
   });
 
   const onPreviewDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
@@ -435,9 +449,18 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
       );
     }
 
-    if (loading || !previewType || !previewSource) {
+    if (loading || (!error && (!previewType || !previewSource))) {
       return (
-        <Flex direction={"column"} align={"center"} justify={"center"} minH={"400px"} gap={"1"} w={"100%"}>
+        <Flex
+          direction={"column"}
+          align={"center"}
+          justify={"center"}
+          h={"100%"}
+          flex={"1"}
+          minH={"400px"}
+          gap={"1"}
+          w={"100%"}
+        >
           <Text fontSize={"sm"} color={STYLES.font.secondaryHeader.color} fontWeight={"semibold"}>
             Preparing Preview
           </Text>
@@ -460,7 +483,7 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
           <Text fontSize={"xs"}>{previewType}</Text>
         </Flex>
 
-        {previewType === "document" && (
+        {!error && previewType === "document" && (
           <DocumentPreview
             previewSource={previewSource}
             previewIndex={previewIndex}
@@ -471,12 +494,16 @@ const PreviewContent = (props: { attachment: PreviewDialogProps["attachment"] })
           />
         )}
 
-        {previewType === "image" && <ImagePreview previewSource={previewSource} />}
+        {!error && previewType === "image" && <ImagePreview previewSource={previewSource} />}
 
-        {previewType === "sequence" && <SequencePreview name={props.attachment.name} fileUrl={previewSource} />}
+        {!error && previewType === "sequence" && (
+          <SequencePreview name={props.attachment.name} fileUrl={previewSource} />
+        )}
 
-        {error && !loading && !data && (
+        {error && (
           <Flex
+            flex={"1"}
+            h={"100%"}
             minH={"400px"}
             rounded={"md"}
             border={STYLES.border.style}
@@ -547,7 +574,7 @@ const PreviewDialog = (props: PreviewDialogProps) => {
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} flex={"1"} overflow={"hidden"} minH={0}>
-            <PreviewContent attachment={props.attachment} />
+            <PreviewContent attachment={props.attachment} workspace={props.workspace} isPublic={props.isPublic} />
           </Dialog.Body>
         </Dialog.Content>
       </Dialog.Positioner>

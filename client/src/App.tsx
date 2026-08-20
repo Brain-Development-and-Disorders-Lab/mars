@@ -59,6 +59,16 @@ import Signup from "@pages/account/Signup";
 import ForgotPassword from "@pages/account/ForgotPassword";
 import ResetPassword from "@pages/account/ResetPassword";
 
+// Page type - Public
+import { Dashboard as PublicDashboard } from "@pages/public/Dashboard";
+import { Search as PublicSearch } from "@pages/public/Search";
+import { Entities as PublicEntities } from "@pages/public/view/Entities";
+import { Entity as PublicEntity } from "@pages/public/view/Entity";
+import { Projects as PublicProjects } from "@pages/public/view/Projects";
+import { Project as PublicProject } from "@pages/public/view/Project";
+import { Templates as PublicTemplates } from "@pages/public/view/Templates";
+import { Template as PublicTemplate } from "@pages/public/view/Template";
+
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
 import { PermissionsProvider } from "@hooks/usePermissions";
@@ -95,14 +105,14 @@ const App = (): ReactElement => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="" element={<Providers />}>
-        {/* Authentication not required */}
+        {/* Non-authenticated routes */}
         <Route path={"/signup"} element={<Signup />} />
         <Route path={"/login"} element={<Login />} />
         <Route path={"/forgot-password"} element={<ForgotPassword />} />
         <Route path={"/reset-password"} element={<ResetPassword />} />
 
-        {/* Authentication required */}
-        <Route element={<Page />}>
+        {/* Private routes */}
+        <Route element={<Page isPublic={false} />}>
           <Route path={"/"} element={<Dashboard />} />
 
           {/* Create routes */}
@@ -143,6 +153,18 @@ const App = (): ReactElement => {
           <Route path={"/invalid"} element={<Invalid />} />
           <Route path={"/unauthorized"} element={<Unauthorized />} />
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
+        </Route>
+
+        {/* Public routes */}
+        <Route element={<Page isPublic={true} />}>
+          <Route path={"/public/:id"} element={<PublicDashboard />} />
+          <Route path={"/public/:id/search"} element={<PublicSearch />} />
+          <Route path={"/public/:id/entities"} element={<PublicEntities />} />
+          <Route path={"/public/:id/entities/:entity"} element={<PublicEntity />} />
+          <Route path={"/public/:id/projects"} element={<PublicProjects />} />
+          <Route path={"/public/:id/projects/:project"} element={<PublicProject />} />
+          <Route path={"/public/:id/templates"} element={<PublicTemplates />} />
+          <Route path={"/public/:id/templates/:template"} element={<PublicTemplate />} />
         </Route>
       </Route>,
     ),

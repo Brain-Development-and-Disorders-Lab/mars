@@ -10,13 +10,13 @@ import { toaster, Toaster } from "@components/Toast";
 import ErrorBoundary from "@components/ErrorBoundary";
 
 // Existing and custom types
-import { ContentProps } from "@types";
+import { ContentProps, PageProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 
 // Routing and navigation
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useParams } from "react-router-dom";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -60,56 +60,104 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 };
 
 // Page container
-const Page: FC = () => {
-  // Authentication state
-  const [session, setSession] = useState<Session>();
+const Page: FC<PageProps> = (props: PageProps) => {
+  if (!props.isPublic) {
+    // Authentication state
+    const [session, setSession] = useState<Session>();
 
-  // Error state
-  const [sessionError, setSessionError] = useState(false);
+    // Error state
+    const [sessionError, setSessionError] = useState(false);
 
-  // `true` when the user authenticated via a third-party but hasn't completed their profile
-  const [incompleteProfile, setIncompleteProfile] = useState(false);
+    // `true` when the user authenticated via a third-party but hasn't completed their profile
+    const [incompleteProfile, setIncompleteProfile] = useState(false);
 
-  /**
-   * Helper function to validate session and check profile completion state
-   */
-  const getSession = async () => {
-    // Retrieve the session information
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
-      // Issue retrieving session
-      toaster.create({
-        title: "Error",
-        description: "Session expired, please login again",
-        type: "error",
-        duration: 4000,
-        closable: true,
-      });
-      setSessionError(true);
-    } else {
-      // Successfully obtained session
-      setSession(sessionResponse.data.session);
-      posthog.identify(sessionResponse.data.user.id, {
-        email: sessionResponse.data.user.email,
-        name: sessionResponse.data.user.name,
-      });
+    /**
+     * Helper function to validate session and check profile completion state
+     */
+    const getSession = async () => {
+      // Retrieve the session information
+      const sessionResponse = await auth.getSession();
+      if (sessionResponse.error || !sessionResponse.data) {
+        // Issue retrieving session
+        toaster.create({
+          title: "Error",
+          description: "Session expired, please login again",
+          type: "error",
+          duration: 4000,
+          closable: true,
+        });
+        setSessionError(true);
+      } else {
+        // Successfully obtained session
+        setSession(sessionResponse.data.session);
+        posthog.identify(sessionResponse.data.user.id, {
+          email: sessionResponse.data.user.email,
+          name: sessionResponse.data.user.name,
+        });
 
-      // Force user to the profile completion page if required
-      if (sessionResponse.data.user.completedProfile === false) {
-        setIncompleteProfile(true);
+        // Force user to the profile completion page if required
+        if (sessionResponse.data.user.completedProfile === false) {
+          setIncompleteProfile(true);
+        }
       }
+    };
+
+    useEffect(() => {
+      if (!props.isPublic) {
+        getSession();
+      }
+    }, []);
+
+    if (incompleteProfile) {
+      return <Navigate to={"/signup"} />;
     }
-  };
 
-  useEffect(() => {
-    getSession();
-  }, []);
+    if (session) {
+      // Display content
+      return (
+        <Flex direction={{ base: "column", lg: "row" }} w={"100%"} p={"0"} m={"0"}>
+          {/* Navigation component */}
+          <Flex
+            justify={"center"}
+            w={{ base: "100%", lg: "200px" }}
+            minW={{ lg: "200px" }}
+            h={{ base: "8vh", lg: "100%" }}
+            position={"fixed"}
+            bg={"nav.bg"}
+            zIndex={2}
+          >
+            <Navigation isPublic={false} />
+          </Flex>
 
-  if (incompleteProfile) {
-    return <Navigate to={"/signup"} />;
-  }
+          <Flex
+            direction={"column"}
+            w={"100%"}
+            minW="0"
+            maxW="100%"
+            minH={{ base: "92vh", lg: "100vh" }}
+            ml={{ base: "0", lg: "200px" }}
+            mt={{ base: "8vh", lg: "0" }}
+            overflowX="hidden"
+            bg={"surface.subtle"}
+          >
+            {/* Main content components */}
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </Flex>
+        </Flex>
+      );
+    } else if (sessionError) {
+      // Navigate to login on error
+      return <Navigate to={"/login"} />;
+    } else {
+      // Loading screen
+      return <Loading />;
+    }
+  } else {
+    // Route param carrying the public Workspace identifier
+    const { id } = useParams();
 
-  if (session) {
     // Display content
     return (
       <Flex direction={{ base: "column", lg: "row" }} w={"100%"} p={"0"} m={"0"}>
@@ -123,7 +171,7 @@ const Page: FC = () => {
           bg={"nav.bg"}
           zIndex={2}
         >
-          <Navigation />
+          <Navigation isPublic={true} workspace={id} />
         </Flex>
 
         <Flex
@@ -144,12 +192,6 @@ const Page: FC = () => {
         </Flex>
       </Flex>
     );
-  } else if (sessionError) {
-    // Navigate to login on error
-    return <Navigate to={"/login"} />;
-  } else {
-    // Loading screen
-    return <Loading />;
   }
 };
 

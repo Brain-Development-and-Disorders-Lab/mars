@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
@@ -10,11 +10,15 @@ import ReportDialog from "@components/ReportDialog";
 import Tooltip from "@components/Tooltip";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
+// Custom types
+import { NavigationProps, WorkspaceModel } from "@types";
+
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
+import { useQuery } from "@apollo/client/react";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -23,13 +27,27 @@ import { usePostHog } from "posthog-js/react";
 import { useWorkspace } from "@hooks/useWorkspace";
 import { usePermissions } from "@hooks/usePermissions";
 
+// GraphQL
+import { gql } from "@apollo/client";
+
 // Variables
 import { STYLES } from "@variables";
 
 // Static assets
 import favicon from "@img/Favicon.png";
+import { getPublicWorkspaceUrl } from "@lib/util";
 
-const Navigation = () => {
+// Queries
+const GET_WORKSPACE = gql`
+  query GetWorkspace($workspace: String) {
+    workspace(_id: $workspace) {
+      _id
+      name
+    }
+  }
+`;
+
+const Navigation = (props: NavigationProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,8 +55,12 @@ const Navigation = () => {
   // Permissions
   const { globalPermissions } = usePermissions();
 
-  // Workspace context value
-  const { workspace } = useWorkspace();
+  // Workspace context value, overridden by the route param on unauthenticated public pages
+  const { workspace: activeWorkspace } = useWorkspace();
+  const workspace = props.isPublic ? props.workspace : activeWorkspace;
+
+  // Display state
+  const [workspaceName, setWorkspaceName] = useState<string>("");
 
   // Dialog open states
   const [importOpen, setImportOpen] = useState(false);
@@ -55,6 +77,26 @@ const Navigation = () => {
     _hover: { bg: "nav.hoverBg" },
   });
 
+  // Execute GraphQL query both on page load and navigation
+  const { data } = useQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, {
+    variables: {
+      workspace: workspace,
+    },
+    // Only unauthenticated public pages need to reach the public Workspace endpoint
+    context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace ?? "") } : undefined,
+    fetchPolicy: "network-only",
+    skip: !workspace,
+  });
+
+  // Assign data
+  useEffect(() => {
+    if (data?.workspace) {
+      setWorkspaceName(data.workspace.name);
+    }
+  }, [data]);
+
   return (
     <Flex w={"100%"} p={"2"} bg={"nav.bg"}>
       {/* Desktop navigation group */}
@@ -67,11 +109,51 @@ const Navigation = () => {
           </Text>
         </Flex>
 
+        {props.isPublic && (
+          <Flex direction={"column"} gap={"2"}>
+            <Flex
+              direction={"column"}
+              rounded={"md"}
+              p={"2"}
+              gap={"1.5"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.card.bg}
+            >
+              <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+                <Icon name={"workspace"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} textAlign={"center"}>
+                  Public Workspace
+                </Text>
+              </Flex>
+              <Tooltip content={workspaceName} disabled={workspaceName.length <= 24} showArrow>
+                <Text fontSize={"xs"} textAlign={"center"}>
+                  {_.truncate(workspaceName, { length: 24 })}
+                </Text>
+              </Tooltip>
+            </Flex>
+            <Button
+              id={"navLoginButtonDesktop"}
+              w={"100%"}
+              key={"login"}
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => navigate("/login")}
+            >
+              Login or Sign Up
+              <Icon name={"person"} size={"xs"} />
+            </Button>
+          </Flex>
+        )}
+
         {/* Workspace menu items */}
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <Flex direction={"column"} gap={"1"} w={"100%"}>
-            <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
-          </Flex>
+          {!props.isPublic && (
+            <Flex direction={"column"} gap={"1"} w={"100%"}>
+              <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
+            </Flex>
+          )}
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
@@ -86,27 +168,35 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.isEqual(location.pathname, "/"))}
-              onClick={() => navigate("/")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}`);
+                } else {
+                  navigate("/");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"dashboard"} size={"xs"} />
               Dashboard
             </Button>
 
-            <Button
-              id={"navActivityButtonDesktop"}
-              key={"activity"}
-              size={"xs"}
-              w={"100%"}
-              rounded={"md"}
-              justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/activity"))}
-              onClick={() => navigate("/activity")}
-              disabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              <Icon name={"activity"} size={"xs"} />
-              Activity
-            </Button>
+            {!props.isPublic && (
+              <Button
+                id={"navActivityButtonDesktop"}
+                key={"activity"}
+                size={"xs"}
+                w={"100%"}
+                rounded={"md"}
+                justifyContent={"left"}
+                {...navLinkStyle(_.includes(location.pathname, "/activity"))}
+                onClick={() => navigate("/activity")}
+                disabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                <Icon name={"activity"} size={"xs"} />
+                Activity
+              </Button>
+            )}
 
             <Button
               id={"navSearchButtonDesktop"}
@@ -116,27 +206,35 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/search"))}
-              onClick={() => navigate("/search")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/search`);
+                } else {
+                  navigate("/search");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"search"} size={"xs"} />
               Search
             </Button>
 
-            <Button
-              id={"navCreateButtonDesktop"}
-              key={"create"}
-              size={"xs"}
-              w={"100%"}
-              rounded={"md"}
-              justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/create")}
-              disabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              <Icon name={"add"} size={"xs"} />
-              Create
-            </Button>
+            {!props.isPublic && (
+              <Button
+                id={"navCreateButtonDesktop"}
+                key={"create"}
+                size={"xs"}
+                w={"100%"}
+                rounded={"md"}
+                justifyContent={"left"}
+                {...navLinkStyle(_.includes(location.pathname, "/create"))}
+                onClick={() => navigate("/create")}
+                disabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                <Icon name={"add"} size={"xs"} />
+                Create
+              </Button>
+            )}
 
             <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               View
@@ -149,7 +247,13 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/entities")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/entities`);
+                } else {
+                  navigate("/entities");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
@@ -165,7 +269,13 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/projects")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/projects`);
+                } else {
+                  navigate("/projects");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
@@ -181,7 +291,13 @@ const Navigation = () => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/templates")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/templates`);
+                } else {
+                  navigate("/templates");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
@@ -189,77 +305,79 @@ const Navigation = () => {
             </Button>
           </Flex>
 
-          <Flex direction={"column"} gap={"2"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
-              Tools
-            </Text>
-            <Flex direction={"row"} gap={"2"} w={"100%"}>
-              <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
-                  <Button
-                    id={"navImportButtonDesktop"}
-                    w={"100%"}
-                    key={"import"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"blue"}
-                    onClick={() => {
-                      // Capture event
-                      posthog.capture("client.import.dialog_open");
+          {!props.isPublic && (
+            <Flex direction={"column"} gap={"2"}>
+              <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
+                Tools
+              </Text>
+              <Flex direction={"row"} gap={"2"} w={"100%"}>
+                <Flex w={"50%"}>
+                  <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
+                    <Button
+                      id={"navImportButtonDesktop"}
+                      w={"100%"}
+                      key={"import"}
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"blue"}
+                      onClick={() => {
+                        // Capture event
+                        posthog.capture("client.import.dialog_open");
 
-                      setImportOpen(true);
-                    }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
-                  >
-                    <Icon name={"upload"} size={"xs"} />
-                    Import
-                  </Button>
-                </Tooltip>
+                        setImportOpen(true);
+                      }}
+                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
+                    >
+                      <Icon name={"upload"} size={"xs"} />
+                      Import
+                    </Button>
+                  </Tooltip>
+                </Flex>
+
+                <Flex w={"50%"}>
+                  <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
+                    <Button
+                      id={"navScanButtonDesktop"}
+                      w={"100%"}
+                      key={"scan"}
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      onClick={() => {
+                        // Capture event
+                        posthog.capture("client.scan.dialog_open");
+
+                        setScanOpen(true);
+                      }}
+                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
+                    >
+                      <Icon name={"scan"} size={"xs"} />
+                      Scan
+                    </Button>
+                  </Tooltip>
+                </Flex>
               </Flex>
+              <Flex>
+                <Button
+                  id={"navBugButtonDesktop"}
+                  w={"100%"}
+                  key={"bug"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"red"}
+                  onClick={() => {
+                    // Capture event
+                    posthog.capture("client.bug.dialog_open");
 
-              <Flex w={"50%"}>
-                <Tooltip disabled={globalPermissions.features.scan} content={"Scan is unavailable"} showArrow>
-                  <Button
-                    id={"navScanButtonDesktop"}
-                    w={"100%"}
-                    key={"scan"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => {
-                      // Capture event
-                      posthog.capture("client.scan.dialog_open");
-
-                      setScanOpen(true);
-                    }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
-                  >
-                    <Icon name={"scan"} size={"xs"} />
-                    Scan
-                  </Button>
-                </Tooltip>
+                    setReportOpen(true);
+                  }}
+                >
+                  <Icon name={"bug"} size={"xs"} />
+                  Report Issue
+                </Button>
               </Flex>
             </Flex>
-            <Flex>
-              <Button
-                id={"navBugButtonDesktop"}
-                w={"100%"}
-                key={"bug"}
-                size={"xs"}
-                rounded={"md"}
-                colorPalette={"red"}
-                onClick={() => {
-                  // Capture event
-                  posthog.capture("client.bug.dialog_open");
-
-                  setReportOpen(true);
-                }}
-              >
-                <Icon name={"bug"} size={"xs"} />
-                Report Issue
-              </Button>
-            </Flex>
-          </Flex>
+          )}
         </Flex>
 
         <Spacer />
@@ -307,25 +425,39 @@ const Navigation = () => {
                   id={"navDashboardButtonMobile"}
                   value={"dashboard"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}`);
+                    } else {
+                      navigate("/");
+                    }
+                  }}
                 >
                   <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
                 </Menu.Item>
-                <Menu.Item
-                  id={"navActivityButtonMobile"}
-                  value={"activity"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/activity")}
-                >
-                  <Icon name={"activity"} size={"xs"} />
-                  Activity
-                </Menu.Item>
+                {!props.isPublic && (
+                  <Menu.Item
+                    id={"navActivityButtonMobile"}
+                    value={"activity"}
+                    fontSize={"xs"}
+                    onClick={() => navigate("/activity")}
+                  >
+                    <Icon name={"activity"} size={"xs"} />
+                    Activity
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   id={"navSearchButtonMobile"}
                   value={"search"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/search")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/search`);
+                    } else {
+                      navigate("/search");
+                    }
+                  }}
                 >
                   <Icon name={"search"} size={"xs"} />
                   Search
@@ -338,7 +470,13 @@ const Navigation = () => {
                   id={"navEntitiesButtonMobile"}
                   value={"entities"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/entities")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/entities`);
+                    } else {
+                      navigate("/entities");
+                    }
+                  }}
                 >
                   <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                   Entities
@@ -347,7 +485,13 @@ const Navigation = () => {
                   id={"navProjectButtonMobile"}
                   value={"projects"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/projects")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/projects`);
+                    } else {
+                      navigate("/projects");
+                    }
+                  }}
                 >
                   <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
                   Projects
@@ -356,40 +500,48 @@ const Navigation = () => {
                   id={"navTemplatesButtonMobile"}
                   value={"templates"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/templates")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/templates`);
+                    } else {
+                      navigate("/templates");
+                    }
+                  }}
                 >
                   <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                   Templates
                 </Menu.Item>
               </Menu.ItemGroup>
 
-              <Menu.ItemGroup title={"Tools"}>
-                <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
-                <Menu.Item
-                  id={"navCreateButtonMobile"}
-                  value={"create"}
-                  fontSize={"xs"}
-                  onClick={() => navigate("/create")}
-                >
-                  <Icon name={"add"} size={"xs"} />
-                  Create
-                </Menu.Item>
-                <Menu.Item
-                  id={"navScanButtonMobile"}
-                  value={"scan"}
-                  fontSize={"xs"}
-                  onClick={() => {
-                    // Capture event
-                    posthog.capture("client.scan.dialog_open");
+              {!props.isPublic && (
+                <Menu.ItemGroup title={"Tools"}>
+                  <Menu.ItemGroupLabel>Tools</Menu.ItemGroupLabel>
+                  <Menu.Item
+                    id={"navCreateButtonMobile"}
+                    value={"create"}
+                    fontSize={"xs"}
+                    onClick={() => navigate("/create")}
+                  >
+                    <Icon name={"add"} size={"xs"} />
+                    Create
+                  </Menu.Item>
+                  <Menu.Item
+                    id={"navScanButtonMobile"}
+                    value={"scan"}
+                    fontSize={"xs"}
+                    onClick={() => {
+                      // Capture event
+                      posthog.capture("client.scan.dialog_open");
 
-                    setScanOpen(true);
-                  }}
-                  disabled={workspace === "" || _.isUndefined(workspace)}
-                >
-                  <Icon name={"scan"} size={"xs"} />
-                  Scan
-                </Menu.Item>
-              </Menu.ItemGroup>
+                      setScanOpen(true);
+                    }}
+                    disabled={workspace === "" || _.isUndefined(workspace)}
+                  >
+                    <Icon name={"scan"} size={"xs"} />
+                    Scan
+                  </Menu.Item>
+                </Menu.ItemGroup>
+              )}
 
               {/* Version number */}
               <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
@@ -402,7 +554,7 @@ const Navigation = () => {
         </Menu.Root>
 
         {/* Workspace switcher */}
-        <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
+        {!props.isPublic && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
       </Flex>
 
       {/* `ImportDialog` component */}

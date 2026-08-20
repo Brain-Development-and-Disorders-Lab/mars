@@ -314,7 +314,7 @@ export class Workspaces {
       $set: {
         name: updated.name,
         description: updated.description,
-        public: updated.public,
+        isPublic: updated.isPublic,
         collaborators: updated.collaborators,
       },
     };
@@ -347,6 +347,10 @@ export class Workspaces {
       return false;
     }
 
-    return workspaceResult.owner === user || isCollaborator(user, workspaceResult.collaborators);
+    return (
+      workspaceResult.isPublic === true ||
+      workspaceResult.owner === user ||
+      isCollaborator(user, workspaceResult.collaborators)
+    );
   };
 }

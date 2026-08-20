@@ -41,12 +41,15 @@ describe("VisibilityTag Component", () => {
   });
 
   describe("Toggle Functionality", () => {
-    it("calls setIsPublic when toggle button is clicked", () => {
+    it("calls setIsPublic when toggle button is clicked", async () => {
       const setIsPublic = vi.fn();
       renderVisibilityTag({ isPublic: true, setIsPublic });
 
       const toggleButton = screen.getByLabelText("set-visibility");
       fireEvent.click(toggleButton);
+
+      const continueButton = await screen.findByText("Continue");
+      fireEvent.click(continueButton);
 
       expect(setIsPublic).toHaveBeenCalledWith(false);
     });

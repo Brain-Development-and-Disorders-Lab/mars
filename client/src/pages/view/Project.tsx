@@ -47,6 +47,7 @@ import {
   ResponseData,
   EntityModel,
   AttributeModel,
+  WorkspaceModel,
 } from "@types";
 
 // Apollo client imports
@@ -86,6 +87,7 @@ const Project = () => {
   // Workspace information
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceIsPublic, setWorkspaceIsPublic] = useState(false);
 
   // Breakpoints
   const { isBreakpointActive } = useBreakpoint();
@@ -214,13 +216,14 @@ const Project = () => {
       workspace(_id: $workspace) {
         _id
         name
+        isPublic
       }
     }
   `;
   const { loading, error, data } = useQuery<{
     project: ProjectModel;
     projectEntities: EntityModel[];
-    workspace: IGenericItem;
+    workspace: WorkspaceModel;
   }>(GET_PROJECT_WITH_ENTITIES, {
     variables: {
       _id: id,
@@ -295,6 +298,7 @@ const Project = () => {
 
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+      setWorkspaceIsPublic(data.workspace.isPublic);
     }
   }, [data, editing]);
 
@@ -806,7 +810,7 @@ const Project = () => {
                 />
                 <Tooltip content={`${displayProjectArchived ? "Archived: " : ""}${displayProjectData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayProjectData.name, { length: 30 })}
+                    {_.truncate(displayProjectName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
@@ -1003,7 +1007,7 @@ const Project = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Visibility
                   </Text>
-                  <VisibilityTag isPublic={false} isInherited />
+                  <VisibilityTag isPublic={workspaceIsPublic} isInherited />
                 </Flex>
               </Flex>
             </Flex>
@@ -1203,6 +1207,7 @@ const Project = () => {
           onChange={setSaveMessage}
           description={"Specify a description of the changes made to the Project."}
           modifiedType={"Project"}
+          isPublic={workspaceIsPublic}
         />
 
         {/* Blocker warning message */}

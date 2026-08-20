@@ -105,6 +105,10 @@ export type ViewAttributeDialogProps = {
 
   // Optional context for comparison display
   entityName?: string;
+
+  // Optional fields for public view
+  workspace?: string;
+  isPublic?: boolean;
 };
 
 export type CompareAttributeDialogProps = {
@@ -194,6 +198,8 @@ export type LinkyProps = {
   justify?: string;
   size?: string;
   truncate?: boolean | number;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 // "Actor" component props
@@ -204,6 +210,8 @@ export type ActorTagProps = {
   inline?: boolean;
   inlineNoAvatar?: boolean;
   avatarOnly?: boolean;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 // "VisibilityTagProps" component props
@@ -255,6 +263,8 @@ export type CreatedCellProps = {
 
 export type OwnerCellProps = {
   value: string;
+  workspace?: string; // Override the active Workspace, used on unauthenticated public pages
+  isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
 export type DescriptionCellProps = {
@@ -350,7 +360,7 @@ export type AddAttributeDialogProps = {
 export type IWorkspace = {
   name: string;
   owner: string;
-  public: boolean;
+  isPublic: boolean;
   description: string;
   collaborators: Collaborator[];
   entities: string[];
@@ -511,13 +521,13 @@ export type ActivityModel = IActivity & {
   _id: string;
 };
 
-// ActivityFeed component props
+// `ActivityFeed` component props
 export type ActivityFeedProps = {
   activities?: ActivityModel[];
   feedLimit?: number; // Number of activities to show in the feed (default: 5)
 };
 
-// RelativeTime component props
+// `RelativeTime` component props
 export type RelativeTimeProps = {
   value: string | number | Date;
   format?: (relative: string) => string;
@@ -526,11 +536,23 @@ export type RelativeTimeProps = {
   color?: string;
 };
 
-// Content component
+// `Content` component
 export type ContentProps = {
   children: React.ReactElement | React.ReactElement[];
   isError?: boolean;
   isLoaded?: boolean;
+};
+
+// `Page` component
+export type PageProps = {
+  children?: React.ReactElement | React.ReactElement[];
+  isPublic: boolean;
+};
+
+// `Navigation` component
+export type NavigationProps = {
+  isPublic: boolean;
+  workspace?: string;
 };
 
 // `AlertDialog` component
@@ -593,6 +615,8 @@ export type DataTableAction = {
 export type PreviewDialogProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
+  workspace?: string;
+  isPublic?: boolean;
 };
 
 // `ImportDialog` props
@@ -810,6 +834,7 @@ export type SaveDialogProps = {
   placeholder?: string;
   showCloseButton?: boolean;
   modifiedType?: "Entity" | "Project" | "Template";
+  isPublic?: boolean;
 };
 
 // "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Template detail pages.

@@ -14,6 +14,8 @@ import _ from "lodash";
 import { ApolloServer, type ApolloServerPlugin, type GraphQLRequestContextWillSendResponse } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { GraphQLError } from "graphql/index";
+import type { IResolvers } from "@graphql-tools/utils";
 import { typedefs } from "./typedefs";
 
 // Resolvers
@@ -179,46 +181,49 @@ const start = async () => {
     },
   };
 
+  // Schema shared by the authenticated ("/") and public ("/public") servers
+  const resolvers: IResolvers<any, Context>[] = [
+    {
+      Upload: GraphQLUpload,
+    },
+    AdminResolvers,
+    ActivityResolvers,
+    APIResolvers,
+    CountersResolvers,
+    DataResolvers,
+    DateResolver,
+    EntitiesResolvers,
+    IdentifiersResolvers,
+    ObjectResolver,
+    ProjectsResolvers,
+    SearchResolvers,
+    TemplatesResolvers,
+    UserResolvers,
+    WorkspacesResolvers,
+    {
+      SearchResult: {
+        __resolveType(result: any) {
+          // Entity identifiers start with "e"
+          if (_.startsWith(result._id, "e")) {
+            return "Entity";
+          }
+
+          // Project identifiers start with "p"
+          if (_.startsWith(result._id, "p")) {
+            return "Project";
+          }
+
+          return null;
+        },
+      },
+    },
+  ];
+
   // Setup the GraphQL server
   const httpServer = http.createServer(app);
   const server = new ApolloServer<Context>({
     typeDefs: typedefs,
-    resolvers: [
-      {
-        Upload: GraphQLUpload,
-      },
-      AdminResolvers,
-      ActivityResolvers,
-      APIResolvers,
-      CountersResolvers,
-      DataResolvers,
-      DateResolver,
-      EntitiesResolvers,
-      IdentifiersResolvers,
-      ObjectResolver,
-      ProjectsResolvers,
-      SearchResolvers,
-      TemplatesResolvers,
-      UserResolvers,
-      WorkspacesResolvers,
-      {
-        SearchResult: {
-          __resolveType(result: any) {
-            // Entity identifiers start with "e"
-            if (_.startsWith(result._id, "e")) {
-              return "Entity";
-            }
-
-            // Project identifiers start with "p"
-            if (_.startsWith(result._id, "p")) {
-              return "Project";
-            }
-
-            return null;
-          },
-        },
-      },
-    ],
+    resolvers,
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), loggingPlugin],
@@ -226,6 +231,62 @@ const start = async () => {
   logger.info("Starting GraphQL server...");
   await server.start();
   logger.info("GraphQL server running!");
+
+  // Root Query fields reachable on the public endpoint
+  const PUBLIC_QUERY_FIELDS = [
+    "workspace",
+    "entity",
+    "entities",
+    "project",
+    "projects",
+    "projectEntities",
+    "template",
+    "templates",
+    "templateUsage",
+    "identifierFormats",
+    "search",
+    "downloadFile",
+    "user",
+  ];
+
+  // Rejects mutations and any root selection outside PUBLIC_QUERY_FIELDS (including fragments)
+  const publicAccessPlugin: ApolloServerPlugin<Context> = {
+    async requestDidStart() {
+      return {
+        async didResolveOperation({ operation }) {
+          if (!operation) return;
+
+          // Only "query" operations are permitted (read-only)
+          if (operation.operation !== "query") {
+            throw new GraphQLError("This operation is not available", {
+              extensions: { code: "FORBIDDEN" },
+            });
+          }
+
+          // Limit the subset of "query"-able fields
+          for (const selection of operation.selectionSet.selections) {
+            if (selection.kind !== "Field" || !_.includes(PUBLIC_QUERY_FIELDS, selection.name.value)) {
+              throw new GraphQLError("This field is not available", {
+                extensions: { code: "FORBIDDEN" },
+              });
+            }
+          }
+        },
+      };
+    },
+  };
+
+  // Unauthenticated GraphQL server, restricted to PUBLIC_QUERY_FIELDS via publicAccessPlugin
+  const publicServer = new ApolloServer<Context>({
+    typeDefs: typedefs,
+    resolvers,
+    introspection: process.env.NODE_ENV !== "production",
+    csrfPrevention: true,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), publicAccessPlugin],
+  });
+  logger.info("Starting public GraphQL server...");
+  await publicServer.start();
+  logger.info("Public GraphQL server running!");
 
   // Serve static resources
   app.use(
@@ -245,6 +306,24 @@ const start = async () => {
     express.json(),
     express.urlencoded({ extended: true }),
     APIRouter(),
+    helmet(),
+  );
+
+  // Unauthenticated public Workspace endpoint, bypasses checkSession
+  app.use(
+    "/public/:workspace",
+    cors<cors.CorsRequest>({
+      origin: origins,
+      credentials: true,
+    }),
+    express.json(),
+    expressMiddleware(publicServer, {
+      context: async ({ req }): Promise<Context> => ({
+        user: "",
+        workspace: req.params.workspace || "",
+        userRole: "user",
+      }),
+    }),
     helmet(),
   );
 
