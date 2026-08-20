@@ -32,15 +32,7 @@ import ExportDialog from "@components/ExportDialog";
 import SaveDialog from "@components/SaveDialog";
 
 // Existing and custom types
-import {
-  AttributeHistory,
-  AttributeModel,
-  AttributeUsage,
-  IGenericItem,
-  IValue,
-  ResponseData,
-  WorkspaceModel,
-} from "@types";
+import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import { removeTypename } from "@lib/util";
@@ -615,7 +607,7 @@ const Template = () => {
                 />
                 <Tooltip content={`${displayTemplateArchived ? "Archived: " : ""}${displayTemplateName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayTemplateName, { length: 30 })}
+                    {_.truncate(displayTemplateName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {displayTemplateArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}

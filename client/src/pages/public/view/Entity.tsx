@@ -653,7 +653,7 @@ export const Entity = () => {
                 <Icon name={"entity"} size={"sm"} color={entityArchived ? "gray.500" : STYLES.entity.color.icon} />
                 <Tooltip content={`${entityArchived ? "Archived: " : ""}${entityName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(entityName, { length: 30 })}
+                    {_.truncate(entityName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {entityArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}

@@ -25,7 +25,7 @@ import { getPublicWorkspaceUrl, getValueTypeIconProps } from "@lib/util";
 // Variables
 import { STYLES } from "@variables";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 18; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
 
 /**
  * Utility to get the icon name, badge background, border, and icon color

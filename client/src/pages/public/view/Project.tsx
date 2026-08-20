@@ -278,7 +278,7 @@ export const Project = () => {
                 <Icon name={"project"} size={"sm"} color={projectArchived ? "gray.500" : STYLES.project.color.icon} />
                 <Tooltip content={`${projectArchived ? "Archived: " : ""}${projectName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(projectName, { length: 30 })}
+                    {_.truncate(projectName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {projectArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}

@@ -78,7 +78,7 @@ const Navigation = (props: NavigationProps) => {
   });
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data } = useQuery<{
+  const { data } = useQuery<{
     workspace: WorkspaceModel;
   }>(GET_WORKSPACE, {
     variables: {
@@ -427,7 +427,13 @@ const Navigation = (props: NavigationProps) => {
                   id={"navDashboardButtonMobile"}
                   value={"dashboard"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}`);
+                    } else {
+                      navigate("/");
+                    }
+                  }}
                 >
                   <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
@@ -447,7 +453,13 @@ const Navigation = (props: NavigationProps) => {
                   id={"navSearchButtonMobile"}
                   value={"search"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/search")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/search`);
+                    } else {
+                      navigate("/search");
+                    }
+                  }}
                 >
                   <Icon name={"search"} size={"xs"} />
                   Search
@@ -460,7 +472,13 @@ const Navigation = (props: NavigationProps) => {
                   id={"navEntitiesButtonMobile"}
                   value={"entities"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/entities")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/entities`);
+                    } else {
+                      navigate("/entities");
+                    }
+                  }}
                 >
                   <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                   Entities
@@ -469,7 +487,13 @@ const Navigation = (props: NavigationProps) => {
                   id={"navProjectButtonMobile"}
                   value={"projects"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/projects")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/projects`);
+                    } else {
+                      navigate("/projects");
+                    }
+                  }}
                 >
                   <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
                   Projects
@@ -478,7 +502,13 @@ const Navigation = (props: NavigationProps) => {
                   id={"navTemplatesButtonMobile"}
                   value={"templates"}
                   fontSize={"xs"}
-                  onClick={() => navigate("/templates")}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/templates`);
+                    } else {
+                      navigate("/templates");
+                    }
+                  }}
                 >
                   <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                   Templates

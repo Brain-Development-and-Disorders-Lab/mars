@@ -917,7 +917,7 @@ const Workspace = () => {
             <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
               <Icon name={"workspace"} size={"sm"} />
               <Heading fontWeight={"semibold"} size={"sm"}>
-                {name}
+                {_.truncate(name, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
               </Heading>
             </Flex>
           </Flex>

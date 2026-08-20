@@ -1379,7 +1379,7 @@ const Entity = () => {
                 />
                 <Tooltip content={`${displayEntityArchived ? "Archived: " : ""}${displayEntityData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayEntityData.name, { length: 30 })}
+                    {_.truncate(displayEntityName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {displayEntityArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}

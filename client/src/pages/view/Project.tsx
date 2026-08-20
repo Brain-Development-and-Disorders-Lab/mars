@@ -810,7 +810,7 @@ const Project = () => {
                 />
                 <Tooltip content={`${displayProjectArchived ? "Archived: " : ""}${displayProjectData.name}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayProjectData.name, { length: 30 })}
+                    {_.truncate(displayProjectName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
                 </Tooltip>
                 {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
