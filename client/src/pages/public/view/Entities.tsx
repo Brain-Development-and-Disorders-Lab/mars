@@ -31,11 +31,10 @@ import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { DataTableAction, EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -56,7 +55,7 @@ import { getPublicWorkspaceUrl } from "@lib/util";
 export const Entities = () => {
   const navigate = useNavigate();
 
-  const { workspace } = useWorkspace();
+  const { id: workspace } = useParams();
   const [workspaceName, setWorkspaceName] = useState("");
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
@@ -300,7 +299,7 @@ export const Entities = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} isPublic />,
+      cell: (info) => <OwnerCell value={info.getValue()} workspace={workspace} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
@@ -447,7 +446,14 @@ export const Entities = () => {
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
                                 <Checkbox.Label fontSize={"xs"}>
-                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} isPublic inline />
+                                  <ActorTag
+                                    identifier={owner}
+                                    fallback={"Unknown User"}
+                                    size={"sm"}
+                                    workspace={workspace}
+                                    isPublic
+                                    inline
+                                  />
                                 </Checkbox.Label>
                               </Checkbox.Root>
                             ))}

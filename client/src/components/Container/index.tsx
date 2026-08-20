@@ -16,7 +16,7 @@ import { ContentProps, PageProps } from "@types";
 import _ from "lodash";
 
 // Routing and navigation
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useParams } from "react-router-dom";
 
 // Authentication
 import { auth } from "@lib/auth";
@@ -155,6 +155,9 @@ const Page: FC<PageProps> = (props: PageProps) => {
       return <Loading />;
     }
   } else {
+    // Route param carrying the public Workspace identifier
+    const { id } = useParams();
+
     // Display content
     return (
       <Flex direction={{ base: "column", lg: "row" }} w={"100%"} p={"0"} m={"0"}>
@@ -168,7 +171,7 @@ const Page: FC<PageProps> = (props: PageProps) => {
           bg={"nav.bg"}
           zIndex={2}
         >
-          <Navigation isPublic={true} />
+          <Navigation isPublic={true} workspace={id} />
         </Flex>
 
         <Flex

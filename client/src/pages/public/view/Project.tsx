@@ -328,7 +328,13 @@ export const Project = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
-                  <ActorTag identifier={projectOwner} fallback={"Unknown User"} size={"sm"} isPublic />
+                  <ActorTag
+                    identifier={projectOwner}
+                    fallback={"Unknown User"}
+                    size={"sm"}
+                    workspace={workspace}
+                    isPublic
+                  />
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>

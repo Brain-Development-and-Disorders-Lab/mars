@@ -40,8 +40,9 @@ const Navigation = (props: NavigationProps) => {
   // Permissions
   const { globalPermissions } = usePermissions();
 
-  // Workspace context value
-  const { workspace } = useWorkspace();
+  // Workspace context value, overridden by the route param on unauthenticated public pages
+  const { workspace: activeWorkspace } = useWorkspace();
+  const workspace = props.isPublic ? props.workspace : activeWorkspace;
 
   // Dialog open states
   const [importOpen, setImportOpen] = useState(false);
@@ -69,6 +70,23 @@ const Navigation = (props: NavigationProps) => {
             Metadatify
           </Text>
         </Flex>
+
+        {props.isPublic && (
+          <Flex>
+            <Button
+              id={"navLoginButtonDesktop"}
+              w={"100%"}
+              key={"login"}
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"green"}
+              onClick={() => navigate("/login")}
+            >
+              Login or Sign Up
+              <Icon name={"person"} size={"xs"} />
+            </Button>
+          </Flex>
+        )}
 
         {/* Workspace menu items */}
         <Flex direction={"column"} gap={"4"} w={"100%"}>
@@ -129,7 +147,13 @@ const Navigation = (props: NavigationProps) => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/search"))}
-              onClick={() => navigate("/search")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/search`);
+                } else {
+                  navigate("/search");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"search"} size={"xs"} />
@@ -208,7 +232,13 @@ const Navigation = (props: NavigationProps) => {
               rounded={"md"}
               justifyContent={"left"}
               {...navLinkStyle(_.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create"))}
-              onClick={() => navigate("/templates")}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/templates`);
+                } else {
+                  navigate("/templates");
+                }
+              }}
               disabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
@@ -292,23 +322,6 @@ const Navigation = (props: NavigationProps) => {
         </Flex>
 
         <Spacer />
-
-        {props.isPublic && (
-          <Flex>
-            <Button
-              id={"navLoginButtonDesktop"}
-              w={"100%"}
-              key={"login"}
-              size={"xs"}
-              rounded={"md"}
-              colorPalette={"green"}
-              onClick={() => navigate("/login")}
-            >
-              Login
-              <Icon name={"c_right"} size={"xs"} />
-            </Button>
-          </Flex>
-        )}
 
         {/* Version number */}
         <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>

@@ -328,8 +328,10 @@ const ImportDialog = (props: ImportDialogProps) => {
   };
 
   useEffect(() => {
-    getUser();
-  }, []);
+    if (props.open) {
+      getUser();
+    }
+  }, [props.open]);
 
   // Apollo hooks
   const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{

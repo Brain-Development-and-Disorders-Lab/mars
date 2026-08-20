@@ -552,6 +552,7 @@ export type PageProps = {
 // `Navigation` component
 export type NavigationProps = {
   isPublic: boolean;
+  workspace?: string;
 };
 
 // `AlertDialog` component

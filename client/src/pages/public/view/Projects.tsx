@@ -29,7 +29,6 @@ import { useNavigate, useParams } from "react-router-dom";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
-import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -62,7 +61,6 @@ export const Projects = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
 
   // Effect to adjust column visibility
@@ -92,7 +90,7 @@ export const Projects = () => {
     workspace: IGenericItem;
   }>(GET_PROJECTS, {
     variables: {
-      workspace: workspace,
+      workspace: id,
     },
     fetchPolicy: "network-only",
     context: {
@@ -236,7 +234,7 @@ export const Projects = () => {
           max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
-          renderTag={(entity) => <Linky type={"entities"} id={entity} workspace={workspace} isPublic />}
+          renderTag={(entity) => <Linky type={"entities"} id={entity} workspace={id} isPublic />}
         />
       ),
       header: "Entities",
@@ -254,7 +252,7 @@ export const Projects = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} isPublic />,
+      cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
     }),
   ];
@@ -400,7 +398,14 @@ export const Projects = () => {
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
                                 <Checkbox.Label fontSize={"xs"}>
-                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} isPublic inline />
+                                  <ActorTag
+                                    identifier={owner}
+                                    fallback={"Unknown User"}
+                                    size={"sm"}
+                                    workspace={id}
+                                    isPublic
+                                    inline
+                                  />
                                 </Checkbox.Label>
                               </Checkbox.Root>
                             ))}

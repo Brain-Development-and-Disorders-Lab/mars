@@ -827,7 +827,13 @@ export const Entity = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
-                  <ActorTag identifier={entityOwner} fallback={"Unknown User"} size={"sm"} isPublic />
+                  <ActorTag
+                    identifier={entityOwner}
+                    fallback={"Unknown User"}
+                    size={"sm"}
+                    workspace={workspace}
+                    isPublic
+                  />
                 </Flex>
 
                 {/* Timestamp */}
