@@ -13,6 +13,10 @@ import {
   Breadcrumb,
   Tag,
   useDisclosure,
+  Spacer,
+  Dialog,
+  CloseButton,
+  IconButton,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -62,6 +66,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
 import { STYLES } from "@variables";
+import QRCode from "react-qr-code";
 
 const Workspace = () => {
   const navigate = useNavigate();
@@ -269,6 +274,9 @@ const Workspace = () => {
 
   // State for Workspace privacy
   const [isPublic, setIsPublic] = useState(false);
+
+  // Share dialog
+  const [shareOpen, setShareOpen] = useState(false);
 
   const { workspace } = useWorkspace();
 
@@ -914,6 +922,8 @@ const Workspace = () => {
             </Flex>
           </Flex>
 
+          <Spacer />
+
           {!editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Tooltip content={"Insufficient permissions in this Workspace"} disabled={canEditWorkspace} showArrow>
@@ -954,6 +964,22 @@ const Workspace = () => {
               </Button>
             </Flex>
           )}
+
+          <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Tooltip content={"Workspace visibility must be set to Public"} disabled={isPublic} showArrow>
+              <Button
+                id={"dialogWorkspaceShareButton"}
+                size={"xs"}
+                rounded={"md"}
+                colorPalette={"teal"}
+                disabled={!isPublic}
+                onClick={() => setShareOpen(!shareOpen)}
+              >
+                Share
+                <Icon name={"share"} size={"xs"} />
+              </Button>
+            </Tooltip>
+          </Flex>
         </Flex>
 
         <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
@@ -1392,12 +1418,136 @@ const Workspace = () => {
         </Flex>
       </Flex>
 
+      {/* Share dialog */}
+      <Dialog.Root
+        open={shareOpen}
+        onOpenChange={(event) => setShareOpen(event.open)}
+        placement={"center"}
+        closeOnEscape
+        closeOnInteractOutside
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content gap={"0"} w={["md", "lg", "xl"]}>
+            {/* Heading and close button */}
+            <Dialog.Header p={"2"} bg={STYLES.dialog.header.bg} roundedTop={"md"}>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon name={"share"} size={"xs"} />
+                <Text fontSize={"xs"} fontWeight={"semibold"}>
+                  Share Workspace
+                </Text>
+              </Flex>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => setShareOpen(false)} />
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+            <Dialog.Body p={"2"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Sharable URL:
+                    </Text>
+                  </Flex>
+                  <Flex w={"60%"}>
+                    <Input
+                      size={"xs"}
+                      value={`https://app.metadatify.com/public/${workspace}`}
+                      rounded={"md"}
+                      onFocus={(event) => event.target.select()}
+                      readOnly
+                    />
+                  </Flex>
+                  <IconButton
+                    size={"xs"}
+                    rounded={"md"}
+                    variant={"outline"}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`https://app.metadatify.com/public/${workspace}`);
+                      toaster.create({
+                        title: "Copied to clipboard",
+                        type: "success",
+                        duration: 2000,
+                        closable: true,
+                      });
+                    }}
+                  >
+                    <Icon name={"copy"} size={"xs"} />
+                  </IconButton>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      Unique ID:
+                    </Text>
+                  </Flex>
+                  <Flex w={"60%"}>
+                    <Input
+                      size={"xs"}
+                      value={workspace}
+                      rounded={"md"}
+                      onFocus={(event) => event.target.select()}
+                      readOnly
+                    />
+                  </Flex>
+                  <IconButton
+                    size={"xs"}
+                    rounded={"md"}
+                    variant={"outline"}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${workspace}`);
+                      toaster.create({
+                        title: "Copied to clipboard",
+                        type: "success",
+                        duration: 2000,
+                        closable: true,
+                      });
+                    }}
+                  >
+                    <Icon name={"copy"} size={"xs"} />
+                  </IconButton>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"}>
+                      QR Code:
+                    </Text>
+                  </Flex>
+                  <Flex p={"1"} border={STYLES.border.style} borderColor={STYLES.border.color} rounded={"md"}>
+                    <QRCode id={`${workspace}_qr`} value={`${workspace}`} size={80} />
+                  </Flex>
+                </Flex>
+              </Flex>
+            </Dialog.Body>
+
+            <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
+              <Flex direction={"row"} w={"100%"} gap={"1"} justify={"right"} align={"center"}>
+                <Button
+                  variant={"solid"}
+                  size={"xs"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => setShareOpen(false)}
+                >
+                  Done
+                  <Icon name={"check"} size={"xs"} />
+                </Button>
+              </Flex>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+
+      {/* Create Counter dialog */}
       <CreateCounterDialog
         open={openCreateCounter}
         onClose={() => setOpenCreateCounter(false)}
         onCreated={handleCounterCreated}
       />
 
+      {/* Create identifier format dialog */}
       <CreateIdentifierFormatDialog
         open={openCreateIdentifierFormat}
         onClose={() => setOpenCreateIdentifierFormat(false)}
