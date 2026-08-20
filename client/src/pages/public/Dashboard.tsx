@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
+import { Button, EmptyState, Flex, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
@@ -35,6 +35,8 @@ import { getPublicWorkspaceUrl } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import TimestampTag from "@components/TimestampTag";
+import ActorTag from "@components/ActorTag";
 dayjs.extend(relativeTime);
 
 // Queries
@@ -49,6 +51,12 @@ const GET_WORKSPACE = gql`
     workspace(_id: $workspace) {
       _id
       name
+      description
+      owner
+      timestamp
+      entities
+      projects
+      templates
     }
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -94,6 +102,12 @@ export const Dashboard = () => {
 
   // Display state
   const [workspaceName, setWorkspaceName] = useState<string>();
+  const [workspaceDescription, setWorkspaceDescription] = useState<string>("");
+  const [workspaceCreated, setWorkspaceCreated] = useState<string>("");
+  const [workspaceOwner, setWorkspaceOwner] = useState<string>("");
+  const [workspaceEntityCount, setWorkspaceEntityCount] = useState<number>(0);
+  const [workspaceProjectCount, setWorkspaceProjectCount] = useState<number>(0);
+  const [workspaceTemplateCount, setWorkspaceTemplateCount] = useState<number>(0);
   const [workspaceEntities, setWorkspaceEntities] = useState<EntityModel[]>([]);
   const [workspaceProjects, setWorkspaceProjects] = useState(
     [] as { _id: string; name: string; description: string; created: string }[],
@@ -125,6 +139,12 @@ export const Dashboard = () => {
   useEffect(() => {
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
+      setWorkspaceDescription(data.workspace.description);
+      setWorkspaceCreated(data.workspace.timestamp);
+      setWorkspaceOwner(data.workspace.owner);
+      setWorkspaceEntityCount(data.workspace.entities?.length ?? 0);
+      setWorkspaceProjectCount(data.workspace.projects?.length ?? 0);
+      setWorkspaceTemplateCount(data.workspace.templates?.length ?? 0);
     }
     if (data?.entities) {
       setWorkspaceEntities(data.entities.entities);
@@ -395,6 +415,190 @@ export const Dashboard = () => {
         {/* Header */}
         <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
           <PageHeader icon={"dashboard"} title={"Public Dashboard"} subtitle={workspaceName} loading={loading} />
+        </Flex>
+
+        {/* Workspace Overview */}
+        <Flex
+          direction={"column"}
+          p={"2"}
+          rounded={"md"}
+          gap={"2"}
+          border={STYLES.border.style}
+          borderColor={STYLES.border.color}
+          bg={"surface.card"}
+          minW={"0"}
+        >
+          <Flex direction={"column"} align={"start"} gap={"1"} py={"1.5"} ml={"1.5"} w={"100%"}>
+            <Flex direction={"row"} gap={"1"}>
+              <Icon name={"workspace"} size={"xs"} />
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                Workspace Overview
+              </Text>
+            </Flex>
+
+            <Flex direction={"row"} gap={"2"} w={"100%"} pt={"2"} wrap={"wrap"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                  Owner
+                </Text>
+                <ActorTag identifier={workspaceOwner} fallback={"Unknown User"} workspace={id} size={"md"} isPublic />
+              </Flex>
+
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                  Created
+                </Text>
+                <TimestampTag timestamp={workspaceCreated} />
+              </Flex>
+
+              <Flex direction={"column"} gap={"1"}>
+                <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                    Contents
+                  </Text>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                  <Flex
+                    direction={"row"}
+                    align={"center"}
+                    h={"52px"}
+                    w={"fit-content"}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.entity.color.border}
+                    rounded={"md"}
+                    overflow={"hidden"}
+                    flexShrink={0}
+                  >
+                    <Flex
+                      align={"center"}
+                      justify={"center"}
+                      bg={STYLES.entity.color.light}
+                      px={"1.5"}
+                      h={"100%"}
+                      borderRight={"1px solid"}
+                      borderColor={STYLES.entity.color.border}
+                    >
+                      <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                    </Flex>
+                    <Flex
+                      direction={"column"}
+                      p={"2"}
+                      gap={"0.5"}
+                      align={"start"}
+                      justify={"center"}
+                      h={"100%"}
+                      bg={"white"}
+                    >
+                      <Text fontSize={"sm"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
+                        {workspaceEntityCount}
+                      </Text>
+                      <Text fontSize={"xs"} fontWeight={"medium"} color={"text.faint"}>
+                        {workspaceEntityCount === 1 ? "Entity" : "Entities"}
+                      </Text>
+                    </Flex>
+                  </Flex>
+
+                  <Flex
+                    direction={"row"}
+                    align={"center"}
+                    h={"52px"}
+                    w={"fit-content"}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.project.color.border}
+                    rounded={"md"}
+                    overflow={"hidden"}
+                    flexShrink={0}
+                  >
+                    <Flex
+                      align={"center"}
+                      justify={"center"}
+                      bg={STYLES.project.color.light}
+                      px={"1.5"}
+                      h={"100%"}
+                      borderRight={"1px solid"}
+                      borderColor={STYLES.project.color.border}
+                    >
+                      <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
+                    </Flex>
+                    <Flex
+                      direction={"column"}
+                      p={"2"}
+                      gap={"0.5"}
+                      align={"start"}
+                      justify={"center"}
+                      h={"100%"}
+                      bg={"white"}
+                    >
+                      <Text fontSize={"sm"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
+                        {workspaceProjectCount}
+                      </Text>
+                      <Text fontSize={"xs"} fontWeight={"medium"} color={"text.faint"}>
+                        {workspaceProjectCount === 1 ? "Project" : "Projects"}
+                      </Text>
+                    </Flex>
+                  </Flex>
+
+                  <Flex
+                    direction={"row"}
+                    align={"center"}
+                    h={"52px"}
+                    w={"fit-content"}
+                    border={STYLES.border.style}
+                    borderColor={STYLES.template.color.border}
+                    rounded={"md"}
+                    overflow={"hidden"}
+                    flexShrink={0}
+                  >
+                    <Flex
+                      align={"center"}
+                      justify={"center"}
+                      bg={STYLES.template.color.light}
+                      px={"1.5"}
+                      h={"100%"}
+                      borderRight={"1px solid"}
+                      borderColor={STYLES.template.color.border}
+                    >
+                      <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+                    </Flex>
+                    <Flex
+                      direction={"column"}
+                      p={"2"}
+                      gap={"0.5"}
+                      align={"start"}
+                      justify={"center"}
+                      h={"100%"}
+                      bg={"white"}
+                    >
+                      <Text fontSize={"sm"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
+                        {workspaceTemplateCount}
+                      </Text>
+                      <Text fontSize={"xs"} fontWeight={"medium"} color={"text.faint"}>
+                        {workspaceTemplateCount === 1 ? "Template" : "Templates"}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              <Flex direction={"column"} gap={"1"} minW={"0"} maxW={"64"}>
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+                  Description
+                </Text>
+                <Flex>
+                  {_.isEqual(workspaceDescription, "") || _.isNull(workspaceDescription) ? (
+                    <Tag.Root colorPalette={"orange"}>
+                      <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
+                    </Tag.Root>
+                  ) : (
+                    <Tooltip content={workspaceDescription} disabled={workspaceDescription.length < 64} showArrow>
+                      <Text fontSize={"xs"}>{_.truncate(workspaceDescription, { length: 64 })}</Text>
+                    </Tooltip>
+                  )}
+                </Flex>
+              </Flex>
+            </Flex>
+          </Flex>
         </Flex>
 
         {/* Recent Entities */}
