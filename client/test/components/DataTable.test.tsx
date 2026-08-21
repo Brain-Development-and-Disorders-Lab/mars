@@ -512,4 +512,51 @@ describe("DataTable Component", () => {
       });
     });
   });
+
+  describe("Footer Action", () => {
+    it("does not render a footer button by default", async () => {
+      renderDataTable();
+      await waitFor(() => {
+        expect(screen.getByText("Name")).toBeTruthy();
+      });
+      expect(screen.queryByRole("button", { name: "Add Item" })).toBeNull();
+    });
+
+    it("renders a footer button and fires its callback when clicked", async () => {
+      const onClick = vi.fn();
+      renderDataTable({ footerAction: { label: "Add Item", icon: "add", onClick } });
+
+      const footerButton = await screen.findByRole("button", { name: "Add Item" });
+      fireEvent.click(footerButton);
+
+      expect(onClick).toHaveBeenCalled();
+    });
+  });
+
+  describe("Resizable Columns", () => {
+    it("does not render resize handles by default", async () => {
+      const { container } = renderDataTable();
+      await waitFor(() => {
+        expect(screen.getByText("Name")).toBeTruthy();
+      });
+      expect(container.querySelector('[data-testid="datatable-resize-name"]')).toBeNull();
+    });
+
+    it("renders resize handles and allows dragging without error", async () => {
+      const { container } = renderDataTable({ resizableColumns: true });
+
+      const handle = await waitFor(() => {
+        const el = container.querySelector('[data-testid="datatable-resize-name"]');
+        expect(el).not.toBeNull();
+        return el as HTMLElement;
+      });
+
+      fireEvent.mouseDown(handle, { clientX: 150 });
+      fireEvent.mouseMove(document, { clientX: 200 });
+      fireEvent.mouseUp(document);
+
+      // Dragging should not throw or remove the column from the DOM
+      expect(container.querySelector('div[data-testid="datatable-header-name"]')).toBeTruthy();
+    });
+  });
 });
