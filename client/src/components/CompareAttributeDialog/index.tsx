@@ -21,11 +21,43 @@ import { useLazyQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
 // Utility functions
-import { getValueTypeIconProps, isValueEqual } from "@lib/util";
+import { formatValueForDisplay, getValueTypeIconProps, isValueEqual } from "@lib/util";
 import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
+
+// Entity/select values get their type icon and parsed label; other types get a truncated, tooltipped text value
+const renderValueData = (value: IValue) => {
+  const { label, secondary } = formatValueForDisplay(value);
+
+  if (value.type === "entity" || value.type === "select") {
+    const { name, color } = getValueTypeIconProps(value.type);
+    return (
+      <Flex direction={"row"} gap={"1"} align={"center"}>
+        <Icon name={name} color={color} size={"xs"} />
+        <Text fontSize={"xs"} fontWeight={"semibold"}>
+          {label}
+        </Text>
+        {secondary && (
+          <Text fontSize={"xs"}>
+            {_.truncate(secondary, {
+              length: 24,
+            })}
+          </Text>
+        )}
+      </Flex>
+    );
+  }
+
+  return (
+    <Tooltip disabled={label.length < 24} content={label} showArrow>
+      <Text fontSize={"xs"} fontWeight={"semibold"}>
+        {_.truncate(label, { length: 24 })}
+      </Text>
+    </Tooltip>
+  );
+};
 
 const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
   const [templateAttribute, setTemplateAttribute] = useState<AttributeModel>();
@@ -577,35 +609,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
-                                {entity.type === "entity" && (
-                                  <Flex direction={"row"} gap={"1"}>
-                                    <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
-                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                      {JSON.parse(entity.data)["name"]}
-                                    </Text>
-                                  </Flex>
-                                )}
-                                {entity.type === "select" && (
-                                  <Flex direction={"row"} gap={"1"}>
-                                    <Icon name={"v_select"} color={"teal.400"} size={"xs"} />
-                                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                      {JSON.parse(entity.data)["selected"]}
-                                    </Text>
-                                    <Text fontSize={"xs"}>
-                                      {_.truncate(`Options: ${JSON.parse(entity.data)["options"].join(", ")}`, {
-                                        length: 24,
-                                      })}
-                                    </Text>
-                                  </Flex>
-                                )}
-                                {(entity.type === "text" ||
-                                  entity.type === "number" ||
-                                  entity.type === "date" ||
-                                  entity.type === "url") && (
-                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {entity.data}
-                                  </Text>
-                                )}
+                                {renderValueData(entity)}
                               </Flex>
                             </Flex>
                           ))}
@@ -791,11 +795,7 @@ const CompareAttributeDialog = (props: CompareAttributeDialogProps) => {
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
-                                <Tooltip disabled={template.data.length < 24} content={template.data} showArrow>
-                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {_.truncate(template.data, { length: 24 })}
-                                  </Text>
-                                </Tooltip>
+                                {renderValueData(template)}
                               </Flex>
                             </Flex>
                           ))}
