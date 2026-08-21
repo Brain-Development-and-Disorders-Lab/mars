@@ -9,7 +9,7 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { IconNames, IGenericItem, IValueType, LinkyProps } from "@types";
+import { IconNames, IGenericItem, LinkyData, LinkyProps, LinkyType, IValueType } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -27,42 +27,66 @@ import { STYLES } from "@variables";
 
 const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
 
-/**
- * Utility to get the icon name, badge background, border, and icon color
- * for each Linky type
- */
-const getTypeStyle = (
-  type: "entities" | "projects" | "templates" | "workspaces",
-): { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string } => {
-  if (type === "projects") {
-    return {
-      icon: "project",
-      badgeBg: STYLES.project.color.light,
-      badgeBorder: STYLES.project.color.border,
-      iconColor: STYLES.project.color.icon,
-    };
-  } else if (type === "templates") {
-    return {
-      icon: "template",
-      badgeBg: STYLES.template.color.light,
-      badgeBorder: STYLES.template.color.border,
-      iconColor: STYLES.template.color.icon,
-    };
-  } else if (type === "workspaces") {
-    return {
-      icon: "workspace",
-      badgeBg: "gray.300",
-      badgeBorder: "gray.300",
-      iconColor: "gray.700",
-    };
-  }
-  // entities
-  return {
+// Singular display name for each Linky type, used in fallback and error labels
+const TYPE_LABEL: Record<LinkyType, string> = {
+  entities: "Entity",
+  projects: "Project",
+  templates: "Template",
+  workspaces: "Workspace",
+};
+
+// Icon name, badge background, border, and icon color for each Linky type
+const TYPE_STYLE: Record<LinkyType, { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string }> = {
+  entities: {
     icon: "entity",
     badgeBg: STYLES.entity.color.light,
     badgeBorder: STYLES.entity.color.border,
     iconColor: STYLES.entity.color.icon,
-  };
+  },
+  projects: {
+    icon: "project",
+    badgeBg: STYLES.project.color.light,
+    badgeBorder: STYLES.project.color.border,
+    iconColor: STYLES.project.color.icon,
+  },
+  templates: {
+    icon: "template",
+    badgeBg: STYLES.template.color.light,
+    badgeBorder: STYLES.template.color.border,
+    iconColor: STYLES.template.color.icon,
+  },
+  workspaces: {
+    icon: "workspace",
+    badgeBg: "gray.300",
+    badgeBorder: "gray.300",
+    iconColor: "gray.700",
+  },
+};
+
+// Label for the navigator preview list, per Linky type
+const NAVIGATOR_LABEL: Record<LinkyType, string> = {
+  entities: "Attributes",
+  projects: "Entities",
+  templates: "Values",
+  workspaces: "Values",
+};
+
+// Icon, color, and color palette for navigator preview tags that don't depend on the item itself
+const NAVIGATOR_ITEM_STYLE: Partial<Record<LinkyType, { icon: IconNames; color: string; palette: string }>> = {
+  entities: { icon: "attribute", color: STYLES.template.color.icon, palette: "template" },
+  projects: { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" },
+  workspaces: { icon: "workspace", color: "black", palette: "gray" },
+};
+
+const NAVIGATOR_PREVIEW_COUNT = 2;
+
+/**
+ * Apply Linky's truncation rules to a label
+ */
+const truncateLabel = (label: string, truncate: LinkyProps["truncate"]): string => {
+  if (truncate === false) return label;
+  const length = _.isNumber(truncate) ? truncate : DEFAULT_LINKY_LABEL_LENGTH;
+  return _.truncate(label, { length });
 };
 
 const Linky = (props: LinkyProps) => {
@@ -154,115 +178,84 @@ const Linky = (props: LinkyProps) => {
     workspace: IGenericItem & { description: string };
   }>(GET_WORKSPACE);
 
+  // Query context is shared across all types, routing to the public Workspace endpoint if required
+  const queryContext = props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined;
+
+  // Fetches and normalizes data for each Linky type, returning `null` if the item is inaccessible
+  const fetchers: Record<LinkyType, () => Promise<LinkyData | null>> = {
+    entities: async () => {
+      const { data, error } = await getEntity({ variables: { _id: props.id }, context: queryContext });
+      if (error || !data) return null;
+      return {
+        name: data.entity.name,
+        archived: data.entity.archived,
+        description: data.entity.description,
+        items: data.entity.attributes,
+      };
+    },
+    projects: async () => {
+      const { data, error } = await getProject({ variables: { _id: props.id }, context: queryContext });
+      if (error || !data) return null;
+      return {
+        name: data.project.name,
+        archived: data.project.archived,
+        description: data.project.description,
+        items: data.projectEntities,
+      };
+    },
+    templates: async () => {
+      const { data, error } = await getTemplate({ variables: { _id: props.id }, context: queryContext });
+      if (error || !data) return null;
+      return {
+        name: data.template.name,
+        archived: data.template.archived,
+        description: data.template.description,
+        items: data.template.values,
+      };
+    },
+    workspaces: async () => {
+      const { data, error } = await getWorkspace({ variables: { _id: props.id }, context: queryContext });
+      if (error || !data) return null;
+      return { name: data.workspace.name, archived: false, description: data.workspace.description, items: [] };
+    },
+  };
+
   /**
    * Utility function to retrieve data of link target
    */
   const getLinkyData = async () => {
-    // If id is empty or missing, just use fallback without making a query
+    const fallbackName = props.fallback || `Invalid ${TYPE_LABEL[props.type]}`;
+
     if (!props.id || props.id.trim() === "") {
-      const fallbackName =
-        props.fallback || `Invalid ${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)}`;
       setTooltipLabel(fallbackName);
       setShowDeleted(true);
-
-      // Apply truncation if needed
-      if (props.truncate === false) {
-        setLinkLabel(fallbackName);
-      } else if (_.isNumber(props.truncate)) {
-        setLinkLabel(_.truncate(fallbackName, { length: props.truncate }));
-      } else {
-        setLinkLabel(_.truncate(fallbackName, { length: DEFAULT_LINKY_LABEL_LENGTH }));
-      }
+      setLinkLabel(truncateLabel(fallbackName, props.truncate));
       return;
     }
 
-    const data: IGenericItem & { description: string } = {
-      _id: props.id,
-      name:
-        props.fallback || `Invalid ${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)}`,
-      description: "",
-    };
+    const notFoundTooltip = `${TYPE_LABEL[props.type]} (ID: ${props.id}) is either inaccessible or does not exist.`;
 
+    // On a GraphQL-level error the fallback is ignored, but a thrown error keeps it, matching prior behaviour
+    let name = fallbackName;
     try {
-      if (props.type === "templates") {
-        const response = await getTemplate({
-          variables: { _id: props.id },
-          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
-        });
-        if (response.error || _.isUndefined(response.data)) {
-          setShowDeleted(true);
-          data.name = "Invalid Template";
-          setTooltipLabel(`Template (ID: ${props.id}) is either inaccessible or does not exist.`);
-        } else {
-          data.name = response.data.template.name;
-          setTooltipLabel(data.name);
-          setShowArchived(response.data.template.archived);
-          setNavigatorDescription(response.data.template.description);
-          setNavigatorItems(response.data.template.values);
-        }
-      } else if (props.type === "entities") {
-        const response = await getEntity({
-          variables: { _id: props.id },
-          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
-        });
-        if (response.error || _.isUndefined(response.data)) {
-          setShowDeleted(true);
-          data.name = "Invalid Entity";
-          setTooltipLabel(`Entity (ID: ${props.id}) is either inaccessible or does not exist.`);
-        } else {
-          data.name = response.data.entity.name;
-          setTooltipLabel(data.name);
-          setShowArchived(response.data.entity.archived);
-          setNavigatorDescription(response.data.entity.description);
-          setNavigatorItems(response.data.entity.attributes);
-        }
-      } else if (props.type === "projects") {
-        const response = await getProject({
-          variables: { _id: props.id },
-          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
-        });
-        if (response.error || _.isUndefined(response.data)) {
-          setShowDeleted(true);
-          data.name = "Invalid Project";
-          setTooltipLabel(`Project (ID: ${props.id}) is either inaccessible or does not exist.`);
-        } else {
-          data.name = response.data.project.name;
-          setTooltipLabel(data.name);
-          setShowArchived(response.data.project.archived);
-          setNavigatorDescription(response.data.project.description);
-          setNavigatorItems(response.data.projectEntities);
-        }
-      } else if (props.type === "workspaces") {
-        const response = await getWorkspace({
-          variables: { _id: props.id },
-          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
-        });
-        if (response.error || _.isUndefined(response.data)) {
-          setShowDeleted(true);
-          data.name = "Invalid Workspace";
-          setTooltipLabel(`Workspace (ID: ${props.id}) is either inaccessible or does not exist.`);
-        } else {
-          data.name = response.data.workspace.name;
-          setTooltipLabel(data.name);
-          setShowArchived(false);
-          setNavigatorDescription(response.data.workspace.description);
-        }
+      const result = await fetchers[props.type]();
+      if (result) {
+        name = result.name;
+        setTooltipLabel(name);
+        setShowArchived(result.archived);
+        setNavigatorDescription(result.description);
+        setNavigatorItems(result.items);
+      } else {
+        name = `Invalid ${TYPE_LABEL[props.type]}`;
+        setShowDeleted(true);
+        setTooltipLabel(notFoundTooltip);
       }
-    } catch (error) {
-      // If query fails completely, use fallback
+    } catch {
       setShowDeleted(true);
-      const tooltipLabel = `${_.capitalize(props.type === "entities" ? "entitys" : props.type).slice(0, -1)} (ID: ${props.id}) is either inaccessible or does not exist.`;
-      setTooltipLabel(tooltipLabel);
+      setTooltipLabel(notFoundTooltip);
     }
 
-    // Set the label text and apply truncating where specified
-    if (props.truncate === false) {
-      setLinkLabel(data.name);
-    } else if (_.isNumber(props.truncate)) {
-      setLinkLabel(_.truncate(data.name, { length: props.truncate }));
-    } else {
-      setLinkLabel(_.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }));
-    }
+    setLinkLabel(truncateLabel(name, props.truncate));
   };
 
   const onClickHandler = () => {
@@ -280,7 +273,8 @@ const Linky = (props: LinkyProps) => {
   }, [props.id]);
 
   const isLoading = loadingTemplate || loadingEntity || loadingProject;
-  const { icon, badgeBg, badgeBorder, iconColor } = getTypeStyle(props.type);
+  const { icon, badgeBg, badgeBorder, iconColor } = TYPE_STYLE[props.type];
+  const navigatorLabel = NAVIGATOR_LABEL[props.type];
 
   /**
    * Preview tag icon and color per item
@@ -288,20 +282,11 @@ const Linky = (props: LinkyProps) => {
    * @return {{ icon: IconNames; color: string; palette: string; }}
    */
   const getNavigatorItemStyle = (item: { type?: IValueType }): { icon: IconNames; color: string; palette: string } => {
-    if (props.type === "entities") {
-      return { icon: "attribute", color: STYLES.template.color.icon, palette: "template" };
-    }
-    if (props.type === "projects") {
-      return { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" };
-    }
-    if (props.type === "workspaces") {
-      return { icon: "workspace", color: "black", palette: "gray" };
-    }
+    const style = NAVIGATOR_ITEM_STYLE[props.type];
+    if (style) return style;
     const { name, color } = getValueTypeIconProps(item.type);
     return { icon: name, color, palette: color.split(".")[0] };
   };
-  const navigatorLabel = props.type === "entities" ? "Attributes" : props.type === "projects" ? "Entities" : "Values";
-  const NAVIGATOR_PREVIEW_COUNT = 2;
 
   if (isLoading) {
     return <Skeleton h={"22px"} w={"80px"} rounded={"md"} />;

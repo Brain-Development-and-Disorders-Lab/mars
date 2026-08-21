@@ -202,6 +202,16 @@ export type LinkyProps = {
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
+export type LinkyType = LinkyProps["type"];
+
+// Normalized data returned by the "Linky" component's per-type data fetchers
+export type LinkyData = {
+  name: string;
+  archived: boolean;
+  description: string;
+  items: { _id: string; name: string; type?: IValueType }[];
+};
+
 // "Actor" component props
 export type ActorTagProps = {
   identifier: string;
