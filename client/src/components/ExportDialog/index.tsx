@@ -221,16 +221,17 @@ const ExportDialog = (props: ExportDialogProps) => {
     exportProjectLoading ||
     exportTemplateLoading;
 
+  // Detail fetchers, one per dataType that has a field-selection view
+  const detailFetchers: Partial<Record<ExportDialogProps["dataType"], (id: string) => void>> = {
+    entity: (id) => getEntity({ variables: { _id: id } }),
+    project: (id) => getProject({ variables: { _id: id } }),
+    template: (id) => getTemplate({ variables: { _id: id } }),
+  };
+
   useEffect(() => {
     if (open) {
-      if (dataType === "entity" && id) {
-        getEntity({ variables: { _id: id } });
-      }
-      if (dataType === "project" && id) {
-        getProject({ variables: { _id: id } });
-      }
-      if (dataType === "template" && id) {
-        getTemplate({ variables: { _id: id } });
+      if (id) {
+        detailFetchers[dataType]?.(id);
       }
     } else {
       // Reset state when the dialog closes
@@ -242,43 +243,47 @@ const ExportDialog = (props: ExportDialogProps) => {
   }, [open]);
 
   const handleDownload = async () => {
-    let responseData: string | undefined;
-    let filename = "";
-
     const datestamp = dayjs().format("YYYY_MM_DD");
 
-    if (dataType === "entity" && id) {
-      const response = await exportEntity({
-        variables: { _id: id, format, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
-      }).catch(ignoreAbort);
-      responseData = response?.data?.exportEntity;
-      filename = slugify(`export_entity_${datestamp}.${format}`);
-    } else if (dataType === "entities") {
-      if (ids !== undefined) {
-        const response = await exportEntities({
-          variables: { entities: ids, format, includeAttributes, includeHistory },
+    // Export queries, one per dataType, each returning the raw export payload and a filename
+    const exporters: Record<ExportDialogProps["dataType"], () => Promise<{ data?: string; filename: string }>> = {
+      entity: async () => {
+        if (!id) return { filename: "" };
+        const response = await exportEntity({
+          variables: { _id: id, format, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
         }).catch(ignoreAbort);
-        responseData = response?.data?.exportEntities;
-      } else {
+        return { data: response?.data?.exportEntity, filename: slugify(`export_entity_${datestamp}.${format}`) };
+      },
+      entities: async () => {
+        const filename = slugify(`export_entities_${datestamp}.${format}`);
+        if (ids !== undefined) {
+          const response = await exportEntities({
+            variables: { entities: ids, format, includeAttributes, includeHistory },
+          }).catch(ignoreAbort);
+          return { data: response?.data?.exportEntities, filename };
+        }
         const response = await exportEntitiesAll({
           variables: { format, includeAttributes, includeHistory },
         }).catch(ignoreAbort);
-        responseData = response?.data?.exportEntitiesAll;
-      }
-      filename = slugify(`export_entities_${datestamp}.${format}`);
-    } else if (dataType === "project" && id) {
-      const response = await exportProject({
-        variables: { _id: id, format, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
-      }).catch(ignoreAbort);
-      responseData = response?.data?.exportProject;
-      filename = slugify(`export_project_${datestamp}.${format}`);
-    } else if (dataType === "template" && id) {
-      const response = await exportTemplate({
-        variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
-      }).catch(ignoreAbort);
-      responseData = response?.data?.exportTemplate;
-      filename = slugify(`export_template_${datestamp}.json`);
-    }
+        return { data: response?.data?.exportEntitiesAll, filename };
+      },
+      project: async () => {
+        if (!id) return { filename: "" };
+        const response = await exportProject({
+          variables: { _id: id, format, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
+        }).catch(ignoreAbort);
+        return { data: response?.data?.exportProject, filename: slugify(`export_project_${datestamp}.${format}`) };
+      },
+      template: async () => {
+        if (!id) return { filename: "" };
+        const response = await exportTemplate({
+          variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
+        }).catch(ignoreAbort);
+        return { data: response?.data?.exportTemplate, filename: slugify(`export_template_${datestamp}.json`) };
+      },
+    };
+
+    const { data: responseData, filename } = await exporters[dataType]();
 
     if (!responseData) {
       toaster.create({

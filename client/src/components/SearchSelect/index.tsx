@@ -24,6 +24,16 @@ import { STYLES } from "@variables";
 // College Scorecard API URL
 const SCORECARD_URL = "https://api.data.gov/ed/collegescorecard/v1/schools";
 
+// Placeholder text and icon per result type
+const RESULT_TYPE_STYLE: Record<
+  SearchSelectProps["resultType"],
+  { placeholder: string; iconName: IconNames; iconColor: string }
+> = {
+  entity: { placeholder: "Search Entities...", iconName: "entity", iconColor: STYLES.entity.color.icon },
+  institution: { placeholder: "Search Institutions...", iconName: "institution", iconColor: "gray.600" },
+  project: { placeholder: "Search Projects...", iconName: "project", iconColor: STYLES.project.color.icon },
+};
+
 const GET_ENTITIES = gql`
   query GetEntities($limit: Int, $archived: Boolean) {
     entities(limit: $limit, archived: $archived) {
@@ -91,37 +101,28 @@ const SearchSelect = (props: SearchSelectProps) => {
   const isLoading =
     entitiesLoading || projectsLoading || searchLoading || institutionLoading || (isTyping && !hasSearched);
 
-  // Setup default presentation parameters
-  let placeholder = "Search Entities...";
-  let iconName: IconNames = "entity";
-  let iconColor = STYLES.entity.color.icon;
-
-  switch (props.resultType) {
-    case "institution": {
-      placeholder = "Search Institutions...";
-      iconName = "institution";
-      iconColor = "gray.600";
-      break;
-    }
-    case "project": {
-      placeholder = "Search Projects...";
-      iconName = "project";
-      iconColor = STYLES.project.color.icon;
-      break;
-    }
-  }
+  const { placeholder, iconName, iconColor } = RESULT_TYPE_STYLE[props.resultType];
 
   useEffect(() => {
     setInputValue(props.value?.name || "");
   }, [props.value]);
 
+  const showOptionsError = () =>
+    toaster.create({
+      title: "Error",
+      type: "error",
+      description: "Error while retrieving options for selection",
+      duration: 4000,
+      closable: true,
+    });
+
   /**
    * Loads the initial dropdown options on mount and on workspace change
    */
   const getSelectOptions = async () => {
-    switch (props.resultType) {
-      case "institution": {
-        // Pre-poll a handful of large institutions so the dropdown isn't empty on first open.
+    const optionFetchers: Record<SearchSelectProps["resultType"], () => Promise<void>> = {
+      // Pre-poll a handful of large institutions so the dropdown isn't empty on first open.
+      institution: async () => {
         setInstitutionLoading(true);
         try {
           const params = new URLSearchParams({
@@ -144,39 +145,26 @@ const SearchSelect = (props: SearchSelectProps) => {
         } finally {
           setInstitutionLoading(false);
         }
-        return;
-      }
-      case "entity": {
+      },
+      entity: async () => {
         const result = await getEntities({ variables: { limit: 20 } });
         if (result.data?.entities?.entities) {
           setOptions(result.data.entities.entities);
         } else if (result.error) {
-          toaster.create({
-            title: "Error",
-            type: "error",
-            description: "Error while retrieving options for selection",
-            duration: 4000,
-            closable: true,
-          });
+          showOptionsError();
         }
-        break;
-      }
-      case "project": {
+      },
+      project: async () => {
         const result = await getProjects({ variables: { limit: 20 } });
         if (result.data?.projects) {
           setOptions(result.data.projects);
         } else if (result.error) {
-          toaster.create({
-            title: "Error",
-            type: "error",
-            description: "Error while retrieving options for selection",
-            duration: 4000,
-            closable: true,
-          });
+          showOptionsError();
         }
-        break;
-      }
-    }
+      },
+    };
+
+    await optionFetchers[props.resultType]();
   };
 
   const { workspace } = useWorkspace();
