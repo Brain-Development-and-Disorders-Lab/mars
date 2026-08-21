@@ -37,7 +37,6 @@ export const typedefs = `#graphql
   # "User" type
   type User {
     _id: String!
-    token: String
     firstName: String
     lastName: String
     name: String
@@ -759,10 +758,8 @@ export const typedefs = `#graphql
     adminWorkspaces: [AdminWorkspace]
 
     # User queries
-    users: [User]
     user(_id: String): User
     userByEmail(email: String): ResponseDataString
-    userByOrcid(orcid: String): ResponseDataString
     userGlobalPermissions(_id: String): UserGlobalPermissions
     userWorkspacePermissions(_id: String, workspace: String): UserWorkspacePermissions
     userCollatedPermissions: UserCollatedPermissions
@@ -854,13 +851,11 @@ export const typedefs = `#graphql
     updateWorkspace(workspace: WorkspaceUpdateInput): ResponseMessage
 
     # Admin mutations
-    setUserRole(_id: String, role: String): ResponseMessage
     setUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
     setUserWorkspacePermissions(_id: String, workspace: String permissions: UserWorkspacePermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations
-    createUser(user: UserInput): ResponseMessage
     updateUser(user: UserInput): ResponseMessage
     reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 

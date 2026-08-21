@@ -84,9 +84,6 @@ app.use(
 // Setup CORS origins
 const origins = process.env.NODE_ENV !== "production" ? ["http://127.0.0.1:8080"] : ["https://app.metadatify.com"];
 
-// Specify non-secure paths
-const nonSecurePaths = ["/login"];
-
 // Start the GraphQL server
 const start = async () => {
   logger.info({ env: process.env.NODE_ENV }, "Environment");
@@ -102,7 +99,7 @@ const start = async () => {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
-    if (!_.includes(nonSecurePaths, req.path) && session === null) {
+    if (session === null) {
       res.status(401).json({ message: `You do not have permission to access ${req.path}` });
     } else {
       res.locals.session = session;
