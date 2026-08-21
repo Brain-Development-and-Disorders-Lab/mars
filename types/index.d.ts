@@ -69,6 +69,39 @@ export type AttributeUsage = {
   modifications: ("name" | "description" | "values")[];
 };
 
+// `TemplateBreadcrumb` props, the breadcrumb trail and name tag shared by the Template detail page
+export type TemplateBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateTemplates: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `TemplateOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Template detail page
+export type TemplateOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+  owner: string;
+  timestamp: string;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `TemplateUsageTable` props, the Entities using a Template, shared by the Template detail page
+export type TemplateUsageTableProps = {
+  templateUsage: AttributeUsage[];
+  onViewEntity: (entityId: string) => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
 export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
@@ -328,6 +361,52 @@ export type ProjectHistory = {
   entities: string[];
 };
 
+// `ProjectBreadcrumb` props, the breadcrumb trail and name tag shared by the Project detail page
+export type ProjectBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateProjects: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `ProjectOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Project detail page
+export type ProjectOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+  owner: string;
+  created: string;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// Row shape for the `ProjectEntitiesTable`; description and attributes are undefined until fetched
+export type ProjectEntityTableRow = {
+  _id: string;
+  description?: string;
+  attributes?: AttributeModel[];
+};
+
+// `ProjectEntitiesTable` props, the Entities within a Project, shared by the Project detail page
+export type ProjectEntitiesTableProps = {
+  entities: ProjectEntityTableRow[];
+  entityCount: number;
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onView: (entityId: string) => void;
+  onRemove?: (entityId: string) => void;
+  onRemoveMany?: (entityIds: string[]) => void;
+  onAddClick?: () => void;
+  addDisabled?: boolean;
+};
+
 // Utility type used across other types, typically in a list
 export type IGenericItem = {
   _id: string;
@@ -446,6 +525,100 @@ export type EntityHistory = {
   relationships: IRelationship[];
   attributes: AttributeModel[];
   attachments: IGenericItem[];
+};
+
+// `EntityBreadcrumb` props, the breadcrumb trail and name tag shared by the Entity detail page
+export type EntityBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateEntities: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `EntityOverviewCard` props, the Name/Secondary Identifier/Owner/Timestamp/Visibility/Description fields shared by the Entity detail page
+export type EntityOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+
+  showSecondaryIdentifier: boolean;
+  onShowSecondaryIdentifierChange?: (value: boolean) => void;
+  showSecondaryIdentifierDisabled: boolean;
+
+  secondaryIdentifierValue: string;
+  onSecondaryIdentifierChange?: (value: string) => void;
+  secondaryIdentifierReadOnly: boolean;
+  secondaryIdentifierDisabled: boolean;
+
+  identifierFormat: string[];
+  onIdentifierFormatChange?: (value: string[]) => void;
+  identifierFormats: ListCollection;
+  identifierFormatDisabled: boolean;
+  customIdentifierFormats: IdentifierFormatModel[];
+  // Value-field validation errors are only meaningful when the field is actually editable
+  showValidationErrors: boolean;
+
+  owner: string;
+  created: string;
+  visibilityIsPublic: boolean;
+
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `EntityAttributesTable` props, the Attributes on an Entity, shared by the Entity detail page
+export type EntityAttributesTableProps = {
+  attributes: AttributeModel[];
+  editing: boolean;
+  entityName: string;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove?: (id: string) => void;
+  onAddClick?: () => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `EntityAttributeNameCell` props, the "Name" column cell within `EntityAttributesTable`
+export type EntityAttributeNameCellProps = {
+  attribute: AttributeModel;
+  editing: boolean;
+  entityName: string;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove?: (id: string) => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `EntityProjectsTable` props, the Projects an Entity belongs to, shared by the Entity detail page
+export type EntityProjectsTableProps = {
+  projects: string[];
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onView: (projectId: string) => void;
+  onRemove?: (projectId: string) => void;
+  onRemoveMany?: (projectIds: string[]) => void;
+  onAddClick?: () => void;
+};
+
+// `EntityAttachmentsTable` props, the files attached to an Entity, shared by the Entity detail page
+export type EntityAttachmentsTableProps = {
+  attachments: IGenericItem[];
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onDownload: (id: string, name: string) => void;
+  onRemove?: (id: string) => void;
+  onRemoveMany?: (ids: string[]) => void;
+  onUploadClick?: () => void;
 };
 
 // Import review summary for Entities being imported

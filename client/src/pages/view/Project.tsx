@@ -8,47 +8,28 @@ import {
   Dialog,
   EmptyState,
   Flex,
-  Heading,
-  Input,
   Menu,
   Spacer,
   Tag,
   Text,
   useDisclosure,
-  Textarea,
-  Breadcrumb,
-  SkeletonText,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import ExportDialog from "@components/ExportDialog";
-import { AttributeTag, EmptyTag } from "@components/FieldTag";
-import FieldTagList from "@components/FieldTagList";
 import HistoryDrawer from "@components/HistoryDrawer";
 import Icon from "@components/Icon";
-import Linky from "@components/Linky";
 import AlertDialog from "@components/AlertDialog";
-import DataTable from "@components/DataTable";
 import MultiEntitySelect from "@components/MultiEntitySelect";
-import TimestampTag from "@components/TimestampTag";
-import VisibilityTag from "@components/VisibilityTag";
+import ProjectBreadcrumb from "@components/ProjectBreadcrumb";
+import ProjectOverviewCard from "@components/ProjectOverviewCard";
+import ProjectEntitiesTable from "@components/ProjectEntitiesTable";
 import Tooltip from "@components/Tooltip";
 import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
 import { toaster } from "@components/Toast";
 import SaveDialog from "@components/SaveDialog";
-import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import {
-  ProjectHistory,
-  ProjectModel,
-  DataTableAction,
-  IGenericItem,
-  ResponseData,
-  EntityModel,
-  AttributeModel,
-  WorkspaceModel,
-} from "@types";
+import { ProjectHistory, ProjectModel, IGenericItem, ResponseData, EntityModel, WorkspaceModel } from "@types";
 
 // Apollo client imports
 import { gql } from "@apollo/client";
@@ -58,7 +39,6 @@ import { useQuery, useMutation, useApolloClient } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
@@ -69,13 +49,6 @@ import dayjs from "dayjs";
 
 // Variables
 import { STYLES } from "@variables";
-
-// Row shape for the Entities table; description and attributes are undefined until fetched
-type EntityTableRow = {
-  _id: string;
-  description?: string;
-  attributes?: AttributeModel[];
-};
 
 const Project = () => {
   const { id } = useParams();
@@ -88,9 +61,6 @@ const Project = () => {
   const { workspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceIsPublic, setWorkspaceIsPublic] = useState(false);
-
-  // Breakpoints
-  const { isBreakpointActive } = useBreakpoint();
 
   // Navigation and routing
   const navigate = useNavigate();
@@ -140,19 +110,6 @@ const Project = () => {
   const displayProjectArchived = useMemo(() => {
     return previewVersion ? previewVersion.archived : projectArchived;
   }, [previewVersion, projectArchived]);
-
-  const displayProjectData = useMemo(() => {
-    if (previewVersion) {
-      return {
-        ...project,
-        name: previewVersion.name,
-        description: previewVersion.description || "",
-        entities: previewVersion.entities,
-        archived: previewVersion.archived,
-      };
-    }
-    return project;
-  }, [previewVersion, project]);
 
   // Merge fetched Entity data into the displayed rows, keyed by identifier
   const entitiesTableData = useMemo(() => {
@@ -586,109 +543,6 @@ const Project = () => {
     setProjectEntities(updatedEntities);
   };
 
-  // Define the columns for Entities listing
-  const columnHelper = createColumnHelper<EntityTableRow>();
-  const entitiesColumns = [
-    columnHelper.accessor("_id", {
-      cell: (info) => {
-        const entityId = info.getValue();
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Linky id={entityId} type={"entities"} />
-            {editing ? (
-              <Button
-                size="2xs"
-                mx={"1"}
-                variant="subtle"
-                colorPalette="red"
-                aria-label={"Remove Entity"}
-                onClick={() => {
-                  handleRemoveEntity(entityId);
-                }}
-              >
-                Remove
-                <Icon name={"delete"} size={"xs"} />
-              </Button>
-            ) : (
-              <Button
-                size="2xs"
-                mx={"1"}
-                variant="subtle"
-                colorPalette="gray"
-                aria-label={"View Entity"}
-                onClick={() => navigate(`/entities/${entityId}`)}
-              >
-                View
-                <Icon name={"a_right"} size={"xs"} />
-              </Button>
-            )}
-          </Flex>
-        );
-      },
-      header: "Name",
-      meta: {
-        minWidth: 360,
-      },
-    }),
-    columnHelper.accessor("description", {
-      cell: (info) => {
-        const description = info.getValue();
-        if (_.isUndefined(description)) {
-          return <SkeletonText noOfLines={1} />;
-        }
-        if (_.isEqual(description, "")) {
-          return <EmptyTag label={"Description"} />;
-        }
-        return (
-          <Flex>
-            <Tooltip content={description} disabled={description.length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(description, { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
-      header: "Description",
-      enableHiding: true,
-      meta: {
-        minWidth: 400,
-      },
-    }),
-    columnHelper.accessor("attributes", {
-      cell: (info) => {
-        const attributes = info.getValue();
-        if (_.isUndefined(attributes)) {
-          return <SkeletonText noOfLines={1} />;
-        }
-        return (
-          <FieldTagList
-            items={attributes}
-            max={2}
-            emptyLabel={"Attributes"}
-            getKey={(attribute) => attribute._id}
-            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
-          />
-        );
-      },
-      header: "Attributes",
-      meta: {
-        minWidth: 120,
-      },
-    }),
-  ];
-  const entitiesTableActions: DataTableAction[] = [
-    {
-      label: "Remove Entities",
-      icon: "delete",
-      action(table, rows) {
-        const entitiesToRemove: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          entitiesToRemove.push(table.getRow(rowIndex).original._id);
-        }
-        handleRemoveEntities(entitiesToRemove);
-      },
-    },
-  ];
-
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading && !archiveLoading && !updateLoading}>
       <Flex direction={"column"}>
@@ -757,66 +611,14 @@ const Project = () => {
         )}
 
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          {/* Breadcrumbs */}
-          <Flex align={"center"} gap={"2"} ml={"0.5"}>
-            <Breadcrumb.Root>
-              <Breadcrumb.List>
-                <Breadcrumb.Item
-                  gap={"1"}
-                  onClick={() => navigate("/")}
-                  _hover={{
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  <Icon name={"workspace"} size={"xs"} color={"black"} />
-                  {loading ? (
-                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
-                  ) : (
-                    _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
-                  )}
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-                <Breadcrumb.Item
-                  gap={"1"}
-                  onClick={() => navigate("/projects")}
-                  _hover={{
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
-                  Projects
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-              </Breadcrumb.List>
-            </Breadcrumb.Root>
-
-            <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
-              <Flex
-                id={"projectNameTag"}
-                align={"center"}
-                gap={"1"}
-                p={"1"}
-                border={"2px solid"}
-                borderColor={displayProjectArchived ? "gray.500" : STYLES.project.color.icon}
-                bg={displayProjectArchived ? STYLES.card.bg : STYLES.project.color.light}
-                rounded={"md"}
-              >
-                <Icon
-                  name={"project"}
-                  size={"sm"}
-                  color={displayProjectArchived ? "gray.500" : STYLES.project.color.icon}
-                />
-                <Tooltip content={`${displayProjectArchived ? "Archived: " : ""}${displayProjectData.name}`} showArrow>
-                  <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayProjectName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
-                  </Heading>
-                </Tooltip>
-                {displayProjectArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
-              </Flex>
-            </Flex>
-          </Flex>
+          <ProjectBreadcrumb
+            loading={loading}
+            workspaceName={workspaceName}
+            onNavigateHome={() => navigate("/")}
+            onNavigateProjects={() => navigate("/projects")}
+            archived={displayProjectArchived}
+            name={displayProjectName}
+          />
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
@@ -951,160 +753,30 @@ const Project = () => {
 
         <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
           {/* Project Overview and Description */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Overview */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              rounded={"md"}
-              grow={"1"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              {/* "Name" field */}
-              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Name
-                  </Text>
-                  <Input
-                    id={"projectNameInput"}
-                    size={"xs"}
-                    rounded={"md"}
-                    value={previewVersion ? displayProjectName : projectName}
-                    onChange={(event) => {
-                      setProjectName(event.target.value);
-                    }}
-                    readOnly={!editing || !!previewVersion}
-                    bg={"white"}
-                    border={STYLES.border.style}
-                    borderColor={STYLES.border.color}
-                  />
-                </Flex>
-              </Flex>
-
-              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Owner
-                  </Text>
-                  <ActorTag identifier={project.owner} fallback={"Unknown User"} size={"sm"} />
-                </Flex>
-
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Timestamp
-                  </Text>
-                  <TimestampTag timestamp={project.created} description={"Created"} />
-                </Flex>
-
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Visibility
-                  </Text>
-                  <VisibilityTag isPublic={workspaceIsPublic} isInherited />
-                </Flex>
-              </Flex>
-            </Flex>
-
-            {/* Description */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"100%"}
-              gap={"2"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              rounded={"md"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                Description
-              </Text>
-              <Textarea
-                id={"projectDescriptionInput"}
-                value={previewVersion ? displayProjectDescription : projectDescription}
-                size={"xs"}
-                h={"100%"}
-                readOnly={!(editing && !previewVersion)}
-                onChange={(event) => setProjectDescription(event.target.value)}
-              />
-            </Flex>
-          </Flex>
+          <ProjectOverviewCard
+            name={previewVersion ? displayProjectName : projectName}
+            onNameChange={setProjectName}
+            nameReadOnly={!editing || !!previewVersion}
+            owner={project.owner}
+            created={project.created}
+            visibilityIsPublic={workspaceIsPublic}
+            description={previewVersion ? displayProjectDescription : projectDescription}
+            onDescriptionChange={setProjectDescription}
+            descriptionReadOnly={!(editing && !previewVersion)}
+          />
 
           {/* Project Entities */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Entities */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                {/* Entities in the Project */}
-                <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
-                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                    Entities ({projectEntities.length})
-                  </Text>
-                </Flex>
-                <Button
-                  colorPalette={"green"}
-                  id={"addEntityButton"}
-                  onClick={() => setEntitiesOpen(true)}
-                  size={"xs"}
-                  rounded={"md"}
-                  disabled={!editing || !!previewVersion}
-                >
-                  Add
-                  <Icon name={"add"} size={"xs"} />
-                </Button>
-              </Flex>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={displayProjectEntities.length > 0 ? "fit-content" : "200px"}
-              >
-                {displayProjectEntities && displayProjectEntities.length > 0 ? (
-                  <DataTable
-                    data={entitiesTableData}
-                    columns={entitiesColumns}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    viewOnly={!editing || !!previewVersion}
-                    showSelection={true}
-                    actions={entitiesTableActions}
-                    showPagination
-                  />
-                ) : (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.default} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Entities</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                )}
-              </Flex>
-            </Flex>
+            <ProjectEntitiesTable
+              entities={entitiesTableData}
+              entityCount={projectEntities.length}
+              editing={editing && !previewVersion}
+              onView={(entityId) => navigate(`/entities/${entityId}`)}
+              onRemove={handleRemoveEntity}
+              onRemoveMany={handleRemoveEntities}
+              onAddClick={() => setEntitiesOpen(true)}
+              addDisabled={!editing || !!previewVersion}
+            />
           </Flex>
         </Flex>
 
