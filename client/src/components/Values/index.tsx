@@ -43,7 +43,7 @@ import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Types
-import { ColumnInfo, IconNames, IValue, IValueSelectData, IValueType } from "@types";
+import { ColumnInfo, IconNames, IValue, IValueSelectData, IValueType, StyledSelectConfig } from "@types";
 
 // Utility functions
 import _ from "lodash";
@@ -63,18 +63,6 @@ interface ValueTypeOption extends OptionBase {
   label: string;
   value: IValueType;
 }
-
-type StyledSelectIconGetter<T> = (data: T) => { name: IconNames; color?: string } | undefined;
-
-type StyledSelectConfig<T> = {
-  getIcon?: StyledSelectIconGetter<T>;
-  optionHeight: string;
-  optionPadding: string;
-  optionMargin?: string;
-  controlPaddingLeft: string;
-  controlHasBorder: boolean;
-  valueContainerHeight: string;
-};
 
 const SharedSelectContainer = <T,>({ children, ...props }: ContainerProps<T>) => (
   <Box w={"100%"}>

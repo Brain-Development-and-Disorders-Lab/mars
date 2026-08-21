@@ -1025,6 +1025,7 @@ const DataTable = (props: DataTableProps) => {
                   bg={"surface.muted"}
                 >
                   <Button
+                    id={"footerAction"}
                     size={"xs"}
                     variant={"ghost"}
                     colorPalette={"green"}

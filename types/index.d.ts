@@ -178,6 +178,18 @@ export type IValueSelectData = {
 // Parsed display label for an `IValue`, produced by `formatValueForDisplay`
 export type FormattedValueDisplay = { label: string; secondary?: string };
 
+type StyledSelectIconGetter<T> = (data: T) => { name: IconNames; color?: string } | undefined;
+
+export type StyledSelectConfig<T> = {
+  getIcon?: StyledSelectIconGetter<T>;
+  optionHeight: string;
+  optionPadding: string;
+  optionMargin?: string;
+  controlPaddingLeft: string;
+  controlHasBorder: boolean;
+  valueContainerHeight: string;
+};
+
 export type Collaborator = {
   _id: string;
   permissions: UserWorkspacePermissions; // Workspace-scoped permissions

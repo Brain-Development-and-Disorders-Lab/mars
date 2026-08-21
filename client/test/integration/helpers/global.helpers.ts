@@ -455,7 +455,7 @@ export const addAttributeValue = async (
 ): Promise<void> => {
   await page.locator("[data-testid='create-attribute-name']").fill(attributeName);
   await page.locator("[data-testid='create-attribute-description']").fill("Attribute description");
-  await page.click("#addValueRowButton");
+  await page.click("#footerAction");
   await page.locator('input[placeholder="Enter name"]').fill(valueName);
   await page.locator('input[placeholder="Enter text"]').fill(valueData);
   await page.waitForFunction(
