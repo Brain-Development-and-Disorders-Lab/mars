@@ -11,7 +11,7 @@ import FieldTagList from "@components/FieldTagList";
 import ActorTag from "@components/ActorTag";
 import Linky from "@components/Linky";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";

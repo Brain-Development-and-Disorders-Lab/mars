@@ -2,30 +2,17 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Box,
-  Flex,
-  Text,
-  Button,
-  Spacer,
-  Tag,
-  EmptyState,
-  Field,
-  Input,
-  Checkbox,
-  Collapsible,
-  Separator,
-} from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import { Box, Flex, Text, Button, Spacer, Tag, EmptyState } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import ExportDialog from "@components/ExportDialog";
 import { AttributeTag } from "@components/FieldTag";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
+import DataTableFilters from "@components/DataTable/DataTableFilters";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -370,243 +357,47 @@ const Entities = () => {
           </Text>
 
           {/* Filter Section */}
-          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-            >
-              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"filter"} size={"sm"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Entity Filters:
-                  </Text>
-                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
-                    {activeFilterCount} Active
-                  </Text>
-                </Flex>
-                <Collapsible.Trigger asChild>
-                  <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
-                    {filtersOpen ? "Hide" : "Show"} Filters
-                    <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
-                  </Button>
-                </Collapsible.Trigger>
-              </Flex>
-              <Collapsible.Content>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                    {/* Date Range Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Created Between
-                      </Text>
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Field.Root gap={"0"}>
-                          <Field.Label
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            ml={"0.5"}
-                            color={STYLES.font.secondaryHeader.color}
-                          >
-                            Start (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.startDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                startDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                        <Field.Root gap={"0"}>
-                          <Field.Label
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            ml={"0.5"}
-                            color={STYLES.font.secondaryHeader.color}
-                          >
-                            End (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.endDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                endDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                      </Flex>
-                    </Flex>
-
-                    <Separator orientation={"vertical"} />
-
-                    {/* Owner Filter */}
-                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Owner
-                      </Text>
-                      <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
-                        {entityData.length > 0 &&
-                          _.uniq(entityData.map((e) => e.owner))
-                            .filter((owner) => owner)
-                            .map((owner) => (
-                              <Checkbox.Root
-                                key={owner}
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={filterState.owners.includes(owner)}
-                                onCheckedChange={(details) => {
-                                  const isChecked = details.checked as boolean;
-                                  if (isChecked) {
-                                    setFilterState({
-                                      ...filterState,
-                                      owners: [...filterState.owners, owner],
-                                    });
-                                  } else {
-                                    setFilterState({
-                                      ...filterState,
-                                      owners: filterState.owners.filter((o) => o !== owner),
-                                    });
-                                  }
-                                }}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} inline />
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            ))}
-
-                        {entityData.length === 0 && (
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                            No Entity Owners
-                          </Text>
-                        )}
-                      </Flex>
-                    </Flex>
-
-                    <Separator orientation={"vertical"} />
-
-                    {/* Has Attachments Filter */}
-                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Attachments
-                      </Text>
-                      <Checkbox.Root
-                        ml={"1"}
-                        size={"xs"}
-                        colorPalette={"blue"}
-                        checked={filterState.hasAttachments}
-                        onCheckedChange={(details) => {
-                          setFilterState({
-                            ...filterState,
-                            hasAttachments: details.checked as boolean,
-                          });
-                        }}
-                      >
-                        <Checkbox.HiddenInput />
-                        <Checkbox.Control />
-                        <Checkbox.Label fontSize={"xs"}>Has Attachments</Checkbox.Label>
-                      </Checkbox.Root>
-                    </Flex>
-
-                    <Separator orientation={"vertical"} />
-
-                    {/* Attribute Count Range Filter */}
-                    <Flex direction={"column"} gap={"1"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Attribute Count
-                      </Text>
-                      <Flex direction={"column"} gap={"2"} ml={"1"}>
-                        {["0", "1-5", "6-10", "11+"].map((range) => (
-                          <Checkbox.Root
-                            key={range}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.attributeCountRanges.includes(range)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  attributeCountRanges: [...filterState.attributeCountRanges, range],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  attributeCountRanges: filterState.attributeCountRanges.filter((r) => r !== range),
-                                });
-                              }
-                            }}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              {range === "0"
-                                ? "0 attributes"
-                                : range === "11+"
-                                  ? "11+ attributes"
-                                  : `${range} attributes`}
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
-                      </Flex>
-                    </Flex>
-                  </Flex>
-
-                  {/* Filter control buttons */}
-                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"blue"}
-                      onClick={() => {
-                        setAppliedFilters({ ...filterState });
-                        setPage(0); // Reset to first page when filters change
-                      }}
-                    >
-                      Apply Filters
-                    </Button>
-                    <Button
-                      size={"xs"}
-                      variant={"outline"}
-                      rounded={"md"}
-                      onClick={() => {
-                        const clearedState = {
-                          startDate: "",
-                          endDate: "",
-                          owners: [],
-                          hasAttachments: false,
-                          attributeCountRanges: [],
-                        };
-                        setFilterState(clearedState);
-                        setAppliedFilters(clearedState);
-                      }}
-                      disabled={activeFilterCount === 0}
-                    >
-                      Reset Filters
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Collapsible.Content>
-            </Flex>
-          </Collapsible.Root>
+          <DataTableFilters
+            entityLabel={"Entity"}
+            filtersOpen={filtersOpen}
+            onFiltersOpenChange={setFiltersOpen}
+            activeFilterCount={activeFilterCount}
+            startDate={filterState.startDate}
+            endDate={filterState.endDate}
+            onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
+            onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
+            owners={entityData.map((e) => e.owner)}
+            selectedOwners={filterState.owners}
+            onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
+            extraCheckbox={{
+              label: "Attachments",
+              checkboxLabel: "Has Attachments",
+              checked: filterState.hasAttachments,
+              onChange: (hasAttachments) => setFilterState({ ...filterState, hasAttachments }),
+            }}
+            countFilter={{
+              mode: "buckets",
+              label: "Attribute Count",
+              unitLabel: "attributes",
+              selected: filterState.attributeCountRanges,
+              onChange: (attributeCountRanges) => setFilterState({ ...filterState, attributeCountRanges }),
+            }}
+            onApply={() => {
+              setAppliedFilters({ ...filterState });
+              setPage(0); // Reset to first page when filters change
+            }}
+            onReset={() => {
+              const clearedState = {
+                startDate: "",
+                endDate: "",
+                owners: [],
+                hasAttachments: false,
+                attributeCountRanges: [],
+              };
+              setFilterState(clearedState);
+              setAppliedFilters(clearedState);
+            }}
+          />
 
           {entityData.filter((entity) => _.isEqual(entity.archived, false)).length > 0 ? (
             <Box w="100%" minW="0" maxW="100%">

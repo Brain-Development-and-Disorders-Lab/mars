@@ -23,7 +23,7 @@ import { AttributeTag, EmptyTag } from "@components/FieldTag";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
-import { CreatedCell } from "@components/DataTableCell";
+import { CreatedCell } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
