@@ -591,7 +591,6 @@ export type DataTableProps = {
   columnFilters?: any;
   onColumnFiltersChange?: (filters: any) => void;
   data: any[];
-  setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;
 
   // Interface visibility
@@ -603,6 +602,8 @@ export type DataTableProps = {
 
   // Layout behavior
   fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
+  resizableColumns?: boolean; // If true, header columns can be resized by dragging their right edge
+  footerAction?: { label: string; icon: IconNames; onClick: () => void }; // Renders a full-width action button below the rows
 
   // Server-side pagination (if pageCount is provided, pagination is handled server-side)
   pageCount?: number; // Total number of pages (enables server-side pagination)

@@ -1,27 +1,21 @@
 // React
-import React, { useState, useEffect, useRef, useCallback, ReactElement } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, ReactElement } from "react";
 
 // Chakra UI components
 import {
   Box,
   Button,
-  Checkbox,
   CloseButton,
   Dialog,
-  Fieldset,
   Field,
   Flex,
   IconButton,
   Input,
   Link,
-  Menu,
-  Portal,
-  Select,
   Separator,
   Spacer,
   Stack,
   Text,
-  createListCollection,
 } from "@chakra-ui/react";
 
 import {
@@ -38,7 +32,10 @@ import {
   PlaceholderProps,
 } from "chakra-react-select";
 
+import { createColumnHelper } from "@tanstack/react-table";
+
 // Custom components
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SearchSelect from "@components/SearchSelect";
@@ -52,9 +49,6 @@ import { ColumnInfo, IconNames, IValue, IValueSelectData, IValueType } from "@ty
 import _ from "lodash";
 import dayjs from "dayjs";
 import { getValueTypeIconProps } from "@lib/util";
-
-// Hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Variables
 import { STYLES } from "@variables";
@@ -70,196 +64,183 @@ interface ValueTypeOption extends OptionBase {
   value: IValueType;
 }
 
-/**
- * Custom styling for each Value `type`, displaying colored icons
- */
-const ValueTypeOption = (props: OptionProps<ValueTypeOption>) => {
-  const iconProps = getValueTypeIconProps(props.data.value);
-  return (
-    <components.Option {...props}>
-      <Flex direction={"row"} h={"8"} p={"1"} gap={"1"} m={"0.5"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
-        <Text fontSize={"xs"}>{props.data.label}</Text>
-      </Flex>
-    </components.Option>
-  );
+type StyledSelectIconGetter<T> = (data: T) => { name: IconNames; color?: string } | undefined;
+
+type StyledSelectConfig<T> = {
+  getIcon?: StyledSelectIconGetter<T>;
+  optionHeight: string;
+  optionPadding: string;
+  optionMargin?: string;
+  controlPaddingLeft: string;
+  controlHasBorder: boolean;
+  valueContainerHeight: string;
 };
 
-/**
- * Custom styling for Value `type` select container
- */
-const ValueTypeSelectContainer = ({ children, ...props }: ContainerProps<ValueTypeOption>) => {
-  return (
-    <Box w={"100%"}>
-      <components.SelectContainer {...props}>{children}</components.SelectContainer>
-    </Box>
-  );
-};
+const SharedSelectContainer = <T,>({ children, ...props }: ContainerProps<T>) => (
+  <Box w={"100%"}>
+    <components.SelectContainer {...props}>{children}</components.SelectContainer>
+  </Box>
+);
 
-/**
- * Custom styling for Value `type` value container
- */
-const ValueTypeValueContainer = ({ children, ...props }: ValueContainerProps<ValueTypeOption>) => {
-  return (
-    <components.ValueContainer {...props}>
-      <Flex w={"100%"} h={"38px"}>
-        {children}
-      </Flex>
-    </components.ValueContainer>
-  );
-};
+const SharedMenuList = <T,>(props: MenuListProps<T, false>) => (
+  <Flex
+    direction={"column"}
+    border={STYLES.border.style}
+    borderColor={STYLES.border.color}
+    bg={"white"}
+    gap={"0.5"}
+    p={"0.5"}
+    rounded={"sm"}
+  >
+    <components.MenuList {...props}>{props.children}</components.MenuList>
+  </Flex>
+);
 
-const ValueTypeControl = (props: ControlProps<ValueTypeOption, false>) => {
-  return (
+const SharedDropdownIndicator = <T,>(props: DropdownIndicatorProps<T, false>) => (
+  <components.DropdownIndicator {...props}>
+    <Icon name={props.selectProps.menuIsOpen ? "c_up" : "c_down"} size={"xs"} />
+  </components.DropdownIndicator>
+);
+
+/** Builds a styled `chakra-react-select` component set, parameterized by each instance's small style differences */
+const makeStyledSelectComponents = <T extends { label: string }>(config: StyledSelectConfig<T>) => {
+  const Control = (props: ControlProps<T, false>) => (
     <Box
-      pl={"2"}
+      pl={config.controlPaddingLeft}
       pr={"3"}
       border={"1px solid transparent"}
-      _hover={{
-        borderColor: "blue.300",
-      }}
+      _hover={config.controlHasBorder ? { borderColor: "blue.300" } : undefined}
     >
       <components.Control {...props} />
     </Box>
   );
-};
 
-/**
- * Custom styling for Value `type` single value
- */
-const ValueTypeSingleValue = ({ ...props }: SingleValueProps<ValueTypeOption>) => {
-  const iconProps = getValueTypeIconProps(props.data.value);
-  return (
-    <Flex direction={"row"} align={"center"}>
-      <components.SingleValue {...props}>
-        <Flex direction={"row"} align={"center"} gap={"2"}>
-          <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
-          <Text fontSize={"xs"}>{props.data.label}</Text>
-        </Flex>
-      </components.SingleValue>
-    </Flex>
-  );
-};
-
-/**
- * Custom styling for Value `type` `MenuList` component containing all menu options
- */
-const ValueTypeMenuList = ({ children, ...props }: MenuListProps<ValueTypeOption, false>) => {
-  return (
-    <Flex
-      direction={"column"}
-      border={STYLES.border.style}
-      borderColor={STYLES.border.color}
-      bg={"white"}
-      gap={"0.5"}
-      p={"0.5"}
-      rounded={"sm"}
-    >
-      <components.MenuList {...props}>{children}</components.MenuList>
-    </Flex>
-  );
-};
-
-/**
- * Custom styling for each Value `data`
- */
-const ValueDataOption = (props: OptionProps<SelectOption>) => {
-  return (
-    <components.Option {...props}>
-      <Flex direction={"row"} h={"8"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Text fontSize={"xs"}>{props.data.label}</Text>
-      </Flex>
-    </components.Option>
-  );
-};
-
-/**
- * Custom styling for Value `data` `DropdownIndicator` component
- */
-const ValueTypeDropdownIndicator = (props: DropdownIndicatorProps<ValueTypeOption, false>) => {
-  return (
-    <components.DropdownIndicator {...props}>
-      <Icon name={props.selectProps.menuIsOpen ? "c_up" : "c_down"} size={"xs"} />
-    </components.DropdownIndicator>
-  );
-};
-
-/**
- * Custom styling for Value `data` select container
- */
-const ValueDataSelectContainer = ({ children, ...props }: ContainerProps<SelectOption>) => {
-  return (
-    <Box w={"100%"}>
-      <components.SelectContainer {...props}>{children}</components.SelectContainer>
-    </Box>
-  );
-};
-
-/**
- * Custom styling for Value `data` value container
- */
-const ValueDataValueContainer = ({ children, ...props }: ValueContainerProps<SelectOption>) => {
-  return (
+  const ValueContainer = ({ children, ...props }: ValueContainerProps<T>) => (
     <components.ValueContainer {...props}>
-      <Flex w={"100%"} h={"34px"}>
+      <Flex w={"100%"} h={config.valueContainerHeight}>
         {children}
       </Flex>
     </components.ValueContainer>
   );
-};
 
-const ValueDataControl = (props: ControlProps<SelectOption, false>) => {
-  return (
-    <Box pl={"2"} pr={"3"}>
-      <components.Control {...props} />
-    </Box>
-  );
-};
-
-/**
- * Custom styling for Value `type` single value
- */
-const ValueDataSingleValue = ({ children, ...props }: SingleValueProps<SelectOption>) => {
-  return (
-    <Flex direction={"row"} align={"center"}>
-      <components.SingleValue {...props}>
-        <Flex direction={"row"} align={"center"} gap={"2"} fontSize={"xs"}>
-          {children}
+  const Option = (props: OptionProps<T>) => {
+    const icon = config.getIcon?.(props.data);
+    return (
+      <components.Option {...props}>
+        <Flex
+          direction={"row"}
+          h={config.optionHeight}
+          p={config.optionPadding}
+          m={config.optionMargin}
+          gap={"1"}
+          align={"center"}
+          _hover={{ bg: "gray.100" }}
+        >
+          {icon && <Icon name={icon.name} size={"xs"} color={icon.color} />}
+          <Text fontSize={"xs"}>{props.data.label}</Text>
         </Flex>
-      </components.SingleValue>
-    </Flex>
-  );
+      </components.Option>
+    );
+  };
+
+  const SingleValue = (props: SingleValueProps<T>) => {
+    const icon = config.getIcon?.(props.data);
+    return (
+      <Flex direction={"row"} align={"center"}>
+        <components.SingleValue {...props}>
+          <Flex direction={"row"} align={"center"} gap={"2"} fontSize={"xs"}>
+            {icon && <Icon name={icon.name} size={"xs"} color={icon.color} />}
+            {props.children}
+          </Flex>
+        </components.SingleValue>
+      </Flex>
+    );
+  };
+
+  return {
+    SelectContainer: SharedSelectContainer<T>,
+    MenuList: SharedMenuList<T>,
+    DropdownIndicator: SharedDropdownIndicator<T>,
+    Control,
+    ValueContainer,
+    Option,
+    SingleValue,
+  };
 };
 
-/**
- * Custom styling for Value `data` `MenuList` component containing all menu options
- */
-const ValueDataMenuList = (props: MenuListProps<SelectOption, false>) => {
-  return (
-    <Flex
-      direction={"column"}
-      border={STYLES.border.style}
-      borderColor={STYLES.border.color}
-      bg={"white"}
-      gap={"0.5"}
-      p={"0.5"}
-      rounded={"sm"}
-    >
-      <components.MenuList {...props}>{props.children}</components.MenuList>
-    </Flex>
-  );
-};
+// Value `type` select
+const valueTypeSelectComponents = makeStyledSelectComponents<ValueTypeOption>({
+  getIcon: (data) => getValueTypeIconProps(data.value),
+  optionHeight: "8",
+  optionPadding: "1",
+  optionMargin: "0.5",
+  controlPaddingLeft: "2",
+  controlHasBorder: false, // hover border clips against DataTable's fixed 34px cell height
+  valueContainerHeight: "34px",
+});
+
+// `select`-type option picker
+const valueDataSelectComponents = makeStyledSelectComponents<SelectOption>({
+  optionHeight: "8",
+  optionPadding: "0.5",
+  controlPaddingLeft: "2",
+  controlHasBorder: false,
+  valueContainerHeight: "34px",
+});
+
+// Import column picker
+const columnPickerSelectComponents = makeStyledSelectComponents<SelectOption>({
+  getIcon: (data) => getValueTypeIconProps(data.inferredType),
+  optionHeight: "6",
+  optionPadding: "0.5",
+  controlPaddingLeft: "1",
+  controlHasBorder: true,
+  valueContainerHeight: "34px",
+});
 
 /**
- * Custom styling for Value `type` `DropdownIndicator` component
+ * Shared styling for the plain-text `Input` cells rendered by `ValueRow` (name, and the
+ * number/text/url/date/fallback branches of `renderDataInput`), which otherwise repeat the
+ * same focus/hover/cursor treatment with only `type`, `placeholder`, and sizing differing.
  */
-const ValueDataDropdownIndicator = (props: DropdownIndicatorProps<SelectOption, false>) => {
-  return (
-    <components.DropdownIndicator {...props}>
-      <Icon name={props.selectProps.menuIsOpen ? "c_up" : "c_down"} size={"xs"} />
-    </components.DropdownIndicator>
-  );
-};
+const StyledDataInput = (props: {
+  value: string;
+  onChange: (value: string) => void;
+  viewOnly?: boolean;
+  type?: "number" | "date";
+  placeholder?: string;
+  height?: string;
+  px?: number;
+  py?: number;
+}) => (
+  <Input
+    value={props.value}
+    onChange={(e) => props.onChange(e.target.value)}
+    size={"xs"}
+    h={props.height ?? "100%"}
+    px={props.px}
+    py={props.py}
+    borderRadius={"none"}
+    fontSize={"xs"}
+    type={props.type}
+    readOnly={props.viewOnly}
+    placeholder={props.placeholder}
+    border={"1px solid transparent"}
+    bg={"transparent"}
+    cursor={props.viewOnly ? "default" : "text"}
+    onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
+    _focus={{
+      bg: "white",
+      border: "1px solid",
+      borderColor: "blue.300",
+    }}
+    _hover={{
+      border: "1px solid",
+      borderColor: "blue.200",
+      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+    }}
+  />
+);
 
 /**
  * Custom `Select` component for displaying `IValue` instances that have a
@@ -385,18 +366,19 @@ const ValueDataSelect = (props: {
             }
           }}
           components={{
-            Control: ValueDataControl,
-            SelectContainer: ValueDataSelectContainer,
-            ValueContainer: ValueDataValueContainer,
-            SingleValue: ValueDataSingleValue,
-            DropdownIndicator: ValueDataDropdownIndicator,
-            MenuList: ValueDataMenuList,
-            Option: ValueDataOption,
+            Control: valueDataSelectComponents.Control,
+            SelectContainer: valueDataSelectComponents.SelectContainer,
+            ValueContainer: valueDataSelectComponents.ValueContainer,
+            SingleValue: valueDataSelectComponents.SingleValue,
+            DropdownIndicator: valueDataSelectComponents.DropdownIndicator,
+            MenuList: valueDataSelectComponents.MenuList,
+            Option: valueDataSelectComponents.Option,
           }}
           menuPortalTarget={document.body}
           menuPosition={"fixed"}
           chakraStyles={{
             menu: (provided) => ({ ...provided, marginY: 0 }),
+            control: (provided) => ({ ...provided, minH: "34px" }), // "sm" size's default (36px) overflows the cell
           }}
           styles={{
             menuPortal: (base) => ({
@@ -568,15 +550,6 @@ const ValueDataSelect = (props: {
 };
 
 /**
- * Custom styling for column picker `Control` component
- */
-const ColumnPickerControl = (props: ControlProps<SelectOption, false>) => (
-  <Box pl={"1"} pr={"3"} border={"1px solid transparent"} _hover={{ borderColor: "blue.300" }}>
-    <components.Control {...props} />
-  </Box>
-);
-
-/**
  * Custom styling for column picker `ValueContainer` component
  */
 const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<SelectOption>) => (
@@ -601,49 +574,554 @@ const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
   </components.Placeholder>
 );
 
-/**
- * Custom styling for each column picker `Option` component, displaying icon
- */
-const ColumnPickerOption = (props: OptionProps<SelectOption>) => {
-  const iconProps = getValueTypeIconProps(props.data.inferredType);
-  return (
-    <components.Option {...props}>
-      <Flex direction={"row"} h={"6"} p={"0.5"} gap={"1"} align={"center"} _hover={{ bg: "gray.100" }}>
-        <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
-        <Text fontSize={"xs"}>{props.data.label}</Text>
-      </Flex>
-    </components.Option>
-  );
+// Default `data` generated for a Value when its `type` changes
+const DEFAULT_VALUE_DATA: Record<IValueType, () => string> = {
+  number: () => "0",
+  text: () => "",
+  url: () => "https://",
+  date: () => dayjs(Date.now()).toISOString(),
+  entity: () => JSON.stringify({ _id: "", name: "" }),
+  select: () => JSON.stringify({ selected: "", options: [] }),
 };
 
+// Icon and badge styling for URLs pointing at known platforms, matched by host or subdomain
+const URL_PLATFORM_STYLES: {
+  host: string;
+  iconStyle: IconNames;
+  badgeBg: string;
+  badgeBorder: string;
+  iconColor: string;
+}[] = [
+  { host: "box.com", iconStyle: "l_box", badgeBg: "blue.100", badgeBorder: "blue.100", iconColor: "blue.600" },
+  {
+    host: "github.com",
+    iconStyle: "l_github",
+    badgeBg: "gray.100",
+    badgeBorder: "gray.200",
+    iconColor: STYLES.font.secondaryHeader.color,
+  },
+  {
+    host: "labarchives.com",
+    iconStyle: "l_labarchives",
+    badgeBg: "purple.100",
+    badgeBorder: "purple.200",
+    iconColor: "purple.600",
+  },
+  { host: "globus.org", iconStyle: "l_globus", badgeBg: "teal.100", badgeBorder: "teal.200", iconColor: "teal.600" },
+];
+
+const DEFAULT_URL_STYLE = {
+  iconStyle: "link" as IconNames,
+  badgeBg: "blue.50",
+  badgeBorder: "blue.100",
+  iconColor: STYLES.project.color.icon,
+};
+
+const getUrlPlatformStyle = (host: string) =>
+  URL_PLATFORM_STYLES.find((platform) => host === platform.host || host.endsWith(`.${platform.host}`)) ??
+  DEFAULT_URL_STYLE;
+
+const columnHelper = createColumnHelper<IValue>();
+
+const baseTypeOptions: ValueTypeOption[] = [
+  { label: "Number", value: "number" },
+  { label: "Text", value: "text" },
+  { label: "URL", value: "url" },
+  { label: "Date", value: "date" },
+];
+// Entity and Select are excluded in column mode since they cannot be round-tripped from raw cell data
+const fullTypeOptions: ValueTypeOption[] = [
+  ...baseTypeOptions,
+  { label: "Entity", value: "entity" },
+  { label: "Select", value: "select" },
+];
+
 /**
- * Custom styling for column picker `SingleValue` component
+ * Utility function to generate URL "tabs" representing links to known platforms
+ * @param {string} url The URL stored as `data` in the Value component
  */
-const ColumnPickerSingleValue = ({ ...props }: SingleValueProps<SelectOption>) => {
-  const iconProps = getValueTypeIconProps(props.data.inferredType);
+const generateUrlTab = (url: string): ReactElement => {
+  const urlObject = URL.parse(url);
+  const isValidUrl = !_.isNull(urlObject);
+
+  // Determine platform-specific icon and badge styling
+  const { iconStyle, badgeBg, badgeBorder, iconColor } = isValidUrl
+    ? getUrlPlatformStyle(urlObject.host)
+    : DEFAULT_URL_STYLE;
+
   return (
-    <Flex direction={"row"} align={"center"}>
-      <components.SingleValue {...props}>
-        <Flex direction={"row"} align={"center"} gap={"2"}>
-          {iconProps ? (
-            <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
-          ) : (
-            <Icon name={"grid"} size={"xs"} color={"text.faint"} />
-          )}
-          <Text fontSize={"xs"}>{props.data.label}</Text>
-        </Flex>
-      </components.SingleValue>
+    <Flex
+      direction={"row"}
+      align={"center"}
+      h={"100%"}
+      w={"100%"}
+      px={"2"}
+      border={"1px solid transparent"}
+      _hover={{
+        border: "1px solid",
+        borderColor: "blue.200",
+        boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+      }}
+    >
+      {isValidUrl ? (
+        <Tooltip content={`Open in new tab: ${url}`} showArrow>
+          <Link href={url} _hover={{ textDecoration: "none" }} target={"_blank"} rel={"noopener noreferrer"}>
+            <Flex
+              direction={"row"}
+              align={"center"}
+              h={"22px"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              rounded={"lg"}
+              overflow={"hidden"}
+              _hover={{
+                borderColor: "blue.300",
+                boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+              }}
+            >
+              {/* Platform icon badge */}
+              <Flex
+                align={"center"}
+                justify={"center"}
+                bg={badgeBg}
+                px={"1.5"}
+                h={"100%"}
+                borderRight={"1px solid"}
+                borderColor={badgeBorder}
+              >
+                <Icon name={iconStyle} size={"xs"} color={iconColor} />
+              </Flex>
+              {/* Hostname */}
+              <Flex px={"1"} align={"center"} h={"100%"} bg={"white"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
+                  {urlObject.host}
+                </Text>
+              </Flex>
+              {/* Platform icon badge */}
+              <Flex align={"center"} justify={"center"} bg={"white"} mr={"1.5"} h={"100%"}>
+                <Icon name={"external"} size={"xs"} color={"gray.600"} />
+              </Flex>
+            </Flex>
+          </Link>
+        </Tooltip>
+      ) : (
+        <Tooltip content={"Invalid URL"} showArrow>
+          <Flex
+            direction={"row"}
+            align={"center"}
+            h={"22px"}
+            border={STYLES.border.style}
+            borderColor={"orange.200"}
+            rounded={"md"}
+            overflow={"hidden"}
+            cursor={"not-allowed"}
+          >
+            {/* Warning badge */}
+            <Flex
+              align={"center"}
+              justify={"center"}
+              bg={"status.warning.subtle"}
+              px={"1.5"}
+              h={"100%"}
+              borderRight={"1px solid"}
+              borderColor={"orange.200"}
+            >
+              <Icon name={"warning"} size={"xs"} color={"orange.500"} />
+            </Flex>
+            {/* Truncated URL */}
+            <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
+              <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
+                {_.truncate(url, { length: 28 })}
+              </Text>
+            </Flex>
+          </Flex>
+        </Tooltip>
+      )}
     </Flex>
   );
 };
 
-const PAGE_SIZE_OPTIONS = [
-  { label: "5", value: "5" },
-  { label: "10", value: "10" },
-  { label: "20", value: "20" },
-  { label: "50", value: "50" },
-  { label: "100", value: "100" },
-];
+/**
+ * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
+ * is `entity` or `select`
+ * @param {IValueType} valueType The type of the value to be copied
+ * @param {string} valueData Serialized value data
+ */
+const copyToClipboard = (valueType: IValueType, valueData: string) => {
+  // If data is a serialized object, parse and copy relevant fields
+  if (valueType === "entity") {
+    valueData = JSON.parse(valueData)._id;
+  } else if (valueType === "select") {
+    valueData = JSON.parse(valueData).selected;
+  }
+  navigator.clipboard.writeText(valueData.toString() || "");
+  toaster.create({
+    title: "Copied to clipboard",
+    type: "success",
+    duration: 2000,
+    closable: true,
+  });
+};
+
+// Renders the `data` cell's contents for a given `IValueType`; shared by the plain and import-column-mode cases
+const renderTypedInput = (params: {
+  type: IValueType;
+  data: string;
+  onChange: (value: string) => void;
+  viewOnly?: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+}): ReactElement => {
+  const { type, data, onChange, viewOnly, workspace, isPublic } = params;
+
+  if (type === "number") {
+    return (
+      <StyledDataInput
+        value={data}
+        onChange={onChange}
+        viewOnly={viewOnly}
+        type={"number"}
+        placeholder={"Enter number"}
+      />
+    );
+  }
+
+  if (type === "text") {
+    return <StyledDataInput value={data} onChange={onChange} viewOnly={viewOnly} placeholder={"Enter text"} />;
+  }
+
+  if (type === "url") {
+    if (!viewOnly) {
+      return <StyledDataInput value={data} onChange={onChange} viewOnly={viewOnly} placeholder={"Enter URL"} />;
+    }
+    return generateUrlTab(data);
+  }
+
+  if (type === "date") {
+    return <StyledDataInput value={data} onChange={onChange} viewOnly={viewOnly} type={"date"} />;
+  }
+
+  if (type === "select") {
+    return (
+      <Flex
+        w={"100%"}
+        h={"100%"}
+        p={"0"}
+        align={"center"}
+        justify={"center"}
+        border={"1px solid transparent"}
+        _focus={{ bg: "white", borderColor: "blue.300" }}
+        _hover={{ border: "1px solid", borderColor: "blue.200", boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)" }}
+      >
+        <ValueDataSelect
+          valueData={data}
+          setValueData={(next) => {
+            const resolved = typeof next === "function" ? (next as (prev: string) => string)(data) : next;
+            onChange(resolved);
+          }}
+          viewOnly={viewOnly}
+        />
+      </Flex>
+    );
+  }
+
+  if (type === "entity") {
+    if (!viewOnly) {
+      return (
+        <Flex
+          w={"100%"}
+          h={"100%"}
+          p={"0"}
+          align={"center"}
+          justify={"center"}
+          border={"1px solid transparent"}
+          _focus={{ bg: "white", borderColor: "blue.300" }}
+          _hover={{ border: "1px solid", borderColor: "blue.200", boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)" }}
+        >
+          <SearchSelect
+            placeholder={"Select Entity"}
+            resultType={"entity"}
+            value={JSON.parse(data) || { _id: "", name: "" }}
+            onChange={(entity) => onChange(JSON.stringify(entity))}
+            disabled={viewOnly}
+            isEmbedded
+          />
+        </Flex>
+      );
+    }
+    return (
+      <Flex
+        w={"100%"}
+        h={"100%"}
+        justify={"start"}
+        align={"center"}
+        pt={"0.5"}
+        px={"2"}
+        border={"1px solid transparent"}
+        _focus={{ bg: "white", borderColor: "blue.300" }}
+        _hover={{ border: "1px solid", borderColor: "blue.200", boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)" }}
+      >
+        <Linky
+          type={"entities"}
+          id={JSON.parse(data)._id || ""}
+          size={"xs"}
+          workspace={workspace}
+          isPublic={isPublic}
+        />
+      </Flex>
+    );
+  }
+
+  return (
+    <StyledDataInput
+      value={data}
+      onChange={onChange}
+      viewOnly={viewOnly}
+      placeholder={"Enter value"}
+      height={viewOnly ? "34px" : "100%"}
+      px={1}
+      py={0.5}
+    />
+  );
+};
+
+// Mirrors `IValue.name` locally so fast keystrokes aren't lost while the update round-trips
+const NameCell = (props: {
+  value: IValue;
+  onUpdate: (id: string, updates: Partial<IValue>) => void;
+  viewOnly?: boolean;
+}) => {
+  const [name, setName] = useState(props.value.name);
+  useEffect(() => setName(props.value.name), [props.value.name]);
+
+  return (
+    <StyledDataInput
+      value={name}
+      onChange={(value) => {
+        setName(value);
+        props.onUpdate(props.value._id, { name: value });
+      }}
+      viewOnly={props.viewOnly}
+      placeholder={"Enter name"}
+      px={1}
+      py={0}
+    />
+  );
+};
+
+const TypeCell = (props: {
+  value: IValue;
+  onUpdate: (id: string, updates: Partial<IValue>) => void;
+  viewOnly?: boolean;
+  permittedValues?: ColumnInfo[];
+}) => {
+  const { value } = props;
+  const source = value.source ?? "column";
+  const inColumnMode = props.permittedValues !== undefined && source === "column";
+  const typeOptions = inColumnMode ? baseTypeOptions : fullTypeOptions;
+  const selected = typeOptions.find((option) => option.value === value.type) ?? baseTypeOptions[1];
+
+  return (
+    <ReactSelect
+      options={typeOptions}
+      size={"sm"}
+      placeholder={"Type"}
+      disabled={props.viewOnly}
+      value={selected}
+      isSearchable={false}
+      components={{
+        Control: valueTypeSelectComponents.Control,
+        SelectContainer: valueTypeSelectComponents.SelectContainer,
+        ValueContainer: valueTypeSelectComponents.ValueContainer,
+        SingleValue: valueTypeSelectComponents.SingleValue,
+        DropdownIndicator: valueTypeSelectComponents.DropdownIndicator,
+        MenuList: valueTypeSelectComponents.MenuList,
+        Option: valueTypeSelectComponents.Option,
+      }}
+      onChange={(event) => {
+        if (!event) return;
+        if (props.permittedValues && inColumnMode) {
+          const stillValid = props.permittedValues.some((column) => column.name === value.data);
+          props.onUpdate(value._id, { type: event.value, data: stillValid ? value.data : "" });
+        } else {
+          props.onUpdate(value._id, { type: event.value, data: DEFAULT_VALUE_DATA[event.value]() });
+        }
+      }}
+      menuPortalTarget={document.body}
+      menuPosition={"fixed"}
+      chakraStyles={{
+        menu: (provided) => ({ ...provided, marginY: 0 }),
+        control: (provided) => ({ ...provided, minH: "34px" }),
+      }}
+      styles={{
+        menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
+        menuList: (base) => ({ ...base, pointerEvents: "auto" }),
+        option: (base) => ({ ...base, pointerEvents: "auto" }),
+      }}
+      closeMenuOnScroll={false}
+    />
+  );
+};
+
+// Renders the type-specific editor, plus (in import mode) the column-reference/fixed-value toggle
+const ValueCell = (props: {
+  value: IValue;
+  onUpdate: (id: string, updates: Partial<IValue>) => void;
+  viewOnly?: boolean;
+  permittedValues?: ColumnInfo[];
+  workspace?: string;
+  isPublic?: boolean;
+}) => {
+  const { value } = props;
+  const source = value.source ?? "column";
+  const inColumnMode = props.permittedValues !== undefined && source === "column";
+
+  // Mirrored locally (normalized against a stale column reference) to avoid lag while typing
+  const [data, setData] = useState(() => {
+    if (inColumnMode && props.permittedValues && !props.permittedValues.some((column) => column.name === value.data)) {
+      return "";
+    }
+    return value.data;
+  });
+  const lastPropData = useRef(value.data);
+
+  useEffect(() => {
+    if (value.data !== lastPropData.current) {
+      lastPropData.current = value.data;
+      setData(value.data);
+    }
+  }, [value.data]);
+
+  // Persist any normalization performed while initializing local state back to `props.values`
+  const didNormalize = useRef(false);
+  useEffect(() => {
+    if (didNormalize.current) return;
+    didNormalize.current = true;
+    if (data !== value.data) {
+      props.onUpdate(value._id, { data });
+    }
+  }, []);
+
+  const commitData = (next: string) => {
+    setData(next);
+    lastPropData.current = next;
+    props.onUpdate(value._id, { data: next });
+  };
+
+  return (
+    <Flex w={"100%"} h={"100%"} p={"0"} overflow={"visible"} justify={"space-between"} align={"center"}>
+      {props.permittedValues !== undefined ? (
+        props.viewOnly ? (
+          <Flex w={"100%"} h={"100%"} align={"center"} px={"2"}>
+            <Text fontSize={"xs"} color={data ? "gray.700" : "gray.400"}>
+              {data || (inColumnMode ? "No column selected" : "No value set")}
+            </Text>
+          </Flex>
+        ) : (
+          <Flex w={"100%"} h={"100%"} align={"center"} overflow={"visible"}>
+            <Flex flex={"1 1 auto"} h={"100%"} overflow={"visible"}>
+              {inColumnMode ? (
+                <ReactSelect<SelectOption>
+                  options={props.permittedValues.map((column) => ({
+                    label: column.name,
+                    value: column.name,
+                    inferredType: column.inferredType,
+                  }))}
+                  size={"sm"}
+                  placeholder={"Select Column"}
+                  value={
+                    data
+                      ? {
+                          label: data,
+                          value: data,
+                          inferredType: props.permittedValues?.find((column) => column.name === data)?.inferredType,
+                        }
+                      : null
+                  }
+                  isSearchable={false}
+                  onChange={(event) => {
+                    if (event) commitData(event.value);
+                  }}
+                  components={{
+                    Control: columnPickerSelectComponents.Control,
+                    Placeholder: ColumnPickerPlaceholder,
+                    SelectContainer: columnPickerSelectComponents.SelectContainer,
+                    ValueContainer: ColumnPickerValueContainer,
+                    SingleValue: columnPickerSelectComponents.SingleValue,
+                    DropdownIndicator: columnPickerSelectComponents.DropdownIndicator,
+                    MenuList: columnPickerSelectComponents.MenuList,
+                    Option: columnPickerSelectComponents.Option,
+                  }}
+                  menuPortalTarget={document.body}
+                  menuPosition={"fixed"}
+                  chakraStyles={{
+                    menu: (provided) => ({ ...provided, marginY: 0 }),
+                    control: (provided) => ({ ...provided, minH: "34px" }),
+                  }}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
+                    menuList: (base) => ({ ...base, pointerEvents: "auto" }),
+                    option: (base) => ({ ...base, pointerEvents: "auto" }),
+                  }}
+                  closeMenuOnScroll={false}
+                />
+              ) : (
+                renderTypedInput({
+                  type: value.type,
+                  data,
+                  onChange: commitData,
+                  viewOnly: props.viewOnly,
+                  workspace: props.workspace,
+                  isPublic: props.isPublic,
+                })
+              )}
+            </Flex>
+            {/* Source toggle */}
+            <Button
+              aria-label={inColumnMode ? "switch-to-value" : "switch-to-column"}
+              size={"2xs"}
+              mx={"1"}
+              variant={"outline"}
+              colorPalette={"gray"}
+              flexShrink={0}
+              onClick={() => {
+                const newSource = source === "column" ? "value" : "column";
+                const nextData = newSource === "value" ? DEFAULT_VALUE_DATA[value.type]() : "";
+                setData(nextData);
+                lastPropData.current = nextData;
+                props.onUpdate(value._id, { source: newSource, data: nextData });
+              }}
+            >
+              <Icon name={inColumnMode ? "grid" : "edit"} size={"xs"} />
+              {inColumnMode ? "Column" : "Value"}
+            </Button>
+          </Flex>
+        )
+      ) : (
+        renderTypedInput({
+          type: value.type,
+          data,
+          onChange: commitData,
+          viewOnly: props.viewOnly,
+          workspace: props.workspace,
+          isPublic: props.isPublic,
+        })
+      )}
+      {props.viewOnly && value.type !== "entity" && !props.permittedValues && (
+        <IconButton
+          aria-label={"Copy value"}
+          size={"2xs"}
+          mx={"1"}
+          variant={"outline"}
+          colorPalette={"gray"}
+          onClick={() => copyToClipboard(value.type, data)}
+        >
+          <Icon name={"copy"} size={"xs"} />
+        </IconButton>
+      )}
+    </Flex>
+  );
+};
 
 /**
  * A spreadsheet-like interface for editing key-value data with type selection,
@@ -657,71 +1135,15 @@ const Values = (props: {
   workspace?: string;
   isPublic?: boolean;
 }) => {
-  // Local type for tracking column names
-  type ValuesColumn = "name" | "type" | "value";
-
-  const { breakpoint, getResponsiveValue } = useBreakpoint();
-
   // Counter for unique IDs
   const idCounter = useRef(0);
 
-  // Column widths scaled to the current breakpoint
-  const minColumnWidths = getResponsiveValue<{ name: number; type: number; value: number }>(
-    {
-      base: { name: 120, type: 100, value: 150 },
-      sm: { name: 150, type: 110, value: 180 },
-      md: { name: 180, type: 120, value: 200 },
+  const onUpdateValue = useCallback(
+    (id: string, updates: Partial<IValue>) => {
+      props.setValues((current) => current.map((value) => (value._id === id ? { ...value, ...updates } : value)));
     },
-    { name: 220, type: 120, value: 260 },
+    [props.setValues],
   );
-  const minColumnWidthsRef = useRef(minColumnWidths);
-  minColumnWidthsRef.current = minColumnWidths;
-
-  const [columnWidths, setColumnWidths] = useState({ ...minColumnWidths });
-
-  // Reset column widths to responsive defaults when the breakpoint changes
-  useEffect(() => {
-    setColumnWidths({ ...minColumnWidthsRef.current });
-  }, [breakpoint]);
-
-  // Refs for components involved in changing column widths
-  const tableRef = useRef<HTMLDivElement>(null);
-  const resizeRef = useRef<{
-    column: ValuesColumn;
-    startX: number;
-    startWidth: number;
-    otherFixedWidth: number;
-  } | null>(null);
-
-  // State for row selection and manipulation
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-
-  const allSelected = props.values.length > 0 && props.values.every((v) => selectedRows.has(v._id));
-  const someSelected = !allSelected && props.values.some((v) => selectedRows.has(v._id));
-
-  const toggleSelectRow = (id: string) => {
-    setSelectedRows((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(props.values.map((v) => v._id)));
-    }
-  };
-
-  // State for pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Default data for new rows
   const createNewValue = (suffix?: string): IValue => ({
@@ -731,1191 +1153,70 @@ const Values = (props: {
     data: "",
   });
 
-  // Pagination calculations
-  const totalPages = Math.ceil(props.values.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedValues = props.values.slice(startIndex, endIndex);
-
-  // Reset to first page when rows per page changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [rowsPerPage]);
-
-  /**
-   * Handles mouse movement during a column resize. Stable reference via useCallback prevents
-   * stale closures in the document listener registered by handleResizeStart.
-   * @param event Mouse event
-   */
-  const handleResizeMove = useCallback((event: MouseEvent) => {
-    if (!resizeRef.current) return;
-    const { column, startX, startWidth, otherFixedWidth } = resizeRef.current;
-    const containerWidth = tableRef.current?.offsetWidth ?? Infinity;
-    const mins = minColumnWidthsRef.current;
-    const maxWidth = containerWidth - otherFixedWidth - (column !== "value" ? mins.value : 0);
-    const newWidth = Math.min(maxWidth, Math.max(mins[column], startWidth + (event.clientX - startX)));
-    setColumnWidths((prev) => ({ ...prev, [column]: newWidth }));
-  }, []);
-
-  /**
-   * Cleans up after a column resize by removing document-level listeners.
-   * Stable reference via useCallback ensures the correct listener is removed.
-   */
-  const handleResizeEnd = useCallback(() => {
-    resizeRef.current = null;
-    document.body.style.cursor = "";
-    document.body.style.userSelect = "";
-    document.removeEventListener("mousemove", handleResizeMove);
-    document.removeEventListener("mouseup", handleResizeEnd);
-  }, [handleResizeMove]);
-
-  /**
-   * Initiates a column resize drag, recording the start state and attaching document listeners.
-   * @param {ValuesColumn} column Column being resized
-   * @param {React.MouseEvent} event Mouse event
-   */
-  const handleResizeStart = (column: ValuesColumn, event: React.MouseEvent) => {
-    event.preventDefault();
-    const allFixedWidth = (props.viewOnly ? 0 : 40) + columnWidths.name + columnWidths.type;
-    const otherFixedWidth = allFixedWidth - (column !== "value" ? columnWidths[column] : 0);
-    resizeRef.current = {
-      column,
-      startX: event.clientX,
-      startWidth: columnWidths[column],
-      otherFixedWidth,
-    };
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    document.addEventListener("mousemove", handleResizeMove);
-    document.addEventListener("mouseup", handleResizeEnd);
-  };
-
-  // Row manipulation functions
   const addRow = () => {
-    const newValue = createNewValue();
-    const updatedValues = [...props.values, newValue];
-    props.setValues(updatedValues);
+    props.setValues([...props.values, createNewValue()]);
   };
 
-  const removeSelectedRows = () => {
-    if (selectedRows.size === 0) return;
-    const updatedValues = props.values.filter((value) => !selectedRows.has(value._id));
-    props.setValues(updatedValues);
-    setSelectedRows(new Set());
-  };
-
-  /**
-   * Propagate updated `Values` rows to the overall React state
-   * @param _id Unique identifier of the `IValue`
-   * @param name Updated name of the `IValue`
-   * @param type Updated `IValueType` of the `IValue`
-   * @param data Updated data of the `IValue`
-   * @param source Optional source mode used in import context
-   */
-  const onValueChange = (_id: string, name: string, type: IValueType, data: string, source?: "column" | "value") => {
-    const updatedValues = _.cloneDeep(props.values).map((value) => {
-      if (value._id === _id) {
-        value.name = name;
-        value.type = type;
-        value.data = data;
-        value.source = source;
-      }
-      return value;
-    });
-    props.setValues(updatedValues);
-  };
-
-  return (
-    <Box w={"100%"} display={"flex"} flexDirection={"column"} css={{ WebkitOverflowScrolling: "touch" }}>
-      {/* Table */}
-      <Box flex={"1"} minH={"0"} overflowX={"auto"} overflowY={"auto"}>
-        <Box
-          ref={tableRef}
-          minW={getResponsiveValue({ base: "360px", sm: "440px", md: "490px" }, "600px")}
-          w={"100%"}
-          border={STYLES.border.style}
-          borderColor={STYLES.border.color}
-          borderRadius={"md"}
-          overflow={"hidden"}
-        >
-          {/* Header Row */}
-          <Flex gap={0} bg={"surface.muted"} borderBottom={"1px solid"} borderColor={"border.subtle"} direction={"row"}>
-            {/* Select Column Header */}
-            {!props.viewOnly && (
-              <Flex
-                w={"40px"}
-                flex={"0 0 auto"}
-                minW={"40px"}
-                px={1}
-                py={1}
-                align={"center"}
-                justify={"center"}
-                bg={"surface.muted"}
-                borderRight={"1px solid"}
-                borderColor={"border.subtle"}
-                overflow={"hidden"}
-                flexShrink={0}
-              >
-                <Checkbox.Root
-                  checked={allSelected ? true : someSelected ? "indeterminate" : false}
-                  onCheckedChange={toggleSelectAll}
-                  size={"xs"}
-                  colorPalette={"blue"}
-                >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control />
-                </Checkbox.Root>
-              </Flex>
-            )}
-
-            {/* Name Column Header */}
-            <Flex
-              w={`${columnWidths.name}px`}
-              flex={"0 0 auto"}
-              minW={`${columnWidths.name}px`}
-              px={1}
-              py={1}
-              fontSize={"xs"}
-              fontWeight={"semibold"}
-              color={STYLES.font.secondaryHeader.color}
-              bg={"surface.muted"}
-              borderRight={"1px solid"}
-              borderColor={"border.subtle"}
-              position={"relative"}
-              textAlign={"center"}
-              lineHeight={"1.2"}
-              align={"center"}
-              justify={"center"}
-              overflow={"hidden"}
-              flexShrink={0}
-            >
-              <Text textAlign={"center"}>Name</Text>
-              {/* Resize Handle */}
-              <Box
-                position={"absolute"}
-                right={"-1px"}
-                top={"0"}
-                bottom={"0"}
-                width={"3px"}
-                cursor={"col-resize"}
-                bg={"transparent"}
-                _hover={{ bg: "blue.300" }}
-                onMouseDown={(e) => handleResizeStart("name", e)}
-                zIndex={10}
-              />
-            </Flex>
-
-            {/* Type Column Header */}
-            <Flex
-              w={`${columnWidths.type}px`}
-              flex={"0 0 auto"}
-              minW={`${columnWidths.type}px`}
-              px={1}
-              py={1}
-              fontSize={"xs"}
-              fontWeight={"semibold"}
-              color={STYLES.font.secondaryHeader.color}
-              bg={"surface.muted"}
-              borderRight={"1px solid"}
-              borderColor={"border.subtle"}
-              position={"relative"}
-              textAlign={"center"}
-              lineHeight={"1.2"}
-              align={"center"}
-              justify={"center"}
-              overflow={"hidden"}
-              flexShrink={0}
-            >
-              <Text textAlign={"center"}>Type</Text>
-              {/* Resize Handle */}
-              <Box
-                position={"absolute"}
-                right={"-1px"}
-                top={"0"}
-                bottom={"0"}
-                width={"3px"}
-                cursor={"col-resize"}
-                bg={"transparent"}
-                _hover={{ bg: "blue.300" }}
-                onMouseDown={(e) => handleResizeStart("type", e)}
-                zIndex={10}
-              />
-            </Flex>
-
-            {/* Value Column Header */}
-            <Flex
-              flex={"1 1 auto"}
-              minW={`${columnWidths.value}px`}
-              px={1}
-              py={1}
-              fontSize={"xs"}
-              fontWeight={"semibold"}
-              color={STYLES.font.secondaryHeader.color}
-              bg={"surface.muted"}
-              position={"relative"}
-              textAlign={"center"}
-              lineHeight={"1.2"}
-              align={"center"}
-              justify={"center"}
-              overflow={"hidden"}
-              flexShrink={0}
-            >
-              <Text textAlign={"center"}>Data</Text>
-              {/* Resize Handle */}
-              <Box
-                position={"absolute"}
-                right={"-1px"}
-                top={"0"}
-                bottom={"0"}
-                width={"3px"}
-                cursor={"col-resize"}
-                bg={"transparent"}
-                _hover={{ bg: "blue.300" }}
-                onMouseDown={(e) => handleResizeStart("value", e)}
-                zIndex={10}
-              />
-            </Flex>
-          </Flex>
-
-          {/* Data Rows */}
-          <Box overflowY={"auto"} overflowX={"hidden"}>
-            {paginatedValues.map((value, index) => (
-              <ValueRow
-                key={value._id}
-                value={value}
-                onValueChange={onValueChange}
-                onToggleSelect={() => toggleSelectRow(value._id)}
-                columnWidths={columnWidths}
-                isSelected={selectedRows.has(value._id)}
-                hideBorder={index >= paginatedValues.length - 1}
-                viewOnly={props.viewOnly}
-                permittedValues={props.permittedValues}
-                workspace={props.workspace}
-                isPublic={props.isPublic}
-              />
-            ))}
-          </Box>
-
-          {/* Add Row Button */}
-          {!props.viewOnly && (
-            <Flex
-              borderTop={"1px solid"}
-              borderColor={"border.subtle"}
-              p={0}
-              justify={"center"}
-              align={"center"}
-              bg={"surface.muted"}
-            >
-              <Button
-                id={"addValueRowButton"}
-                size={"xs"}
-                variant={"ghost"}
-                colorPalette={"green"}
-                onClick={addRow}
-                aria-label={"Add value"}
-                w={"100%"}
-                h={"fit-content"}
-                p={"0.5"}
-              >
-                <Icon name={"add"} size={"xs"} />
-                <Text ml={1} fontSize={"xs"} fontWeight={"semibold"}>
-                  Add Value
-                </Text>
-              </Button>
-            </Flex>
-          )}
-        </Box>
-      </Box>
-
-      {/* Pagination Toolbar */}
-      <Flex
-        gap={2}
-        align={"center"}
-        wrap={"wrap"}
-        justify={{ base: "space-between", sm: "space-between" }}
-        w={"100%"}
-        mt={2}
-        flexShrink={0}
-      >
-        <Flex direction={"row"} gap={2} align={"center"} wrap={"wrap"}>
-          <IconButton
-            variant={"outline"}
-            size={"xs"}
-            rounded={"md"}
-            aria-label={"first page"}
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage <= 1}
-          >
-            <Icon name={"c_double_left"} />
-          </IconButton>
-          <IconButton
-            variant={"outline"}
-            size={"xs"}
-            rounded={"md"}
-            aria-label={"previous page"}
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage <= 1}
-          >
-            <Icon name={"c_left"} />
-          </IconButton>
-          {totalPages > 0 && (
-            <Flex gap={1}>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {currentPage}
-              </Text>
-              <Text fontSize={"xs"}> of </Text>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {totalPages}
-              </Text>
-            </Flex>
-          )}
-          <IconButton
-            variant={"outline"}
-            size={"xs"}
-            rounded={"md"}
-            aria-label={"next page"}
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage >= totalPages}
-          >
-            <Icon name={"c_right"} />
-          </IconButton>
-          <IconButton
-            variant={"outline"}
-            size={"xs"}
-            rounded={"md"}
-            aria-label={"last page"}
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage >= totalPages}
-          >
-            <Icon name={"c_double_right"} />
-          </IconButton>
-          {!props.viewOnly && (
-            <Menu.Root>
-              <Menu.Trigger asChild>
-                <Button colorPalette={"action"} size={"xs"} rounded={"md"}>
-                  Actions
-                  <Icon name={"lightning"} size={"xs"} />
-                </Button>
-              </Menu.Trigger>
-              <Menu.Positioner>
-                <Menu.Content p={1} rounded={"md"}>
-                  <Menu.Item
-                    value={"remove"}
-                    disabled={selectedRows.size === 0}
-                    onClick={() => {
-                      if (selectedRows.size > 0) removeSelectedRows();
-                    }}
-                  >
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Icon name={"delete"} size={"xs"} />
-                      <Text fontSize={"xs"}>Remove Values ({selectedRows.size})</Text>
-                    </Flex>
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu.Positioner>
-            </Menu.Root>
-          )}
-        </Flex>
-
-        <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
-          <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
-            Show:
-          </Text>
-          <Fieldset.Root w={"fit-content"}>
-            <Fieldset.Content>
-              <Field.Root>
-                <Select.Root
-                  size={"xs"}
-                  w={"80px"}
-                  collection={createListCollection({ items: PAGE_SIZE_OPTIONS })}
-                  value={[rowsPerPage.toString()]}
-                  onValueChange={(details) => setRowsPerPage(parseInt(details.value[0]))}
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger rounded={"md"}>
-                      <Select.ValueText placeholder={"Page Size"} />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {PAGE_SIZE_OPTIONS.map((count) => (
-                          <Select.Item item={count} key={count.value}>
-                            {count.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              </Field.Root>
-            </Fieldset.Content>
-          </Fieldset.Root>
-        </Flex>
-      </Flex>
-    </Box>
-  );
-};
-
-const ValueRow = (props: {
-  value: IValue;
-  onValueChange: (_id: string, name: string, type: IValueType, data: string, source?: "column" | "value") => void;
-  onToggleSelect: () => void;
-  columnWidths: { type: number; name: number; value: number };
-  isSelected: boolean;
-  hideBorder?: boolean;
-  viewOnly?: boolean;
-  permittedValues?: ColumnInfo[];
-  workspace?: string;
-  isPublic?: boolean;
-}) => {
-  // In import mode (permittedValues present), the source toggles between column reference and fixed value
-  const [source, setSource] = useState<"column" | "value">(props.value.source ?? "column");
-
-  const inColumnMode = props.permittedValues !== undefined && source === "column";
-
-  const baseTypeOptions: ValueTypeOption[] = [
-    { label: "Number", value: "number" },
-    { label: "Text", value: "text" },
-    { label: "URL", value: "url" },
-    { label: "Date", value: "date" },
-  ];
-  // In column mode, entity and select are not meaningful since they cannot be round-tripped from raw cell data
-  const valueTypeOptions: ValueTypeOption[] = inColumnMode
-    ? baseTypeOptions
-    : [...baseTypeOptions, { label: "Entity", value: "entity" }, { label: "Select", value: "select" }];
-
-  // Get the initial `ValueTypeOption` based on the `IValue` type
-  const initialValueType = valueTypeOptions.find((v) => v.value === props.value.type) ?? baseTypeOptions[1];
-
-  // React state for value display
-  const [valueName, setValueName] = useState(props.value.name);
-  const [valueType, setValueType] = useState<IValueType>(props.value.type);
-  const [valueTypeOption, setValueTypeOption] = useState<ValueTypeOption>(initialValueType);
-  let initialData = props.value.data;
-  if (inColumnMode && !props.permittedValues?.some((c) => c.name === props.value.data)) {
-    initialData = "";
-  }
-  const [valueData, setValueData] = useState<string>(props.permittedValues ? initialData : props.value.data);
-
-  /**
-   * Update local state and immediately propagate the change to the parent within the
-   * same event handler. Keeping this synchronous (rather than reacting to local state
-   * changes via `useEffect`) ensures the local update and the parent's round-trip update
-   * land in a single React commit, preventing the sync-from-props effect below from ever
-   * observing a stale intermediate value and momentarily reverting fast keystrokes.
-   */
-  const commitChange = (updates: { name?: string; type?: IValueType; data?: string; source?: "column" | "value" }) => {
-    const nextName = updates.name ?? valueName;
-    const nextType = updates.type ?? valueType;
-    const nextData = updates.data ?? valueData;
-    const nextSource = updates.source ?? source;
-    if (updates.name !== undefined) setValueName(updates.name);
-    if (updates.type !== undefined) setValueType(updates.type);
-    if (updates.data !== undefined) setValueData(updates.data);
-    if (updates.source !== undefined) setSource(updates.source);
-    props.onValueChange(props.value._id, nextName, nextType, nextData, props.permittedValues ? nextSource : undefined);
-  };
-
-  // Persist any local normalization performed during initialization (e.g. clearing an
-  // invalid column reference) back to the parent once on mount
-  const didMountRef = useRef(false);
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      props.onValueChange(props.value._id, valueName, valueType, valueData, props.permittedValues ? source : undefined);
-    }
-  }, []);
-
-  // Sync local state when props change from an external source
-  useEffect(() => {
-    setValueName(props.value.name);
-    setValueType(props.value.type as IValueType);
-    setValueData(props.value.data);
-
-    // Adjust for Value sources
-    const valueSource = props.value.source ?? "column";
-    setSource(valueSource);
-    const columnMode = props.permittedValues !== undefined && valueSource === "column";
-
-    // Update Value types
-    const typeOptions: ValueTypeOption[] = columnMode
-      ? baseTypeOptions
-      : [...baseTypeOptions, { label: "Entity", value: "entity" }, { label: "Select", value: "select" }];
-    const valueType = typeOptions.find((option) => option.value === props.value.type) ?? baseTypeOptions[1];
-    setValueTypeOption(valueType);
-  }, [props.value.name, props.value.type, props.value.data, props.value.source, props.permittedValues]);
-
-  /**
-   * Utility function to generate default data when the `type` changes
-   * @param valueType The new `IValueType` that has been selected
-   * @returns
-   */
-  const generateDefaultData = (valueType: IValueType): string => {
-    switch (valueType) {
-      case "number":
-        return "0";
-      case "text":
-        return "";
-      case "url":
-        return "https://";
-      case "date":
-        return dayjs(Date.now()).toISOString();
-      case "entity":
-        return JSON.stringify({ _id: "", name: "" });
-      case "select":
-        return JSON.stringify({
-          selected: "",
-          options: [],
-        });
-    }
-  };
-
-  /**
-   * Utility function to generate URL "tabs" representing links to known platforms
-   * @param {string} url The URL stored as `data` in the Value component
-   */
-  const generateUrlTab = (url: string): ReactElement => {
-    const urlObject = URL.parse(url);
-    const isValidUrl = !_.isNull(urlObject);
-
-    // Determine platform-specific icon and badge styling
-    let iconStyle: IconNames = "link";
-    let badgeBg = "blue.50";
-    let badgeBorder = "blue.100";
-    let iconColor = STYLES.project.color.icon;
-
-    if (isValidUrl) {
-      if (urlObject.host === "box.com" || urlObject.host.endsWith(".box.com")) {
-        iconStyle = "l_box";
-        badgeBg = "blue.100";
-        badgeBorder = "blue.100";
-        iconColor = "blue.600";
-      } else if (urlObject.host === "github.com" || urlObject.host.endsWith(".github.com")) {
-        iconStyle = "l_github";
-        badgeBg = "gray.100";
-        badgeBorder = "gray.200";
-        iconColor = STYLES.font.secondaryHeader.color;
-      } else if (urlObject.host === "labarchives.com" || urlObject.host.endsWith(".labarchives.com")) {
-        iconStyle = "l_labarchives";
-        badgeBg = "purple.100";
-        badgeBorder = "purple.200";
-        iconColor = "purple.600";
-      } else if (urlObject.host === "globus.org" || urlObject.host.endsWith(".globus.org")) {
-        iconStyle = "l_globus";
-        badgeBg = "teal.100";
-        badgeBorder = "teal.200";
-        iconColor = "teal.600";
-      }
-    }
-
-    return (
-      <Flex
-        direction={"row"}
-        align={"center"}
-        h={"100%"}
-        w={"100%"}
-        px={"2"}
-        border={"1px solid transparent"}
-        _hover={{
-          border: "1px solid",
-          borderColor: "blue.200",
-          boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-        }}
-      >
-        {isValidUrl ? (
-          <Tooltip content={`Open in new tab: ${url}`} showArrow>
-            <Link href={url} _hover={{ textDecoration: "none" }} target={"_blank"} rel={"noopener noreferrer"}>
-              <Flex
-                direction={"row"}
-                align={"center"}
-                h={"22px"}
-                border={STYLES.border.style}
-                borderColor={STYLES.border.color}
-                rounded={"lg"}
-                overflow={"hidden"}
-                _hover={{
-                  borderColor: "blue.300",
-                  boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-                }}
-              >
-                {/* Platform icon badge */}
-                <Flex
-                  align={"center"}
-                  justify={"center"}
-                  bg={badgeBg}
-                  px={"1.5"}
-                  h={"100%"}
-                  borderRight={"1px solid"}
-                  borderColor={badgeBorder}
-                >
-                  <Icon name={iconStyle} size={"xs"} color={iconColor} />
-                </Flex>
-                {/* Hostname */}
-                <Flex px={"1"} align={"center"} h={"100%"} bg={"white"}>
-                  <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
-                    {urlObject.host}
-                  </Text>
-                </Flex>
-                {/* Platform icon badge */}
-                <Flex align={"center"} justify={"center"} bg={"white"} mr={"1.5"} h={"100%"}>
-                  <Icon name={"external"} size={"xs"} color={"gray.600"} />
-                </Flex>
-              </Flex>
-            </Link>
-          </Tooltip>
-        ) : (
-          <Tooltip content={"Invalid URL"} showArrow>
-            <Flex
-              direction={"row"}
-              align={"center"}
-              h={"22px"}
-              border={STYLES.border.style}
-              borderColor={"orange.200"}
-              rounded={"md"}
-              overflow={"hidden"}
-              cursor={"not-allowed"}
-            >
-              {/* Warning badge */}
-              <Flex
-                align={"center"}
-                justify={"center"}
-                bg={"status.warning.subtle"}
-                px={"1.5"}
-                h={"100%"}
-                borderRight={"1px solid"}
-                borderColor={"orange.200"}
-              >
-                <Icon name={"warning"} size={"xs"} color={"orange.500"} />
-              </Flex>
-              {/* Truncated URL */}
-              <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-                <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
-                  {_.truncate(url, { length: 28 })}
-                </Text>
-              </Flex>
-            </Flex>
-          </Tooltip>
-        )}
-      </Flex>
-    );
-  };
-
-  /**
-   * Copy a `IValue`'s data, parsing and utilizing relevant fields if `type`
-   * is `entity` or `select`
-   * @param {IValueType} valueType The type of the value to be copied
-   * @param {string} valueData Serialized value data
-   */
-  const copyToClipboard = (valueType: IValueType, valueData: string) => {
-    // If data is a serialized object, parse and copy relevant fields
-    if (valueType === "entity") {
-      valueData = JSON.parse(valueData)._id;
-    } else if (valueType === "select") {
-      valueData = JSON.parse(valueData).selected;
-    }
-    navigator.clipboard.writeText(valueData.toString() || "");
-    toaster.create({
-      title: "Copied to clipboard",
-      type: "success",
-      duration: 2000,
-      closable: true,
-    });
-  };
-
-  // Render data input based on type
-  const renderDataInput = (valueType: IValueType) => {
-    if (valueType === "number") {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => commitChange({ data: e.target.value })}
-          size={"xs"}
-          h={"100%"}
-          borderRadius={"none"}
-          fontSize={"xs"}
-          type={"number"}
-          readOnly={props.viewOnly}
-          placeholder={"Enter number"}
-          border={"1px solid transparent"}
-          bg={"transparent"}
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
-    } else if (valueType === "text") {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => commitChange({ data: e.target.value })}
-          size={"xs"}
-          h={"100%"}
-          borderRadius={"none"}
-          fontSize={"xs"}
-          readOnly={props.viewOnly}
-          placeholder={"Enter text"}
-          border={"1px solid transparent"}
-          bg={"transparent"}
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
-    } else if (valueType === "url") {
-      if (!props.viewOnly) {
-        return (
-          <Input
-            value={valueData}
-            onChange={(e) => commitChange({ data: e.target.value })}
-            size={"xs"}
-            h={"100%"}
-            borderRadius={"none"}
-            fontSize={"xs"}
-            readOnly={props.viewOnly}
-            placeholder={"Enter URL"}
-            border={"1px solid transparent"}
-            bg={"transparent"}
-            cursor={props.viewOnly ? "default" : "text"}
-            onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-            _focus={{
-              bg: "white",
-              border: "1px solid",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          />
-        );
-      } else {
-        return generateUrlTab(valueData);
-      }
-    } else if (valueType === "date") {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => commitChange({ data: e.target.value })}
-          size={"xs"}
-          h={"100%"}
-          borderRadius={"none"}
-          fontSize={"xs"}
-          type={"date"}
-          readOnly={props.viewOnly}
-          border={"1px solid transparent"}
-          bg={"transparent"}
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
-    } else if (valueType === "select") {
-      // Check if select has options configured
-      return (
-        <Flex
-          w={"100%"}
-          h={"100%"}
-          p={"0"}
-          align={"center"}
-          justify={"center"}
-          border={"1px solid transparent"}
-          _focus={{
-            bg: "white",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        >
-          <ValueDataSelect
-            valueData={valueData}
-            setValueData={(next) => {
-              const resolved = typeof next === "function" ? (next as (prev: string) => string)(valueData) : next;
-              commitChange({ data: resolved });
-            }}
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: "Name",
+        cell: (info) => <NameCell value={info.row.original} onUpdate={onUpdateValue} viewOnly={props.viewOnly} />,
+        meta: { minWidth: 220, noPadding: true },
+      }),
+      columnHelper.accessor("type", {
+        header: "Type",
+        cell: (info) => (
+          <TypeCell
+            value={info.row.original}
+            onUpdate={onUpdateValue}
             viewOnly={props.viewOnly}
+            permittedValues={props.permittedValues}
           />
-        </Flex>
-      );
-    } else if (valueType === "entity") {
-      if (!props.viewOnly) {
-        return (
-          <Flex
-            w={"100%"}
-            h={"100%"}
-            p={"0"}
-            align={"center"}
-            justify={"center"}
-            border={"1px solid transparent"}
-            _focus={{
-              bg: "white",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          >
-            <SearchSelect
-              placeholder={"Select Entity"}
-              resultType={"entity"}
-              value={JSON.parse(valueData) || { _id: "", name: "" }}
-              onChange={(entity) => commitChange({ data: JSON.stringify(entity) })}
-              disabled={props.viewOnly}
-              isEmbedded
-            />
-          </Flex>
-        );
-      } else {
-        return (
-          <Flex
-            w={"100%"}
-            h={"100%"}
-            justify={"start"}
-            align={"center"}
-            pt={"0.5"}
-            px={"2"}
-            border={"1px solid transparent"}
-            _focus={{
-              bg: "white",
-              borderColor: "blue.300",
-            }}
-            _hover={{
-              border: "1px solid",
-              borderColor: "blue.200",
-              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-            }}
-          >
-            <Linky
-              type={"entities"}
-              id={JSON.parse(valueData)._id || ""}
-              size={"xs"}
-              workspace={props.workspace}
-              isPublic={props.isPublic}
-            />
-          </Flex>
-        );
-      }
-    } else {
-      return (
-        <Input
-          value={valueData}
-          onChange={(e) => commitChange({ data: e.target.value })}
-          size={"xs"}
-          h={props.viewOnly ? "34px" : "100%"}
-          px={1}
-          py={0.5}
-          fontSize={"xs"}
-          readOnly={props.viewOnly}
-          placeholder={"Enter value"}
-          border={"1px solid transparent"}
-          bg={"transparent"}
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      );
-    }
-  };
+        ),
+        meta: { minWidth: 120, noPadding: true },
+      }),
+      columnHelper.accessor("data", {
+        header: "Data",
+        cell: (info) => (
+          <ValueCell
+            value={info.row.original}
+            onUpdate={onUpdateValue}
+            viewOnly={props.viewOnly}
+            permittedValues={props.permittedValues}
+            workspace={props.workspace}
+            isPublic={props.isPublic}
+          />
+        ),
+        meta: { minWidth: 260, noPadding: true },
+      }),
+    ],
+    [onUpdateValue, props.viewOnly, props.permittedValues, props.workspace, props.isPublic],
+  );
 
   return (
-    <Flex
-      gap={0}
-      borderBottom={props.hideBorder ? "none" : "1px solid"}
-      borderColor={"border.subtle"}
-      _hover={{ bg: "gray.25" }}
-      overflow={"hidden"}
-      bg={props.isSelected ? "blue.50" : "white"}
-    >
-      {/* Drag Handle Column */}
-      {!props.viewOnly && (
-        <Box
-          w={"40px"}
-          minW={"40px"}
-          flex={"0 0 auto"}
-          px={1}
-          py={0.5}
-          display={"flex"}
-          alignItems={"center"}
-          justifyContent={"center"}
-          borderRight={"1px solid"}
-          borderColor={"border.subtle"}
-          bg={props.isSelected ? "blue.100" : "white"}
-          _hover={{ bg: props.isSelected ? "blue.200" : "gray.100" }}
-          cursor={props.viewOnly ? "default" : "pointer"}
-        >
-          <Checkbox.Root
-            checked={props.isSelected}
-            onCheckedChange={() => props.onToggleSelect()}
-            size={"xs"}
-            colorPalette={"blue"}
-            disabled={props.viewOnly}
-          >
-            <Checkbox.HiddenInput />
-            <Checkbox.Control />
-          </Checkbox.Root>
-        </Box>
-      )}
-
-      {/* Name Column */}
-      <Box
-        w={`${props.columnWidths.name}px`}
-        flex={"0 0 auto"}
-        p={"0"}
-        m={"0"}
-        borderRight={"1px solid"}
-        borderColor={"border.subtle"}
-      >
-        <Input
-          value={valueName}
-          onChange={(e) => commitChange({ name: e.target.value })}
-          size={"xs"}
-          px={1}
-          py={0}
-          h={"100%"}
-          fontSize={"xs"}
-          readOnly={props.viewOnly}
-          placeholder={"Enter name"}
-          border={"1px solid transparent"}
-          borderRadius={"none"}
-          bg={"transparent"}
-          cursor={props.viewOnly ? "default" : "text"}
-          onClick={props.viewOnly ? (e) => e.preventDefault() : undefined}
-          _focus={{
-            bg: "white",
-            border: "1px solid",
-            borderColor: "blue.300",
-          }}
-          _hover={{
-            border: "1px solid",
-            borderColor: "blue.200",
-            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
-          }}
-        />
-      </Box>
-
-      {/* Type Column */}
-      <Box
-        w={`${props.columnWidths.type}px`}
-        flex={"0 0 auto"}
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"center"}
-        borderRight={"1px solid"}
-        borderColor={"border.subtle"}
-      >
-        <ReactSelect
-          options={valueTypeOptions}
-          size={"sm"}
-          placeholder={"Type"}
-          disabled={props.viewOnly}
-          value={valueTypeOption}
-          isSearchable={false}
-          components={{
-            Control: ValueTypeControl,
-            SelectContainer: ValueTypeSelectContainer,
-            ValueContainer: ValueTypeValueContainer,
-            SingleValue: ValueTypeSingleValue,
-            DropdownIndicator: ValueTypeDropdownIndicator,
-            MenuList: ValueTypeMenuList,
-            Option: ValueTypeOption,
-          }}
-          onChange={(event) => {
-            if (event) {
-              setValueTypeOption({ label: event.label, value: event.value });
-              if (props.permittedValues) {
-                if (inColumnMode) {
-                  // In column mode, keep the selected column only if it is still valid
-                  if (!props.permittedValues.some((c) => c.name === valueData)) {
-                    commitChange({ type: event.value, data: "" });
-                  } else {
-                    commitChange({ type: event.value });
-                  }
-                } else {
-                  commitChange({ type: event.value, data: generateDefaultData(event.value) });
-                }
-              } else {
-                commitChange({ type: event.value, data: generateDefaultData(event.value) });
-              }
-            }
-          }}
-          menuPortalTarget={document.body}
-          menuPosition={"fixed"}
-          chakraStyles={{
-            menu: (provided) => ({ ...provided, marginY: 0 }),
-          }}
-          styles={{
-            menuPortal: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menuList: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-            }),
-            option: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-            }),
-          }}
-          closeMenuOnScroll={false}
-        />
-      </Box>
-
-      {/* Value Column */}
-      <Flex
-        flex={"1 1 auto"}
-        minW={`${props.columnWidths.value}px`}
-        p={"0"}
-        overflow={"visible"}
-        justify={"space-between"}
-        align={"center"}
-      >
-        {props.permittedValues !== undefined ? (
-          props.viewOnly ? (
-            <Flex w={"100%"} h={"100%"} align={"center"} px={"2"}>
-              <Text fontSize={"xs"} color={valueData ? "gray.700" : "gray.400"}>
-                {valueData || (inColumnMode ? "No column selected" : "No value set")}
-              </Text>
-            </Flex>
-          ) : (
-            <Flex w={"100%"} h={"100%"} align={"center"} overflow={"visible"}>
-              {/* Column picker or free-form input depending on source mode */}
-              <Flex flex={"1 1 auto"} h={"100%"} overflow={"visible"}>
-                {inColumnMode ? (
-                  <ReactSelect<SelectOption>
-                    options={props.permittedValues.map((col) => ({
-                      label: col.name,
-                      value: col.name,
-                      inferredType: col.inferredType,
-                    }))}
-                    size={"sm"}
-                    placeholder={"Select Column"}
-                    value={
-                      valueData
-                        ? {
-                            label: valueData,
-                            value: valueData,
-                            inferredType: props.permittedValues?.find((column) => column.name === valueData)
-                              ?.inferredType,
-                          }
-                        : null
-                    }
-                    isSearchable={false}
-                    onChange={(event) => {
-                      if (event) commitChange({ data: event.value });
-                    }}
-                    components={{
-                      Control: ColumnPickerControl,
-                      Placeholder: ColumnPickerPlaceholder,
-                      SelectContainer: ValueDataSelectContainer,
-                      ValueContainer: ColumnPickerValueContainer,
-                      SingleValue: ColumnPickerSingleValue,
-                      DropdownIndicator: ValueDataDropdownIndicator,
-                      MenuList: ValueDataMenuList,
-                      Option: ColumnPickerOption,
-                    }}
-                    menuPortalTarget={document.body}
-                    menuPosition={"fixed"}
-                    chakraStyles={{
-                      menu: (provided) => ({ ...provided, marginY: 0 }),
-                    }}
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
-                      menuList: (base) => ({ ...base, pointerEvents: "auto" }),
-                      option: (base) => ({ ...base, pointerEvents: "auto" }),
-                    }}
-                    closeMenuOnScroll={false}
-                  />
-                ) : (
-                  renderDataInput(valueType)
-                )}
-              </Flex>
-              {/* Source toggle */}
-              <Button
-                aria-label={inColumnMode ? "switch-to-value" : "switch-to-column"}
-                size={"2xs"}
-                mx={"1"}
-                variant={"outline"}
-                colorPalette={"gray"}
-                flexShrink={0}
-                onClick={() => {
-                  const newSource = source === "column" ? "value" : "column";
-                  commitChange({
-                    source: newSource,
-                    data: newSource === "value" ? generateDefaultData(valueType) : "",
-                  });
-                }}
-              >
-                <Icon name={inColumnMode ? "grid" : "edit"} size={"xs"} />
-                {inColumnMode ? "Column" : "Value"}
-              </Button>
-            </Flex>
-          )
-        ) : (
-          renderDataInput(valueType)
-        )}
-        {props.viewOnly && valueType !== "entity" && !props.permittedValues && (
-          <IconButton
-            aria-label={"Copy value"}
-            size={"2xs"}
-            mx={"1"}
-            variant={"outline"}
-            colorPalette={"gray"}
-            onClick={() => copyToClipboard(valueType, valueData)}
-          >
-            <Icon name={"copy"} size={"xs"} />
-          </IconButton>
-        )}
-      </Flex>
-    </Flex>
+    <DataTable
+      columns={columns}
+      data={props.values}
+      visibleColumns={{}}
+      selectedRows={{}}
+      showSelection={!props.viewOnly}
+      viewOnly={props.viewOnly}
+      resizableColumns
+      showPagination
+      pageSize={10}
+      actions={[
+        {
+          label: (count: number) => `Remove Values (${count})`,
+          icon: "delete",
+          action: (table, rows) => {
+            const ids = new Set(Object.keys(rows).map((rowIndex) => table.getRow(rowIndex).original._id as string));
+            props.setValues((current) => current.filter((value) => !ids.has(value._id)));
+          },
+        },
+      ]}
+      footerAction={props.viewOnly ? undefined : { label: "Add Value", icon: "add", onClick: addRow }}
+    />
   );
 };
 

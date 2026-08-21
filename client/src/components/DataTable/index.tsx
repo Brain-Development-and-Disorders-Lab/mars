@@ -37,17 +37,11 @@ import { DataTableProps } from "@types";
 
 // Utility functions
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useColumnResize } from "@hooks/useColumnResize";
 import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
-
-declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
-  }
-}
 
 export type ColumnMeta = {
   minWidth?: number;
@@ -55,6 +49,7 @@ export type ColumnMeta = {
   fixedWidth?: number;
   isFunction?: boolean;
   align?: "left" | "center" | "right";
+  noPadding?: boolean; // Renders the cell without its default px/py, for content that fills the cell itself
 };
 
 const SELECT_COLUMN_WIDTH = 40;
@@ -250,6 +245,13 @@ const canSortColumn = (columnId: string): boolean => {
   );
 };
 
+/** Convert an arbitrary cell value to a string for comparison, per customSortingFn's rules. */
+const toComparableString = (value: unknown): string => {
+  if (Array.isArray(value)) return value.length > 0 ? String(value[0]) : "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
 /**
  * Custom sorting function that handles edge cases:
  * - null/undefined values (sorted to the end)
@@ -275,29 +277,9 @@ const customSortingFn = (
     return -1; // b is null/undefined, a is not, so b comes after
   }
 
-  // Convert both values to strings for consistent comparison
-  let strA: string;
-  let strB: string;
-
-  if (Array.isArray(a)) {
-    strA = a.length > 0 ? String(a[0]) : "";
-  } else if (typeof a === "object") {
-    strA = JSON.stringify(a);
-  } else {
-    strA = String(a);
-  }
-
-  if (Array.isArray(b)) {
-    strB = b.length > 0 ? String(b[0]) : "";
-  } else if (typeof b === "object") {
-    strB = JSON.stringify(b);
-  } else {
-    strB = String(b);
-  }
-
   // Case-insensitive comparison
-  const normalizedA = strA.toLowerCase().trim();
-  const normalizedB = strB.toLowerCase().trim();
+  const normalizedA = toComparableString(a).toLowerCase().trim();
+  const normalizedB = toComparableString(b).toLowerCase().trim();
 
   // Compare normalized strings
   if (normalizedA < normalizedB) return -1;
@@ -612,23 +594,6 @@ const DataTable = (props: DataTableProps) => {
     sortingFns: {
       customSort: customSortingFn,
     },
-    meta: {
-      updateData: (rowIndex: number, columnId: string, value: unknown) => {
-        if (props.setData) {
-          props.setData((data) =>
-            data.map((row, index) => {
-              if (index === rowIndex) {
-                return {
-                  ...data[rowIndex],
-                  [columnId]: value,
-                };
-              }
-              return row;
-            }),
-          );
-        }
-      },
-    },
   });
 
   // Sync pagination changes to parent (for server-side pagination)
@@ -838,6 +803,23 @@ const DataTable = (props: DataTableProps) => {
     [table],
   );
 
+  // Unlike getColumnMinWidth, ignores any live resize so drags can't ratchet the floor upward
+  const getColumnConfiguredMinWidth = useCallback(
+    (columnId: string): number => {
+      if (columnId === "select") {
+        return SELECT_COLUMN_WIDTH;
+      }
+      const meta = table.getColumn(columnId)?.columnDef.meta as ColumnMeta | undefined;
+      return meta?.fixedWidth || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+    },
+    [table],
+  );
+
+  const { handleResizeStart } = useColumnResize({
+    containerRef,
+    onResize: (columnId, width) => setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
+  });
+
   return (
     <Box
       w={"100%"}
@@ -851,6 +833,7 @@ const DataTable = (props: DataTableProps) => {
         <ScrollArea.Viewport>
           <ScrollArea.Content pb={"4"} data-testid={"data-table-scroll-container"}>
             <Box
+              ref={containerRef}
               w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
               minW={`${totalMinWidth}px`}
               border={STYLES.border.style}
@@ -944,6 +927,36 @@ const DataTable = (props: DataTableProps) => {
                               </Flex>
                             </Flex>
                           )}
+                          {props.resizableColumns && !isSelectColumn && (
+                            <Box
+                              data-testid={`datatable-resize-${header.id}`}
+                              position={"absolute"}
+                              right={"-1px"}
+                              top={"0"}
+                              bottom={"0"}
+                              width={"3px"}
+                              cursor={"col-resize"}
+                              bg={"transparent"}
+                              _hover={{ bg: "blue.300" }}
+                              onMouseDown={(event) => {
+                                const lastHeader = visibleHeaders[visibleHeaders.length - 1];
+                                const otherFixedWidth = visibleHeaders
+                                  .filter((h) => h.id !== header.id && h.id !== lastHeader.id)
+                                  .reduce((sum, h) => sum + getColumnMinWidth(h.id), 0);
+                                handleResizeStart(
+                                  {
+                                    columnId: header.id,
+                                    startWidth: getColumnMinWidth(header.id),
+                                    minWidth: getColumnConfiguredMinWidth(header.id),
+                                    otherFixedWidth,
+                                    reserveWidth: isLastColumn ? 0 : getColumnMinWidth(lastHeader.id),
+                                  },
+                                  event,
+                                );
+                              }}
+                              zIndex={10}
+                            />
+                          )}
                         </Flex>
                       );
                     })}
@@ -981,8 +994,8 @@ const DataTable = (props: DataTableProps) => {
                             minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
                             maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
                             h={"34px"}
-                            px={1}
-                            py={0.5}
+                            px={cellMeta?.noPadding ? 0 : 1}
+                            py={cellMeta?.noPadding ? 0 : 0.5}
                             borderRight={!isLastCell ? "1px solid" : "none"}
                             borderColor={"border.subtle"}
                             textAlign={align}
@@ -1003,6 +1016,33 @@ const DataTable = (props: DataTableProps) => {
                   );
                 })}
               </Box>
+
+              {props.footerAction && (
+                <Flex
+                  borderTop={"1px solid"}
+                  borderColor={"border.subtle"}
+                  p={0}
+                  justify={"center"}
+                  align={"center"}
+                  bg={"surface.muted"}
+                >
+                  <Button
+                    size={"xs"}
+                    variant={"ghost"}
+                    colorPalette={"green"}
+                    onClick={props.footerAction.onClick}
+                    aria-label={props.footerAction.label}
+                    w={"100%"}
+                    h={"fit-content"}
+                    p={"0.5"}
+                  >
+                    <Icon name={props.footerAction.icon} size={"xs"} />
+                    <Text ml={1} fontSize={"xs"} fontWeight={"semibold"}>
+                      {props.footerAction.label}
+                    </Text>
+                  </Button>
+                </Flex>
+              )}
             </Box>
           </ScrollArea.Content>
         </ScrollArea.Viewport>
