@@ -23,7 +23,7 @@ test.describe("Entity", () => {
       const entityName = getUniqueName("Test Entity Navigation");
 
       await page.locator("[data-testid='create-entity-name']").fill(entityName);
-      await page.locator('input[type="date"]').fill("2023-10-01");
+      await page.locator('input[type="date"]').fill("2023-10-01T12:00");
       await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for navigation.");
 
       await page.click("[data-testid='create-entity-continue']");
@@ -48,7 +48,7 @@ test.describe("Entity", () => {
       const entityName = getUniqueName("Test Entity Complete");
 
       await page.locator("[data-testid='create-entity-name']").fill(entityName);
-      await page.locator('input[type="date"]').fill("2023-10-01");
+      await page.locator('input[type="date"]').fill("2023-10-01T12:00");
       await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for completion.");
       await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-continue']");
