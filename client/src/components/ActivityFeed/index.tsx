@@ -128,7 +128,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                     <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                       <Text fontSize={"xs"}>
                         {activity.details}
-                        {activity.target.type !== "workspace" ? ":" : ""}
+                        {activity.target.type !== "workspaces" ? ":" : ""}
                       </Text>
                       <RelativeTime
                         value={activity.timestamp}
@@ -137,26 +137,16 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                         color={"text.subtle"}
                       />
                     </Flex>
-                    {activity.target.type !== "workspace" && (
-                      <Flex>
-                        <Linky
-                          id={activity.target._id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                          justify={"left"}
-                          size={"xs"}
-                          truncate={20}
-                        />
-                      </Flex>
-                    )}
-                    {activity.target.type === "workspace" && (
-                      <Flex direction={"row"} gap={"1"} align={"center"}>
-                        <Icon name={"workspace"} size={"xs"} />
-                        <Text fontWeight={"semibold"} fontSize={"xs"}>
-                          {activity.target.name}
-                        </Text>
-                      </Flex>
-                    )}
+                    <Flex>
+                      <Linky
+                        id={activity.target._id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                        justify={"left"}
+                        size={"xs"}
+                        truncate={20}
+                      />
+                    </Flex>
                   </Flex>
                 </Flex>
               );

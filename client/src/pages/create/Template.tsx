@@ -59,7 +59,7 @@ const Template = () => {
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
-  const [created, setCreated] = useState("");
+  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
   const [values, setValues] = useState<IValue[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -255,7 +255,7 @@ const Template = () => {
             bg={STYLES.surface.card}
             rounded={"md"}
           >
-            <Field.Root>
+            <Field.Root required>
               <Field.Label fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                 Values
                 <Field.RequiredIndicator />

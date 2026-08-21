@@ -11,14 +11,6 @@ import { getDatabase } from "@connectors/database";
 const USERS_COLLECTION = "user";
 
 export class User {
-  /**
-   * Get all User entries from the Users collection
-   * @returns Collection of all User entries
-   */
-  static all = async (): Promise<UserModel[]> => {
-    return await getDatabase().collection<UserModel>(USERS_COLLECTION).find().toArray();
-  };
-
   static getOne = async (_id: string): Promise<UserModel | null> => {
     return await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ _id: _id });
   };

@@ -371,15 +371,4 @@ export class Admin {
       message: result.modifiedCount === 1 ? "User status updated" : "Unable to update user status",
     };
   };
-
-  static setUserRole = async (_id: string, role: string): Promise<IResponseMessage> => {
-    const result = await getDatabase()
-      .collection<UserModel>(USERS_COLLECTION)
-      .updateOne({ _id: _id }, { $set: { role } });
-
-    return {
-      success: result.modifiedCount === 1,
-      message: result.modifiedCount === 1 ? "User role updated" : "Unable to update user role",
-    };
-  };
 }

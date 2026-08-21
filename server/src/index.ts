@@ -84,9 +84,6 @@ app.use(
 // Setup CORS origins
 const origins = process.env.NODE_ENV !== "production" ? ["http://127.0.0.1:8080"] : ["https://app.metadatify.com"];
 
-// Specify non-secure paths
-const nonSecurePaths = ["/login"];
-
 // Start the GraphQL server
 const start = async () => {
   logger.info({ env: process.env.NODE_ENV }, "Environment");
@@ -102,7 +99,7 @@ const start = async () => {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
-    if (!_.includes(nonSecurePaths, req.path) && session === null) {
+    if (session === null) {
       res.status(401).json({ message: `You do not have permission to access ${req.path}` });
     } else {
       res.locals.session = session;
@@ -249,6 +246,9 @@ const start = async () => {
     "user",
   ];
 
+  // Subset of "User" fields safe to expose unauthenticated (excludes api_keys, token, email, role, etc.)
+  const PUBLIC_USER_FIELDS = ["_id", "name", "firstName", "lastName", "image", "account_orcid", "__typename"];
+
   // Rejects mutations and any root selection outside PUBLIC_QUERY_FIELDS (including fragments)
   const publicAccessPlugin: ApolloServerPlugin<Context> = {
     async requestDidStart() {
@@ -269,6 +269,17 @@ const start = async () => {
               throw new GraphQLError("This field is not available", {
                 extensions: { code: "FORBIDDEN" },
               });
+            }
+
+            // Restrict "user" sub-selections to a safe subset to avoid leaking credentials/PII
+            if (selection.name.value === "user" && selection.selectionSet) {
+              for (const userSelection of selection.selectionSet.selections) {
+                if (userSelection.kind !== "Field" || !_.includes(PUBLIC_USER_FIELDS, userSelection.name.value)) {
+                  throw new GraphQLError("This field is not available", {
+                    extensions: { code: "FORBIDDEN" },
+                  });
+                }
+              }
             }
           }
         },

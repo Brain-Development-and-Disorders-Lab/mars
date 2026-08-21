@@ -32,7 +32,7 @@ const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
  * for each Linky type
  */
 const getTypeStyle = (
-  type: "entities" | "projects" | "templates",
+  type: "entities" | "projects" | "templates" | "workspaces",
 ): { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string } => {
   if (type === "projects") {
     return {
@@ -47,6 +47,13 @@ const getTypeStyle = (
       badgeBg: STYLES.template.color.light,
       badgeBorder: STYLES.template.color.border,
       iconColor: STYLES.template.color.icon,
+    };
+  } else if (type === "workspaces") {
+    return {
+      icon: "workspace",
+      badgeBg: "gray.300",
+      badgeBorder: "gray.300",
+      iconColor: "gray.700",
     };
   }
   // entities
@@ -134,6 +141,19 @@ const Linky = (props: LinkyProps) => {
     };
   }>(GET_TEMPLATE);
 
+  const GET_WORKSPACE = gql`
+    query GetWorkspace($_id: String) {
+      workspace(_id: $_id) {
+        _id
+        name
+        description
+      }
+    }
+  `;
+  const [getWorkspace, { loading: loadingWorkspace }] = useLazyQuery<{
+    workspace: IGenericItem & { description: string };
+  }>(GET_WORKSPACE);
+
   /**
    * Utility function to retrieve data of link target
    */
@@ -212,6 +232,21 @@ const Linky = (props: LinkyProps) => {
           setNavigatorDescription(response.data.project.description);
           setNavigatorItems(response.data.projectEntities);
         }
+      } else if (props.type === "workspaces") {
+        const response = await getWorkspace({
+          variables: { _id: props.id },
+          context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
+        });
+        if (response.error || _.isUndefined(response.data)) {
+          setShowDeleted(true);
+          data.name = "Invalid Workspace";
+          setTooltipLabel(`Workspace (ID: ${props.id}) is either inaccessible or does not exist.`);
+        } else {
+          data.name = response.data.workspace.name;
+          setTooltipLabel(data.name);
+          setShowArchived(false);
+          setNavigatorDescription(response.data.workspace.description);
+        }
       }
     } catch (error) {
       // If query fails completely, use fallback
@@ -231,8 +266,8 @@ const Linky = (props: LinkyProps) => {
   };
 
   const onClickHandler = () => {
-    if (!showDeleted && !loadingEntity && !loadingProject && !loadingTemplate) {
-      if (props.isPublic) {
+    if (!showDeleted && !loadingEntity && !loadingProject && !loadingTemplate && !loadingWorkspace) {
+      if (props.isPublic && props.type !== "workspaces") {
         navigate(`/public/${props.workspace}/${props.type}/${props.id}`);
       } else {
         navigate(`/${props.type}/${props.id}`);
@@ -258,6 +293,9 @@ const Linky = (props: LinkyProps) => {
     }
     if (props.type === "projects") {
       return { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" };
+    }
+    if (props.type === "workspaces") {
+      return { icon: "workspace", color: "black", palette: "gray" };
     }
     const { name, color } = getValueTypeIconProps(item.type);
     return { icon: name, color, palette: color.split(".")[0] };
@@ -402,30 +440,32 @@ const Linky = (props: LinkyProps) => {
                 </Flex>
 
                 {/* Preview */}
-                <Flex direction={"column"} gap={"0.5"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-                    {navigatorLabel}
-                  </Text>
-                  <Flex>
-                    <FieldTagList
-                      items={navigatorItems}
-                      max={NAVIGATOR_PREVIEW_COUNT}
-                      emptyLabel={navigatorLabel}
-                      getKey={(item) => item._id}
-                      renderTag={(item) => {
-                        const itemStyle = getNavigatorItemStyle(item);
-                        return (
-                          <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
-                            <Tag.StartElement>
-                              <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
-                            </Tag.StartElement>
-                            <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
-                          </Tag.Root>
-                        );
-                      }}
-                    />
+                {props.type !== "workspaces" && (
+                  <Flex direction={"column"} gap={"0.5"}>
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
+                      {navigatorLabel}
+                    </Text>
+                    <Flex>
+                      <FieldTagList
+                        items={navigatorItems}
+                        max={NAVIGATOR_PREVIEW_COUNT}
+                        emptyLabel={navigatorLabel}
+                        getKey={(item) => item._id}
+                        renderTag={(item) => {
+                          const itemStyle = getNavigatorItemStyle(item);
+                          return (
+                            <Tag.Root colorPalette={itemStyle.palette} size={"sm"}>
+                              <Tag.StartElement>
+                                <Icon name={itemStyle.icon} color={itemStyle.color} size={"xs"} />
+                              </Tag.StartElement>
+                              <Tag.Label fontSize={"xs"}>{_.truncate(item.name, { length: 16 })}</Tag.Label>
+                            </Tag.Root>
+                          );
+                        }}
+                      />
+                    </Flex>
                   </Flex>
-                </Flex>
+                )}
               </HoverCard.Content>
             </HoverCard.Positioner>
           </Portal>
