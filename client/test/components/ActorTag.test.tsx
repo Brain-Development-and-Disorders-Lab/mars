@@ -109,7 +109,7 @@ describe("ActorTag Component", () => {
 
   describe("Missing Data", () => {
     it("handles missing orcid", () => {
-      renderActorTag({ orcid: "" });
+      renderActorTag({ identifier: "" });
       expect(screen.getByText("Test User")).toBeTruthy();
     });
 

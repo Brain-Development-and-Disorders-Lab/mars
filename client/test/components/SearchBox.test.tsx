@@ -1,3 +1,5 @@
+import React from "react";
+
 // Testing imports
 import { vi } from "vitest";
 import { InMemoryCache } from "@apollo/client";
