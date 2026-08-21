@@ -182,7 +182,7 @@ const columnPickerSelectComponents = makeStyledSelectComponents<SelectOption>({
   optionHeight: "6",
   optionPadding: "0.5",
   controlPaddingLeft: "1",
-  controlHasBorder: true,
+  controlHasBorder: false, // hover border clips against DataTable's fixed 34px cell height
   valueContainerHeight: "34px",
 });
 

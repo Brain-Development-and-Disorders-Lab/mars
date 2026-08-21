@@ -33,6 +33,9 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
+
 // Variables
 import { STYLES } from "@variables";
 
@@ -47,6 +50,8 @@ const SUGGEST_TEMPLATE = gql`
  * Handles template selection, AI-powered template suggestions, and optional "Save as Template".
  */
 const AddAttributeDialog = (props: AddAttributeDialogProps) => {
+  const { globalPermissions } = usePermissions();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [values, setValues] = useState<IValue[]>([]);
@@ -81,7 +86,7 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
 
   // Run AI suggestion when the dialog opens, if templates are available
   useEffect(() => {
-    if (!props.open || props.templates.length === 0) return;
+    if (!globalPermissions.features.ai || !props.open || props.templates.length === 0) return;
 
     setSuggestedTemplateId(undefined);
     setIsSuggestingTemplate(true);
@@ -209,34 +214,40 @@ const AddAttributeDialog = (props: AddAttributeDialogProps) => {
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Use Template ({templatesCollection.items.length} available)
                       </Text>
-                      {isSuggestingTemplate && (
+                      {globalPermissions.features.ai && (
                         <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
-                          <Text fontSize={"xs"} color={"purple.300"}>
-                            Suggesting...
-                          </Text>
-                        </Flex>
-                      )}
-                      {!isSuggestingTemplate && suggestedTemplateId && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
-                          <Text
-                            fontSize={"xs"}
-                            color={"purple.600"}
-                            cursor={"pointer"}
-                            _hover={{ textDecoration: "underline" }}
-                            onClick={() => applyTemplate(suggestedTemplateId)}
-                          >
-                            Suggested: {props.templates.find((t) => t._id === suggestedTemplateId)?.name}
-                          </Text>
-                        </Flex>
-                      )}
-                      {!isSuggestingTemplate && suggestedTemplateId === null && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
-                          <Text fontSize={"xs"} color={"text.faint"}>
-                            No Suggestions
-                          </Text>
+                          {isSuggestingTemplate && (
+                            <React.Fragment>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                              <Text fontSize={"xs"} color={"purple.300"}>
+                                Suggesting...
+                              </Text>
+                            </React.Fragment>
+                          )}
+
+                          {!isSuggestingTemplate && suggestedTemplateId && (
+                            <React.Fragment>
+                              <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                              <Text
+                                fontSize={"xs"}
+                                color={"purple.600"}
+                                cursor={"pointer"}
+                                _hover={{ textDecoration: "underline" }}
+                                onClick={() => applyTemplate(suggestedTemplateId)}
+                              >
+                                Suggested: {props.templates.find((t) => t._id === suggestedTemplateId)?.name}
+                              </Text>
+                            </React.Fragment>
+                          )}
+
+                          {!isSuggestingTemplate && suggestedTemplateId === null && (
+                            <React.Fragment>
+                              <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
+                              <Text fontSize={"xs"} color={"text.faint"}>
+                                No Suggestions
+                              </Text>
+                            </React.Fragment>
+                          )}
                         </Flex>
                       )}
                     </Flex>
