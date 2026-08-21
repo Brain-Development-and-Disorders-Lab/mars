@@ -54,14 +54,18 @@ export const STATIC_URL = import.meta.env.PROD ? "https://api.metadatify.com/sta
 // Key for the local storage data
 export const STORAGE_KEY = "metadatify_storage";
 
+// MIME types
+export const JSON_MIME_TYPE = "application/json";
+export const CSV_MIME_TYPE = "text/csv";
+export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 // Accepted MIME types for attachments and imports
 export const ACCEPTED_ATTACHMENTS = ["image/jpeg", "image/png", "application/pdf", "application/vnd.dna"];
-export const ACCEPTED_IMPORTS_ENTITIES = [
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "text/csv",
-  "application/json",
-];
+export const ACCEPTED_IMPORTS_ENTITIES = [XLSX_MIME_TYPE, CSV_MIME_TYPE, JSON_MIME_TYPE];
 export const ACCEPTED_IMPORTS_TEMPLATES = ["application/json"];
+
+// Number of displayed columns on spreadsheet imports
+export const MAX_DISPLAYED_COLUMNS = 10;
 
 // Default styling, canonical design tokens
 export { STYLES } from "./styles/styles";

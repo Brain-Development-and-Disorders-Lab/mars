@@ -1,5 +1,5 @@
 // Import external types
-import { BoxProps } from "@chakra-ui/react";
+import { BoxProps, ListCollection } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
@@ -174,6 +174,9 @@ export type IValueSelectData = {
   selected: string;
   options: string[];
 };
+
+// Parsed display label for an `IValue`, produced by `formatValueForDisplay`
+export type FormattedValueDisplay = { label: string; secondary?: string };
 
 export type Collaborator = {
   _id: string;
