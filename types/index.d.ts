@@ -622,6 +622,80 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
+// `DataTablePaginationNav` props
+export type DataTablePaginationNavProps = {
+  table: any;
+};
+
+// Item shape backing the `DataTablePageSizeSelect` collection
+export type DataTablePageSizeOption = { label: string; value: string };
+
+// `DataTablePageSizeSelect` props
+export type DataTablePageSizeSelectProps = {
+  table: any;
+  pageLength: string[];
+  setPageLength: (value: string[]) => void;
+  pageLengthsCollection: ListCollection<DataTablePageSizeOption>;
+};
+
+// Item shape backing the `DataTableColumnSelect` collection
+export type DataTableColumnOption = { label: string; value: string; disabled: boolean };
+
+// `DataTableColumnSelect` props
+export type DataTableColumnSelectProps = {
+  columnNamesCollection: ListCollection<DataTableColumnOption>;
+  visibleColumnsForSelect: string[];
+  alwaysVisibleColumns: string[];
+  updateColumnVisibility: (toggleableColumns: string[]) => void;
+};
+
+// `DataTableFilters` props
+export type DataTableFiltersCountProps =
+  | {
+      mode: "range";
+      label: string;
+      min: string;
+      max: string;
+      onMinChange: (value: string) => void;
+      onMaxChange: (value: string) => void;
+    }
+  | {
+      mode: "buckets";
+      label: string;
+      unitLabel: string;
+      selected: string[];
+      onChange: (ranges: string[]) => void;
+    };
+
+export type DataTableFiltersProps = {
+  entityLabel: string;
+  filtersOpen: boolean;
+  onFiltersOpenChange: (open: boolean) => void;
+  activeFilterCount: number;
+
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (value: string) => void;
+  onEndDateChange: (value: string) => void;
+
+  owners: string[];
+  selectedOwners: string[];
+  onOwnersChange: (owners: string[]) => void;
+  workspace?: string;
+  isPublic?: boolean;
+
+  countFilter?: DataTableFiltersCountProps;
+  extraCheckbox?: {
+    label: string;
+    checkboxLabel: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  };
+
+  onApply: () => void;
+  onReset: () => void;
+};
+
 // `PreviewDialog` props
 export type PreviewDialogProps = {
   attachment: IGenericItem;
@@ -634,6 +708,77 @@ export type PreviewDialogProps = {
 export type ImportDialogProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
+};
+
+// `UploadStep` props, the `ImportDialog` step used to select the import type and upload a file
+export type UploadStepProps = {
+  importType: "entities" | "template" | undefined;
+  isTypeSelectDisabled: boolean;
+  onSelectImportType: (type: "entities" | "template") => void;
+  fileUpload: any; // `useFileUpload()` return value
+};
+
+// `EntityDetailsStep` props, the `ImportDialog` step used to configure name/description/project/owner fields
+export type EntityDetailsStepProps = {
+  fileType: string;
+  columns: ColumnInfo[];
+  namePrefixField: string;
+  onNamePrefixFieldChange: (value: string) => void;
+  nameField: ColumnInfo | undefined;
+  onNameFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  nameUseCounter: boolean;
+  onNameUseCounterChange: (value: boolean) => void;
+  counter: string;
+  onCounterChange: React.Dispatch<React.SetStateAction<string>>;
+  onContinueDisabledChange: (value: boolean) => void;
+  suggestions: { name: string | null; description: string | null } | null;
+  isSuggesting: boolean;
+  descriptionField: ColumnInfo | undefined;
+  onDescriptionFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierField: ColumnInfo | undefined;
+  onIdentifierFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierFormat: string[];
+  onIdentifierFormatChange: React.Dispatch<React.SetStateAction<string[]>>;
+  projectField: string;
+  onProjectFieldChange: (value: string) => void;
+  projectsCollection: ListCollection<IGenericItem>;
+  ownerField: string;
+  getSelectComponent: (
+    key: string,
+    currentValue: ColumnInfo | undefined,
+    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
+  ) => React.ReactElement;
+};
+
+// `EntityMappingStep` props, the `ImportDialog` step used to add Attributes applied to all imported Entities
+export type EntityMappingStepProps = {
+  attributesField: AttributeModel[];
+  onAttributesFieldChange: (value: AttributeModel[]) => void;
+  addAttributeOpen: boolean;
+  onAddAttributeOpenChange: (value: boolean) => void;
+  ownerField: string;
+  templates: AttributeModel[];
+  fileType: string;
+  columns: ColumnInfo[];
+};
+
+// `AttributeNameCell` props, the "Name" column cell within `EntityMappingStep`'s attribute table
+export type AttributeNameCellProps = {
+  attribute: AttributeModel;
+  fileType: string;
+  columns: ColumnInfo[];
+  onRemove: (identifier: string) => void;
+  onUpdate: (updated: AttributeModel) => void;
+};
+
+// `EntityReviewStep` props, the final `ImportDialog` review step for an Entity import
+export type EntityReviewStepProps = {
+  reviewEntities: EntityImportReview[];
+};
+
+// `TemplateReviewStep` props, the final `ImportDialog` review step for a Template import
+export type TemplateReviewStepProps = {
+  reviewTemplates: TemplateImportReview[];
 };
 
 // `ExportDialog` props

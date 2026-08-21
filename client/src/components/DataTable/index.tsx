@@ -5,16 +5,12 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import {
   Box,
   Flex,
-  IconButton,
-  Select,
   Text,
   Checkbox,
   Menu,
   Button,
   Portal,
   createListCollection,
-  Fieldset,
-  Field,
   Input,
   ScrollArea,
 } from "@chakra-ui/react";
@@ -31,6 +27,8 @@ import {
   Table,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
+import { DataTablePaginationNav, DataTablePageSizeSelect } from "@components/DataTable/DataTablePagination";
+import DataTableColumnSelect from "@components/DataTable/DataTableColumnSelect";
 
 // Custom types
 import { DataTableProps } from "@types";
@@ -54,7 +52,7 @@ export type ColumnMeta = {
 
 const SELECT_COLUMN_WIDTH = 40;
 const DEFAULT_COLUMN_WIDTH = 200;
-const ALWAYS_VISIBLE_COLUMNS = ["_id", "name"];
+export const ALWAYS_VISIBLE_COLUMNS = ["_id", "name"];
 const NON_TOGGLEABLE_COLUMNS = [...ALWAYS_VISIBLE_COLUMNS, "select", "view"];
 
 const PAGE_SIZE_OPTIONS = [
@@ -1053,65 +1051,7 @@ const DataTable = (props: DataTableProps) => {
 
       <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
         <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>
-          {props.showPagination && (
-            <Flex direction={"row"} gap={2} align={"center"} data-testid={"data-table-pagination"}>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"first page"}
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <Icon name={"c_double_left"} />
-              </IconButton>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"previous page"}
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <Icon name={"c_left"} />
-              </IconButton>
-              {table.getPageCount() > 0 && (
-                <Flex gap={1}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    {table.getState().pagination.pageIndex + 1}
-                  </Text>
-                  <Text fontSize={"xs"}> of </Text>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    {table.getPageCount()}
-                  </Text>
-                </Flex>
-              )}
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"next page"}
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <Icon name={"c_right"} />
-              </IconButton>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"last page"}
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <Icon name={"c_double_right"} />
-              </IconButton>
-            </Flex>
-          )}
+          {props.showPagination && <DataTablePaginationNav table={table} />}
 
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
@@ -1165,111 +1105,21 @@ const DataTable = (props: DataTableProps) => {
         </Flex>
 
         {allColumnIds.length > 0 && props.showColumnSelect && showAdvancedControls && (
-          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"} justify={"center"} grow={1}>
-            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
-              Show Columns:
-            </Text>
-            <Select.Root
-              key={"select-columns"}
-              size={"xs"}
-              w={"200px"}
-              bg={"white"}
-              collection={columnNamesCollection}
-              value={visibleColumnsForSelect}
-              onValueChange={(details) => {
-                const toggleableColumns = (details.value as string[]).filter(
-                  (col) => !ALWAYS_VISIBLE_COLUMNS.includes(col),
-                );
-                updateColumnVisibility(toggleableColumns);
-              }}
-              multiple
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger rounded={"md"}>
-                  <Select.ValueText placeholder={"Visible Columns"} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {(columnNamesCollection.items || []).map((item) => {
-                      const isDisabled = ALWAYS_VISIBLE_COLUMNS.includes(item.value);
-                      return (
-                        <Select.Item
-                          item={item}
-                          key={item.value}
-                          pointerEvents={isDisabled ? "none" : "auto"}
-                          opacity={isDisabled ? 0.5 : 1}
-                          cursor={isDisabled ? "not-allowed" : "pointer"}
-                          onClick={(e) => {
-                            if (isDisabled) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }
-                          }}
-                        >
-                          {item.label}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-          </Flex>
+          <DataTableColumnSelect
+            columnNamesCollection={columnNamesCollection}
+            visibleColumnsForSelect={visibleColumnsForSelect}
+            alwaysVisibleColumns={ALWAYS_VISIBLE_COLUMNS}
+            updateColumnVisibility={updateColumnVisibility}
+          />
         )}
 
         {props.showPagination && showAdvancedControls && (
-          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
-            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
-              Show:
-            </Text>
-            <Fieldset.Root w={"fit-content"}>
-              <Fieldset.Content>
-                <Field.Root>
-                  <Select.Root
-                    key={"select-pagesize"}
-                    size={"xs"}
-                    w={"80px"}
-                    bg={"white"}
-                    collection={pageLengthsCollection}
-                    value={pageLength}
-                    onValueChange={(details) => {
-                      setPageLength(details.value);
-                      table.setPageSize(parseInt(details.value[0]));
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger rounded={"md"} data-testid={"data-table-page-size"}>
-                        <Select.ValueText placeholder={"Page Size"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {pageLengthsCollection.items.map((count) => (
-                            <Select.Item item={count} key={count.value}>
-                              {count.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
-          </Flex>
+          <DataTablePageSizeSelect
+            table={table}
+            pageLength={pageLength}
+            setPageLength={setPageLength}
+            pageLengthsCollection={pageLengthsCollection}
+          />
         )}
       </Flex>
     </Box>
