@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button, EmptyState, Flex, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
 import { AttributeTag, ValueTag } from "@components/FieldTag";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";

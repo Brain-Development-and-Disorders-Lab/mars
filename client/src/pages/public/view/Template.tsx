@@ -285,7 +285,7 @@ export const Template = () => {
                   size={"sm"}
                   color={templateArchived ? "gray.500" : STYLES.template.color.icon}
                 />
-                <Tooltip content={`${templateArchived ? "Archived: " : ""}${templateArchived}`} showArrow>
+                <Tooltip content={`${templateArchived ? "Archived: " : ""}${templateName}`} showArrow>
                   <Heading fontWeight={"semibold"} size={"sm"}>
                     {_.truncate(templateName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
                   </Heading>
