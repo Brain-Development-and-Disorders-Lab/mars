@@ -191,7 +191,7 @@ export type CollaboratorsProps = {
 
 // "Linky" component props
 export type LinkyProps = {
-  type: "entities" | "templates" | "projects";
+  type: "entities" | "templates" | "projects" | "workspaces";
   id: string;
   fallback?: string;
   color?: string;
@@ -509,7 +509,7 @@ export type IActivity = {
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
-    type: "entities" | "projects" | "templates" | "workspace";
+    type: "entities" | "projects" | "templates" | "workspaces";
     _id: string;
     name: string;
   };
