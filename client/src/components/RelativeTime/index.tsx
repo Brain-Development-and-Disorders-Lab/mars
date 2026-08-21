@@ -3,6 +3,7 @@ import React from "react";
 
 // Existing and custom components
 import { Text } from "@chakra-ui/react";
+import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { RelativeTimeProps } from "@types";
@@ -22,9 +23,11 @@ const RelativeTime = ({ value, format, fontSize, fontWeight, color }: RelativeTi
   const relative = dayjs(value).fromNow();
 
   return (
-    <Text fontSize={fontSize} fontWeight={fontWeight} color={color}>
-      {format ? format(relative) : relative}
-    </Text>
+    <Tooltip content={dayjs(value).toISOString()} showArrow>
+      <Text fontSize={fontSize} fontWeight={fontWeight} color={color}>
+        {format ? format(relative) : relative}
+      </Text>
+    </Tooltip>
   );
 };
 

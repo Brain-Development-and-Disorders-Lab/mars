@@ -102,7 +102,7 @@ const Entity = () => {
   const [name, setName] = useState("");
   const [counter, setCounter] = useState("");
   const [useCounter, setUseCounter] = useState(false);
-  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DD"));
+  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
@@ -620,7 +620,7 @@ const Entity = () => {
                 <Input
                   size={"xs"}
                   rounded={"md"}
-                  type={"date"}
+                  type={"datetime-local"}
                   bg={"white"}
                   value={created}
                   onChange={(event) => setCreated(event.target.value)}

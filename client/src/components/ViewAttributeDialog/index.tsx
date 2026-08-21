@@ -182,6 +182,7 @@ const ViewAttributeDialog = (props: ViewAttributeDialogProps) => {
                           identifier={props.attribute.owner}
                           fallback={"Unknown User"}
                           size={"sm"}
+                          workspace={props.workspace}
                           isPublic={props.isPublic}
                         />
                       </Flex>
