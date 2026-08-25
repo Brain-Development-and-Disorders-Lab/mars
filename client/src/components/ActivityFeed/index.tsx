@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { Flex, Text, Button, Avatar, Stack, EmptyState, Box } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import ActivityGraph from "@components/ActivityGraph";
 import RelativeTime from "@components/RelativeTime";
 
@@ -118,7 +118,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
               return (
                 <Flex direction={"row"} width={"100%"} gap={"2"} key={`activity-${activity._id}`} align={"center"}>
                   {activity.actor ? (
-                    <ActorTag identifier={activity.actor} fallback={"Unknown User"} size={"sm"} avatarOnly />
+                    <TagActor identifier={activity.actor} fallback={"Unknown User"} size={"sm"} avatarOnly />
                   ) : (
                     <Avatar.Root size={"xs"} colorPalette={"blue"}>
                       <Avatar.Fallback name={"Unknown"} />

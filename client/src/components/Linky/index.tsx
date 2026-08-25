@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Button, Flex, HoverCard, Portal, Separator, Skeleton, Tag, Text } from "@chakra-ui/react";
-import { EmptyTag } from "@components/FieldTag";
+import { EmptyTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";

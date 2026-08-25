@@ -120,7 +120,7 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type ViewAttributeDialogProps = {
+export type DialogViewAttributeProps = {
   // Dialog state
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -144,7 +144,7 @@ export type ViewAttributeDialogProps = {
   isPublic?: boolean;
 };
 
-export type CompareAttributeDialogProps = {
+export type DialogCompareAttributeProps = {
   // Dialog state
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -261,7 +261,7 @@ export type LinkyData = {
 };
 
 // "Actor" component props
-export type ActorTagProps = {
+export type TagActorProps = {
   identifier: string;
   fallback: string;
   size: "sm" | "md";
@@ -272,15 +272,21 @@ export type ActorTagProps = {
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
-// "VisibilityTagProps" component props
-export type VisibilityTagProps = {
+// "Visibility" component props
+export type TagVisibilityProps = {
   isPublic: boolean;
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
   disabled?: boolean; // Disable changing the visibility
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
-// "FieldTag" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
+// "Timestamp" component props
+export type TagTimestampProps = {
+  timestamp: string;
+  description?: string;
+};
+
+// "TagField" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
 export type EmptyTagProps = {
   label: string; // Noun describing the missing content, rendered as "No {label}"
   size?: "sm" | "md";
@@ -296,7 +302,7 @@ export type AttributeTagProps = {
   size?: "sm" | "md";
 };
 
-// "FieldTagList" component props, renders up to `max` `FieldTag`s followed by an "and N more" summary
+// "FieldTagList" component props, renders up to `max` `TagField`s followed by an "and N more" summary
 export type FieldTagListProps = {
   items: any[];
   max: number;
@@ -437,8 +443,8 @@ export type RelationshipsProps = {
   sourceId?: string;
 };
 
-// Utility type to specify the props of `AddRelationshipDialog`
-export type AddRelationshipDialogProps = {
+// Utility type to specify the props of `DialogAddRelationship`
+export type DialogAddRelationshipProps = {
   open: boolean;
   onClose: () => void;
   sourceId?: string;
@@ -447,7 +453,7 @@ export type AddRelationshipDialogProps = {
   onAdd: (relationships: IRelationship[]) => void;
 };
 
-export type AddAttributeDialogProps = {
+export type DialogAddAttributeProps = {
   open: boolean;
   onClose: () => void;
   owner: string;
@@ -657,13 +663,13 @@ export type CounterModel = ICounter & {
   _id: string;
 };
 
-export type CounterProps = {
+export type SelectCounterProps = {
   counter: string;
   setCounter: (value: React.SetStateAction<string>) => void;
   showCreate: boolean;
 };
 
-export type CreateCounterDialogProps = {
+export type DialogCreateCounterProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
@@ -686,14 +692,14 @@ export type IdentifierFormatModel = IIdentifierFormat & {
   _id: string;
 };
 
-export type CreateCustomIdentifierFormatDialogProps = {
+export type DialogCreateIdentifierFormatProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
 };
 
-// "IdentifierFormatSelect" component props
-export type IdentifierFormatSelectProps = {
+// "SelectIdentifierFormat" component props
+export type SelectIdentifierFormatProps = {
   format: string[];
   setFormat: (value: React.SetStateAction<string[]>) => void;
   onFormatsChange?: (formats: IdentifierFormatModel[]) => void;
@@ -753,8 +759,8 @@ export type NavigationProps = {
   workspace?: string;
 };
 
-// `AlertDialog` component
-export type AlertDialogProps = {
+// `DialogAlert` component
+export type DialogAlertProps = {
   // Ref for placement
   header: string;
   children: React.ReactElement | React.ReactElement[];
@@ -884,21 +890,21 @@ export type DataTableFiltersProps = {
   onReset: () => void;
 };
 
-// `PreviewDialog` props
-export type PreviewDialogProps = {
+// `DialogPreview` props
+export type DialogPreviewProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
   workspace?: string;
   isPublic?: boolean;
 };
 
-// `ImportDialog` props
-export type ImportDialogProps = {
+// `DialogImport` props
+export type DialogImportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `UploadStep` props, the `ImportDialog` step used to select the import type and upload a file
+// `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {
   importType: "entities" | "template" | undefined;
   isTypeSelectDisabled: boolean;
@@ -906,7 +912,7 @@ export type UploadStepProps = {
   fileUpload: any; // `useFileUpload()` return value
 };
 
-// `EntityDetailsStep` props, the `ImportDialog` step used to configure name/description/project/owner fields
+// `EntityDetailsStep` props, the `DialogImport` step used to configure name/description/project/owner fields
 export type EntityDetailsStepProps = {
   fileType: string;
   columns: ColumnInfo[];
@@ -938,7 +944,7 @@ export type EntityDetailsStepProps = {
   ) => React.ReactElement;
 };
 
-// `EntityMappingStep` props, the `ImportDialog` step used to add Attributes applied to all imported Entities
+// `EntityMappingStep` props, the `DialogImport` step used to add Attributes applied to all imported Entities
 export type EntityMappingStepProps = {
   attributesField: AttributeModel[];
   onAttributesFieldChange: (value: AttributeModel[]) => void;
@@ -959,18 +965,18 @@ export type AttributeNameCellProps = {
   onUpdate: (updated: AttributeModel) => void;
 };
 
-// `EntityReviewStep` props, the final `ImportDialog` review step for an Entity import
+// `EntityReviewStep` props, the final `DialogImport` review step for an Entity import
 export type EntityReviewStepProps = {
   reviewEntities: EntityImportReview[];
 };
 
-// `TemplateReviewStep` props, the final `ImportDialog` review step for a Template import
+// `TemplateReviewStep` props, the final `DialogImport` review step for a Template import
 export type TemplateReviewStepProps = {
   reviewTemplates: TemplateImportReview[];
 };
 
-// `ExportDialog` props
-export type ExportDialogProps = {
+// `DialogExport` props
+export type DialogExportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
   dataType: "entity" | "entities" | "project" | "template";
@@ -980,24 +986,34 @@ export type ExportDialogProps = {
   ids?: string[];
 };
 
-// `ScanDialog` props
-export type ScanDialogProps = {
+// `DialogScan` props
+export type DialogScanProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `ReportDialog` props
-export type ReportDialogProps = {
+// `DialogReport` props
+export type DialogReportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `UnsavedChangesDialog` props
-export type UnsavedChangesDialogProps = {
+// `DialogUnsavedChanges` props
+export type DialogUnsavedChangesProps = {
   blocker: Blocker;
   cancelBlockerRef: React.MutableRefObject<null>;
   onClose: () => void;
   callback: () => void;
+};
+
+// `DialogUpload` props
+export type DialogUploadProps = {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  target: string;
+  uploads: string[];
+  setUploads: React.Dispatch<React.SetStateAction<string[]>>;
+  onUploadSuccess?: () => void;
 };
 
 // `Scanner` props
@@ -1148,8 +1164,8 @@ export type SearchRuleSelectProps = {
   testId?: string;
 };
 
-// SearchSelect props
-export type SearchSelectProps = {
+// SelectSearch props
+export type SelectSearchProps = {
   id?: string;
   value: IGenericItem;
   resultType: "entity" | "project" | "institution";
@@ -1160,15 +1176,15 @@ export type SearchSelectProps = {
   isEmbedded?: boolean;
 };
 
-// MultiEntitySelect props
-export type MultiEntitySelectProps = {
+// SelectMultiEntity props
+export type SelectMultiEntityProps = {
   projectEntities: string[];
   selectedEntities: IGenericItem[];
   setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
-// `SaveDialog` props
-export type SaveDialogProps = {
+// `DialogSave` props
+export type DialogSaveProps = {
   open: boolean;
   onOpenChange: (details: { open: boolean }) => void;
   onDone: () => void;
@@ -1315,7 +1331,7 @@ export type UserCollatedPermissions = {
 };
 
 // Permissions Dialog props
-export type PermissionsDialogProps = {
+export type DialogPermissionsProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   user: string;

@@ -3,9 +3,9 @@ import React, { useState } from "react";
 // Existing and custom components
 import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import DataTable, { ColumnMeta } from "@components/DataTable";
-import { EmptyTag } from "@components/FieldTag";
+import { EmptyTag } from "@components/TagField";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
@@ -24,7 +24,7 @@ import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
-import PermissionsDialog from "@components/PermissionsDialog";
+import DialogPermissions from "@components/DialogPermissions";
 
 const GET_ADMIN_DATA = gql`
   query GetAdminData {
@@ -123,7 +123,7 @@ const Admin = () => {
     onCompleted: () => refetch(),
   });
 
-  // `PermissionsDialog` state
+  // `DialogPermissions` state
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
   const [permissionsDialogUser, setPermissionsDialogUser] = useState("");
 
@@ -278,7 +278,7 @@ const Admin = () => {
       meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("owner", {
-      cell: (info) => <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,
+      cell: (info) => <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,
       header: "Owner",
       meta: { minWidth: 160 } as ColumnMeta,
     }),
@@ -313,7 +313,7 @@ const Admin = () => {
 
   return (
     <Content isError={!!error} isLoaded={!loading}>
-      <PermissionsDialog
+      <DialogPermissions
         open={permissionsDialogOpen}
         setOpen={setPermissionsDialogOpen}
         user={permissionsDialogUser}

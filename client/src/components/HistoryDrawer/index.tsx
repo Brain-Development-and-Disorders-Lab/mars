@@ -18,8 +18,8 @@ import {
   Text,
   Timeline,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
-import { AttributeTag, EmptyTag, ValueTag } from "@components/FieldTag";
+import TagActor from "@components/TagActor";
+import { AttributeTag, EmptyTag, ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -461,7 +461,7 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                                     <Text fontSize={"xs"} fontWeight={"semibold"}>
                                       Author:
                                     </Text>
-                                    <ActorTag identifier={version.author} fallback={"Unknown User"} size={"sm"} />
+                                    <TagActor identifier={version.author} fallback={"Unknown User"} size={"sm"} />
                                   </Flex>
 
                                   <Flex direction={"column"} gap={"0.5"}>

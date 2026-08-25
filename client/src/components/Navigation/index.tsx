@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import ImportDialog from "@components/ImportDialog";
-import ScanDialog from "@components/ScanDialog";
-import ReportDialog from "@components/ReportDialog";
+import DialogImport from "@components/DialogImport";
+import DialogScan from "@components/DialogScan";
+import DialogReport from "@components/DialogReport";
 import Tooltip from "@components/Tooltip";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
@@ -557,14 +557,14 @@ const Navigation = (props: NavigationProps) => {
         {!props.isPublic && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
       </Flex>
 
-      {/* `ImportDialog` component */}
-      <ImportDialog open={importOpen} setOpen={setImportOpen} />
+      {/* `DialogImport` component */}
+      <DialogImport open={importOpen} setOpen={setImportOpen} />
 
-      {/* `ScanDialog` component */}
-      <ScanDialog open={scanOpen} setOpen={setScanOpen} />
+      {/* `DialogScan` component */}
+      <DialogScan open={scanOpen} setOpen={setScanOpen} />
 
-      {/* `ReportDialog` component */}
-      <ReportDialog open={reportOpen} setOpen={setReportOpen} />
+      {/* `DialogReport` component */}
+      <DialogReport open={reportOpen} setOpen={setReportOpen} />
     </Flex>
   );
 };

@@ -432,7 +432,7 @@ export const clickButtonWhenEnabled = async (page: Page, selector: string, timeo
 };
 
 /**
- * Utility function to open the `AddAttributeDialog` component
+ * Utility function to open the `DialogAddAttribute` component
  * @param page
  */
 export const openAddAttributeDialog = async (page: Page): Promise<void> => {

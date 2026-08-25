@@ -6,9 +6,9 @@ import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import { AttributeTag } from "@components/FieldTag";
+import { AttributeTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Linky from "@components/Linky";
 import PageHeader from "@components/PageHeader";
 import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
@@ -486,7 +486,7 @@ const Dashboard = () => {
         <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} p={"0"}>
           <PageHeader icon={"dashboard"} title={"Dashboard"} subtitle={workspaceName ?? ""} loading={loading} />
 
-          <ActorTag identifier={user} fallback={"Unknown User"} size={"md"} />
+          <TagActor identifier={user} fallback={"Unknown User"} size={"md"} />
         </Flex>
 
         {/* Quick Search */}

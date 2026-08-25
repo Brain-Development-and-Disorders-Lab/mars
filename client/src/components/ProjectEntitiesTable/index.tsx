@@ -4,7 +4,7 @@ import React from "react";
 // Existing and custom components
 import { Button, EmptyState, Flex, SkeletonText, Text } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import { AttributeTag, EmptyTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";

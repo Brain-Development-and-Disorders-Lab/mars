@@ -13,13 +13,13 @@ import {
   Field,
   EmptyState,
 } from "@chakra-ui/react";
-import SearchSelect from "@components/SearchSelect";
+import SelectSearch from "@components/SelectSearch";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import DataTable, { ColumnMeta } from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -838,7 +838,7 @@ const User = () => {
                 >
                   Avatar
                 </Text>
-                <ActorTag
+                <TagActor
                   key={staticName}
                   identifier={`${userModel._id}`}
                   fallback={"Unknown User"}
@@ -1000,7 +1000,7 @@ const User = () => {
                       <Field.RequiredIndicator />
                     </Field.Label>
                     <Box mt={"0.5"} minW={"sm"}>
-                      <SearchSelect
+                      <SelectSearch
                         resultType={"institution"}
                         defaultOption={"Affiliation Not Shown"}
                         value={{ _id: userAffiliation, name: userAffiliation }}

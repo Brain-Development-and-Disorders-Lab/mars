@@ -15,18 +15,18 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import ExportDialog from "@components/ExportDialog";
+import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";
 import Icon from "@components/Icon";
-import AlertDialog from "@components/AlertDialog";
-import MultiEntitySelect from "@components/MultiEntitySelect";
+import DialogAlert from "@components/DialogAlert";
+import SelectMultiEntity from "@components/SelectMultiEntity";
 import ProjectBreadcrumb from "@components/ProjectBreadcrumb";
 import ProjectOverviewCard from "@components/ProjectOverviewCard";
 import ProjectEntitiesTable from "@components/ProjectEntitiesTable";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
-import SaveDialog from "@components/SaveDialog";
+import DialogSave from "@components/DialogSave";
 
 // Existing and custom types
 import { ProjectHistory, ProjectModel, IGenericItem, ResponseData, EntityModel, WorkspaceModel } from "@types";
@@ -736,7 +736,7 @@ const Project = () => {
             />
 
             {/* Archive Dialog */}
-            <AlertDialog
+            <DialogAlert
               header={"Archive Project"}
               leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
@@ -747,7 +747,7 @@ const Project = () => {
                 Are you sure you want to archive this Project? No Entities will be deleted. This Project will be moved
                 to the Workspace archive.
               </Text>
-            </AlertDialog>
+            </DialogAlert>
           </Flex>
         </Flex>
 
@@ -821,7 +821,7 @@ const Project = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"2"} gap={"2"}>
-                <MultiEntitySelect
+                <SelectMultiEntity
                   projectEntities={projectEntities}
                   selectedEntities={selectedEntities}
                   setSelectedEntities={setSelectedEntities}
@@ -860,10 +860,10 @@ const Project = () => {
         </Dialog.Root>
 
         {/* Export dialog, individual project */}
-        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"project"} id={id} />
+        <DialogExport open={exportOpen} setOpen={setExportOpen} dataType={"project"} id={id} />
 
         {/* Export dialog, project entities */}
-        <ExportDialog
+        <DialogExport
           open={exportEntitiesOpen}
           setOpen={setExportEntitiesOpen}
           dataType={"entities"}
@@ -871,7 +871,7 @@ const Project = () => {
         />
 
         {/* Save message dialog */}
-        <SaveDialog
+        <DialogSave
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -883,7 +883,7 @@ const Project = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesDialog
+        <DialogUnsavedChanges
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}

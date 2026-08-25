@@ -3,8 +3,8 @@ import React from "react";
 import { Flex, Text } from "@chakra-ui/react";
 
 // Custom components
-import ActorTag from "@components/ActorTag";
-import { EmptyTag } from "@components/FieldTag";
+import TagActor from "@components/TagActor";
+import { EmptyTag } from "@components/TagField";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
@@ -28,7 +28,7 @@ export const CreatedCell = (props: CreatedCellProps) => (
 );
 
 export const OwnerCell = (props: OwnerCellProps) => (
-  <ActorTag
+  <TagActor
     identifier={props.value}
     fallback={"Unknown User"}
     size={"sm"}

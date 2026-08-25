@@ -3,12 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Flex, Spacer, Input, Button, Text, Heading, Fieldset, Field, useDisclosure, Textarea } from "@chakra-ui/react";
 
 // Custom components
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
 import Collaborators from "@components/Collaborators";
 import { Content } from "@components/Container";
 import { toaster } from "@components/Toast";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -266,7 +266,7 @@ const CreateWorkspace = () => {
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Owner
                 </Text>
-                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                <TagActor identifier={owner} fallback={"Unknown User"} size={"sm"} />
               </Flex>
             </Flex>
 
@@ -338,7 +338,7 @@ const CreateWorkspace = () => {
       </Flex>
 
       {/* Blocker warning message */}
-      <UnsavedChangesDialog
+      <DialogUnsavedChanges
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

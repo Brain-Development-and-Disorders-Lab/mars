@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { EmptyTag, ValueTag } from "@components/FieldTag";
+import { EmptyTag, ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import ViewAttributeDialog from "@components/ViewAttributeDialog";
+import DialogViewAttribute from "@components/DialogViewAttribute";
 
 // Existing and custom types
 import { AttributeModel, EntityAttributeNameCellProps, EntityAttributesTableProps } from "@types";
@@ -76,7 +76,7 @@ const EntityAttributeNameCell = ({
             <Icon name={"delete"} size={"xs"} />
           </Button>
         )}
-        <ViewAttributeDialog
+        <DialogViewAttribute
           open={viewAttributeDialogOpen}
           setOpen={setViewAttributeDialogOpen}
           editing={editing}

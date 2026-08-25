@@ -6,7 +6,7 @@ import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import DataTableFilters from "@components/DataTable/DataTableFilters";
 import { Content } from "@components/Container";
-import { ValueTag } from "@components/FieldTag";
+import { ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";

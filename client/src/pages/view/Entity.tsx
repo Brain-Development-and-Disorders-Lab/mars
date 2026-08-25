@@ -21,16 +21,16 @@ import {
   ListCollection,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import ExportDialog from "@components/ExportDialog";
+import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";
 import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import UploadDialog from "@components/UploadDialog";
-import AddAttributeDialog from "@components/AddAttributeDialog";
-import SearchSelect from "@components/SearchSelect";
-import AlertDialog from "@components/AlertDialog";
-import AddRelationshipDialog from "@components/AddRelationshipDialog";
+import DialogUpload from "@components/DialogUpload";
+import DialogAddAttribute from "@components/DialogAddAttribute";
+import SelectSearch from "@components/SelectSearch";
+import DialogAlert from "@components/DialogAlert";
+import DialogAddRelationship from "@components/DialogAddRelationship";
 import Relationships from "@components/Relationships";
 import EntityBreadcrumb from "@components/EntityBreadcrumb";
 import EntityOverviewCard from "@components/EntityOverviewCard";
@@ -38,9 +38,9 @@ import EntityAttributesTable from "@components/EntityAttributesTable";
 import EntityProjectsTable from "@components/EntityProjectsTable";
 import EntityAttachmentsTable from "@components/EntityAttachmentsTable";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
-import SaveDialog from "@components/SaveDialog";
+import DialogSave from "@components/DialogSave";
 
 // Existing and custom types
 import {
@@ -1138,7 +1138,7 @@ const Entity = () => {
             />
 
             {/* Archive Dialog */}
-            <AlertDialog
+            <DialogAlert
               header={"Archive Entity"}
               leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
@@ -1154,7 +1154,7 @@ const Entity = () => {
                   will not be visible. It can be restored at any time.
                 </Text>
               </Flex>
-            </AlertDialog>
+            </DialogAlert>
           </Flex>
         </Flex>
 
@@ -1263,7 +1263,7 @@ const Entity = () => {
         </Flex>
 
         {/* Add Attributes dialog */}
-        <AddAttributeDialog
+        <DialogAddAttribute
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
           owner={user}
@@ -1299,7 +1299,7 @@ const Entity = () => {
                 </Dialog.Header>
                 <Dialog.Body p={"2"} gap={"2"}>
                   <Flex direction={"column"} gap={"2"}>
-                    <SearchSelect
+                    <SelectSearch
                       id={"projectSearchSelect"}
                       resultType={"project"}
                       value={selectedProject}
@@ -1412,7 +1412,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Add Relationships dialog */}
-        <AddRelationshipDialog
+        <DialogAddRelationship
           open={addRelationshipsOpen}
           onClose={() => setAddRelationshipsOpen(false)}
           sourceId={entity._id}
@@ -1422,7 +1422,7 @@ const Entity = () => {
         />
 
         {/* Upload dialog */}
-        <UploadDialog
+        <DialogUpload
           open={uploadOpen}
           setOpen={setUploadOpen}
           uploads={toUploadAttachments}
@@ -1436,7 +1436,7 @@ const Entity = () => {
         />
 
         {/* Export dialog */}
-        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
+        <DialogExport open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
 
         {/* Graph dialog */}
         <Dialog.Root
@@ -1669,7 +1669,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Save message dialog */}
-        <SaveDialog
+        <DialogSave
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -1682,7 +1682,7 @@ const Entity = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesDialog
+        <DialogUnsavedChanges
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}

@@ -20,18 +20,18 @@ import {
 } from "@chakra-ui/react";
 
 // Custom components
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Collaborators from "@components/Collaborators";
-import CreateCounterDialog from "@components/CreateCounterDialog";
-import CreateIdentifierFormatDialog from "@components/CreateIdentifierFormatDialog";
+import DialogCreateCounter from "@components/DialogCreateCounter";
+import DialogCreateIdentifierFormat from "@components/DialogCreateIdentifierFormat";
 import Icon from "@components/Icon";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import TimestampTag from "@components/TimestampTag";
+import TagTimestamp from "@components/TagTimestamp";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
-import VisibilityTag from "@components/VisibilityTag";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
+import TagVisibility from "@components/TagVisibility";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
@@ -1023,14 +1023,14 @@ const Workspace = () => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Owner
                   </Text>
-                  <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                  <TagActor identifier={owner} fallback={"Unknown User"} size={"sm"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                     Timestamp
                   </Text>
-                  <TimestampTag timestamp={created} description={"Created"} />
+                  <TagTimestamp timestamp={created} description={"Created"} />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
@@ -1042,7 +1042,7 @@ const Workspace = () => {
                     disabled={currentUser === owner}
                     showArrow
                   >
-                    <VisibilityTag
+                    <TagVisibility
                       isPublic={isPublic}
                       setIsPublic={setIsPublic}
                       disabled={!editing || currentUser !== owner}
@@ -1541,21 +1541,21 @@ const Workspace = () => {
       </Dialog.Root>
 
       {/* Create Counter dialog */}
-      <CreateCounterDialog
+      <DialogCreateCounter
         open={openCreateCounter}
         onClose={() => setOpenCreateCounter(false)}
         onCreated={handleCounterCreated}
       />
 
       {/* Create identifier format dialog */}
-      <CreateIdentifierFormatDialog
+      <DialogCreateIdentifierFormat
         open={openCreateIdentifierFormat}
         onClose={() => setOpenCreateIdentifierFormat(false)}
         onCreated={handleIdentifierFormatCreated}
       />
 
       {/* Blocker warning message */}
-      <UnsavedChangesDialog
+      <DialogUnsavedChanges
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

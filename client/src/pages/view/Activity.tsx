@@ -17,7 +17,7 @@ import {
   SkeletonText,
   Separator,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
@@ -250,7 +250,7 @@ const Activity = () => {
             </Text>
           );
         }
-        return <ActorTag identifier={actor} fallback={"Unknown User"} size={"sm"} inline />;
+        return <TagActor identifier={actor} fallback={"Unknown User"} size={"sm"} inline />;
       },
       header: "User",
       enableHiding: true,

@@ -3,7 +3,7 @@ import React from "react";
 
 // Components
 import { Button, Checkbox, Collapsible, Field, Flex, Input, Separator, Text } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
 
 // Existing and custom types
@@ -136,7 +136,7 @@ const DataTableFilters = ({
                       <Checkbox.HiddenInput />
                       <Checkbox.Control />
                       <Checkbox.Label fontSize={"xs"}>
-                        <ActorTag
+                        <TagActor
                           identifier={owner}
                           fallback={"Unknown User"}
                           size={"sm"}

@@ -19,8 +19,8 @@ vi.mock("../../src/hooks/useBreakpoint", () => ({
   }),
 }));
 
-// Mock SearchSelect and Linky, both of which depend on GraphQL queries unrelated to Values' own behavior
-vi.mock("../../src/components/SearchSelect", () => ({
+// Mock SelectSearch and Linky, both of which depend on GraphQL queries unrelated to Values' own behavior
+vi.mock("../../src/components/SelectSearch", () => ({
   default: (props: {
     value: { _id: string; name: string };
     onChange: (value: { _id: string; name: string }) => void;
@@ -159,7 +159,7 @@ describe("Values Component", () => {
   });
 
   describe("Entity Type", () => {
-    it("renders SearchSelect when editable", async () => {
+    it("renders SelectSearch when editable", async () => {
       const values = [createValue({ type: "entity", data: JSON.stringify({ _id: "", name: "" }) })];
       renderValues({ values });
 

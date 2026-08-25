@@ -6,7 +6,7 @@ import { Button, EmptyState, Flex, IconButton, Tag, Text } from "@chakra-ui/reac
 import { Cell, createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import PreviewDialog from "@components/PreviewDialog";
+import DialogPreview from "@components/DialogPreview";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
@@ -44,7 +44,7 @@ const EntityAttachmentsTable = ({
               </Text>
             </Tooltip>
             <Flex gap={"1"} align={"center"}>
-              <PreviewDialog
+              <DialogPreview
                 attachment={{
                   _id: attachmentId,
                   name: attachmentName,

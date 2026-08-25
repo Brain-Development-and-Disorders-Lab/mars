@@ -15,7 +15,7 @@ import {
   Box,
   AbsoluteCenter,
 } from "@chakra-ui/react";
-import SearchSelect from "@components/SearchSelect";
+import SelectSearch from "@components/SelectSearch";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -392,7 +392,7 @@ const Signup = () => {
                     Affiliation
                     <Field.RequiredIndicator />
                   </Field.Label>
-                  <SearchSelect
+                  <SelectSearch
                     resultType="institution"
                     value={{ _id: affiliation, name: affiliation }}
                     onChange={(item) => setAffiliation(item.name)}

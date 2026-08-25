@@ -38,7 +38,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import SearchSelect from "@components/SearchSelect";
+import SelectSearch from "@components/SelectSearch";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
@@ -826,7 +826,7 @@ const renderTypedInput = (params: {
           _focus={{ bg: "white", borderColor: "blue.300" }}
           _hover={{ border: "1px solid", borderColor: "blue.200", boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)" }}
         >
-          <SearchSelect
+          <SelectSearch
             placeholder={"Select Entity"}
             resultType={"entity"}
             value={JSON.parse(data) || { _id: "", name: "" }}

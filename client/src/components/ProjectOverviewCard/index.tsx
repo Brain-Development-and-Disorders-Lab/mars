@@ -3,9 +3,9 @@ import React from "react";
 
 // Existing and custom components
 import { Flex, Input, Text, Textarea } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
-import TimestampTag from "@components/TimestampTag";
-import VisibilityTag from "@components/VisibilityTag";
+import TagActor from "@components/TagActor";
+import TagTimestamp from "@components/TagTimestamp";
+import TagVisibility from "@components/TagVisibility";
 
 // Existing and custom types
 import { ProjectOverviewCardProps } from "@types";
@@ -66,7 +66,7 @@ const ProjectOverviewCard = ({
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Owner
           </Text>
-          <ActorTag
+          <TagActor
             identifier={owner}
             fallback={"Unknown User"}
             size={"sm"}
@@ -79,14 +79,14 @@ const ProjectOverviewCard = ({
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Timestamp
           </Text>
-          <TimestampTag timestamp={created} description={"Created"} />
+          <TagTimestamp timestamp={created} description={"Created"} />
         </Flex>
 
         <Flex direction={"column"} gap={"2"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Visibility
           </Text>
-          <VisibilityTag isPublic={visibilityIsPublic} isInherited />
+          <TagVisibility isPublic={visibilityIsPublic} isInherited />
         </Flex>
       </Flex>
     </Flex>

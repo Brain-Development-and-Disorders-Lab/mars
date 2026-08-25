@@ -16,10 +16,10 @@ import {
   InputGroup,
   SkeletonText,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import { AttributeTag, EmptyTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
@@ -421,7 +421,7 @@ const Search = () => {
       }),
       searchResultColumnHelper.accessor("owner", {
         cell: (info) => {
-          return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+          return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
         },
         header: "Owner",
       }),

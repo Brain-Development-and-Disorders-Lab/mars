@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import { Box, Flex, Text, Button, Tag, EmptyState } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import ExportDialog from "@components/ExportDialog";
-import { AttributeTag } from "@components/FieldTag";
+import DialogExport from "@components/DialogExport";
+import { AttributeTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";
@@ -413,7 +413,7 @@ export const Entities = () => {
         </Flex>
       </Flex>
 
-      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
+      <DialogExport open={exportOpen} setOpen={setExportOpen} dataType={"entities"} ids={exportIds} />
     </Content>
   );
 };

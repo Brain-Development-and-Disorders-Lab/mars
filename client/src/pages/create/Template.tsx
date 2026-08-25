@@ -15,12 +15,12 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import Values from "@components/Values";
 
 // Existing and custom types
@@ -198,7 +198,7 @@ const Template = () => {
                 Owner
               </Field.Label>
               <Flex>
-                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                <TagActor identifier={owner} fallback={"Unknown User"} size={"sm"} />
               </Flex>
             </Field.Root>
 
@@ -501,7 +501,7 @@ const Template = () => {
         </Tooltip>
       </Flex>
 
-      <UnsavedChangesDialog
+      <DialogUnsavedChanges
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

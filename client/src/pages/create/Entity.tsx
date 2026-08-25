@@ -21,20 +21,20 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import CounterSelect from "@components/CounterSelect";
-import IdentifierFormatSelect from "@components/IdentifierFormatSelect";
+import SelectCounter from "@components/SelectCounter";
+import SelectIdentifierFormat from "@components/SelectIdentifierFormat";
 import DataTable from "@components/DataTable";
-import { EmptyTag, ValueTag } from "@components/FieldTag";
+import { EmptyTag, ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import ActorTag from "@components/ActorTag";
-import AddAttributeDialog from "@components/AddAttributeDialog";
+import TagActor from "@components/TagActor";
+import DialogAddAttribute from "@components/DialogAddAttribute";
 import Relationships from "@components/Relationships";
-import AddRelationshipsDialog from "@components/AddRelationshipDialog";
-import ViewAttributeDialog from "@components/ViewAttributeDialog";
+import AddRelationshipsDialog from "@components/DialogAddRelationship";
+import DialogViewAttribute from "@components/DialogViewAttribute";
 import Linky from "@components/Linky";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
@@ -408,7 +408,7 @@ const Entity = () => {
                 Delete
                 <Icon name={"delete"} size={"xs"} />
               </Button>
-              <ViewAttributeDialog
+              <DialogViewAttribute
                 open={viewAttributeDialogOpen}
                 setOpen={setViewAttributeDialogOpen}
                 attribute={attribute}
@@ -514,7 +514,7 @@ const Entity = () => {
                 </Field.Label>
                 <Flex gap={"2"} w={"100%"}>
                   {useCounter ? (
-                    <CounterSelect counter={counter} setCounter={setCounter} showCreate />
+                    <SelectCounter counter={counter} setCounter={setCounter} showCreate />
                   ) : (
                     <Input
                       data-testid={"create-entity-name"}
@@ -596,7 +596,7 @@ const Entity = () => {
                       <Field.Label fontSize={"xs"} ml={"0.5"}>
                         Format
                       </Field.Label>
-                      <IdentifierFormatSelect
+                      <SelectIdentifierFormat
                         format={identifierFormat}
                         setFormat={setIdentifierFormat}
                         onFormatsChange={setCustomIdentifierFormats}
@@ -637,7 +637,7 @@ const Entity = () => {
                 >
                   Owner
                 </Field.Label>
-                <ActorTag size={"md"} identifier={owner} fallback={"Unknown User"} />
+                <TagActor size={"md"} identifier={owner} fallback={"Unknown User"} />
               </Field.Root>
             </Flex>
 
@@ -813,7 +813,7 @@ const Entity = () => {
               )}
             </Flex>
 
-            <AddAttributeDialog
+            <DialogAddAttribute
               open={addAttributesOpen}
               onClose={() => setAddAttributesOpen(false)}
               owner={owner}
@@ -1061,7 +1061,7 @@ const Entity = () => {
         </Tooltip>
       </Flex>
 
-      <UnsavedChangesDialog
+      <DialogUnsavedChanges
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

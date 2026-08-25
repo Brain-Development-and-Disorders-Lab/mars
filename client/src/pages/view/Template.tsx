@@ -7,14 +7,14 @@ import { Content } from "@components/Container";
 import HistoryDrawer from "@components/HistoryDrawer";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import AlertDialog from "@components/AlertDialog";
+import DialogAlert from "@components/DialogAlert";
 import TemplateBreadcrumb from "@components/TemplateBreadcrumb";
 import TemplateOverviewCard from "@components/TemplateOverviewCard";
 import TemplateUsageTable from "@components/TemplateUsageTable";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
-import ExportDialog from "@components/ExportDialog";
-import SaveDialog from "@components/SaveDialog";
+import DialogExport from "@components/DialogExport";
+import DialogSave from "@components/DialogSave";
 
 // Existing and custom types
 import { AttributeHistory, AttributeModel, AttributeUsage, IValue, ResponseData, WorkspaceModel } from "@types";
@@ -588,7 +588,7 @@ const Template = () => {
             />
 
             {/* Archive Dialog */}
-            <AlertDialog
+            <DialogAlert
               header={"Archive Template"}
               leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
@@ -598,7 +598,7 @@ const Template = () => {
               <Text fontSize={"xs"}>
                 Are you sure you want to archive this Template? It can be restored any time from the Workspace archives.
               </Text>
-            </AlertDialog>
+            </DialogAlert>
           </Flex>
         </Flex>
 
@@ -652,10 +652,10 @@ const Template = () => {
         </Flex>
       </Flex>
 
-      <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
+      <DialogExport open={exportOpen} setOpen={setExportOpen} dataType={"template"} id={id} />
 
       {/* Save message dialog */}
-      <SaveDialog
+      <DialogSave
         open={saveMessageOpen}
         onOpenChange={(details) => setSaveMessageOpen(details.open)}
         onDone={handleSaveMessageDoneClick}
