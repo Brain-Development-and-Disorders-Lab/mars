@@ -379,7 +379,6 @@ export class AI {
         },
       ],
       max_completion_tokens: 64,
-      temperature: 0,
     });
 
     const content = response.choices[0]?.message?.content?.trim();
@@ -448,7 +447,6 @@ export class AI {
         },
       ],
       max_completion_tokens: 64,
-      temperature: 0,
     });
 
     const content = response.choices[0]?.message?.content?.trim();
@@ -487,7 +485,6 @@ export class AI {
         { role: "user", content: query },
       ],
       max_completion_tokens: 512,
-      temperature: 0,
     });
 
     const content = response.choices[0]?.message?.content?.trim();

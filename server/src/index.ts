@@ -61,6 +61,18 @@ export { PostHogClient } from "@lib/posthog";
 const port = process.env.PORT || 8000;
 const app = express();
 
+// Azure App Service middleware to strip `x-forwarded-for` port
+app.use((req, _res, next) => {
+  const xForwardedFor = req.headers["x-forwarded-for"];
+  if (typeof xForwardedFor === "string") {
+    req.headers["x-forwarded-for"] = xForwardedFor
+      .split(",")
+      .map((hop) => hop.trim().replace(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d+$/, "$1"))
+      .join(", ");
+  }
+  next();
+});
+
 // Configure all HTTP logging
 app.use(
   pinoHttp({
@@ -75,12 +87,7 @@ app.use(
       return "info";
     },
     serializers: {
-      req: (req) => ({
-        method: req.method,
-        url: req.url,
-        remoteAddress: req.remoteAddress,
-        xForwardedFor: req.headers["x-forwarded-for"], // TEMP: diagnose better-auth IP resolution
-      }),
+      req: (req) => ({ method: req.method, url: req.url, remoteAddress: req.remoteAddress }),
       res: (res) => ({ statusCode: res.statusCode }),
     },
   }),
