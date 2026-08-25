@@ -378,7 +378,7 @@ export class AI {
           content: `From these CSV column headers, pick which one best represents an entity name (title/identifier) and which best represents a description. Return ONLY a JSON object — use the exact column string or JSON null:\n{"name":"exact_column_or_null","description":"exact_column_or_null"}\nColumns: ${columns.join(", ")}`,
         },
       ],
-      max_tokens: 64,
+      max_completion_tokens: 64,
       temperature: 0,
     });
 
@@ -447,7 +447,7 @@ export class AI {
           }),
         },
       ],
-      max_tokens: 64,
+      max_completion_tokens: 64,
       temperature: 0,
     });
 
@@ -486,7 +486,7 @@ export class AI {
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: query },
       ],
-      max_tokens: 512,
+      max_completion_tokens: 512,
       temperature: 0,
     });
 
