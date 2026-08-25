@@ -1,3 +1,5 @@
+import React from "react";
+
 // Testing imports
 import { screen, fireEvent } from "@testing-library/react";
 import { render } from "../render";

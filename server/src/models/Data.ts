@@ -276,10 +276,10 @@ export class Data {
   /**
    * Infers the most specific IValueType for a column by sampling its non-empty values.
    * Checked in order: native Date objects, numeric strings, ISO date strings, URLs, then text.
-   * @param {any[]} values Raw cell values for the column across all sampled rows
+   * @param {unknown[]} values Raw cell values for the column across all sampled rows
    * @return {IValueType}
    */
-  private static inferColumnType = (values: any[]): IValueType => {
+  private static inferColumnType = (values: unknown[]): IValueType => {
     const nonEmpty = values.filter((v) => v !== "" && v !== undefined && v !== null);
     if (nonEmpty.length === 0) return "text";
 

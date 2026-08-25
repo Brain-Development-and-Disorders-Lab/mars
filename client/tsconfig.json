@@ -1,6 +1,6 @@
 {
-  "include": ["src/**/*", ".storybook/**/*", "vite.config.ts"],
-  "exclude": ["node_modules", "test", "../server", "../website"],
+  "include": ["src/**/*", "test/**/*", ".storybook/**/*", "vite.config.ts"],
+  "exclude": ["node_modules", "../server", "../website"],
   "compilerOptions": {
     "module": "ESNext",
     "target": "ESNext",
@@ -31,6 +31,6 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["@testing-library/jest-dom", "node", "vitest/globals", "vite/client"]
+    "types": ["@testing-library/jest-dom", "vitest/globals", "vite/client"]
   }
 }

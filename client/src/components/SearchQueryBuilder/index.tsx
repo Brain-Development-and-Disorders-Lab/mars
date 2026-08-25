@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 // Existing and custom components
 import { Button, Flex, Input, type ListCollection, Portal, Select, Text, createListCollection } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import SearchSelect from "@components/SearchSelect";
+import SelectSearch from "@components/SelectSearch";
 
 // Custom types
 import {
@@ -198,7 +198,7 @@ const RuleRow = React.memo(
           )}
 
           {rule.field === "projects" && (
-            <SearchSelect
+            <SelectSearch
               value={localSelected}
               resultType={"project"}
               onChange={(item: IGenericItem) => {
@@ -209,7 +209,7 @@ const RuleRow = React.memo(
           )}
 
           {rule.field === "relationships" && (
-            <SearchSelect
+            <SelectSearch
               value={localSelected}
               resultType={"entity"}
               onChange={(item: IGenericItem) => {

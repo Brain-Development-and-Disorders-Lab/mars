@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Button, EmptyState, Field, Fieldset, Flex, Input, Link, Separator, Stack, Tag, Text } from "@chakra-ui/react";
 
 // Custom components
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
-import PermissionsDialog from "@components/PermissionsDialog";
+import DialogPermissions from "@components/DialogPermissions";
 import { toaster } from "@components/Toast";
 
 // Custom types
@@ -84,7 +84,7 @@ const Collaborators = (props: CollaboratorsProps) => {
 
   const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
 
-  // `PermissionsDialog` state
+  // `DialogPermissions` state
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
   const [permissionsDialogUser, setPermissionsDialogUser] = useState("");
 
@@ -237,7 +237,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                     <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
                       Collaborator
                     </Text>
-                    <ActorTag identifier={collaborator._id} fallback={"New User"} size={"sm"} />
+                    <TagActor identifier={collaborator._id} fallback={"New User"} size={"sm"} />
                     <Flex ml={"0.5"}>
                       <CollaboratorEmail userId={collaborator._id} />
                     </Flex>
@@ -311,7 +311,7 @@ const Collaborators = (props: CollaboratorsProps) => {
       </Flex>
 
       {permissionsDialogUser && (
-        <PermissionsDialog
+        <DialogPermissions
           open={permissionsDialogOpen}
           setOpen={setPermissionsDialogOpen}
           user={permissionsDialogUser}

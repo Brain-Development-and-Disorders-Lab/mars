@@ -4,6 +4,7 @@ import _ from "lodash";
 // Custom types
 import {
   Collaborator,
+  FormattedValueDisplay,
   IAttribute,
   ISelectOption,
   IValue,
@@ -24,11 +25,16 @@ import {
   ACCEPTED_IMPORTS_ENTITIES,
   ACCEPTED_IMPORTS_TEMPLATES,
   API_URL,
+  CSV_MIME_TYPE,
   STYLES,
+  XLSX_MIME_TYPE,
 } from "@variables";
 
 // URL of the public, unauthenticated Workspace endpoint for a given Workspace ID
 export const getPublicWorkspaceUrl = (workspace: string): string => `${API_URL}/public/${workspace}`;
+
+/** Returns true for CSV and XLSX file types, which share the same import flow. */
+export const isSpreadsheetFile = (type: string) => type === CSV_MIME_TYPE || type === XLSX_MIME_TYPE;
 
 export const isValueEqual = (a: IValue, b: IValue): boolean => {
   return a.name === b.name && a.type === b.type && a.data === b.data;
@@ -191,6 +197,29 @@ export const getValueTypeIconProps = (type: IValueType | undefined): { name: Ico
     default:
       return { name: "unknown", color: "red.400" };
   }
+};
+
+// Entity/select values store a JSON payload in `data`; parse it into a display-friendly label
+export const formatValueForDisplay = (value: Pick<IValue, "type" | "data">): FormattedValueDisplay => {
+  if (value.type === "entity") {
+    try {
+      return { label: JSON.parse(value.data)?.name ?? "" };
+    } catch {
+      return { label: value.data };
+    }
+  }
+  if (value.type === "select") {
+    try {
+      const parsed = JSON.parse(value.data);
+      return {
+        label: parsed?.selected ?? "",
+        secondary: Array.isArray(parsed?.options) ? `Options: ${parsed.options.join(", ")}` : undefined,
+      };
+    } catch {
+      return { label: value.data };
+    }
+  }
+  return { label: value.data };
 };
 
 export const isValidAttribute = (attribute: IAttribute) => {

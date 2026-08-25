@@ -6,6 +6,9 @@ import { render } from "../render";
 // Target component
 import Icon from "../../src/components/Icon";
 
+// Custom types
+import { IconNames } from "@types";
+
 const renderIcon = (props: React.ComponentProps<typeof Icon>) => {
   return render(<Icon {...props} />);
 };
@@ -85,7 +88,7 @@ describe("Icon Component", () => {
 
   describe("Edge Cases", () => {
     it("handles all icon types", () => {
-      const iconNames = ["search", "entity", "project", "dashboard", "add", "delete", "edit", "close"];
+      const iconNames: IconNames[] = ["search", "entity", "project", "dashboard", "add", "delete", "edit", "close"];
 
       iconNames.forEach((name) => {
         const { container } = renderIcon({ name: name });

@@ -15,14 +15,14 @@ import {
   Collapsible,
   SkeletonText,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import { AttributeTag, EmptyTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
-import { CreatedCell } from "@components/DataTableCell";
+import { CreatedCell } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -337,7 +337,7 @@ export const Search = () => {
       searchResultColumnHelper.accessor("owner", {
         cell: (info) => {
           return (
-            <ActorTag
+            <TagActor
               identifier={info.getValue()}
               fallback={"Unknown User"}
               size={"sm"}

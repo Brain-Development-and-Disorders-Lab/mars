@@ -84,11 +84,11 @@ test.describe("Template", () => {
       await page.locator("[data-testid='create-attribute-name']").fill("Measurements");
       await page.locator("[data-testid='create-attribute-description']").fill("Multiple measurement values");
 
-      await page.click("#addValueRowButton");
+      await page.click("#footerAction");
       await page.locator('input[placeholder="Enter name"]').nth(0).fill("Width");
       await page.locator('input[placeholder="Enter text"]').nth(0).fill("10cm");
 
-      await page.click("#addValueRowButton");
+      await page.click("#footerAction");
       await page.locator('input[placeholder="Enter name"]').nth(1).fill("Height");
       await page.locator('input[placeholder="Enter text"]').nth(1).fill("20cm");
 

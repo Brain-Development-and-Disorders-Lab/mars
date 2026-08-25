@@ -28,6 +28,17 @@ interface ChartDataPoint {
   count: number;
 }
 
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: { value: number; payload: ChartDataPoint }[];
+}
+
+interface ChartTickProps {
+  x?: number;
+  y?: number;
+  payload?: { value: string };
+}
+
 const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphProps) => {
   // recharts renders into SVG, where Chakra token strings don't resolve, so
   // the actual CSS values are resolved once here via useToken, keeping
@@ -69,7 +80,7 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   }, [activities]);
 
   // Custom tooltip component
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <Box
@@ -93,21 +104,19 @@ const ActivityGraph = ({ activities, title, height = "180px" }: ActivityGraphPro
   };
 
   // Custom tick component for X-axis
-  const CustomXTick = (props: any) => {
-    const { x, y, payload } = props;
+  const CustomXTick = ({ x, y, payload }: ChartTickProps) => {
     return (
       <text x={x} y={y} dy={16} textAnchor="middle" fill={chartAxis} style={{ fontSize: "12px", fontWeight: "normal" }}>
-        {payload.value}
+        {payload?.value}
       </text>
     );
   };
 
   // Custom tick component for Y-axis
-  const CustomYTick = (props: any) => {
-    const { x, y, payload } = props;
+  const CustomYTick = ({ x, y, payload }: ChartTickProps) => {
     return (
       <text x={x} y={y} dx={-4} textAnchor="end" fill={chartAxis} style={{ fontSize: "12px", fontWeight: "normal" }}>
-        {payload.value}
+        {payload?.value}
       </text>
     );
   };

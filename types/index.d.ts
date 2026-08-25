@@ -1,5 +1,5 @@
 // Import external types
-import { BoxProps } from "@chakra-ui/react";
+import { BoxProps, ListCollection } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
@@ -69,6 +69,39 @@ export type AttributeUsage = {
   modifications: ("name" | "description" | "values")[];
 };
 
+// `TemplateBreadcrumb` props, the breadcrumb trail and name tag shared by the Template detail page
+export type TemplateBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateTemplates: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `TemplateOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Template detail page
+export type TemplateOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+  owner: string;
+  timestamp: string;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `TemplateUsageTable` props, the Entities using a Template, shared by the Template detail page
+export type TemplateUsageTableProps = {
+  templateUsage: AttributeUsage[];
+  onViewEntity: (entityId: string) => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
 export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
@@ -87,7 +120,7 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type ViewAttributeDialogProps = {
+export type DialogViewAttributeProps = {
   // Dialog state
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -111,7 +144,7 @@ export type ViewAttributeDialogProps = {
   isPublic?: boolean;
 };
 
-export type CompareAttributeDialogProps = {
+export type DialogCompareAttributeProps = {
   // Dialog state
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -175,6 +208,21 @@ export type IValueSelectData = {
   options: string[];
 };
 
+// Parsed display label for an `IValue`, produced by `formatValueForDisplay`
+export type FormattedValueDisplay = { label: string; secondary?: string };
+
+type StyledSelectIconGetter<T> = (data: T) => { name: IconNames; color?: string } | undefined;
+
+export type StyledSelectConfig<T> = {
+  getIcon?: StyledSelectIconGetter<T>;
+  optionHeight: string;
+  optionPadding: string;
+  optionMargin?: string;
+  controlPaddingLeft: string;
+  controlHasBorder: boolean;
+  valueContainerHeight: string;
+};
+
 export type Collaborator = {
   _id: string;
   permissions: UserWorkspacePermissions; // Workspace-scoped permissions
@@ -202,8 +250,18 @@ export type LinkyProps = {
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
+export type LinkyType = LinkyProps["type"];
+
+// Normalized data returned by the "Linky" component's per-type data fetchers
+export type LinkyData = {
+  name: string;
+  archived: boolean;
+  description: string;
+  items: { _id: string; name: string; type?: IValueType }[];
+};
+
 // "Actor" component props
-export type ActorTagProps = {
+export type TagActorProps = {
   identifier: string;
   fallback: string;
   size: "sm" | "md";
@@ -214,15 +272,21 @@ export type ActorTagProps = {
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
-// "VisibilityTagProps" component props
-export type VisibilityTagProps = {
+// "Visibility" component props
+export type TagVisibilityProps = {
   isPublic: boolean;
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
   disabled?: boolean; // Disable changing the visibility
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
-// "FieldTag" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
+// "Timestamp" component props
+export type TagTimestampProps = {
+  timestamp: string;
+  description?: string;
+};
+
+// "TagField" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
 export type EmptyTagProps = {
   label: string; // Noun describing the missing content, rendered as "No {label}"
   size?: "sm" | "md";
@@ -238,7 +302,7 @@ export type AttributeTagProps = {
   size?: "sm" | "md";
 };
 
-// "FieldTagList" component props, renders up to `max` `FieldTag`s followed by an "and N more" summary
+// "FieldTagList" component props, renders up to `max` `TagField`s followed by an "and N more" summary
 export type FieldTagListProps = {
   items: any[];
   max: number;
@@ -303,6 +367,52 @@ export type ProjectHistory = {
   entities: string[];
 };
 
+// `ProjectBreadcrumb` props, the breadcrumb trail and name tag shared by the Project detail page
+export type ProjectBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateProjects: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `ProjectOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Project detail page
+export type ProjectOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+  owner: string;
+  created: string;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// Row shape for the `ProjectEntitiesTable`; description and attributes are undefined until fetched
+export type ProjectEntityTableRow = {
+  _id: string;
+  description?: string;
+  attributes?: AttributeModel[];
+};
+
+// `ProjectEntitiesTable` props, the Entities within a Project, shared by the Project detail page
+export type ProjectEntitiesTableProps = {
+  entities: ProjectEntityTableRow[];
+  entityCount: number;
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onView: (entityId: string) => void;
+  onRemove?: (entityId: string) => void;
+  onRemoveMany?: (entityIds: string[]) => void;
+  onAddClick?: () => void;
+  addDisabled?: boolean;
+};
+
 // Utility type used across other types, typically in a list
 export type IGenericItem = {
   _id: string;
@@ -333,8 +443,8 @@ export type RelationshipsProps = {
   sourceId?: string;
 };
 
-// Utility type to specify the props of `AddRelationshipDialog`
-export type AddRelationshipDialogProps = {
+// Utility type to specify the props of `DialogAddRelationship`
+export type DialogAddRelationshipProps = {
   open: boolean;
   onClose: () => void;
   sourceId?: string;
@@ -343,7 +453,7 @@ export type AddRelationshipDialogProps = {
   onAdd: (relationships: IRelationship[]) => void;
 };
 
-export type AddAttributeDialogProps = {
+export type DialogAddAttributeProps = {
   open: boolean;
   onClose: () => void;
   owner: string;
@@ -423,6 +533,117 @@ export type EntityHistory = {
   attachments: IGenericItem[];
 };
 
+// `EntityBreadcrumb` props, the breadcrumb trail and name tag shared by the Entity detail page
+export type EntityBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateEntities: () => void;
+  archived: boolean;
+  name: string;
+};
+
+// `EntityOverviewCard` props, the Name/Secondary Identifier/Owner/Timestamp/Visibility/Description fields shared by the Entity detail page
+export type EntityOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+
+  showSecondaryIdentifier: boolean;
+  onShowSecondaryIdentifierChange?: (value: boolean) => void;
+  showSecondaryIdentifierDisabled: boolean;
+
+  secondaryIdentifierValue: string;
+  onSecondaryIdentifierChange?: (value: string) => void;
+  secondaryIdentifierReadOnly: boolean;
+  secondaryIdentifierDisabled: boolean;
+
+  identifierFormat: string[];
+  onIdentifierFormatChange?: (value: string[]) => void;
+  identifierFormats: ListCollection;
+  identifierFormatDisabled: boolean;
+  customIdentifierFormats: IdentifierFormatModel[];
+  // Value-field validation errors are only meaningful when the field is actually editable
+  showValidationErrors: boolean;
+
+  owner: string;
+  created: string;
+  visibilityIsPublic: boolean;
+
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `EntityAttributesTable` props, the Attributes on an Entity, shared by the Entity detail page
+export type EntityAttributesTableProps = {
+  attributes: AttributeModel[];
+  editing: boolean;
+  entityName: string;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove?: (id: string) => void;
+  onAddClick?: () => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `EntityAttributeNameCell` props, the "Name" column cell within `EntityAttributesTable`
+export type EntityAttributeNameCellProps = {
+  attribute: AttributeModel;
+  editing: boolean;
+  entityName: string;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove?: (id: string) => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `CreateEntityAttributesTable` props, the Entity creation flow's attributes table
+export type CreateEntityAttributesTableProps = {
+  attributes: AttributeModel[];
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove: (id: string) => void;
+  onAddClick: () => void;
+};
+
+// `CreateEntityAttributeNameCell` props, the "Name" column cell within `CreateEntityAttributesTable`
+export type CreateEntityAttributeNameCellProps = {
+  attribute: AttributeModel;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove: (id: string) => void;
+};
+
+// `EntityProjectsTable` props, the Projects an Entity belongs to, shared by the Entity detail page
+export type EntityProjectsTableProps = {
+  projects: string[];
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onView: (projectId: string) => void;
+  onRemove?: (projectId: string) => void;
+  onRemoveMany?: (projectIds: string[]) => void;
+  onAddClick?: () => void;
+};
+
+// `EntityAttachmentsTable` props, the files attached to an Entity, shared by the Entity detail page
+export type EntityAttachmentsTableProps = {
+  attachments: IGenericItem[];
+  editing: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+  onDownload: (id: string, name: string) => void;
+  onRemove?: (id: string) => void;
+  onRemoveMany?: (ids: string[]) => void;
+  onUploadClick?: () => void;
+};
+
 // Import review summary for Entities being imported
 export type EntityImportReview = {
   name: string;
@@ -459,13 +680,13 @@ export type CounterModel = ICounter & {
   _id: string;
 };
 
-export type CounterProps = {
+export type SelectCounterProps = {
   counter: string;
   setCounter: (value: React.SetStateAction<string>) => void;
   showCreate: boolean;
 };
 
-export type CreateCounterDialogProps = {
+export type DialogCreateCounterProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
@@ -488,14 +709,14 @@ export type IdentifierFormatModel = IIdentifierFormat & {
   _id: string;
 };
 
-export type CreateCustomIdentifierFormatDialogProps = {
+export type DialogCreateIdentifierFormatProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
 };
 
-// "IdentifierFormatSelect" component props
-export type IdentifierFormatSelectProps = {
+// "SelectIdentifierFormat" component props
+export type SelectIdentifierFormatProps = {
   format: string[];
   setFormat: (value: React.SetStateAction<string[]>) => void;
   onFormatsChange?: (formats: IdentifierFormatModel[]) => void;
@@ -555,8 +776,8 @@ export type NavigationProps = {
   workspace?: string;
 };
 
-// `AlertDialog` component
-export type AlertDialogProps = {
+// `DialogAlert` component
+export type DialogAlertProps = {
   // Ref for placement
   header: string;
   children: React.ReactElement | React.ReactElement[];
@@ -581,7 +802,6 @@ export type DataTableProps = {
   columnFilters?: any;
   onColumnFiltersChange?: (filters: any) => void;
   data: any[];
-  setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;
 
   // Interface visibility
@@ -593,6 +813,8 @@ export type DataTableProps = {
 
   // Layout behavior
   fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
+  resizableColumns?: boolean; // If true, header columns can be resized by dragging their right edge
+  footerAction?: { label: string; icon: IconNames; onClick: () => void }; // Renders a full-width action button below the rows
 
   // Server-side pagination (if pageCount is provided, pagination is handled server-side)
   pageCount?: number; // Total number of pages (enables server-side pagination)
@@ -611,22 +833,167 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// `PreviewDialog` props
-export type PreviewDialogProps = {
+// `DataTablePaginationNav` props
+export type DataTablePaginationNavProps = {
+  table: any;
+};
+
+// Item shape backing the `DataTablePageSizeSelect` collection
+export type DataTablePageSizeOption = { label: string; value: string };
+
+// `DataTablePageSizeSelect` props
+export type DataTablePageSizeSelectProps = {
+  table: any;
+  pageLength: string[];
+  setPageLength: (value: string[]) => void;
+  pageLengthsCollection: ListCollection<DataTablePageSizeOption>;
+};
+
+// Item shape backing the `DataTableColumnSelect` collection
+export type DataTableColumnOption = { label: string; value: string; disabled: boolean };
+
+// `DataTableColumnSelect` props
+export type DataTableColumnSelectProps = {
+  columnNamesCollection: ListCollection<DataTableColumnOption>;
+  visibleColumnsForSelect: string[];
+  alwaysVisibleColumns: string[];
+  updateColumnVisibility: (toggleableColumns: string[]) => void;
+};
+
+// `DataTableFilters` props
+export type DataTableFiltersCountProps =
+  | {
+      mode: "range";
+      label: string;
+      min: string;
+      max: string;
+      onMinChange: (value: string) => void;
+      onMaxChange: (value: string) => void;
+    }
+  | {
+      mode: "buckets";
+      label: string;
+      unitLabel: string;
+      selected: string[];
+      onChange: (ranges: string[]) => void;
+    };
+
+export type DataTableFiltersProps = {
+  entityLabel: string;
+  filtersOpen: boolean;
+  onFiltersOpenChange: (open: boolean) => void;
+  activeFilterCount: number;
+
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (value: string) => void;
+  onEndDateChange: (value: string) => void;
+
+  owners: string[];
+  selectedOwners: string[];
+  onOwnersChange: (owners: string[]) => void;
+  workspace?: string;
+  isPublic?: boolean;
+
+  countFilter?: DataTableFiltersCountProps;
+  extraCheckbox?: {
+    label: string;
+    checkboxLabel: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  };
+
+  onApply: () => void;
+  onReset: () => void;
+};
+
+// `DialogPreview` props
+export type DialogPreviewProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
   workspace?: string;
   isPublic?: boolean;
 };
 
-// `ImportDialog` props
-export type ImportDialogProps = {
+// `DialogImport` props
+export type DialogImportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `ExportDialog` props
-export type ExportDialogProps = {
+// `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
+export type UploadStepProps = {
+  importType: "entities" | "template" | undefined;
+  isTypeSelectDisabled: boolean;
+  onSelectImportType: (type: "entities" | "template") => void;
+  fileUpload: any; // `useFileUpload()` return value
+};
+
+// `EntityDetailsStep` props, the `DialogImport` step used to configure name/description/project/owner fields
+export type EntityDetailsStepProps = {
+  fileType: string;
+  columns: ColumnInfo[];
+  namePrefixField: string;
+  onNamePrefixFieldChange: (value: string) => void;
+  nameField: ColumnInfo | undefined;
+  onNameFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  nameUseCounter: boolean;
+  onNameUseCounterChange: (value: boolean) => void;
+  counter: string;
+  onCounterChange: React.Dispatch<React.SetStateAction<string>>;
+  onContinueDisabledChange: (value: boolean) => void;
+  suggestions: { name: string | null; description: string | null } | null;
+  isSuggesting: boolean;
+  descriptionField: ColumnInfo | undefined;
+  onDescriptionFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierField: ColumnInfo | undefined;
+  onIdentifierFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierFormat: string[];
+  onIdentifierFormatChange: React.Dispatch<React.SetStateAction<string[]>>;
+  projectField: string;
+  onProjectFieldChange: (value: string) => void;
+  projectsCollection: ListCollection<IGenericItem>;
+  ownerField: string;
+  getSelectComponent: (
+    key: string,
+    currentValue: ColumnInfo | undefined,
+    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
+  ) => React.ReactElement;
+};
+
+// `EntityMappingStep` props, the `DialogImport` step used to add Attributes applied to all imported Entities
+export type EntityMappingStepProps = {
+  attributesField: AttributeModel[];
+  onAttributesFieldChange: (value: AttributeModel[]) => void;
+  addAttributeOpen: boolean;
+  onAddAttributeOpenChange: (value: boolean) => void;
+  ownerField: string;
+  templates: AttributeModel[];
+  fileType: string;
+  columns: ColumnInfo[];
+};
+
+// `AttributeNameCell` props, the "Name" column cell within `EntityMappingStep`'s attribute table
+export type AttributeNameCellProps = {
+  attribute: AttributeModel;
+  fileType: string;
+  columns: ColumnInfo[];
+  onRemove: (identifier: string) => void;
+  onUpdate: (updated: AttributeModel) => void;
+};
+
+// `EntityReviewStep` props, the final `DialogImport` review step for an Entity import
+export type EntityReviewStepProps = {
+  reviewEntities: EntityImportReview[];
+};
+
+// `TemplateReviewStep` props, the final `DialogImport` review step for a Template import
+export type TemplateReviewStepProps = {
+  reviewTemplates: TemplateImportReview[];
+};
+
+// `DialogExport` props
+export type DialogExportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
   dataType: "entity" | "entities" | "project" | "template";
@@ -636,24 +1003,34 @@ export type ExportDialogProps = {
   ids?: string[];
 };
 
-// `ScanDialog` props
-export type ScanDialogProps = {
+// `DialogScan` props
+export type DialogScanProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `ReportDialog` props
-export type ReportDialogProps = {
+// `DialogReport` props
+export type DialogReportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `UnsavedChangesDialog` props
-export type UnsavedChangesDialogProps = {
+// `DialogUnsavedChanges` props
+export type DialogUnsavedChangesProps = {
   blocker: Blocker;
   cancelBlockerRef: React.MutableRefObject<null>;
   onClose: () => void;
   callback: () => void;
+};
+
+// `DialogUpload` props
+export type DialogUploadProps = {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  target: string;
+  uploads: string[];
+  setUploads: React.Dispatch<React.SetStateAction<string[]>>;
+  onUploadSuccess?: () => void;
 };
 
 // `Scanner` props
@@ -804,8 +1181,8 @@ export type SearchRuleSelectProps = {
   testId?: string;
 };
 
-// SearchSelect props
-export type SearchSelectProps = {
+// SelectSearch props
+export type SelectSearchProps = {
   id?: string;
   value: IGenericItem;
   resultType: "entity" | "project" | "institution";
@@ -816,15 +1193,15 @@ export type SearchSelectProps = {
   isEmbedded?: boolean;
 };
 
-// MultiEntitySelect props
-export type MultiEntitySelectProps = {
+// SelectMultiEntity props
+export type SelectMultiEntityProps = {
   projectEntities: string[];
   selectedEntities: IGenericItem[];
   setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
-// `SaveDialog` props
-export type SaveDialogProps = {
+// `DialogSave` props
+export type DialogSaveProps = {
   open: boolean;
   onOpenChange: (details: { open: boolean }) => void;
   onDone: () => void;
@@ -971,7 +1348,7 @@ export type UserCollatedPermissions = {
 };
 
 // Permissions Dialog props
-export type PermissionsDialogProps = {
+export type DialogPermissionsProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   user: string;

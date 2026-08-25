@@ -5,16 +5,12 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import {
   Box,
   Flex,
-  IconButton,
-  Select,
   Text,
   Checkbox,
   Menu,
   Button,
   Portal,
   createListCollection,
-  Fieldset,
-  Field,
   Input,
   ScrollArea,
 } from "@chakra-ui/react";
@@ -31,23 +27,19 @@ import {
   Table,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
+import { DataTablePaginationNav, DataTablePageSizeSelect } from "@components/DataTable/DataTablePagination";
+import DataTableColumnSelect from "@components/DataTable/DataTableColumnSelect";
 
 // Custom types
 import { DataTableProps } from "@types";
 
 // Utility functions
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useColumnResize } from "@hooks/useColumnResize";
 import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
-
-declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
-  }
-}
 
 export type ColumnMeta = {
   minWidth?: number;
@@ -55,11 +47,12 @@ export type ColumnMeta = {
   fixedWidth?: number;
   isFunction?: boolean;
   align?: "left" | "center" | "right";
+  noPadding?: boolean; // Renders the cell without its default px/py, for content that fills the cell itself
 };
 
 const SELECT_COLUMN_WIDTH = 40;
 const DEFAULT_COLUMN_WIDTH = 200;
-const ALWAYS_VISIBLE_COLUMNS = ["_id", "name"];
+export const ALWAYS_VISIBLE_COLUMNS = ["_id", "name"];
 const NON_TOGGLEABLE_COLUMNS = [...ALWAYS_VISIBLE_COLUMNS, "select", "view"];
 
 const PAGE_SIZE_OPTIONS = [
@@ -250,6 +243,13 @@ const canSortColumn = (columnId: string): boolean => {
   );
 };
 
+/** Convert an arbitrary cell value to a string for comparison, per customSortingFn's rules. */
+const toComparableString = (value: unknown): string => {
+  if (Array.isArray(value)) return value.length > 0 ? String(value[0]) : "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
 /**
  * Custom sorting function that handles edge cases:
  * - null/undefined values (sorted to the end)
@@ -275,29 +275,9 @@ const customSortingFn = (
     return -1; // b is null/undefined, a is not, so b comes after
   }
 
-  // Convert both values to strings for consistent comparison
-  let strA: string;
-  let strB: string;
-
-  if (Array.isArray(a)) {
-    strA = a.length > 0 ? String(a[0]) : "";
-  } else if (typeof a === "object") {
-    strA = JSON.stringify(a);
-  } else {
-    strA = String(a);
-  }
-
-  if (Array.isArray(b)) {
-    strB = b.length > 0 ? String(b[0]) : "";
-  } else if (typeof b === "object") {
-    strB = JSON.stringify(b);
-  } else {
-    strB = String(b);
-  }
-
   // Case-insensitive comparison
-  const normalizedA = strA.toLowerCase().trim();
-  const normalizedB = strB.toLowerCase().trim();
+  const normalizedA = toComparableString(a).toLowerCase().trim();
+  const normalizedB = toComparableString(b).toLowerCase().trim();
 
   // Compare normalized strings
   if (normalizedA < normalizedB) return -1;
@@ -612,23 +592,6 @@ const DataTable = (props: DataTableProps) => {
     sortingFns: {
       customSort: customSortingFn,
     },
-    meta: {
-      updateData: (rowIndex: number, columnId: string, value: unknown) => {
-        if (props.setData) {
-          props.setData((data) =>
-            data.map((row, index) => {
-              if (index === rowIndex) {
-                return {
-                  ...data[rowIndex],
-                  [columnId]: value,
-                };
-              }
-              return row;
-            }),
-          );
-        }
-      },
-    },
   });
 
   // Sync pagination changes to parent (for server-side pagination)
@@ -838,6 +801,23 @@ const DataTable = (props: DataTableProps) => {
     [table],
   );
 
+  // Unlike getColumnMinWidth, ignores any live resize so drags can't ratchet the floor upward
+  const getColumnConfiguredMinWidth = useCallback(
+    (columnId: string): number => {
+      if (columnId === "select") {
+        return SELECT_COLUMN_WIDTH;
+      }
+      const meta = table.getColumn(columnId)?.columnDef.meta as ColumnMeta | undefined;
+      return meta?.fixedWidth || meta?.minWidth || DEFAULT_COLUMN_WIDTH;
+    },
+    [table],
+  );
+
+  const { handleResizeStart } = useColumnResize({
+    containerRef,
+    onResize: (columnId, width) => setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
+  });
+
   return (
     <Box
       w={"100%"}
@@ -851,6 +831,7 @@ const DataTable = (props: DataTableProps) => {
         <ScrollArea.Viewport>
           <ScrollArea.Content pb={"4"} data-testid={"data-table-scroll-container"}>
             <Box
+              ref={containerRef}
               w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
               minW={`${totalMinWidth}px`}
               border={STYLES.border.style}
@@ -944,6 +925,36 @@ const DataTable = (props: DataTableProps) => {
                               </Flex>
                             </Flex>
                           )}
+                          {props.resizableColumns && !isSelectColumn && (
+                            <Box
+                              data-testid={`datatable-resize-${header.id}`}
+                              position={"absolute"}
+                              right={"-1px"}
+                              top={"0"}
+                              bottom={"0"}
+                              width={"3px"}
+                              cursor={"col-resize"}
+                              bg={"transparent"}
+                              _hover={{ bg: "blue.300" }}
+                              onMouseDown={(event) => {
+                                const lastHeader = visibleHeaders[visibleHeaders.length - 1];
+                                const otherFixedWidth = visibleHeaders
+                                  .filter((h) => h.id !== header.id && h.id !== lastHeader.id)
+                                  .reduce((sum, h) => sum + getColumnMinWidth(h.id), 0);
+                                handleResizeStart(
+                                  {
+                                    columnId: header.id,
+                                    startWidth: getColumnMinWidth(header.id),
+                                    minWidth: getColumnConfiguredMinWidth(header.id),
+                                    otherFixedWidth,
+                                    reserveWidth: isLastColumn ? 0 : getColumnMinWidth(lastHeader.id),
+                                  },
+                                  event,
+                                );
+                              }}
+                              zIndex={10}
+                            />
+                          )}
                         </Flex>
                       );
                     })}
@@ -981,8 +992,8 @@ const DataTable = (props: DataTableProps) => {
                             minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
                             maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
                             h={"34px"}
-                            px={1}
-                            py={0.5}
+                            px={cellMeta?.noPadding ? 0 : 1}
+                            py={cellMeta?.noPadding ? 0 : 0.5}
                             borderRight={!isLastCell ? "1px solid" : "none"}
                             borderColor={"border.subtle"}
                             textAlign={align}
@@ -1003,6 +1014,34 @@ const DataTable = (props: DataTableProps) => {
                   );
                 })}
               </Box>
+
+              {props.footerAction && (
+                <Flex
+                  borderTop={"1px solid"}
+                  borderColor={"border.subtle"}
+                  p={0}
+                  justify={"center"}
+                  align={"center"}
+                  bg={"surface.muted"}
+                >
+                  <Button
+                    id={"footerAction"}
+                    size={"xs"}
+                    variant={"ghost"}
+                    colorPalette={"green"}
+                    onClick={props.footerAction.onClick}
+                    aria-label={props.footerAction.label}
+                    w={"100%"}
+                    h={"fit-content"}
+                    p={"0.5"}
+                  >
+                    <Icon name={props.footerAction.icon} size={"xs"} />
+                    <Text ml={1} fontSize={"xs"} fontWeight={"semibold"}>
+                      {props.footerAction.label}
+                    </Text>
+                  </Button>
+                </Flex>
+              )}
             </Box>
           </ScrollArea.Content>
         </ScrollArea.Viewport>
@@ -1013,65 +1052,7 @@ const DataTable = (props: DataTableProps) => {
 
       <Flex gap={1} align={"center"} justify={"space-between"} w={"100%"} mt={2} flexShrink={0}>
         <Flex direction={"row"} gap={2} align={"center"} flexShrink={0}>
-          {props.showPagination && (
-            <Flex direction={"row"} gap={2} align={"center"} data-testid={"data-table-pagination"}>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"first page"}
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <Icon name={"c_double_left"} />
-              </IconButton>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"previous page"}
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <Icon name={"c_left"} />
-              </IconButton>
-              {table.getPageCount() > 0 && (
-                <Flex gap={1}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    {table.getState().pagination.pageIndex + 1}
-                  </Text>
-                  <Text fontSize={"xs"}> of </Text>
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    {table.getPageCount()}
-                  </Text>
-                </Flex>
-              )}
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"next page"}
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <Icon name={"c_right"} />
-              </IconButton>
-              <IconButton
-                variant={"outline"}
-                size={"xs"}
-                rounded={"md"}
-                bg={"white"}
-                aria-label={"last page"}
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <Icon name={"c_double_right"} />
-              </IconButton>
-            </Flex>
-          )}
+          {props.showPagination && <DataTablePaginationNav table={table} />}
 
           {!props.viewOnly && props.showSelection && (
             <Menu.Root>
@@ -1125,111 +1106,21 @@ const DataTable = (props: DataTableProps) => {
         </Flex>
 
         {allColumnIds.length > 0 && props.showColumnSelect && showAdvancedControls && (
-          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"} justify={"center"} grow={1}>
-            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
-              Show Columns:
-            </Text>
-            <Select.Root
-              key={"select-columns"}
-              size={"xs"}
-              w={"200px"}
-              bg={"white"}
-              collection={columnNamesCollection}
-              value={visibleColumnsForSelect}
-              onValueChange={(details) => {
-                const toggleableColumns = (details.value as string[]).filter(
-                  (col) => !ALWAYS_VISIBLE_COLUMNS.includes(col),
-                );
-                updateColumnVisibility(toggleableColumns);
-              }}
-              multiple
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger rounded={"md"}>
-                  <Select.ValueText placeholder={"Visible Columns"} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {(columnNamesCollection.items || []).map((item) => {
-                      const isDisabled = ALWAYS_VISIBLE_COLUMNS.includes(item.value);
-                      return (
-                        <Select.Item
-                          item={item}
-                          key={item.value}
-                          pointerEvents={isDisabled ? "none" : "auto"}
-                          opacity={isDisabled ? 0.5 : 1}
-                          cursor={isDisabled ? "not-allowed" : "pointer"}
-                          onClick={(e) => {
-                            if (isDisabled) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }
-                          }}
-                        >
-                          {item.label}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      );
-                    })}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-          </Flex>
+          <DataTableColumnSelect
+            columnNamesCollection={columnNamesCollection}
+            visibleColumnsForSelect={visibleColumnsForSelect}
+            alwaysVisibleColumns={ALWAYS_VISIBLE_COLUMNS}
+            updateColumnVisibility={updateColumnVisibility}
+          />
         )}
 
         {props.showPagination && showAdvancedControls && (
-          <Flex direction={"row"} gap={1} align={"center"} wrap={"wrap"}>
-            <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
-              Show:
-            </Text>
-            <Fieldset.Root w={"fit-content"}>
-              <Fieldset.Content>
-                <Field.Root>
-                  <Select.Root
-                    key={"select-pagesize"}
-                    size={"xs"}
-                    w={"80px"}
-                    bg={"white"}
-                    collection={pageLengthsCollection}
-                    value={pageLength}
-                    onValueChange={(details) => {
-                      setPageLength(details.value);
-                      table.setPageSize(parseInt(details.value[0]));
-                    }}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger rounded={"md"} data-testid={"data-table-page-size"}>
-                        <Select.ValueText placeholder={"Page Size"} />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {pageLengthsCollection.items.map((count) => (
-                            <Select.Item item={count} key={count.value}>
-                              {count.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
-                </Field.Root>
-              </Fieldset.Content>
-            </Fieldset.Root>
-          </Flex>
+          <DataTablePageSizeSelect
+            table={table}
+            pageLength={pageLength}
+            setPageLength={setPageLength}
+            pageLengthsCollection={pageLengthsCollection}
+          />
         )}
       </Flex>
     </Box>

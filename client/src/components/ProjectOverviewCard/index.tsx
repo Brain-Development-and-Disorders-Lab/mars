@@ -1,0 +1,123 @@
+// React
+import React from "react";
+
+// Existing and custom components
+import { Flex, Input, Text, Textarea } from "@chakra-ui/react";
+import TagActor from "@components/TagActor";
+import TagTimestamp from "@components/TagTimestamp";
+import TagVisibility from "@components/TagVisibility";
+
+// Existing and custom types
+import { ProjectOverviewCardProps } from "@types";
+
+// Variables
+import { STYLES } from "@variables";
+
+const ProjectOverviewCard = ({
+  name,
+  onNameChange,
+  nameReadOnly,
+  owner,
+  created,
+  visibilityIsPublic,
+  description,
+  onDescriptionChange,
+  descriptionReadOnly,
+  workspace,
+  isPublic,
+}: ProjectOverviewCardProps) => (
+  <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
+    {/* Overview */}
+    <Flex
+      direction={"column"}
+      p={"2"}
+      h={"fit-content"}
+      gap={"2"}
+      rounded={"md"}
+      grow={"1"}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
+      bg={"surface.card"}
+      basis={{ base: "100%", md: "calc(50% - 4px)" }}
+      minW={{ base: "100%", md: "calc(50% - 4px)" }}
+    >
+      {/* "Name" field */}
+      <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+            Name
+          </Text>
+          <Input
+            id={"projectNameInput"}
+            size={"xs"}
+            rounded={"md"}
+            value={name}
+            onChange={onNameChange ? (event) => onNameChange(event.target.value) : undefined}
+            readOnly={nameReadOnly}
+            bg={"white"}
+            border={STYLES.border.style}
+            borderColor={STYLES.border.color}
+          />
+        </Flex>
+      </Flex>
+
+      <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+            Owner
+          </Text>
+          <TagActor
+            identifier={owner}
+            fallback={"Unknown User"}
+            size={"sm"}
+            workspace={workspace}
+            isPublic={isPublic}
+          />
+        </Flex>
+
+        <Flex direction={"column"} gap={"2"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+            Timestamp
+          </Text>
+          <TagTimestamp timestamp={created} description={"Created"} />
+        </Flex>
+
+        <Flex direction={"column"} gap={"2"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+            Visibility
+          </Text>
+          <TagVisibility isPublic={visibilityIsPublic} isInherited />
+        </Flex>
+      </Flex>
+    </Flex>
+
+    {/* Description */}
+    <Flex
+      direction={"column"}
+      p={"2"}
+      h={"100%"}
+      gap={"2"}
+      border={STYLES.border.style}
+      borderColor={STYLES.border.color}
+      bg={"surface.card"}
+      rounded={"md"}
+      grow={"1"}
+      basis={{ base: "100%", md: "calc(50% - 4px)" }}
+      minW={{ base: "100%", md: "calc(50% - 4px)" }}
+    >
+      <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
+        Description
+      </Text>
+      <Textarea
+        id={"projectDescriptionInput"}
+        value={description}
+        size={"xs"}
+        h={"100%"}
+        readOnly={descriptionReadOnly}
+        onChange={onDescriptionChange ? (event) => onDescriptionChange(event.target.value) : undefined}
+      />
+    </Flex>
+  </Flex>
+);
+
+export default ProjectOverviewCard;

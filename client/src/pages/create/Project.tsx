@@ -18,11 +18,11 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
-import MultiEntitySelect from "@components/MultiEntitySelect";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import SelectMultiEntity from "@components/SelectMultiEntity";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
@@ -215,7 +215,7 @@ const Project = () => {
                 Owner
               </Field.Label>
               <Flex>
-                <ActorTag identifier={owner} fallback={"Unknown User"} size={"sm"} />
+                <TagActor identifier={owner} fallback={"Unknown User"} size={"sm"} />
               </Flex>
             </Field.Root>
 
@@ -390,7 +390,7 @@ const Project = () => {
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body p={"2"}>
-              <MultiEntitySelect
+              <SelectMultiEntity
                 projectEntities={entities}
                 selectedEntities={selectedEntities}
                 setSelectedEntities={setSelectedEntities}
@@ -540,7 +540,7 @@ const Project = () => {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      <UnsavedChangesDialog
+      <DialogUnsavedChanges
         blocker={blocker}
         cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}

@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Flex,
-  Heading,
   Input,
   Text,
   useDisclosure,
@@ -18,45 +17,34 @@ import {
   Portal,
   CloseButton,
   HStack,
-  EmptyState,
-  Textarea,
-  Breadcrumb,
-  SkeletonText,
-  Select,
   createListCollection,
-  Checkbox,
   ListCollection,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
-import DataTable from "@components/DataTable";
-import ExportDialog from "@components/ExportDialog";
-import { EmptyTag, ValueTag } from "@components/FieldTag";
-import FieldTagList from "@components/FieldTagList";
+import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";
 import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import UploadDialog from "@components/UploadDialog";
-import PreviewDialog from "@components/PreviewDialog";
-import ViewAttributeDialog from "@components/ViewAttributeDialog";
-import AddAttributeDialog from "@components/AddAttributeDialog";
-import SearchSelect from "@components/SearchSelect";
-import AlertDialog from "@components/AlertDialog";
-import TimestampTag from "@components/TimestampTag";
-import VisibilityTag from "@components/VisibilityTag";
-import AddRelationshipDialog from "@components/AddRelationshipDialog";
+import DialogUpload from "@components/DialogUpload";
+import DialogAddAttribute from "@components/DialogAddAttribute";
+import SelectSearch from "@components/SelectSearch";
+import DialogAlert from "@components/DialogAlert";
+import DialogAddRelationship from "@components/DialogAddRelationship";
 import Relationships from "@components/Relationships";
+import EntityBreadcrumb from "@components/EntityBreadcrumb";
+import EntityOverviewCard from "@components/EntityOverviewCard";
+import EntityAttributesTable from "@components/EntityAttributesTable";
+import EntityProjectsTable from "@components/EntityProjectsTable";
+import EntityAttachmentsTable from "@components/EntityAttachmentsTable";
 import Tooltip from "@components/Tooltip";
-import { UnsavedChangesDialog } from "@components/UnsavedChangesDialog";
+import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
-import SaveDialog from "@components/SaveDialog";
-import { Cell, createColumnHelper } from "@tanstack/react-table";
+import DialogSave from "@components/DialogSave";
 
 // Existing and custom types
 import {
   AttributeModel,
-  DataTableAction,
   EntityHistory,
   EntityModel,
   IAttribute,
@@ -69,15 +57,8 @@ import {
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
-import {
-  getBaseIdentifierFormatHelperText,
-  getCustomIdentifierFormatHelperText,
-  ignoreAbort,
-  isValidBaseIdentifierFormat,
-  isValidCustomIdentifierFormat,
-  removeTypename,
-} from "@lib/util";
-import _, { groupBy } from "lodash";
+import { ignoreAbort, removeTypename } from "@lib/util";
+import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -91,7 +72,6 @@ import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Contexts and hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 import { useWorkspace } from "@hooks/useWorkspace";
 import { usePermissions } from "@hooks/usePermissions";
 
@@ -106,7 +86,6 @@ import { usePostHog } from "posthog-js/react";
 
 const Entity = () => {
   const { id } = useParams();
-  const { breakpoint } = useBreakpoint();
   const posthog = usePostHog();
 
   // Permissions
@@ -119,9 +98,6 @@ const Entity = () => {
   );
   const { onClose: onBlockerClose } = useDisclosure();
   const cancelBlockerRef = useRef(null);
-
-  // Breakpoint
-  const { isBreakpointActive } = useBreakpoint();
 
   // Workspace information
   const { workspace } = useWorkspace();
@@ -179,37 +155,6 @@ const Entity = () => {
   const [customIdentifierFormats, setCustomIdentifierFormats] = useState<IdentifierFormatModel[]>([]);
   const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
   const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
-
-  const isValidSecondaryIdentifierField = (): boolean => {
-    if (identifierFormat.length > 0) {
-      if (
-        _.includes(
-          BASE_IDENTIFIER_FORMATS.map((format) => format.value),
-          identifierFormat[0],
-        )
-      ) {
-        return isValidBaseIdentifierFormat(secondaryIdentifier, identifierFormat[0]);
-      } else {
-        const formatParameters = customIdentifierFormats.filter((format) => format._id === identifierFormat[0]);
-        return isValidCustomIdentifierFormat(secondaryIdentifier, formatParameters[0]);
-      }
-    }
-    return false;
-  };
-
-  const getIdentifierFormatHelperText = (format: string): string => {
-    if (
-      _.includes(
-        BASE_IDENTIFIER_FORMATS.map((baseFormat) => baseFormat.value),
-        format,
-      )
-    ) {
-      return getBaseIdentifierFormatHelperText(format);
-    } else {
-      const formatParameters = customIdentifierFormats.filter((customFormat) => customFormat._id === format);
-      return getCustomIdentifierFormatHelperText(formatParameters[0]);
-    }
-  };
 
   /**
    * Helper function to get user information
@@ -620,22 +565,6 @@ const Entity = () => {
     return format ? [format] : [];
   }, [previewVersion, identifierFormat]);
 
-  const displayEntityData = useMemo(() => {
-    if (previewVersion) {
-      return {
-        ...entity,
-        name: previewVersion.name,
-        description: previewVersion.description || "",
-        projects: previewVersion.projects,
-        relationships: previewVersion.relationships,
-        attributes: previewVersion.attributes,
-        attachments: previewVersion.attachments,
-        archived: previewVersion.archived,
-      };
-    }
-    return entity;
-  }, [previewVersion, entity]);
-
   // Archive dialog
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
@@ -759,275 +688,6 @@ const Entity = () => {
       setEntityArchived(false);
     }
   };
-
-  // Configure Projects table columns and data
-  const projectsTableColumns = [
-    {
-      id: "projectId",
-      accessorFn: (row: string) => row,
-      cell: (info: Cell<string, string>) => {
-        const projectId = info.getValue();
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={projectId} disabled={projectId.length < 32} showArrow>
-              <Linky id={projectId} type={"projects"} size={"xs"} truncate={false} />
-            </Tooltip>
-            {editing ? (
-              <Button
-                size="2xs"
-                mx={"1"}
-                variant="subtle"
-                colorPalette="red"
-                aria-label={"Remove Project"}
-                onClick={() => {
-                  removeProject(projectId);
-                }}
-              >
-                Remove
-                <Icon name={"delete"} size={"xs"} />
-              </Button>
-            ) : (
-              <Button
-                size="2xs"
-                mx={"1"}
-                variant="subtle"
-                colorPalette="gray"
-                aria-label={"View Project"}
-                onClick={() => navigate(`/projects/${projectId}`)}
-              >
-                View
-                <Icon name={"a_right"} size={"xs"} />
-              </Button>
-            )}
-          </Flex>
-        );
-      },
-      header: "Name",
-    },
-  ];
-  const projectsTableActions: DataTableAction[] = [
-    {
-      label: "Remove Projects",
-      icon: "delete",
-      action(table, rows) {
-        const projectsToRemove: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          projectsToRemove.push(table.getRow(rowIndex).original);
-        }
-
-        removeProjects(projectsToRemove);
-      },
-    },
-  ];
-
-  // Utility function to check if Attribute is an instance of a known Template
-  const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
-    for (const attribute of templates) {
-      if (_.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id)) {
-        // Template / Attribute ID matches
-        return true;
-      }
-    }
-    // No matches
-    return false;
-  };
-
-  // Configure attribute table columns and data
-  const attributeTableColumnHelper = createColumnHelper<AttributeModel>();
-  const attributeTableColumns = [
-    attributeTableColumnHelper.accessor("name", {
-      cell: (info) => {
-        const attribute = info.row.original;
-        const [viewAttributeDialogOpen, setViewAttributeDialogOpen] = useState(false);
-        return (
-          <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 16} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 16 })}
-              </Text>
-            </Tooltip>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Button
-                size="2xs"
-                variant="subtle"
-                rounded="md"
-                colorPalette="gray"
-                aria-label={"View Attribute"}
-                onClick={() => setViewAttributeDialogOpen(true)}
-              >
-                {editing ? "Edit" : "Expand"}
-                <Icon name={editing ? "edit" : "expand"} size={"xs"} />
-              </Button>
-              {editing && (
-                <Button
-                  size="2xs"
-                  rounded="md"
-                  variant="subtle"
-                  colorPalette="red"
-                  aria-label={"Delete Attribute"}
-                  onClick={() => removeAttribute(attribute._id)}
-                >
-                  Delete
-                  <Icon name={"delete"} size={"xs"} />
-                </Button>
-              )}
-              <ViewAttributeDialog
-                open={viewAttributeDialogOpen}
-                setOpen={setViewAttributeDialogOpen}
-                editing={editing}
-                entityName={entityName}
-                attribute={attribute}
-                isTemplate={isKnownTemplate(attribute._id, templates)}
-                onAttributeUpdate={onAttributeUpdate}
-                removeCallback={() => {
-                  removeAttribute(attribute._id);
-                }}
-              />
-            </Flex>
-          </Flex>
-        );
-      },
-      header: "Name",
-      meta: {
-        minWidth: 240,
-      },
-    }),
-    attributeTableColumnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <EmptyTag label={"Description"} />;
-        }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
-      },
-      header: "Description",
-    }),
-    attributeTableColumnHelper.accessor("values", {
-      cell: (info) => (
-        <FieldTagList
-          items={info.row.original.values}
-          max={2}
-          emptyLabel={"Values"}
-          getKey={(value) => value._id}
-          renderTag={(value) => <ValueTag value={value} />}
-        />
-      ),
-      header: "Values",
-      meta: {
-        minWidth: 300,
-      },
-    }),
-  ];
-  const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] = useState({});
-
-  // Effect to adjust column visibility
-  useEffect(() => {
-    if (_.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint)) {
-      setVisibleAttributeTableColumns({ description: false });
-    } else {
-      setVisibleAttributeTableColumns({});
-    }
-  }, [breakpoint]);
-
-  // Configure attachment table columns and data
-  const attachmentTableColumnHelper = createColumnHelper<IGenericItem>();
-  const attachmentTableColumns = [
-    attachmentTableColumnHelper.accessor("name", {
-      cell: (info) => {
-        const attachmentId = info.row.original._id;
-        const attachmentName = info.row.original.name;
-
-        const handleDownload = async () => {
-          await getDownload(attachmentId, attachmentName);
-        };
-
-        return (
-          <Flex w={"100%"} justify={"space-between"} gap={"1"} align={"center"}>
-            <Tooltip content={attachmentName} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(attachmentName, { length: 36 })}
-              </Text>
-            </Tooltip>
-            <Flex gap={"1"} align={"center"}>
-              <PreviewDialog
-                attachment={{
-                  _id: attachmentId,
-                  name: attachmentName,
-                }}
-              />
-              {editing ? (
-                <IconButton
-                  aria-label={"Remove attachment"}
-                  size={"2xs"}
-                  variant={"subtle"}
-                  key={`remove-file-${attachmentId}`}
-                  colorPalette={"red"}
-                  onClick={() => removeAttachment(attachmentId)}
-                >
-                  <Icon name={"delete"} size={"xs"} />
-                </IconButton>
-              ) : (
-                <IconButton
-                  aria-label={"Download attachment"}
-                  size={"2xs"}
-                  variant={"subtle"}
-                  key={`download-file-${attachmentId}`}
-                  colorPalette={"blue"}
-                  onClick={() => handleDownload()}
-                >
-                  <Icon name={"download"} size={"xs"} />
-                </IconButton>
-              )}
-            </Flex>
-          </Flex>
-        );
-      },
-      header: "Name",
-      meta: {
-        minWidth: 360,
-      },
-    }),
-    {
-      id: "type",
-      accessorFn: (row: IGenericItem) => row.name,
-      cell: (info: Cell<IGenericItem, string>) => {
-        const fileExtension = _.upperCase(_.last(info.row.original.name.split(".")));
-        let fileColorScheme = "yellow";
-        if (_.isEqual(fileExtension, "PDF")) {
-          fileColorScheme = "red";
-        } else if (_.isEqual(fileExtension, "DNA")) {
-          fileColorScheme = "green";
-        } else if (_.isEqual(fileExtension, "PNG") || _.isEqual(fileExtension, "JPEG")) {
-          fileColorScheme = "blue";
-        }
-
-        return (
-          <Tag.Root colorPalette={fileColorScheme}>
-            <Tag.Label>{fileExtension}</Tag.Label>
-          </Tag.Root>
-        );
-      },
-      header: "File Format",
-    },
-  ];
-  const attachmentTableActions: DataTableAction[] = [
-    {
-      label: "Remove Attachments",
-      icon: "delete",
-      action(table, rows) {
-        const attachmentsToRemove: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          attachmentsToRemove.push(table.getRow(rowIndex).original._id);
-        }
-        removeAttachments(attachmentsToRemove);
-      },
-    },
-  ];
 
   /**
    * Restore an Entity from an earlier point in time
@@ -1326,66 +986,14 @@ const Entity = () => {
         )}
 
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          {/* Breadcrumbs */}
-          <Flex align={"center"} gap={"2"} ml={"0.5"}>
-            <Breadcrumb.Root>
-              <Breadcrumb.List>
-                <Breadcrumb.Item
-                  gap={"1"}
-                  onClick={() => navigate("/")}
-                  _hover={{
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  <Icon name={"workspace"} size={"xs"} color={"black"} />
-                  {loading ? (
-                    <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
-                  ) : (
-                    _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
-                  )}
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-                <Breadcrumb.Item
-                  gap={"1"}
-                  onClick={() => navigate("/entities")}
-                  _hover={{
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  <Icon size={"xs"} name={"entity"} color={STYLES.entity.color.icon} />
-                  Entities
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-              </Breadcrumb.List>
-            </Breadcrumb.Root>
-
-            <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
-              <Flex
-                id={"entityNameTag"}
-                align={"center"}
-                gap={"1"}
-                p={"1"}
-                border={"2px solid"}
-                borderColor={displayEntityArchived ? "gray.500" : STYLES.entity.color.icon}
-                bg={displayEntityArchived ? STYLES.card.bg : STYLES.entity.color.light}
-                rounded={"md"}
-              >
-                <Icon
-                  name={"entity"}
-                  size={"sm"}
-                  color={displayEntityArchived ? "gray.500" : STYLES.entity.color.icon}
-                />
-                <Tooltip content={`${displayEntityArchived ? "Archived: " : ""}${displayEntityData.name}`} showArrow>
-                  <Heading fontWeight={"semibold"} size={"sm"}>
-                    {_.truncate(displayEntityName, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
-                  </Heading>
-                </Tooltip>
-                {displayEntityArchived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}
-              </Flex>
-            </Flex>
-          </Flex>
+          <EntityBreadcrumb
+            loading={loading}
+            workspaceName={workspaceName}
+            onNavigateHome={() => navigate("/")}
+            onNavigateEntities={() => navigate("/entities")}
+            archived={displayEntityArchived}
+            name={displayEntityName}
+          />
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
@@ -1530,7 +1138,7 @@ const Entity = () => {
             />
 
             {/* Archive Dialog */}
-            <AlertDialog
+            <DialogAlert
               header={"Archive Entity"}
               leftButtonAction={() => setArchiveDialogOpen(false)}
               rightButtonAction={handleArchiveClick}
@@ -1546,367 +1154,57 @@ const Entity = () => {
                   will not be visible. It can be restored at any time.
                 </Text>
               </Flex>
-            </AlertDialog>
+            </DialogAlert>
           </Flex>
         </Flex>
 
         <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
           {/* Entity Overview and Description */}
-          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Entity Overview */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              bg={"surface.card"}
-              rounded={"md"}
-              grow={"1"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              {/* "Name" field */}
-              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"2"} grow={"1"}>
-                  <Flex direction={"row"} align={"center"} justify={"space-between"}>
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                      Name
-                    </Text>
-                    <Tooltip
-                      content={
-                        "If your Entity has an external identifier (such as a GUID or other identifier) associated with it, you can specify it here."
-                      }
-                      showArrow
-                    >
-                      <Checkbox.Root
-                        size={"xs"}
-                        colorPalette={"blue"}
-                        checked={showSecondaryIdentifier}
-                        onCheckedChange={(event) => setShowSecondaryIdentifier(!!event.checked)}
-                        disabled={!editing || !!previewVersion}
-                      >
-                        <Checkbox.HiddenInput />
-                        <Checkbox.Control />
-                        <Checkbox.Label>
-                          <Flex direction={"row"} gap={"1"} align={"center"}>
-                            <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                              Specify Secondary Identifier
-                            </Text>
-                            <Icon name={"info"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                          </Flex>
-                        </Checkbox.Label>
-                      </Checkbox.Root>
-                    </Tooltip>
-                  </Flex>
-                  <Input
-                    id={"entityNameInput"}
-                    size={"xs"}
-                    value={previewVersion ? displayEntityName : entityName}
-                    onChange={(event) => {
-                      setEntityName(event.target.value || "");
-                    }}
-                    readOnly={!editing || !!previewVersion}
-                    rounded={"md"}
-                    border={STYLES.border.style}
-                    borderColor={STYLES.border.color}
-                    bg={"white"}
-                  />
-                </Flex>
-              </Flex>
-
-              {/* Secondary Identifier */}
-              {displayShowSecondaryIdentifier && (
-                <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
-                  <Flex direction={"column"} gap={"2"} grow={"3"}>
-                    <Field.Root
-                      invalid={!previewVersion && showSecondaryIdentifier && !isValidSecondaryIdentifierField()}
-                    >
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={STYLES.font.secondaryHeader.color}
-                        ml={"0.5"}
-                      >
-                        Secondary Identifier
-                      </Text>
-                      <Input
-                        id={"entitySecondaryIdentifierInput"}
-                        size={"xs"}
-                        value={displaySecondaryIdentifierValue}
-                        onChange={(event) => setSecondaryIdentifier(event.target.value)}
-                        readOnly={!editing || !!previewVersion}
-                        rounded={"md"}
-                        border={STYLES.border.style}
-                        borderColor={STYLES.border.color}
-                        bg={"white"}
-                        disabled={!previewVersion && identifierFormat.length === 0}
-                      />
-                      {!previewVersion && isValidSecondaryIdentifierField() && (
-                        <Field.HelperText>
-                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                            {getIdentifierFormatHelperText(identifierFormat[0])}
-                          </Text>
-                        </Field.HelperText>
-                      )}
-                      <Field.ErrorText>
-                        {!previewVersion && identifierFormat.length !== 0 && !isValidSecondaryIdentifierField() && (
-                          <Text fontSize={"xs"} ml={"0.5"}>
-                            {getIdentifierFormatHelperText(identifierFormat[0])}
-                          </Text>
-                        )}
-                        {!previewVersion && identifierFormat.length === 0 && (
-                          <Text fontSize={"xs"} ml={"0.5"}>
-                            Please select the Identifier Format
-                          </Text>
-                        )}
-                      </Field.ErrorText>
-                    </Field.Root>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"2"} grow={"1"}>
-                    <Field.Root invalid={!previewVersion && showSecondaryIdentifier && identifierFormat.length === 0}>
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={STYLES.font.secondaryHeader.color}
-                        ml={"0.5"}
-                      >
-                        Identifier Format
-                      </Text>
-                      <Select.Root
-                        value={displaySecondaryIdentifierFormat}
-                        onValueChange={(event) => setIdentifierFormat(event.value)}
-                        collection={identifierFormats}
-                        size={"xs"}
-                        width={"100%"}
-                        disabled={!editing || !!previewVersion}
-                      >
-                        <Select.HiddenSelect />
-                        <Select.Control>
-                          <Select.Trigger>
-                            <Select.ValueText placeholder={"Select Identifier Format"} />
-                          </Select.Trigger>
-                          <Select.IndicatorGroup>
-                            <Select.Indicator />
-                          </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Portal>
-                          <Select.Positioner>
-                            <Select.Content>
-                              {Object.entries(groupBy(identifierFormats.items, (item) => item.category)).map(
-                                ([category, items]) => (
-                                  <Select.ItemGroup key={category}>
-                                    <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
-                                    {items.map((format) => (
-                                      <Select.Item item={format} key={format.value}>
-                                        {format.label}
-                                        <Select.ItemIndicator />
-                                      </Select.Item>
-                                    ))}
-                                  </Select.ItemGroup>
-                                ),
-                              )}
-                            </Select.Content>
-                          </Select.Positioner>
-                        </Portal>
-                      </Select.Root>
-                      <Field.ErrorText>
-                        <Text fontSize={"xs"} ml={"0.5"}>
-                          Please select an Identifier Format
-                        </Text>
-                      </Field.ErrorText>
-                    </Field.Root>
-                  </Flex>
-                </Flex>
-              )}
-
-              {/* "Owner", "Timestamp", and "Visibility" fields */}
-              <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
-                {/* Owner */}
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Owner
-                  </Text>
-                  <ActorTag identifier={entity.owner} fallback={"Unknown User"} size={"sm"} />
-                </Flex>
-
-                {/* Timestamp */}
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Timestamp
-                  </Text>
-                  <TimestampTag timestamp={entity.created} description={"Created"} />
-                </Flex>
-
-                {/* Visibility */}
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Visibility
-                  </Text>
-                  <VisibilityTag isPublic={workspaceIsPublic} isInherited />
-                </Flex>
-              </Flex>
-            </Flex>
-
-            {/* Description */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"100%"}
-              gap={"2"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              rounded={"md"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                Description
-              </Text>
-              <Textarea
-                id={"entityDescriptionInput"}
-                value={previewVersion ? displayEntityDescription : entityDescription}
-                readOnly={!(editing && !previewVersion)}
-                onChange={(event) => setEntityDescription(event.target.value)}
-                h={"100%"}
-                size={"xs"}
-              />
-            </Flex>
-          </Flex>
+          <EntityOverviewCard
+            name={previewVersion ? displayEntityName : entityName}
+            onNameChange={setEntityName}
+            nameReadOnly={!editing || !!previewVersion}
+            showSecondaryIdentifier={displayShowSecondaryIdentifier}
+            onShowSecondaryIdentifierChange={setShowSecondaryIdentifier}
+            showSecondaryIdentifierDisabled={!editing || !!previewVersion}
+            secondaryIdentifierValue={displaySecondaryIdentifierValue}
+            onSecondaryIdentifierChange={setSecondaryIdentifier}
+            secondaryIdentifierReadOnly={!editing || !!previewVersion}
+            secondaryIdentifierDisabled={!previewVersion && identifierFormat.length === 0}
+            identifierFormat={displaySecondaryIdentifierFormat}
+            onIdentifierFormatChange={setIdentifierFormat}
+            identifierFormats={identifierFormats}
+            identifierFormatDisabled={!editing || !!previewVersion}
+            customIdentifierFormats={customIdentifierFormats}
+            showValidationErrors={!previewVersion}
+            owner={entity.owner}
+            created={entity.created}
+            visibilityIsPublic={workspaceIsPublic}
+            description={previewVersion ? displayEntityDescription : entityDescription}
+            onDescriptionChange={setEntityDescription}
+            descriptionReadOnly={!(editing && !previewVersion)}
+          />
 
           {/* Attributes and Projects */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Attributes */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"attribute"} size={"xs"} color={STYLES.template.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Attributes ({entityAttributes.length})
-                  </Text>
-                </Flex>
-                <Button
-                  id={"addAttributeDialogButton"}
-                  variant={"solid"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => setAddAttributesOpen(true)}
-                  disabled={!editing}
-                >
-                  Add
-                  <Icon name={"add"} size={"xs"} />
-                </Button>
-              </Flex>
+            <EntityAttributesTable
+              attributes={displayEntityAttributes}
+              editing={editing && !previewVersion}
+              entityName={entityName}
+              templates={templates}
+              onUpdate={onAttributeUpdate}
+              onRemove={removeAttribute}
+              onAddClick={() => setAddAttributesOpen(true)}
+            />
 
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={displayEntityAttributes.length > 0 ? "fit-content" : "120px"}
-              >
-                {displayEntityAttributes.length === 0 ? (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"attribute"} size={"lg"} color={STYLES.template.color.light} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Attributes</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                ) : (
-                  <DataTable
-                    data={displayEntityAttributes}
-                    columns={attributeTableColumns}
-                    visibleColumns={visibleAttributeTableColumns}
-                    selectedRows={{}}
-                    viewOnly={!editing || !!previewVersion}
-                    showPagination
-                    showSelection
-                  />
-                )}
-              </Flex>
-            </Flex>
-
-            {/* Projects */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                  <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                    Projects ({entityProjects.length})
-                  </Text>
-                </Flex>
-                <Button
-                  id={"addProjectsDialogButton"}
-                  variant={"solid"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"green"}
-                  onClick={() => setAddProjectsOpen(true)}
-                  disabled={!editing}
-                >
-                  Add
-                  <Icon name={"add"} size={"xs"} />
-                </Button>
-              </Flex>
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={displayEntityProjects.length > 0 ? "fit-content" : "120px"}
-              >
-                {displayEntityProjects.length === 0 ? (
-                  <EmptyState.Root>
-                    <EmptyState.Content>
-                      <EmptyState.Indicator>
-                        <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
-                      </EmptyState.Indicator>
-                      <EmptyState.Description>No Projects</EmptyState.Description>
-                    </EmptyState.Content>
-                  </EmptyState.Root>
-                ) : (
-                  <DataTable
-                    data={displayEntityProjects}
-                    columns={projectsTableColumns}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    viewOnly={!editing || !!previewVersion}
-                    actions={projectsTableActions}
-                    showPagination
-                    showSelection
-                  />
-                )}
-              </Flex>
-            </Flex>
+            <EntityProjectsTable
+              projects={displayEntityProjects}
+              editing={editing && !previewVersion}
+              onView={(projectId) => navigate(`/projects/${projectId}`)}
+              onRemove={removeProject}
+              onRemoveMany={removeProjects}
+              onAddClick={() => setAddProjectsOpen(true)}
+            />
           </Flex>
 
           {/* Relationships and Attachments */}
@@ -1953,76 +1251,19 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            {/* Attachments */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              h={"fit-content"}
-              gap={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-              grow={"1"}
-              basis={{ base: "100%", md: "calc(50% - 4px)" }}
-              minW={{ base: "100%", md: "calc(50% - 4px)" }}
-            >
-              <Flex gap={"1"} direction={"column"}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                    <Icon name={"attachment"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                      Attachments ({entityAttachments.length})
-                    </Text>
-                  </Flex>
-                  <Button
-                    variant={"solid"}
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    onClick={() => setUploadOpen(true)}
-                    disabled={!editing || !!previewVersion}
-                  >
-                    Upload
-                    <Icon name={"upload"} size={"xs"} />
-                  </Button>
-                </Flex>
-
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={"center"}
-                  minH={displayEntityAttachments.length > 0 ? "fit-content" : "120px"}
-                >
-                  {displayEntityAttachments.length === 0 ? (
-                    <EmptyState.Root>
-                      <EmptyState.Content>
-                        <EmptyState.Indicator>
-                          <Icon name={"attachment"} size={"lg"} />
-                        </EmptyState.Indicator>
-                        <EmptyState.Description>No Attachments</EmptyState.Description>
-                      </EmptyState.Content>
-                    </EmptyState.Root>
-                  ) : (
-                    <DataTable
-                      data={displayEntityAttachments}
-                      columns={attachmentTableColumns}
-                      visibleColumns={{}}
-                      selectedRows={{}}
-                      viewOnly={!editing || !!previewVersion}
-                      actions={attachmentTableActions}
-                      showPagination
-                      showSelection
-                    />
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
+            <EntityAttachmentsTable
+              attachments={displayEntityAttachments}
+              editing={editing && !previewVersion}
+              onDownload={getDownload}
+              onRemove={removeAttachment}
+              onRemoveMany={removeAttachments}
+              onUploadClick={() => setUploadOpen(true)}
+            />
           </Flex>
         </Flex>
 
         {/* Add Attributes dialog */}
-        <AddAttributeDialog
+        <DialogAddAttribute
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
           owner={user}
@@ -2058,7 +1299,7 @@ const Entity = () => {
                 </Dialog.Header>
                 <Dialog.Body p={"2"} gap={"2"}>
                   <Flex direction={"column"} gap={"2"}>
-                    <SearchSelect
+                    <SelectSearch
                       id={"projectSearchSelect"}
                       resultType={"project"}
                       value={selectedProject}
@@ -2171,7 +1412,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Add Relationships dialog */}
-        <AddRelationshipDialog
+        <DialogAddRelationship
           open={addRelationshipsOpen}
           onClose={() => setAddRelationshipsOpen(false)}
           sourceId={entity._id}
@@ -2181,7 +1422,7 @@ const Entity = () => {
         />
 
         {/* Upload dialog */}
-        <UploadDialog
+        <DialogUpload
           open={uploadOpen}
           setOpen={setUploadOpen}
           uploads={toUploadAttachments}
@@ -2195,7 +1436,7 @@ const Entity = () => {
         />
 
         {/* Export dialog */}
-        <ExportDialog open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
+        <DialogExport open={exportOpen} setOpen={setExportOpen} dataType={"entity"} id={id} />
 
         {/* Graph dialog */}
         <Dialog.Root
@@ -2428,7 +1669,7 @@ const Entity = () => {
         </Dialog.Root>
 
         {/* Save message dialog */}
-        <SaveDialog
+        <DialogSave
           open={saveMessageOpen}
           onOpenChange={(details) => setSaveMessageOpen(details.open)}
           onDone={handleSaveMessageDoneClick}
@@ -2441,7 +1682,7 @@ const Entity = () => {
         />
 
         {/* Blocker warning message */}
-        <UnsavedChangesDialog
+        <DialogUnsavedChanges
           blocker={blocker}
           cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}

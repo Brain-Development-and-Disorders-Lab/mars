@@ -16,14 +16,14 @@ import {
   InputGroup,
   SkeletonText,
 } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { AttributeTag, EmptyTag } from "@components/FieldTag";
+import { AttributeTag, EmptyTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
-import { CreatedCell } from "@components/DataTableCell";
+import { CreatedCell } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -421,7 +421,7 @@ const Search = () => {
       }),
       searchResultColumnHelper.accessor("owner", {
         cell: (info) => {
-          return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+          return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
         },
         header: "Owner",
       }),
@@ -466,7 +466,7 @@ const Search = () => {
       {
         label: (count) => `Export selection as JSON (${count})`,
         icon: "download",
-        action: async (table, rows: any) => {
+        action: async (table, rows) => {
           const toExport: string[] = [];
           for (const rowIndex of Object.keys(rows)) {
             toExport.push(table.getRow(rowIndex).original._id);

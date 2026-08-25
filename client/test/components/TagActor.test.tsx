@@ -1,0 +1,141 @@
+import React from "react";
+
+// Testing imports
+import { screen } from "@testing-library/react";
+import { render } from "../render";
+import { vi } from "vitest";
+import { MockedProvider } from "@apollo/client/testing/react";
+import { InMemoryCache } from "@apollo/client";
+import { gql } from "@apollo/client";
+
+// Chakra UI imports
+import { ChakraProvider } from "@chakra-ui/react";
+import { theme } from "../../src/styles/theme";
+
+// Target component
+import TagActor from "../../src/components/TagActor";
+
+// Create test cache matching app configuration (without deprecated addTypename)
+const createTestCache = () => {
+  return new InMemoryCache({
+    typePolicies: {
+      Workspace: {
+        keyFields: ["_id"],
+      },
+      Entity: {
+        keyFields: ["_id"],
+      },
+      Project: {
+        keyFields: ["_id"],
+      },
+      Attribute: {
+        keyFields: ["_id"],
+      },
+      Activity: {
+        keyFields: ["_id"],
+      },
+    },
+  });
+};
+
+// Mock useBreakpoint hook
+vi.mock("../../src/hooks/useBreakpoint", () => ({
+  useBreakpoint: () => ({
+    isBreakpointActive: vi.fn(() => false),
+  }),
+}));
+
+// Define the actual GraphQL query
+const GET_USER = gql`
+  query GetUser($_id: String) {
+    user(_id: $_id) {
+      _id
+      firstName
+      lastName
+    }
+  }
+`;
+
+// Mock GraphQL query
+const mockDefaultUserQuery = {
+  request: {
+    query: GET_USER,
+    variables: { _id: "test-orcid" },
+  },
+  result: {
+    data: {
+      user: {
+        __typename: "User",
+        _id: "test-orcid",
+        firstName: "John",
+        lastName: "Doe",
+      },
+    },
+  },
+};
+
+const renderActorTag = (props: Partial<React.ComponentProps<typeof TagActor>> = {}) => {
+  const defaultProps: React.ComponentProps<typeof TagActor> = {
+    identifier: "test-orcid",
+    fallback: "Test User",
+    size: "md",
+    ...props,
+  };
+
+  return render(
+    <MockedProvider mocks={[mockDefaultUserQuery]} cache={createTestCache()}>
+      <TagActor {...defaultProps} />
+    </MockedProvider>,
+  );
+};
+
+describe("TagActor Component", () => {
+  describe("Default Behavior", () => {
+    it("renders with fallback initially", () => {
+      renderActorTag({ fallback: "Fallback Name" });
+      expect(screen.getByText("Fallback Name")).toBeTruthy();
+    });
+
+    it("renders inline variant", () => {
+      renderActorTag({ inline: true, identifier: "" });
+      expect(screen.getByText("Test User")).toBeTruthy();
+    });
+
+    it("renders avatar only variant", () => {
+      const { container } = renderActorTag({ avatarOnly: true });
+      expect(container.firstChild).toBeTruthy();
+    });
+  });
+
+  describe("Missing Data", () => {
+    it("handles missing orcid", () => {
+      renderActorTag({ identifier: "" });
+      expect(screen.getByText("Test User")).toBeTruthy();
+    });
+
+    it("handles loading state", () => {
+      renderActorTag();
+      // Component should render even while loading
+      expect(screen.getByText("Test User")).toBeTruthy();
+    });
+
+    it("handles GraphQL error gracefully", () => {
+      const errorMock = {
+        ...mockDefaultUserQuery,
+        result: {
+          errors: [{ message: "Error fetching user" }],
+        },
+      };
+
+      render(
+        <ChakraProvider value={theme}>
+          <MockedProvider mocks={[errorMock]} cache={createTestCache()}>
+            <TagActor identifier="test-orcid" fallback="Fallback" size="md" />
+          </MockedProvider>
+        </ChakraProvider>,
+      );
+
+      expect(screen.getByText("Fallback")).toBeTruthy();
+    });
+  });
+});

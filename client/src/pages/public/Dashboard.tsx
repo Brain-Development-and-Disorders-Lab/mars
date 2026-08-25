@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Button, EmptyState, Flex, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
-import { AttributeTag, ValueTag } from "@components/FieldTag";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
+import { AttributeTag, ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -35,8 +35,8 @@ import { getPublicWorkspaceUrl } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import TimestampTag from "@components/TimestampTag";
-import ActorTag from "@components/ActorTag";
+import TagTimestamp from "@components/TagTimestamp";
+import TagActor from "@components/TagActor";
 dayjs.extend(relativeTime);
 
 // Queries
@@ -441,14 +441,14 @@ export const Dashboard = () => {
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Owner
                 </Text>
-                <ActorTag identifier={workspaceOwner} fallback={"Unknown User"} workspace={id} size={"md"} isPublic />
+                <TagActor identifier={workspaceOwner} fallback={"Unknown User"} workspace={id} size={"md"} isPublic />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Created
                 </Text>
-                <TimestampTag timestamp={workspaceCreated} />
+                <TagTimestamp timestamp={workspaceCreated} />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>

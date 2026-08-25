@@ -2,15 +2,15 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, EmptyState, Flex, Text, Input, Checkbox, Collapsible, Field, Separator } from "@chakra-ui/react";
-import ActorTag from "@components/ActorTag";
+import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
+import DataTableFilters from "@components/DataTable/DataTableFilters";
 import { Content } from "@components/Container";
-import { ValueTag } from "@components/FieldTag";
+import { ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTableCell";
+import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -284,209 +284,39 @@ export const Templates = () => {
           </Text>
 
           {/* Filter Section */}
-          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={"surface.card"}
-            >
-              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"filter"} size={"sm"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Template Filters:
-                  </Text>
-                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
-                    {activeFilterCount} Active
-                  </Text>
-                </Flex>
-                <Collapsible.Trigger asChild>
-                  <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
-                    {filtersOpen ? "Hide" : "Show"} Filters
-                    <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
-                  </Button>
-                </Collapsible.Trigger>
-              </Flex>
-              <Collapsible.Content>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex direction={"row"} gap={["1", "4"]} wrap={"wrap"}>
-                    {/* Date Range Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Created Between
-                      </Text>
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
-                            Start (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.startDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                startDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                        <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
-                            End (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.endDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                endDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                      </Flex>
-                    </Flex>
-
-                    <Separator orientation={"vertical"} />
-
-                    {/* Owner Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Owner
-                      </Text>
-                      <Flex direction={"column"} gap={"2"} maxH={"200px"} overflowY={"auto"} ml={"1"}>
-                        {templates.length > 0 &&
-                          _.uniq(templates.map((t) => t.owner))
-                            .filter((owner) => owner)
-                            .map((owner) => (
-                              <Checkbox.Root
-                                key={owner}
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={filterState.owners.includes(owner)}
-                                onCheckedChange={(details) => {
-                                  const isChecked = details.checked as boolean;
-                                  if (isChecked) {
-                                    setFilterState({
-                                      ...filterState,
-                                      owners: [...filterState.owners, owner],
-                                    });
-                                  } else {
-                                    setFilterState({
-                                      ...filterState,
-                                      owners: filterState.owners.filter((o) => o !== owner),
-                                    });
-                                  }
-                                }}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"}>
-                                  <ActorTag
-                                    identifier={owner}
-                                    fallback={"Unknown User"}
-                                    size="sm"
-                                    workspace={workspace}
-                                    isPublic
-                                    inline
-                                  />
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            ))}
-
-                        {templates.length === 0 && (
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                            No Template Owners
-                          </Text>
-                        )}
-                      </Flex>
-                    </Flex>
-
-                    <Separator orientation={"vertical"} />
-
-                    {/* Value Count Range Filter */}
-                    <Flex direction={"column"} gap={"1"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Value Count
-                      </Text>
-                      <Flex direction={"column"} gap={"2"} ml={"1"}>
-                        {["0", "1-5", "6-10", "11+"].map((range) => (
-                          <Checkbox.Root
-                            key={range}
-                            size={"xs"}
-                            colorPalette={"blue"}
-                            checked={filterState.valueCountRanges.includes(range)}
-                            onCheckedChange={(details) => {
-                              const isChecked = details.checked as boolean;
-                              if (isChecked) {
-                                setFilterState({
-                                  ...filterState,
-                                  valueCountRanges: [...filterState.valueCountRanges, range],
-                                });
-                              } else {
-                                setFilterState({
-                                  ...filterState,
-                                  valueCountRanges: filterState.valueCountRanges.filter((r) => r !== range),
-                                });
-                              }
-                            }}
-                          >
-                            <Checkbox.HiddenInput />
-                            <Checkbox.Control />
-                            <Checkbox.Label fontSize={"xs"}>
-                              {range === "0" ? "0 values" : range === "11+" ? "11+ values" : `${range} values`}
-                            </Checkbox.Label>
-                          </Checkbox.Root>
-                        ))}
-                      </Flex>
-                    </Flex>
-                  </Flex>
-
-                  {/* Filter control buttons */}
-                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"blue"}
-                      onClick={() => {
-                        setAppliedFilters({ ...filterState });
-                      }}
-                    >
-                      Apply Filters
-                    </Button>
-                    <Button
-                      size={"xs"}
-                      variant={"outline"}
-                      rounded={"md"}
-                      onClick={() => {
-                        const clearedState = {
-                          startDate: "",
-                          endDate: "",
-                          owners: [],
-                          valueCountRanges: [],
-                        };
-                        setFilterState(clearedState);
-                        setAppliedFilters(clearedState);
-                      }}
-                      disabled={activeFilterCount === 0}
-                    >
-                      Reset Filters
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Collapsible.Content>
-            </Flex>
-          </Collapsible.Root>
+          <DataTableFilters
+            entityLabel={"Template"}
+            filtersOpen={filtersOpen}
+            onFiltersOpenChange={setFiltersOpen}
+            activeFilterCount={activeFilterCount}
+            startDate={filterState.startDate}
+            endDate={filterState.endDate}
+            onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
+            onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
+            owners={templates.map((t) => t.owner)}
+            selectedOwners={filterState.owners}
+            onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
+            workspace={workspace}
+            isPublic
+            countFilter={{
+              mode: "buckets",
+              label: "Value Count",
+              unitLabel: "values",
+              selected: filterState.valueCountRanges,
+              onChange: (valueCountRanges) => setFilterState({ ...filterState, valueCountRanges }),
+            }}
+            onApply={() => setAppliedFilters({ ...filterState })}
+            onReset={() => {
+              const clearedState = {
+                startDate: "",
+                endDate: "",
+                owners: [],
+                valueCountRanges: [],
+              };
+              setFilterState(clearedState);
+              setAppliedFilters(clearedState);
+            }}
+          />
 
           {filteredTemplates.filter((template) => _.isEqual(template.archived, false)).length > 0 ? (
             <DataTable

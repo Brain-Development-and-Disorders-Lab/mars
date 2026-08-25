@@ -61,53 +61,56 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 
 // Page container
 const Page: FC<PageProps> = (props: PageProps) => {
+  // Authentication state
+  const [session, setSession] = useState<Session>();
+
+  // Error state
+  const [sessionError, setSessionError] = useState(false);
+
+  // `true` when the user authenticated via a third-party but hasn't completed their profile
+  const [incompleteProfile, setIncompleteProfile] = useState(false);
+
+  // Route param carrying the public Workspace identifier
+  const { id } = useParams();
+
+  /**
+   * Helper function to validate session and check profile completion state
+   */
+  const getSession = async () => {
+    // Retrieve the session information
+    const sessionResponse = await auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data) {
+      // Issue retrieving session
+      toaster.create({
+        title: "Error",
+        description: "Session expired, please login again",
+        type: "error",
+        duration: 4000,
+        closable: true,
+      });
+      setSessionError(true);
+    } else {
+      // Successfully obtained session
+      setSession(sessionResponse.data.session);
+      posthog.identify(sessionResponse.data.user.id, {
+        email: sessionResponse.data.user.email,
+        name: sessionResponse.data.user.name,
+      });
+
+      // Force user to the profile completion page if required
+      if (sessionResponse.data.user.completedProfile === false) {
+        setIncompleteProfile(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!props.isPublic) {
+      getSession();
+    }
+  }, []);
+
   if (!props.isPublic) {
-    // Authentication state
-    const [session, setSession] = useState<Session>();
-
-    // Error state
-    const [sessionError, setSessionError] = useState(false);
-
-    // `true` when the user authenticated via a third-party but hasn't completed their profile
-    const [incompleteProfile, setIncompleteProfile] = useState(false);
-
-    /**
-     * Helper function to validate session and check profile completion state
-     */
-    const getSession = async () => {
-      // Retrieve the session information
-      const sessionResponse = await auth.getSession();
-      if (sessionResponse.error || !sessionResponse.data) {
-        // Issue retrieving session
-        toaster.create({
-          title: "Error",
-          description: "Session expired, please login again",
-          type: "error",
-          duration: 4000,
-          closable: true,
-        });
-        setSessionError(true);
-      } else {
-        // Successfully obtained session
-        setSession(sessionResponse.data.session);
-        posthog.identify(sessionResponse.data.user.id, {
-          email: sessionResponse.data.user.email,
-          name: sessionResponse.data.user.name,
-        });
-
-        // Force user to the profile completion page if required
-        if (sessionResponse.data.user.completedProfile === false) {
-          setIncompleteProfile(true);
-        }
-      }
-    };
-
-    useEffect(() => {
-      if (!props.isPublic) {
-        getSession();
-      }
-    }, []);
-
     if (incompleteProfile) {
       return <Navigate to={"/signup"} />;
     }
@@ -155,9 +158,6 @@ const Page: FC<PageProps> = (props: PageProps) => {
       return <Loading />;
     }
   } else {
-    // Route param carrying the public Workspace identifier
-    const { id } = useParams();
-
     // Display content
     return (
       <Flex direction={{ base: "column", lg: "row" }} w={"100%"} p={"0"} m={"0"}>

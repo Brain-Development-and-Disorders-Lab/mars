@@ -8,7 +8,7 @@ import DataTable from "@components/DataTable";
 import React from "react";
 import { Flex, Text, Button, Tag } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import ActorTag from "@components/ActorTag";
+import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
@@ -156,7 +156,7 @@ const columns = [
   }),
   columnHelper.accessor("owner", {
     cell: (info) => {
-      return <ActorTag identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
     },
     header: "Owner",
     enableHiding: true,
