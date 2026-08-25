@@ -14,6 +14,7 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
     "jest.config.js",
     "webpack.*.js",
     "*.d.ts",
-    "yarn.lock      ",
+    "yarn.lock",
+    "src/setup.js",
   ],
 });

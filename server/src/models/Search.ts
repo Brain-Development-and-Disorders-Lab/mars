@@ -226,10 +226,13 @@ export class Search {
   };
 
   /**
-   * Helper function to traverse an object and call a callback function for each key
+   * Helper function to traverse an object and call a callback function for each key.
+   * Values are mutated in place, including replacing strings with RegExp instances, so the
+   * traversal is untyped by necessity.
    * @param object Object to traverse
    * @param callback Callback function to call for each key
    */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private static traverseQueryObject = (object: any, callback: (key: any, value: any) => void) => {
     const stack = [object];
 
@@ -300,6 +303,7 @@ export class Search {
       return parsedQuery;
     }
   };
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   /**
    * Create and execute a structured MongoDB query
@@ -315,7 +319,7 @@ export class Search {
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Parse the query string into a MongoDB query object
     const parsedQuery = JSON.parse(query);
-    const mongoQuery: Record<string, any> = Search.generateMongoQuery(parsedQuery);
+    const mongoQuery = Search.generateMongoQuery(parsedQuery);
 
     if (resultType === "project") {
       // Execute the search query with any specified options

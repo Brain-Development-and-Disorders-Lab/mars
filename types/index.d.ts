@@ -603,6 +603,23 @@ export type EntityAttributeNameCellProps = {
   isPublic?: boolean;
 };
 
+// `CreateEntityAttributesTable` props, the Entity creation flow's attributes table
+export type CreateEntityAttributesTableProps = {
+  attributes: AttributeModel[];
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove: (id: string) => void;
+  onAddClick: () => void;
+};
+
+// `CreateEntityAttributeNameCell` props, the "Name" column cell within `CreateEntityAttributesTable`
+export type CreateEntityAttributeNameCellProps = {
+  attribute: AttributeModel;
+  templates: AttributeModel[];
+  onUpdate: (updated: AttributeModel) => void;
+  onRemove: (id: string) => void;
+};
+
 // `EntityProjectsTable` props, the Projects an Entity belongs to, shared by the Entity detail page
 export type EntityProjectsTableProps = {
   projects: string[];

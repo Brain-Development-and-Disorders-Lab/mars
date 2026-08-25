@@ -184,7 +184,11 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
 
   const toggleExpanded = (version: string) => {
     const next = new Set(expandedVersions);
-    next.has(version) ? next.delete(version) : next.add(version);
+    if (next.has(version)) {
+      next.delete(version);
+    } else {
+      next.add(version);
+    }
     setExpandedVersions(next);
   };
 

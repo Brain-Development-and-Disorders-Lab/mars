@@ -178,7 +178,7 @@ export const WorkspacesResolvers = {
     // Get collection of Workspace metrics
     collaboratorMetrics: async (
       _parent: IResolverParent,
-      _args: any,
+      _args: Record<string, unknown>,
       context: Context,
     ): Promise<CollaboratorMetrics> => {
       const workspace = await Workspaces.getOne(context.workspace);

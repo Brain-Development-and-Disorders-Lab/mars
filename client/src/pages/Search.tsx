@@ -466,7 +466,7 @@ const Search = () => {
       {
         label: (count) => `Export selection as JSON (${count})`,
         icon: "download",
-        action: async (table, rows: any) => {
+        action: async (table, rows) => {
           const toExport: string[] = [];
           for (const rowIndex of Object.keys(rows)) {
             toExport.push(table.getRow(rowIndex).original._id);

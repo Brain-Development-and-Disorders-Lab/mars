@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { ConfigType, Dayjs } from "dayjs";
 import { GraphQLScalarType } from "graphql";
 
 /**
@@ -8,13 +8,13 @@ export const DateResolver = {
   Date: new GraphQLScalarType({
     name: "Date",
     description: "Date type using Dayjs",
-    parseValue(value: any): Dayjs {
+    parseValue(value: unknown): Dayjs {
       // Value received from the client, typically a string
-      return dayjs(value);
+      return dayjs(value as ConfigType);
     },
-    serialize(value: any) {
+    serialize(value: unknown) {
       // Value sent to the client, formatted for JSON
-      return value.toJSON();
+      return (value as Date | Dayjs).toJSON();
     },
   }),
 };

@@ -2,18 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Existing and custom components
-import {
-  Button,
-  CloseButton,
-  Dialog,
-  EmptyState,
-  Flex,
-  Menu,
-  Spacer,
-  Tag,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Flex, Menu, Spacer, Tag, Text, useDisclosure } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";

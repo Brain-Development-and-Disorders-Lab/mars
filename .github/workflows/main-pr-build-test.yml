@@ -56,6 +56,42 @@ jobs:
           name: mars-server
           path: server/dist/
 
+  lint_server:
+    name: Lint server
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      - name: Lint server
+        working-directory: server
+        run: |
+          yarn install
+          yarn lint
+
+  format_server:
+    name: Format server
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      - name: Check server formatting
+        working-directory: server
+        run: |
+          yarn install
+          yarn format:check
+
   build_client:
     name: Build client
     runs-on: ubuntu-latest
@@ -73,6 +109,42 @@ jobs:
         run: |
           yarn install
           yarn build
+
+  lint_client:
+    name: Lint client
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      - name: Lint client
+        working-directory: client
+        run: |
+          yarn install
+          yarn lint
+
+  format_client:
+    name: Format client
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      - name: Check client formatting
+        working-directory: client
+        run: |
+          yarn install
+          yarn format:check
 
   test_server:
     name: Test server

@@ -1,9 +1,10 @@
-import { GraphQLScalarType, Kind } from "graphql";
+import { GraphQLScalarType, Kind, ObjectValueNode, ValueNode } from "graphql";
 
 /**
  * Generic GraphQL scalar type to deal with dynamic types rarely used in codebase
  * Credit: https://stackoverflow.com/a/45598911
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const toObject = (value: any) => {
   if (typeof value === "object") {
     return value;
@@ -16,16 +17,16 @@ const toObject = (value: any) => {
   return value.toString();
 };
 
-const parseObject = (ast: any) => {
-  const value = Object.create(null);
-  ast.fields.forEach((field: any) => {
+const parseObject = (ast: ObjectValueNode): Record<string, unknown> => {
+  const value: Record<string, unknown> = Object.create(null);
+  ast.fields.forEach((field) => {
     value[field.name.value] = parseValue(field.value);
   });
 
   return value;
 };
 
-const parseValue = (ast: any) => {
+const parseValue = (ast: ValueNode): unknown => {
   switch (ast.kind) {
     case Kind.STRING:
     case Kind.BOOLEAN:

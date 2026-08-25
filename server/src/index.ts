@@ -179,6 +179,7 @@ const start = async () => {
   };
 
   // Schema shared by the authenticated ("/") and public ("/public") servers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const resolvers: IResolvers<any, Context>[] = [
     {
       Upload: GraphQLUpload,
@@ -199,7 +200,7 @@ const start = async () => {
     WorkspacesResolvers,
     {
       SearchResult: {
-        __resolveType(result: any) {
+        __resolveType(result: { _id: string }) {
           // Entity identifiers start with "e"
           if (_.startsWith(result._id, "e")) {
             return "Entity";

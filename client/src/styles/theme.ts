@@ -12,13 +12,18 @@ import { STYLES } from "./styles";
 const toColorRef = (value: string): string =>
   value.startsWith("#") || !value.includes(".") ? value : `{colors.${value}}`;
 
+// Mirrors Chakra's own (unexported) `TokenSchema`/`Recursive<T>` shapes
+interface WrappedColors {
+  [key: string]: { value: string } | WrappedColors;
+}
+
 /**
  * Recursively wraps a STYLES sub-object's string leaves into Chakra's
  * `{ value }` token shape
  * @param {Record<string, unknown>} input Color input structure
- * @return {any}
+ * @return {WrappedColors}
  */
-const wrapColors = (input: Record<string, unknown>): any =>
+const wrapColors = (input: Record<string, unknown>): WrappedColors =>
   Object.fromEntries(
     Object.entries(input).map(([key, value]) =>
       typeof value === "string"

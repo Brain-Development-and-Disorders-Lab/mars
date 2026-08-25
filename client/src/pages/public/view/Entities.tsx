@@ -82,7 +82,7 @@ export const Entities = () => {
 
   // Entities export dialog
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportIds, setExportIds] = useState<string[] | undefined>(undefined);
+  const [exportIds] = useState<string[] | undefined>(undefined);
 
   // Pagination state
   const [page, setPage] = useState(0);
