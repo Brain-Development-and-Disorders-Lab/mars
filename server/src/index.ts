@@ -75,7 +75,12 @@ app.use(
       return "info";
     },
     serializers: {
-      req: (req) => ({ method: req.method, url: req.url, remoteAddress: req.remoteAddress }),
+      req: (req) => ({
+        method: req.method,
+        url: req.url,
+        remoteAddress: req.remoteAddress,
+        xForwardedFor: req.headers["x-forwarded-for"], // TEMP: diagnose better-auth IP resolution
+      }),
       res: (res) => ({ statusCode: res.statusCode }),
     },
   }),
