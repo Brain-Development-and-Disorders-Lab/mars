@@ -137,6 +137,12 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 minutes
     },
   },
+  rateLimit: {
+    customRules: {
+      // Read-only and polled frequently by the client
+      "/get-session": { window: 60, max: 300 },
+    },
+  },
   plugins: [
     genericOAuth({
       config: [getOAuthConfig()],

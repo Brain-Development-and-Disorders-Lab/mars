@@ -53,14 +53,11 @@ const User = () => {
   const { globalPermissions } = usePermissions();
 
   // Authentication and user
-  const [user, setUser] = useState("");
+  const { data: session, error: sessionErrorState } = auth.useSession();
+  const user = session?.user.id ?? "";
 
-  /**
-   * Helper function to get user information
-   */
-  const getUser = async () => {
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  useEffect(() => {
+    if (sessionErrorState) {
       toaster.create({
         title: "Error",
         description: "Session expired, please login again",
@@ -68,14 +65,8 @@ const User = () => {
         duration: 4000,
         closable: true,
       });
-    } else {
-      setUser(sessionResponse.data.user.id);
     }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  }, [sessionErrorState]);
 
   // Query to get a User and Workspaces
   const GET_USER = gql`

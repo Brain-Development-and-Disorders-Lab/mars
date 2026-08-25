@@ -20,7 +20,6 @@ import { Navigate, Outlet, useParams } from "react-router-dom";
 
 // Authentication
 import { auth } from "@lib/auth";
-import { Session } from "better-auth";
 
 // Analytics
 import posthog from "posthog-js";
@@ -62,7 +61,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 // Page container
 const Page: FC<PageProps> = (props: PageProps) => {
   // Authentication state
-  const [session, setSession] = useState<Session>();
+  const { data: session, isPending: isSessionPending, error: sessionErrorState } = auth.useSession();
 
   // Error state
   const [sessionError, setSessionError] = useState(false);
@@ -73,13 +72,11 @@ const Page: FC<PageProps> = (props: PageProps) => {
   // Route param carrying the public Workspace identifier
   const { id } = useParams();
 
-  /**
-   * Helper function to validate session and check profile completion state
-   */
-  const getSession = async () => {
-    // Retrieve the session information
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  // Validate session and check profile completion state once the session settles
+  useEffect(() => {
+    if (props.isPublic || isSessionPending) return;
+
+    if (sessionErrorState || !session) {
       // Issue retrieving session
       toaster.create({
         title: "Error",
@@ -89,26 +86,20 @@ const Page: FC<PageProps> = (props: PageProps) => {
         closable: true,
       });
       setSessionError(true);
-    } else {
-      // Successfully obtained session
-      setSession(sessionResponse.data.session);
-      posthog.identify(sessionResponse.data.user.id, {
-        email: sessionResponse.data.user.email,
-        name: sessionResponse.data.user.name,
-      });
-
-      // Force user to the profile completion page if required
-      if (sessionResponse.data.user.completedProfile === false) {
-        setIncompleteProfile(true);
-      }
+      return;
     }
-  };
 
-  useEffect(() => {
-    if (!props.isPublic) {
-      getSession();
+    // Successfully obtained session
+    posthog.identify(session.user.id, {
+      email: session.user.email,
+      name: session.user.name,
+    });
+
+    // Force user to the profile completion page if required
+    if (session.user.completedProfile === false) {
+      setIncompleteProfile(true);
     }
-  }, []);
+  }, [props.isPublic, isSessionPending, sessionErrorState, session]);
 
   if (!props.isPublic) {
     if (incompleteProfile) {

@@ -35,9 +35,6 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY as string, {
 // Variables
 import { API_URL } from "./variables";
 
-// Authentication
-import { auth } from "@lib/auth";
-
 // Hooks
 import { useStorage } from "@hooks/useStorage";
 
@@ -63,18 +60,13 @@ const httpLink = new UploadHttpLink({
 /**
  * Authentication link to add headers to each request
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const authLink = new SetContextLink(async (previousContext, _operation) => {
-  // Get session data
-  const { data: sessionData } = await auth.getSession();
-
+const authLink = new SetContextLink((previousContext) => {
   // Get active Workspace
   const { storage } = useStorage();
 
   return {
     headers: {
       ...previousContext.headers,
-      user: sessionData?.user.id,
       workspace: storage.workspace,
     },
   };

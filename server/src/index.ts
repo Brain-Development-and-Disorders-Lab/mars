@@ -61,6 +61,9 @@ export { PostHogClient } from "@lib/posthog";
 const port = process.env.PORT || 8000;
 const app = express();
 
+// Trust exactly one hop to resolve to the real client address
+app.set("trust proxy", 1);
+
 // Azure App Service middleware to strip `x-forwarded-for` port
 app.use((req, _res, next) => {
   const xForwardedFor = req.headers["x-forwarded-for"];

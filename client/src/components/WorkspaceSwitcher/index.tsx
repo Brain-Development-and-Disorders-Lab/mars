@@ -110,13 +110,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   }, [open]);
 
   // Admin visibility
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    auth.getSession().then(({ data }) => {
-      setIsAdmin(data?.user?.role === "admin");
-    });
-  }, []);
+  const { data: session } = auth.useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   /**
    * Handle selecting a Workspace from the drop-down

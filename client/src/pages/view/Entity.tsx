@@ -142,9 +142,6 @@ const Entity = () => {
   // Controls the add-attribute dialog
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
-  // Authentication and user
-  const [user, setUser] = useState("");
-
   // Secondary identifier
   const [showSecondaryIdentifier, setShowSecondaryIdentifier] = useState(false);
   const [identifierFormats, setIdentifierFormats] = useState<ListCollection>(
@@ -156,12 +153,12 @@ const Entity = () => {
   const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
   const [secondaryIdentifier, setSecondaryIdentifier] = useState("");
 
-  /**
-   * Helper function to get user information
-   */
-  const getUser = async () => {
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  // Authentication and user
+  const { data: session, error: sessionErrorState } = auth.useSession();
+  const user = session?.user.id ?? "";
+
+  useEffect(() => {
+    if (sessionErrorState) {
       toaster.create({
         title: "Error",
         description: "Session expired, please login again",
@@ -169,14 +166,8 @@ const Entity = () => {
         duration: 4000,
         closable: true,
       });
-    } else {
-      setUser(sessionResponse.data.user.id);
     }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  }, [sessionErrorState]);
 
   // Query to retrieve Entity data and associated data for editing
   const GET_ENTITY = gql`

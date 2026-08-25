@@ -57,20 +57,24 @@ const Template = () => {
 
   const [informationOpen, setInformationOpen] = useState(false);
   const [name, setName] = useState("");
-  const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
   const [values, setValues] = useState<IValue[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const getUser = async () => {
+  // Authentication and user
+  const { data: session, error: sessionErrorState } = auth.useSession();
+  const owner = session?.user.id ?? "";
+
+  useEffect(() => {
     // If the User does not have Workspace permissions, direct to `/unauthorized`
     if (!permissionsLoading && !workspacePermissions.templates.create && window.location.pathname !== "/unauthorized") {
       window.location.href = "/unauthorized";
     }
+  }, []);
 
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  useEffect(() => {
+    if (sessionErrorState) {
       toaster.create({
         title: "Error",
         description: "Session expired, please login again",
@@ -78,14 +82,8 @@ const Template = () => {
         duration: 4000,
         closable: true,
       });
-    } else {
-      setOwner(sessionResponse.data.user.id);
     }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  }, [sessionErrorState]);
 
   const isNameError = name === "";
   const isDescriptionError = description === "";

@@ -253,13 +253,8 @@ const Workspace = () => {
   const [selectedTemplates, setSelectedTemplates] = useState({});
 
   // State for current user
-  const [currentUser, setCurrentUser] = useState("");
-
-  useEffect(() => {
-    auth.getSession().then(({ data: session }) => {
-      if (session?.user) setCurrentUser(session.user.id);
-    });
-  }, []);
+  const { data: session } = auth.useSession();
+  const currentUser = session?.user.id ?? "";
 
   // State for Workspace collaborators
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);

@@ -192,9 +192,13 @@ const DialogImport = (props: DialogImportProps) => {
   // Confirmation dialog shown when the user clicks Finish and warnings are present
   const [confirmWarningsOpen, setConfirmWarningsOpen] = useState(false);
 
-  const getUser = async () => {
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  // Authentication and user
+  const { data: session, error: sessionErrorState } = auth.useSession();
+
+  useEffect(() => {
+    if (!props.open) return;
+
+    if (sessionErrorState || !session) {
       toaster.create({
         title: "Error",
         description: "Session expired, please login again",
@@ -202,16 +206,11 @@ const DialogImport = (props: DialogImportProps) => {
         duration: 4000,
         closable: true,
       });
-    } else {
-      setOwnerField(sessionResponse.data.user.id);
+      return;
     }
-  };
 
-  useEffect(() => {
-    if (props.open) {
-      getUser();
-    }
-  }, [props.open]);
+    setOwnerField(session.user.id);
+  }, [props.open, session, sessionErrorState]);
 
   // Apollo hooks
   const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{

@@ -58,7 +58,6 @@ const CreateWorkspace = () => {
   // State for Workspace details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [owner, setOwner] = useState("");
 
   // State for Workspace collaborators
   const [collaborators, setCollaborators] = useState([] as string[]);
@@ -66,13 +65,12 @@ const CreateWorkspace = () => {
   // State for submitting the form
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Authentication and user
-  /**
-   * Helper function to get user information
-   */
-  const getUser = async () => {
-    const sessionResponse = await auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data) {
+  // Authentication and user, read from the already-fetched shared session store
+  const { data: session, error: sessionErrorState } = auth.useSession();
+  const owner = session?.user.id ?? "";
+
+  useEffect(() => {
+    if (sessionErrorState) {
       toaster.create({
         title: "Error",
         description: "Session expired, please login again",
@@ -80,14 +78,8 @@ const CreateWorkspace = () => {
         duration: 4000,
         closable: true,
       });
-    } else {
-      setOwner(sessionResponse.data.user.id);
     }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  }, [sessionErrorState]);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
