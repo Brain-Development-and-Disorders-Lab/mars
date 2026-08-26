@@ -235,18 +235,12 @@ const SearchBox = () => {
   };
 
   // Basic handler to navigate to a result
-  const handleResultClick = (id: string, type?: string) => {
+  const handleResultClick = (id: string) => {
     setQuery("");
     setOpen(false);
-    // Determine route based on result type
-    if (type === "Project") {
-      navigate(`/projects/${id}`);
-    } else if (type === "Entity") {
-      navigate(`/entities/${id}`);
-    } else {
-      // Default to entity for backwards compatibility
-      navigate(`/entities/${id}`);
-    }
+
+    // Navigate to the Entity
+    navigate(`/entities/${id}`);
   };
 
   return (
@@ -319,14 +313,7 @@ const SearchBox = () => {
               shadow={"lg"}
               w={inputWidth ? `${inputWidth}px` : "100%"}
             >
-              <Flex
-                p={"1"}
-                bg={"surface.muted"}
-                roundedTop={"md"}
-                roundedBottom={!isSearching && hasSearched && results.length === 0 ? "md" : undefined}
-                direction={"column"}
-                gap={"1"}
-              >
+              <Flex p={"1"} bg={"surface.muted"} roundedTop={"md"} direction={"column"} gap={"1"}>
                 <Flex width={"100%"} direction={"row"} gap={"1"} align={"center"}>
                   {isSearching ? (
                     <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"} p={"2"}>
@@ -345,24 +332,27 @@ const SearchBox = () => {
                       </Text>
                       <Text fontSize={"xs"}>
                         result
-                        {results.length > 1 || results.length === 0 ? "s" : ""}, view more using{" "}
+                        {results.length !== 1 ? "s" : ""}
+                        {results.length > MAX_RESULTS && ", view more with"}
                       </Text>
-                      <Link
-                        className={"light"}
-                        color={"black"}
-                        variant={"underline"}
-                        fontWeight={"semibold"}
-                        gap={"1"}
-                        fontSize={"xs"}
-                        onClick={() => {
-                          // Close the dropdown and navigate to the `/search` route
-                          onCloseWrapper();
-                          navigate("/search");
-                        }}
-                      >
-                        Search
-                        <Icon name={"a_right"} color={"black"} size={"xs"} />
-                      </Link>
+                      {results.length > MAX_RESULTS && (
+                        <Link
+                          className={"light"}
+                          color={"black"}
+                          variant={"underline"}
+                          fontWeight={"semibold"}
+                          gap={"1"}
+                          fontSize={"xs"}
+                          onClick={() => {
+                            // Close the dropdown and navigate to the `/search` route
+                            onCloseWrapper();
+                            navigate("/search");
+                          }}
+                        >
+                          Search
+                          <Icon name={"a_right"} color={"black"} size={"xs"} />
+                        </Link>
+                      )}
                     </Flex>
                   )}
                 </Flex>
@@ -379,12 +369,11 @@ const SearchBox = () => {
               )}
 
               {/* Conditionally show search results */}
-              {hasSearched && results.length > 0 && !isError && (
+              {hasSearched && !isSearching && results.length >= 0 && !isError && (
                 <Flex p={"1"} gap={"1"} py={"1"} roundedTop={"md"}>
                   <Stack gap={"1"} separator={<Separator />} w={"100%"}>
                     {results.length > 0 ? (
                       results.slice(0, MAX_RESULTS).map((result: IGenericItem) => {
-                        const resultType = (result as IGenericItem & { __typename?: string }).__typename || "Entity";
                         return (
                           <Flex
                             key={result._id}
@@ -393,27 +382,22 @@ const SearchBox = () => {
                             w={"100%"}
                             justify={"space-between"}
                             align={"center"}
-                            p={"0"}
+                            p={"1"}
                             pl={"2"}
                           >
-                            <Flex direction={"column"} gap={"0.5"}>
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                               <Text color={"black"} fontWeight={"semibold"} fontSize={"xs"}>
                                 {result.name}
                               </Text>
-                              <Flex direction={"row"} gap={"0.5"} align={"center"}>
-                                <Icon name={"entity"} size={"xxs"} color={STYLES.entity.color.icon} />
-                                <Text fontSize={"2xs"} color={"text.subtle"}>
-                                  {resultType}
-                                </Text>
-                              </Flex>
                             </Flex>
                             <Button
                               size="2xs"
                               mx={"2"}
                               variant="subtle"
                               colorPalette="gray"
-                              aria-label={`View ${resultType}`}
-                              onClick={() => handleResultClick(result._id, resultType)}
+                              aria-label={"View Entity"}
+                              onClick={() => handleResultClick(result._id)}
                             >
                               View
                               <Icon name={"a_right"} color={"black"} size={"xs"} />
