@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import { Flex, IconButton, Image, Button, Text, Menu, Spacer } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import DialogCreate from "@components/DialogCreate";
 import DialogImport from "@components/DialogImport";
 import DialogScan from "@components/DialogScan";
 import DialogReport from "@components/DialogReport";
@@ -63,6 +64,7 @@ const Navigation = (props: NavigationProps) => {
   const [workspaceName, setWorkspaceName] = useState<string>("");
 
   // Dialog open states
+  const [dialogCreateOpen, setDialogCreateOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -219,23 +221,6 @@ const Navigation = (props: NavigationProps) => {
               Search
             </Button>
 
-            {!props.isPublic && (
-              <Button
-                id={"navCreateButtonDesktop"}
-                key={"create"}
-                size={"xs"}
-                w={"100%"}
-                rounded={"md"}
-                justifyContent={"left"}
-                {...navLinkStyle(_.includes(location.pathname, "/create"))}
-                onClick={() => navigate("/create")}
-                disabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                <Icon name={"add"} size={"xs"} />
-                Create
-              </Button>
-            )}
-
             <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
               View
             </Text>
@@ -246,7 +231,7 @@ const Navigation = (props: NavigationProps) => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/entit") && !_.includes(location.pathname, "/create"))}
+              {...navLinkStyle(_.includes(location.pathname, "/entit"))}
               onClick={() => {
                 if (props.isPublic) {
                   navigate(`/public/${workspace}/entities`);
@@ -268,7 +253,7 @@ const Navigation = (props: NavigationProps) => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/project") && !_.includes(location.pathname, "/create"))}
+              {...navLinkStyle(_.includes(location.pathname, "/project"))}
               onClick={() => {
                 if (props.isPublic) {
                   navigate(`/public/${workspace}/projects`);
@@ -290,7 +275,7 @@ const Navigation = (props: NavigationProps) => {
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/template") && !_.includes(location.pathname, "/create"))}
+              {...navLinkStyle(_.includes(location.pathname, "/template"))}
               onClick={() => {
                 if (props.isPublic) {
                   navigate(`/public/${workspace}/templates`);
@@ -310,6 +295,21 @@ const Navigation = (props: NavigationProps) => {
               <Text fontSize={"xs"} fontWeight={"bold"} color={"nav.textMuted"}>
                 Tools
               </Text>
+              <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
+                <Button
+                  id={"navCreateButtonDesktop"}
+                  key={"create"}
+                  size={"xs"}
+                  w={"100%"}
+                  rounded={"md"}
+                  colorPalette={"green"}
+                  onClick={() => setDialogCreateOpen(!dialogCreateOpen)}
+                  disabled={workspace === "" || _.isUndefined(workspace)}
+                >
+                  <Icon name={"add"} size={"xs"} />
+                  Create
+                </Button>
+              </Tooltip>
               <Flex direction={"row"} gap={"2"} w={"100%"}>
                 <Flex w={"50%"}>
                   <Tooltip disabled={globalPermissions.features.import} content={"Import is unavailable"} showArrow>
@@ -342,7 +342,7 @@ const Navigation = (props: NavigationProps) => {
                       key={"scan"}
                       size={"xs"}
                       rounded={"md"}
-                      colorPalette={"green"}
+                      colorPalette={"purple"}
                       onClick={() => {
                         // Capture event
                         posthog.capture("client.scan.dialog_open");
@@ -357,30 +357,31 @@ const Navigation = (props: NavigationProps) => {
                   </Tooltip>
                 </Flex>
               </Flex>
-              <Flex>
-                <Button
-                  id={"navBugButtonDesktop"}
-                  w={"100%"}
-                  key={"bug"}
-                  size={"xs"}
-                  rounded={"md"}
-                  colorPalette={"red"}
-                  onClick={() => {
-                    // Capture event
-                    posthog.capture("client.bug.dialog_open");
-
-                    setReportOpen(true);
-                  }}
-                >
-                  <Icon name={"bug"} size={"xs"} />
-                  Report Issue
-                </Button>
-              </Flex>
             </Flex>
           )}
         </Flex>
 
         <Spacer />
+
+        <Flex>
+          <Button
+            id={"navBugButtonDesktop"}
+            w={"100%"}
+            key={"bug"}
+            size={"xs"}
+            rounded={"md"}
+            colorPalette={"red"}
+            onClick={() => {
+              // Capture event
+              posthog.capture("client.bug.dialog_open");
+
+              setReportOpen(true);
+            }}
+          >
+            <Icon name={"bug"} size={"xs"} />
+            Report Issue
+          </Button>
+        </Flex>
 
         {/* Version number */}
         <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
@@ -520,7 +521,7 @@ const Navigation = (props: NavigationProps) => {
                     id={"navCreateButtonMobile"}
                     value={"create"}
                     fontSize={"xs"}
-                    onClick={() => navigate("/create")}
+                    onClick={() => setDialogCreateOpen(!dialogCreateOpen)}
                   >
                     <Icon name={"add"} size={"xs"} />
                     Create
@@ -556,6 +557,9 @@ const Navigation = (props: NavigationProps) => {
         {/* Workspace switcher */}
         {!props.isPublic && <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />}
       </Flex>
+
+      {/* `DialogCreate` component */}
+      <DialogCreate open={dialogCreateOpen} setOpen={setDialogCreateOpen} />
 
       {/* `DialogImport` component */}
       <DialogImport open={importOpen} setOpen={setImportOpen} />

@@ -144,6 +144,12 @@ export type DialogViewAttributeProps = {
   isPublic?: boolean;
 };
 
+export type DialogCreateProps = {
+  // Dialog state
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+};
+
 export type DialogCompareAttributeProps = {
   // Dialog state
   open: boolean;
