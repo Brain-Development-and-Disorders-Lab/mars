@@ -41,7 +41,7 @@ export class Search {
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Sanitize database query
     query = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-    const expression = new RegExp(query, "gi");
+    const expression = new RegExp(query, "i");
 
     // Limit the fields returned for efficiency, default limit is 10
     const options = {
