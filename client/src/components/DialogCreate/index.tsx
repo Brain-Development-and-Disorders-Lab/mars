@@ -24,7 +24,19 @@ import { STYLES } from "@variables";
 // Information underlying each of the create cards and options
 const CREATE_OPTIONS = [
   {
+    type: "workspace",
+    scope: "global",
+    permissionKey: "workspaces",
+    label: "Workspace",
+    route: "/create/workspace",
+    event: "client.create.workspace_click",
+    description: "Create a Workspace to organize Entities and Projects, and invite collaborators.",
+    required: ["Name"],
+    optional: ["Description", "Collaborators"],
+  },
+  {
     type: "entity",
+    scope: "workspace",
     permissionKey: "entities",
     label: "Entity",
     route: "/create/entity",
@@ -35,6 +47,7 @@ const CREATE_OPTIONS = [
   },
   {
     type: "project",
+    scope: "workspace",
     permissionKey: "projects",
     label: "Project",
     route: "/create/project",
@@ -45,6 +58,7 @@ const CREATE_OPTIONS = [
   },
   {
     type: "template",
+    scope: "workspace",
     permissionKey: "templates",
     label: "Template",
     route: "/create/template",
@@ -60,7 +74,7 @@ const DialogCreate = (props: DialogCreateProps) => {
   const navigate = useNavigate();
 
   // Permissions
-  const { workspacePermissions } = usePermissions();
+  const { workspacePermissions, globalPermissions } = usePermissions();
 
   return (
     <Dialog.Root
@@ -104,13 +118,16 @@ const DialogCreate = (props: DialogCreateProps) => {
                 color={STYLES.font.secondaryHeader.color}
                 textAlign={"center"}
               >
-                Create a new Entity, Project, or Template in this Workspace.
+                Create a new Workspace, Entity, Project, or Template.
               </Text>
 
               <Flex direction={{ base: "column", md: "row" }} gap={"3"} align={"stretch"}>
                 {CREATE_OPTIONS.map((option) => {
                   const colors = STYLES[option.type].color;
-                  const canCreate = workspacePermissions[option.permissionKey].create;
+                  const canCreate =
+                    option.scope === "global"
+                      ? globalPermissions.workspaces.create
+                      : workspacePermissions[option.permissionKey].create;
 
                   return (
                     <Flex
@@ -161,7 +178,15 @@ const DialogCreate = (props: DialogCreateProps) => {
                       </Flex>
 
                       <Flex w={"100%"} justify={"center"}>
-                        <Tooltip content={"Insufficient permissions in this Workspace"} disabled={canCreate} showArrow>
+                        <Tooltip
+                          content={
+                            option.scope === "global"
+                              ? "You do not have permission to create Workspaces"
+                              : "Insufficient permissions in this Workspace"
+                          }
+                          disabled={canCreate}
+                          showArrow
+                        >
                           <Button
                             id={`create${option.label}Button`}
                             rounded={"md"}
