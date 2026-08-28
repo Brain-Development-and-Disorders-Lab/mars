@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Dialog, Flex, Menu, Spacer, Spinner, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Dialog, Flex, Menu, ScrollArea, Spacer, Spinner, Text, useDisclosure } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
@@ -18,7 +18,8 @@ import { IGenericItem, WorkspaceModel } from "@types";
 import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
-// Contexts
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Authentication
@@ -41,6 +42,9 @@ const GET_WORKSPACES = gql`
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
   const posthog = usePostHog();
+
+  // Permissions
+  const { globalPermissions } = usePermissions();
 
   // Dialog state for transition overlay
   const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
@@ -148,11 +152,13 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Create Workspace` button
    */
   const handleCreateClick = () => {
-    // Open the create Workspace dialog
-    navigate("/create/workspace");
+    if (globalPermissions.workspaces.create) {
+      // Open the create Workspace dialog
+      navigate("/create/workspace");
 
-    // Ensure `WorkspaceSwitcher` is closed
-    setOpen(false);
+      // Ensure `WorkspaceSwitcher` is closed
+      setOpen(false);
+    }
   };
 
   /**
@@ -223,44 +229,13 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 <Flex direction={"row"} gap={"1"} p={"1"} align={"center"}>
                   <Icon name={"workspace"} size={"xs"} color={"gray.700"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-                    Available Workspaces
+                    Available Workspaces ({workspaces.length})
                   </Text>
                 </Flex>
               </Menu.ItemGroupLabel>
+
               {/* Create a list of all Workspaces the user has access to */}
-              {workspaces.length > 0 ? (
-                workspaces.map((accessible) => {
-                  return (
-                    <Menu.Item
-                      value={accessible.name}
-                      onClick={() => {
-                        if (workspace !== accessible._id) {
-                          handleWorkspaceClick(accessible);
-                        }
-                      }}
-                      key={"w_" + accessible._id}
-                      cursor={workspace !== accessible._id ? "pointer" : undefined}
-                    >
-                      <Flex direction={"row"} gap={"2"} w={"100%"} align={"center"}>
-                        <Tooltip
-                          content={`${workspace === accessible._id ? "Active: " : "Switch to: "} ${accessible.name}`}
-                          showArrow
-                        >
-                          <Text fontSize={"xs"}>{_.truncate(accessible.name, { length: 24 })}</Text>
-                        </Tooltip>
-
-                        <Spacer />
-
-                        {workspace === accessible._id && (
-                          <Flex gap={"1"} align={"center"}>
-                            <Icon name={"check"} color={"green"} />
-                          </Flex>
-                        )}
-                      </Flex>
-                    </Menu.Item>
-                  );
-                })
-              ) : (
+              {workspaces.length === 0 ? (
                 <Menu.Item value={"no-workspaces"} disabled>
                   <Flex direction={"row"} gap={"2"} align={"center"} justify={"space-between"}>
                     <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -268,6 +243,47 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                     </Text>
                   </Flex>
                 </Menu.Item>
+              ) : (
+                <ScrollArea.Root maxH={"100px"}>
+                  <ScrollArea.Viewport>
+                    <ScrollArea.Content>
+                      {workspaces.map((accessible) => {
+                        return (
+                          <Menu.Item
+                            value={accessible.name}
+                            onClick={() => {
+                              if (workspace !== accessible._id) {
+                                handleWorkspaceClick(accessible);
+                              }
+                            }}
+                            key={"w_" + accessible._id}
+                            cursor={workspace !== accessible._id ? "pointer" : undefined}
+                          >
+                            <Flex direction={"row"} gap={"2"} w={"100%"} align={"center"}>
+                              <Tooltip
+                                content={`${workspace === accessible._id ? "Active: " : "Switch to: "} ${accessible.name}`}
+                                showArrow
+                              >
+                                <Text fontSize={"xs"}>{_.truncate(accessible.name, { length: 24 })}</Text>
+                              </Tooltip>
+
+                              <Spacer />
+
+                              {workspace === accessible._id && (
+                                <Flex gap={"1"} align={"center"}>
+                                  <Icon name={"check"} color={"green"} />
+                                </Flex>
+                              )}
+                            </Flex>
+                          </Menu.Item>
+                        );
+                      })}
+                    </ScrollArea.Content>
+                  </ScrollArea.Viewport>
+                  <ScrollArea.Scrollbar>
+                    <ScrollArea.Thumb />
+                  </ScrollArea.Scrollbar>
+                </ScrollArea.Root>
               )}
             </Menu.ItemGroup>
 
@@ -277,30 +293,41 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               {/* Option to create a new Workspace */}
               <Menu.Item
                 value={"edit"}
-                onClick={() => handleUpdateClick()}
+                onClick={handleUpdateClick}
                 disabled={workspaces.length === 0}
                 cursor={"pointer"}
               >
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"edit"} size={"xs"} />
-                  <Text fontSize={"xs"}>Manage workspace</Text>
+                  <Text fontSize={"xs"}>Manage Workspace</Text>
                 </Flex>
               </Menu.Item>
-              <Menu.Item value={"create"} onClick={() => handleCreateClick()} cursor={"pointer"}>
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"add"} size={"xs"} />
-                  <Text fontSize={"xs"}>Create workspace</Text>
-                </Flex>
-              </Menu.Item>
+              <Tooltip
+                content={"You do not have permission to create Workspaces"}
+                disabled={globalPermissions.workspaces.create}
+                showArrow
+              >
+                <Menu.Item
+                  value={"create"}
+                  onClick={handleCreateClick}
+                  cursor={globalPermissions.workspaces.create ? "pointer" : "disabled"}
+                  disabled={!globalPermissions.workspaces.create}
+                >
+                  <Flex direction={"row"} gap={"2"} align={"center"}>
+                    <Icon name={"add"} size={"xs"} />
+                    <Text fontSize={"xs"}>Create Workspace</Text>
+                  </Flex>
+                </Menu.Item>
+              </Tooltip>
             </Menu.ItemGroup>
 
             <Menu.Separator />
 
             <Menu.ItemGroup>
-              <Menu.Item value={"account"} onClick={() => handleProfileClick()} cursor={"pointer"}>
+              <Menu.Item value={"account"} onClick={handleProfileClick} cursor={"pointer"}>
                 <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"person"} size={"xs"} />
-                  <Text fontSize={"xs"}>Account settings</Text>
+                  <Text fontSize={"xs"}>Manage Account</Text>
                 </Flex>
               </Menu.Item>
               {isAdmin && (
@@ -308,7 +335,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                   id={"navAdminButtonMobile"}
                   value={"admin"}
                   fontSize={"xs"}
-                  onClick={() => handleAdminClick()}
+                  onClick={handleAdminClick}
                   cursor={"pointer"}
                 >
                   <Flex id={"accountSettingsItem"} direction={"row"} gap={"2"} align={"center"}>
@@ -320,7 +347,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               <Menu.Item value={"logout"} onClick={() => handleLogoutClick()} cursor={"pointer"}>
                 <Flex id={"accountLogoutItem"} direction={"row"} gap={"2"} align={"center"}>
                   <Icon name={"logout"} size={"xs"} />
-                  <Text fontSize={"xs"}>Log out</Text>
+                  <Text fontSize={"xs"}>Log Out</Text>
                 </Flex>
               </Menu.Item>
             </Menu.ItemGroup>
