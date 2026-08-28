@@ -21,7 +21,7 @@ import { usePostHog } from "posthog-js/react";
 // Variables
 import { STYLES } from "@variables";
 
-// Data driving the three cards, so each resource type is defined once instead of duplicated per card
+// Information underlying each of the create cards and options
 const CREATE_OPTIONS = [
   {
     type: "entity",
