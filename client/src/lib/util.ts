@@ -11,6 +11,7 @@ import {
   IValueType,
   IconNames,
   IdentifierFormatModel,
+  SampleFile,
   SearchAttributeValue,
   SearchQuery,
   UserWorkspacePermissions,
@@ -415,6 +416,21 @@ export const createSelectOptions = <T>(
     });
   }
   return options;
+};
+
+/**
+ * Trigger a browser download of an example file
+ * @param {SampleFile} sample Example file to download
+ */
+export const downloadSampleFile = (sample: SampleFile): void => {
+  const url = URL.createObjectURL(new Blob([sample.content], { type: sample.mimeType }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = sample.filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
 };
 
 /**

@@ -927,6 +927,9 @@ export type DialogImportProps = {
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
+// `SampleFile` type representing a downloadable example file
+export type SampleFile = { label: string; filename: string; mimeType: string; content: string };
+
 // `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {
   importType: "entities" | "template" | undefined;

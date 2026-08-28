@@ -7,14 +7,72 @@ import Icon from "@components/Icon";
 import FileUploadList from "@components/UploadList";
 
 // Existing and custom types
-import { UploadStepProps } from "@types";
+import { SampleFile, UploadStepProps } from "@types";
 
 // Utility functions and libraries
-import { getFileExtension } from "@lib/util";
+import { downloadSampleFile, getFileExtension } from "@lib/util";
 import _ from "lodash";
 
 // Variables
 import { ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, STYLES } from "@variables";
+
+// Minimal valid example files
+const SAMPLE_FILES: Record<"entities" | "template", SampleFile[]> = {
+  entities: [
+    {
+      label: "CSV",
+      filename: "sample-entities.csv",
+      mimeType: "text/csv",
+      content: [
+        "Name,Description,Notes",
+        "Sample Entity 1,An example row for reference,Optional notes column",
+        "Sample Entity 2,Another example row for reference,",
+      ].join("\n"),
+    },
+    {
+      label: "JSON",
+      filename: "sample-entities.json",
+      mimeType: "application/json",
+      content: JSON.stringify(
+        {
+          entities: [
+            {
+              _id: "sample-entity-001",
+              name: "Sample Entity",
+              owner: "",
+              created: "2024-01-01T00:00:00.000Z",
+              archived: false,
+              description: "An example Entity created from a JSON import",
+              projects: [],
+              relationships: [],
+              attributes: [],
+              attachments: [],
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    },
+  ],
+  template: [
+    {
+      label: "JSON",
+      filename: "sample-template.json",
+      mimeType: "application/json",
+      content: JSON.stringify(
+        {
+          name: "Sample Template",
+          description: "An example Template created from a JSON import",
+          archived: false,
+          values: [{ _id: "value-001", name: "Example Value", type: "text", data: "" }],
+        },
+        null,
+        2,
+      ),
+    },
+  ],
+};
 
 const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, fileUpload }: UploadStepProps) => (
   <>
@@ -122,6 +180,28 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
           </Field.Root>
         </Fieldset.Content>
       </Fieldset.Root>
+
+      {/* Sample file downloads, shown once a file type is chosen and before a file is uploaded */}
+      {!_.isUndefined(importType) && fileUpload.acceptedFiles.length === 0 && (
+        <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"} justify={"center"}>
+          <Text fontSize={"xs"} color={"text.subtle"}>
+            Download a sample {_.capitalize(importType)} file:
+          </Text>
+          {SAMPLE_FILES[importType].map((sample) => (
+            <Button
+              key={sample.label}
+              size={"xs"}
+              variant={"plain"}
+              color={"text.subtle"}
+              _hover={{ textDecoration: "underline" }}
+              onClick={() => downloadSampleFile(sample)}
+            >
+              <Icon name={"download"} size={"xs"} />
+              {sample.label}
+            </Button>
+          ))}
+        </Flex>
+      )}
     </Flex>
   </>
 );
