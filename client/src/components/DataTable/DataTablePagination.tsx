@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import Select from "@components/Select";
 
 // Existing and custom types
-import { DataTablePageSizeOption, DataTablePageSizeSelectProps, DataTablePaginationNavProps } from "@types";
+import { DataTablePageSizeSelectProps, DataTablePaginationNavProps } from "@types";
 
 export const DataTablePaginationNav = ({ table }: DataTablePaginationNavProps) => (
   <Flex direction={"row"} gap={2} align={"center"} data-testid={"data-table-pagination"}>

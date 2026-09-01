@@ -15,6 +15,7 @@ import {
   Separator,
   Spacer,
   Stack,
+  SystemStyleObject,
   Text,
 } from "@chakra-ui/react";
 
@@ -31,6 +32,7 @@ import {
   ControlProps,
   PlaceholderProps,
 } from "chakra-react-select";
+import { CSSObjectWithLabel } from "react-select";
 
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -66,12 +68,12 @@ const SELECT_MENU_PORTAL_PROPS = {
   menuPortalTarget: document.body,
   menuPosition: "fixed" as const,
   chakraStyles: {
-    menu: (provided: any) => ({ ...provided, marginY: 0 }),
+    menu: (provided: SystemStyleObject) => ({ ...provided, marginY: 0 }),
   },
   styles: {
-    menuPortal: (base: any) => ({ ...base, zIndex: 15000, pointerEvents: "auto" as const }),
-    menuList: (base: any) => ({ ...base, pointerEvents: "auto" as const }),
-    option: (base: any) => ({ ...base, pointerEvents: "auto" as const }),
+    menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 15000, pointerEvents: "auto" as const }),
+    menuList: (base: CSSObjectWithLabel) => ({ ...base, pointerEvents: "auto" as const }),
+    option: (base: CSSObjectWithLabel) => ({ ...base, pointerEvents: "auto" as const }),
   },
   closeMenuOnScroll: false as const,
 };
