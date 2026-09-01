@@ -151,6 +151,8 @@ To run unit tests, run `yarn test` in the `/server` directory.
 
 ## Acknowledgements
 
+_This research was supported by the National Science Foundation through the ACCESS program and Microsoft Azure through the CloudBank project, which is supported by National Science Foundation grant #1925001._
+
 **Organizations:**
 
 - Department of Neuroscience, Washington University School of Medicine in St. Louis

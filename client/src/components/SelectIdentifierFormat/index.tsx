@@ -2,9 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
-import { Button, createListCollection, Flex, Portal, Select } from "@chakra-ui/react";
+import { Button, createListCollection, Flex } from "@chakra-ui/react";
 import DialogCreateIdentifierFormat from "@components/DialogCreateIdentifierFormat";
 import Icon from "@components/Icon";
+import Select from "@components/Select";
 
 // Custom types
 import { IdentifierFormatModel, SelectIdentifierFormatProps } from "@types";
@@ -12,9 +13,6 @@ import { IdentifierFormatModel, SelectIdentifierFormatProps } from "@types";
 // GraphQL imports
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-
-// Utility functions and libraries
-import { groupBy } from "lodash";
 
 // Variables
 import { BASE_IDENTIFIER_FORMATS } from "@variables";
@@ -76,41 +74,15 @@ const SelectIdentifierFormat = (props: SelectIdentifierFormatProps) => {
 
   return (
     <Flex direction={"row"} gap={"2"} w={"100%"}>
-      <Select.Root
+      <Select
+        collection={identifierFormats}
         value={props.format}
         onValueChange={(event) => props.setFormat(event.value)}
-        collection={identifierFormats}
-        size={"xs"}
-        width={"100%"}
         disabled={props.disabled}
-      >
-        <Select.HiddenSelect />
-        <Select.Control>
-          <Select.Trigger rounded={"md"}>
-            <Select.ValueText placeholder={"Select Identifier Format"} />
-          </Select.Trigger>
-          <Select.IndicatorGroup>
-            <Select.Indicator />
-          </Select.IndicatorGroup>
-        </Select.Control>
-        <Portal>
-          <Select.Positioner>
-            <Select.Content>
-              {Object.entries(groupBy(identifierFormats.items, (item) => item.category)).map(([category, items]) => (
-                <Select.ItemGroup key={category}>
-                  <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
-                  {items.map((format) => (
-                    <Select.Item item={format} key={format.value}>
-                      {format.label}
-                      <Select.ItemIndicator />
-                    </Select.Item>
-                  ))}
-                </Select.ItemGroup>
-              ))}
-            </Select.Content>
-          </Select.Positioner>
-        </Portal>
-      </Select.Root>
+        width={"100%"}
+        placeholder={"Select Identifier Format"}
+        groupBy={(item) => item.category}
+      />
 
       {props.showCreate && (
         <Button size={"xs"} rounded={"md"} colorPalette={"green"} onClick={() => setOpen(true)}>

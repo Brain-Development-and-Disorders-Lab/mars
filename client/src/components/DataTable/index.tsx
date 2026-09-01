@@ -991,7 +991,7 @@ const DataTable = (props: DataTableProps) => {
                             flex={isLastCell ? "1 1 auto" : "0 0 auto"}
                             minW={isLastCell ? `${columnMinWidth}px` : columnWidth}
                             maxW={isLastCell && cellMeta?.maxWidth ? `${cellMeta.maxWidth}px` : undefined}
-                            h={"34px"}
+                            h={"38px"}
                             px={cellMeta?.noPadding ? 0 : 1}
                             py={cellMeta?.noPadding ? 0 : 0.5}
                             borderRight={!isLastCell ? "1px solid" : "none"}

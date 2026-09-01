@@ -7,6 +7,7 @@ import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
 import SelectCounter from "@components/SelectCounter";
 import SelectIdentifierFormat from "@components/SelectIdentifierFormat";
+import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 
 // Existing and custom types
 import { EntityDetailsStepProps, IGenericItem } from "@types";
@@ -257,12 +258,13 @@ const EntityDetailsStep = ({
               </Field.Label>
               <Select.Root
                 key={"select-project"}
-                size={"xs"}
-                bg={"white"}
-                rounded={"md"}
+                size={SELECT_SIZE}
+                bg={SELECT_BG}
+                rounded={SELECT_ROUNDED}
                 collection={projectsCollection}
                 value={[projectField]}
                 onValueChange={(details) => onProjectFieldChange(details.items[0]._id)}
+                disabled={projectsCollection.items.length === 0}
               >
                 <Select.HiddenSelect />
                 <Select.Control>

@@ -24,6 +24,7 @@ import EntityDetailsStep from "@components/DialogImport/steps/EntityDetailsStep"
 import EntityMappingStep from "@components/DialogImport/steps/EntityMappingStep";
 import EntityReviewStep from "@components/DialogImport/steps/EntityReviewStep";
 import TemplateReviewStep from "@components/DialogImport/steps/TemplateReviewStep";
+import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 
 // Custom and existing types
 import {
@@ -674,9 +675,9 @@ const DialogImport = (props: DialogImportProps) => {
     return (
       <Select.Root
         key={key}
-        size={"xs"}
-        rounded={"md"}
-        bg={"white"}
+        size={SELECT_SIZE}
+        rounded={SELECT_ROUNDED}
+        bg={SELECT_BG}
         collection={columnsCollection}
         value={currentValue ? [currentValue.name] : []}
         onValueChange={(details) => onValueChange(details.items[0])}

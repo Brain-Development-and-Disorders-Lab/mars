@@ -42,7 +42,6 @@ import Workspace from "@pages/view/Workspace";
 import Activity from "@pages/view/Activity";
 
 // Page type - Create
-import Create from "@pages/create/Create";
 import CreateWorkspace from "@pages/create/Workspace";
 import CreateTemplate from "@pages/create/Template";
 import CreateEntity from "@pages/create/Entity";
@@ -120,7 +119,6 @@ const App = (): ReactElement => {
           <Route path={"/create/template"} element={<CreateTemplate />} />
           <Route path={"/create/project"} element={<CreateProject />} />
           <Route path={"/create/entity"} element={<CreateEntity />} />
-          <Route path={"/create"} element={<Create />} />
 
           {/* Workspace routes */}
           <Route path={"workspaces"}>

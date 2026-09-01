@@ -18,6 +18,7 @@ import {
 import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 import Values from "@components/Values";
 
 // Existing and custom types
@@ -196,8 +197,9 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                 {/* Template selector with AI suggestion */}
                 <Select.Root
                   key={"select-template"}
-                  size={"xs"}
-                  rounded={"md"}
+                  size={SELECT_SIZE}
+                  rounded={SELECT_ROUNDED}
+                  bg={SELECT_BG}
                   collection={templatesCollection}
                   disabled={templatesCollection.items.length === 0 || usingTemplate}
                   value={selectedTemplateValue}

@@ -2,7 +2,8 @@
 import React from "react";
 
 // Components
-import { Flex, Portal, Select, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
+import Select from "@components/Select";
 
 // Existing and custom types
 import { DataTableColumnOption, DataTableColumnSelectProps } from "@types";
@@ -17,11 +18,7 @@ const DataTableColumnSelect = ({
     <Text fontSize={"xs"} display={{ base: "none", sm: "block" }}>
       Show Columns:
     </Text>
-    <Select.Root
-      key={"select-columns"}
-      size={"xs"}
-      w={"200px"}
-      bg={"white"}
+    <Select
       collection={columnNamesCollection}
       value={visibleColumnsForSelect}
       onValueChange={(details) => {
@@ -29,44 +26,10 @@ const DataTableColumnSelect = ({
         updateColumnVisibility(toggleableColumns);
       }}
       multiple
-    >
-      <Select.HiddenSelect />
-      <Select.Control>
-        <Select.Trigger rounded={"md"}>
-          <Select.ValueText placeholder={"Visible Columns"} />
-        </Select.Trigger>
-        <Select.IndicatorGroup>
-          <Select.Indicator />
-        </Select.IndicatorGroup>
-      </Select.Control>
-      <Portal>
-        <Select.Positioner>
-          <Select.Content>
-            {(columnNamesCollection.items || []).map((item: DataTableColumnOption) => {
-              const isDisabled = alwaysVisibleColumns.includes(item.value);
-              return (
-                <Select.Item
-                  item={item}
-                  key={item.value}
-                  pointerEvents={isDisabled ? "none" : "auto"}
-                  opacity={isDisabled ? 0.5 : 1}
-                  cursor={isDisabled ? "not-allowed" : "pointer"}
-                  onClick={(e) => {
-                    if (isDisabled) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                  }}
-                >
-                  {item.label}
-                  <Select.ItemIndicator />
-                </Select.Item>
-              );
-            })}
-          </Select.Content>
-        </Select.Positioner>
-      </Portal>
-    </Select.Root>
+      width={"200px"}
+      placeholder={"Visible Columns"}
+      itemDisabled={(item: DataTableColumnOption) => item.disabled}
+    />
   </Flex>
 );
 

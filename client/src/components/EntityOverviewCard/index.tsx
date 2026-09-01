@@ -2,9 +2,10 @@
 import React from "react";
 
 // Existing and custom components
-import { Checkbox, Field, Flex, Input, Portal, Select, Text, Textarea } from "@chakra-ui/react";
+import { Checkbox, Field, Flex, Input, Text, Textarea } from "@chakra-ui/react";
 import TagActor from "@components/TagActor";
 import Icon from "@components/Icon";
+import Select from "@components/Select";
 import TagTimestamp from "@components/TagTimestamp";
 import Tooltip from "@components/Tooltip";
 import TagVisibility from "@components/TagVisibility";
@@ -19,7 +20,7 @@ import {
   isValidBaseIdentifierFormat,
   isValidCustomIdentifierFormat,
 } from "@lib/util";
-import _, { groupBy } from "lodash";
+import _ from "lodash";
 
 // Variables
 import { BASE_IDENTIFIER_FORMATS, STYLES } from "@variables";
@@ -205,45 +206,17 @@ const EntityOverviewCard = ({
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Identifier Format
                 </Text>
-                <Select.Root
+                <Select
+                  collection={identifierFormats}
                   value={identifierFormat}
                   onValueChange={
                     onIdentifierFormatChange ? (event) => onIdentifierFormatChange(event.value) : undefined
                   }
-                  collection={identifierFormats}
-                  size={"xs"}
-                  width={"100%"}
                   disabled={identifierFormatDisabled}
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder={"Select Identifier Format"} />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {Object.entries(groupBy(identifierFormats.items, (item) => item.category)).map(
-                          ([category, items]) => (
-                            <Select.ItemGroup key={category}>
-                              <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
-                              {items.map((format) => (
-                                <Select.Item item={format} key={format.value}>
-                                  {format.label}
-                                  <Select.ItemIndicator />
-                                </Select.Item>
-                              ))}
-                            </Select.ItemGroup>
-                          ),
-                        )}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
+                  width={"100%"}
+                  placeholder={"Select Identifier Format"}
+                  groupBy={(item) => item.category}
+                />
                 <Field.ErrorText>
                   <Text fontSize={"xs"} ml={"0.5"}>
                     Please select an Identifier Format

@@ -1,5 +1,5 @@
 // Import external types
-import { BoxProps, ListCollection } from "@chakra-ui/react";
+import { ListCollection } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
@@ -144,6 +144,12 @@ export type DialogViewAttributeProps = {
   isPublic?: boolean;
 };
 
+export type DialogCreateProps = {
+  // Dialog state
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+};
+
 export type DialogCompareAttributeProps = {
   // Dialog state
   open: boolean;
@@ -221,6 +227,22 @@ export type StyledSelectConfig<T> = {
   controlPaddingLeft: string;
   controlHasBorder: boolean;
   valueContainerHeight: string;
+};
+
+// `Select` component props, shared native `Select` wrapper
+export type SelectProps<T> = {
+  collection: ListCollection<T>;
+  value?: string[];
+  onValueChange: (details: { value: string[]; items: T[] }) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  multiple?: boolean;
+  width?: string;
+  minW?: string;
+  fontSize?: string;
+  testId?: string;
+  groupBy?: (item: T) => string;
+  itemDisabled?: (item: T) => boolean;
 };
 
 export type Collaborator = {
@@ -920,6 +942,9 @@ export type DialogImportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
+
+// `SampleFile` type representing a downloadable example file
+export type SampleFile = { label: string; filename: string; mimeType: string; content: string };
 
 // `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {

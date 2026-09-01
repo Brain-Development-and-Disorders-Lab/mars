@@ -2,9 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
-import { Button, createListCollection, Flex, Portal, Select, Text } from "@chakra-ui/react";
+import { Button, createListCollection, Flex, Text } from "@chakra-ui/react";
 import DialogCreateCounter from "@components/DialogCreateCounter";
 import Icon from "@components/Icon";
+import Select from "@components/Select";
 import { toaster } from "@components/Toast";
 
 // Custom types
@@ -139,37 +140,13 @@ const SelectCounter = (props: SelectCounterProps) => {
   return (
     <Flex direction={"column"} gap={"1"} w={"100%"}>
       <Flex w={"100%"} gap={"2"}>
-        <Select.Root
-          key={"select-counter"}
-          size={"xs"}
-          rounded={"md"}
-          minW={"100px"}
+        <Select
           collection={counterCollection}
           onValueChange={handleSelectCounter}
           disabled={counterCollection.items.length === 0}
-        >
-          <Select.HiddenSelect />
-          <Select.Control>
-            <Select.Trigger rounded={"md"}>
-              <Select.ValueText placeholder={"Select Counter"} />
-            </Select.Trigger>
-            <Select.IndicatorGroup>
-              <Select.Indicator />
-            </Select.IndicatorGroup>
-          </Select.Control>
-          <Portal>
-            <Select.Positioner>
-              <Select.Content>
-                {counterCollection.items.map((counter) => (
-                  <Select.Item item={counter} key={counter.value}>
-                    {counter.label}
-                    <Select.ItemIndicator />
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Positioner>
-          </Portal>
-        </Select.Root>
+          minW={"100px"}
+          placeholder={"Select Counter"}
+        />
 
         {/* Button to create new Counter */}
         {props.showCreate && (

@@ -20,7 +20,8 @@ import { useLazyQuery, useMutation } from "@apollo/client/react";
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
 
-// Contexts
+// Hooks
+import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Authentication
@@ -37,6 +38,9 @@ import { STYLES } from "@variables";
 
 const CreateWorkspace = () => {
   const posthog = usePostHog();
+
+  // Permissions
+  const { globalPermissions, loading: permissionsLoading } = usePermissions();
 
   // Access token to set the active Workspace
   const navigate = useNavigate();
@@ -80,6 +84,13 @@ const CreateWorkspace = () => {
       });
     }
   }, [sessionErrorState]);
+
+  useEffect(() => {
+    // If the User does not have Workspace create permissions, direct to `/unauthorized`
+    if (!permissionsLoading && !globalPermissions.workspaces.create && window.location.pathname !== "/unauthorized") {
+      window.location.href = "/unauthorized";
+    }
+  }, []);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
