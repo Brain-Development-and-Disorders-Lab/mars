@@ -117,6 +117,34 @@ export const clientPathDisabled = (name: string, path: string, locator: (page: P
 };
 
 /**
+ * Access point state gated by a form control inside the Create dialog, opened via the Navigation
+ * menu's "Create" button rather than a dedicated route
+ * @param {string} name Path name
+ * @param {string} path Path to load before opening the Create dialog
+ * @param {(page: Page) => Locator} locator Playwright `Locator` to establish gate form control
+ * @return {ClientPath}
+ */
+export const clientPathDisabledInCreateDialog = (
+  name: string,
+  path: string,
+  locator: (page: Page) => Locator,
+): ClientPath => {
+  return {
+    name: name,
+    verify: async (page, granted) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      await page.locator("#navCreateButtonDesktop").click();
+      if (granted) {
+        await expect(locator(page)).toBeEnabled();
+      } else {
+        await expect(locator(page)).toBeDisabled();
+      }
+    },
+  };
+};
+
+/**
  * Access point state gated by a form control that only becomes enabled once the Workspace is in
  * "editing" mode, entering that mode first when access is expected
  * @param {string} name Path name

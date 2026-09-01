@@ -3,6 +3,7 @@ import { createTestEntity, createTestProject, createTestTemplate } from "../help
 import {
   clientPathArchive,
   clientPathDisabled,
+  clientPathDisabledInCreateDialog,
   clientPathEditingDisabled,
   clientPathVisible,
   openManageWorkspace,
@@ -64,7 +65,9 @@ test.describe("Entity permissions", () => {
       clientPathDisabled("Entities list button", "/entities", (p) =>
         p.getByRole("button", { name: "Create Entity", exact: true }),
       ),
-      clientPathDisabled("Create hub button", "/create", (p) => p.locator("#createEntityButton")),
+      clientPathDisabledInCreateDialog("Create dialog Entity button", "/entities", (p) =>
+        p.locator("#createEntityButton"),
+      ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
@@ -125,7 +128,9 @@ test.describe("Project permissions", () => {
       clientPathDisabled("Projects list button", "/projects", (p) =>
         p.getByRole("button", { name: "Create Project", exact: true }),
       ),
-      clientPathDisabled("Create hub button", "/create", (p) => p.locator("#createProjectButton")),
+      clientPathDisabledInCreateDialog("Create dialog Project button", "/projects", (p) =>
+        p.locator("#createProjectButton"),
+      ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
@@ -187,7 +192,9 @@ test.describe("Template permissions", () => {
       clientPathDisabled("Templates list button", "/templates", (p) =>
         p.getByRole("button", { name: "Create Template", exact: true }),
       ),
-      clientPathDisabled("Create hub button", "/create", (p) => p.locator("#createTemplateButton")),
+      clientPathDisabledInCreateDialog("Create dialog Template button", "/templates", (p) =>
+        p.locator("#createTemplateButton"),
+      ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
