@@ -159,21 +159,20 @@ const makeStyledSelectComponents = <T extends { label: string }>(config: StyledS
 // Value `type` select
 const valueTypeSelectComponents = makeStyledSelectComponents<ValueTypeOption>({
   getIcon: (data) => getValueTypeIconProps(data.value),
-  optionHeight: "8",
-  optionPadding: "1",
-  optionMargin: "0.5",
+  optionHeight: "6",
+  optionPadding: "0.5",
   controlPaddingLeft: "2",
-  controlHasBorder: false, // hover border clips against DataTable's fixed 34px cell height
-  valueContainerHeight: "34px",
+  controlHasBorder: false,
+  valueContainerHeight: "38px",
 });
 
 // `select`-type option picker
 const valueDataSelectComponents = makeStyledSelectComponents<SelectOption>({
-  optionHeight: "8",
+  optionHeight: "6",
   optionPadding: "0.5",
   controlPaddingLeft: "2",
   controlHasBorder: false,
-  valueContainerHeight: "34px",
+  valueContainerHeight: "38px",
 });
 
 // Import column picker
@@ -181,15 +180,14 @@ const columnPickerSelectComponents = makeStyledSelectComponents<SelectOption>({
   getIcon: (data) => getValueTypeIconProps(data.inferredType),
   optionHeight: "6",
   optionPadding: "0.5",
-  controlPaddingLeft: "1",
-  controlHasBorder: false, // hover border clips against DataTable's fixed 34px cell height
-  valueContainerHeight: "34px",
+  controlPaddingLeft: "2",
+  controlHasBorder: false,
+  valueContainerHeight: "38px",
 });
 
 /**
  * Shared styling for the plain-text `Input` cells rendered by `ValueRow` (name, and the
- * number/text/url/date/fallback branches of `renderDataInput`), which otherwise repeat the
- * same focus/hover/cursor treatment with only `type`, `placeholder`, and sizing differing.
+ * number/text/url/date/fallback branches of `renderDataInput`)
  */
 const StyledDataInput = (props: {
   value: string;
@@ -232,8 +230,7 @@ const StyledDataInput = (props: {
 
 /**
  * Custom `Select` component for displaying `IValue` instances that have a
- * `type` of `select`. A separate component was required to manage state
- * and parse `data` correctly.
+ * `type` of `select`
  * @param props Required props for `ValueDataSelect` component
  */
 const ValueDataSelect = (props: {
@@ -366,7 +363,6 @@ const ValueDataSelect = (props: {
           menuPosition={"fixed"}
           chakraStyles={{
             menu: (provided) => ({ ...provided, marginY: 0 }),
-            control: (provided) => ({ ...provided, minH: "34px" }), // "sm" size's default (36px) overflows the cell
           }}
           styles={{
             menuPortal: (base) => ({
@@ -489,7 +485,7 @@ const ValueDataSelect = (props: {
                             colorPalette={"red"}
                             onClick={() => removeOption(option)}
                           >
-                            <Icon name={"delete"} />
+                            <Icon name={"delete"} size={"xs"} />
                           </IconButton>
                         </Flex>
                       ))
@@ -537,29 +533,15 @@ const ValueDataSelect = (props: {
   );
 };
 
-/**
- * Custom styling for column picker `ValueContainer` component
- */
-const ColumnPickerValueContainer = ({ children, ...props }: ValueContainerProps<SelectOption>) => (
-  <components.ValueContainer {...props}>
-    <Flex w={"100%"} h={"34px"} align={"center"} fontSize={"xs"}>
-      {children}
-    </Flex>
-  </components.ValueContainer>
-);
-
-/**
- * Custom styling for column picker `Placeholder` component
- */
 const ColumnPickerPlaceholder = (props: PlaceholderProps<SelectOption>) => (
-  <components.Placeholder {...props}>
-    <Flex direction={"row"} align={"center"} gap={"1"}>
-      <Icon name={"grid"} size={"xs"} color={"text.faint"} />
-      <Text fontSize={"xs"} color={"text.faint"}>
-        {props.children}
-      </Text>
-    </Flex>
-  </components.Placeholder>
+  <Flex direction={"row"} align={"center"}>
+    <components.Placeholder {...props}>
+      <Flex direction={"row"} align={"center"} gap={"2"} fontSize={"xs"}>
+        <Icon name={"grid"} size={"xs"} color={"text.faint"} />
+        <Text color={"text.faint"}>{props.children}</Text>
+      </Flex>
+    </components.Placeholder>
+  </Flex>
 );
 
 // Default `data` generated for a Value when its `type` changes
@@ -866,7 +848,7 @@ const renderTypedInput = (params: {
       onChange={onChange}
       viewOnly={viewOnly}
       placeholder={"Enter value"}
-      height={viewOnly ? "34px" : "100%"}
+      height={viewOnly ? "38px" : "100%"}
       px={1}
       py={0.5}
     />
@@ -939,7 +921,6 @@ const TypeCell = (props: {
       menuPosition={"fixed"}
       chakraStyles={{
         menu: (provided) => ({ ...provided, marginY: 0 }),
-        control: (provided) => ({ ...provided, minH: "34px" }),
       }}
       styles={{
         menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
@@ -1034,7 +1015,7 @@ const ValueCell = (props: {
                     Control: columnPickerSelectComponents.Control,
                     Placeholder: ColumnPickerPlaceholder,
                     SelectContainer: columnPickerSelectComponents.SelectContainer,
-                    ValueContainer: ColumnPickerValueContainer,
+                    ValueContainer: columnPickerSelectComponents.ValueContainer,
                     SingleValue: columnPickerSelectComponents.SingleValue,
                     DropdownIndicator: columnPickerSelectComponents.DropdownIndicator,
                     MenuList: columnPickerSelectComponents.MenuList,
@@ -1044,7 +1025,6 @@ const ValueCell = (props: {
                   menuPosition={"fixed"}
                   chakraStyles={{
                     menu: (provided) => ({ ...provided, marginY: 0 }),
-                    control: (provided) => ({ ...provided, minH: "34px" }),
                   }}
                   styles={{
                     menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),

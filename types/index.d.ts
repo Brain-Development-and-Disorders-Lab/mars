@@ -1,5 +1,5 @@
 // Import external types
-import { BoxProps, ListCollection } from "@chakra-ui/react";
+import { ListCollection } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 

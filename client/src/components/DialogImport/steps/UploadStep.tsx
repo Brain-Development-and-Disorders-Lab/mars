@@ -187,19 +187,22 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
           <Text fontSize={"xs"} color={"text.subtle"}>
             Download a sample {_.capitalize(importType)} file:
           </Text>
-          {SAMPLE_FILES[importType].map((sample) => (
-            <Button
-              key={sample.label}
-              size={"xs"}
-              variant={"plain"}
-              color={"text.subtle"}
-              _hover={{ textDecoration: "underline" }}
-              onClick={() => downloadSampleFile(sample)}
-            >
-              <Icon name={"download"} size={"xs"} />
-              {sample.label}
-            </Button>
-          ))}
+          <Flex direction={"row"} gap={"2"} align={"center"}>
+            {SAMPLE_FILES[importType].map((sample) => (
+              <Button
+                key={sample.label}
+                size={"2xs"}
+                p={"0"}
+                variant={"plain"}
+                color={"text.subtle"}
+                _hover={{ textDecoration: "underline" }}
+                onClick={() => downloadSampleFile(sample)}
+              >
+                <Icon name={"download"} size={"xs"} />
+                {sample.label}
+              </Button>
+            ))}
+          </Flex>
         </Flex>
       )}
     </Flex>

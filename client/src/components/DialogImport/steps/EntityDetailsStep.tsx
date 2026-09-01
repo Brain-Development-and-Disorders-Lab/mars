@@ -263,6 +263,7 @@ const EntityDetailsStep = ({
                 collection={projectsCollection}
                 value={[projectField]}
                 onValueChange={(details) => onProjectFieldChange(details.items[0]._id)}
+                disabled={projectsCollection.items.length === 0}
               >
                 <Select.HiddenSelect />
                 <Select.Control>
