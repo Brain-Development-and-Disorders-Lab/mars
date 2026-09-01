@@ -2,8 +2,9 @@
 import React, { useState, useCallback } from "react";
 
 // Existing and custom components
-import { Button, Flex, Input, type ListCollection, Portal, Select, Text, createListCollection } from "@chakra-ui/react";
+import { Button, Flex, Input, type ListCollection, Text, createListCollection } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Select from "@components/Select";
 import SelectSearch from "@components/SelectSearch";
 
 // Custom types
@@ -67,36 +68,15 @@ const SearchRuleSelect = ({
   placeholder = "Select...",
   testId,
 }: SearchRuleSelectProps) => (
-  <Select.Root
-    size={"xs"}
-    rounded={"md"}
-    bg={"white"}
-    value={[value]}
+  <Select
     collection={collection}
+    value={[value]}
     onValueChange={(d) => onChange(d.value[0])}
-  >
-    <Select.HiddenSelect />
-    <Select.Control minW={minW}>
-      <Select.Trigger fontSize={"xs"} data-testid={testId}>
-        <Select.ValueText placeholder={placeholder} fontSize={"xs"} />
-      </Select.Trigger>
-      <Select.IndicatorGroup>
-        <Select.Indicator />
-      </Select.IndicatorGroup>
-    </Select.Control>
-    <Portal>
-      <Select.Positioner>
-        <Select.Content fontSize={"xs"}>
-          {collection.items.map((item: string) => (
-            <Select.Item item={item} key={`${item}`} fontSize={"xs"}>
-              {`${item}`}
-              <Select.ItemIndicator />
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select.Positioner>
-    </Portal>
-  </Select.Root>
+    minW={minW}
+    placeholder={placeholder}
+    testId={testId}
+    fontSize={"xs"}
+  />
 );
 
 /**

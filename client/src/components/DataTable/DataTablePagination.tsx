@@ -2,8 +2,9 @@
 import React from "react";
 
 // Components
-import { Field, Fieldset, Flex, IconButton, Portal, Select, Text } from "@chakra-ui/react";
+import { Field, Fieldset, Flex, IconButton, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Select from "@components/Select";
 
 // Existing and custom types
 import { DataTablePageSizeOption, DataTablePageSizeSelectProps, DataTablePaginationNavProps } from "@types";
@@ -81,40 +82,17 @@ export const DataTablePageSizeSelect = ({
     <Fieldset.Root w={"fit-content"}>
       <Fieldset.Content>
         <Field.Root>
-          <Select.Root
-            key={"select-pagesize"}
-            size={"xs"}
-            w={"80px"}
-            bg={"white"}
+          <Select
             collection={pageLengthsCollection}
             value={pageLength}
             onValueChange={(details) => {
               setPageLength(details.value);
               table.setPageSize(parseInt(details.value[0]));
             }}
-          >
-            <Select.HiddenSelect />
-            <Select.Control>
-              <Select.Trigger rounded={"md"} data-testid={"data-table-page-size"}>
-                <Select.ValueText placeholder={"Page Size"} />
-              </Select.Trigger>
-              <Select.IndicatorGroup>
-                <Select.Indicator />
-              </Select.IndicatorGroup>
-            </Select.Control>
-            <Portal>
-              <Select.Positioner>
-                <Select.Content>
-                  {pageLengthsCollection.items.map((count: DataTablePageSizeOption) => (
-                    <Select.Item item={count} key={count.value}>
-                      {count.label}
-                      <Select.ItemIndicator />
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Positioner>
-            </Portal>
-          </Select.Root>
+            width={"80px"}
+            placeholder={"Page Size"}
+            testId={"data-table-page-size"}
+          />
         </Field.Root>
       </Fieldset.Content>
     </Fieldset.Root>

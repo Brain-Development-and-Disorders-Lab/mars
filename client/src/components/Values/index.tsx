@@ -59,6 +59,23 @@ interface SelectOption extends OptionBase {
   inferredType?: IValueType;
 }
 
+/**
+ * Shared by every `chakra-react-select` instance used by `Values` component
+ */
+const SELECT_MENU_PORTAL_PROPS = {
+  menuPortalTarget: document.body,
+  menuPosition: "fixed" as const,
+  chakraStyles: {
+    menu: (provided: any) => ({ ...provided, marginY: 0 }),
+  },
+  styles: {
+    menuPortal: (base: any) => ({ ...base, zIndex: 15000, pointerEvents: "auto" as const }),
+    menuList: (base: any) => ({ ...base, pointerEvents: "auto" as const }),
+    option: (base: any) => ({ ...base, pointerEvents: "auto" as const }),
+  },
+  closeMenuOnScroll: false as const,
+};
+
 interface ValueTypeOption extends OptionBase {
   label: string;
   value: IValueType;
@@ -76,8 +93,8 @@ const SharedMenuList = <T,>(props: MenuListProps<T, false>) => (
     border={STYLES.border.style}
     borderColor={STYLES.border.color}
     bg={"white"}
-    gap={"0.5"}
-    p={"0.5"}
+    gap={"1"}
+    p={"1"}
     rounded={"sm"}
   >
     <components.MenuList {...props}>{props.children}</components.MenuList>
@@ -123,6 +140,7 @@ const makeStyledSelectComponents = <T extends { label: string }>(config: StyledS
           gap={"1"}
           align={"center"}
           _hover={{ bg: "gray.100" }}
+          rounded={"xs"}
         >
           {icon && <Icon name={icon.name} size={"xs"} color={icon.color} />}
           <Text fontSize={"xs"}>{props.data.label}</Text>
@@ -160,7 +178,7 @@ const makeStyledSelectComponents = <T extends { label: string }>(config: StyledS
 const valueTypeSelectComponents = makeStyledSelectComponents<ValueTypeOption>({
   getIcon: (data) => getValueTypeIconProps(data.value),
   optionHeight: "6",
-  optionPadding: "0.5",
+  optionPadding: "2",
   controlPaddingLeft: "2",
   controlHasBorder: false,
   valueContainerHeight: "38px",
@@ -169,7 +187,7 @@ const valueTypeSelectComponents = makeStyledSelectComponents<ValueTypeOption>({
 // `select`-type option picker
 const valueDataSelectComponents = makeStyledSelectComponents<SelectOption>({
   optionHeight: "6",
-  optionPadding: "0.5",
+  optionPadding: "2",
   controlPaddingLeft: "2",
   controlHasBorder: false,
   valueContainerHeight: "38px",
@@ -179,7 +197,7 @@ const valueDataSelectComponents = makeStyledSelectComponents<SelectOption>({
 const columnPickerSelectComponents = makeStyledSelectComponents<SelectOption>({
   getIcon: (data) => getValueTypeIconProps(data.inferredType),
   optionHeight: "6",
-  optionPadding: "0.5",
+  optionPadding: "2",
   controlPaddingLeft: "2",
   controlHasBorder: false,
   valueContainerHeight: "38px",
@@ -359,27 +377,7 @@ const ValueDataSelect = (props: {
             MenuList: valueDataSelectComponents.MenuList,
             Option: valueDataSelectComponents.Option,
           }}
-          menuPortalTarget={document.body}
-          menuPosition={"fixed"}
-          chakraStyles={{
-            menu: (provided) => ({ ...provided, marginY: 0 }),
-          }}
-          styles={{
-            menuPortal: (base) => ({
-              ...base,
-              zIndex: 15000,
-              pointerEvents: "auto",
-            }),
-            menuList: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-            }),
-            option: (base) => ({
-              ...base,
-              pointerEvents: "auto",
-            }),
-          }}
-          closeMenuOnScroll={false}
+          {...SELECT_MENU_PORTAL_PROPS}
         />
       ) : (
         <Flex
@@ -917,17 +915,7 @@ const TypeCell = (props: {
           props.onUpdate(value._id, { type: event.value, data: DEFAULT_VALUE_DATA[event.value]() });
         }
       }}
-      menuPortalTarget={document.body}
-      menuPosition={"fixed"}
-      chakraStyles={{
-        menu: (provided) => ({ ...provided, marginY: 0 }),
-      }}
-      styles={{
-        menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
-        menuList: (base) => ({ ...base, pointerEvents: "auto" }),
-        option: (base) => ({ ...base, pointerEvents: "auto" }),
-      }}
-      closeMenuOnScroll={false}
+      {...SELECT_MENU_PORTAL_PROPS}
     />
   );
 };
@@ -1021,17 +1009,7 @@ const ValueCell = (props: {
                     MenuList: columnPickerSelectComponents.MenuList,
                     Option: columnPickerSelectComponents.Option,
                   }}
-                  menuPortalTarget={document.body}
-                  menuPosition={"fixed"}
-                  chakraStyles={{
-                    menu: (provided) => ({ ...provided, marginY: 0 }),
-                  }}
-                  styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 15000, pointerEvents: "auto" }),
-                    menuList: (base) => ({ ...base, pointerEvents: "auto" }),
-                    option: (base) => ({ ...base, pointerEvents: "auto" }),
-                  }}
-                  closeMenuOnScroll={false}
+                  {...SELECT_MENU_PORTAL_PROPS}
                 />
               ) : (
                 renderTypedInput({

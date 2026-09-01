@@ -229,6 +229,22 @@ export type StyledSelectConfig<T> = {
   valueContainerHeight: string;
 };
 
+// `Select` component props, shared native `Select` wrapper
+export type SelectProps<T> = {
+  collection: ListCollection<T>;
+  value?: string[];
+  onValueChange: (details: { value: string[]; items: T[] }) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  multiple?: boolean;
+  width?: string;
+  minW?: string;
+  fontSize?: string;
+  testId?: string;
+  groupBy?: (item: T) => string;
+  itemDisabled?: (item: T) => boolean;
+};
+
 export type Collaborator = {
   _id: string;
   permissions: UserWorkspacePermissions; // Workspace-scoped permissions

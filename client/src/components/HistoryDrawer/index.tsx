@@ -13,7 +13,6 @@ import {
   Flex,
   Input,
   Portal,
-  Select,
   Tag,
   Text,
   Timeline,
@@ -23,6 +22,7 @@ import { AttributeTag, EmptyTag, ValueTag } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import Select from "@components/Select";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
@@ -262,35 +262,12 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} w={"100%"} ml={"0.5"}>
                     Sort
                   </Text>
-                  <Select.Root
-                    value={[sortOrder]}
-                    w={"240px"}
-                    rounded={"md"}
-                    size={"xs"}
-                    bg={"white"}
+                  <Select
                     collection={SORT_OPTIONS}
+                    value={[sortOrder]}
                     onValueChange={(details) => setSortOrder(details.value[0] as "newest-first" | "oldest-first")}
-                  >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger rounded={"md"}>
-                        <Select.ValueText />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {SORT_OPTIONS.items.map((item) => (
-                          <Select.Item item={item} key={item.value}>
-                            {item.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Select.Root>
+                    width={"240px"}
+                  />
                 </Flex>
 
                 <Flex direction={"column"} gap={"1"} align={"center"} wrap={"wrap"} ml={"0.5"}>
