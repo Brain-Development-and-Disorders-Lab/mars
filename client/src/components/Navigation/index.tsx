@@ -38,7 +38,8 @@ import { STYLES } from "@variables";
 import favicon from "@img/Favicon.png";
 import { getPublicWorkspaceUrl } from "@lib/util";
 
-// Queries
+// Query used only for the public Workspace name, since private pages already have the
+// Workspace name available via the `workspaces` list in `useWorkspace`
 const GET_WORKSPACE = gql`
   query GetWorkspace($workspace: String) {
     workspace(_id: $workspace) {
@@ -57,8 +58,11 @@ const Navigation = (props: NavigationProps) => {
   const { globalPermissions } = usePermissions();
 
   // Workspace context value, overridden by the route param on unauthenticated public pages
-  const { workspace: activeWorkspace } = useWorkspace();
+  const { workspace: activeWorkspace, workspaces } = useWorkspace();
   const workspace = props.isPublic ? props.workspace : activeWorkspace;
+
+  // No active Workspace, used to disable Workspace-scoped navigation items
+  const noWorkspace = !props.isPublic && (workspace === "" || _.isUndefined(workspace));
 
   // Display state
   const [workspaceName, setWorkspaceName] = useState<string>("");
@@ -79,25 +83,26 @@ const Navigation = (props: NavigationProps) => {
     _hover: { bg: "nav.hoverBg" },
   });
 
-  // Execute GraphQL query both on page load and navigation
+  // Only public pages need to resolve the Workspace name over the network
   const { data } = useQuery<{
     workspace: WorkspaceModel;
   }>(GET_WORKSPACE, {
     variables: {
       workspace: workspace,
     },
-    // Only unauthenticated public pages need to reach the public Workspace endpoint
-    context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace ?? "") } : undefined,
+    context: { uri: getPublicWorkspaceUrl(workspace ?? "") },
     fetchPolicy: "network-only",
-    skip: !workspace,
+    skip: !props.isPublic || !workspace,
   });
 
-  // Assign data
+  // Assign the resolved public Workspace name, or read the private Workspace name from context
   useEffect(() => {
-    if (data?.workspace) {
-      setWorkspaceName(data.workspace.name);
+    if (props.isPublic) {
+      if (data?.workspace) setWorkspaceName(data.workspace.name);
+    } else {
+      setWorkspaceName(workspaces.find((w) => w._id === workspace)?.name ?? "");
     }
-  }, [data]);
+  }, [props.isPublic, data, workspace, workspaces]);
 
   return (
     <Flex w={"100%"} p={"2"} bg={"nav.bg"}>
@@ -181,7 +186,7 @@ const Navigation = (props: NavigationProps) => {
                   navigate("/");
                 }
               }}
-              disabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={noWorkspace}
             >
               <Icon name={"dashboard"} size={"xs"} />
               Dashboard
@@ -197,7 +202,7 @@ const Navigation = (props: NavigationProps) => {
                 justifyContent={"left"}
                 {...navLinkStyle(_.includes(location.pathname, "/activity"))}
                 onClick={() => navigate("/activity")}
-                disabled={workspace === "" || _.isUndefined(workspace)}
+                disabled={noWorkspace}
               >
                 <Icon name={"activity"} size={"xs"} />
                 Activity
@@ -219,7 +224,7 @@ const Navigation = (props: NavigationProps) => {
                   navigate("/search");
                 }
               }}
-              disabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={noWorkspace}
             >
               <Icon name={"search"} size={"xs"} />
               Search
@@ -243,7 +248,7 @@ const Navigation = (props: NavigationProps) => {
                   navigate("/entities");
                 }
               }}
-              disabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={noWorkspace}
             >
               <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
               Entities
@@ -263,7 +268,7 @@ const Navigation = (props: NavigationProps) => {
                   navigate("/projects");
                 }
               }}
-              disabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={noWorkspace}
             >
               <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
               Projects
@@ -283,7 +288,7 @@ const Navigation = (props: NavigationProps) => {
                   navigate("/templates");
                 }
               }}
-              disabled={workspace === "" || _.isUndefined(workspace)}
+              disabled={noWorkspace}
             >
               <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
               Templates
@@ -303,7 +308,7 @@ const Navigation = (props: NavigationProps) => {
                 rounded={"md"}
                 colorPalette={"green"}
                 onClick={() => setDialogCreateOpen(!dialogCreateOpen)}
-                disabled={workspace === "" || _.isUndefined(workspace)}
+                disabled={noWorkspace}
               >
                 <Icon name={"add"} size={"xs"} />
                 Create
@@ -326,7 +331,7 @@ const Navigation = (props: NavigationProps) => {
 
                         setImportOpen(true);
                       }}
-                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.import}
+                      disabled={noWorkspace || !globalPermissions.features.import}
                     >
                       <Icon name={"upload"} size={"xs"} />
                       Import
@@ -351,7 +356,7 @@ const Navigation = (props: NavigationProps) => {
 
                         setScanOpen(true);
                       }}
-                      disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
+                      disabled={noWorkspace || !globalPermissions.features.scan}
                     >
                       <Icon name={"scan"} size={"xs"} />
                       Scan
@@ -435,6 +440,7 @@ const Navigation = (props: NavigationProps) => {
                       navigate("/");
                     }
                   }}
+                  disabled={noWorkspace}
                 >
                   <Icon name={"dashboard"} size={"xs"} />
                   Dashboard
@@ -445,6 +451,7 @@ const Navigation = (props: NavigationProps) => {
                     value={"activity"}
                     fontSize={"xs"}
                     onClick={() => navigate("/activity")}
+                    disabled={noWorkspace}
                   >
                     <Icon name={"activity"} size={"xs"} />
                     Activity
@@ -461,6 +468,7 @@ const Navigation = (props: NavigationProps) => {
                       navigate("/search");
                     }
                   }}
+                  disabled={noWorkspace}
                 >
                   <Icon name={"search"} size={"xs"} />
                   Search
@@ -480,6 +488,7 @@ const Navigation = (props: NavigationProps) => {
                       navigate("/entities");
                     }
                   }}
+                  disabled={noWorkspace}
                 >
                   <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
                   Entities
@@ -495,6 +504,7 @@ const Navigation = (props: NavigationProps) => {
                       navigate("/projects");
                     }
                   }}
+                  disabled={noWorkspace}
                 >
                   <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
                   Projects
@@ -510,6 +520,7 @@ const Navigation = (props: NavigationProps) => {
                       navigate("/templates");
                     }
                   }}
+                  disabled={noWorkspace}
                 >
                   <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
                   Templates
@@ -524,6 +535,7 @@ const Navigation = (props: NavigationProps) => {
                     value={"create"}
                     fontSize={"xs"}
                     onClick={() => setDialogCreateOpen(!dialogCreateOpen)}
+                    disabled={noWorkspace}
                   >
                     <Icon name={"add"} size={"xs"} />
                     Create
@@ -538,7 +550,7 @@ const Navigation = (props: NavigationProps) => {
 
                       setScanOpen(true);
                     }}
-                    disabled={workspace === "" || _.isUndefined(workspace) || !globalPermissions.features.scan}
+                    disabled={noWorkspace || !globalPermissions.features.scan}
                   >
                     <Icon name={"scan"} size={"xs"} />
                     Scan

@@ -2,17 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Button, Dialog, Flex, Menu, ScrollArea, Spacer, Spinner, Text, useDisclosure } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
-import { toaster } from "@components/Toast";
-
-// GraphQL resources
-import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
 
 // Custom types
-import { IGenericItem, WorkspaceModel } from "@types";
+import { IGenericItem } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -28,17 +23,6 @@ import { auth } from "@lib/auth";
 // Analytics
 import { usePostHog } from "posthog-js/react";
 
-const GET_WORKSPACES = gql`
-  query GetWorkspaces {
-    workspaces {
-      _id
-      owner
-      name
-      description
-    }
-  }
-`;
-
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
   const posthog = usePostHog();
@@ -49,11 +33,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   // Dialog state for transition overlay
   const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
 
-  // Store all Workspaces
-  const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
-
   // Get contexts
-  const { workspace, activateWorkspace } = useWorkspace();
+  const { workspace, workspaces, activateWorkspace, refreshWorkspaces } = useWorkspace();
 
   // Switcher drop-down visibility state
   const [open, setOpen] = useState(false);
@@ -64,10 +45,6 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   // Derived label from workspaces list
   const label = workspaces.find((w) => w._id === workspace)?.name ?? "Select Workspace";
 
-  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
-    workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
-
   // Present the transition overlay when loading
   useEffect(() => {
     if (isLoading) {
@@ -77,39 +54,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [isLoading]);
 
-  // Fetch Workspace list on mount and whenever the active Workspace changes
-  useEffect(() => {
-    getWorkspaces()
-      .then((result) => {
-        if (result.data?.workspaces) {
-          setWorkspaces(result.data.workspaces);
-          if (result.data.workspaces.length === 0) {
-            navigate("/create/workspace");
-          }
-        }
-        if (workspacesError) {
-          toaster.create({
-            title: "Error",
-            description: "Unable to retrieve Workspaces",
-            type: "error",
-            duration: 2000,
-            closable: true,
-          });
-        }
-      })
-      .catch(ignoreAbort);
-  }, [workspace]);
-
-  // Refresh the workspace list when the dropdown opens
+  // Refresh the Workspace list whenever the dropdown opens, to reflect recent changes
   useEffect(() => {
     if (open) {
-      getWorkspaces()
-        .then((result) => {
-          if (result.data?.workspaces) {
-            setWorkspaces(result.data.workspaces);
-          }
-        })
-        .catch(ignoreAbort);
+      refreshWorkspaces().catch(ignoreAbort);
     }
   }, [open]);
 
