@@ -61,7 +61,7 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
     api: false,
   },
   workspaces: {
-    create: false,
+    create: true,
   },
 };
 
