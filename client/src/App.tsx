@@ -15,6 +15,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 
 // Custom components
 import { Page } from "@components/Container";
+import WorkspaceRoute from "@components/WorkspaceRoute";
 
 // Routing and navigation
 import {
@@ -112,44 +113,50 @@ const App = (): ReactElement => {
 
         {/* Private routes */}
         <Route element={<Page isPublic={false} />}>
-          <Route path={"/"} element={<Dashboard />} />
-
-          {/* Create routes */}
+          {/* Routes accessible without an active Workspace */}
           <Route path={"/create/workspace"} element={<CreateWorkspace />} />
-          <Route path={"/create/template"} element={<CreateTemplate />} />
-          <Route path={"/create/project"} element={<CreateProject />} />
-          <Route path={"/create/entity"} element={<CreateEntity />} />
-
-          {/* Workspace routes */}
-          <Route path={"workspaces"}>
-            <Route path={":id"} element={<Workspace />} />
-          </Route>
-
-          {/* Entity routes */}
-          <Route path={"/entities"} element={<Entities />} />
-          <Route path={"entities"}>
-            <Route path={":id"} element={<Entity />} />
-          </Route>
-
-          {/* Projects routes */}
-          <Route path={"/projects"} element={<Projects />} />
-          <Route path={"projects"}>
-            <Route path={":id"} element={<Project />} />
-          </Route>
-
-          {/* Templates routes */}
-          <Route path={"/templates"} element={<Templates />} />
-          <Route path={"templates"}>
-            <Route path={":id"} element={<Template />} />
-          </Route>
-
-          {/* Other routes */}
           <Route path={"/profile"} element={<User />} />
-          <Route path={"/search"} element={<Search />} />
-          <Route path={"/activity"} element={<Activity />} />
           <Route path={"/admin"} element={<Admin />} />
           <Route path={"/invalid"} element={<Invalid />} />
           <Route path={"/unauthorized"} element={<Unauthorized />} />
+
+          {/* Routes requiring an active Workspace */}
+          <Route element={<WorkspaceRoute />}>
+            <Route path={"/"} element={<Dashboard />} />
+
+            {/* Create routes */}
+            <Route path={"/create/template"} element={<CreateTemplate />} />
+            <Route path={"/create/project"} element={<CreateProject />} />
+            <Route path={"/create/entity"} element={<CreateEntity />} />
+
+            {/* Workspace routes */}
+            <Route path={"workspaces"}>
+              <Route path={":id"} element={<Workspace />} />
+            </Route>
+
+            {/* Entity routes */}
+            <Route path={"/entities"} element={<Entities />} />
+            <Route path={"entities"}>
+              <Route path={":id"} element={<Entity />} />
+            </Route>
+
+            {/* Projects routes */}
+            <Route path={"/projects"} element={<Projects />} />
+            <Route path={"projects"}>
+              <Route path={":id"} element={<Project />} />
+            </Route>
+
+            {/* Templates routes */}
+            <Route path={"/templates"} element={<Templates />} />
+            <Route path={"templates"}>
+              <Route path={":id"} element={<Template />} />
+            </Route>
+
+            {/* Other routes */}
+            <Route path={"/search"} element={<Search />} />
+            <Route path={"/activity"} element={<Activity />} />
+          </Route>
+
           <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
         </Route>
 
