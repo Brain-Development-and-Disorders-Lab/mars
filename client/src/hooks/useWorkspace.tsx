@@ -36,8 +36,8 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
 
   // Activate the stored workspace or fall back to the first available one
   useEffect(() => {
-    // Wait until session has loaded and authentication is complete
-    if (isSessionPending || !session?.user) return;
+    // Wait until session has loaded, authentication is complete, and the profile is complete
+    if (isSessionPending || !session?.user || session.user.completedProfile === false) return;
 
     /**
      * Activate the workspace on first render after the session has loaded
@@ -47,7 +47,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       if (!result.success) navigate("/create/workspace");
     };
     initializeWorkspace().catch(ignoreAbort);
-  }, [isSessionPending, session?.user?.id]);
+  }, [isSessionPending, session?.user?.id, session?.user?.completedProfile]);
 
   // Query to retrieve Workspaces
   const GET_WORKSPACES = gql`

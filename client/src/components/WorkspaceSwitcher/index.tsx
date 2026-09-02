@@ -77,7 +77,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [isLoading]);
 
-  // Fetch Workspace list once on mount
+  // Fetch Workspace list on mount and whenever the active Workspace changes
   useEffect(() => {
     getWorkspaces()
       .then((result) => {
@@ -98,7 +98,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         }
       })
       .catch(ignoreAbort);
-  }, []);
+  }, [workspace]);
 
   // Refresh the workspace list when the dropdown opens
   useEffect(() => {

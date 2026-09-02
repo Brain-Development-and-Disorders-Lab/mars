@@ -66,13 +66,14 @@ const Page: FC<PageProps> = (props: PageProps) => {
   // Error state
   const [sessionError, setSessionError] = useState(false);
 
-  // `true` when the user authenticated via a third-party but hasn't completed their profile
-  const [incompleteProfile, setIncompleteProfile] = useState(false);
-
   // Route param carrying the public Workspace identifier
   const { id } = useParams();
 
-  // Validate session and check profile completion state once the session settles
+  // `true` when the user authenticated via a third-party but hasn't completed their profile
+  const incompleteProfile =
+    !props.isPublic && !isSessionPending && !!session && session.user.completedProfile === false;
+
+  // Validate session and identify the user for analytics once the session settles
   useEffect(() => {
     if (props.isPublic || isSessionPending) return;
 
@@ -94,11 +95,6 @@ const Page: FC<PageProps> = (props: PageProps) => {
       email: session.user.email,
       name: session.user.name,
     });
-
-    // Force user to the profile completion page if required
-    if (session.user.completedProfile === false) {
-      setIncompleteProfile(true);
-    }
   }, [props.isPublic, isSessionPending, sessionErrorState, session]);
 
   if (!props.isPublic) {
