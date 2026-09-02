@@ -87,10 +87,10 @@ const CreateWorkspace = () => {
 
   useEffect(() => {
     // If the User does not have Workspace create permissions, direct to `/unauthorized`
-    if (!permissionsLoading && !globalPermissions.workspaces.create && window.location.pathname !== "/unauthorized") {
-      window.location.href = "/unauthorized";
+    if (!permissionsLoading && !globalPermissions.workspaces.create) {
+      navigate("/unauthorized");
     }
-  }, []);
+  }, [permissionsLoading, globalPermissions.workspaces.create, navigate]);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`

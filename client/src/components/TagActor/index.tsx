@@ -71,6 +71,7 @@ const TagActor = (props: TagActorProps) => {
     context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace) } : undefined,
     skip: !props.identifier || props.identifier.trim() === "",
     fetchPolicy: "network-only",
+    errorPolicy: "all",
   });
 
   useEffect(() => {
