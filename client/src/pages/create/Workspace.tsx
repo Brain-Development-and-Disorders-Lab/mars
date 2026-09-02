@@ -11,11 +11,11 @@ import { toaster } from "@components/Toast";
 import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 
 // Custom types
-import { IResponseMessage, WorkspaceModel } from "@types";
+import { ResponseData } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery, useMutation } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 
 // Routing and navigation
 import { useBlocker, useNavigate } from "react-router-dom";
@@ -98,27 +98,13 @@ const CreateWorkspace = () => {
       createWorkspace(workspace: $workspace) {
         success
         message
+        data
       }
     }
   `;
   const [createWorkspace, { loading: createLoading, error: createError }] = useMutation<{
-    createWorkspace: IResponseMessage;
+    createWorkspace: ResponseData<string>;
   }>(CREATE_WORKSPACE);
-
-  // Query to retrieve all Workspaces
-  const GET_WORKSPACES = gql`
-    query GetWorkspaces {
-      workspaces {
-        _id
-        owner
-        name
-        description
-      }
-    }
-  `;
-  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
-    workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Capture event
   useEffect(() => {
@@ -151,41 +137,37 @@ const CreateWorkspace = () => {
       },
     });
 
-    if (result.data?.createWorkspace.success) {
-      // Update to use the new Workspace identifier
-      const workspaces = await getWorkspaces().catch(ignoreAbort);
-      if (workspaces?.data?.workspaces && workspaces.data.workspaces.length > 0) {
-        // Get the latest created Workspace
-        const created = workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
+    const created = result.data?.createWorkspace;
+    if (created?.success && created.data) {
+      // Activate the newly created Workspace and refresh the accessible list
+      await activateWorkspace(created.data).catch(ignoreAbort);
+      navigate("/");
 
-        // Update the stored Workspace identifier and collection of Workspaces
-        navigate("/");
-        activateWorkspace(created._id);
+      // Reset dialog state
+      setName("");
+      setDescription("");
+      setCollaborators([]);
 
-        // Reset dialog state
-        setName("");
-        setDescription("");
-        setCollaborators([]);
-
-        toaster.create({
-          title: "Success",
-          description: "Workspace created successfully",
-          type: "success",
-          duration: 4000,
-          closable: true,
-        });
-      }
+      toaster.create({
+        title: "Success",
+        description: "Workspace created successfully",
+        type: "success",
+        duration: 4000,
+        closable: true,
+      });
     }
 
-    if (createError || workspacesError) {
+    if (createError || created?.success === false) {
       toaster.create({
         title: "Error",
-        description: "Unable to retrieve Workspaces",
+        description: "Unable to create Workspace",
         type: "error",
         duration: 2000,
         closable: true,
       });
     }
+
+    setIsSubmitting(false);
   };
 
   /**

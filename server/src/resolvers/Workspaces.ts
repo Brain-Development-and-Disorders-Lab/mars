@@ -8,6 +8,7 @@ import {
   CollaboratorMetrics,
   WorkspaceModel,
   IResolverParent,
+  ResponseData,
 } from "@types";
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -215,7 +216,7 @@ export const WorkspacesResolvers = {
       _parent: IResolverParent,
       args: { workspace: IWorkspace },
       context: Context,
-    ): Promise<IResponseMessage> => {
+    ): Promise<ResponseData<string>> => {
       const result = await Workspaces.create(args.workspace);
 
       // Capture event
