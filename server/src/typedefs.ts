@@ -847,7 +847,7 @@ export const typedefs = `#graphql
     createActivity(activity: ActivityCreateInput): ResponseMessage
 
     # Workspace mutations
-    createWorkspace(workspace: WorkspaceCreateInput): ResponseMessage
+    createWorkspace(workspace: WorkspaceCreateInput): ResponseDataString
     updateWorkspace(workspace: WorkspaceUpdateInput): ResponseMessage
 
     # Admin mutations

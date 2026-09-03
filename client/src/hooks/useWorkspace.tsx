@@ -4,14 +4,10 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
-// Routing
-import { useNavigate } from "react-router-dom";
-
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
-import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
 // Hooks
@@ -20,127 +16,97 @@ import { useStorage } from "@hooks/useStorage";
 // Authentication
 import { auth } from "@lib/auth";
 
+// Query to retrieve all Workspaces the User has access to
+const GET_WORKSPACES = gql`
+  query GetWorkspaces {
+    workspaces {
+      _id
+      owner
+      name
+      description
+    }
+  }
+`;
+
 type WorkspaceContextValue = {
   workspace: string;
+  workspaces: WorkspaceModel[];
+  loading: boolean;
   activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
+  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
 };
 const WorkspaceContext = createContext({} as WorkspaceContextValue);
 
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
-  const navigate = useNavigate();
   const { storage, updateStorageField } = useStorage();
   const { data: session, isPending: isSessionPending } = auth.useSession();
 
   // Workspace state
   const [activeWorkspace, setActiveWorkspace] = useState(storage.workspace);
+  const [workspaces, setWorkspaces] = useState<WorkspaceModel[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Activate the stored workspace or fall back to the first available one
-  useEffect(() => {
-    // Wait until session has loaded, authentication is complete, and the profile is complete
-    if (isSessionPending || !session?.user || session.user.completedProfile === false) return;
-
-    /**
-     * Activate the workspace on first render after the session has loaded
-     */
-    const initializeWorkspace = async () => {
-      const result = await activateWorkspace(storage.workspace);
-      if (!result.success) navigate("/create/workspace");
-    };
-    initializeWorkspace().catch(ignoreAbort);
-  }, [isSessionPending, session?.user?.id, session?.user?.completedProfile]);
-
-  // Query to retrieve Workspaces
-  const GET_WORKSPACES = gql`
-    query GetWorkspaces {
-      workspaces {
-        _id
-        owner
-        name
-        description
-      }
-    }
-  `;
-  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
+  const [getWorkspaces] = useLazyQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
-  // Query to check if a specific Workspace exists
-  const GET_WORKSPACE = gql`
-    query GetWorkspace($_id: String) {
-      workspace(_id: $_id) {
-        _id
-        name
-      }
-    }
-  `;
-  const [getWorkspace] = useLazyQuery<{
-    workspace: WorkspaceModel;
-  }>(GET_WORKSPACE, {
-    fetchPolicy: "network-only",
-    errorPolicy: "all", // Don't throw on errors, return them in the response
-  });
+  /**
+   * Refetch the list of Workspaces accessible to the User
+   * @return {Promise<WorkspaceModel[]>}
+   */
+  const refreshWorkspaces = async (): Promise<WorkspaceModel[]> => {
+    const result = await getWorkspaces();
+    const refreshed = result.data?.workspaces ?? [];
+    setWorkspaces(refreshed);
+    return refreshed;
+  };
 
+  /**
+   * Set the active Workspace, provided the User has access to it
+   * @param {string} workspace Identifier of the Workspace to activate, or an empty string to
+   * resolve the stored or first available Workspace
+   * @return {Promise<IResponseMessage>}
+   */
   const activateWorkspace = async (workspace: string): Promise<IResponseMessage> => {
-    if (workspace === "") {
-      // Check if there's a stored workspace in session
-      const storedWorkspace = storage.workspace;
+    const accessible = await refreshWorkspaces();
 
-      if (storedWorkspace && storedWorkspace !== "") {
-        // Verify the stored workspace exists
-        const workspaceResponse = await getWorkspace({
-          variables: { _id: storedWorkspace },
-        });
+    // Resolve which Workspace to activate: the requested one, the stored one, or the first available
+    const target = workspace || storage.workspace;
+    const resolved = accessible.find((w) => w._id === target) ?? accessible[0];
 
-        if (workspaceResponse.data?.workspace && !workspaceResponse.error) {
-          // Stored workspace exists, use it
-          updateStorageField("workspace", storedWorkspace);
-          setActiveWorkspace(storedWorkspace);
-          return {
-            success: true,
-            message: "Set active Workspace",
-          };
-        }
-      }
-
-      // Stored workspace doesn't exist or wasn't found, get all workspaces
-      const workspacesResponse = await getWorkspaces();
-      const workspacesData = workspacesResponse.data?.workspaces;
-
-      // Check for any query errors
-      if (_.isUndefined(workspacesData) || !_.isUndefined(workspacesError)) {
-        return {
-          success: false,
-          message: "Unable to activate Workspace",
-        };
-      }
-
-      // Check that the User is a member of a Workspace
-      if (workspacesData.length === 0) {
-        return {
-          success: false,
-          message: "No Workspaces exist",
-        };
-      }
-
-      // Use the first available workspace
-      updateStorageField("workspace", workspacesData[0]._id);
-      setActiveWorkspace(workspacesData[0]._id);
-    } else {
-      updateStorageField("workspace", workspace);
-      setActiveWorkspace(workspace);
+    if (!resolved) {
+      return {
+        success: false,
+        message: "No Workspaces exist",
+      };
     }
+
+    updateStorageField("workspace", resolved._id);
+    setActiveWorkspace(resolved._id);
     return {
       success: true,
       message: "Set active Workspace",
     };
   };
 
+  // Resolve the active Workspace once the session has loaded and the profile is complete
+  useEffect(() => {
+    if (isSessionPending || !session?.user || session.user.completedProfile === false) return;
+
+    activateWorkspace(storage.workspace)
+      .catch(ignoreAbort)
+      .finally(() => setLoading(false));
+  }, [isSessionPending, session?.user?.id, session?.user?.completedProfile]);
+
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       workspace: activeWorkspace,
+      workspaces,
+      loading,
       activateWorkspace,
+      refreshWorkspaces,
     }),
-    [activeWorkspace],
+    [activeWorkspace, workspaces, loading],
   );
 
   return <WorkspaceContext.Provider value={value}>{props.children}</WorkspaceContext.Provider>;
