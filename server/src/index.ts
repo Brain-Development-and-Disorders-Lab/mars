@@ -30,7 +30,7 @@ import { IdentifiersResolvers } from "@resolvers/Identifiers";
 import { ObjectResolver } from "@resolvers/Object";
 import { ProjectsResolvers } from "@resolvers/Projects";
 import { SearchResolvers } from "@resolvers/Search";
-import { TemplatesResolvers } from "@resolvers/Templates";
+import { AttributesResolvers } from "@resolvers/Attributes";
 import { UserResolvers } from "@resolvers/User";
 import { WorkspacesResolvers } from "@resolvers/Workspaces";
 
@@ -202,6 +202,7 @@ const start = async () => {
     AdminResolvers,
     ActivityResolvers,
     APIResolvers,
+    AttributesResolvers,
     CountersResolvers,
     DataResolvers,
     DateResolver,
@@ -210,7 +211,6 @@ const start = async () => {
     ObjectResolver,
     ProjectsResolvers,
     SearchResolvers,
-    TemplatesResolvers,
     UserResolvers,
     WorkspacesResolvers,
     {
@@ -253,9 +253,9 @@ const start = async () => {
     "project",
     "projects",
     "projectEntities",
-    "template",
-    "templates",
-    "templateUsage",
+    "attribute",
+    "attributes",
+    "attributeUsage",
     "identifierFormats",
     "search",
     "downloadFile",

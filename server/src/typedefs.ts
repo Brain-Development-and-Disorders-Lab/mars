@@ -57,7 +57,7 @@ export const typedefs = `#graphql
     workspaces: Int
     entities: Int
     projects: Int
-    templates: Int
+    attributes: Int
   }
   
   # All "Global" permissions ("features" and "workspaces")
@@ -99,7 +99,7 @@ export const typedefs = `#graphql
     workspaces: UserWorkspacesPermissionsInput
   }
   
-  # All "Workspace" permissions ("administration", "entities", "projects", "templates")
+  # All "Workspace" permissions ("administration", "entities", "projects", "attributes")
   # "UserWorkspaceAdministrationPermissions" type
   type UserWorkspaceAdministrationPermissions {
     edit: Boolean
@@ -140,15 +140,15 @@ export const typedefs = `#graphql
     archive: Boolean
   }
   
-  # "UserWorkspaceTemplatesPermissions" type
-  type UserWorkspaceTemplatesPermissions {
+  # "UserWorkspaceAttributesPermissions" type
+  type UserWorkspaceAttributesPermissions {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
   
-  # "UserWorkspaceTemplatesPermissionsInput" type
-  input UserWorkspaceTemplatesPermissionsInput {
+  # "UserWorkspaceAttributesPermissionsInput" type
+  input UserWorkspaceAttributesPermissionsInput {
     create: Boolean
     edit: Boolean
     archive: Boolean
@@ -159,7 +159,7 @@ export const typedefs = `#graphql
     administration: UserWorkspaceAdministrationPermissions
     entities: UserWorkspaceEntitiesPermissions
     projects: UserWorkspaceProjectsPermissions
-    templates: UserWorkspaceTemplatesPermissions
+    attributes: UserWorkspaceAttributesPermissions
   }
   
   # "UserWorkspacePermissionsInput" type
@@ -167,7 +167,7 @@ export const typedefs = `#graphql
     administration: UserWorkspaceAdministrationPermissionsInput
     entities: UserWorkspaceEntitiesPermissionsInput
     projects: UserWorkspaceProjectsPermissionsInput
-    templates: UserWorkspaceTemplatesPermissionsInput
+    attributes: UserWorkspaceAttributesPermissionsInput
   }
   
   # Collated permissions
@@ -191,7 +191,7 @@ export const typedefs = `#graphql
     owner: String
     entities: Int
     projects: Int
-    templates: Int
+    attributes: Int
   }
 
   # "AdminUser" type
@@ -304,7 +304,7 @@ export const typedefs = `#graphql
     history: [AttributeHistory]
   }
 
-  # "AttributeHistory" type storing iterations of a Template (Attribute)
+  # "AttributeHistory" type storing iterations of an Attribute
   type AttributeHistory {
     author: String
     message: String
@@ -445,8 +445,8 @@ export const typedefs = `#graphql
     warnings: [String]
   }
 
-  # "TemplateReview" type storing the review state of a Template to be imported
-  type TemplateReview {
+  # "AttributesReview" type storing the review state of an Attribute to be imported
+  type AttributesReview {
     name: String
     state: String
   }
@@ -539,7 +539,7 @@ export const typedefs = `#graphql
     collaborators: [Collaborator]
     entities: [String]
     projects: [String]
-    templates: [String]
+    attributes: [String]
     activity: [String]
   }
 
@@ -552,7 +552,7 @@ export const typedefs = `#graphql
     collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
-    templates: [String]
+    attributes: [String]
     activity: [String]
   }
 
@@ -566,7 +566,7 @@ export const typedefs = `#graphql
     collaborators: [CollaboratorInput]
     entities: [String]
     projects: [String]
-    templates: [String]
+    attributes: [String]
     activity: [String]
   }
 
@@ -604,11 +604,11 @@ export const typedefs = `#graphql
     data: [EntityReview]
   }
 
-  # "ResponseData"-type containing data with type "TemplateReview"
-  type ResponseDataTemplateReview {
+  # "ResponseData"-type containing data with type "AttributeReview"
+  type ResponseDataAttributeReview {
     success: Boolean
     message: String
-    data: [TemplateReview]
+    data: [AttributeReview]
   }
 
   # "ResponseData"-type containing data with type "APIKey"
@@ -668,14 +668,14 @@ export const typedefs = `#graphql
     addedDay: Int
   }
   
-  # "TemplateUsage" type
-  type TemplateUsage {
+  # "AttributeUsage" type
+  type AttributeUsage {
     entity: String!
     modifications: [String]
   }
 
-  # "TemplateMetrics" type
-  type TemplateMetrics {
+  # "AttributeMetrics" type
+  type AttributeMetrics {
     all: Int
     addedDay: Int
   }
@@ -692,8 +692,8 @@ export const typedefs = `#graphql
     description: String
   }
 
-  # Input type for template suggestion queries
-  input TemplateSuggestionInput {
+  # Input type for Attribute suggestion queries
+  input AttributeSuggestionInput {
     _id: String!
     name: String!
     description: String!
@@ -776,11 +776,11 @@ export const typedefs = `#graphql
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics
 
-    # Template queries
-    templates(limit: Int): [Attribute]
-    template(_id: String): Attribute
-    templateUsage(_id: String): [TemplateUsage]
-    templateMetrics: TemplateMetrics
+    # Attribute queries
+    attributes(limit: Int): [Attribute]
+    attribute(_id: String): Attribute
+    attributeUsage(_id: String): [AttributeUsage]
+    attributeMetrics: AttributeMetrics
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -799,7 +799,7 @@ export const typedefs = `#graphql
     exportEntitiesAll(format: String, includeAttributes: Boolean, includeHistory: Boolean): String
     exportProject(_id: String, format: String, fields: [String], includeHistory: Boolean): String
     exportProjectEntities(_id: String, format: String): String
-    exportTemplate(_id: String, fields: [String], includeHistory: Boolean): String
+    exportAttribute(_id: String, fields: [String], includeHistory: Boolean): String
 
     # Authentication queries
     login(code: String): ResponseDataAuth
@@ -812,7 +812,7 @@ export const typedefs = `#graphql
     search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean, filters: EntityFilterInput): [SearchResult]
     translateSearch(query: String!): String
     suggestColumnMapping(columns: [String]!): ColumnMappingSuggestion
-    suggestTemplate(name: String!, description: String, templates: [TemplateSuggestionInput!]!): String
+    suggestAttribute(name: String!, description: String, attributes: [AttributeSuggestionInput!]!): String
 
     # Counters queries
     counter(_id: String): Counter
@@ -859,11 +859,11 @@ export const typedefs = `#graphql
     updateUser(user: UserInput): ResponseMessage
     reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 
-    # Template mutations
-    createTemplate(template: AttributeCreateInput): ResponseMessage
-    updateTemplate(template: AttributeInput, message: String): ResponseMessage
-    archiveTemplate(_id: String, state: Boolean): ResponseMessage
-    archiveTemplates(toArchive: [String], state: Boolean): ResponseMessage
+    # Attribute mutations
+    createAttribute(attribute: AttributeCreateInput): ResponseMessage
+    updateAttribute(attribute: AttributeInput, message: String): ResponseMessage
+    archiveAttribute(_id: String, state: Boolean): ResponseMessage
+    archiveTAttribute(toArchive: [String], state: Boolean): ResponseMessage
 
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseDataString
@@ -876,8 +876,8 @@ export const typedefs = `#graphql
     # Data import JSON mutations
     reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
     importEntityJSON(file: [Upload]!, project: String, attributes: [AttributeInput]): ResponseMessage
-    reviewTemplateJSON(file: [Upload]!): ResponseDataTemplateReview
-    importTemplateJSON(file: [Upload]!): ResponseMessage
+    reviewAttributeJSON(file: [Upload]!): ResponseDataAttributeReview
+    importAttributeJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
     revokeKey(key: String): ResponseMessage

@@ -4,7 +4,7 @@ import {
   Context,
   CSVImportOptions,
   EntityImportReview,
-  TemplateImportReview,
+  AttributeImportReview,
   IColumnMapping,
   IFile,
   IResolverParent,
@@ -177,12 +177,12 @@ export const DataResolvers = {
       return await Data.importEntityJSON(args.file, args.project, args.attributes, context);
     },
 
-    // Review a Template JSON file, return collection of Template names and their updates
-    reviewTemplateJSON: async (
+    // Review an Attribute JSON file, return collection of Attribute names and their updates
+    reviewAttributeJSON: async (
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
-    ): Promise<ResponseData<TemplateImportReview[]>> => {
+    ): Promise<ResponseData<AttributeImportReview[]>> => {
       // Verify access to the Workspace
       const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
@@ -193,11 +193,11 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.reviewTemplateJSON(args.file);
+      return await Data.reviewAttributeJSON(args.file);
     },
 
-    // Import Template JSON file
-    importTemplateJSON: async (
+    // Import Attribute JSON file
+    importAttributeJSON: async (
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
@@ -212,7 +212,7 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.importTemplateJSON(args.file, context);
+      return await Data.importAttributeJSON(args.file, context);
     },
   },
 };

@@ -27,7 +27,7 @@ const USERS_COLLECTION = "user";
 const WORKSPACES_COLLECTION = "workspaces";
 const ENTITIES_COLLECTION = "entities";
 const PROJECTS_COLLECTION = "projects";
-const TEMPLATES_COLLECTION = "templates";
+const ATTRIBUTES_COLLECTION = "attributes";
 
 // Default Workspace permissions
 export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
@@ -40,7 +40,7 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
     edit: false,
     archive: false,
   },
-  templates: {
+  attributes: {
     create: false,
     edit: false,
     archive: false,
@@ -67,15 +67,15 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
 
 export class Admin {
   static getMetrics = async (): Promise<AdminMetrics> => {
-    const [users, workspaces, entities, projects, templates] = await Promise.all([
+    const [users, workspaces, entities, projects, attributes] = await Promise.all([
       getDatabase().collection(USERS_COLLECTION).countDocuments(),
       getDatabase().collection(WORKSPACES_COLLECTION).countDocuments(),
       getDatabase().collection(ENTITIES_COLLECTION).countDocuments(),
       getDatabase().collection(PROJECTS_COLLECTION).countDocuments(),
-      getDatabase().collection(TEMPLATES_COLLECTION).countDocuments(),
+      getDatabase().collection(ATTRIBUTES_COLLECTION).countDocuments(),
     ]);
 
-    return { users, workspaces, entities, projects, templates };
+    return { users, workspaces, entities, projects, attributes };
   };
 
   static getUsers = async (): Promise<AdminUser[]> => {
@@ -138,7 +138,7 @@ export class Admin {
         owner: workspace.owner || "",
         entities: workspace.entities.length,
         projects: workspace.projects.length,
-        templates: workspace.templates.length,
+        attributes: workspace.attributes.length,
       };
     });
   };
@@ -216,7 +216,7 @@ export class Admin {
           edit: true,
           archive: true,
         },
-        templates: {
+        attributes: {
           create: true,
           edit: true,
           archive: true,
@@ -265,11 +265,11 @@ export class Admin {
     if (permissions?.projects?.edit !== undefined) updatedPermissions.projects.edit = permissions.projects.edit;
     if (permissions?.projects?.archive !== undefined)
       updatedPermissions.projects.archive = permissions.projects.archive;
-    if (permissions?.templates?.create !== undefined)
-      updatedPermissions.templates.create = permissions.templates.create;
-    if (permissions?.templates?.edit !== undefined) updatedPermissions.templates.edit = permissions.templates.edit;
-    if (permissions?.templates?.archive !== undefined)
-      updatedPermissions.templates.archive = permissions.templates.archive;
+    if (permissions?.attributes?.create !== undefined)
+      updatedPermissions.attributes.create = permissions.attributes.create;
+    if (permissions?.attributes?.edit !== undefined) updatedPermissions.attributes.edit = permissions.attributes.edit;
+    if (permissions?.attributes?.archive !== undefined)
+      updatedPermissions.attributes.archive = permissions.attributes.archive;
 
     // Apply update in-place in list of Collaborators
     for (const collaborator of workspaceResult.collaborators) {
@@ -334,7 +334,7 @@ export class Admin {
             edit: true,
             archive: true,
           },
-          templates: {
+          attributes: {
             create: true,
             edit: true,
             archive: true,

@@ -10,7 +10,7 @@ import {
   IResponseMessage,
   ResponseData,
   EntityImportReview,
-  TemplateImportReview,
+  AttributeImportReview,
   IColumnMapping,
   IRow,
   CSVImportOptions,
@@ -26,10 +26,10 @@ import _ from "lodash";
 
 // Models
 import { Activity } from "@models/Activity";
+import { Attributes } from "@models/Attributes";
 import { Counters } from "@models/Counters";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
-import { Templates } from "@models/Templates";
 import { Workspaces } from "@models/Workspaces";
 
 export class Data {
@@ -134,14 +134,14 @@ export class Data {
    * @param {"create" | "update" | "delete" | "archived"} type Activity type
    * @param {string} actor User identifier performing the action
    * @param {string} details Human-readable activity description
-   * @param {{ _id: string; type: "entities" | "projects" | "templates"; name: string }} target Target resource metadata
+   * @param {{ _id: string; type: "entities" | "projects" | "attributes"; name: string }} target Target resource metadata
    */
   private static recordActivity = async (
     workspace: string,
     type: "create" | "update" | "delete" | "archived",
     actor: string,
     details: string,
-    target: { _id: string; type: "entities" | "projects" | "templates"; name: string },
+    target: { _id: string; type: "entities" | "projects" | "attributes"; name: string },
   ): Promise<void> => {
     const activity = await Activity.create({
       timestamp: dayjs(Date.now()).toISOString(),
@@ -451,11 +451,11 @@ export class Data {
   };
 
   /**
-   * Reviews a Template JSON file and returns a list of operations that will be made on import.
+   * Reviews an Attribute JSON file and returns a list of operations that will be made on import.
    * @param {IFile[]} file JSON file for import
-   * @return {Promise<ResponseData<TemplateImportReview[]>>}
+   * @return {Promise<ResponseData<AttributeImportReview[]>>}
    */
-  static reviewTemplateJSON = async (file: IFile[]): Promise<ResponseData<TemplateImportReview[]>> => {
+  static reviewAttributeJSON = async (file: IFile[]): Promise<ResponseData<AttributeImportReview[]>> => {
     const { createReadStream, mimetype } = await file[0];
     if (!_.isEqual(mimetype, "application/json")) {
       return { success: false, message: "Invalid JSON file", data: [] };
@@ -471,13 +471,13 @@ export class Data {
         _.isUndefined(parsed["archived"]) ||
         _.isUndefined(parsed["values"])
       ) {
-        return { success: false, message: "Template JSON file is missing required fields", data: [] };
+        return { success: false, message: "Attribute JSON file is missing required fields", data: [] };
       }
 
-      const exists = !_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id));
+      const exists = !_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id));
       return {
         success: true,
-        message: "Collated list of Templates from JSON file to review",
+        message: "Collated list of Attributes from JSON file to review",
         data: [{ name: parsed.name, state: exists ? "update" : "create" }],
       };
     } catch (error: unknown) {
@@ -565,12 +565,12 @@ export class Data {
   };
 
   /**
-   * Imports a Template JSON file, creating or updating the Template as required.
+   * Imports an Attribute JSON file, creating or updating the Attribute as required.
    * @param {IFile[]} file JSON file for import
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
-  static importTemplateJSON = async (file: IFile[], context: Context): Promise<IResponseMessage> => {
+  static importAttributeJSON = async (file: IFile[], context: Context): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     if (!_.isEqual(mimetype, "application/json")) {
       return { success: false, message: "Invalid JSON file" };
@@ -586,28 +586,28 @@ export class Data {
         _.isUndefined(parsed["archived"]) ||
         _.isUndefined(parsed["values"])
       ) {
-        return { success: false, message: "Template JSON file is missing required fields" };
+        return { success: false, message: "Attribute JSON file is missing required fields" };
       }
 
-      if (!_.isUndefined(parsed["_id"]) && (await Templates.exists(parsed._id))) {
-        const result = await Templates.update(parsed);
+      if (!_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id))) {
+        const result = await Attributes.update(parsed);
         if (!result.success) {
-          return { success: false, message: `Error updating Template: "${parsed.name}"` };
+          return { success: false, message: `Error updating Attribute: "${parsed.name}"` };
         }
-        await Data.recordActivity(context.workspace, "update", context.user, "Updated Template", {
+        await Data.recordActivity(context.workspace, "update", context.user, "Updated Attribute", {
           _id: parsed._id,
-          type: "templates",
+          type: "attributes",
           name: parsed.name,
         });
       } else {
-        const result = await Templates.create(parsed);
+        const result = await Attributes.create(parsed);
         if (!result.success) {
-          return { success: false, message: `Error creating new Template: "${parsed.name}"` };
+          return { success: false, message: `Error creating new Attribute: "${parsed.name}"` };
         }
-        await Workspaces.addTemplate(context.workspace, result.data);
-        await Data.recordActivity(context.workspace, "create", context.user, "Created new Template", {
+        await Workspaces.addAttribute(context.workspace, result.data);
+        await Data.recordActivity(context.workspace, "create", context.user, "Created new Attribute", {
           _id: result.data,
-          type: "templates",
+          type: "attributes",
           name: parsed.name,
         });
       }

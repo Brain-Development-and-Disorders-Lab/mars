@@ -21,84 +21,84 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet("1234567890abcdef", 10);
 
 // Collection name
-const TEMPLATES_COLLECTION = "templates";
+const ATTRIBUTES_COLLECTION = "attributes";
 
-export class Templates {
+export class Attributes {
   /**
-   * Get all Template entries from the Templates collection
-   * @returns Collection of all Template entries
+   * Get all Attribute entries from the Attributes collection
+   * @returns Collection of all Attribute entries
    */
   static all = async (): Promise<AttributeModel[]> => {
-    logger.debug("Retrieving all Templates...");
-    return await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).find().toArray();
+    logger.debug("Retrieving all Attributes...");
+    return await getDatabase().collection<AttributeModel>(ATTRIBUTES_COLLECTION).find().toArray();
   };
 
   static getOne = async (_id: string): Promise<AttributeModel | null> => {
-    logger.debug({ templateId: _id }, "Retrieving Template");
-    return await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).findOne({ _id: _id });
+    logger.debug({ attributeId: _id }, "Retrieving Attribute");
+    return await getDatabase().collection<AttributeModel>(ATTRIBUTES_COLLECTION).findOne({ _id: _id });
   };
 
-  static getMany = async (templates: string[]): Promise<AttributeModel[]> => {
-    logger.debug({ count: templates.length }, "Retrieving Templates...");
+  static getMany = async (attributes: string[]): Promise<AttributeModel[]> => {
+    logger.debug({ count: attributes.length }, "Retrieving Attributes...");
     return await getDatabase()
-      .collection<AttributeModel>(TEMPLATES_COLLECTION)
-      .find({ _id: { $in: templates } })
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
+      .find({ _id: { $in: attributes } })
       .toArray();
   };
 
   /**
-   * Utility function to check if a Template exists or not
-   * @param _id Template identifier
+   * Utility function to check if an Attribute exists or not
+   * @param _id Attribute identifier
    * @return {boolean}
    */
   static exists = async (_id: string): Promise<boolean> => {
-    logger.debug({ templateId: _id }, "Checking if Template exists");
-    const response = await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).findOne({ _id: _id });
+    logger.debug({ attributeId: _id }, "Checking if Attribute exists");
+    const response = await getDatabase().collection<AttributeModel>(ATTRIBUTES_COLLECTION).findOne({ _id: _id });
     return !_.isNull(response);
   };
 
   /**
-   * Create a new Template
-   * @param template Template data
+   * Create a new Attribute
+   * @param {IAttribute} attribute Attribute data
    * @return {ResponseData<string>}
    */
-  static create = async (template: IAttribute): Promise<ResponseData<string>> => {
-    logger.debug("Creating new Template...");
-    // Add an identifier to the Template
-    const joinedTemplate: AttributeModel = {
-      _id: getIdentifier("template"),
+  static create = async (attribute: IAttribute): Promise<ResponseData<string>> => {
+    logger.debug("Creating new Attribute...");
+    // Add an identifier to the Attribute
+    const joinedAttribute: AttributeModel = {
+      _id: getIdentifier("attribute"),
       timestamp: dayjs(Date.now()).toISOString(),
-      ...template,
+      ...attribute,
     };
-    logger.debug({ templateId: joinedTemplate._id, name: joinedTemplate.name }, "Template");
+    logger.debug({ attributeId: joinedAttribute._id, name: joinedAttribute.name }, "Attribute");
 
-    const response = await getDatabase().collection<AttributeModel>(TEMPLATES_COLLECTION).insertOne(joinedTemplate);
-    const successStatus = _.isEqual(response.insertedId, joinedTemplate._id);
+    const response = await getDatabase().collection<AttributeModel>(ATTRIBUTES_COLLECTION).insertOne(joinedAttribute);
+    const successStatus = _.isEqual(response.insertedId, joinedAttribute._id);
     if (!successStatus) {
-      logger.error({ templateId: joinedTemplate._id }, "Unable to create new Template entry");
+      logger.error({ attributeId: joinedAttribute._id }, "Unable to create new Attribute entry");
     }
 
     return {
       success: successStatus,
-      message: successStatus ? "Created new Template" : "Unable to create Template",
+      message: successStatus ? "Created new Attribute" : "Unable to create Attribute",
       data: response.insertedId.toString(),
     };
   };
 
   static update = async (updated: AttributeModel): Promise<IResponseMessage> => {
-    logger.debug({ templateId: updated._id }, "Updating Template");
-    const template = await Templates.getOne(updated._id);
-    if (_.isNull(template)) {
-      logger.error({ templateId: updated._id }, "Unable to retrieve Template");
+    logger.debug({ attributeId: updated._id }, "Updating Attribute");
+    const attribute = await Attributes.getOne(updated._id);
+    if (_.isNull(attribute)) {
+      logger.error({ attributeId: updated._id }, "Unable to retrieve Attribute");
       return {
         success: false,
-        message: "Error retrieving existing Template",
+        message: "Error retrieving existing Attribute",
       };
     }
 
     const update: { $set: IAttribute } = {
       $set: {
-        ...template,
+        ...attribute,
       },
     };
 
@@ -118,32 +118,32 @@ export class Templates {
     }
 
     const response = await getDatabase()
-      .collection<AttributeModel>(TEMPLATES_COLLECTION)
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
     if (response.modifiedCount > 0) {
-      logger.info({ templateId: updated._id }, "Updated Template");
+      logger.info({ attributeId: updated._id }, "Updated Attribute");
     }
 
     return {
       success: true,
-      message: response.modifiedCount === 1 ? "Updated Template" : "No changes made to Template",
+      message: response.modifiedCount === 1 ? "Updated Attribute" : "No changes made to Attribute",
     };
   };
 
   /**
-   * Get the collection of Entities currently utilizing the Template Attribute and whether it has
+   * Get the collection of Entities currently utilizing the Attribute and whether it has
    * been modified or not
-   * @param _id Attribute or Template identifier
+   * @param _id Attribute identifier
    * @return {Promise<ResponseData<AttributeUsage[]>>} Collection of `AttributeUsage` objects
    */
   static usage = async (workspace: string, _id: string): Promise<AttributeUsage[]> => {
-    // Get the Template itself
-    const template = await Templates.getOne(_id);
+    // Get the Attribute itself
+    const attribute = await Attributes.getOne(_id);
 
     // Retrieve collection of Entities to examine
     const entities = await Workspaces.getEntities(workspace);
 
-    // Iterate through all Workspace Entities, extracting Attribute IDs and checking if they match known Templates
+    // Iterate through all Workspace Entities, extracting Attribute IDs and checking if they match known Attributes
     const activeEntities: EntityModel[] = [];
     for (const entity of entities) {
       const attributeIds = entity.attributes.map((attribute) => attribute._id);
@@ -155,7 +155,7 @@ export class Templates {
       }
     }
 
-    // Run comparison check across all Entities using the Template
+    // Run comparison check across all Entities using the attribute
     const usage: AttributeUsage[] = [];
     activeEntities.map((entity) => {
       const modifications: AttributeUsage["modifications"] = [];
@@ -166,19 +166,19 @@ export class Templates {
       })[0];
 
       // Run comparisons: name, description, values
-      if (downstreamAttribute.name !== template?.name) {
+      if (downstreamAttribute.name !== attribute?.name) {
         modifications.push("name");
       }
-      if (downstreamAttribute.description !== template?.description) {
+      if (downstreamAttribute.description !== attribute?.description) {
         modifications.push("description");
       }
-      if (downstreamAttribute.values.length !== template?.values.length) {
+      if (downstreamAttribute.values.length !== attribute?.values.length) {
         modifications.push("values");
       } else {
         // Iterate through values sequentially to check if Value names or types have been modified
         for (let i = 0; i < downstreamAttribute.values.length; i++) {
           const downstreamValue = downstreamAttribute.values[i];
-          const originalValue = template.values[i];
+          const originalValue = attribute.values[i];
           if (downstreamValue.name !== originalValue.name || downstreamValue.type !== originalValue.type) {
             modifications.push("values");
             break;
@@ -197,67 +197,67 @@ export class Templates {
   };
 
   /**
-   * Generate export data for the Template
-   * @param _id Template identifier
+   * Generate export data for the Attribute
+   * @param _id Attribute identifier
    * @returns {Promise<string>}
    */
   static export = async (_id: string, fields?: string[], includeHistory = false): Promise<string> => {
-    const template = await Templates.getOne(_id);
+    const attribute = await Attributes.getOne(_id);
 
-    if (_.isNull(template)) {
+    if (_.isNull(attribute)) {
       return "";
     }
 
     if (!includeHistory) {
-      delete (template as never)["history"];
+      delete (attribute as never)["history"];
     }
 
     if (_.isUndefined(fields)) {
-      return JSON.stringify(template, null, "  ");
+      return JSON.stringify(attribute, null, "  ");
     }
 
     const formatted: Record<string, unknown> = {
-      _id: template._id,
-      name: template.name,
-      values: template.values,
+      _id: attribute._id,
+      name: attribute.name,
+      values: attribute.values,
     };
 
     for (const field of fields) {
       if (_.isEqual(field, "description")) {
-        formatted["description"] = template.description;
+        formatted["description"] = attribute.description;
       } else if (_.isEqual(field, "owner")) {
-        formatted["owner"] = template.owner;
+        formatted["owner"] = attribute.owner;
       } else if (_.isEqual(field, "timestamp")) {
-        formatted["timestamp"] = template.timestamp;
+        formatted["timestamp"] = attribute.timestamp;
       } else if (_.isEqual(field, "archived")) {
-        formatted["archived"] = template.archived;
+        formatted["archived"] = attribute.archived;
       }
     }
 
     if (includeHistory) {
-      formatted["history"] = template.history;
+      formatted["history"] = attribute.history;
     }
 
     return JSON.stringify(formatted, null, "  ");
   };
 
   /**
-   * Add a history entry to a Template based on provided Template state
-   * @param historyTemplate Existing Template state to add to Template history
+   * Add a history entry to an Attribute based on provided Attribute state
+   * @param historyAttribute Existing Attribute state to add to Attribute history
    * @param author Identifier of User who authored changes
    * @param message Changelog message associated with changes
    * @return {Promise<IResponseMessage>}
    */
   static addHistory = async (
-    historyTemplate: AttributeModel,
+    historyAttribute: AttributeModel,
     author?: string,
     message?: string,
   ): Promise<IResponseMessage> => {
-    const template = await Templates.getOne(historyTemplate._id);
-    if (_.isNull(template)) {
+    const attribute = await Attributes.getOne(historyAttribute._id);
+    if (_.isNull(attribute)) {
       return {
         success: false,
-        message: "Template not found",
+        message: "Attribute not found",
       };
     }
 
@@ -267,68 +267,68 @@ export class Templates {
       version: nanoid(),
       timestamp: dayjs(Date.now()).toISOString(),
 
-      _id: historyTemplate._id,
-      name: historyTemplate.name,
-      owner: historyTemplate.owner,
-      archived: historyTemplate.archived,
-      description: historyTemplate.description,
-      values: historyTemplate.values,
+      _id: historyAttribute._id,
+      name: historyAttribute.name,
+      owner: historyAttribute.owner,
+      archived: historyAttribute.archived,
+      description: historyAttribute.description,
+      values: historyAttribute.values,
     };
 
     const update: { $set: Partial<AttributeModel> } = {
       $set: {
-        history: [historyEntry, ...(template.history || [])],
+        history: [historyEntry, ...(attribute.history || [])],
       },
     };
 
     const response = await getDatabase()
-      .collection<AttributeModel>(TEMPLATES_COLLECTION)
-      .updateOne({ _id: historyTemplate._id }, update);
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
+      .updateOne({ _id: historyAttribute._id }, update);
     if (response.modifiedCount > 0) {
-      logger.info({ templateId: historyTemplate._id }, "Added history to Template");
+      logger.info({ attributeId: historyAttribute._id }, "Added history to Attribute");
     }
 
     return {
       success: true,
-      message: response.modifiedCount === 1 ? "Added history to Template" : "No history added to Template",
+      message: response.modifiedCount === 1 ? "Added history to Attribute" : "No history added to Attribute",
     };
   };
 
   /**
-   * Set the archive state of an Template
-   * @param _id Template identifier to archive
-   * @param state Template archive state
+   * Set the archive state of an Attribute
+   * @param _id Attribute identifier to archive
+   * @param state Attribute archive state
    * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (_id: string, state: boolean): Promise<IResponseMessage> => {
-    logger.debug({ templateId: _id, archived: state }, "Setting archive state of Template");
-    const template = await this.getOne(_id);
-    if (_.isNull(template)) {
-      logger.error({ templateId: _id }, "Unable to retrieve Template");
+    logger.debug({ attributeId: _id, archived: state }, "Setting archive state of Attribute");
+    const attribute = await this.getOne(_id);
+    if (_.isNull(attribute)) {
+      logger.error({ attributeId: _id }, "Unable to retrieve Attribute");
       return {
         success: false,
-        message: "Error retrieving existing Template",
+        message: "Error retrieving existing Attribute",
       };
     }
 
     // Update the archived state
-    template.archived = state;
+    attribute.archived = state;
     const update: { $set: IAttribute } = {
       $set: {
-        ...template,
+        ...attribute,
       },
     };
 
     const response = await getDatabase()
-      .collection<AttributeModel>(TEMPLATES_COLLECTION)
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: _id }, update);
     if (response.modifiedCount > 0) {
-      logger.info({ templateId: _id, archived: state }, "Set archive state of Template");
+      logger.info({ attributeId: _id, archived: state }, "Set archive state of Attribute");
     }
 
     return {
       success: true,
-      message: response.modifiedCount === 1 ? "Set archive state of Template" : "No changes made to Template",
+      message: response.modifiedCount === 1 ? "Set archive state of Attribute" : "No changes made to Attribute",
     };
   };
 }

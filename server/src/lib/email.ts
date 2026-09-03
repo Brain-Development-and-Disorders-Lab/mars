@@ -71,7 +71,7 @@ const divider = (): string => `
     <tr><td style="border-top:1px solid #e4e4e7;"></td></tr>
   </table>`;
 
-export const templates = {
+export const emailTemplates = {
   resetPassword: (name: string, url: string): string =>
     buildEmail(`
       <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">Reset your password</p>

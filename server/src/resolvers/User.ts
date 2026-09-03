@@ -16,7 +16,7 @@ import { User } from "@models/User";
 import { Workspaces } from "@models/Workspaces";
 
 // Email
-import { sendEmail, templates } from "@lib/email";
+import { sendEmail, emailTemplates } from "@lib/email";
 
 // Utility functions
 import { isCollaborator } from "@lib/util";
@@ -141,7 +141,7 @@ export const UserResolvers = {
       await sendEmail({
         to: adminEmail,
         subject: "Issue Report - Metadatify",
-        html: templates.reportIssue({
+        html: emailTemplates.reportIssue({
           description: args.description,
           path: args.path,
           userName: args.userName,

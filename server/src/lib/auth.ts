@@ -12,7 +12,7 @@ import { admin } from "better-auth/plugins/admin";
 import { User } from "@models/User";
 
 // Email
-import { sendEmail, templates } from "./email";
+import { sendEmail, emailTemplates } from "./email";
 
 // Variables
 import { DEFAULT_GLOBAL_PERMISSIONS } from "@models/Admin";
@@ -112,7 +112,7 @@ export const auth = betterAuth({
       await sendEmail({
         to: user.email,
         subject: "Reset your Metadatify password",
-        html: templates.resetPassword(user.name, url),
+        html: emailTemplates.resetPassword(user.name, url),
       });
     },
   },
@@ -122,7 +122,7 @@ export const auth = betterAuth({
       await sendEmail({
         to: user.email,
         subject: "Verify your Metadatify email",
-        html: templates.verifyEmail(user.name, url),
+        html: emailTemplates.verifyEmail(user.name, url),
       });
     },
   },

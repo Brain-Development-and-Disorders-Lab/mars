@@ -6,12 +6,12 @@ import {
   IAttribute,
   IResolverParent,
   IResponseMessage,
-  TemplateMetrics,
+  AttributeMetrics,
 } from "@types";
 
 // Models
 import { Activity } from "@models/Activity";
-import { Templates } from "@models/Templates";
+import { Attributes } from "@models/Attributes";
 import { Workspaces } from "@models/Workspaces";
 
 // Utility functions and libraries
@@ -23,10 +23,10 @@ import { GraphQLError } from "graphql/index";
 // Posthog
 import { PostHogClient } from "@lib/posthog";
 
-export const TemplatesResolvers = {
+export const AttributesResolvers = {
   Query: {
-    // Retrieve all Templates
-    templates: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
+    // Retrieve all Attribute
+    attributes: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Verify access to the Workspace
       const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
@@ -48,14 +48,14 @@ export const TemplatesResolvers = {
       }
 
       // Filter by ownership and Workspace membership
-      const templates = await Templates.all();
-      return templates
-        .filter((template: AttributeModel) => _.includes(workspace.templates, template._id))
+      const attributes = await Attributes.all();
+      return attributes
+        .filter((attribute: AttributeModel) => _.includes(workspace.attributes, attribute._id))
         .slice(0, args.limit);
     },
 
-    // Retrieve one Template by _id
-    template: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
+    // Retrieve one Attribute by _id
+    attribute: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
       const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
       if (!hasAccess) {
@@ -76,21 +76,21 @@ export const TemplatesResolvers = {
         });
       }
 
-      // Check Template exists
-      const template = await Templates.getOne(args._id);
-      if (_.isNull(template)) {
-        throw new GraphQLError("Template does not exist", {
+      // Check Attribute exists
+      const attribute = await Attributes.getOne(args._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      // Check that Template exists in the Workspace
-      if (_.includes(workspace.templates, template._id)) {
-        return template;
+      // Check that Attribute exists in the Workspace
+      if (_.includes(workspace.attributes, attribute._id)) {
+        return attribute;
       } else {
-        throw new GraphQLError("You do not have permission to access this Template", {
+        throw new GraphQLError("You do not have permission to access this Attribute", {
           extensions: {
             code: "UNAUTHORIZED",
           },
@@ -98,7 +98,7 @@ export const TemplatesResolvers = {
       }
     },
 
-    templateUsage: async (
+    attributeUsage: async (
       _parent: IResolverParent,
       args: { _id: string },
       context: Context,
@@ -123,15 +123,15 @@ export const TemplatesResolvers = {
         });
       }
 
-      return await Templates.usage(workspace._id, args._id);
+      return await Attributes.usage(workspace._id, args._id);
     },
 
-    // Get collection of Template metrics
-    templateMetrics: async (
+    // Get collection of Attribute metrics
+    attributeMetrics: async (
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<TemplateMetrics> => {
+    ): Promise<AttributeMetrics> => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -143,28 +143,28 @@ export const TemplatesResolvers = {
       }
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
-      const templates = await Templates.all();
-      const workspaceTemplates = templates.filter((template) => _.includes(workspace.templates, template._id));
+      const attributes = await Attributes.all();
+      const workspaceAttributes = attributes.filter((attribute) => _.includes(workspace.attributes, attribute._id));
 
       // Filter Activity by Workspace and then timestamps (within last 24 hours)
       const activity = await Activity.all();
       const workspaceActivity = activity.filter((activity) => {
         return (
           _.includes(workspace.activity, activity._id) && // Activity in Workspace
-          activity.target.type === "templates" && // Activity on Templates
-          activity.type === "create" && // Activity is Template creation
+          activity.target.type === "attributes" && // Activity on Attributes
+          activity.type === "create" && // Activity is Attribute creation
           dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
         );
       });
 
       return {
-        all: workspaceTemplates.length,
+        all: workspaceAttributes.length,
         addedDay: workspaceActivity.length,
       };
     },
 
-    // Export a Template
-    exportTemplate: async (
+    // Export an Attribute
+    exportAttribute: async (
       _parent: IResolverParent,
       args: { _id: string; fields?: string[]; includeHistory?: boolean },
       context: Context,
@@ -179,19 +179,19 @@ export const TemplatesResolvers = {
         });
       }
 
-      const template = await Templates.getOne(args._id);
-      if (_.isNull(template)) {
-        throw new GraphQLError("Template does not exist", {
+      const attribute = await Attributes.getOne(args._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      if (_.includes(workspace.templates, args._id)) {
-        return await Templates.export(args._id, args.fields, args.includeHistory);
+      if (_.includes(workspace.attributes, args._id)) {
+        return await Attributes.export(args._id, args.fields, args.includeHistory);
       } else {
-        throw new GraphQLError("You do not have permission to access this Template", {
+        throw new GraphQLError("You do not have permission to access this Attribute", {
           extensions: {
             code: "UNAUTHORIZED",
           },
@@ -201,24 +201,24 @@ export const TemplatesResolvers = {
   },
 
   Mutation: {
-    // Create a new Template
-    createTemplate: async (_parent: IResolverParent, args: { template: IAttribute }, context: Context) => {
-      const result = await Templates.create(args.template);
+    // Create a new Attribute
+    createAttribute: async (_parent: IResolverParent, args: { attribute: IAttribute }, context: Context) => {
+      const result = await Attributes.create(args.attribute);
 
       if (result.success) {
-        // Add the Template to the Workspace
-        await Workspaces.addTemplate(context.workspace, result.data);
+        // Add the Attribute to the Workspace
+        await Workspaces.addAttribute(context.workspace, result.data);
 
         // If successful, add Activity
         const activity = await Activity.create({
           timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
-          details: "Created new Template",
+          details: "Created new Attribute",
           target: {
-            _id: result.data, // New Template identifier
-            type: "templates",
-            name: args.template.name,
+            _id: result.data, // New Attribute identifier
+            type: "attributes",
+            name: args.attribute.name,
           },
         });
 
@@ -230,17 +230,17 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "template.created",
+          event: "attribute.created",
         });
       }
 
       return result;
     },
 
-    // Update an existing Template
-    updateTemplate: async (
+    // Update an existing Attribute
+    updateAttribute: async (
       _parent: IResolverParent,
-      args: { template: AttributeModel; message?: string },
+      args: { attribute: AttributeModel; message?: string },
       context: Context,
     ) => {
       // Retrieve the Workspace to determine which Entities to return
@@ -253,17 +253,17 @@ export const TemplatesResolvers = {
         });
       }
 
-      const template = await Templates.getOne(args.template._id);
-      if (_.isNull(template)) {
-        throw new GraphQLError("Template does not exist", {
+      const attribute = await Attributes.getOne(args.attribute._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      if (!_.includes(workspace.templates, args.template._id)) {
-        throw new GraphQLError("You do not have permission to modify this Template", {
+      if (!_.includes(workspace.attributes, args.attribute._id)) {
+        throw new GraphQLError("You do not have permission to modify this Attribute", {
           extensions: {
             code: "UNAUTHORIZED",
           },
@@ -271,10 +271,10 @@ export const TemplatesResolvers = {
       }
 
       // Add history entry before executing the update
-      await Templates.addHistory(template, context.user, args.message);
+      await Attributes.addHistory(attribute, context.user, args.message);
 
       // Execute update operation
-      const result = await Templates.update(args.template);
+      const result = await Attributes.update(args.attribute);
 
       if (result.success) {
         // If successful, add Activity
@@ -282,11 +282,11 @@ export const TemplatesResolvers = {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated Template",
+          details: "Updated Attribute",
           target: {
-            _id: args.template._id,
-            type: "templates",
-            name: args.template.name,
+            _id: args.attribute._id,
+            type: "attributes",
+            name: args.attribute.name,
           },
         });
 
@@ -298,15 +298,15 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "template.updated",
+          event: "attribute.updated",
         });
       }
 
       return result;
     },
 
-    // Archive a Template
-    archiveTemplate: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
+    // Archive a Attribute
+    archiveAttribute: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
@@ -317,17 +317,17 @@ export const TemplatesResolvers = {
         });
       }
 
-      const template = await Templates.getOne(args._id);
-      if (_.isNull(template)) {
-        throw new GraphQLError("Template does not exist", {
+      const attribute = await Attributes.getOne(args._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      if (!_.includes(workspace.templates, args._id)) {
-        throw new GraphQLError("You do not have permission to modify the archive state of this Template", {
+      if (!_.includes(workspace.attributes, args._id)) {
+        throw new GraphQLError("You do not have permission to modify the archive state of this Attribute", {
           extensions: {
             code: "UNAUTHORIZED",
           },
@@ -338,18 +338,18 @@ export const TemplatesResolvers = {
       if (process.env.DISABLE_CAPTURE !== "true") {
         PostHogClient?.capture({
           distinctId: context.user,
-          event: "template.archived",
+          event: "attribute.archived",
         });
       }
 
       // Execute archive operation
-      if (template.archived === args.state) {
+      if (attribute.archived === args.state) {
         return {
           success: true,
-          message: "Template archive state unchanged",
+          message: "Attribute archive state unchanged",
         };
       } else {
-        const result = await Templates.setArchived(args._id, args.state);
+        const result = await Attributes.setArchived(args._id, args.state);
 
         // If successful, add Activity
         if (result.success) {
@@ -357,11 +357,11 @@ export const TemplatesResolvers = {
             timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
-            details: args.state ? "Archived Template" : "Restored Template",
+            details: args.state ? "Archived Attribute" : "Restored Attribute",
             target: {
               _id: args._id,
-              type: "templates",
-              name: template.name,
+              type: "attributes",
+              name: attribute.name,
             },
           });
 
@@ -373,28 +373,28 @@ export const TemplatesResolvers = {
       }
     },
 
-    // Archive multiple Templates
-    archiveTemplates: async (
+    // Archive multiple Attributes
+    archiveAttributes: async (
       _parent: IResolverParent,
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
-        const template = await Templates.getOne(_id);
-        if (_.isNull(template)) {
-          throw new GraphQLError("Template does not exist", {
+        const attribute = await Attributes.getOne(_id);
+        if (_.isNull(attribute)) {
+          throw new GraphQLError("Attribute does not exist", {
             extensions: {
               code: "NON_EXIST",
             },
           });
         }
 
-        if (template.archived === args.state) {
+        if (attribute.archived === args.state) {
           archiveCounter += 1;
         } else {
           // Execute archive operation
-          const result = await Templates.setArchived(_id, args.state);
+          const result = await Attributes.setArchived(_id, args.state);
 
           // If successful, add Activity
           if (result.success) {
@@ -402,11 +402,11 @@ export const TemplatesResolvers = {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
-              details: args.state ? "Archived Template" : "Restored Template",
+              details: args.state ? "Archived Attribute" : "Restored Attribute",
               target: {
                 _id: _id,
-                type: "templates",
-                name: template.name,
+                type: "attributes",
+                name: attribute.name,
               },
             });
 
@@ -421,8 +421,8 @@ export const TemplatesResolvers = {
         success: args.toArchive.length === archiveCounter,
         message:
           args.toArchive.length === archiveCounter
-            ? "Archived Templates successfully"
-            : "Error while archiving multiple Templates",
+            ? "Archived Attributes successfully"
+            : "Error while archiving multiple Attributes",
       };
     },
   },

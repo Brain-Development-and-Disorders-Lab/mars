@@ -5,7 +5,7 @@ import { connect, disconnect, getDatabase, getClient } from "@connectors/databas
 import { Workspaces } from "@models/Workspaces";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
-import { Templates } from "@models/Templates";
+import { Templates } from "@models/Attributes";
 
 // Utility functions
 import dayjs from "dayjs";

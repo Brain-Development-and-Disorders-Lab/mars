@@ -5,7 +5,7 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Template model and types
-import { Templates } from "@models/Templates";
+import { Templates } from "@models/Attributes";
 import { AttributeModel, IResponseMessage, ResponseData } from "@types";
 
 // Database connectivity

@@ -411,18 +411,18 @@ export class AI {
   };
 
   /**
-   * Suggest the best-fitting template for a new entity based on its name and description
+   * Suggest the best-fitting Attribute for a new Entity based on its name and description
    * @param name Entity name
    * @param description Entity description
-   * @param templates Available templates (id, name, description only)
-   * @return {Promise<string | null>} Matched template _id, or null if none fit
+   * @param attributes Available Attributes (id, name, description only)
+   * @return {Promise<string | null>} Matched Attribute _id, or null if none fit
    */
-  static suggestTemplate = async (
+  static suggestAttribute = async (
     name: string,
     description: string,
-    templates: { _id: string; name: string; description: string }[],
+    attributes: { _id: string; name: string; description: string }[],
   ): Promise<string | null> => {
-    if (templates.length === 0) return null;
+    if (attributes.length === 0) return null;
 
     const client = AI.createClient();
     const model =
@@ -436,13 +436,13 @@ export class AI {
         {
           role: "system",
           content:
-            "You are a metadata assistant. Given an entity name and description, pick the best-fitting template from the list. Return ONLY the template _id string exactly as given, or null if none fit well.",
+            "You are a metadata assistant. Given an Entity name and description, pick the best-fitting Attribute from the list. Return ONLY the Attribute _id string exactly as given, or null if none fit well.",
         },
         {
           role: "user",
           content: JSON.stringify({
             entity: { name, description },
-            templates: templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+            attributes: attributes.map((a) => ({ _id: a._id, name: a.name, description: a.description })),
           }),
         },
       ],
@@ -452,8 +452,8 @@ export class AI {
     const content = response.choices[0]?.message?.content?.trim();
     if (!content || content === "null") return null;
 
-    // Validate the returned ID is actually one of the provided templates
-    const match = templates.find((t) => t._id === content);
+    // Validate the returned ID is actually one of the provided Attributes
+    const match = attributes.find((t) => t._id === content);
     return match ? match._id : null;
   };
 

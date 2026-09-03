@@ -106,9 +106,9 @@ export const SearchResolvers = {
       return result;
     },
 
-    suggestTemplate: async (
+    suggestAttribute: async (
       _parent: IResolverParent,
-      args: { name: string; description?: string; templates: { _id: string; name: string; description: string }[] },
+      args: { name: string; description?: string; attributes: { _id: string; name: string; description: string }[] },
       context: Context,
     ): Promise<string | null> => {
       if (!process.env.AI_PROVIDER && !process.env.OPENAI_BASE_URL) {
@@ -116,9 +116,9 @@ export const SearchResolvers = {
           extensions: { code: "NOT_CONFIGURED" },
         });
       }
-      const result = await AI.suggestTemplate(args.name, args.description ?? "", args.templates);
+      const result = await AI.suggestAttribute(args.name, args.description ?? "", args.attributes);
       if (process.env.DISABLE_CAPTURE !== "true") {
-        PostHogClient?.capture({ distinctId: context.user, event: "search.suggest_template" });
+        PostHogClient?.capture({ distinctId: context.user, event: "search.suggest_attribute" });
       }
       return result;
     },
