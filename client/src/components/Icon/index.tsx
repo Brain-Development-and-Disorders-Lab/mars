@@ -97,7 +97,6 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   entity: FaCube,
   project: FaLayerGroup,
   attribute: FaTable,
-  template: FaTable,
 
   // Signal and action icons
   activity: FaChartLine,

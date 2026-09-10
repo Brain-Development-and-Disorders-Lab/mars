@@ -235,26 +235,6 @@ const Navigation = (props: NavigationProps) => {
             </Text>
 
             <Button
-              id={"navEntitiesButtonDesktop"}
-              size={"xs"}
-              w={"100%"}
-              rounded={"md"}
-              justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/entit"), STYLES.entity.color.default)}
-              onClick={() => {
-                if (props.isPublic) {
-                  navigate(`/public/${workspace}/entities`);
-                } else {
-                  navigate("/entities");
-                }
-              }}
-              disabled={noWorkspace}
-            >
-              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
-              Entities
-            </Button>
-
-            <Button
               id={"navProjectsButtonDesktop"}
               size={"xs"}
               w={"100%"}
@@ -275,23 +255,43 @@ const Navigation = (props: NavigationProps) => {
             </Button>
 
             <Button
-              id={"navTemplatesButtonDesktop"}
+              id={"navEntitiesButtonDesktop"}
               size={"xs"}
               w={"100%"}
               rounded={"md"}
               justifyContent={"left"}
-              {...navLinkStyle(_.includes(location.pathname, "/template"), STYLES.template.color.default)}
+              {...navLinkStyle(_.includes(location.pathname, "/entit"), STYLES.entity.color.default)}
               onClick={() => {
                 if (props.isPublic) {
-                  navigate(`/public/${workspace}/templates`);
+                  navigate(`/public/${workspace}/entities`);
                 } else {
-                  navigate("/templates");
+                  navigate("/entities");
                 }
               }}
               disabled={noWorkspace}
             >
-              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-              Templates
+              <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+              Entities
+            </Button>
+
+            <Button
+              id={"navAttributesButtonDesktop"}
+              size={"xs"}
+              w={"100%"}
+              rounded={"md"}
+              justifyContent={"left"}
+              {...navLinkStyle(_.includes(location.pathname, "/attribute"), STYLES.attribute.color.default)}
+              onClick={() => {
+                if (props.isPublic) {
+                  navigate(`/public/${workspace}/attributes`);
+                } else {
+                  navigate("/attributes");
+                }
+              }}
+              disabled={noWorkspace}
+            >
+              <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
+              Attributes
             </Button>
           </Flex>
 
@@ -478,22 +478,6 @@ const Navigation = (props: NavigationProps) => {
               <Menu.ItemGroup title={"View"}>
                 <Menu.ItemGroupLabel>View</Menu.ItemGroupLabel>
                 <Menu.Item
-                  id={"navEntitiesButtonMobile"}
-                  value={"entities"}
-                  fontSize={"xs"}
-                  onClick={() => {
-                    if (props.isPublic) {
-                      navigate(`/public/${workspace}/entities`);
-                    } else {
-                      navigate("/entities");
-                    }
-                  }}
-                  disabled={noWorkspace}
-                >
-                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
-                  Entities
-                </Menu.Item>
-                <Menu.Item
                   id={"navProjectButtonMobile"}
                   value={"projects"}
                   fontSize={"xs"}
@@ -510,20 +494,36 @@ const Navigation = (props: NavigationProps) => {
                   Projects
                 </Menu.Item>
                 <Menu.Item
-                  id={"navTemplatesButtonMobile"}
-                  value={"templates"}
+                  id={"navEntitiesButtonMobile"}
+                  value={"entities"}
                   fontSize={"xs"}
                   onClick={() => {
                     if (props.isPublic) {
-                      navigate(`/public/${workspace}/templates`);
+                      navigate(`/public/${workspace}/entities`);
                     } else {
-                      navigate("/templates");
+                      navigate("/entities");
                     }
                   }}
                   disabled={noWorkspace}
                 >
-                  <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-                  Templates
+                  <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
+                  Entities
+                </Menu.Item>
+                <Menu.Item
+                  id={"navAttributesButtonMobile"}
+                  value={"attributes"}
+                  fontSize={"xs"}
+                  onClick={() => {
+                    if (props.isPublic) {
+                      navigate(`/public/${workspace}/attributes`);
+                    } else {
+                      navigate("/attributes");
+                    }
+                  }}
+                  disabled={noWorkspace}
+                >
+                  <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
+                  Attributes
                 </Menu.Item>
               </Menu.ItemGroup>
 

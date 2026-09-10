@@ -16,7 +16,7 @@ export const GET_MAPPING_DATA = gql`
       _id
       name
     }
-    templates {
+    attributes {
       _id
       name
       description
@@ -95,9 +95,9 @@ export const IMPORT_ENTITY_JSON = gql`
   }
 `;
 
-export const REVIEW_TEMPLATE_JSON = gql`
-  mutation ReviewTemplateJSON($file: [Upload]!) {
-    reviewTemplateJSON(file: $file) {
+export const REVIEW_ATTRIBUTE_JSON = gql`
+  mutation ReviewAttributeJSON($file: [Upload]!) {
+    reviewAttributeJSON(file: $file) {
       success
       message
       data {
@@ -108,9 +108,9 @@ export const REVIEW_TEMPLATE_JSON = gql`
   }
 `;
 
-export const IMPORT_TEMPLATE_JSON = gql`
-  mutation ImportTemplateJSON($file: [Upload]!) {
-    importTemplateJSON(file: $file) {
+export const IMPORT_ATTRIBUTE_JSON = gql`
+  mutation ImportAttributeJSON($file: [Upload]!) {
+    importAttributeJSON(file: $file) {
       success
       message
     }

@@ -193,8 +193,8 @@ const DialogCreateCounter = (props: DialogCreateCounterProps) => {
           <Dialog.Header
             p={"1"}
             flexShrink={0}
-            bg={"template.light"}
-            color={"template.dark"}
+            bg={"attribute.light"}
+            color={"attribute.dark"}
             borderBottom={"2px"}
             roundedTop={"md"}
           >
@@ -207,7 +207,7 @@ const DialogCreateCounter = (props: DialogCreateCounterProps) => {
               </Flex>
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} colorPalette={"template"} />
+              <CloseButton size={"2xs"} top={"6px"} onClick={handleClose} colorPalette={"attribute"} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
 

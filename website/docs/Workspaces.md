@@ -1,6 +1,6 @@
 # Workspaces
 
-Metadatify uses Workspaces to manage Entities, Projects, and Templates amongst collaborators and organizations.
+Metadatify uses Workspaces to manage Entities, Projects, and Attributes amongst collaborators and organizations.
 
 ## Workspace Switcher
 
@@ -23,4 +23,4 @@ To update the Workspace, click the "Edit workspace" action in the Workspace Swit
 
 ![Edit Workspace](../img/workspace_page.png)
 
-This page displays the Workspace's name, description, collaborators, archived metadata, and active Counters. The name and description can be updated, and collaborators can be added or removed. Archived Entities, Projects, and Templates can be viewed or restored. To restore archived metadata, click the corresponding orange "Restore" button.
+This page displays the Workspace's name, description, collaborators, archived metadata, and active Counters. The name and description can be updated, and collaborators can be added or removed. Archived Entities, Projects, and Attributes can be viewed or restored. To restore archived metadata, click the corresponding orange "Restore" button.

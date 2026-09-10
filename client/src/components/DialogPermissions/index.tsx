@@ -53,9 +53,9 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
   const [projectsCreate, setProjectsCreate] = useState(workspacePermissions.projects.create);
   const [projectsEdit, setProjectsEdit] = useState(workspacePermissions.projects.edit);
   const [projectsArchive, setProjectsArchive] = useState(workspacePermissions.projects.archive);
-  const [templatesCreate, setTemplatesCreate] = useState(workspacePermissions.templates.create);
-  const [templatesEdit, setTemplatesEdit] = useState(workspacePermissions.templates.edit);
-  const [templatesArchive, setTemplatesArchive] = useState(workspacePermissions.templates.archive);
+  const [attributesCreate, setAttributesCreate] = useState(workspacePermissions.attributes.create);
+  const [attributesEdit, setAttributesEdit] = useState(workspacePermissions.attributes.edit);
+  const [attributesArchive, setAttributesArchive] = useState(workspacePermissions.attributes.archive);
 
   // If `isGlobal`, get the permissions of the User we are modifying
   const GET_USER_GLOBAL_PERMISSIONS = gql`
@@ -113,9 +113,9 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
     setProjectsCreate(permissions.projects.create);
     setProjectsEdit(permissions.projects.edit);
     setProjectsArchive(permissions.projects.archive);
-    setTemplatesCreate(permissions.templates.create);
-    setTemplatesEdit(permissions.templates.edit);
-    setTemplatesArchive(permissions.templates.archive);
+    setAttributesCreate(permissions.attributes.create);
+    setAttributesEdit(permissions.attributes.edit);
+    setAttributesArchive(permissions.attributes.archive);
   };
 
   useEffect(() => {
@@ -204,10 +204,10 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
           edit: projectsEdit,
           archive: projectsArchive,
         },
-        templates: {
-          create: templatesCreate,
-          edit: templatesEdit,
-          archive: templatesArchive,
+        attributes: {
+          create: attributesCreate,
+          edit: attributesEdit,
+          archive: attributesArchive,
         },
       });
 
@@ -398,11 +398,11 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
 
                   <Flex direction={"column"} gap={"1"}>
                     <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
-                      Templates
+                      Attributes
                     </Text>
-                    <PermissionStatus label={"Create"} granted={templatesCreate} />
-                    <PermissionStatus label={"Edit"} granted={templatesEdit} />
-                    <PermissionStatus label={"Archive"} granted={templatesArchive} />
+                    <PermissionStatus label={"Create"} granted={attributesCreate} />
+                    <PermissionStatus label={"Edit"} granted={attributesEdit} />
+                    <PermissionStatus label={"Archive"} granted={attributesArchive} />
                   </Flex>
                 </Flex>
               )}
@@ -612,7 +612,7 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                       </Switch.Root>
                     </Flex>
 
-                    {/* Templates Permissions */}
+                    {/* Attributes Permissions */}
                     <Flex
                       direction={"column"}
                       p={"2"}
@@ -628,12 +628,12 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         color={STYLES.font.secondaryHeader.color}
                         ml={"0.5"}
                       >
-                        Templates
+                        Attributes
                       </Text>
-                      {/* Create Templates */}
+                      {/* Create Attributes */}
                       <Switch.Root
-                        checked={templatesCreate}
-                        onCheckedChange={(event) => setTemplatesCreate(event.checked)}
+                        checked={attributesCreate}
+                        onCheckedChange={(event) => setAttributesCreate(event.checked)}
                         colorPalette={"green"}
                       >
                         <Switch.HiddenInput />
@@ -643,15 +643,15 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         <Switch.Label>
                           <Flex direction={"row"} gap={"1"} align={"center"}>
                             <Icon name={"add"} size={"xs"} />
-                            <Text fontSize={"xs"}>Create Templates</Text>
+                            <Text fontSize={"xs"}>Create Attributes</Text>
                           </Flex>
                         </Switch.Label>
                       </Switch.Root>
 
-                      {/* Edit Templates */}
+                      {/* Edit Attributes */}
                       <Switch.Root
-                        checked={templatesEdit}
-                        onCheckedChange={(event) => setTemplatesEdit(event.checked)}
+                        checked={attributesEdit}
+                        onCheckedChange={(event) => setAttributesEdit(event.checked)}
                         colorPalette={"green"}
                       >
                         <Switch.HiddenInput />
@@ -661,15 +661,15 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         <Switch.Label>
                           <Flex direction={"row"} gap={"1"} align={"center"}>
                             <Icon name={"edit"} size={"xs"} />
-                            <Text fontSize={"xs"}>Edit Templates</Text>
+                            <Text fontSize={"xs"}>Edit Attributes</Text>
                           </Flex>
                         </Switch.Label>
                       </Switch.Root>
 
-                      {/* Archive Templates */}
+                      {/* Archive Attributes */}
                       <Switch.Root
-                        checked={templatesArchive}
-                        onCheckedChange={(event) => setTemplatesArchive(event.checked)}
+                        checked={attributesArchive}
+                        onCheckedChange={(event) => setAttributesArchive(event.checked)}
                         colorPalette={"green"}
                       >
                         <Switch.HiddenInput />
@@ -679,7 +679,7 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         <Switch.Label>
                           <Flex direction={"row"} gap={"1"} align={"center"}>
                             <Icon name={"archive"} size={"xs"} />
-                            <Text fontSize={"xs"}>Archive Templates</Text>
+                            <Text fontSize={"xs"}>Archive Attributes</Text>
                           </Flex>
                         </Switch.Label>
                       </Switch.Root>

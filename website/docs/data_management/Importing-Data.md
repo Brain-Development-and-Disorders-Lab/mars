@@ -141,7 +141,7 @@ The _Project_ drop-down menu presents a list of all Projects in the current Work
 
 ![Import JSON - Step 3](../img/import_JSON_3.png)
 
-When importing Entities via JSON files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Template Attribute. The Attributes from this step will be added to all Entities as they are imported.
+When importing Entities via JSON files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Attribute. The Attributes from this step will be added to all Entities as they are imported.
 
 #### Step 4
 
@@ -188,7 +188,7 @@ The _Project_ drop-down menu presents a list of all Projects in the current Work
 
 ![Import CSV - Step 3](../img/import_CSV_3.png)
 
-When importing Entities via CSV files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Template Attribute.
+When importing Entities via CSV files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Attribute.
 
 Similar to Step 2, the data field in each Value comprising the Attribute must be mapped to a column in the CSV file. The Attributes from this step will be added to all Entities as they are imported.
 

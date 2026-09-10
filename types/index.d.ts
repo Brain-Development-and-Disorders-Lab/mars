@@ -69,18 +69,18 @@ export type AttributeUsage = {
   modifications: ("name" | "description" | "values")[];
 };
 
-// `TemplateBreadcrumb` props, the breadcrumb trail and name tag shared by the Template detail page
-export type TemplateBreadcrumbProps = {
+// `AttributeBreadcrumb` props, the breadcrumb trail and name tag shared by the Attribute detail page
+export type AttributeBreadcrumbProps = {
   loading: boolean;
   workspaceName: string;
   onNavigateHome: () => void;
-  onNavigateTemplates: () => void;
+  onNavigateAttributes: () => void;
   archived: boolean;
   name: string;
 };
 
-// `TemplateOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Template detail page
-export type TemplateOverviewCardProps = {
+// `AttributeOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Attribute detail page
+export type AttributeOverviewCardProps = {
   name: string;
   onNameChange?: (value: string) => void;
   nameReadOnly: boolean;
@@ -94,9 +94,9 @@ export type TemplateOverviewCardProps = {
   isPublic?: boolean;
 };
 
-// `TemplateUsageTable` props, the Entities using a Template, shared by the Template detail page
-export type TemplateUsageTableProps = {
-  templateUsage: AttributeUsage[];
+// `AttributeUsageTable` props, the Entities using an Attribute, shared by the Attribute detail page
+export type AttributeUsageTableProps = {
+  attributeUsage: AttributeUsage[];
   onViewEntity: (entityId: string) => void;
   workspace?: string;
   isPublic?: boolean;
@@ -128,7 +128,7 @@ export type DialogViewAttributeProps = {
   // Dialog Attribute information
   attribute: AttributeModel;
   editing?: boolean;
-  isTemplate?: boolean;
+  originalAttributeId?: string;
   permittedDataValues?: ColumnInfo[];
 
   // Callback functions
@@ -157,9 +157,9 @@ export type DialogCompareAttributeProps = {
 
   // Dialog Attribute information
   modifiedAttribute: AttributeModel;
-  templateAttributeId: string;
+  originalAttributeId: string;
 
-  // Optional callback to apply selected Template changes back to the Entity Attribute
+  // Optional callback to apply selected Attribute changes back to the Entity Attribute
   onUpdate?: (updated: AttributeModel) => void;
 
   // When true, all changes are pre-selected
@@ -261,7 +261,7 @@ export type CollaboratorsProps = {
 
 // "Linky" component props
 export type LinkyProps = {
-  type: "entities" | "templates" | "projects" | "workspaces";
+  type: "entities" | "attributes" | "projects" | "workspaces";
   id: string;
   fallback?: string;
   color?: string;
@@ -479,13 +479,13 @@ export type DialogAddAttributeProps = {
   open: boolean;
   onClose: () => void;
   owner: string;
-  templates: AttributeModel[];
+  attributes: AttributeModel[];
   entityName: string;
   entityDescription: string;
   permittedDataValues?: ColumnInfo[];
   onAdd: (attribute: AttributeModel) => void;
-  /** Optional, shown only when the user is creating from scratch (not from a template). */
-  onSaveAsTemplate?: (attribute: IAttribute) => Promise<void>;
+  /** Optional, shown only when the user is creating from scratch */
+  onSaveAsAttribute?: (attribute: IAttribute) => Promise<void>;
 };
 
 // Workspace types
@@ -497,7 +497,7 @@ export type IWorkspace = {
   collaborators: Collaborator[];
   entities: string[];
   projects: string[];
-  templates: string[];
+  attributes: string[];
   activity: string[];
 };
 
@@ -603,9 +603,9 @@ export type EntityOverviewCardProps = {
 // `EntityAttributesTable` props, the Attributes on an Entity, shared by the Entity detail page
 export type EntityAttributesTableProps = {
   attributes: AttributeModel[];
+  availableAttributes: AttributeModel[];
   editing: boolean;
   entityName: string;
-  templates: AttributeModel[];
   onUpdate: (updated: AttributeModel) => void;
   onRemove?: (id: string) => void;
   onAddClick?: () => void;
@@ -616,9 +616,9 @@ export type EntityAttributesTableProps = {
 // `EntityAttributeNameCell` props, the "Name" column cell within `EntityAttributesTable`
 export type EntityAttributeNameCellProps = {
   attribute: AttributeModel;
+  availableAttributes: AttributeModel[];
   editing: boolean;
   entityName: string;
-  templates: AttributeModel[];
   onUpdate: (updated: AttributeModel) => void;
   onRemove?: (id: string) => void;
   workspace?: string;
@@ -628,7 +628,7 @@ export type EntityAttributeNameCellProps = {
 // `CreateEntityAttributesTable` props, the Entity creation flow's attributes table
 export type CreateEntityAttributesTableProps = {
   attributes: AttributeModel[];
-  templates: AttributeModel[];
+  availableAttributes: AttributeModel[];
   onUpdate: (updated: AttributeModel) => void;
   onRemove: (id: string) => void;
   onAddClick: () => void;
@@ -637,7 +637,7 @@ export type CreateEntityAttributesTableProps = {
 // `CreateEntityAttributeNameCell` props, the "Name" column cell within `CreateEntityAttributesTable`
 export type CreateEntityAttributeNameCellProps = {
   attribute: AttributeModel;
-  templates: AttributeModel[];
+  availableAttributes: AttributeModel[];
   onUpdate: (updated: AttributeModel) => void;
   onRemove: (id: string) => void;
 };
@@ -673,8 +673,8 @@ export type EntityImportReview = {
   warnings?: string[];
 };
 
-// Import review summary for Templates being imported
-export type TemplateImportReview = {
+// Import review summary for Attributes being imported
+export type AttributeImportReview = {
   name: string;
   state: "create" | "update";
 };
@@ -752,7 +752,7 @@ export type IActivity = {
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
-    type: "entities" | "projects" | "templates" | "workspaces";
+    type: "entities" | "projects" | "attributes" | "workspaces";
     _id: string;
     name: string;
   };
@@ -948,9 +948,9 @@ export type SampleFile = { label: string; filename: string; mimeType: string; co
 
 // `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {
-  importType: "entities" | "template" | undefined;
+  importType: "entities" | "attribute" | undefined;
   isTypeSelectDisabled: boolean;
-  onSelectImportType: (type: "entities" | "template") => void;
+  onSelectImportType: (type: "entities" | "attribute") => void;
   fileUpload: any; // `useFileUpload()` return value
 };
 
@@ -993,7 +993,7 @@ export type EntityMappingStepProps = {
   addAttributeOpen: boolean;
   onAddAttributeOpenChange: (value: boolean) => void;
   ownerField: string;
-  templates: AttributeModel[];
+  attributes: AttributeModel[];
   fileType: string;
   columns: ColumnInfo[];
 };
@@ -1012,19 +1012,19 @@ export type EntityReviewStepProps = {
   reviewEntities: EntityImportReview[];
 };
 
-// `TemplateReviewStep` props, the final `DialogImport` review step for a Template import
-export type TemplateReviewStepProps = {
-  reviewTemplates: TemplateImportReview[];
+// `AttributeReviewStep` props, the final `DialogImport` review step for a Attribute import
+export type AttributeReviewStepProps = {
+  reviewAttributes: AttributeImportReview[];
 };
 
 // `DialogExport` props
 export type DialogExportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
-  dataType: "entity" | "entities" | "project" | "template";
-  // Single-item export (entity, project, or template)
+  dataType: "entity" | "entities" | "project" | "attribute";
+  // Single-item export (Entity, Project, or Attribute)
   id?: string;
-  // Multi-entity export; undefined means export all entities
+  // Multi-entity export; undefined means export all Entities
   ids?: string[];
 };
 
@@ -1072,7 +1072,6 @@ export type IconNames =
   // Locations
   | "dashboard"
   | "entity"
-  | "template"
   | "attribute"
   | "project"
 
@@ -1235,15 +1234,13 @@ export type DialogSaveProps = {
   description?: string;
   placeholder?: string;
   showCloseButton?: boolean;
-  modifiedType?: "Entity" | "Project" | "Template";
+  modifiedType?: "Entity" | "Project" | "Attribute";
   isPublic?: boolean;
 };
 
-// "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Template detail pages.
-// `type` selects both the drawer title and which type-specific detail panel (Attributes/Attachments, Entities, or
-// Values) is rendered for each version
+// "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Attribute detail pages
 export type HistoryDrawerProps = {
-  type: "entity" | "project" | "template";
+  type: "entity" | "project" | "attribute";
   open: boolean;
   onOpenChange: (open: boolean) => void;
   history: (EntityHistory | ProjectHistory | AttributeHistory)[];
@@ -1347,7 +1344,7 @@ export type UserWorkspacePermissions = {
     edit: boolean;
     archive: boolean;
   };
-  templates: {
+  attributes: {
     create: boolean;
     edit: boolean;
     archive: boolean;
@@ -1392,7 +1389,7 @@ export type IContentMetrics = {
 
 export type EntityMetrics = IContentMetrics;
 export type ProjectMetrics = IContentMetrics;
-export type TemplateMetrics = IContentMetrics;
+export type AttributeMetrics = IContentMetrics;
 export type CollaboratorMetrics = IContentMetrics;
 
 export type AdminWorkspace = {
@@ -1402,7 +1399,7 @@ export type AdminWorkspace = {
   owner: string;
   entities: number;
   projects: number;
-  templates: number;
+  attributes: number;
 };
 
 export type AdminMetrics = {
@@ -1410,7 +1407,7 @@ export type AdminMetrics = {
   workspaces: number;
   entities: number;
   projects: number;
-  templates: number;
+  attributes: number;
 };
 
 export type AdminUser = {

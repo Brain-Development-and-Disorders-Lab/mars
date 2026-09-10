@@ -32,7 +32,7 @@ const FORMAT_OPTIONS: Record<string, string[]> = {
   entity: ["JSON", "CSV", "XLSX"],
   entities: ["JSON", "CSV", "XLSX"],
   project: ["JSON", "CSV"],
-  template: ["JSON"],
+  attribute: ["JSON"],
 };
 
 // Labels shown in the dialog header
@@ -40,7 +40,7 @@ const DIALOG_TITLE: Record<string, string> = {
   entity: "Export Entity",
   entities: "Export Entities",
   project: "Export Project",
-  template: "Export Template",
+  attribute: "Export Attribute",
 };
 
 // GraphQL documents hoisted to module scope so they are not recreated on each render
@@ -114,9 +114,9 @@ const EXPORT_PROJECT = gql`
   }
 `;
 
-const GET_TEMPLATE_FOR_EXPORT = gql`
-  query GetTemplateForExport($_id: String) {
-    template(_id: $_id) {
+const GET_ATTRIBUTE_FOR_EXPORT = gql`
+  query GetAttributeForExport($_id: String) {
+    attribute(_id: $_id) {
       _id
       name
       owner
@@ -132,9 +132,9 @@ const GET_TEMPLATE_FOR_EXPORT = gql`
   }
 `;
 
-const EXPORT_TEMPLATE = gql`
-  query ExportTemplate($_id: String, $fields: [String], $includeHistory: Boolean) {
-    exportTemplate(_id: $_id, fields: $fields, includeHistory: $includeHistory)
+const EXPORT_ATTRIBUTE = gql`
+  query ExportAttribute($_id: String, $fields: [String], $includeHistory: Boolean) {
+    exportAttribute(_id: $_id, fields: $fields, includeHistory: $includeHistory)
   }
 `;
 
@@ -189,8 +189,8 @@ const DialogExport = (props: DialogExportProps) => {
     };
   }>(GET_PROJECT_FOR_EXPORT);
 
-  const [getTemplate, { data: templateData, loading: templateLoading }] = useLazyQuery<{
-    template: {
+  const [getAttribute, { data: attributeData, loading: attributeLoading }] = useLazyQuery<{
+    attribute: {
       _id: string;
       name: string;
       owner: string;
@@ -199,7 +199,7 @@ const DialogExport = (props: DialogExportProps) => {
       archived: boolean;
       values: { _id: string; name: string; type: string }[];
     };
-  }>(GET_TEMPLATE_FOR_EXPORT);
+  }>(GET_ATTRIBUTE_FOR_EXPORT);
 
   // Export queries
   const [exportEntity, { loading: exportEntityLoading }] = useLazyQuery<{ exportEntity: string }>(EXPORT_ENTITY);
@@ -210,8 +210,8 @@ const DialogExport = (props: DialogExportProps) => {
     EXPORT_ENTITIES_ALL,
   );
   const [exportProject, { loading: exportProjectLoading }] = useLazyQuery<{ exportProject: string }>(EXPORT_PROJECT);
-  const [exportTemplate, { loading: exportTemplateLoading }] = useLazyQuery<{ exportTemplate: string }>(
-    EXPORT_TEMPLATE,
+  const [exportAttribute, { loading: exportAttributeLoading }] = useLazyQuery<{ exportAttribute: string }>(
+    EXPORT_ATTRIBUTE,
   );
 
   const isLoading =
@@ -219,13 +219,13 @@ const DialogExport = (props: DialogExportProps) => {
     exportEntitiesLoading ||
     exportEntitiesAllLoading ||
     exportProjectLoading ||
-    exportTemplateLoading;
+    exportAttributeLoading;
 
   // Detail fetchers, one per dataType that has a field-selection view
   const detailFetchers: Partial<Record<DialogExportProps["dataType"], (id: string) => void>> = {
     entity: (id) => getEntity({ variables: { _id: id } }),
     project: (id) => getProject({ variables: { _id: id } }),
-    template: (id) => getTemplate({ variables: { _id: id } }),
+    attribute: (id) => getAttribute({ variables: { _id: id } }),
   };
 
   useEffect(() => {
@@ -274,12 +274,12 @@ const DialogExport = (props: DialogExportProps) => {
         }).catch(ignoreAbort);
         return { data: response?.data?.exportProject, filename: slugify(`export_project_${datestamp}.${format}`) };
       },
-      template: async () => {
+      attribute: async () => {
         if (!id) return { filename: "" };
-        const response = await exportTemplate({
+        const response = await exportAttribute({
           variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
         }).catch(ignoreAbort);
-        return { data: response?.data?.exportTemplate, filename: slugify(`export_template_${datestamp}.json`) };
+        return { data: response?.data?.exportAttribute, filename: slugify(`export_attribute_${datestamp}.json`) };
       },
     };
 
@@ -302,15 +302,15 @@ const DialogExport = (props: DialogExportProps) => {
   };
 
   const handleCopyJson = async () => {
-    if (dataType !== "template" || !id) return;
-    const response = await exportTemplate({
+    if (dataType !== "attribute" || !id) return;
+    const response = await exportAttribute({
       variables: { _id: id, fields: exportFields.length > 0 ? exportFields : undefined, includeHistory },
     }).catch(ignoreAbort);
-    const responseData = response?.data?.exportTemplate;
+    const responseData = response?.data?.exportAttribute;
     if (!responseData) {
       toaster.create({
         title: "Error",
-        description: "Unable to copy template JSON",
+        description: "Unable to copy Attribute JSON",
         type: "error",
         duration: 2000,
         closable: true,
@@ -320,7 +320,7 @@ const DialogExport = (props: DialogExportProps) => {
     await navigator.clipboard.writeText(responseData);
     toaster.create({
       title: "Copied",
-      description: "Template JSON copied to clipboard",
+      description: "Attribute JSON copied to clipboard",
       type: "success",
       duration: 2000,
       closable: true,
@@ -329,8 +329,8 @@ const DialogExport = (props: DialogExportProps) => {
 
   const entity = entityData?.entity;
   const project = projectData?.project;
-  const template = templateData?.template;
-  const dataLoading = entityLoading || projectLoading || templateLoading;
+  const attribute = attributeData?.attribute;
+  const dataLoading = entityLoading || projectLoading || attributeLoading;
 
   const title = DIALOG_TITLE[dataType];
   const formatOptions = FORMAT_OPTIONS[dataType];
@@ -739,8 +739,8 @@ const DialogExport = (props: DialogExportProps) => {
               </Flex>
             )}
 
-            {/* Template field selection */}
-            {dataType === "template" && (
+            {/* Attribute field selection */}
+            {dataType === "attribute" && (
               <Flex
                 direction={"column"}
                 gap={"2"}
@@ -753,7 +753,7 @@ const DialogExport = (props: DialogExportProps) => {
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
                   Fields
                 </Text>
-                {dataLoading || !template ? (
+                {dataLoading || !attribute ? (
                   <Text fontSize={"xs"} color={"text.subtle"}>
                     Loading fields...
                   </Text>
@@ -771,7 +771,7 @@ const DialogExport = (props: DialogExportProps) => {
                           <Checkbox.Label>
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Name:</Text>
-                              <Text>{template.name}</Text>
+                              <Text>{attribute.name}</Text>
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
@@ -782,7 +782,7 @@ const DialogExport = (props: DialogExportProps) => {
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Values:</Text>
                               <Text>
-                                {template.values.length} {template.values.length === 1 ? "value" : "values"}
+                                {attribute.values.length} {attribute.values.length === 1 ? "value" : "values"}
                               </Text>
                             </Flex>
                           </Checkbox.Label>
@@ -799,7 +799,7 @@ const DialogExport = (props: DialogExportProps) => {
                           <Checkbox.Label>
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Created:</Text>
-                              <Text>{dayjs(template.timestamp).format("DD MMM YYYY")}</Text>
+                              <Text>{dayjs(attribute.timestamp).format("DD MMM YYYY")}</Text>
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
@@ -817,7 +817,7 @@ const DialogExport = (props: DialogExportProps) => {
                               <Text fontSize={"xs"} fontWeight={"semibold"}>
                                 Owner:
                               </Text>
-                              <TagActor identifier={template.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                              <TagActor identifier={attribute.owner} inlineNoAvatar fallback={""} size={"sm"} />
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
@@ -827,7 +827,7 @@ const DialogExport = (props: DialogExportProps) => {
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "description", details.checked as boolean))
                           }
-                          disabled={_.isEqual(template.description, "")}
+                          disabled={_.isEqual(attribute.description, "")}
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
@@ -835,9 +835,9 @@ const DialogExport = (props: DialogExportProps) => {
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Description:</Text>
                               <Text lineClamp={1}>
-                                {_.isEqual(template.description, "")
+                                {_.isEqual(attribute.description, "")
                                   ? "No description"
-                                  : _.truncate(template.description, { length: 32 })}
+                                  : _.truncate(attribute.description, { length: 32 })}
                               </Text>
                             </Flex>
                           </Checkbox.Label>
@@ -854,7 +854,7 @@ const DialogExport = (props: DialogExportProps) => {
                           <Checkbox.Label>
                             <Flex fontSize={"xs"} gap={"1"} direction={"row"}>
                               <Text fontWeight={"semibold"}>Archived:</Text>
-                              <Text>{template.archived ? "Yes" : "No"}</Text>
+                              <Text>{attribute.archived ? "Yes" : "No"}</Text>
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
@@ -911,7 +911,7 @@ const DialogExport = (props: DialogExportProps) => {
           {/* Footer */}
           <Dialog.Footer p={"2"} bg={STYLES.dialog.footer.bg} roundedBottom={"md"}>
             <Flex direction={"row"} w={"100%"} justify={"right"} align={"center"} gap={"2"}>
-              {dataType === "template" && (
+              {dataType === "attribute" && (
                 <Button
                   colorPalette={"blue"}
                   variant={"solid"}

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 type HistoryEntry = { timestamp: string };
 
 /**
- * Sorts and date-filters a version history list, shared by Entity, Project, and Template `HistoryDrawer` instances
+ * Sorts and date-filters a version history list, shared by Entity, Project, and Attribute `HistoryDrawer` instances
  * @param {HistoryEntry[]} history raw, unsorted version history
  */
 export const useHistorySort = <T extends HistoryEntry>(history: T[]) => {

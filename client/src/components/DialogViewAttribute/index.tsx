@@ -37,8 +37,8 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
   };
 
   /**
-   * Helper function to apply changes to the `AttributeModel` after the `DialogCompareAttribute` has been closed
-   * @param updated Update `AttributeModel` after comparison
+   * Helper function to apply changes to the `AttributeModel` after `DialogCompareAttribute` has been closed
+   * @param updated Updated `AttributeModel` after comparison
    */
   const onUpdateAttribute = (updated: AttributeModel) => {
     setName(updated.name);
@@ -63,27 +63,27 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
             <Dialog.Header
               p={"1"}
               flexShrink={0}
-              bg={"template.light"}
-              color={"template.dark"}
+              bg={"attribute.light"}
+              color={"attribute.dark"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
               <Flex direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
                 <Flex align={"center"} gap={"1"} p={"1"} border={"2px"} rounded={"md"}>
-                  <Icon name={"template"} size={"xs"} />
+                  <Icon name={"attribute"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
                     Attribute: {props.attribute.name}
                   </Text>
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"template"} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"attribute"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
             <Dialog.Body p={"0"} flex={"1"} overflow={"auto"}>
               <Flex direction={"column"} p={"2"} gap={"2"}>
-                {props.isTemplate && (
+                {props.originalAttributeId && (
                   <Flex
                     direction={"row"}
                     gap={"2"}
@@ -97,10 +97,9 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
                       <Text fontWeight={"semibold"} fontSize={"xs"} ml={"0.5"} color={"text.muted"}>
                         Using:
                       </Text>
-                      {/* Ensure actual ID is passed to Linky, remove appended Template unique identifier */}
                       <Linky
-                        id={props.attribute._id.slice(0, 10)}
-                        type={"templates"}
+                        id={props.originalAttributeId}
+                        type={"attributes"}
                         size={"xs"}
                         workspace={props.workspace}
                         isPublic={props.isPublic}
@@ -138,7 +137,7 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
                         open={compareDialogOpen}
                         setOpen={setCompareDialogOpen}
                         modifiedAttribute={currentAttribute}
-                        templateAttributeId={props.attribute._id.slice(0, 10)}
+                        originalAttributeId={props.originalAttributeId}
                         onUpdate={onUpdateAttribute}
                         defaultApplyAll={compareDefaultApplyAll}
                         entityName={props.entityName}

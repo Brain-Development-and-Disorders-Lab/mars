@@ -445,8 +445,8 @@ export const typedefs = `#graphql
     warnings: [String]
   }
 
-  # "AttributesReview" type storing the review state of an Attribute to be imported
-  type AttributesReview {
+  # "AttributeReview" type storing the review state of an Attribute to be imported
+  type AttributeReview {
     name: String
     state: String
   }
@@ -863,7 +863,7 @@ export const typedefs = `#graphql
     createAttribute(attribute: AttributeCreateInput): ResponseMessage
     updateAttribute(attribute: AttributeInput, message: String): ResponseMessage
     archiveAttribute(_id: String, state: Boolean): ResponseMessage
-    archiveTAttribute(toArchive: [String], state: Boolean): ResponseMessage
+    archiveAttributes(toArchive: [String], state: Boolean): ResponseMessage
 
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseDataString

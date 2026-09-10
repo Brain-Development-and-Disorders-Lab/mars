@@ -5,8 +5,8 @@ Metadatify introduces a nomenclature for describing the creation and management 
 The three primary components of the Metadatify schema are:
 
 - Entities;
-- Projects; and
-- Attributes (with Templates).
+- Attributes; and
+- Projects.
 
 ## Entities
 

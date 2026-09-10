@@ -10,7 +10,7 @@ import Linky from "@components/Linky";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { AttributeUsage, TemplateUsageTableProps } from "@types";
+import { AttributeUsage, AttributeUsageTableProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -20,7 +20,7 @@ import { STYLES } from "@variables";
 
 const usageColumnHelper = createColumnHelper<AttributeUsage>();
 
-const TemplateUsageTable = ({ templateUsage, onViewEntity, workspace, isPublic }: TemplateUsageTableProps) => {
+const AttributeUsageTable = ({ attributeUsage, onViewEntity, workspace, isPublic }: AttributeUsageTableProps) => {
   const usageColumns = [
     usageColumnHelper.accessor("entity", {
       cell: (info) => {
@@ -92,11 +92,11 @@ const TemplateUsageTable = ({ templateUsage, onViewEntity, workspace, isPublic }
       minW={{ base: "100%", md: "calc(50% - 4px)" }}
     >
       <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-        Usage ({templateUsage.length} {templateUsage.length !== 1 ? "Entities" : "Entity"})
+        Usage ({attributeUsage.length} {attributeUsage.length !== 1 ? "Entities" : "Entity"})
       </Text>
-      {templateUsage.length > 0 ? (
+      {attributeUsage.length > 0 ? (
         <DataTable
-          data={templateUsage}
+          data={attributeUsage}
           columns={usageColumns}
           visibleColumns={{}}
           selectedRows={{}}
@@ -108,7 +108,7 @@ const TemplateUsageTable = ({ templateUsage, onViewEntity, workspace, isPublic }
         <EmptyState.Root>
           <EmptyState.Content>
             <EmptyState.Indicator>
-              <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
+              <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.default} />
             </EmptyState.Indicator>
             <EmptyState.Description>No Usage</EmptyState.Description>
           </EmptyState.Content>
@@ -118,4 +118,4 @@ const TemplateUsageTable = ({ templateUsage, onViewEntity, workspace, isPublic }
   );
 };
 
-export default TemplateUsageTable;
+export default AttributeUsageTable;

@@ -41,7 +41,7 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Variables
 import { STYLES } from "@variables";
 
-const Templates = () => {
+const Attributes = () => {
   const navigate = useNavigate();
 
   // Permissions
@@ -51,8 +51,8 @@ const Templates = () => {
   const [workspaceName, setWorkspaceName] = useState("");
 
   // Page state
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
-  const [filteredTemplates, setFilteredTemplates] = useState([] as AttributeModel[]);
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [filteredAttributes, setFilteredAttributes] = useState([] as AttributeModel[]);
 
   // Filter state (temporary values before applying)
   const [filterState, setFilterState] = useState({
@@ -75,9 +75,9 @@ const Templates = () => {
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // GraphQL operations
-  const GET_TEMPLATES = gql`
-    query GetTemplates($workspace: String) {
-      templates {
+  const GET_ATTRIBUTES = gql`
+    query GetAttributes($workspace: String) {
+      attributes {
         _id
         name
         owner
@@ -98,9 +98,9 @@ const Templates = () => {
     }
   `;
   const { loading, error, data } = useQuery<{
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
     workspace: IGenericItem;
-  }>(GET_TEMPLATES, {
+  }>(GET_ATTRIBUTES, {
     variables: {
       workspace: workspace,
     },
@@ -109,10 +109,10 @@ const Templates = () => {
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.templates) {
-      // Unpack all the Template data
-      setTemplates(data.templates);
-      setFilteredTemplates(data.templates);
+    if (data?.attributes) {
+      // Unpack all the Attribute data
+      setAttributes(data.attributes);
+      setFilteredAttributes(data.attributes);
     }
 
     if (data?.workspace) {
@@ -121,33 +121,33 @@ const Templates = () => {
     }
   }, [loading]);
 
-  // Apply filters to template data
+  // Apply filters to Attribute data
   useEffect(() => {
-    let filtered = [...templates];
+    let filtered = [...attributes];
     let activeFilterCount = 0;
 
     // Filter by date range
     if (appliedFilters.startDate) {
       const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((template) => dayjs(template.timestamp).isSameOrAfter(startDate));
+      filtered = filtered.filter((attribute) => dayjs(attribute.timestamp).isSameOrAfter(startDate));
       activeFilterCount++;
     }
     if (appliedFilters.endDate) {
       const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((template) => dayjs(template.timestamp).isSameOrBefore(endDate));
+      filtered = filtered.filter((attribute) => dayjs(attribute.timestamp).isSameOrBefore(endDate));
       activeFilterCount++;
     }
 
     // Filter by owners
     if (appliedFilters.owners.length > 0) {
-      filtered = filtered.filter((template) => appliedFilters.owners.includes(template.owner));
+      filtered = filtered.filter((attribute) => appliedFilters.owners.includes(attribute.owner));
       activeFilterCount += appliedFilters.owners.length;
     }
 
     // Filter by value count ranges
     if (appliedFilters.valueCountRanges.length > 0) {
-      filtered = filtered.filter((template) => {
-        const valueCount = template.values.length;
+      filtered = filtered.filter((attribute) => {
+        const valueCount = attribute.values.length;
         return appliedFilters.valueCountRanges.some((range) => {
           if (range === "0") return valueCount === 0;
           if (range === "1-5") return valueCount >= 1 && valueCount <= 5;
@@ -160,15 +160,15 @@ const Templates = () => {
     }
 
     setActiveFilterCount(activeFilterCount);
-    setFilteredTemplates(filtered);
-  }, [templates, appliedFilters]);
+    setFilteredAttributes(filtered);
+  }, [attributes, appliedFilters]);
 
   useEffect(() => {
     if (error) {
       toaster.create({
         title: "Error",
         type: "error",
-        description: "Unable to retrieve Templates",
+        description: "Unable to retrieve Attributes",
         duration: 4000,
         closable: true,
       });
@@ -201,7 +201,7 @@ const Templates = () => {
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+                <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -212,8 +212,8 @@ const Templates = () => {
               mx={"1"}
               variant="subtle"
               colorPalette="gray"
-              aria-label={"View Template"}
-              onClick={() => navigate(`/templates/${info.row.original._id}`)}
+              aria-label={"View Attribute"}
+              onClick={() => navigate(`/attributes/${info.row.original._id}`)}
             >
               View
               <Icon name={"a_right"} size={"xs"} />
@@ -271,26 +271,26 @@ const Templates = () => {
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
             <PageHeader
-              icon={"template"}
-              iconColor={STYLES.template.color.icon}
-              title={"Templates"}
+              icon={"attribute"}
+              iconColor={STYLES.attribute.color.icon}
+              title={"Attributes"}
               subtitle={workspaceName}
               loading={loading}
             />
             <Spacer />
             <Tooltip
               content={"Insufficient permissions in this Workspace"}
-              disabled={workspacePermissions.templates.create}
+              disabled={workspacePermissions.attributes.create}
               showArrow
             >
               <Button
                 colorPalette={"green"}
-                onClick={() => navigate("/create/template")}
+                onClick={() => navigate("/create/attribute")}
                 size={"xs"}
                 rounded={"md"}
-                disabled={!workspacePermissions.templates.create}
+                disabled={!workspacePermissions.attributes.create}
               >
-                Create Template
+                Create Attribute
                 <Icon name={"add"} size={"xs"} />
               </Button>
             </Tooltip>
@@ -298,13 +298,13 @@ const Templates = () => {
         </Flex>
         <Flex direction={"column"} gap={"2"} w={"100%"}>
           <Text fontSize={"xs"} ml={"0.5"}>
-            All Templates in the current Workspace are shown below. Sort the Templates using the column headers or use
+            All Attributes in the current Workspace are shown below. Sort the Attributes using the column headers or use
             the filters below.
           </Text>
 
           {/* Filter Section */}
           <DataTableFilters
-            entityLabel={"Template"}
+            entityLabel={"Attribute"}
             filtersOpen={filtersOpen}
             onFiltersOpenChange={setFiltersOpen}
             activeFilterCount={activeFilterCount}
@@ -312,7 +312,7 @@ const Templates = () => {
             endDate={filterState.endDate}
             onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
             onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
-            owners={templates.map((t) => t.owner)}
+            owners={attributes.map((attribute) => attribute.owner)}
             selectedOwners={filterState.owners}
             onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
             countFilter={{
@@ -335,10 +335,10 @@ const Templates = () => {
             }}
           />
 
-          {filteredTemplates.filter((template) => _.isEqual(template.archived, false)).length > 0 ? (
+          {filteredAttributes.filter((attribute) => _.isEqual(attribute.archived, false)).length > 0 ? (
             <DataTable
               columns={columns}
-              data={filteredTemplates.filter((template) => _.isEqual(template.archived, false))}
+              data={filteredAttributes.filter((attribute) => _.isEqual(attribute.archived, false))}
               visibleColumns={visibleColumns}
               selectedRows={{}}
               showColumnSelect
@@ -349,10 +349,10 @@ const Templates = () => {
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
+                  <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0 ? "No templates match the selected filters" : "No Templates"}
+                  {activeFilterCount > 0 ? "No Attributes match the selected filters" : "No Attributes"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
@@ -363,4 +363,4 @@ const Templates = () => {
   );
 };
 
-export default Templates;
+export default Attributes;

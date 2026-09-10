@@ -13,7 +13,7 @@ This documentation provides an in-depth guide to Metadatify's primary features, 
   - [Overview](../creating/Creating)
   - [Creating Entities](../creating/Creating-Entities)
   - [Creating Projects](../creating/Creating-Projects)
-  - [Creating Templates](../creating/Creating-Templates)
+  - [Creating Attributes](../creating/Creating-Attributes)
   - [Creating Workspaces](../creating/Creating-Workspaces)
 - [Searching Metadata](Searching)
 - [Tracking Entities](Tracking)

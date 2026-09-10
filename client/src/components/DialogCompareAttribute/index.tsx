@@ -60,7 +60,7 @@ const renderValueData = (value: IValue) => {
 };
 
 const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
-  const [templateAttribute, setTemplateAttribute] = useState<AttributeModel>();
+  const [originalAttribute, setOriginalAttribute] = useState<AttributeModel>();
   const [loadingComparison, setLoadingComparison] = useState(false);
   const [warningOpen, setWarningOpen] = useState(false);
 
@@ -68,15 +68,15 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   // Selection state
-  const [useTemplateName, setUseTemplateName] = useState(false);
-  const [useTemplateDescription, setUseTemplateDescription] = useState(false);
+  const [useOriginalName, setUseOriginalName] = useState(false);
+  const [useOriginalDescription, setUseOriginalDescription] = useState(false);
   const [adoptModifiedValueIds, setAdoptModifiedValueIds] = useState<Set<string>>(new Set());
-  const [pullTemplateValueIds, setPullTemplateValueIds] = useState<Set<string>>(new Set());
+  const [pullOriginalValueIds, setPullOriginalValueIds] = useState<Set<string>>(new Set());
   const [removeEntityValueIds, setRemoveEntityValueIds] = useState<Set<string>>(new Set());
 
-  const GET_TEMPLATE = gql`
-    query GetTemplate($_id: String) {
-      template(_id: $_id) {
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String) {
+      attribute(_id: $_id) {
         _id
         name
         timestamp
@@ -109,9 +109,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
       }
     }
   `;
-  const [getTemplate] = useLazyQuery<{
-    template: AttributeModel;
-  }>(GET_TEMPLATE);
+  const [getAttribute] = useLazyQuery<{
+    attribute: AttributeModel;
+  }>(GET_ATTRIBUTE);
 
   /**
    * Utility function to configure state prior to displaying comparison view
@@ -119,60 +119,60 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
   const prepareComparison = async () => {
     // Reset state
     setLoadingComparison(true);
-    setUseTemplateName(false);
-    setUseTemplateDescription(false);
+    setUseOriginalName(false);
+    setUseOriginalDescription(false);
     setAdoptModifiedValueIds(new Set());
-    setPullTemplateValueIds(new Set());
+    setPullOriginalValueIds(new Set());
     setRemoveEntityValueIds(new Set());
 
-    // Retreive the latest version of the Template for comparison
-    const templateAttributeResult = await getTemplate({
+    // Retreive the latest version of the Attribute for comparison
+    const originalAttributeResult = await getAttribute({
       variables: {
-        _id: props.templateAttributeId,
+        _id: props.originalAttributeId,
       },
     });
 
-    if (templateAttributeResult.data?.template) {
-      const template = templateAttributeResult.data.template;
-      setTemplateAttribute(template);
+    if (originalAttributeResult.data?.attribute) {
+      const attribute = originalAttributeResult.data.attribute;
+      setOriginalAttribute(attribute);
 
       // Apply operations and selections if `defaultApplyAll` is `true`
       if (props.defaultApplyAll) {
-        if (props.modifiedAttribute.name !== template.name) {
-          setUseTemplateName(true);
+        if (props.modifiedAttribute.name !== attribute.name) {
+          setUseOriginalName(true);
         }
-        if (props.modifiedAttribute.description !== template.description) {
-          setUseTemplateDescription(true);
+        if (props.modifiedAttribute.description !== attribute.description) {
+          setUseOriginalDescription(true);
         }
 
         const entityValueMap = new Map(props.modifiedAttribute.values.map((value) => [value._id, value]));
-        const templateValueMap = new Map(template.values.map((value) => [value._id, value]));
+        const attributeValueMap = new Map(attribute.values.map((value) => [value._id, value]));
 
-        // Create Sets and determine exact differences between Template and current Entity Attribute
+        // Create Sets and determine exact differences between original Attribute and current Entity Attribute
         const adoptModifiedSet = new Set<string>();
-        const pullTemplateSet = new Set<string>();
+        const pullAttributeSet = new Set<string>();
         const removeEntitySet = new Set<string>();
 
-        for (const [id, templateValue] of templateValueMap) {
+        for (const [id, attributeValue] of attributeValueMap) {
           const entityValue = entityValueMap.get(id);
-          if (entityValue && !isValueEqual(entityValue, templateValue)) {
-            // Modified Value from Template
+          if (entityValue && !isValueEqual(entityValue, attributeValue)) {
+            // Modified Value from Attribute
             adoptModifiedSet.add(id);
           } else if (!entityValue) {
-            // Added Value from Template
-            pullTemplateSet.add(id);
+            // Added Value from Attribute
+            pullAttributeSet.add(id);
           }
         }
 
-        // Removed Values from Template
+        // Removed Values from Attribute
         for (const [id] of entityValueMap) {
-          if (!templateValueMap.has(id)) {
+          if (!attributeValueMap.has(id)) {
             removeEntitySet.add(id);
           }
         }
 
         setAdoptModifiedValueIds(adoptModifiedSet);
-        setPullTemplateValueIds(pullTemplateSet);
+        setPullOriginalValueIds(pullAttributeSet);
         setRemoveEntityValueIds(removeEntitySet);
       }
     }
@@ -204,7 +204,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
 
   /**
    * Helper function to toggle the `CompareAttributeDialogCollapsible` sections that are expanded
-   * @param {string} section Selected section of the Template Values diff
+   * @param {string} section Selected section of the Attribute Values diff
    */
   const toggleSection = (section: string) => {
     setExpandedSections((previous) => {
@@ -219,7 +219,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
   };
 
   /**
-   * Helper component to represent the collapsible sections for each type of modification to the Template
+   * Helper component to represent the collapsible sections for each type of modification to the Attribute
    * @param props Component props
    * @return
    */
@@ -254,7 +254,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
   );
 
   /**
-   * Helper component to represent the direct comparison of a single modification to the Template
+   * Helper component to represent the direct comparison of a single modification to the Attribute
    * @param props Component props
    * @return
    */
@@ -282,7 +282,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
           >
             <Checkbox.HiddenInput />
             <Checkbox.Control />
-            <Checkbox.Label fontSize={"xs"}>Reset to Template</Checkbox.Label>
+            <Checkbox.Label fontSize={"xs"}>Reset to Attribute</Checkbox.Label>
           </Checkbox.Root>
         )}
       </Flex>
@@ -306,7 +306,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
         )}
         <Flex direction={"row"} gap={"1"} align={"center"}>
           <Text fontSize={"xs"} color={"text.subtle"}>
-            Template:
+            Attribute:
           </Text>
           <Tooltip disabled={props.originalValue.length < 24} content={props.originalValue} showArrow>
             <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -322,54 +322,54 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
     </Flex>
   );
 
-  // Generate the differences between the Template Values and the Entity Attribute Values
+  // Generate the differences between the original Attribute Values and the Entity Attribute Values
   const entityValueMap = new Map(props.modifiedAttribute.values.map((v) => [v._id, v]));
-  const templateValueMap = new Map(templateAttribute?.values.map((v) => [v._id, v]) || []);
+  const originalValueMap = new Map(originalAttribute?.values.map((v) => [v._id, v]) || []);
 
   // Generate the collection of shared Values
-  const sharedValues = [...entityValueMap.keys()].filter((id) => templateValueMap.has(id));
+  const sharedValues = [...entityValueMap.keys()].filter((id) => originalValueMap.has(id));
 
   // Generate the collections of differing Values
-  const unchangedValues: { entity: IValue; template: IValue }[] = [];
-  const modifiedValues: { entity: IValue; template: IValue }[] = [];
-  const templateOnlyValues: IValue[] = [];
+  const unchangedValues: { entity: IValue; original: IValue }[] = [];
+  const modifiedValues: { entity: IValue; original: IValue }[] = [];
+  const originalOnlyValues: IValue[] = [];
   const entityOnlyValues: IValue[] = [];
 
   for (const value of sharedValues) {
     const entityValue = entityValueMap.get(value)!;
-    const templateValue = templateValueMap.get(value)!;
-    if (isValueEqual(entityValue, templateValue)) {
-      unchangedValues.push({ entity: entityValue, template: templateValue });
+    const originalValue = originalValueMap.get(value)!;
+    if (isValueEqual(entityValue, originalValue)) {
+      unchangedValues.push({ entity: entityValue, original: originalValue });
     } else {
-      modifiedValues.push({ entity: entityValue, template: templateValue });
+      modifiedValues.push({ entity: entityValue, original: originalValue });
     }
   }
 
-  // Values only contained in the Template
-  for (const [id, value] of templateValueMap) {
+  // Values only contained in the Attribute
+  for (const [id, value] of originalValueMap) {
     if (!entityValueMap.has(id)) {
-      templateOnlyValues.push(value);
+      originalOnlyValues.push(value);
     }
   }
 
   // Values only contained in the Entity Attribute
   for (const [id, value] of entityValueMap) {
-    if (!templateValueMap.has(id)) entityOnlyValues.push(value);
+    if (!originalValueMap.has(id)) entityOnlyValues.push(value);
   }
 
-  const nameIsDifferent = props.modifiedAttribute.name !== templateAttribute?.name;
-  const descriptionIsDifferent = props.modifiedAttribute.description !== templateAttribute?.description;
+  const nameIsDifferent = props.modifiedAttribute.name !== originalAttribute?.name;
+  const descriptionIsDifferent = props.modifiedAttribute.description !== originalAttribute?.description;
 
   const hasSelection =
-    useTemplateName ||
-    useTemplateDescription ||
+    useOriginalName ||
+    useOriginalDescription ||
     adoptModifiedValueIds.size > 0 ||
-    pullTemplateValueIds.size > 0 ||
+    pullOriginalValueIds.size > 0 ||
     removeEntityValueIds.size > 0;
 
   const onUpdate = () => {
     // If no `onUpdate` function is specified or the `AttributeModel` is undefined, ignore
-    if (!props.onUpdate || !templateAttribute) {
+    if (!props.onUpdate || !originalAttribute) {
       return;
     }
 
@@ -378,8 +378,8 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
     mergedValues = mergedValues.filter((value) => !removeEntityValueIds.has(value._id));
     const mergedMap = new Map(mergedValues.map((v) => [v._id, v]));
 
-    // Apply Values that are to be updated from the Template
-    for (const value of templateAttribute.values) {
+    // Apply Values that are to be updated from the Attribute
+    for (const value of originalAttribute.values) {
       if (mergedMap.has(value._id) && adoptModifiedValueIds.has(value._id)) {
         const valueId = mergedValues.findIndex((mergedValue) => mergedValue._id === value._id);
         if (valueId !== -1) {
@@ -388,9 +388,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
       }
     }
 
-    // Add Values to be pulled from the Template
-    for (const value of templateAttribute.values) {
-      if (!mergedMap.has(value._id) && pullTemplateValueIds.has(value._id)) {
+    // Add Values to be pulled from the Attribute
+    for (const value of originalAttribute.values) {
+      if (!mergedMap.has(value._id) && pullOriginalValueIds.has(value._id)) {
         mergedValues.push({ ...value });
       }
     }
@@ -398,10 +398,10 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
     // Call the `onUpdate` function to apply changes
     props.onUpdate({
       ...props.modifiedAttribute,
-      name: useTemplateName && nameIsDifferent ? templateAttribute.name : props.modifiedAttribute.name,
+      name: useOriginalName && nameIsDifferent ? originalAttribute.name : props.modifiedAttribute.name,
       description:
-        useTemplateDescription && descriptionIsDifferent
-          ? templateAttribute.description
+        useOriginalDescription && descriptionIsDifferent
+          ? originalAttribute.description
           : props.modifiedAttribute.description,
       values: mergedValues,
     });
@@ -425,8 +425,8 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
             <Dialog.Header
               p={"1"}
               flexShrink={0}
-              bg={"template.light"}
-              color={"template.dark"}
+              bg={"attribute.light"}
+              color={"attribute.dark"}
               borderBottom={"2px"}
               roundedTop={"md"}
             >
@@ -438,12 +438,12 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                   </Text>
                   <Icon name={"a_both"} size={"xs"} />
                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    {templateAttribute?.name}
+                    {originalAttribute?.name}
                   </Text>
                 </Flex>
               </Flex>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"template"} />
+                <CloseButton size={"2xs"} top={"6px"} onClick={() => props.setOpen(false)} colorPalette={"attribute"} />
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
@@ -457,7 +457,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                     </Text>
                   </Flex>
                 </Flex>
-              ) : !templateAttribute ? (
+              ) : !originalAttribute ? (
                 <Flex
                   w={"100%"}
                   minH={"240px"}
@@ -468,33 +468,33 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                   p={"4"}
                 >
                   <Text fontWeight={"semibold"} fontSize={"xs"} color={"status.danger.emphasized"}>
-                    Unable to load Template
+                    Unable to load Attribute
                   </Text>
                 </Flex>
               ) : (
                 <Flex direction={"column"} gap={"2"}>
                   <Flex direction={"row"} gap={"2"} align={"stretch"}>
-                    {/* Template Name */}
+                    {/* Attribute Name */}
                     <CompareAttributeFieldDiff
                       label={"Name"}
                       isDifferent={!!nameIsDifferent}
-                      useOriginal={useTemplateName}
-                      setUseOriginal={setUseTemplateName}
+                      useOriginal={useOriginalName}
+                      setUseOriginal={setUseOriginalName}
                       currentValue={props.modifiedAttribute.name || "(empty)"}
-                      originalValue={templateAttribute.name || "(empty)"}
+                      originalValue={originalAttribute.name || "(empty)"}
                     />
-                    {/* Template Description */}
+                    {/* Attribute Description */}
                     <CompareAttributeFieldDiff
                       label={"Description"}
                       isDifferent={!!descriptionIsDifferent}
-                      useOriginal={useTemplateDescription}
-                      setUseOriginal={setUseTemplateDescription}
+                      useOriginal={useOriginalDescription}
+                      setUseOriginal={setUseOriginalDescription}
                       currentValue={props.modifiedAttribute.description || "(empty)"}
-                      originalValue={templateAttribute.description || "(empty)"}
+                      originalValue={originalAttribute.description || "(empty)"}
                     />
                   </Flex>
 
-                  {/* Template Values */}
+                  {/* Attribute Values */}
                   <Flex
                     direction={"column"}
                     gap={"1"}
@@ -623,7 +623,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                           count={entityOnlyValues.length}
                           disabled={entityOnlyValues.length === 0}
                         >
-                          {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
+                          {entityOnlyValues.length === 0 && originalOnlyValues.length === 0 && (
                             <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
@@ -682,7 +682,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
 
                       <Icon name={"a_both"} size={"xs"} />
 
-                      {/* Right Column: Template Attribute */}
+                      {/* Right Column: Attribute Attribute */}
                       <Flex
                         direction={"column"}
                         w={"50%"}
@@ -693,11 +693,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                         gap={"2"}
                       >
                         <Flex direction={"row"} gap={"1"} justify={"space-between"}>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.template.color.icon}>
-                            Template
+                          <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.attribute.color.icon}>
+                            Attribute
                           </Text>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            {templateAttribute.name}
+                            {originalAttribute.name}
                           </Text>
                         </Flex>
 
@@ -714,9 +714,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               No Unmodified Values
                             </Text>
                           )}
-                          {unchangedValues.map(({ template }) => (
+                          {unchangedValues.map(({ original }) => (
                             <Flex
-                              key={template._id}
+                              key={original._id}
                               direction={"row"}
                               gap={"1"}
                               align={"center"}
@@ -730,12 +730,12 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   Value:
                                 </Text>
                                 <Icon
-                                  name={getValueTypeIconProps(template.type).name}
-                                  color={getValueTypeIconProps(template.type).color}
+                                  name={getValueTypeIconProps(original.type).name}
+                                  color={getValueTypeIconProps(original.type).color}
                                   size={"xs"}
                                 />
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {template.name}
+                                  {original.name}
                                 </Text>
                               </Flex>
                             </Flex>
@@ -755,9 +755,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               No Modified Values
                             </Text>
                           )}
-                          {modifiedValues.map(({ template }) => (
+                          {modifiedValues.map(({ original }) => (
                             <Flex
-                              key={template._id}
+                              key={original._id}
                               direction={"column"}
                               gap={"0.5"}
                               bg={"white"}
@@ -772,30 +772,30 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                     Value:
                                   </Text>
                                   <Icon
-                                    name={getValueTypeIconProps(template.type).name}
-                                    color={getValueTypeIconProps(template.type).color}
+                                    name={getValueTypeIconProps(original.type).name}
+                                    color={getValueTypeIconProps(original.type).color}
                                     size={"xs"}
                                   />
                                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {template.name}
+                                    {original.name}
                                   </Text>
                                 </Flex>
                                 <Checkbox.Root
                                   size={"xs"}
                                   colorPalette={"blue"}
-                                  checked={adoptModifiedValueIds.has(template._id)}
-                                  onCheckedChange={() => toggleSet(setAdoptModifiedValueIds, template._id)}
+                                  checked={adoptModifiedValueIds.has(original._id)}
+                                  onCheckedChange={() => toggleSet(setAdoptModifiedValueIds, original._id)}
                                 >
                                   <Checkbox.HiddenInput />
                                   <Checkbox.Control />
-                                  <Checkbox.Label fontSize={"xs"}>Reset to Template</Checkbox.Label>
+                                  <Checkbox.Label fontSize={"xs"}>Reset to Attribute</Checkbox.Label>
                                 </Checkbox.Root>
                               </Flex>
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Data:
                                 </Text>
-                                {renderValueData(template)}
+                                {renderValueData(original)}
                               </Flex>
                             </Flex>
                           ))}
@@ -804,17 +804,17 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                         <CompareAttributeDialogCollapsible
                           sectionKey={"add-remove"}
                           icon={"add"}
-                          color={templateOnlyValues.length === 0 ? "gray" : "teal"}
+                          color={originalOnlyValues.length === 0 ? "gray" : "teal"}
                           label={"Added or Removed"}
-                          count={templateOnlyValues.length}
-                          disabled={templateOnlyValues.length === 0}
+                          count={originalOnlyValues.length}
+                          disabled={originalOnlyValues.length === 0}
                         >
-                          {entityOnlyValues.length === 0 && templateOnlyValues.length === 0 && (
+                          {entityOnlyValues.length === 0 && originalOnlyValues.length === 0 && (
                             <Text fontSize={"xs"} color={"text.subtle"} ml={"0.5"}>
                               No Values to Add or Remove
                             </Text>
                           )}
-                          {templateOnlyValues.length > 0 && (
+                          {originalOnlyValues.length > 0 && (
                             <Text
                               fontSize={"xs"}
                               fontWeight={"semibold"}
@@ -824,10 +824,10 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               pb={"0.5"}
                               ml={"0.5"}
                             >
-                              Available in Template
+                              Available in Attribute
                             </Text>
                           )}
-                          {templateOnlyValues.map((value) => (
+                          {originalOnlyValues.map((value) => (
                             <Flex
                               key={value._id}
                               direction={"row"}
@@ -854,8 +854,8 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               <Checkbox.Root
                                 size={"xs"}
                                 colorPalette={"blue"}
-                                checked={pullTemplateValueIds.has(value._id)}
-                                onCheckedChange={() => toggleSet(setPullTemplateValueIds, value._id)}
+                                checked={pullOriginalValueIds.has(value._id)}
+                                onCheckedChange={() => toggleSet(setPullOriginalValueIds, value._id)}
                               >
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
@@ -901,7 +901,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
       </Dialog.Root>
 
       <DialogAlert
-        header={"Modify Template"}
+        header={"Modify Attribute"}
         open={warningOpen}
         setOpen={setWarningOpen}
         leftButtonLabel={"Cancel"}

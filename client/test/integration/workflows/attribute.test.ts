@@ -8,34 +8,34 @@ import {
   saveAndWait,
   addAttributeValue,
   openAddAttributeDialog,
-  createTestTemplate,
+  createTestAttribute,
   createTestEntity,
   createTestWorkspace,
   createTestUser,
   switchWorkspace,
 } from "../helpers/global.helpers";
 
-test.describe("Template", () => {
+test.describe("Attribute", () => {
   test.describe("Create", () => {
     test.beforeEach(async ({ context, page }) => {
       // Create User
       const user = await createTestUser(context);
 
-      // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Template-1", user);
-      await createTestTemplate("1-Template-Create", user, workspace);
+      // Setup Workspace and Attributes
+      const workspace = await createTestWorkspace("Attribute-1", user);
+      await createTestAttribute("1-Attribute-Create", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Template-1");
+      await switchWorkspace(page, "Attribute-1");
     });
 
-    test("should create a Template and appear in the list", async ({ page }) => {
-      await navigateToSection(page, "Templates");
+    test("should create an Attribute and appear in the list", async ({ page }) => {
+      await navigateToSection(page, "Attributes");
 
       const table = page.getByTestId("data-table-scroll-container");
       await table.waitFor({ state: "visible", timeout: 5000 });
-      await expect(table.locator(`text=1-Template-Create`)).toBeVisible({ timeout: 10000 });
+      await expect(table.locator(`text=1-Attribute-Create`)).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -44,15 +44,15 @@ test.describe("Template", () => {
       // Create User
       const user = await createTestUser(context);
 
-      // Setup Workspace and Templates
-      const workspace = await createTestWorkspace("Template-5", user);
+      // Setup Workspace and Attributes
+      const workspace = await createTestWorkspace("Attribute-5", user);
       await createTestEntity("1-Attribute-Text-Entity", user, workspace);
       await createTestEntity("2-Attribute-Multi-Entity", user, workspace);
       await createTestEntity("3-Attribute-Delete-Entity", user, workspace);
 
       // Navigate for tests
       await page.goto("/");
-      await switchWorkspace(page, "Template-5");
+      await switchWorkspace(page, "Attribute-5");
     });
 
     test("should add a text Attribute to an Entity and persist after reload", async ({ page }) => {

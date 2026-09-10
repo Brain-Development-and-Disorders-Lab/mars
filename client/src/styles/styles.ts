@@ -64,7 +64,7 @@ export const STYLES = {
       icon: "#2FBF9D",
     },
   },
-  template: {
+  attribute: {
     color: {
       default: "#8A63E8",
       light: "#F2ECFF",

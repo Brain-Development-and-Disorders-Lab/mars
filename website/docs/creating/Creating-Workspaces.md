@@ -1,6 +1,6 @@
 # Creating Workspaces
 
-Workspaces are used to manage Entities, Projects, and Templates amongst collaborators and organizations.
+Workspaces are used to manage Entities, Projects, and Attributes amongst collaborators and organizations.
 
 Upon first login, you will be required to create a new Workspace, unless your ORCiD has been added as a collaborator to another existing Workspace.
 

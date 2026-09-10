@@ -90,7 +90,7 @@ const Entity = () => {
   const cancelBlockerRef = useRef(null);
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
@@ -176,7 +176,7 @@ const Entity = () => {
         name
         description
       }
-      templates {
+      attributes {
         _id
         name
         description
@@ -192,7 +192,7 @@ const Entity = () => {
   `;
   const { loading, error, data } = useQuery<{
     projects: IGenericItem[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
   }>(GET_CREATE_ENTITIES_DATA, { fetchPolicy: "network-only" });
 
   const GET_COUNTER_CURRENT = gql`
@@ -236,7 +236,7 @@ const Entity = () => {
 
   useEffect(() => {
     if (data?.projects) setProjects(data.projects);
-    if (data?.templates) setTemplates(data.templates);
+    if (data?.attributes) setAttributes(data.attributes);
   }, [data]);
 
   useEffect(() => {
@@ -668,7 +668,7 @@ const Entity = () => {
           <Flex direction={"column"} gap={"2"} p={"1"}>
             <CreateEntityAttributesTable
               attributes={selectedAttributes}
-              templates={templates}
+              availableAttributes={attributes}
               onUpdate={onAttributeUpdate}
               onRemove={removeAttribute}
               onAddClick={() => setAddAttributesOpen(true)}
@@ -678,7 +678,7 @@ const Entity = () => {
               open={addAttributesOpen}
               onClose={() => setAddAttributesOpen(false)}
               owner={owner}
-              templates={templates}
+              attributes={attributes}
               entityName={name}
               entityDescription={description}
               onAdd={(attribute) => setSelectedAttributes([...selectedAttributes, attribute])}
@@ -845,7 +845,7 @@ const Entity = () => {
                             Attributes - Attach Metadata
                           </Text>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                            Select Attribute Templates and add Values to describe this Entity's metadata.
+                            Select Attributes and add Values to describe this Entity's metadata.
                           </Text>
                         </Flex>
                       </Flex>

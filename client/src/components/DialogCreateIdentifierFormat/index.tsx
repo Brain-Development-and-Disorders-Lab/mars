@@ -140,8 +140,8 @@ const DialogCreateIdentifierFormat = (props: DialogCreateIdentifierFormatProps) 
           <Dialog.Header
             p={"1"}
             flexShrink={0}
-            bg={"template.light"}
-            color={"template.dark"}
+            bg={"attribute.light"}
+            color={"attribute.dark"}
             borderBottom={"2px"}
             roundedTop={"md"}
           >
@@ -154,7 +154,7 @@ const DialogCreateIdentifierFormat = (props: DialogCreateIdentifierFormatProps) 
               </Flex>
             </Flex>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size={"2xs"} top={"6px"} onClick={() => props.onClose()} colorPalette={"template"} />
+              <CloseButton size={"2xs"} top={"6px"} onClick={() => props.onClose()} colorPalette={"attribute"} />
             </Dialog.CloseTrigger>
           </Dialog.Header>
 

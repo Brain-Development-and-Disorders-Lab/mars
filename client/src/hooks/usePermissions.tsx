@@ -33,7 +33,7 @@ const GET_USER_PERMISSIONS = gql`
           edit
           archive
         }
-        templates {
+        attributes {
           create
           edit
           archive

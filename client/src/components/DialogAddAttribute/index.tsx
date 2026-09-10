@@ -40,15 +40,15 @@ import { usePermissions } from "@hooks/usePermissions";
 // Variables
 import { STYLES } from "@variables";
 
-const SUGGEST_TEMPLATE = gql`
-  query SuggestTemplate($name: String!, $description: String, $templates: [TemplateSuggestionInput!]!) {
-    suggestTemplate(name: $name, description: $description, templates: $templates)
+const SUGGEST_ATTRIBUTE = gql`
+  query SuggestAttribute($name: String!, $description: String, $attributes: [AttributeSuggestionInput!]!) {
+    suggestAttribute(name: $name, description: $description, attributes: $attributes)
   }
 `;
 
 /**
  * Dialog for adding a new Attribute to an Entity, used in both the create and view flows.
- * Handles template selection, AI-powered template suggestions, and optional "Save as Template".
+ * Handles Attribute selection, AI-powered Attribute suggestions, and optional "Save as Attribute".
  */
 const DialogAddAttribute = (props: DialogAddAttributeProps) => {
   const { globalPermissions } = usePermissions();
@@ -57,55 +57,55 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
   const [description, setDescription] = useState("");
   const [values, setValues] = useState<IValue[]>([]);
 
-  // When a template is selected, track its ID so we can generate a unique attribute ID later
-  const [usingTemplate, setUsingTemplate] = useState(false);
-  const [templateId, setTemplateId] = useState("");
+  // When a Attribute is selected, track its ID so we can generate a unique attribute ID later
+  const [usingAttribute, setUsingAttribute] = useState(false);
+  const [attributeId, setAttributeId] = useState("");
 
-  // AI template suggestion state: undefined = not yet run, null = ran with no match, string = matched ID
-  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null | undefined>(undefined);
-  const [isSuggestingTemplate, setIsSuggestingTemplate] = useState(false);
+  // AI Attribute suggestion state: undefined = not yet run, null = ran with no match, string = matched ID
+  const [suggestedAttributeId, setSuggestedAttributeId] = useState<string | null | undefined>(undefined);
+  const [isSuggestingAttribute, setIsSuggestingAttribute] = useState(false);
 
-  // Tracks loading state for the "Save as Template" action
-  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  // Tracks loading state for the "Save as Attribute" action
+  const [isSavingAttribute, setIsSavingAttribute] = useState(false);
 
-  // Controlled select value, reset after each selection so the same template can be applied again
-  const [selectedTemplateValue, setSelectedTemplateValue] = useState<string[]>([]);
+  // Controlled select value, reset after each selection so the same Attribute can be applied again
+  const [selectedAttributeValue, setSelectedAttributeValue] = useState<string[]>([]);
 
   const isNameError = name === "";
   const isDescriptionError = description === "";
   const [isValueError, setIsValueError] = useState(true);
   const isError = isNameError || isDescriptionError || isValueError;
 
-  const [runSuggestTemplate] = useLazyQuery<{ suggestTemplate: string | null }>(SUGGEST_TEMPLATE, {
+  const [runSuggestAttribute] = useLazyQuery<{ suggestAttribute: string | null }>(SUGGEST_ATTRIBUTE, {
     fetchPolicy: "network-only",
   });
 
-  const templatesCollection = useMemo(() => {
-    const items = createSelectOptions<AttributeModel>(props.templates, "_id", "name");
+  const attributesCollection = useMemo(() => {
+    const items = createSelectOptions<AttributeModel>(props.attributes, "_id", "name");
     return createListCollection<ISelectOption>({ items: items || [] });
-  }, [props.templates]);
+  }, [props.attributes]);
 
-  // Run AI suggestion when the dialog opens, if templates are available
+  // Run AI suggestion when the dialog opens, if Attributes are available
   useEffect(() => {
-    if (!globalPermissions.features.ai || !props.open || props.templates.length === 0) return;
+    if (!globalPermissions.features.ai || !props.open || props.attributes.length === 0) return;
 
-    setSuggestedTemplateId(undefined);
-    setIsSuggestingTemplate(true);
+    setSuggestedAttributeId(undefined);
+    setIsSuggestingAttribute(true);
 
     const fetchSuggestion = async () => {
       try {
-        const result = await runSuggestTemplate({
+        const result = await runSuggestAttribute({
           variables: {
             name: props.entityName,
             description: props.entityDescription,
-            templates: props.templates.map((t) => ({ _id: t._id, name: t.name, description: t.description })),
+            attributes: props.attributes.map((a) => ({ _id: a._id, name: a.name, description: a.description })),
           },
         });
-        setSuggestedTemplateId(result.data?.suggestTemplate ?? null);
+        setSuggestedAttributeId(result.data?.suggestAttribute ?? null);
       } catch {
         // Silently ignore, AI may not be configured
       } finally {
-        setIsSuggestingTemplate(false);
+        setIsSuggestingAttribute(false);
       }
     };
 
@@ -120,10 +120,10 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
     setName("");
     setDescription("");
     setValues([]);
-    setUsingTemplate(false);
-    setTemplateId("");
-    setSuggestedTemplateId(undefined);
-    setSelectedTemplateValue([]);
+    setUsingAttribute(false);
+    setAttributeId("");
+    setSuggestedAttributeId(undefined);
+    setSelectedAttributeValue([]);
   };
 
   const handleClose = () => {
@@ -131,19 +131,19 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
     props.onClose();
   };
 
-  const applyTemplate = (id: string) => {
-    const template = props.templates.find((t) => t._id === id);
-    if (!template) return;
-    setUsingTemplate(true);
-    setTemplateId(template._id);
-    setName(template.name);
-    setDescription(template.description);
-    setValues([...template.values]);
+  const applyAttribute = (id: string) => {
+    const attribute = props.attributes.find((t) => t._id === id);
+    if (!attribute) return;
+    setUsingAttribute(true);
+    setAttributeId(attribute._id);
+    setName(attribute.name);
+    setDescription(attribute.description);
+    setValues([...attribute.values]);
   };
 
   const handleAdd = () => {
     const newAttribute: AttributeModel = {
-      _id: usingTemplate ? `${templateId}-${nanoid(6)}` : `a-${nanoid(6)}`,
+      _id: usingAttribute ? `${attributeId}-${nanoid(6)}` : `a-${nanoid(6)}`,
       name,
       owner: props.owner,
       timestamp: dayjs(Date.now()).toISOString(),
@@ -155,13 +155,13 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
     handleClose();
   };
 
-  const handleSaveAsTemplate = async () => {
-    if (!props.onSaveAsTemplate) return;
-    setIsSavingTemplate(true);
+  const handleSaveAsAttribute = async () => {
+    if (!props.onSaveAsAttribute) return;
+    setIsSavingAttribute(true);
     try {
-      await props.onSaveAsTemplate({ name, owner: props.owner, archived: false, description, values });
+      await props.onSaveAsAttribute({ name, owner: props.owner, archived: false, description, values });
     } finally {
-      setIsSavingTemplate(false);
+      setIsSavingAttribute(false);
     }
   };
 
@@ -194,31 +194,31 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
 
             <Dialog.Body p={"2"}>
               <Flex direction={"column"} gap={"2"}>
-                {/* Template selector with AI suggestion */}
+                {/* Attribute selector with AI suggestion */}
                 <Select.Root
-                  key={"select-template"}
+                  key={"select-attribute"}
                   size={SELECT_SIZE}
                   rounded={SELECT_ROUNDED}
                   bg={SELECT_BG}
-                  collection={templatesCollection}
-                  disabled={templatesCollection.items.length === 0 || usingTemplate}
-                  value={selectedTemplateValue}
+                  collection={attributesCollection}
+                  disabled={attributesCollection.items.length === 0 || usingAttribute}
+                  value={selectedAttributeValue}
                   onValueChange={(details) => {
                     const id = details.value[0];
                     if (id && !_.isEqual(id, "")) {
-                      applyTemplate(id);
-                      setSelectedTemplateValue([]);
+                      applyAttribute(id);
+                      setSelectedAttributeValue([]);
                     }
                   }}
                 >
                   <Select.Label fontSize={"xs"} ml={"0.5"}>
                     <Flex direction={"row"} gap={"1"} align={"center"}>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Use Template ({templatesCollection.items.length} available)
+                        Use Attribute ({attributesCollection.items.length} available)
                       </Text>
                       {globalPermissions.features.ai && (
                         <Flex direction={"row"} gap={"1"} align={"center"}>
-                          {isSuggestingTemplate && (
+                          {isSuggestingAttribute && (
                             <React.Fragment>
                               <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
                               <Text fontSize={"xs"} color={"purple.300"}>
@@ -227,7 +227,7 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                             </React.Fragment>
                           )}
 
-                          {!isSuggestingTemplate && suggestedTemplateId && (
+                          {!isSuggestingAttribute && suggestedAttributeId && (
                             <React.Fragment>
                               <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
                               <Text
@@ -235,14 +235,14 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                                 color={"purple.600"}
                                 cursor={"pointer"}
                                 _hover={{ textDecoration: "underline" }}
-                                onClick={() => applyTemplate(suggestedTemplateId)}
+                                onClick={() => applyAttribute(suggestedAttributeId)}
                               >
-                                Suggested: {props.templates.find((t) => t._id === suggestedTemplateId)?.name}
+                                Suggested: {props.attributes.find((t) => t._id === suggestedAttributeId)?.name}
                               </Text>
                             </React.Fragment>
                           )}
 
-                          {!isSuggestingTemplate && suggestedTemplateId === null && (
+                          {!isSuggestingAttribute && suggestedAttributeId === null && (
                             <React.Fragment>
                               <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
                               <Text fontSize={"xs"} color={"text.faint"}>
@@ -258,9 +258,9 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                   <Select.Control>
                     <Select.Trigger rounded={"md"} bg={"white"}>
                       <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Icon name={"template"} size={"xs"} color={STYLES.template.color.light} />
+                        <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.light} />
                         <Text fontSize={"xs"} color={"text.subtle"}>
-                          Select Template
+                          Select Attribute
                         </Text>
                       </Flex>
                     </Select.Trigger>
@@ -271,11 +271,11 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                   <Portal>
                     <Select.Positioner>
                       <Select.Content>
-                        {templatesCollection.items.map((template: ISelectOption) => (
-                          <Select.Item item={template} key={template.value} fontSize={"xs"}>
+                        {attributesCollection.items.map((attribute: ISelectOption) => (
+                          <Select.Item item={attribute} key={attribute.value} fontSize={"xs"}>
                             <Flex direction={"row"} gap={"2"} align={"center"}>
-                              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-                              {template.label}
+                              <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
+                              {attribute.label}
                             </Flex>
                             <Select.ItemIndicator />
                           </Select.Item>
@@ -285,13 +285,13 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                   </Portal>
                 </Select.Root>
 
-                {/* Link back to the base template when one is selected */}
-                {usingTemplate && (
+                {/* Link back to the base Attribute when one is selected */}
+                {usingAttribute && (
                   <Flex direction={"row"} gap={"1"} align={"center"} ml={"0.5"}>
                     <Text fontWeight={"semibold"} fontSize={"xs"}>
-                      Base Template:
+                      Base Attribute:
                     </Text>
-                    <Linky id={templateId} type={"templates"} size={"xs"} />
+                    <Linky id={attributeId} type={"attributes"} size={"xs"} />
                   </Flex>
                 )}
 
@@ -375,18 +375,18 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                   <Icon name={"cross"} size={"xs"} />
                 </Button>
                 <Flex direction={"row"} gap={"2"}>
-                  {props.onSaveAsTemplate && (
+                  {props.onSaveAsAttribute && (
                     <Button
                       variant={"solid"}
                       size={"xs"}
                       rounded={"md"}
                       colorPalette={"green"}
-                      onClick={handleSaveAsTemplate}
-                      disabled={isError || usingTemplate}
-                      loading={isSavingTemplate}
+                      onClick={handleSaveAsAttribute}
+                      disabled={isError || usingAttribute}
+                      loading={isSavingAttribute}
                     >
-                      Save as Template
-                      <Icon name={"template"} size={"xs"} />
+                      Save as Attribute
+                      <Icon name={"attribute"} size={"xs"} />
                     </Button>
                   )}
                   <Button

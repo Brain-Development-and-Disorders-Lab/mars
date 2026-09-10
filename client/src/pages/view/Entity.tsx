@@ -136,8 +136,8 @@ const Entity = () => {
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
 
-  // Templates
-  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+  // Attributes
+  const [attributes, setAttributes] = useState<AttributeModel[]>([]);
 
   // Controls the add-attribute dialog
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
@@ -260,7 +260,7 @@ const Entity = () => {
         _id
         name
       }
-      templates {
+      attributes {
         _id
         name
         description
@@ -291,7 +291,7 @@ const Entity = () => {
   const { loading, error, data, refetch } = useQuery<{
     entity: EntityModel;
     projects: IGenericItem[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
     workspace: WorkspaceModel;
     identifierFormats: IdentifierFormatModel[];
   }>(GET_ENTITY, {
@@ -323,18 +323,18 @@ const Entity = () => {
     createEntity: ResponseData<string>;
   }>(CREATE_ENTITY);
 
-  // Query to create a template Template
-  const CREATE_TEMPLATE = gql`
-    mutation CreateTemplate($template: AttributeCreateInput) {
-      createTemplate(template: $template) {
+  // Query to create an Attribute
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
         success
         message
       }
     }
   `;
-  const [createTemplate, { error: errorTemplateCreate }] = useMutation<{
-    createTemplate: ResponseData<string>;
-  }>(CREATE_TEMPLATE);
+  const [createAttribute, { error: errorAttributeCreate }] = useMutation<{
+    createAttribute: ResponseData<string>;
+  }>(CREATE_ATTRIBUTE);
 
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
@@ -391,9 +391,9 @@ const Entity = () => {
       setClonedEntityName(`${data.entity.name} (cloned)`);
     }
 
-    // Unpack Template data
-    if (data?.templates) {
-      setTemplates(data.templates);
+    // Unpack Attribute data
+    if (data?.attributes) {
+      setAttributes(data.attributes);
     }
 
     // Store Workspace information
@@ -479,25 +479,25 @@ const Entity = () => {
   };
 
   /**
-   * Saves the current attribute form as a reusable Template.
-   * Called from the add-attribute dialog when the user clicks "Save as Template".
+   * Saves the current attribute form as a reusable Attribute.
+   * Called from the add-attribute dialog when the user clicks "Save as Attribute".
    */
-  const onSaveAsTemplate = async (attributeData: IAttribute) => {
-    const response = await createTemplate({
-      variables: { template: attributeData },
+  const onSaveAsAttribute = async (attributeData: IAttribute) => {
+    const response = await createAttribute({
+      variables: { attribute: attributeData },
     });
 
-    if (errorTemplateCreate || !response.data?.createTemplate) {
+    if (errorAttributeCreate || !response.data?.createAttribute) {
       toaster.create({
         title: "Error",
-        description: errorTemplateCreate?.message || "Unable to save Template",
+        description: errorAttributeCreate?.message || "Unable to save Attribute",
         type: "error",
         duration: 4000,
         closable: true,
       });
-    } else if (response.data.createTemplate.success) {
+    } else if (response.data.createAttribute.success) {
       toaster.create({ title: "Saved!", type: "success", duration: 2000, closable: true });
-      setTemplates([...templates, attributeData as AttributeModel]);
+      setAttributes([...attributes, attributeData as AttributeModel]);
     }
   };
 
@@ -1180,9 +1180,9 @@ const Entity = () => {
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             <EntityAttributesTable
               attributes={displayEntityAttributes}
+              availableAttributes={attributes}
               editing={editing && !previewVersion}
               entityName={entityName}
-              templates={templates}
               onUpdate={onAttributeUpdate}
               onRemove={removeAttribute}
               onAddClick={() => setAddAttributesOpen(true)}
@@ -1255,14 +1255,14 @@ const Entity = () => {
 
         {/* Add Attributes dialog */}
         <DialogAddAttribute
+          attributes={attributes}
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
           owner={user}
-          templates={templates}
           entityName={entityName}
           entityDescription={entityDescription}
           onAdd={(attribute) => setEntityAttributes([...entityAttributes, attribute])}
-          onSaveAsTemplate={onSaveAsTemplate}
+          onSaveAsAttribute={onSaveAsAttribute}
         />
 
         {/* Add Projects dialog */}

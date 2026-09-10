@@ -1,5 +1,5 @@
 // Test helper functions
-import { createTestEntity, createTestProject, createTestTemplate } from "../helpers/global.helpers";
+import { createTestAttribute, createTestEntity, createTestProject } from "../helpers/global.helpers";
 import {
   clientPathArchive,
   clientPathDisabled,
@@ -184,33 +184,33 @@ test.describe("Project permissions", () => {
   });
 });
 
-test.describe("Template permissions", () => {
-  test("Create Templates", async ({ context, page, collaboratorPage }) => {
-    const { workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Template-Create");
+test.describe("Attribute permissions", () => {
+  test("Create Attributes", async ({ context, page, collaboratorPage }) => {
+    const { workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Attribute-Create");
 
     const clientPaths: ClientPath[] = [
-      clientPathDisabled("Templates list button", "/templates", (p) =>
-        p.getByRole("button", { name: "Create Template", exact: true }),
+      clientPathDisabled("Attributes list button", "/attributes", (p) =>
+        p.getByRole("button", { name: "Create Attribute", exact: true }),
       ),
-      clientPathDisabledInCreateDialog("Create dialog Template button", "/templates", (p) =>
-        p.locator("#createTemplateButton"),
+      clientPathDisabledInCreateDialog("Create dialog Attribute button", "/attributes", (p) =>
+        p.locator("#createAttributeButton"),
       ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
     await toggleManageWorkspace(page, "edit");
-    await toggleCollaboratorPermission(page, "Create Templates");
+    await toggleCollaboratorPermission(page, "Create Attributes");
     await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
-  test("Edit Templates", async ({ context, page, collaboratorPage }) => {
-    const { owner, workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Template-Edit");
-    const templateId = await createTestTemplate("Permission Test Template", owner, workspaceId);
+  test("Edit Attributes", async ({ context, page, collaboratorPage }) => {
+    const { owner, workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Attribute-Edit");
+    const attributeId = await createTestAttribute("Permission Test Attribute", owner, workspaceId);
 
     const clientPaths: ClientPath[] = [
-      clientPathDisabled("Template view Edit button", `/templates/${templateId}`, (p) =>
+      clientPathDisabled("Attribute view Edit button", `/attributes/${attributeId}`, (p) =>
         p.getByRole("button", { name: "Edit", exact: true }),
       ),
     ];
@@ -218,31 +218,31 @@ test.describe("Template permissions", () => {
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
     await toggleManageWorkspace(page, "edit");
-    await toggleCollaboratorPermission(page, "Edit Templates");
+    await toggleCollaboratorPermission(page, "Edit Attributes");
     await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });
 
-  test("Archive Templates", async ({ context, page, collaboratorPage }) => {
-    const { owner, workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Template-Archive");
-    const templateId = await createTestTemplate("Permission Test Template", owner, workspaceId);
-    await createTestTemplate("Permission Test Archived Template", owner, workspaceId, true);
+  test("Archive Attributes", async ({ context, page, collaboratorPage }) => {
+    const { owner, workspaceId } = await setupDefaultPermissions(context, collaboratorPage, "Perm-Attribute-Archive");
+    const attributeId = await createTestAttribute("Permission Test Attribute", owner, workspaceId);
+    await createTestAttribute("Permission Test Archived Attribute", owner, workspaceId, true);
     const workspacePath = `/workspaces/${workspaceId}`;
 
     const clientPaths: ClientPath[] = [
-      clientPathArchive("Template view Archive menu item", `/templates/${templateId}`),
+      clientPathArchive("Attribute view Archive menu item", `/attributes/${attributeId}`),
       clientPathEditingDisabled(
-        "Workspace archived Templates restore button",
+        "Workspace archived Attributes restore button",
         workspacePath,
-        (p) => p.getByRole("button", { name: "Restore Template", exact: true }),
-        "Archived Templates",
+        (p) => p.getByRole("button", { name: "Restore Attribute", exact: true }),
+        "Archived Attributes",
       ),
     ];
 
     await verifyClientPaths(collaboratorPage, clientPaths, false);
     await openManageWorkspace(page, workspaceId);
     await toggleManageWorkspace(page, "edit");
-    await toggleCollaboratorPermission(page, "Archive Templates");
+    await toggleCollaboratorPermission(page, "Archive Attributes");
     await toggleManageWorkspace(page, "save");
     await verifyClientPaths(collaboratorPage, clientPaths, true);
   });

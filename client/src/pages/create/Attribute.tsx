@@ -49,7 +49,7 @@ import { usePostHog } from "posthog-js/react";
 // Variables
 import { STYLES } from "@variables";
 
-const Template = () => {
+const Attribute = () => {
   const posthog = usePostHog();
 
   // Permissions
@@ -68,7 +68,11 @@ const Template = () => {
 
   useEffect(() => {
     // If the User does not have Workspace permissions, direct to `/unauthorized`
-    if (!permissionsLoading && !workspacePermissions.templates.create && window.location.pathname !== "/unauthorized") {
+    if (
+      !permissionsLoading &&
+      !workspacePermissions.attributes.create &&
+      window.location.pathname !== "/unauthorized"
+    ) {
       window.location.href = "/unauthorized";
     }
   }, []);
@@ -94,22 +98,22 @@ const Template = () => {
   }, [values]);
 
   useEffect(() => {
-    posthog?.capture("client.create.template_start");
+    posthog?.capture("client.create.attribute_start");
   }, [posthog]);
 
-  const templateData: IAttribute = { name, owner, archived: false, description, values };
+  const attributeData: IAttribute = { name, owner, archived: false, description, values };
 
-  const CREATE_TEMPLATE = gql`
-    mutation CreateTemplate($template: AttributeCreateInput) {
-      createTemplate(template: $template) {
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
         success
         message
       }
     }
   `;
-  const [createTemplate, { loading, error }] = useMutation<{
-    createTemplate: ResponseData<string>;
-  }>(CREATE_TEMPLATE);
+  const [createAttribute, { loading, error }] = useMutation<{
+    createAttribute: ResponseData<string>;
+  }>(CREATE_ATTRIBUTE);
 
   const navigate = useNavigate();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
@@ -122,22 +126,22 @@ const Template = () => {
   const cancelBlockerRef = useRef(null);
 
   const onSubmit = async () => {
-    posthog?.capture("client.create.template_finish");
+    posthog?.capture("client.create.attribute_finish");
     setIsSubmitting(true);
-    const response = await createTemplate({ variables: { template: templateData } });
+    const response = await createAttribute({ variables: { attribute: attributeData } });
 
-    if (!response.data?.createTemplate?.success) {
+    if (!response.data?.createAttribute?.success) {
       toaster.create({
         title: "Error",
-        description: "An error occurred when creating Template",
+        description: "An error occurred when creating Attribute",
         type: "error",
         duration: 2000,
         closable: true,
       });
     } else {
-      toaster.create({ title: "Template created successfully", type: "success", duration: 2000, closable: true });
+      toaster.create({ title: "Attribute created successfully", type: "success", duration: 2000, closable: true });
       setIsSubmitting(false);
-      navigate("/templates");
+      navigate("/attributes");
     }
   };
 
@@ -152,8 +156,8 @@ const Template = () => {
       <Flex direction={"column"}>
         {/* Page header */}
         <Flex direction={"row"} p={"1"} align={"center"} gap={"1"} ml={"0.5"}>
-          <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
-          <Heading size={"md"}>Create Template</Heading>
+          <Icon name={"attribute"} size={"sm"} color={STYLES.attribute.color.icon} />
+          <Heading size={"md"}>Create Attribute</Heading>
           <Spacer />
           <Button size={"xs"} rounded={"md"} variant={"outline"} onClick={() => setInformationOpen(true)}>
             Info
@@ -187,7 +191,7 @@ const Template = () => {
                 onChange={(event) => setName(event.target.value)}
               />
               {isNameError && (
-                <Field.ErrorText fontSize={"xs"}>A name must be specified for the Template.</Field.ErrorText>
+                <Field.ErrorText fontSize={"xs"}>A name must be specified for the Attribute.</Field.ErrorText>
               )}
             </Field.Root>
 
@@ -232,7 +236,7 @@ const Template = () => {
                 <Field.RequiredIndicator />
               </Field.Label>
               <Textarea
-                data-testid={"create-template-description"}
+                data-testid={"create-attribute-description"}
                 value={description}
                 size={"xs"}
                 h={"100%"}
@@ -282,20 +286,20 @@ const Template = () => {
                 size={"2xs"}
                 top={"6px"}
                 onClick={() => setInformationOpen(false)}
-                colorPalette={"template"}
+                colorPalette={"attribute"}
               />
             </Dialog.CloseTrigger>
             <Dialog.Header
               p={"2"}
               fontWeight={"semibold"}
               fontSize={"xs"}
-              bg={"template.light"}
-              color={"template.dark"}
+              bg={"attribute.light"}
+              color={"attribute.dark"}
               roundedTop={"md"}
             >
               <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-                Template Attributes
+                <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
+                Attributes
               </Flex>
             </Dialog.Header>
             <Dialog.Body p={"2"}>
@@ -312,12 +316,12 @@ const Template = () => {
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Icon name={"info"} size={"xs"} color={"text.subtle"} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-                      What is a Template?
+                      What is an Attribute?
                     </Text>
                   </Flex>
                   <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} lineHeight={"tall"}>
-                    Templates define a set of metadata fields that can be applied to Entities during creation. Use them
-                    to pre-populate Attributes and keep metadata consistent across similar Entities.
+                    Attributes define a set of metadata fields that can be applied to Entities during creation. Use them
+                    with pre-populated Values to keep metadata consistent across similar Entities.
                   </Text>
                 </Flex>
 
@@ -448,7 +452,7 @@ const Template = () => {
                       flex={"1"}
                       minW={"200px"}
                     >
-                      <Icon name={"v_select"} color={"template.default"} size={"sm"} />
+                      <Icon name={"v_select"} color={"attribute.default"} size={"sm"} />
                       <Flex direction={"column"} gap={"0"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
                           Select
@@ -475,7 +479,7 @@ const Template = () => {
           rounded={"md"}
           colorPalette={"red"}
           variant={"solid"}
-          onClick={() => navigate("/templates")}
+          onClick={() => navigate("/attributes")}
         >
           Cancel
           <Icon name={"cross"} size={"xs"} />
@@ -483,7 +487,7 @@ const Template = () => {
         <Spacer />
         <Tooltip
           content={"Insufficient permissions in this Workspace"}
-          disabled={workspacePermissions.templates.create}
+          disabled={workspacePermissions.attributes.create}
           showArrow
         >
           <Button
@@ -491,7 +495,7 @@ const Template = () => {
             rounded={"md"}
             colorPalette={"green"}
             onClick={onSubmit}
-            disabled={isDetailsError || isValueError || isSubmitting || !workspacePermissions.templates.create}
+            disabled={isDetailsError || isValueError || isSubmitting || !workspacePermissions.attributes.create}
           >
             Finish
             <Icon name={"check"} size={"xs"} />
@@ -509,4 +513,4 @@ const Template = () => {
   );
 };
 
-export default Template;
+export default Attribute;

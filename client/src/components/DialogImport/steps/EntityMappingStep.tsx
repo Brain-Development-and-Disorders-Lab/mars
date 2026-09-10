@@ -29,7 +29,7 @@ const AttributeNameCell = ({ attribute, fileType, columns, onRemove, onUpdate }:
   return (
     <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"} w={"100%"}>
       <Flex direction={"row"} gap={"1"} ml={"1"}>
-        <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+        <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
         <Text fontSize={"xs"} fontWeight={"semibold"} color={attribute.name !== "" ? "black" : "gray.400"}>
           {attribute.name !== "" ? attribute.name : "Unnamed"}
         </Text>
@@ -76,7 +76,7 @@ const EntityMappingStep = ({
   addAttributeOpen,
   onAddAttributeOpenChange,
   ownerField,
-  templates,
+  attributes,
   fileType,
   columns,
 }: EntityMappingStepProps) => {
@@ -147,7 +147,7 @@ const EntityMappingStep = ({
       <Flex direction={"row"} align={"center"} justify={"space-between"}>
         <Flex direction={"column"} gap={"1"} ml={"0.5"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+            <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
             <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
               Attributes
             </Text>
@@ -167,7 +167,7 @@ const EntityMappingStep = ({
           <EmptyState.Root>
             <EmptyState.Content>
               <EmptyState.Indicator>
-                <Icon name={"attribute"} size={"lg"} color={STYLES.template.color.light} />
+                <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.light} />
               </EmptyState.Indicator>
               <EmptyState.Description>No Attributes added</EmptyState.Description>
             </EmptyState.Content>
@@ -179,7 +179,7 @@ const EntityMappingStep = ({
         open={addAttributeOpen}
         onClose={() => onAddAttributeOpenChange(false)}
         owner={ownerField}
-        templates={templates}
+        attributes={attributes}
         entityName={""}
         entityDescription={""}
         permittedDataValues={isSpreadsheetFile(fileType) ? columns : undefined}

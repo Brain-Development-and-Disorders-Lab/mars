@@ -9,7 +9,7 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { TemplateImportReview, TemplateReviewStepProps } from "@types";
+import { AttributeImportReview, AttributeReviewStepProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -17,14 +17,14 @@ import _ from "lodash";
 // Variables
 import { STYLES } from "@variables";
 
-const templateReviewTableColumnHelper = createColumnHelper<TemplateImportReview>();
-const templateReviewTableColumns = [
-  templateReviewTableColumnHelper.accessor("name", {
+const attributeReviewTableColumnHelper = createColumnHelper<AttributeImportReview>();
+const attributeReviewTableColumns = [
+  attributeReviewTableColumnHelper.accessor("name", {
     cell: (info) => (
       <Flex>
         <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
           <Flex direction={"row"} gap={"1"} ml={"1"}>
-            <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+            <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
             <Text fontSize={"xs"} fontWeight={"semibold"}>
               {_.truncate(info.getValue(), { length: 30 })}
             </Text>
@@ -32,9 +32,9 @@ const templateReviewTableColumns = [
         </Tooltip>
       </Flex>
     ),
-    header: "Template Name",
+    header: "Attribute Name",
   }),
-  templateReviewTableColumnHelper.accessor("state", {
+  attributeReviewTableColumnHelper.accessor("state", {
     cell: (info) => (
       <Flex direction={"row"} gap={"1"} align={"center"} p={"1"}>
         <Icon
@@ -51,7 +51,7 @@ const templateReviewTableColumns = [
   }),
 ];
 
-const TemplateReviewStep = ({ reviewTemplates }: TemplateReviewStepProps) => (
+const AttributeReviewStep = ({ reviewAttributes }: AttributeReviewStepProps) => (
   <Flex w={"100%"} direction={"column"} gap={"2"} rounded={"md"} mt={"2"}>
     <Flex
       direction={"row"}
@@ -59,23 +59,23 @@ const TemplateReviewStep = ({ reviewTemplates }: TemplateReviewStepProps) => (
       p={"2"}
       align={"center"}
       rounded={"md"}
-      bg={STYLES.template.color.light}
+      bg={STYLES.attribute.color.light}
       border={"1px solid"}
-      borderColor={STYLES.template.color.border}
+      borderColor={STYLES.attribute.color.border}
     >
-      <Icon name={"template"} size={"sm"} color={STYLES.template.color.icon} />
+      <Icon name={"attribute"} size={"sm"} color={STYLES.attribute.color.icon} />
       <Flex direction={"column"} gap={"0.5"}>
         <Text fontSize={"xs"} fontWeight={"bold"}>
-          Reviewing {reviewTemplates.length} {reviewTemplates.length === 1 ? "Template" : "Templates"}
+          Reviewing {reviewAttributes.length} {reviewAttributes.length === 1 ? "Attribute" : "Attributes"}
         </Text>
         <Text fontSize={"xs"} color={"text.subtle"}>
-          Existing Templates will be updated, new Templates will be created.
+          Existing Attributes will be updated, new Attributes will be created.
         </Text>
       </Flex>
     </Flex>
     <DataTable
-      columns={templateReviewTableColumns}
-      data={reviewTemplates}
+      columns={attributeReviewTableColumns}
+      data={reviewAttributes}
       visibleColumns={{}}
       selectedRows={{}}
       showPagination
@@ -83,4 +83,4 @@ const TemplateReviewStep = ({ reviewTemplates }: TemplateReviewStepProps) => (
   </Flex>
 );
 
-export default TemplateReviewStep;
+export default AttributeReviewStep;

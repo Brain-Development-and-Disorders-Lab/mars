@@ -14,10 +14,10 @@ import { downloadSampleFile, getFileExtension } from "@lib/util";
 import _ from "lodash";
 
 // Variables
-import { ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_TEMPLATES, STYLES } from "@variables";
+import { ACCEPTED_IMPORTS_ENTITIES, ACCEPTED_IMPORTS_ATTRIBUTES, STYLES } from "@variables";
 
 // Minimal valid example files
-const SAMPLE_FILES: Record<"entities" | "template", SampleFile[]> = {
+const SAMPLE_FILES: Record<"entities" | "attribute", SampleFile[]> = {
   entities: [
     {
       label: "CSV",
@@ -55,15 +55,15 @@ const SAMPLE_FILES: Record<"entities" | "template", SampleFile[]> = {
       ),
     },
   ],
-  template: [
+  attribute: [
     {
       label: "JSON",
-      filename: "sample-template.json",
+      filename: "sample-attribute.json",
       mimeType: "application/json",
       content: JSON.stringify(
         {
-          name: "Sample Template",
-          description: "An example Template created from a JSON import",
+          name: "Sample Attribute",
+          description: "An example Attribute created from a JSON import",
           archived: false,
           values: [{ _id: "value-001", name: "Example Value", type: "text", data: "" }],
         },
@@ -82,7 +82,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
         File Contents
       </Text>
       <Flex gap={"2"}>
-        {(["entities", "template"] as const).map((type) => (
+        {(["entities", "attribute"] as const).map((type) => (
           <Button
             key={type}
             size={"xs"}
@@ -94,7 +94,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
             disabled={isTypeSelectDisabled}
             data-testid={`import-type-select-trigger-${type}`}
           >
-            <Icon name={type === "entities" ? "entity" : "template"} size={"xs"} />
+            <Icon name={type === "entities" ? "entity" : "attribute"} size={"xs"} />
             {_.capitalize(type)}
           </Button>
         ))}
@@ -115,7 +115,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
                     <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                       <Flex direction={"row"} align={"center"} justify={"center"} gap={"2"}>
                         <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.light} />
-                        <Icon name={"template"} size={"lg"} color={STYLES.template.color.light} />
+                        <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.light} />
                       </Flex>
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         Select File Contents
@@ -127,9 +127,9 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
                   {fileUpload.acceptedFiles.length === 0 && !_.isUndefined(importType) && (
                     <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                       <Icon
-                        name={importType === "entities" ? "entity" : "template"}
+                        name={importType === "entities" ? "entity" : "attribute"}
                         size={"lg"}
-                        color={importType === "entities" ? STYLES.entity.color.light : STYLES.template.color.light}
+                        color={importType === "entities" ? STYLES.entity.color.light : STYLES.attribute.color.light}
                       />
                       <Flex direction={"column"} gap={"1"} justify={"center"} align={"center"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
@@ -140,7 +140,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
                         </Text>
                         <Flex direction={"row"} gap={"1"} mt={"1"}>
                           <Flex direction={"row"} gap={"1"} mt={"1"}>
-                            {(importType === "entities" ? ACCEPTED_IMPORTS_ENTITIES : ACCEPTED_IMPORTS_TEMPLATES).map(
+                            {(importType === "entities" ? ACCEPTED_IMPORTS_ENTITIES : ACCEPTED_IMPORTS_ATTRIBUTES).map(
                               (format) => {
                                 return (
                                   <Tag.Root
@@ -164,9 +164,9 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
                   {fileUpload.acceptedFiles.length > 0 && !_.isUndefined(importType) && (
                     <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                       <Icon
-                        name={importType === "entities" ? "entity" : "template"}
+                        name={importType === "entities" ? "entity" : "attribute"}
                         size={"xl"}
-                        color={importType === "entities" ? STYLES.entity.color.light : STYLES.template.color.light}
+                        color={importType === "entities" ? STYLES.entity.color.light : STYLES.attribute.color.light}
                       />
                       <Text fontSize={"xs"} fontWeight={"semibold"}>
                         {fileUpload.acceptedFiles.length > 0 && fileUpload.acceptedFiles[0].name}
