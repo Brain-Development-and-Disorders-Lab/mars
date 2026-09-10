@@ -27,7 +27,7 @@ test.describe("Entity", () => {
       await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for navigation.");
 
       await page.click("[data-testid='create-entity-continue']");
-      await expect(page.locator("text=No Relationships")).toBeVisible();
+      await expect(page.locator("text=No Links")).toBeVisible();
 
       // Back navigation must restore the form state
       await page.click("[data-testid='create-entity-back']");
@@ -35,13 +35,13 @@ test.describe("Entity", () => {
       await expect(page.locator("[data-testid='create-entity-name']")).toHaveValue(entityName);
 
       await page.click("[data-testid='create-entity-continue']");
-      await expect(page.locator("text=No Relationships")).toBeVisible();
+      await expect(page.locator("text=No Links")).toBeVisible();
 
       await page.click("[data-testid='create-entity-continue']");
       await expect(page.locator("text=No Attributes")).toBeVisible();
 
       await page.click("[data-testid='create-entity-back']");
-      await expect(page.locator("text=No Relationships")).toBeVisible();
+      await expect(page.locator("text=No Links")).toBeVisible();
     });
 
     test("should complete Entity creation", async ({ page }) => {

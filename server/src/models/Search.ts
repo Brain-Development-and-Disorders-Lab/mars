@@ -33,7 +33,7 @@ export class Search {
           owners?: string[];
           hasAttachments?: boolean;
           hasAttributes?: boolean;
-          hasRelationships?: boolean;
+          hasLinks?: boolean;
           attributeCountRanges?: string[];
         }
       | undefined,
@@ -94,7 +94,7 @@ export class Search {
           { _id: { $regex: expression } },
           { name: { $regex: expression } },
           { description: { $regex: expression } },
-          { "relationships.target.name": { $regex: expression } },
+          { "links.target.name": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.values": { $regex: expression } },
@@ -158,9 +158,9 @@ export class Search {
           filteredResults = filteredResults.filter((entity) => entity.attributes && entity.attributes.length > 0);
         }
 
-        // Has relationships
-        if (filters.hasRelationships === true) {
-          filteredResults = filteredResults.filter((entity) => entity.relationships && entity.relationships.length > 0);
+        // Has links
+        if (filters.hasLinks === true) {
+          filteredResults = filteredResults.filter((entity) => entity.links && entity.links.length > 0);
         }
       }
 

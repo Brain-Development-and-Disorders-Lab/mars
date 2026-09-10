@@ -52,7 +52,7 @@ Only the following fields may be queried. Never invent field names.
 - description: string
 - archived: boolean
 - projects: string[] (project IDs)
-- relationships[].target.name: string
+- links[].target.name: string
 - attributes[].name: string
 - attributes[].values[].type: string
 - attributes[].values[].data: string
@@ -118,14 +118,14 @@ Description:
 
 → description
 
-Relationship:
+Link:
 
 - related to
 - connected to
 - linked to
 - associated with
 
-→ relationships.target.name
+→ links.target.name
 
 Attribute name:
 
@@ -153,7 +153,7 @@ Search these fields:
 
 - name
 - description
-- relationships.target.name
+- links.target.name
 - attributes.name
 - attributes.values.data
 
@@ -165,7 +165,7 @@ Example:
   "$or": [
     {"name":{"$regex":"/cancer/i"}},
     {"description":{"$regex":"/cancer/i"}},
-    {"relationships.target.name":{"$regex":"/cancer/i"}},
+    {"links.target.name":{"$regex":"/cancer/i"}},
     {"attributes.name":{"$regex":"/cancer/i"}},
     {"attributes.values.data":{"$regex":"/cancer/i"}}
   ]

@@ -27,7 +27,7 @@ export const SearchResolvers = {
           owners?: string[];
           hasAttachments?: boolean;
           hasAttributes?: boolean;
-          hasRelationships?: boolean;
+          hasLinks?: boolean;
           attributeCountRanges?: string[];
         };
       },

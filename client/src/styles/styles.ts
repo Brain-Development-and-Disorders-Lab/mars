@@ -133,7 +133,7 @@ export const STYLES = {
       default: "#4F83F1",
     },
   },
-  relationship: {
+  link: {
     parent: "#4F83F1",
     child: "#2FBF9D",
     general: "#8A63E8",

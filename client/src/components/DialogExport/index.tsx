@@ -10,7 +10,7 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
-import { AttributeModel, DialogExportProps, IRelationship } from "@types";
+import { AttributeModel, DialogExportProps, ILink } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -53,7 +53,7 @@ const GET_ENTITY_FOR_EXPORT = gql`
       created
       description
       projects
-      relationships {
+      links {
         source {
           _id
           name
@@ -173,7 +173,7 @@ const DialogExport = (props: DialogExportProps) => {
       created: string;
       description: string;
       projects: string[];
-      relationships: IRelationship[];
+      links: ILink[];
       attributes: AttributeModel[];
     };
   }>(GET_ENTITY_FOR_EXPORT);
@@ -508,26 +508,23 @@ const DialogExport = (props: DialogExportProps) => {
                       </Flex>
                     </Flex>
 
-                    {/* Relationships */}
-                    {entity.relationships.length > 0 && (
+                    {/* Links */}
+                    {entity.links.length > 0 && (
                       <Flex direction={"column"} gap={"1"}>
                         <Text fontSize={"xs"} fontWeight={"semibold"}>
-                          Relationships
+                          Links
                         </Text>
                         <Stack gap={"1"} direction={"column"}>
-                          {entity.relationships.map((relationship) => (
+                          {entity.links.map((link) => (
                             <Checkbox.Root
                               size={"xs"}
-                              key={`${relationship.target._id}_${relationship.type}`}
-                              checked={_.includes(
-                                exportFields,
-                                `relationship_${relationship.target._id}_${relationship.type}`,
-                              )}
+                              key={`${link.target._id}_${link.type}`}
+                              checked={_.includes(exportFields, `link_${link.target._id}_${link.type}`)}
                               onCheckedChange={(details) =>
                                 setExportFields(
                                   toggleField(
                                     exportFields,
-                                    `relationship_${relationship.target._id}_${relationship.type}`,
+                                    `link_${link.target._id}_${link.type}`,
                                     details.checked as boolean,
                                   ),
                                 )
@@ -538,11 +535,9 @@ const DialogExport = (props: DialogExportProps) => {
                               <Checkbox.Label>
                                 <Flex direction={"row"} gap={"1"} align={"center"}>
                                   <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {relationship.type === "general"
-                                      ? "Related to:"
-                                      : `${_.capitalize(relationship.type)} of:`}
+                                    {link.type === "general" ? "Related to:" : `${_.capitalize(link.type)} of:`}
                                   </Text>
-                                  <Linky id={relationship.target._id} type={"entities"} size={"xs"} />
+                                  <Linky id={link.target._id} type={"entities"} size={"xs"} />
                                 </Flex>
                               </Checkbox.Label>
                             </Checkbox.Root>

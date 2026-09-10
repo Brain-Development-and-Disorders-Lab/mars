@@ -339,15 +339,15 @@ export const typedefs = `#graphql
     values: [ValueInput]
   }
 
-  # Representation of an Entity relationship
-  type Relationship {
+  # Representation of an Entity link
+  type Link {
     source: Item
     target: Item
     type: String
   }
 
-  # Input representation of an Entity relationship
-  input RelationshipInput {
+  # Input representation of an Entity link
+  input LinkInput {
     source: ItemInput
     target: ItemInput
     type: String
@@ -376,7 +376,7 @@ export const typedefs = `#graphql
     owner: String
     description: String
     projects: [String]
-    relationships: [Relationship]
+    links: [Link]
     attachments: [Item]
     attributes: [Attribute]
     history: [EntityHistory]
@@ -391,7 +391,7 @@ export const typedefs = `#graphql
     owner: String!
     description: String!
     projects: [String]!
-    relationships: [RelationshipInput]!
+    links: [LinkInput]!
     attachments: [ItemInput]!
     attributes: [AttributeInput]!
   }
@@ -407,7 +407,7 @@ export const typedefs = `#graphql
     owner: String
     description: String
     projects: [String]
-    relationships: [RelationshipInput]!
+    links: [LinkInput]!
     attachments: [ItemInput]
     attributes: [AttributeInput]
   }
@@ -427,7 +427,7 @@ export const typedefs = `#graphql
     created: String
     description: String
     projects: [String]
-    relationships: [Relationship]
+    links: [Link]
     attachments: [Item]
     attributes: [Attribute]
   }
@@ -652,7 +652,7 @@ export const typedefs = `#graphql
     owners: [String]
     hasAttachments: Boolean
     hasAttributes: Boolean
-    hasRelationships: Boolean
+    hasLinks: Boolean
     attributeCountRanges: [String]
   }
 

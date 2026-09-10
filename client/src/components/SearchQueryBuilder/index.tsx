@@ -26,12 +26,12 @@ import { nanoid } from "nanoid";
 import { STYLES } from "@variables";
 
 const FIELDS = createListCollection({
-  items: ["name", "description", "projects", "relationships", "attributes"],
+  items: ["name", "description", "projects", "links", "attributes"],
 });
 
 const TEXT_OPERATORS = createListCollection({ items: ["contains", "does not contain"] });
 const PROJECT_OPERATORS = createListCollection({ items: ["member of", "not member of"] });
-const RELATIONSHIP_OPERATORS = createListCollection({
+const LINKS_OPERATORS = createListCollection({
   items: ["is related to", "is not related to", "is parent of", "is child of"],
 });
 const ATTR_VALUE_TYPES = createListCollection({ items: ["text", "url", "number", "date"] });
@@ -42,7 +42,7 @@ const FIELD_OPERATORS_MAP: Record<string, ListCollection<string>> = {
   name: TEXT_OPERATORS,
   description: TEXT_OPERATORS,
   projects: PROJECT_OPERATORS,
-  relationships: RELATIONSHIP_OPERATORS,
+  links: LINKS_OPERATORS,
   attributes: TEXT_OPERATORS,
 };
 
@@ -50,7 +50,7 @@ const DEFAULT_OPERATORS: Record<SearchField, string> = {
   name: "contains",
   description: "contains",
   projects: "member of",
-  relationships: "is related to",
+  links: "is related to",
   attributes: "contains",
 };
 
@@ -188,7 +188,7 @@ const RuleRow = React.memo(
             />
           )}
 
-          {rule.field === "relationships" && (
+          {rule.field === "links" && (
             <SelectSearch
               value={localSelected}
               resultType={"entity"}
@@ -267,8 +267,8 @@ const RuleRow = React.memo(
 );
 
 /**
- * Bespoke MongoDB query builder supporting name, description, project membership,
- * entity relationships, and typed attribute value matching.
+ * Bespoke MongoDB query builder supporting name, description, Project membership,
+ * Entity links, and typed attribute value matching.
  * @param {SearchQuery} query
  */
 const SearchQueryBuilder = ({ query, onQueryChange, isValid, onSearch, onClear }: SearchQueryBuilderProps) => {

@@ -23,15 +23,15 @@ import {
 import { Content } from "@components/Container";
 import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";
-import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import DialogUpload from "@components/DialogUpload";
 import DialogAddAttribute from "@components/DialogAddAttribute";
 import SelectSearch from "@components/SelectSearch";
 import DialogAlert from "@components/DialogAlert";
-import DialogAddRelationship from "@components/DialogAddRelationship";
-import Relationships from "@components/Relationships";
+import DialogAddLinks from "@components/DialogAddLinks";
+import Links from "@components/Links";
+import LinksGraph from "@components/LinksGraph";
 import EntityBreadcrumb from "@components/EntityBreadcrumb";
 import EntityOverviewCard from "@components/EntityOverviewCard";
 import EntityAttributesTable from "@components/EntityAttributesTable";
@@ -50,7 +50,7 @@ import {
   IAttribute,
   IdentifierFormatModel,
   IGenericItem,
-  IRelationship,
+  ILink,
   ResponseData,
   WorkspaceModel,
 } from "@types";
@@ -114,8 +114,8 @@ const Entity = () => {
   const [selectedProject, setSelectedProject] = useState({} as IGenericItem);
   const [selectedProjects, setSelectedProjects] = useState<IGenericItem[]>([]);
 
-  // Add relationships dialog
-  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
+  // Add Links dialog
+  const [addLinksOpen, setAddLinksOpen] = useState(false);
 
   // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -184,7 +184,7 @@ const Entity = () => {
           value
           format
         }
-        relationships {
+        links {
           source {
             _id
             name
@@ -227,7 +227,7 @@ const Entity = () => {
             value
             format
           }
-          relationships {
+          links {
             source {
               _id
               name
@@ -377,7 +377,7 @@ const Entity = () => {
         setEntityArchived(data.entity.archived);
         setEntityDescription(data.entity.description || "");
         setEntityProjects(data.entity.projects || []);
-        setEntityRelationships(data.entity.relationships || []);
+        setEntityLinks(data.entity.links || []);
         setEntityAttributes(data.entity.attributes || []);
         setShowSecondaryIdentifier(!!data.entity.secondaryIdentifier?.value);
         setSecondaryIdentifier(data.entity.secondaryIdentifier?.value || "");
@@ -506,7 +506,7 @@ const Entity = () => {
   const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState<string[]>([]);
-  const [entityRelationships, setEntityRelationships] = useState<IRelationship[]>([]);
+  const [entityLinks, setEntityLinks] = useState<ILink[]>([]);
   const [entityAttributes, setEntityAttributes] = useState<AttributeModel[]>([]);
   const [entityHistory, setEntityHistory] = useState<EntityHistory[]>([]);
 
@@ -526,9 +526,9 @@ const Entity = () => {
     return previewVersion ? previewVersion.projects : entityProjects;
   }, [previewVersion, entityProjects]);
 
-  const displayEntityRelationships = useMemo(() => {
-    return previewVersion ? previewVersion.relationships : entityRelationships;
-  }, [previewVersion, entityRelationships]);
+  const displayEntityLinks = useMemo(() => {
+    return previewVersion ? previewVersion.links : entityLinks;
+  }, [previewVersion, entityLinks]);
 
   const displayEntityAttributes = useMemo(() => {
     return previewVersion ? previewVersion.attributes : entityAttributes;
@@ -591,7 +591,7 @@ const Entity = () => {
         owner: entity.owner,
         description: entityDescription,
         projects: entityProjects,
-        relationships: entityRelationships,
+        links: entityLinks,
         attributes: entityAttributes,
         attachments: entityAttachments,
         secondaryIdentifier: {
@@ -642,7 +642,7 @@ const Entity = () => {
     setEntityName(entity.name);
     setEntityDescription(entity.description);
     setEntityProjects(entity.projects);
-    setEntityRelationships(entity.relationships);
+    setEntityLinks(entity.links);
     setEntityAttributes(entity.attributes);
     setEntityAttachments(entity.attachments);
     setEntityHistory(entity.history);
@@ -694,7 +694,7 @@ const Entity = () => {
         owner: entityVersion.owner,
         description: entityVersion.description || "",
         projects: entityVersion.projects || [],
-        relationships: entityVersion.relationships || [],
+        links: entityVersion.links || [],
         attributes: entityVersion.attributes || [],
         attachments: entityVersion.attachments || [],
         secondaryIdentifier: entityVersion.secondaryIdentifier || { value: "", format: "" },
@@ -713,10 +713,10 @@ const Entity = () => {
         closable: true,
       });
 
-      // Update the state (safely)
+      // Update the state
       setEntityDescription(entityVersion.description || "");
       setEntityProjects(entityVersion.projects || []);
-      setEntityRelationships(entityVersion.relationships || []);
+      setEntityLinks(entityVersion.links || []);
       setEntityAttributes(entityVersion.attributes || []);
       setEntityAttachments(entityVersion.attachments || []);
       setShowSecondaryIdentifier(!!entityVersion.secondaryIdentifier?.value);
@@ -768,7 +768,7 @@ const Entity = () => {
           archived: false,
           description: entity.description,
           projects: entity.projects,
-          relationships: entity.relationships,
+          links: entity.links,
           attributes: entity.attributes,
           attachments: entity.attachments,
           secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
@@ -1141,8 +1141,8 @@ const Entity = () => {
                   Are you sure you want to archive this Entity?
                 </Text>
                 <Text fontSize={"xs"}>
-                  This Entity will be moved to the Workspace archive. All relationships will be preserved, however it
-                  will not be visible. It can be restored at any time.
+                  This Entity will be moved to the Workspace archive. All links will be preserved, however it will not
+                  be visible. It can be restored at any time.
                 </Text>
               </Flex>
             </DialogAlert>
@@ -1198,9 +1198,9 @@ const Entity = () => {
             />
           </Flex>
 
-          {/* Relationships and Attachments */}
+          {/* Links and Attachments */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Relationships */}
+            {/* Links */}
             <Flex
               direction={"column"}
               p={"2"}
@@ -1219,7 +1219,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                      Relationships ({entityRelationships.length})
+                      Links ({entityLinks.length})
                     </Text>
                   </Flex>
                   <Button
@@ -1227,18 +1227,14 @@ const Entity = () => {
                     size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
+                    onClick={() => setAddLinksOpen(true)}
                     disabled={!editing || !!previewVersion}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
-                <Relationships
-                  relationships={displayEntityRelationships}
-                  setRelationships={setEntityRelationships}
-                  viewOnly={!editing || !!previewVersion}
-                />
+                <Links links={displayEntityLinks} setLinks={setEntityLinks} viewOnly={!editing || !!previewVersion} />
               </Flex>
             </Flex>
 
@@ -1402,14 +1398,14 @@ const Entity = () => {
           </Portal>
         </Dialog.Root>
 
-        {/* Add Relationships dialog */}
-        <DialogAddRelationship
-          open={addRelationshipsOpen}
-          onClose={() => setAddRelationshipsOpen(false)}
+        {/* Add Links dialog */}
+        <DialogAddLinks
+          open={addLinksOpen}
+          onClose={() => setAddLinksOpen(false)}
           sourceId={entity._id}
           sourceName={entityName}
-          existingRelationships={entityRelationships}
-          onAdd={(relationships) => setEntityRelationships([...entityRelationships, ...relationships])}
+          existingLinks={entityLinks}
+          onAdd={(links: ILink[]) => setEntityLinks([...entityLinks, ...links])}
         />
 
         {/* Upload dialog */}
@@ -1452,7 +1448,7 @@ const Entity = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"}>
-                <RelationshipsGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
+                <LinksGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
               </Dialog.Body>
             </Dialog.Content>
           </Dialog.Positioner>

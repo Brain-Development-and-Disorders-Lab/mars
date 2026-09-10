@@ -144,7 +144,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Parent Entity",
     projects: [projectResult.data],
-    relationships: [],
+    links: [],
     attributes: [],
     attachments: [],
     history: [],
@@ -158,7 +158,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Child Entity",
     projects: [projectResult.data],
-    relationships: [
+    links: [
       {
         target: {
           _id: parentResult.data,
@@ -185,7 +185,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Entity",
     projects: [projectResult.data],
-    relationships: [],
+    links: [],
     attributes: [
       {
         _id: "a-ndl2n3k",
@@ -281,7 +281,7 @@ export const createQueryTestEntity = async (workspaceId: string): Promise<void> 
     owner: TEST_USER_ID,
     description: "Entity for query builder tests",
     projects: [],
-    relationships: [],
+    links: [],
     attributes: [
       {
         _id: "a-query-test",

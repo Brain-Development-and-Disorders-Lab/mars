@@ -43,7 +43,7 @@ const CREATE_OPTIONS = [
     event: "client.create.entity_click",
     description: "Create an Entity to store metadata of a physical or digital resource.",
     required: ["Name", "Created"],
-    optional: ["Description", "Projects", "Relationships", "Attributes"],
+    optional: ["Description", "Projects", "Links", "Attributes"],
   },
   {
     type: "project",

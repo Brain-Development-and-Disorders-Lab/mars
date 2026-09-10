@@ -10,11 +10,11 @@ import EntityAttributesTable from "@components/EntityAttributesTable";
 import EntityProjectsTable from "@components/EntityProjectsTable";
 import EntityAttachmentsTable from "@components/EntityAttachmentsTable";
 import Icon from "@components/Icon";
-import Relationships from "@components/Relationships";
+import Links from "@components/Links";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { AttributeModel, EntityModel, IdentifierFormatModel, IGenericItem, IRelationship } from "@types";
+import { AttributeModel, EntityModel, IdentifierFormatModel, IGenericItem, ILink } from "@types";
 
 // Utility functions and libraries
 import { requestStatic } from "@database/functions";
@@ -78,7 +78,7 @@ export const Entity = () => {
           value
           format
         }
-        relationships {
+        links {
           source {
             _id
             name
@@ -121,7 +121,7 @@ export const Entity = () => {
             value
             format
           }
-          relationships {
+          links {
             source {
               _id
               name
@@ -215,7 +215,7 @@ export const Entity = () => {
       setEntityCreated(data.entity.created);
       setEntityDescription(data.entity.description || "");
       setEntityProjects(data.entity.projects || []);
-      setEntityRelationships(data.entity.relationships || []);
+      setEntityLinks(data.entity.links || []);
       setEntityAttributes(data.entity.attributes || []);
       setShowSecondaryIdentifier(!!data.entity.secondaryIdentifier?.value);
       setSecondaryIdentifier(data.entity.secondaryIdentifier?.value || "");
@@ -318,7 +318,7 @@ export const Entity = () => {
   const [entityOwner, setEntityOwner] = useState("");
   const [entityCreated, setEntityCreated] = useState("");
   const [entityProjects, setEntityProjects] = useState<string[]>([]);
-  const [entityRelationships, setEntityRelationships] = useState<IRelationship[]>([]);
+  const [entityLinks, setEntityLinks] = useState<ILink[]>([]);
   const [entityAttributes, setEntityAttributes] = useState<AttributeModel[]>([]);
   const [entityAttachments, setEntityAttachments] = useState<IGenericItem[]>([]);
 
@@ -381,9 +381,9 @@ export const Entity = () => {
             />
           </Flex>
 
-          {/* Relationships and Attachments */}
+          {/* Links and Attachments */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Relationships */}
+            {/* Links */}
             <Flex
               direction={"column"}
               p={"2"}
@@ -402,15 +402,11 @@ export const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                      Relationships ({entityRelationships.length})
+                      Links ({entityLinks.length})
                     </Text>
                   </Flex>
                 </Flex>
-                <Relationships
-                  relationships={entityRelationships}
-                  setRelationships={setEntityRelationships}
-                  viewOnly={true}
-                />
+                <Links links={entityLinks} setLinks={setEntityLinks} viewOnly={true} />
               </Flex>
             </Flex>
 

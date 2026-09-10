@@ -23,7 +23,7 @@ Optional fields are not required to create an Entity, but it strongly encouraged
 
 **Projects:** Entities can be added to existing Projects.
 
-**Relationships:** Relationships can be created between Entities. Relationships can be directional (e.g. parent-child) or general. Specify the target Entity, then specify the type of relationship between these Entities. When creating parent or child directional relationships, the relationship is read from left-to-right like so:
+**Links:** Links can be created between Entities. Links can be directional (e.g. parent-child) or general. Specify the target Entity, then specify the type of link between these Entities. When creating parent or child directional links, the link is read from left-to-right like so:
 
 ```text
 Created Entity is the parent / child of Target Entity

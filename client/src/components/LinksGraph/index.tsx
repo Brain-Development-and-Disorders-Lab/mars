@@ -35,7 +35,7 @@ import { STYLES } from "@variables";
 const NODE_W = 185;
 const NODE_H = 85;
 
-const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string) => void }) => {
+const LinksGraph = (props: { id: string; entityNavigateHook: (id: string) => void }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,9 +46,9 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   // via useToken, keeping STYLES as the single source for these colors.
   const [edgeParent, edgeChild, edgeGeneral, nodePrimary, nodeSecondary, nodePrimaryBg, nodeCanvasBg, canvasDot] =
     useToken("colors", [
-      "relationship.parent",
-      "relationship.child",
-      "relationship.general",
+      "link.parent",
+      "link.child",
+      "link.general",
       "graph.primary",
       "graph.secondary",
       "graph.primaryBg",
@@ -62,7 +62,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       entity(_id: $_id) {
         _id
         name
-        relationships {
+        links {
           target {
             _id
             name
@@ -99,7 +99,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       <Flex align={"center"} w={"100%"} gap={"1"}>
         {relCount !== undefined && (
           <Text fontSize={"xs"} color={"text.subtle"}>
-            {relCount} relationship{relCount !== 1 ? "s" : ""}
+            {relCount} link{relCount !== 1 ? "s" : ""}
           </Text>
         )}
         {isPrimary ? (
@@ -173,17 +173,17 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     try {
       const entity = await getEntityData(props.id);
 
-      // Use a Map to deduplicate nodes when multiple relationships reference the same target
+      // Use a Map to deduplicate nodes when multiple links reference the same target
       const nodesMap = new Map<string, Node>();
-      nodesMap.set(props.id, buildNode(props.id, entity.name, true, entity.relationships.length));
-      for (const rel of entity.relationships) {
+      nodesMap.set(props.id, buildNode(props.id, entity.name, true, entity.links.length));
+      for (const rel of entity.links) {
         if (!nodesMap.has(rel.target._id)) {
           nodesMap.set(rel.target._id, buildNode(rel.target._id, rel.target.name, false));
         }
       }
 
       const initialNodes = Array.from(nodesMap.values());
-      const initialEdges = entity.relationships.map((rel) => buildEdge(rel.source._id, rel.target._id, rel.type));
+      const initialEdges = entity.links.map((link) => buildEdge(link.source._id, link.target._id, link.type));
 
       const layout = await generateLayout(initialNodes, initialEdges);
       setNodes(applyLayout(layout, initialNodes));
@@ -192,7 +192,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       toaster.create({
         title: "Graph Error",
         type: "error",
-        description: "Could not set up the relationship graph.",
+        description: "Could not set up the link graph.",
         duration: 4000,
         closable: true,
       });
@@ -206,38 +206,36 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     let updatedNodes = _.cloneDeep(nodes);
     let updatedEdges = _.cloneDeep(edges);
 
-    // Reveal relationship count on the clicked node now that we have its data
+    // Reveal link count on the clicked node now that we have its data
     updatedNodes = updatedNodes.map((n) =>
-      n.id === node.id
-        ? { ...n, data: { label: createLabel(node.id, entity.name, false, entity.relationships.length) } }
-        : n,
+      n.id === node.id ? { ...n, data: { label: createLabel(node.id, entity.name, false, entity.links.length) } } : n,
     );
 
     let addedCount = 0;
-    for (const rel of entity.relationships) {
-      if (!updatedNodes.some((n) => n.id === rel.target._id)) {
-        updatedNodes = [...updatedNodes, buildNode(rel.target._id, rel.target.name, false, undefined, true)];
+    for (const link of entity.links) {
+      if (!updatedNodes.some((n) => n.id === link.target._id)) {
+        updatedNodes = [...updatedNodes, buildNode(link.target._id, link.target.name, false, undefined, true)];
         addedCount++;
       }
       const edgeExists = updatedEdges.some(
         (e) =>
-          (e.source === rel.source._id && e.target === rel.target._id) ||
-          (e.source === rel.target._id && e.target === rel.source._id),
+          (e.source === link.source._id && e.target === link.target._id) ||
+          (e.source === link.target._id && e.target === link.source._id),
       );
       if (!edgeExists) {
-        updatedEdges = [...updatedEdges, buildEdge(rel.source._id, rel.target._id, rel.type)];
+        updatedEdges = [...updatedEdges, buildEdge(link.source._id, link.target._id, link.type)];
       }
     }
 
     if (addedCount > 0) {
       const layout = await generateLayout(updatedNodes, updatedEdges);
       updatedNodes = applyLayout(layout, updatedNodes);
-      if (!toaster.isVisible("toast-retrieved-relationships")) {
+      if (!toaster.isVisible("toast-retrieved-links")) {
         toaster.create({
-          id: "toast-retrieved-relationships",
-          title: "Retrieved relationships",
+          id: "toast-retrieved-links",
+          title: "Retrieved links",
           type: "success",
-          description: `Showing ${addedCount} new relationship${addedCount !== 1 ? "s" : ""} for "${entity.name}"`,
+          description: `Showing ${addedCount} new link${addedCount !== 1 ? "s" : ""} for "${entity.name}"`,
           duration: 4000,
           closable: true,
         });
@@ -319,4 +317,4 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   );
 };
 
-export default RelationshipsGraph;
+export default LinksGraph;

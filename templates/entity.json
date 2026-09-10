@@ -9,7 +9,7 @@
   "projects": [
     "<Project ID>"
   ],
-  "relationships": [
+  "links": [
     {
       "source": {
         "_id": "<Entity ID>",
@@ -19,7 +19,7 @@
         "_id": "<Entity ID>",
         "name": "Target name"
       },
-      "type": "<type:RelationshipType>"
+      "type": "<type:LinkType>"
     }
   ],
   "attributes": [

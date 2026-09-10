@@ -207,7 +207,7 @@ export const theme = createSystem(defaultConfig, {
         project: { ...aliasPalette("teal"), ...wrapColors(STYLES.project.color) },
         attribute: { ...aliasPalette("purple"), ...wrapColors(STYLES.attribute.color) },
         workspace: { ...aliasPalette("yellow"), ...wrapColors(STYLES.workspace.color) },
-        relationship: wrapColors(STYLES.relationship),
+        link: wrapColors(STYLES.link),
         graph: wrapColors(STYLES.graph),
         chart: wrapColors(STYLES.chart),
         ai: {

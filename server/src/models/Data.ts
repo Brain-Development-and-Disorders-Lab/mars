@@ -250,7 +250,7 @@ export class Data {
         created: dayjs(Date.now()).toISOString(),
         description: row[columnMapping.description] || "",
         projects: [],
-        relationships: [],
+        links: [],
         attributes,
         attachments: [],
         history: [],

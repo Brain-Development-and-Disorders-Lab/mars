@@ -44,7 +44,7 @@ const SAMPLE_FILES: Record<"entities" | "attribute", SampleFile[]> = {
               archived: false,
               description: "An example Entity created from a JSON import",
               projects: [],
-              relationships: [],
+              links: [],
               attributes: [],
               attachments: [],
             },

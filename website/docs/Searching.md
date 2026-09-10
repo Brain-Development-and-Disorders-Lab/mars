@@ -39,7 +39,7 @@ Each rule targets a specific field. When building an advanced query, the followi
 - Name
 - Description
 - Projects
-- Relationships
+- Links
 - Attributes
 
 A preview of the query expressed in natural language is shown above the query structure to aid interpretability.
@@ -48,9 +48,9 @@ A preview of the query expressed in natural language is shown above the query st
 
 When building a rule involving Projects, the user can select a Project from the value dropdown menu. The rule criteria refers to the Entity's membership in that Project. For example, "contains" means the Entity is a member of the specified Project.
 
-### Advanced Query Search - Relationships
+### Advanced Query Search - Links
 
-When building a rule involving Relationships, the user can select an Entity from the value dropdown menu. The rule criteria refers to whether the Entity has any relationship to the target Entity. For example, "contains" means that some relationship exists between the result and the specified Entity.
+When building a rule involving Links, the user can select an Entity from the value dropdown menu. The rule criteria refers to whether the Entity has any link to the target Entity. For example, "contains" means that some links exists between the result and the specified Entity.
 
 ### Advanced Query Search - Attributes
 

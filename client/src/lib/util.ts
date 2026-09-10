@@ -575,13 +575,13 @@ export const buildMongoQuery = (query: SearchQuery): Record<string, unknown> => 
         : { projects: { $elemMatch: { _id: rule.value } } };
     }
 
-    if (rule.field === "relationships") {
-      // "is parent/child of" filters by relationship type in addition to the target ID
+    if (rule.field === "links") {
+      // "is parent/child of" filters by link type in addition to the target ID
       const target = { "target._id": rule.value };
-      if (rule.operator === "is not related to") return { relationships: { $not: { $elemMatch: target } } };
-      if (rule.operator === "is parent of") return { relationships: { $elemMatch: { ...target, type: "parent" } } };
-      if (rule.operator === "is child of") return { relationships: { $elemMatch: { ...target, type: "child" } } };
-      return { relationships: { $elemMatch: target } };
+      if (rule.operator === "is not related to") return { links: { $not: { $elemMatch: target } } };
+      if (rule.operator === "is parent of") return { links: { $elemMatch: { ...target, type: "parent" } } };
+      if (rule.operator === "is child of") return { links: { $elemMatch: { ...target, type: "child" } } };
+      return { links: { $elemMatch: target } };
     }
 
     if (rule.field === "attributes") {

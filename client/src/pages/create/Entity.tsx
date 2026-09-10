@@ -28,14 +28,14 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import TagActor from "@components/TagActor";
 import DialogAddAttribute from "@components/DialogAddAttribute";
-import Relationships from "@components/Relationships";
-import AddRelationshipsDialog from "@components/DialogAddRelationship";
+import DialogAddLinks from "@components/DialogAddLinks";
+import Links from "@components/Links";
 import Linky from "@components/Linky";
 import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { AttributeModel, IdentifierFormatModel, IGenericItem, IRelationship, ResponseData } from "@types";
+import { AttributeModel, IdentifierFormatModel, IGenericItem, ILink, ResponseData } from "@types";
 
 // Utility functions and libraries
 import {
@@ -72,10 +72,10 @@ const Entity = () => {
   // Permissions
   const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
-  const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
+  const [pageState, setPageState] = useState("start" as "start" | "attributes" | "links");
   const pageSteps = [
     { title: "Start", description: "Basic information" },
-    { title: "Relationships", description: "Relationships between Entities" },
+    { title: "Links", description: "Links between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
   const [pageStep, setPageStep] = useState(0);
@@ -136,8 +136,8 @@ const Entity = () => {
     }
   };
 
-  const [relationships, setRelationships] = useState([] as IRelationship[]);
-  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
+  const [links, setLinks] = useState([] as ILink[]);
+  const [addLinksOpen, setAddLinksOpen] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
@@ -264,10 +264,10 @@ const Entity = () => {
 
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
-      posthog.capture("client.create.entity_relationships");
-      setPageState("relationships");
+      posthog.capture("client.create.entity_links");
+      setPageState("links");
       setPageStep(1);
-    } else if (_.isEqual("relationships", pageState)) {
+    } else if (_.isEqual("links", pageState)) {
       posthog.capture("client.create.entity_attributes");
       setPageState("attributes");
       setPageStep(2);
@@ -316,7 +316,7 @@ const Entity = () => {
             created,
             archived: false,
             description,
-            relationships,
+            links,
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
@@ -332,13 +332,13 @@ const Entity = () => {
   };
 
   const onPageBack = () => {
-    if (_.isEqual("relationships", pageState)) {
+    if (_.isEqual("links", pageState)) {
       posthog.capture("client.create.entity_start");
       setPageState("start");
       setPageStep(0);
     } else if (_.isEqual("attributes", pageState)) {
-      posthog.capture("client.create.entity_relationships");
-      setPageState("relationships");
+      posthog.capture("client.create.entity_links");
+      setPageState("links");
       setPageStep(1);
     }
   };
@@ -571,8 +571,8 @@ const Entity = () => {
           </Flex>
         )}
 
-        {/* Relationships page */}
-        {_.isEqual("relationships", pageState) && (
+        {/* Links page */}
+        {_.isEqual("links", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
               <Flex
@@ -588,7 +588,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Icon size={"xs"} name={"graph"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                      Relationships
+                      Links
                     </Text>
                   </Flex>
                   <Button
@@ -596,19 +596,19 @@ const Entity = () => {
                     size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
+                    onClick={() => setAddLinksOpen(true)}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
-                <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
-                <AddRelationshipsDialog
-                  open={addRelationshipsOpen}
-                  onClose={() => setAddRelationshipsOpen(false)}
+                <Links links={links} setLinks={setLinks} viewOnly={false} />
+                <DialogAddLinks
+                  open={addLinksOpen}
+                  onClose={() => setAddLinksOpen(false)}
                   sourceName={name}
-                  existingRelationships={relationships}
-                  onAdd={(added) => setRelationships([...relationships, ...added])}
+                  existingLinks={links}
+                  onAdd={(added: ILink[]) => setLinks([...links, ...added])}
                 />
               </Flex>
             </Flex>
@@ -809,7 +809,7 @@ const Entity = () => {
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Relationships - Link to Other Entities
+                            Links - Relationships with other Entities
                           </Text>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
                             Define how this Entity relates to others and assign it to Projects.

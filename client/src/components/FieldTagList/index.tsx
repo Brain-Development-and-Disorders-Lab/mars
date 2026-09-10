@@ -16,11 +16,13 @@ const FieldTagList = (props: FieldTagListProps) => {
   const overflow = props.items.length - props.max;
 
   return (
-    <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
-      {props.items.slice(0, props.max).map((item) => (
-        <Fragment key={props.getKey(item)}>{props.renderTag(item)}</Fragment>
-      ))}
-      {overflow > 0 && <Text fontSize={"xs"}>and {overflow} more</Text>}
+    <Flex>
+      <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
+        {props.items.slice(0, props.max).map((item) => (
+          <Fragment key={props.getKey(item)}>{props.renderTag(item)}</Fragment>
+        ))}
+        {overflow > 0 && <Text fontSize={"xs"}>and {overflow} more</Text>}
+      </Flex>
     </Flex>
   );
 };

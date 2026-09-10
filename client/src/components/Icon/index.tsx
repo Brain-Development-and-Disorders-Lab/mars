@@ -139,7 +139,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   graph: FaSitemap,
   clock: FaClockRotateLeft,
   rewind: FaRotateLeft,
-  link: FaLink,
+  url: FaLink,
   scan: FaMobileScreen,
   lock: FaLock,
   exit: FaPowerOff,

@@ -43,7 +43,7 @@ export const createTestEntity = async (
     created: dayjs("2023-10-01").toISOString(),
     owner: owner,
     description: "Test Entity",
-    relationships: [],
+    links: [],
     projects: [],
     attributes: [
       {

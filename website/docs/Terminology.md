@@ -19,7 +19,7 @@ Entities have the following metadata components:
 - **Date**: The date that the Entity came into existence.
 - **Description**: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
 - **Projects**: Specify any existing Projects that the Entity belongs to.
-- **Relationships**: Relationships are used to create links between Entities. An Entity can be a _parent_ of another Entity, a _child_ of another Entity, or express a _general_ relationship with another Entity.
+- **Links**: Links are used to create links between Entities. An Entity can be a _parent_ of another Entity, a _child_ of another Entity, or express a _general_ link with another Entity.
 - **Attributes**: This is a specific metadata component and is explained below.
 
 ## Attributes
@@ -30,7 +30,7 @@ Attributes are the primary method of expressing metadata associated with Entitie
 - `number`: A numerical value.
 - `date`: A date or time.
 - `url`: A link to external or internal item.
-- `entity`: A "soft" relationship with another Entity. This does not have the significance of a `Relationship`, but could be used to express a reference to another Entity.
+- `entity`: A "soft" link with another Entity. This does not have the significance of a `Link`, but could be used to express a reference to another Entity.
 - `select`: A drop-down containing a set of user-defined options that can be selected.
 
 ## Projects

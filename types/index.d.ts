@@ -5,19 +5,19 @@ import { ReadStream } from "fs";
 
 export namespace State.Entity {
   type Start = {
-    location: "none" | "start" | "relationships" | "attributes";
+    location: "none" | "start" | "links" | "attributes";
     name: string;
     created: string;
     owner: string;
     description: string;
   };
 
-  type Relationships = Start & {
+  type Links = Start & {
     projects: string[];
-    relationships: IRelationship[];
+    links: ILinks[];
   };
 
-  type Attributes = Relationships & {
+  type Attributes = Links & {
     attributes: IAttribute[];
   };
 }
@@ -447,32 +447,32 @@ export type ISelectOption = {
   value: string;
 };
 
-// Utility type to define set of relationship types
-export type RelationshipType = "parent" | "child" | "general";
+// Utility type to define set of Link types
+export type LinkType = "parent" | "child" | "general";
 
-// Utility type to define relationship between two Entities
-export type IRelationship = {
-  type: RelationshipType;
+// Utility type to define Link between two Entities
+export type ILink = {
+  type: LinkType;
   source: IGenericItem;
   target: IGenericItem;
 };
 
-export type RelationshipsProps = {
-  relationships: IRelationship[];
-  setRelationships: (value: React.SetStateAction<IRelationship[]>) => void;
+export type LinksProps = {
+  links: ILink[];
+  setLinks: (value: React.SetStateAction<ILink[]>) => void;
   viewOnly?: boolean;
   sourceName?: string;
   sourceId?: string;
 };
 
-// Utility type to specify the props of `DialogAddRelationship`
-export type DialogAddRelationshipProps = {
+// Utility type to specify the props of `DialogAddLinks`
+export type DialogAddLinksProps = {
   open: boolean;
   onClose: () => void;
   sourceId?: string;
   sourceName: string;
-  existingRelationships: IRelationship[];
-  onAdd: (relationships: IRelationship[]) => void;
+  existingLinks: ILink[];
+  onAdd: (links: ILink[]) => void;
 };
 
 export type DialogAddAttributeProps = {
@@ -521,7 +521,7 @@ export type IEntity = {
   created: string;
   description: string;
   projects: string[];
-  relationships: IRelationship[];
+  links: ILink[];
   attributes: AttributeModel[];
   attachments: IGenericItem[];
   history: EntityHistory[];
@@ -533,7 +533,7 @@ export type EntityModel = IEntity & {
 };
 
 export type EntityNode = IGenericItem & {
-  relationships: IRelationship[];
+  links: ILink[];
 };
 
 export type EntityHistory = {
@@ -550,7 +550,7 @@ export type EntityHistory = {
   created: string;
   description: string;
   projects: string[];
-  relationships: IRelationship[];
+  links: ILink[];
   attributes: AttributeModel[];
   attachments: IGenericItem[];
 };
@@ -1116,7 +1116,7 @@ export type IconNames =
   | "graph"
   | "clock"
   | "rewind"
-  | "link"
+  | "url"
   | "scan"
   | "lock"
   | "settings"
@@ -1166,7 +1166,7 @@ export type IconNames =
 
 // SearchQuery types
 export type SearchCombinator = "and" | "or";
-export type SearchField = "name" | "description" | "projects" | "relationships" | "attributes";
+export type SearchField = "name" | "description" | "projects" | "links" | "attributes";
 
 export interface SearchAttributeValue {
   type: IValueType;
