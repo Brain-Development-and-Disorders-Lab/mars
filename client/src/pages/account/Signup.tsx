@@ -393,10 +393,10 @@ const Signup = () => {
                     <Field.RequiredIndicator />
                   </Field.Label>
                   <SelectSearch
-                    resultType="institution"
+                    resultType={"institution"}
                     value={{ _id: affiliation, name: affiliation }}
                     onChange={(item) => setAffiliation(item.name)}
-                    defaultOption="Affiliation Not Shown"
+                    defaultOption={"No Affiliation"}
                   />
                 </Field.Root>
 
