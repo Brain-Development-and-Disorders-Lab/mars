@@ -10,19 +10,21 @@ import { FieldTagListProps } from "@types";
 
 const FieldTagList = (props: FieldTagListProps) => {
   if (props.items.length === 0) {
-    return props.emptyLabel ? <EmptyTag label={props.emptyLabel} /> : null;
+    return props.emptyLabel ? (
+      <Flex>
+        <EmptyTag label={props.emptyLabel} />
+      </Flex>
+    ) : null;
   }
 
   const overflow = props.items.length - props.max;
 
   return (
-    <Flex>
-      <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
-        {props.items.slice(0, props.max).map((item) => (
-          <Fragment key={props.getKey(item)}>{props.renderTag(item)}</Fragment>
-        ))}
-        {overflow > 0 && <Text fontSize={"xs"}>and {overflow} more</Text>}
-      </Flex>
+    <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
+      {props.items.slice(0, props.max).map((item) => (
+        <Fragment key={props.getKey(item)}>{props.renderTag(item)}</Fragment>
+      ))}
+      {overflow > 0 && <Text fontSize={"xs"}>and {overflow} more</Text>}
     </Flex>
   );
 };
