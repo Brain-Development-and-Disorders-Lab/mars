@@ -629,7 +629,7 @@ const Project = () => {
                 </Button>
               </Tooltip>
             ) : (
-              <Flex gap={"1"}>
+              <Flex gap={"2"}>
                 {editing && (
                   <Button onClick={handleCancelClick} size={"xs"} rounded={"md"} colorPalette={"red"}>
                     Cancel
@@ -667,46 +667,51 @@ const Project = () => {
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
-                <Menu.Content>
-                  <Menu.Item
-                    value={"export-project"}
-                    onClick={handleExportClick}
-                    fontSize={"xs"}
-                    disabled={projectArchived || !!previewVersion}
-                  >
-                    <Icon name={"download"} size={"xs"} />
-                    Export Project
-                  </Menu.Item>
-                  <Tooltip
-                    content={"This Project does not contain any Entities."}
-                    disabled={displayProjectEntities?.length > 0 || displayProjectArchived}
-                    showArrow
-                  >
+                <Menu.Content p={"1"}>
+                  <Menu.ItemGroup title={"Manage"}>
+                    <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                      Manage
+                    </Menu.ItemGroupLabel>
                     <Menu.Item
-                      value={"export-entities"}
-                      onClick={handleExportEntitiesClick}
+                      value={"export-project"}
+                      onClick={handleExportClick}
                       fontSize={"xs"}
-                      disabled={displayProjectEntities?.length === 0 || displayProjectArchived || !!previewVersion}
+                      disabled={projectArchived || !!previewVersion}
                     >
                       <Icon name={"download"} size={"xs"} />
-                      Export Entities
+                      Export Project
                     </Menu.Item>
-                  </Tooltip>
-                  <Tooltip
-                    content={"Insufficient permissions in this Workspace"}
-                    disabled={workspacePermissions.projects.create}
-                    showArrow
-                  >
-                    <Menu.Item
-                      value={"archive"}
-                      onClick={() => setArchiveDialogOpen(true)}
-                      fontSize={"xs"}
-                      disabled={projectArchived || !!previewVersion || !workspacePermissions.projects.archive}
+                    <Tooltip
+                      content={"This Project does not contain any Entities."}
+                      disabled={displayProjectEntities?.length > 0 || displayProjectArchived}
+                      showArrow
                     >
-                      <Icon name={"archive"} size={"xs"} />
-                      Archive
-                    </Menu.Item>
-                  </Tooltip>
+                      <Menu.Item
+                        value={"export-entities"}
+                        onClick={handleExportEntitiesClick}
+                        fontSize={"xs"}
+                        disabled={displayProjectEntities?.length === 0 || displayProjectArchived || !!previewVersion}
+                      >
+                        <Icon name={"download"} size={"xs"} />
+                        Export Project Entities
+                      </Menu.Item>
+                    </Tooltip>
+                    <Tooltip
+                      content={"Insufficient permissions in this Workspace"}
+                      disabled={workspacePermissions.projects.create}
+                      showArrow
+                    >
+                      <Menu.Item
+                        value={"archive"}
+                        onClick={() => setArchiveDialogOpen(true)}
+                        fontSize={"xs"}
+                        disabled={projectArchived || !!previewVersion || !workspacePermissions.projects.archive}
+                      >
+                        <Icon name={"archive"} size={"xs"} />
+                        Archive Project
+                      </Menu.Item>
+                    </Tooltip>
+                  </Menu.ItemGroup>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>

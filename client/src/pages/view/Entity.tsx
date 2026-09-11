@@ -1052,64 +1052,81 @@ const Entity = () => {
               </Menu.Trigger>
               <Portal>
                 <Menu.Positioner>
-                  <Menu.Content>
-                    <Menu.Item value={"print"} fontSize={"xs"} disabled>
-                      <Icon name={"print"} size={"xs"} />
-                      Print
-                    </Menu.Item>
-                    <Menu.Item value={"share"} fontSize={"xs"} onClick={handleShareClick}>
-                      <Icon name={"share"} size={"xs"} />
-                      Share
-                    </Menu.Item>
-                    <Menu.Item
-                      value={"visualize"}
-                      onClick={() => setGraphOpen(true)}
-                      fontSize={"xs"}
-                      disabled={editing || entityArchived || !!previewVersion}
-                    >
-                      <Icon name={"graph"} size={"xs"} />
-                      Visualize
-                    </Menu.Item>
-                    <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
-                      disabled={workspacePermissions.entities.create}
-                      showArrow
-                    >
+                  <Menu.Content p={"1"}>
+                    <Menu.ItemGroup title={"Tools"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Tools
+                      </Menu.ItemGroupLabel>
                       <Menu.Item
-                        value={"clone"}
-                        onClick={() => setCloneOpen(true)}
+                        value={"visualize"}
+                        onClick={() => setGraphOpen(true)}
                         fontSize={"xs"}
-                        disabled={entityArchived || !!previewVersion || !workspacePermissions.entities.create}
+                        disabled={editing || entityArchived || !!previewVersion}
                       >
-                        <Icon name={"copy"} size={"xs"} />
-                        Clone
+                        <Icon name={"graph"} size={"xs"} />
+                        Visualize Links
                       </Menu.Item>
-                    </Tooltip>
-                    <Menu.Item
-                      value={"export"}
-                      onClick={handleExportClick}
-                      fontSize={"xs"}
-                      disabled={editing || entityArchived || !!previewVersion}
-                    >
-                      <Icon name={"download"} size={"xs"} />
-                      Export
-                    </Menu.Item>
-                    <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
-                      disabled={workspacePermissions.entities.archive}
-                      showArrow
-                    >
+                    </Menu.ItemGroup>
+
+                    <Menu.ItemGroup title={"Share"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Share
+                      </Menu.ItemGroupLabel>
+                      <Menu.Item value={"print"} fontSize={"xs"} disabled>
+                        <Icon name={"print"} size={"xs"} />
+                        Print Entity
+                      </Menu.Item>
+                      <Menu.Item value={"share"} fontSize={"xs"} onClick={handleShareClick}>
+                        <Icon name={"share"} size={"xs"} />
+                        Share Entity
+                      </Menu.Item>
+                    </Menu.ItemGroup>
+
+                    <Menu.ItemGroup title={"Manage"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Manage
+                      </Menu.ItemGroupLabel>
+                      <Tooltip
+                        content={"Insufficient permissions in this Workspace"}
+                        disabled={workspacePermissions.entities.create}
+                        showArrow
+                      >
+                        <Menu.Item
+                          value={"clone"}
+                          onClick={() => setCloneOpen(true)}
+                          fontSize={"xs"}
+                          disabled={entityArchived || !!previewVersion || !workspacePermissions.entities.create}
+                        >
+                          <Icon name={"copy"} size={"xs"} />
+                          Clone Entity
+                        </Menu.Item>
+                      </Tooltip>
                       <Menu.Item
-                        id={"archiveEntityButton"}
-                        value={"archive"}
-                        onClick={() => setArchiveDialogOpen(true)}
+                        value={"export"}
+                        onClick={handleExportClick}
                         fontSize={"xs"}
-                        disabled={entityArchived || !workspacePermissions.entities.archive}
+                        disabled={editing || entityArchived || !!previewVersion}
                       >
-                        <Icon name={"archive"} size={"xs"} />
-                        Archive
+                        <Icon name={"download"} size={"xs"} />
+                        Export Entity
                       </Menu.Item>
-                    </Tooltip>
+                      <Tooltip
+                        content={"Insufficient permissions in this Workspace"}
+                        disabled={workspacePermissions.entities.archive}
+                        showArrow
+                      >
+                        <Menu.Item
+                          id={"archiveEntityButton"}
+                          value={"archive"}
+                          onClick={() => setArchiveDialogOpen(true)}
+                          fontSize={"xs"}
+                          disabled={entityArchived || !workspacePermissions.entities.archive}
+                        >
+                          <Icon name={"archive"} size={"xs"} />
+                          Archive Entity
+                        </Menu.Item>
+                      </Tooltip>
+                    </Menu.ItemGroup>
                   </Menu.Content>
                 </Menu.Positioner>
               </Portal>

@@ -545,31 +545,36 @@ const Attribute = () => {
                 </Button>
               </Menu.Trigger>
               <Menu.Positioner>
-                <Menu.Content>
-                  <Menu.Item
-                    fontSize={"xs"}
-                    value={"export"}
-                    onClick={() => setExportOpen(true)}
-                    disabled={attributeArchived || !!previewVersion}
-                  >
-                    <Icon name={"download"} size={"xs"} />
-                    Export
-                  </Menu.Item>
-                  <Tooltip
-                    content={"Insufficient permissions in this Workspace"}
-                    disabled={workspacePermissions.attributes.archive}
-                    showArrow
-                  >
+                <Menu.Content p={"1"}>
+                  <Menu.ItemGroup title={"Manage"}>
+                    <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                      Manage
+                    </Menu.ItemGroupLabel>
                     <Menu.Item
                       fontSize={"xs"}
-                      value={"archive"}
-                      onClick={() => setArchiveDialogOpen(true)}
-                      disabled={attributeArchived || !workspacePermissions.attributes.archive}
+                      value={"export"}
+                      onClick={() => setExportOpen(true)}
+                      disabled={attributeArchived || !!previewVersion}
                     >
-                      <Icon name={"archive"} size={"xs"} />
-                      Archive
+                      <Icon name={"download"} size={"xs"} />
+                      Export Attribute
                     </Menu.Item>
-                  </Tooltip>
+                    <Tooltip
+                      content={"Insufficient permissions in this Workspace"}
+                      disabled={workspacePermissions.attributes.archive}
+                      showArrow
+                    >
+                      <Menu.Item
+                        fontSize={"xs"}
+                        value={"archive"}
+                        onClick={() => setArchiveDialogOpen(true)}
+                        disabled={attributeArchived || !workspacePermissions.attributes.archive}
+                      >
+                        <Icon name={"archive"} size={"xs"} />
+                        Archive Attribute
+                      </Menu.Item>
+                    </Tooltip>
+                  </Menu.ItemGroup>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
